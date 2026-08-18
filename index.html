@@ -1477,7 +1477,7 @@ button{cursor:pointer}
     <!-- ⭐ v5.4: link nhanh sang các webapp MMH khác -->
     <div class="tb-links"><a class="tb-link" href="https://manimedicalhanoi.github.io/Tender-Result/" target="_blank" rel="noopener" title="Thông tin thầu">📑 Thông tin thầu<svg viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a><a class="tb-link" href="https://manimedicalhanoi.github.io/Product-Data/" target="_blank" rel="noopener" title="Product Data">📦 Product Data<svg viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a><a class="tb-link" href="https://manimedicalhanoi.github.io/MMH-FY67-Turnover/" target="_blank" rel="noopener" title="Dự trù & Doanh số">📈 Dự trù & Doanh số<svg viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a></div>
     <button class="cal-launch" onclick="openMMHCalendar()">📅 MMH Calendar</button>
-    <button class="cal-launch" onclick="syncVisiting()" title="Quét lại sheet Field Report của Sales → cập nhật Customer visiting">🔄 Đồng bộ visiting</button>
+    <button class="cal-launch" onclick="syncVisiting()" title="Quét lại sheet Field Report của Sales → cập nhật Customer visiting &amp; Working at office">🔄 Đồng bộ Sales tasks</button>
 <div class="tb-sp"></div>
     <div id="lang-switch" class="lang-sw"></div>   <!-- ⭐ v5.5: VN / EN -->
     <div class="tb-user">
@@ -1759,11 +1759,9 @@ function vAppUrl(o){
   if(!u) return "";
   return u+"?pic="+encodeURIComponent((o&&o.pic)||(S.user&&S.user.pic)||"");
 }
-function vOpenBtn(o){
-  var u=vAppUrl(o); if(!u) return "";
-  return '<a class="v-open" href="'+esc(u)+'" target="_blank" rel="noopener" '
-    +'onclick="event.stopPropagation()" title="Mở webapp Field Report để sửa dữ liệu gốc">↗ Field Report</a>';
-}
+/* ⭐ v9.4 (#2) — bỏ hẳn nút mở Field Report trên từng dòng. Dữ liệu Sales sửa ở sheet gốc,
+   không cần lối tắt trong Report Hub. Giữ hàm để các chỗ đang gọi không lỗi. */
+function vOpenBtn(o){ return ""; }
 function vTag(t,c){ return t ? '<span class="v-tag '+c+'">'+esc(t)+'</span>' : ""; }
 function visitNameTags(o){
   var m=o&&o.vMeta; if(!m) return "";
@@ -1844,9 +1842,9 @@ function renderSyncModal(){
       +'<button onclick="vsyncAll(false)">Bỏ chọn tất cả</button>'
       +'<span class="vs-count">Đang chọn <b>'+nPick+'</b>/'+vis.length+' tháng</span></div>'
       +(rowsH||'<div style="padding:22px;text-align:center;color:var(--faint)">Không có tháng nào ở nguồn.</div>')
-      +'<div class="vs-note">Tháng đã đồng bộ đủ được bỏ tick sẵn để loại trừ. Dữ liệu Customer visiting chỉ sửa được ở sheet Field Report của Sales.</div>';
+      +'<div class="vs-note">Gồm cả Customer visiting và Working at office. Tháng đã đồng bộ đủ được bỏ tick sẵn để loại trừ. Dữ liệu này chỉ sửa được ở sheet Field Report của Sales.</div>';
   }
-  showModal('<div class="modal-box modal-lg"><div class="modal-head"><h3>🔄 Đồng bộ Customer visiting</h3>'
+  showModal('<div class="modal-box modal-lg"><div class="modal-head"><h3>🔄 Đồng bộ Sales tasks</h3>'
     +'<button class="modal-close" onclick="closeModal()">✕</button></div>'
     +'<div class="modal-body vs-body">'+body+'</div>'
     +'<div class="modal-footer"><button class="btn-secondary" onclick="closeModal()">Đóng</button>'
@@ -2003,6 +2001,10 @@ function stKey(st){
 }
 function subInReportThis(s, from, to){
   var st  = String(s.start||"").slice(0,10);
+  /* ⭐ v9.4 (#1) — Sub-task ĐỒNG BỘ từ sheet Sales: CHỈ căn cứ Start date rơi đúng trong
+     tuần đang xem. Không kéo theo việc quá hạn / chạy xuyên tuần như task Marketing,
+     vì đội Sales đi địa bàn theo ngày — hạn cũ không còn ý nghĩa trong báo cáo tuần. */
+  if(vIsSync(s)) return !!(st && st>=from && st<=to);
   var eff = String(s.revised||s.planned||"").slice(0,10);
   var act = String(s.actual||"").slice(0,10);
   var open = !isDone(s.status) && !isCancelled(s.status);
@@ -2015,6 +2017,8 @@ function subInReportThis(s, from, to){
   return false;
 }
 function subInReportNext(s, from, to){
+  var _st0=String(s.start||"").slice(0,10);
+  if(vIsSync(s)) return !!(_st0 && _st0>=from && _st0<=to);        /* ⭐ v9.4 (#1) */
   if(isCancelled(s.status) || isDone(s.status)) return false;      // plan không chứa việc đã xong/huỷ
   var st  = String(s.start||"").slice(0,10);
   var eff = String(s.revised||s.planned||"").slice(0,10);
@@ -2786,6 +2790,15 @@ var DICT_EN = {
   /* Filters / toolbar */
   "Nhân sự":"Assignee", "Loại việc":"Work type", "Tất cả":"All", "Xóa lọc":"Clear", "Xóa":"Clear",
   "Xóa bộ lọc":"Clear filters", "✕ Xóa bộ lọc":"✕ Clear filters",
+    "🔄 Đồng bộ Sales tasks":"🔄 Sync Sales tasks",
+  "Đồng bộ Sales tasks":"Sync Sales tasks",
+  "Đồng bộ các tháng đã chọn":"Sync selected months",
+  "Chọn tất cả":"Select all", "Bỏ chọn tất cả":"Clear all", "Đang chọn":"Selected",
+  "Tất cả":"All",
+  "⏳ Đang đọc sheet Field Report của Sales…":"⏳ Reading the Sales Field Report sheet…",
+  "Gồm cả Customer visiting và Working at office. Tháng đã đồng bộ đủ được bỏ tick sẵn để loại trừ. Dữ liệu này chỉ sửa được ở sheet Field Report của Sales.":"Covers both Customer visiting and Working at office. Months already fully synced are unticked so they are skipped. This data can only be edited in the Sales Field Report sheet.",
+  "🔒 Bạn chỉ xem được công việc của mình":"🔒 You can only view your own tasks",
+  "⚠ Chưa chọn tháng nào":"⚠ No month selected",
   "Lọc theo nhân sự":"Filter by assignee", "Không có mục":"No items",
   "Công việc trong tuần":"This week's tasks", "CV trong tháng":"This month's tasks",
   "Tuần này":"This week", "Tháng này":"This month", "Tuần":"Week", "Tháng":"Month", "Ngày":"Day",
@@ -3652,6 +3665,29 @@ function renderGantt(bodyOnly){
   var selGT=S.ganttTypes||[], selGP=S.ganttPics||[];
   if(S.ganttType && selGT.indexOf(S.ganttType)<0) selGT=[S.ganttType];   // tương thích ngược
   if(selGT.length) kts=kts.filter(function(k){ return selGT.indexOf(k.type)>=0; });
+
+  /* ══ ⭐ v9.5 (#2) — LỌC SUB-TASK THEO START DATE TRONG KHOẢNG ĐANG CHỌN ══
+     Trước đây tab Tiến độ luôn xổ ra TOÀN BỘ sub của key task, chỉ có thanh Gantt là
+     vẽ theo ngày. Vì vậy xem tuần 17/08–23/08 vẫn thấy sub Start date 05/08.
+     Nay: sub chỉ hiện khi Start date (không có thì lấy deadline) nằm trong khoảng đang
+     chọn. Áp cho MỌI phòng ban, mọi loại key task. Key task nào không còn sub nào trong
+     khoảng thì ẩn luôn, trừ key task tự nó là đầu việc (không có sub). */
+  if(S.dateFrom && S.dateTo){
+    var _gf=S.dateFrom, _gt=S.dateTo;
+    var _inWin=function(o){
+      var d=String(o.start||o.revised||o.planned||"").slice(0,10);
+      return d ? (d>=_gf && d<=_gt) : true;      /* chưa điền ngày → vẫn giữ để không mất việc */
+    };
+    kts=kts.map(function(k){
+      var all=k.subs||[];
+      if(!all.length) return _inWin(k) ? k : null;
+      var subs=all.filter(_inWin);
+      if(!subs.length) return null;
+      if(subs.length===all.length) return k;
+      var c={}; for(var p in k){ if(Object.prototype.hasOwnProperty.call(k,p)) c[p]=k[p]; }
+      c.subs=subs; return c;
+    }).filter(Boolean);
+  }
   /* ⭐ v9.1 FIX — LỌC NHÂN SỰ PHẢI ĂN XUỐNG CẢ SUB-TASK.
      Trước đây chỉ LỌC KEY (giữ key nếu key hoặc bất kỳ sub nào khớp PIC) rồi vẫn xổ ra
      TOÀN BỘ sub của mọi người ⇒ key đồng bộ "202607_Dental Customer visiting" hiện 119/119
@@ -4713,11 +4749,11 @@ function reportSection(kind,label,from,to,data){
   if(!data.length){ return h+'<div class="rp-empty">Không có công việc trong khoảng này.</div>'; }
   h+='<div class="rp-table-wrap"><table class="rp-table"><thead><tr>'
     +'<th class="rp-c-task">Sub Task</th>'
+    +'<th class="rp-c-res">Kết quả / Link</th>'   /* ⭐ v9.4 (#3): đưa lên ngay sau Sub Task */
     +'<th class="rp-c-pic">PIC</th>'
     +'<th class="rp-c-dl">Deadline</th>'
     +'<th class="rp-c-prog">Tiến độ</th>'
     +'<th class="rp-c-st">Trạng thái</th>'
-    +'<th class="rp-c-res">Kết quả / Link</th>'   /* ⭐ luôn có, cả tuần sau */
     +'</tr></thead><tbody>';
   data.forEach(function(g){
     var k=g.k, kpct=ktProgress(k), km=stMeta(ktStatus(k));
@@ -4733,12 +4769,12 @@ function reportSection(kind,label,from,to,data){
       /* ⭐ v8.1: key task tự nó là đầu việc (không có sub-task) */
       var _od=isOverdue(k);
       h+='<tr class="rp-subrow'+(_od?' od-row':'')+'">'
-        +'<td class="rp-c-task"><span class="rp-sub-no">'+esc(k.no)+'</span>'+esc(k.keyTask)+(_od?'<span class="od-chip">QUÁ HẠN</span>':'')+'</td>'
+        +'<td class="rp-c-task"><span class="rp-sub-no">'+esc(k.no)+'</span>'+esc(k.keyTask)+(_od?'<span class="od-chip">QUÁ HẠN</span>':'')+visitTags(k)+'</td>'
+        +'<td class="rp-c-res">'+(String(k.result||'').trim()?esc(String(k.result).slice(0,180)):'<span style="color:var(--faint)">—</span>')+visitResTags(k)+'</td>'
         +'<td class="rp-c-pic"><span class="rp-pic-av" style="background:'+avColor(k.pic)+'">'+esc(initials(k.pic||'?'))+'</span>'+esc(k.pic||'—')+'</td>'
         +'<td class="rp-c-dl">'+(effDate(k)?fmtVN(effDate(k)):'—')+'</td>'
         +'<td class="rp-c-prog"><span class="rp-bar"><span class="rp-bar-fill" style="width:'+kpct+'%;background:'+progColor(kpct)+'"></span></span><span class="rp-bar-pct" style="color:'+progColor(kpct)+'">'+kpct+'%</span></td>'
         +'<td class="rp-c-st"><span class="tc-status '+km.cls+'">'+esc(k.status||'To Do')+'</span></td>'
-        +'<td class="rp-c-res">'+(String(k.result||'').trim()?esc(String(k.result).slice(0,180)):'<span style="color:var(--faint)">—</span>')+'</td>'
         +'</tr>';
     }
     g.subs.forEach(function(s){
@@ -4746,12 +4782,12 @@ function reportSection(kind,label,from,to,data){
       var resTxt=String(s.result||"").trim();
       var od=isOverdue(s);   // ⭐ quá hạn
       h+='<tr class="rp-subrow'+(od?' od-row':'')+'" onclick="gotoSub(\''+jsq(k.no)+'\',\''+jsq(s.no)+'\')">'
-        +'<td class="rp-c-task"><span class="rp-sub-no">'+esc(s.no)+'</span>'+esc(s.name||s.subTask)+(od?'<span class="od-chip">QUÁ HẠN</span>':'')+'</td>'
+        +'<td class="rp-c-task"><span class="rp-sub-no">'+esc(s.no)+'</span>'+esc(s.name||s.subTask)+(od?'<span class="od-chip">QUÁ HẠN</span>':'')+visitTags(s)+'</td>'
+        +'<td class="rp-c-res">'+(resTxt?esc(resTxt.slice(0,180))+(resTxt.length>180?'…':''):'<span style="color:var(--faint)">—</span>')+visitResTags(s)+'</td>'
         +'<td class="rp-c-pic"><span class="rp-pic-av" style="background:'+avColor(s.pic)+'">'+esc(initials(s.pic||'?'))+'</span>'+esc(s.pic||'—')+'</td>'
         +'<td class="rp-c-dl">'+(effDate(s)?fmtVN(effDate(s)):'—')+'</td>'
         +'<td class="rp-c-prog"><span class="rp-bar"><span class="rp-bar-fill" style="width:'+pct+'%;background:'+progColor(pct)+'"></span></span><span class="rp-bar-pct" style="color:'+progColor(pct)+'">'+pct+'%</span></td>'
         +'<td class="rp-c-st"><span class="tc-status '+m.cls+'">'+esc(s.status||'To Do')+'</span></td>'
-        +'<td class="rp-c-res">'+(resTxt?esc(resTxt.slice(0,180))+(resTxt.length>180?'…':''):'<span style="color:var(--faint)">—</span>')+'</td>'
         +'</tr>';
     });
   });
