@@ -419,6 +419,21 @@ button{cursor:pointer}
 .bar-fill{height:100%;border-radius:6px;width:0;animation:barGrow .7s cubic-bezier(.4,0,.2,1) forwards}
 .bar-row:hover .bar-fill{filter:brightness(1.08)}
 @keyframes barGrow{from{width:0}}
+.pg-bar{display:inline-flex;gap:4px;padding:3px;background:#EEF2F8;border-radius:9px;margin-right:8px}
+.pg-btn{padding:6px 12px;border:0;background:transparent;border-radius:7px;font-size:12.5px;font-weight:700;color:var(--faint);cursor:pointer}
+.pg-btn.on{background:#0F2E5A;color:#fff}
+.pb-row.pb-clk{cursor:pointer;border-radius:6px}
+.pb-row.pb-clk:hover{background:#F4F8FF}
+.pb-row.on{background:#EEF4FF}
+.pb-late{margin-left:6px;font-size:11px;color:#B3322E;font-weight:700}
+.pb-drill{margin:2px 0 10px 92px;padding:8px 10px;background:#F7F9FC;border:1px solid var(--border);border-radius:8px}
+.pb-dr{display:flex;align-items:center;gap:10px;padding:5px 2px;font-size:13px}
+.pb-dr-av{width:22px;height:22px;border-radius:50%;color:#fff;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex:0 0 auto}
+.pb-dr-name{flex:1;font-weight:600;color:var(--text)}
+.pb-dr-st{font-size:12px;color:var(--faint);min-width:44px;text-align:right}
+.pb-dr-st.late{color:#B3322E;font-weight:700}
+.pb-dr-pct{font-weight:800;min-width:42px;text-align:right}
+@media(max-width:640px){.pb-drill{margin-left:0}}
 .donut-wrap{display:flex;align-items:center;gap:20px;flex-wrap:wrap}
 /* ⭐ v5.5: khu biểu đồ Tổng quan */
 .chart-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
@@ -2078,6 +2093,39 @@ var SALES_TEAM_PICS={
   "viet":"Dental","vinh":"Dental","phuong":"Dental",
   "viet ha":"Surgical","khang":"Surgical"
 };
+/* ══ ⭐ v9.6 (#7) — CHUYỂN NHANH NHÓM NHÂN SỰ (MKT / Sales) ══
+   Bấm một nhóm → bộ lọc Nhân sự của tab đang xem được set đúng danh sách nhóm đó.
+   Vẫn tick/bỏ tick từng PIC như bình thường sau khi chọn nhóm. */
+var SALES_ALL_PICS=["Viet","Vinh","Phuong","Viet Ha","Khang"];
+function groupPics(g){
+  var all=picListAll();
+  if(g==="sales")  return all.filter(function(p){ return SALES_ALL_PICS.indexOf(p)>=0; });
+  if(g==="mkt")    return all.filter(function(p){ return SALES_ALL_PICS.indexOf(p)<0; });
+  return [];
+}
+function activeGroupOf(sel){
+  if(!sel||!sel.length) return "all";
+  var sa=groupPics("sales"), mk=groupPics("mkt");
+  var same=function(a,b){ return a.length===b.length && a.every(function(x){return b.indexOf(x)>=0;}); };
+  if(same(sel,sa)) return "sales";
+  if(same(sel,mk)) return "mkt";
+  return "";
+}
+function setPicGroup(key,g){
+  if(!canViewOthers()){ toast("🔒 Bạn chỉ xem được công việc của mình"); return; }
+  S[key] = (g==="all") ? [] : groupPics(g);
+  if(key==="ganttPics") renderGantt();
+  else if(key==="detailPics") renderDetail();
+  else if(key==="ovPics") renderOverview();
+  else render();
+}
+function picGroupBar(key,sel){
+  if(!canViewOthers()) return "";
+  var cur=activeGroupOf(sel||[]);
+  function b(g,lb){ return '<button class="pg-btn'+(cur===g?" on":"")+'" onclick="setPicGroup(\''+key+'\',\''+g+'\')">'+lb+'</button>'; }
+  return '<div class="pg-bar">'+b("all","Tất cả")+b("mkt","Marketing")+b("sales","Sales")+'</div>';
+}
+
 function mySalesTeam(){ return SALES_TEAM_PICS[String((S.user&&S.user.pic)||"").toLowerCase()]||""; }
 function typeOptionsAllowed(list){
   var team=mySalesTeam();
@@ -2536,7 +2584,7 @@ function applyDefaultPicFilter(){
 
 /* ══════════════ ⭐ SOURCE TABS (Marketing / Management) ══════════════ */
 var SOURCE_META={
-  marketing:  {label:"Marketing Department", icon:'<rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/>'},
+  marketing:  {label:"Marketing & Sales", icon:'<rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/>'},
   backoffice: {label:"Back Office",           icon:'<path d="M3 9h18M3 15h18M9 3v18"/><rect x="3" y="3" width="18" height="18" rx="2"/>'},
   management: {label:"Management",            icon:'<path d="M20 7h-9M14 17H5M17 3v4M17 17v4M7 7v4M7 13v4"/><circle cx="17" cy="7" r="2"/><circle cx="7" cy="13" r="2"/>'}
 };
@@ -2690,7 +2738,7 @@ function showDeniedPage(){
     +'<h2>Bạn chưa có công việc ở '+esc(SOURCE_META[S.source]?SOURCE_META[S.source].label:S.source)+'</h2>'
     +'<p>Bạn chỉ thấy dữ liệu ở đây khi tên <b>'+esc(S.user?S.user.pic:"")+'</b> xuất hiện ở cột <b>PIC</b> của sheet này.</p>'
     +'<p class="who">Director/HOD (<b>Nguyen Ha</b> · <b>Tuyen</b> · <b>Hoa</b>) luôn xem &amp; sửa được toàn bộ.</p>'
-    +'<div style="margin-top:20px"><button class="btn-secondary" onclick="switchSource(\'marketing\')">← Quay lại Marketing Department</button></div>'
+    +'<div style="margin-top:20px"><button class="btn-secondary" onclick="switchSource(\'marketing\')">← Quay lại Marketing &amp; Sales</button></div>'
     +'</div>';
   $("tabnav").style.display="none";
   $("fab-wrap").style.display="none";
@@ -2784,7 +2832,7 @@ var DICT_EN = {
   /* Tabs & nav */
   "Tổng quan":"Overview", "Tiến độ công việc":"Timeline", "Cập nhật công việc":"All tasks",
   "Báo cáo tuần":"Weekly report", "Monthly Report":"Monthly report",
-  "Marketing Department":"Marketing Department", "Back Office":"Back Office", "Management":"Management",
+  "Marketing & Sales":"Marketing & Sales", "Back Office":"Back Office", "Management":"Management",
   "Weekly / Monthly Tracker · Toàn bộ phòng ban":"Weekly / Monthly Tracker · All departments",
   "Thông tin thầu":"Tender results", "Product Data":"Product data", "Dự trù & Doanh số":"Forecast & Turnover",
   /* Filters / toolbar */
@@ -3254,6 +3302,7 @@ function picLabel(p){ return (p && String(p).trim()) ? p : NO_PIC; }
 function ovFilterBar(pics, types){
   var selP=S.ovPics||[], selT=S.ovTypes||[];
   var h='<div class="ov-picbar">';
+  h+=picGroupBar("ovPics",selP);                          /* ⭐ v9.6 (#7) */
   h+=multiFilterDropdown("opic","Nhân sự",pics.map(function(p){return {val:p,label:p,av:true};}),selP);
   h+=multiFilterDropdown("otype","Loại việc",types.map(function(t){return {val:t,label:t,color:typeColor(t)};}),selT);
   if(selP.length||selT.length){
@@ -3371,6 +3420,7 @@ function renderOverview(){
       +donutBig([["Completed",done,"#22c55e"],["In Progress",prog2,"#3b82f6"],["To Do",todo,"#94a3b8"],["Cancelled",cancel,"#b8b2c2"]], String(total.length), t("unit.task"))
       +'</div>';
     h+='</div>';
+    h+=salesChartsHTML(total);                       /* ⭐ v9.6 (#6) */
     h+='<div class="panel panel-pad chart-card" style="margin-top:16px"><h3>'+t("chart.progress")+' '
       +fmtVNFull(from)+' → '+fmtVNFull(to)+'</h3>'
       +progressBarsHTML(total, from, to)+'</div>';
@@ -3504,40 +3554,93 @@ function donutBig(entries,centerLabel,centerSub,colorFn){
     +'<div class="donut-legend">'+legend+'</div></div>';
 }
 /* ⭐ v5.5: BIỂU ĐỒ TIẾN ĐỘ CỘT NGANG — completed / tổng sub-task theo từng kỳ (tuần hoặc tháng) */
+/* ══ ⭐ v9.6 (#7) — TIẾN ĐỘ THEO KỲ: KHUNG CỐ ĐỊNH THEO KHOẢNG ĐANG CHỌN ══
+   Trước đây khung được sinh ra TỪ DỮ LIỆU (mỗi ngày/tuần có task thì đẻ một thanh),
+   nên xem tuần 17–23/08 vẫn lòi ra thanh 26/10–01/11. Nay khung dựng TỪ KHOẢNG THỜI GIAN:
+     · ≤ 8 ngày   → đúng 1 thanh / 1 NGÀY (xem tuần = 7 thanh)
+     · ≤ 70 ngày  → 1 thanh / 1 TUẦN, chỉ các tuần giao với khoảng (xem tháng = 4–5 thanh)
+     · dài hơn    → 1 thanh / 1 THÁNG
+   Task nằm ngoài khoảng bị loại hẳn. Bấm vào thanh để xổ chi tiết theo PIC. */
+var PB_OPEN={};
+function pbToggle(k){ PB_OPEN[k]=!PB_OPEN[k]; renderOverview(); }
 function progressBarsHTML(pool, from, to){
   if(!pool.length) return '<div class="chart-empty">'+t("chart.nodata")+'</div>';
   var spanDays = Math.round((new Date(to+"T00:00:00") - new Date(from+"T00:00:00"))/86400000)+1;
-  var byMonth = spanDays > 70;                       // >10 tuần → gom theo tháng cho gọn
+  var mode = spanDays<=8 ? "day" : (spanDays<=70 ? "week" : "month");
+  var byMonth = (mode==="month");
   var buckets=[], idx={};
-  function bucketOf(iso){
-    if(!iso) return null;
-    if(byMonth){
-      var k=String(iso).slice(0,7);
-      return { key:k, label:fmtMonth(k.replace("-","")) };
+
+  /* dựng SẴN toàn bộ khung theo khoảng đang chọn — kể cả kỳ không có việc nào */
+  (function(){
+    if(mode==="day"){
+      for(var d=from; d<=to; d=addDaysISO(d,1)){
+        idx[d]={key:d,label:fmtVN(d),from:d,to:d,done:0,total:0,late:0,pics:{}}; buckets.push(idx[d]);
+      }
+    }else if(mode==="week"){
+      var mon=toISO(mondayOf(new Date(from+"T00:00:00")));
+      while(mon<=to){
+        var end=addDaysISO(mon,6);
+        idx[mon]={key:mon,label:fmtVN(mon)+"–"+fmtVN(end),from:mon,to:end,done:0,total:0,late:0,pics:{}};
+        buckets.push(idx[mon]); mon=addDaysISO(mon,7);
+      }
+    }else{
+      var cur=String(from).slice(0,7);
+      while(cur<=String(to).slice(0,7)){
+        idx[cur]={key:cur,label:fmtMonth(cur.replace("-","")),from:cur+"-01",to:cur+"-31",done:0,total:0,late:0,pics:{}};
+        buckets.push(idx[cur]);
+        var y=+cur.slice(0,4), m=+cur.slice(5,7)+1; if(m>12){m=1;y++;}
+        cur=y+"-"+(m<10?"0":"")+m;
+      }
     }
-    var mon=toISO(mondayOf(new Date(iso+"T00:00:00")));
-    return { key:mon, label:fmtVN(mon)+"–"+fmtVN(addDaysISO(mon,6)) };
+  })();
+  function bucketKeyOf(iso){
+    if(!iso) return null;
+    if(iso<from || iso>to) return null;                    /* ⭐ loại hẳn việc ngoài khoảng */
+    if(mode==="day")   return iso;
+    if(mode==="month") return String(iso).slice(0,7);
+    return toISO(mondayOf(new Date(iso+"T00:00:00")));
   }
+  var todayIso=toISO(new Date());
   pool.forEach(function(o){
-    var d=effDate(o.s)||o.s.start||o.s.actual;
-    var b=bucketOf(toISO(d)); if(!b) return;
-    if(!idx[b.key]){ idx[b.key]={key:b.key,label:b.label,done:0,total:0}; buckets.push(idx[b.key]); }
-    var bk=idx[b.key];
+    var d=toISO(o.s.start||effDate(o.s)||o.s.actual);      /* ⭐ căn theo Start date */
+    var bk=idx[bucketKeyOf(d)]; if(!bk) return;
     if(isCancelled(o.s.status)) return;
-    bk.total++;
-    if(isDone(o.s.status)) bk.done++;
+    var pic=picOf(o.s)||"—";
+    var pr=bk.pics[pic]||(bk.pics[pic]={done:0,total:0,late:0});
+    bk.total++; pr.total++;
+    if(isDone(o.s.status)){ bk.done++; pr.done++; }
+    else{
+      var dl=String(effDate(o.s)||"").slice(0,10);
+      if(dl && dl<todayIso){ bk.late++; pr.late++; }
+    }
   });
-  buckets.sort(function(a,b){ return a.key<b.key?-1:1; });
   if(!buckets.length) return '<div class="chart-empty">'+t("chart.nodata")+'</div>';
   var gd=buckets.reduce(function(a,b){return a+b.done;},0), gt=buckets.reduce(function(a,b){return a+b.total;},0);
   var grate=gt?Math.round(gd/gt*100):0;
   var rows=buckets.map(function(b){
     var pct=b.total?Math.round(b.done/b.total*100):0;
-    return '<div class="pb-row" title="'+esc(b.label)+': '+b.done+'/'+b.total+' ('+pct+'%)">'
+    var open=!!PB_OPEN[b.key];
+    var h='<div class="pb-row'+(b.total?' pb-clk':'')+(open?' on':'')+'" '
+      +(b.total?'onclick="pbToggle(\''+jsq(b.key)+'\')" ':'')
+      +'title="'+esc(b.label)+': '+b.done+'/'+b.total+' ('+pct+'%)">'
       +'<span class="pb-lb">'+esc(b.label)+'</span>'
       +'<span class="pb-track"><span class="pb-fill" style="width:'+pct+'%;background:'+progColor(pct)+'"></span>'
         +'<span class="pb-inpct">'+pct+'%</span></span>'
-      +'<span class="pb-val">'+b.done+'<small>/'+b.total+'</small></span></div>';
+      +'<span class="pb-val">'+b.done+'<small>/'+b.total+'</small>'
+      +(b.late?'<span class="pb-late">⏰'+b.late+'</span>':'')+'</span></div>';
+    if(open){
+      var names=Object.keys(b.pics).sort(function(x,y){ return b.pics[y].total-b.pics[x].total; });
+      h+='<div class="pb-drill">'+(names.length?names.map(function(p){
+        var pr=b.pics[p], rt=pr.total?Math.round(pr.done/pr.total*100):0;
+        return '<div class="pb-dr"><span class="pb-dr-av" style="background:'+avColor(p)+'">'+esc(initials(p))+'</span>'
+          +'<span class="pb-dr-name">'+esc(p)+'</span>'
+          +'<span class="pb-dr-st">✅ '+pr.done+'</span>'
+          +'<span class="pb-dr-st'+(pr.late?' late':'')+'">⏰ '+pr.late+'</span>'
+          +'<span class="pb-dr-st">📋 '+pr.total+'</span>'
+          +'<span class="pb-dr-pct" style="color:'+progColor(rt)+'">'+rt+'%</span></div>';
+      }).join("") : '<div class="pb-dr" style="color:var(--faint)">Không có việc trong kỳ này.</div>')+'</div>';
+    }
+    return h;
   }).join("");
   return '<div class="pb-wrap">'
     +'<div class="pb-hero"><div class="pb-hero-l"><b style="color:'+progColor(grate)+'">'+grate+'%</b><span>'+t("chart.overall")+'</span></div>'
@@ -3547,8 +3650,47 @@ function progressBarsHTML(pool, from, to){
         +'<span class="pb-hero-n">'+gd+' / '+gt+' '+t("unit.subtask")+'</span>'
       +'</div></div>'
     +'<div class="pb-list">'+rows+'</div>'
-    +'<div class="pb-note">'+(byMonth?t("chart.byMonth"):t("chart.byWeek"))+'</div></div>';
+    +'<div class="pb-note">'+(mode==="day"?"Mỗi dòng = 1 ngày · bấm vào dòng để xem chi tiết theo PIC"
+        :(byMonth?t("chart.byMonth"):"Mỗi dòng = 1 tuần · bấm vào dòng để xem chi tiết theo PIC"))+'</div></div>';
 }
+/* ══ ⭐ v9.6 (#6) — 2 BIỂU ĐỒ RIÊNG CHO CÔNG VIỆC ĐỘI SALES ══
+   ① Field Engagement Rate — tỉ lệ việc GẶP KHÁCH HÀNG (Hospital · Clinic · University ·
+      Distributor · Dealer) so với việc LÀM TẠI VĂN PHÒNG, trên tổng sub-task đồng bộ.
+   ② Cơ cấu Customer type — donut theo loại khách hàng đã gặp.
+   Chỉ đọc từ sub-task đồng bộ (vMeta): meta.of=1 là Working at office, meta.t là loại KH.
+   Không có dữ liệu Sales trong kỳ thì khối này tự ẩn. */
+var CUSTOMER_TYPE_COLORS={
+  "Hospital":"#2A5DB0","Public Hospital":"#1E4E8C","Private Hospital":"#4A7FD4",
+  "Clinic":"#0E8A6E","University":"#B8860B","Distributor":"#8E4FBF","Dealer":"#D2691E","(khác)":"#94a3b8"
+};
+function salesChartsHTML(pool){
+  var field=0, office=0, byCust={};
+  (pool||[]).forEach(function(o){
+    var m=o.s&&o.s.vMeta; if(!m) return;                       /* chỉ tính dòng đồng bộ từ Sales */
+    if(m.of){ office++; return; }
+    field++;
+    var ct=String(m.t||"").trim()||"(khác)";
+    byCust[ct]=(byCust[ct]||0)+1;
+  });
+  var tot=field+office;
+  if(!tot) return "";
+  var rate=Math.round(field/tot*100);
+  var custEntries=Object.keys(byCust).sort(function(a,b){return byCust[b]-byCust[a];})
+    .map(function(k){ return [k,byCust[k],CUSTOMER_TYPE_COLORS[k]||"#94a3b8"]; });
+
+  var h='<div class="chart-grid" style="margin-top:16px">';
+  h+='<div class="panel panel-pad chart-card"><h3>Field Engagement Rate — Sales</h3>'
+    +donutBig([["Gặp khách hàng",field,"#2A5DB0"],["Làm tại văn phòng",office,"#94a3b8"]],
+              rate+'%', 'gặp khách')
+    +'<div class="pb-note">Tỉ lệ sub-task đi gặp khách hàng trên tổng công việc đồng bộ của đội Sales ('+field+'/'+tot+').</div>'
+    +'</div>';
+  h+='<div class="panel panel-pad chart-card"><h3>Cơ cấu Customer type</h3>'
+    +(custEntries.length?donutBig(custEntries, String(field), 'lượt gặp')
+        :'<div class="chart-empty">'+t("chart.nodata")+'</div>')
+    +'</div>';
+  return h+'</div>';
+}
+
 function donutHTML(entries,centerLabel,centerSub){
   var total=entries.reduce(function(a,e){return a+e[1];},0);
   if(!total) return '<p style="color:var(--faint);font-size:13px;text-align:center;padding:20px">Chưa có dữ liệu</p>';
@@ -3753,6 +3895,7 @@ function renderGantt(bodyOnly){
 
   h+='<div class="detail-toolbar" style="margin-bottom:14px">'
     +multiFilterDropdown("gtype","Loại việc",types.map(function(t){return {val:t,label:t,color:typeColor(t)};}),selGT)
+    +picGroupBar("ganttPics",selGP)                       /* ⭐ v9.6 (#7) */
     +multiFilterDropdown("gpic","Nhân sự",gPics.map(function(p){return {val:p,label:p,av:true};}),selGP)
     +'</div>';
 
@@ -4084,6 +4227,7 @@ function renderDetail(){
   h+='<div class="search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>'
     +'<input type="text" id="detail-search" placeholder="Tìm key task, sub-task, PIC…" value="'+esc(S.detailQ||"")+'" oninput="S.detailQ=this.value;clearTimeout(window._dq);window._dq=setTimeout(renderDetailList,200)"/></div>';
   h+=multiFilterDropdown("type","Loại việc",types.map(function(t){return {val:t,label:t,color:typeColor(t)};}),selTypes);
+  h+=picGroupBar("detailPics",selPics);                   /* ⭐ v9.6 (#7) */
   h+=multiFilterDropdown("pic","Nhân sự",pics.map(function(p){return {val:p,label:p,av:true};}),selPics);
   /* ⭐ v7.0: STATUS FILTER — mặc định ẩn Completed, hiện In Progress + Todo */
   h+=statusFilterToggle();
@@ -4756,7 +4900,16 @@ function reportSection(kind,label,from,to,data){
     +'<th class="rp-c-st">Trạng thái</th>'
     +'</tr></thead><tbody>';
   data.forEach(function(g){
-    var k=g.k, kpct=ktProgress(k), km=stMeta(ktStatus(k));
+    /* ⭐ v9.7 (#8) — % KEY TASK PHẢI TÍNH TRÊN ĐÚNG SỐ SUB ĐANG HIỂN THỊ.
+       Trước đây lấy ktProgress(k) trên TOÀN BỘ k.subs, nên bảng chỉ liệt kê vài sub của
+       tuần (25% · 50%) mà dòng key vẫn ghi 97% — lấy từ hàng trăm sub Completed của cả
+       tháng. Nay dựng bản sao key task chỉ chứa sub đang hiển thị rồi mới tính. */
+    var k=g.k, _kv=k;
+    if(g.subs.length && g.subs.length!==(k.subs||[]).length){
+      _kv={}; for(var _p in k){ if(Object.prototype.hasOwnProperty.call(k,_p)) _kv[_p]=k[_p]; }
+      _kv.subs=g.subs;
+    }
+    var kpct=ktProgress(_kv), km=stMeta(ktStatus(_kv));
     /* ⭐ v7.4: tag PIC giống tab "Cập nhật công việc" — đếm trên TOÀN BỘ sub-task
        của key task (k.subs), không phải phần đã lọc, để thấy đủ ai đang giữ việc gì. */
     var _rp=picChargeInfo(k, k.subs||[]);
