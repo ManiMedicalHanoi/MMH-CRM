@@ -361,6 +361,27 @@ button{cursor:pointer}
 .as-item-status{font-size:10.5px;font-weight:700;padding:2px 9px;border-radius:8px;margin-left:auto;white-space:nowrap}
 .as-item-dl{width:150px;flex:0 0 auto;font-size:12.5px;padding:6px 9px;border:1px solid var(--border);border-radius:8px}
 .modal-footer{display:flex;gap:12px;justify-content:flex-end;margin-top:8px}
+/* ⭐ v9.2 — bảng đồng bộ Customer visiting */
+.vs-body{max-height:62vh;overflow:auto}
+.vs-tabs{display:flex;gap:6px;margin-bottom:12px}
+.vs-tabs button{flex:1;padding:8px 10px;border:1px solid var(--border);background:#fff;border-radius:8px;font-size:13px;font-weight:600;color:var(--faint);cursor:pointer}
+.vs-tabs button.active{background:#0F2E5A;border-color:#0F2E5A;color:#fff}
+.vs-bulk{display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap}
+.vs-bulk button{padding:5px 10px;border:1px solid var(--border);background:#fff;border-radius:6px;font-size:12px;cursor:pointer}
+.vs-count{margin-left:auto;font-size:12px;color:var(--faint)}
+.vs-row{display:grid;grid-template-columns:22px 92px 74px auto 1fr;align-items:center;gap:10px;padding:9px 10px;border:1px solid var(--border);border-radius:8px;margin-bottom:6px;cursor:pointer;font-size:13px}
+.vs-row.on{border-color:#0F2E5A;background:#F4F8FF}
+.vs-row input{width:16px;height:16px;cursor:pointer}
+.vs-team{font-weight:700;font-size:11px;letter-spacing:.3px;text-transform:uppercase}
+.vs-team.surgical{color:#1F7A5A}.vs-team.dental{color:#2A5DB0}
+.vs-ym{font-weight:700;color:var(--ink)}
+.vs-badge{font-size:11px;font-weight:600;padding:3px 8px;border-radius:20px;white-space:nowrap}
+.vs-badge.ok{background:#E6F5EC;color:#1E9E5A}
+.vs-badge.todo{background:#FFF2E0;color:#C97A00}
+.vs-detail{font-size:12px;color:var(--faint);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.vs-note{margin-top:12px;font-size:12px;color:var(--faint);line-height:1.5}
+.vs-err{background:#FFECEC;color:#B3322E;padding:8px 10px;border-radius:8px;font-size:12px;margin-bottom:10px}
+@media(max-width:640px){.vs-row{grid-template-columns:22px 1fr auto;row-gap:4px}.vs-detail{grid-column:2/-1}}
 .voice-btn{background:var(--pale);border:1.5px dashed var(--mmh-blue);color:var(--mmh-blue);font-size:12px;font-weight:700;padding:7px 12px;border-radius:var(--r-sm);display:inline-flex;align-items:center;gap:5px}
 .voice-btn.rec{background:var(--danger);border-color:var(--danger);color:#fff;border-style:solid;animation:pulse 1s infinite}
 @keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(239,68,68,.4)}50%{box-shadow:0 0 0 6px rgba(239,68,68,0)}}
@@ -1754,14 +1775,110 @@ function visitResTags(o){
   var h=vTag(m.ts,"v-ts")+vTag(m.fb,"v-fb")+vTag(m.na,"v-na");
   return h ? '<span class="v-tags">'+h+'</span>' : "";
 }
-/* Đồng bộ thủ công — backend cũng tự chạy khi boot + trigger 10 phút/lần */
+/* ══ ⭐ v9.2 — BẢNG ĐỒNG BỘ CUSTOMER VISITING (chọn nhóm + chọn tháng) ══
+   Bấm "🔄 Đồng bộ visiting" → mở bảng liệt kê từng tháng của từng nhóm kèm tình trạng.
+   Tháng nào đã đồng bộ đủ thì tự BỎ TICK sẵn (loại trừ), chỉ tick những tháng còn
+   thiếu / đã đổi ở nguồn. Backend chỉ xử lý đúng các tháng được tick ⇒ nhanh hơn nhiều
+   so với quét cả cửa sổ 4 tháng. */
+var VSYNC={ rows:[], pick:{}, team:"all", loading:false };
+
 window.syncVisiting=function(){
-  toast("⏳ Đang đồng bộ Customer visiting…");
-  apiGet("syncVisiting").then(function(r){
-    toast((r&&r.ok) ? ("✅ "+(r.message||"Đã đồng bộ")) : ("❌ "+((r&&r.error)||"Lỗi")));
-    if(r&&r.ok) reload();
-  }).catch(function(e){ toast("❌ "+(e.message||e)); });
+  VSYNC.loading=true; VSYNC.rows=[]; VSYNC.pick={};
+  renderSyncModal();
+  apiGet("syncVisiting",{mode:"status"}).then(function(r){
+    VSYNC.loading=false;
+    VSYNC.rows=(r&&r.rows)||[];
+    VSYNC.err=(r&&r.errors&&r.errors.length)?r.errors.join(" | "):"";
+    /* mặc định: tick tháng CÒN VIỆC, bỏ tick tháng đã xong */
+    VSYNC.rows.forEach(function(x){ VSYNC.pick[x.src+"|"+x.ym] = !x.done; });
+    renderSyncModal();
+  }).catch(function(e){
+    VSYNC.loading=false; VSYNC.err=e.message||String(e); renderSyncModal();
+  });
 };
+function vsyncKey(x){ return x.src+"|"+x.ym; }
+function vsyncToggle(k){ VSYNC.pick[k]=!VSYNC.pick[k]; renderSyncModal(); }
+function vsyncTeam(t){ VSYNC.team=t; renderSyncModal(); }
+function vsyncAll(on){
+  vsyncVisible().forEach(function(x){ VSYNC.pick[vsyncKey(x)]=!!on; });
+  renderSyncModal();
+}
+function vsyncVisible(){
+  return VSYNC.rows.filter(function(x){ return VSYNC.team==="all" || x.src===VSYNC.team; });
+}
+function vsyncYmLabel(ym){ return String(ym).slice(4,6)+"/"+String(ym).slice(0,4); }
+
+function renderSyncModal(){
+  var body="";
+  if(VSYNC.loading){
+    body='<div style="padding:26px;text-align:center;color:var(--faint)">⏳ Đang đọc sheet Field Report của Sales…</div>';
+  }else{
+    var vis=vsyncVisible();
+    var nPick=vis.filter(function(x){return VSYNC.pick[vsyncKey(x)];}).length;
+    var rowsH=vis.map(function(x){
+      var k=vsyncKey(x), on=!!VSYNC.pick[k];
+      var todo=x.missing+x.stale+x.orphan;
+      var badge = x.done
+        ? '<span class="vs-badge ok">✓ Đã đủ '+x.synced+'/'+x.srcCount+'</span>'
+        : '<span class="vs-badge todo">Cần xử lý '+todo+'</span>';
+      var detail=[];
+      if(x.missing) detail.push("thiếu "+x.missing);
+      if(x.stale)   detail.push("đổi nội dung "+x.stale);
+      if(x.orphan)  detail.push("nguồn đã xoá "+x.orphan);
+      if(!x.keyExists) detail.push("chưa có key task");
+      return '<label class="vs-row'+(on?" on":"")+'">'
+        +'<input type="checkbox" '+(on?"checked":"")+' onchange="vsyncToggle(\''+jsq(k)+'\')"/>'
+        +'<span class="vs-team '+esc(x.src)+'">'+esc(x.label)+'</span>'
+        +'<span class="vs-ym">'+vsyncYmLabel(x.ym)+'</span>'
+        +badge
+        +'<span class="vs-detail">'+(detail.length?esc(detail.join(" · ")):"—")+'</span>'
+        +'</label>';
+    }).join("");
+    body='<div class="vs-tabs">'
+      +'<button class="'+(VSYNC.team==="all"?"active":"")+'" onclick="vsyncTeam(\'all\')">Tất cả</button>'
+      +'<button class="'+(VSYNC.team==="surgical"?"active":"")+'" onclick="vsyncTeam(\'surgical\')">Surgical</button>'
+      +'<button class="'+(VSYNC.team==="dental"?"active":"")+'" onclick="vsyncTeam(\'dental\')">Dental</button>'
+      +'</div>'
+      +(VSYNC.err?'<div class="vs-err">⚠ '+esc(VSYNC.err)+'</div>':"")
+      +'<div class="vs-bulk"><button onclick="vsyncAll(true)">Chọn tất cả</button>'
+      +'<button onclick="vsyncAll(false)">Bỏ chọn tất cả</button>'
+      +'<span class="vs-count">Đang chọn <b>'+nPick+'</b>/'+vis.length+' tháng</span></div>'
+      +(rowsH||'<div style="padding:22px;text-align:center;color:var(--faint)">Không có tháng nào ở nguồn.</div>')
+      +'<div class="vs-note">Tháng đã đồng bộ đủ được bỏ tick sẵn để loại trừ. Dữ liệu Customer visiting chỉ sửa được ở sheet Field Report của Sales.</div>';
+  }
+  showModal('<div class="modal-box modal-lg"><div class="modal-head"><h3>🔄 Đồng bộ Customer visiting</h3>'
+    +'<button class="modal-close" onclick="closeModal()">✕</button></div>'
+    +'<div class="modal-body vs-body">'+body+'</div>'
+    +'<div class="modal-footer"><button class="btn-secondary" onclick="closeModal()">Đóng</button>'
+    +'<button class="btn-primary" onclick="vsyncRun()"'+(VSYNC.loading?" disabled":"")+'>Đồng bộ các tháng đã chọn</button></div></div>');
+}
+
+function vsyncRun(){
+  var vis=vsyncVisible().filter(function(x){ return VSYNC.pick[vsyncKey(x)]; });
+  if(!vis.length){ toast("⚠ Chưa chọn tháng nào"); return; }
+  var bySrc={};
+  vis.forEach(function(x){ (bySrc[x.src]=bySrc[x.src]||[]).push(x.ym); });
+  var srcs=Object.keys(bySrc);
+  closeModal();
+  toast("⏳ Đang đồng bộ "+vis.length+" tháng…");
+  var msgs=[];
+  /* chạy lần lượt từng nhóm để backend không phải quét cả 2 nguồn trong 1 lượt */
+  (function next(i){
+    if(i>=srcs.length){
+      toast("✅ "+(msgs.join(" || ")||"Đã đồng bộ"));
+      reload();
+      return;
+    }
+    var src=srcs[i];
+    apiGet("syncVisiting",{only:src,months:JSON.stringify(bySrc[src])}).then(function(r){
+      msgs.push((r&&r.message)||"");
+      next(i+1);
+    }).catch(function(e){
+      msgs.push("❌ "+src+": "+(e.message||e));
+      next(i+1);
+    });
+  })(0);
+}
 
 /* ── STATE ── */
 var S={
