@@ -3471,9 +3471,23 @@ function renderGantt(bodyOnly){
   var selGT=S.ganttTypes||[], selGP=S.ganttPics||[];
   if(S.ganttType && selGT.indexOf(S.ganttType)<0) selGT=[S.ganttType];   // tương thích ngược
   if(selGT.length) kts=kts.filter(function(k){ return selGT.indexOf(k.type)>=0; });
-  if(selGP.length) kts=kts.filter(function(k){
-    return selGP.indexOf(picOf(k))>=0 || (k.subs||[]).some(function(s){ return selGP.indexOf(picOf(s))>=0; });
-  });
+  /* ⭐ v9.1 FIX — LỌC NHÂN SỰ PHẢI ĂN XUỐNG CẢ SUB-TASK.
+     Trước đây chỉ LỌC KEY (giữ key nếu key hoặc bất kỳ sub nào khớp PIC) rồi vẫn xổ ra
+     TOÀN BỘ sub của mọi người ⇒ key đồng bộ "202607_Dental Customer visiting" hiện 119/119
+     và % tính trên cả team dù đang lọc 1 PIC. Nay clone key task và chỉ giữ sub đúng PIC:
+     số sub (x/y), % tiến độ, trạng thái, cờ quá hạn đều tính lại theo đúng người đang lọc. */
+  if(selGP.length){
+    kts=kts.map(function(k){
+      var all=k.subs||[];
+      var subs=all.filter(function(s){ return selGP.indexOf(picOf(s))>=0; });
+      var keyMatch=selGP.indexOf(picOf(k))>=0;
+      if(!subs.length && !keyMatch) return null;      // không liên quan PIC đang lọc → ẩn hẳn
+      if(subs.length===all.length) return k;          // khớp hết → dùng nguyên bản
+      var c={}; for(var p in k){ if(Object.prototype.hasOwnProperty.call(k,p)) c[p]=k[p]; }
+      c.subs=subs;
+      return c;
+    }).filter(Boolean);
+  }
   // ⭐ SMART SEARCH: lọc theo key/sub/PIC/type (không re-render ô input → không mất focus)
   var gq=(S.ganttQ||"").trim().toLowerCase();
   if(gq){
