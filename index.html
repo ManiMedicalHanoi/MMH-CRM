@@ -969,7 +969,7 @@ function buildNav(){
     if(t.grp!==lastGrp){ h+='<div class="grp">'+t.grp+'</div>'; lastGrp=t.grp; }
     h+='<button class="nvi" data-t="'+t.id+'" onclick="go(\''+t.id+'\')"><span class="ic">'+t.ic+'</span><span class="lb">'+t.lb+'</span></button>';
   });
-  h+='<div style="flex:1"></div><div style="padding:10px;font-size:10.5px;color:var(--mute);line-height:1.5">MMH Dental CRM v4.1<br><a href="'+DRIVE_FOLDER+'" target="_blank">📁 Folder ảnh Drive</a></div>';
+  h+='<div style="flex:1"></div><div style="padding:10px;font-size:10.5px;color:var(--mute);line-height:1.5">MMH Dental CRM v4.2<br><a href="'+DRIVE_FOLDER+'" target="_blank">📁 Folder ảnh Drive</a></div>';
   $("side").innerHTML=h;
   $("navMob").innerHTML=TABS.filter(function(t){return t.mob;}).map(function(t){
     return '<button data-t="'+t.id+'" onclick="go(\''+t.id+'\')"><span class="ic">'+t.ic+'</span>'+(t.mlb||t.lb.split(" ")[0])+'</button>';
@@ -1017,39 +1017,160 @@ function myCust(){
 var CH={};
 var PAL=["#3A5CAA","#7D97CE","#1E9E5A","#E8A302","#B44FA6","#00A0B0","#D9433F","#5C6B8A","#8FBF4D","#C77DFF"];
 
-function pgDash(){
-  if(S.dash&&S.dash._fy===S.fy&&S.dash._pic===(S.filt.pic||"")){
-    renderDash();
-    /* có dữ liệu cũ ⇒ hiện ngay, đồng thời làm mới ngầm nếu đã lâu */
-    if(Date.now()-(S._dashAt||0)>300000){ S._dashAt=Date.now(); refreshDash(); }
-    return;
+/* ═══════════════════════ ⭐ v4.2 — DASHBOARD TÍNH TẠI CHỖ ═══════════════════════
+   Trước: mỗi lần bấm Dashboard / đổi PIC / đổi FY đều gọi action "dashboard" trên
+   Apps Script ⇒ 3–6 giây mỗi thao tác.
+   Nay: mọi con số được tính TRỰC TIẾP trong trình duyệt từ dữ liệu đã nạp sẵn
+   (kho địa bàn cả FY + tab Đơn hàng + Thuyết trình + danh mục khách hàng).
+   ⇒ đổi PIC / đổi khoảng thời gian = 0 lần gọi mạng, và số liệu luôn khớp tức thì
+   với mọi thay đổi vừa ghi (afterWrite đã vá thẳng vào các kho này).
+   ═══════════════════════════════════════════════════════════════════════════════ */
+function dashRange(){
+  var ms=fyMonths(S.fy), r=S.dashR||{mode:"FY"};
+  if(r.mode==="Q"){
+    var i=(Math.max(1,Math.min(4,r.q||1))-1)*3;
+    return { months:ms.slice(i,i+3), label:"Quý "+(r.q||1)+" · "+S.fy, sub:ms.slice(i,i+3).map(mLb).join(" · ") };
   }
-  $("main").innerHTML=skDash();
-  Promise.all([ apiGet("dashboard",{fy:S.fy,pic:S.filt.pic||""}), S.kpi&&S.kpi._fy===S.fy?Promise.resolve(S.kpi):apiGet("kpi",{fy:S.fy}) ])
-    .then(function(r){
-      S.dash=r[0]; S.dash._fy=S.fy; S.dash._pic=S.filt.pic||"";
-      S.kpi=r[1]; S.kpi._fy=S.fy;
-      renderDash();
-    })
-    .catch(function(e){ $("main").innerHTML='<div class="pg"><div class="card pad"><b style="color:#A82F2C">Lỗi:</b> '+esc(e.message)+'</div></div>'; });
+  if(r.mode==="M"){
+    var m=r.m||ymOf(todayISO()); if(ms.indexOf(m)<0) m=ms[ms.length-1];
+    return { months:[m], label:"Tháng "+mLb(m), sub:"" };
+  }
+  return { months:ms, label:"Cả năm tài chính "+S.fy, sub:mLb(ms[0])+" → "+mLb(ms[11]) };
 }
-/* làm mới ngầm, không xoá màn hình đang xem */
-function refreshDash(){
-  apiGet("dashboard",{fy:S.fy,pic:S.filt.pic||""}).then(function(d){
-    S.dash=d; S.dash._fy=S.fy; S.dash._pic=S.filt.pic||"";
-    if(S.tab==="dash") renderDash();
-  }).catch(function(){});
+function mLb(m){ return String(m).slice(4)+"/"+String(m).slice(0,4); }
+function setDashR(mode,v){
+  S.dashR = (mode==="Q") ? {mode:"Q",q:v} : (mode==="M") ? {mode:"M",m:v} : {mode:"FY"};
+  renderDash();
 }
+function dashPic(p){ S.filt.pic=p; renderDash(); }          /* tức thì, không gọi mạng */
+
+/* nguồn dữ liệu sẵn có */
+function dashSrc(){
+  return { weekly: terrRows(), order: tGet("order")||[], present: tGet("present")||[], cust: S.custIndex||[] };
+}
+function dashMissing(){
+  var m=[];
+  if(!S.cache.weekly) m.push("hoạt động địa bàn");
+  if(!tGet("order")) m.push("đơn hàng");
+  if(!tGet("present")) m.push("thuyết trình");
+  if(!(S.custIndex&&S.custIndex.length)) m.push("danh mục khách hàng");
+  return m;
+}
+/* ── tính toàn bộ số liệu dashboard trong trình duyệt ── */
+function dashBuild(){
+  var R=dashRange(), months=R.months, src=dashSrc();
+  var mIdx={}; months.forEach(function(m,i){ mIdx[m]=i; });
+  var pic=S.filt.pic||"";
+  function keep(p){ if(!pic) return true; var s=String(p||"");
+    return s===pic || s.toLowerCase().indexOf(pic.toLowerCase())>=0; }
+  function z(){ return months.map(function(){ return 0; }); }
+  function top(o,k){ return Object.keys(o).map(function(x){return {k:x,v:o[x]};})
+      .sort(function(a,b){return b.v-a.v;}).slice(0,k||10); }
+  function ymField(v,alt){ var s=String(v==null?"":v).replace(/\D/g,""); return s.length>=6?s.slice(0,6):ymOf(alt||""); }
+
+  /* ── đơn hàng ── */
+  var amtByMonth=z(), ordByMonth=z(), amtByPic={}, custAmt={}, prodAmt={}, channel={};
+  src.order.forEach(function(o){
+    if(!keep(o.pic)) return;
+    var i=mIdx[ymField(o.month,o.day)]; if(i===undefined) return;
+    var a=n(o.amount);
+    amtByMonth[i]+=a; ordByMonth[i]+=1;
+    amtByPic[String(o.pic||"—")]=(amtByPic[String(o.pic||"—")]||0)+a;
+    var cn=String(o.name||o.code||"(không rõ)"); custAmt[cn]=(custAmt[cn]||0)+a;
+    var pt=String(o.ptype||"Khác");             prodAmt[pt]=(prodAmt[pt]||0)+a;
+    var ch=String(o.channel||"Khác");           channel[ch]=(channel[ch]||0)+a;
+  });
+
+  /* ── hoạt động đi địa bàn ── */
+  var visByMonth=z(), actByType={}, byAccountType={}, byStatus={}, byProcess={}, byFeedback={}, byProduct={}, byPicVisit={};
+  var visited={}, overdue=0, withPhoto=0, total=0, today=todayISO(), inRange=[];
+  src.weekly.forEach(function(w){
+    if(!keep(w.pic)) return;
+    var d=String(w.start).slice(0,10);
+    var i=mIdx[ymField(w.month,d)]; if(i===undefined) return;
+    total++; inRange.push(w);
+    if(String(w.typeAction||"")==="Visiting") visByMonth[i]++;
+    var A=parseAcc(w.account);
+    function bump(o,k){ k=String(k||"—")||"—"; o[k]=(o[k]||0)+1; }
+    bump(actByType,w.typeAction); bump(byAccountType,A.type||w.type);
+    bump(byStatus,w.status||"Chưa cập nhật"); bump(byProcess,w.process);
+    bump(byFeedback,w.feedback); bump(byProduct,w.product); bump(byPicVisit,w.pic);
+    if(A.name) visited[A.name.toLowerCase()]=1;
+    if((w.photos&&w.photos.length)||String(w.photo||"").trim()) withPhoto++;
+    var fin=String(w.finish||"").slice(0,10)||d;
+    if(!/complet|cancel/i.test(String(w.status||"")) && fin && fin<today) overdue++;
+  });
+
+  /* ── khách hàng & account mở mới ── */
+  var totalAcc=0, coveredAcc=0, byAreaAcc={}, newAcc=z();
+  src.cust.forEach(function(c){
+    if(!keep(c.pic)) return;
+    totalAcc++;
+    var ar=String(c.area||"—")||"—"; byAreaAcc[ar]=(byAreaAcc[ar]||0)+1;
+    if(visited[String(c.name||"").toLowerCase()]) coveredAcc++;
+    var i=mIdx[ymOf(String(c.openDate||"").slice(0,10))];
+    if(i!==undefined) newAcc[i]++;
+  });
+
+  /* ── thuyết trình ── */
+  var presByMonth=z(), attByMonth=z();
+  src.present.forEach(function(r){
+    if(!keep(r.pic)) return;
+    var i=mIdx[ymField(r.month,r.day)]; if(i===undefined) return;
+    presByMonth[i]++; attByMonth[i]+=n(r.actual);
+  });
+
+  var recent=inRange.slice().sort(function(a,b){ return String(b.start).localeCompare(String(a.start)); })
+    .slice(0,25).map(function(w){
+      return { start:w.start, pic:w.pic, account:parseAcc(w.account).name, typeAction:w.typeAction,
+               typeTask:w.typeTask, status:w.status, result:String(w.result||"").slice(0,220),
+               photo:((w.photos&&w.photos.length)?"1":w.photo), _row:w._row };
+    });
+
+  return { months:months, rangeLabel:R.label, rangeSub:R.sub,
+    monthLabels: months.map(function(m){ return "T"+parseInt(String(m).slice(4,6),10); }),
+    amtByMonth:amtByMonth, ordByMonth:ordByMonth, visByMonth:visByMonth, newAcc:newAcc,
+    presByMonth:presByMonth, attByMonth:attByMonth,
+    amtByPic:top(amtByPic,12), topCustomers:top(custAmt,10), prodAmt:top(prodAmt,10),
+    channel:top(channel,6), actByType:top(actByType,10), byAccountType:top(byAccountType,10),
+    byStatus:top(byStatus,10), byProcess:top(byProcess,10), byFeedback:top(byFeedback,6),
+    byProduct:top(byProduct,12), byPicVisit:top(byPicVisit,12), byAreaAcc:top(byAreaAcc,6),
+    totalAcc:totalAcc, coveredAcc:coveredAcc, totalActivity:total, overdue:overdue,
+    withPhoto:withPhoto, recent:recent };
+}
+
+function pgDash(){
+  var miss=dashMissing();
+  if(miss.length===4){ $("main").innerHTML=skDash(); }
+  else renderDash();
+  dashEnsure();
+}
+/* nạp những nguồn còn thiếu — mỗi nguồn xong là vẽ lại ngay, không chờ nhau */
+function dashEnsure(force){
+  if(!S.cache.weekly || force) loadTerritoryAll(true).then(dashRepaint);
+  if(!tGet("order")   || force) ensureTab("order",{},  function(r,ready){ if(ready) dashRepaint(); });
+  if(!tGet("present") || force) ensureTab("present",{},function(r,ready){ if(ready) dashRepaint(); });
+  if(!(S.custIndex&&S.custIndex.length)) loadCustomerIndex().then(dashRepaint);
+}
+function dashRepaint(){ if(S.tab==="dash") renderDash(); }
+function refreshDash(){ dashEnsure(true); }
+
 function renderDash(){
-  var d=S.dash,k=S.kpi;
+  var d=dashBuild(), k=S.kpi||{blocks:[]};
+  var miss=dashMissing();
+  var ms=fyMonths(S.fy), R=S.dashR||{mode:"FY"};
   var bid={}; (k.blocks||[]).forEach(function(b){ bid[b.id]=b; });
+  var isFY=(R.mode==="FY");
+
   function kpiCard(lb,val,blockId,fmt){
     var b=bid[blockId]||{grand:{}};
-    var t=b.grand.targetFY||0, a=b.grand.fyActual||0, p=t?a/t:null;
+    var t=(b.grand&&b.grand.targetFY)||0, a=(b.grand&&b.grand.fyActual)||0;
+    if(!isFY) t=0;                       /* mục tiêu đặt theo FY ⇒ chỉ so khi xem cả FY */
+    var p=t?val/t:null;
     return '<div class="kpi"><div class="lb">'+lb+'</div><div class="vl">'+(fmt==="vnd"?fmtVND(val):fmtN(val))+'</div>'+
       (t? '<div class="sb">Mục tiêu FY <b>'+(fmt==="vnd"?fmtVND(t):fmtN(t))+'</b></div>'+pb(p)+
-          '<div class="pbl"><span style="color:'+pctColor(p)+'">'+Math.round(p*100)+'%</span><span>còn '+(fmt==="vnd"?fmtVND(Math.max(0,t-a)):fmtN(Math.max(0,t-a)))+'</span></div>'
-        : '<div class="sb" style="color:var(--mute)">Chưa đặt mục tiêu FY</div>')+
+          '<div class="pbl"><span style="color:'+pctColor(p)+'">'+Math.round(p*100)+'%</span><span>còn '+(fmt==="vnd"?fmtVND(Math.max(0,t-val)):fmtN(Math.max(0,t-val)))+'</span></div>'
+        : '<div class="sb" style="color:var(--mute)">'+(isFY?"Chưa đặt mục tiêu FY":"Đang xem "+esc(d.rangeLabel))+'</div>')+
       '</div>';
   }
   var totalAmt=d.amtByMonth.reduce(function(s,v){return s+v;},0);
@@ -1058,20 +1179,35 @@ function renderDash(){
   var totalNew=d.newAcc.reduce(function(s,v){return s+v;},0);
   var cov=d.totalAcc?d.coveredAcc/d.totalAcc:0;
 
-  var picFilterBar = S.user.role==="manager" ?
-    '<div class="chipbar" style="margin-bottom:12px">'+
+  var picBar = S.user.role==="manager" ?
+    '<div class="chipbar" style="margin-bottom:10px">'+
       '<div class="chip'+(S.filt.pic?"":" on")+'" onclick="dashPic(\'\')">Toàn nhóm</div>'+
       S.picList.filter(function(p){return p.team==="Dental Sales Team";}).map(function(p){
         return '<div class="chip'+(S.filt.pic===p.pic?" on":"")+'" onclick="dashPic(\''+esc(p.pic)+'\')">'+esc(p.pic)+'</div>';
       }).join("")+'</div>' : "";
 
+  var timeBar='<div class="card pad" style="margin-bottom:12px"><div class="tbar">'+
+    '<div class="seg">'+
+      '<button class="'+(isFY?"on":"")+'" onclick="setDashR(\'FY\')">Cả FY</button>'+
+      [1,2,3,4].map(function(q){ return '<button class="'+(R.mode==="Q"&&R.q===q?"on":"")+'" onclick="setDashR(\'Q\','+q+')">Q'+q+'</button>'; }).join("")+
+    '</div>'+
+    '<select class="inp" style="height:34px;width:auto;min-width:126px" onchange="if(this.value)setDashR(\'M\',this.value)">'+
+      '<option value="">Chọn tháng…</option>'+
+      ms.map(function(m){ return '<option value="'+m+'"'+(R.mode==="M"&&R.m===m?" selected":"")+'>Tháng '+mLb(m)+'</option>'; }).join("")+
+    '</select>'+
+    '<span class="lbl" style="min-width:0">'+esc(d.rangeLabel)+(d.rangeSub?' <span style="font-weight:600;color:var(--mute)">· '+esc(d.rangeSub)+'</span>':"")+'</span>'+
+    '<div style="flex:1"></div>'+
+    (miss.length?'<span class="stale"><span class="dot"></span>Đang nạp '+esc(miss.join(", "))+'…</span>'
+                :'<button class="btn sm" onclick="refreshDash()">⟳ Đồng bộ với Sheet</button>')+
+  '</div></div>';
+
   $("main").innerHTML='<div class="pg">'+
     '<div class="ph"><div><h2>Tổng quan '+esc(S.fy)+'</h2><p>'+
       (S.filt.pic?("PIC: <b>"+esc(S.filt.pic)+"</b>"):"Toàn nhóm Dental")+' · '+fmtN(d.totalActivity)+' hoạt động · '+fmtN(d.totalAcc)+' account</p></div>'+
       '<div class="sp"></div><button class="btn pri sm" onclick="formWeekly(null)">＋ Ghi hoạt động</button></div>'+
-    picFilterBar+
+    picBar+ timeBar+
     '<div class="grid g4" style="margin-bottom:14px">'+
-      kpiCard("Doanh số FY",totalAmt,"amount","vnd")+
+      kpiCard("Doanh số",totalAmt,"amount","vnd")+
       kpiCard("Số đơn hàng",totalOrd,"orders")+
       kpiCard("Lượt viếng thăm",totalVis,"visiting")+
       kpiCard("Account mở mới",totalNew,"newacct")+
@@ -1089,15 +1225,15 @@ function renderDash(){
     '</div>'+
 
     '<div class="cwrap" style="margin-bottom:14px">'+
-      '<div class="cbox"><h4>Doanh số theo tháng</h4><div class="csub">Đơn vị VND · năm tài chính '+esc(S.fy)+'</div>'+
-        svgSeries(d.monthLabels,[{name:"Doanh số",data:d.amtByMonth,color:"#3A5CAA"}],"vnd","line")+'</div>'+
+      '<div class="cbox"><h4>Doanh số theo tháng</h4><div class="csub">Đơn vị VND · '+esc(d.rangeLabel)+'</div>'+
+        svgSeries(d.monthLabels,[{name:"Doanh số",data:d.amtByMonth,color:"#3A5CAA"}],"vnd",d.months.length>2?"line":"bar")+'</div>'+
       '<div class="cbox"><h4>Viếng thăm &amp; đơn hàng</h4><div class="csub">Số lượt mỗi tháng</div>'+
         svgSeries(d.monthLabels,[{name:"Viếng thăm",data:d.visByMonth,color:"#5B8DD9"},{name:"Đơn hàng",data:d.ordByMonth,color:"#E8A302"}],"num","bar")+'</div>'+
     '</div>'+
 
     '<div class="cwrap" style="margin-bottom:14px">'+
-      '<div class="cbox"><h4>Doanh số theo PIC</h4><div class="csub">Xếp hạng trong '+esc(S.fy)+'</div>'+
-        svgHBars(toEntries(d.amtByPic),"vnd",function(k){ return avColor(k); })+'</div>'+
+      '<div class="cbox"><h4>Doanh số theo PIC</h4><div class="csub">Xếp hạng · '+esc(d.rangeLabel)+'</div>'+
+        svgHBars(toEntries(d.amtByPic),"vnd",function(k2){ return avColor(k2); })+'</div>'+
       '<div class="cbox"><h4>Cơ cấu nhóm sản phẩm</h4><div class="csub">Theo doanh số</div>'+
         svgDonut(toEntries(d.prodAmt),fmtVND(totalAmt),"tổng","vnd")+'</div>'+
       '<div class="cbox"><h4>Loại khách hàng viếng thăm</h4><div class="csub">Số lượt theo Account type</div>'+
@@ -1106,19 +1242,19 @@ function renderDash(){
 
     '<div class="cwrap" style="margin-bottom:14px">'+
       '<div class="cbox"><h4>Phễu Sales Process</h4><div class="csub">Vị trí khách hàng trong quy trình</div>'+
-        svgHBars(toEntries(d.byProcess),"num",function(k,i){ return ["#8A97B5","#5B8DD9","#3A5CAA","#1E9E5A","#D9433F","#B44FA6"][i%6]; })+'</div>'+
+        svgHBars(toEntries(d.byProcess),"num",function(k2,i){ return ["#8A97B5","#5B8DD9","#3A5CAA","#1E9E5A","#D9433F","#B44FA6"][i%6]; })+'</div>'+
       '<div class="cbox"><h4>Trạng thái công việc</h4><div class="csub">Tiến độ các đầu việc đã ghi nhận</div>'+
-        svgHBars(toEntries(d.byStatus),"num",function(k){ return /complet/i.test(k)?"#1E9E5A":/cancel/i.test(k)?"#8A97B5":/75/.test(k)?"#3FA64B":/50/.test(k)?"#3A5CAA":/25/.test(k)?"#E08A00":"#8A97B5"; })+'</div>'+
+        svgHBars(toEntries(d.byStatus),"num",function(k2){ return /complet/i.test(k2)?"#1E9E5A":/cancel/i.test(k2)?"#8A97B5":/75/.test(k2)?"#3FA64B":/50/.test(k2)?"#3A5CAA":/25/.test(k2)?"#E08A00":"#8A97B5"; })+'</div>'+
       '<div class="cbox"><h4>Phản hồi khách hàng</h4><div class="csub">Cảm nhận sau tiếp xúc</div>'+
-        svgHBars(toEntries(d.byFeedback),"num",function(k){ return /tích/i.test(k)?"#1E9E5A":/tiêu/i.test(k)?"#D9433F":/trung/i.test(k)?"#E8A302":"#8A97B5"; })+'</div>'+
+        svgHBars(toEntries(d.byFeedback),"num",function(k2){ return /tích/i.test(k2)?"#1E9E5A":/tiêu/i.test(k2)?"#D9433F":/trung/i.test(k2)?"#E8A302":"#8A97B5"; })+'</div>'+
     '</div>'+
 
     '<div class="grid g2" style="margin-bottom:14px">'+
-      '<div class="card pad"><div class="ct"><span class="dot"></span>Top 10 khách hàng theo doanh số '+esc(S.fy)+'</div>'+
+      '<div class="card pad"><div class="ct"><span class="dot"></span>Top 10 khách hàng theo doanh số<small>'+esc(d.rangeLabel)+'</small></div>'+
         '<div class="tbwrap" style="max-height:330px"><table class="tb"><thead><tr><th style="width:34px">#</th><th>Khách hàng</th><th class="num">Doanh số</th></tr></thead><tbody>'+
         (d.topCustomers.length?d.topCustomers.map(function(x,i){
           return '<tr style="cursor:pointer" onclick="rAcc(\''+reg({name:x.k})+'\')"><td class="ctr" style="color:var(--mute)">'+(i+1)+'</td><td><b>'+esc(x.k)+'</b></td><td class="num"><b>'+fmtVND(x.v)+'</b></td></tr>'; }).join("")
-          :'<tr><td colspan="3" class="ctr" style="color:var(--mute);padding:20px">Chưa có đơn hàng trong FY này</td></tr>')+
+          :'<tr><td colspan="3" class="ctr" style="color:var(--mute);padding:20px">Chưa có đơn hàng trong kỳ này</td></tr>')+
         '</tbody></table></div></div>'+
       '<div class="card pad"><div class="ct"><span class="dot"></span>Hoạt động gần đây<span class="sp"></span><button class="btn xs" onclick="go(\'weekly\')">Xem tất cả</button></div>'+
         '<div style="max-height:330px;overflow:auto" class="list">'+
@@ -1127,13 +1263,12 @@ function renderDash(){
             '<div class="m"><span>'+fmtVN(r.start)+'</span><span>·</span><span>'+esc(r.pic)+'</span><span>·</span><span>'+esc(r.typeAction||"")+'</span>'+
             (r.photo?'<span class="tag t-b">📷</span>':"")+'</div>'+
             (r.result?'<div class="d">'+nl2br(String(r.result).slice(0,150))+'</div>':"")+'</div>'; }).join("")
-          :'<div class="empty"><div class="e">📍</div><p>Chưa có hoạt động</p></div>')+
+          :'<div class="empty"><div class="e">📍</div><p>Chưa có hoạt động trong kỳ này</p></div>')+
         '</div></div>'+
     '</div>'+
   '</div>';
-
 }
-function dashPic(p){ S.filt.pic=p; S.dash=null; pgDash(); }
+
 function barList(arr){
   if(!arr||!arr.length) return '<div class="empty"><p>Không có dữ liệu</p></div>';
   var mx=Math.max.apply(null,arr.map(function(x){return x.v;}))||1;
@@ -2278,7 +2413,7 @@ function renderOrder(){
     '<div class="card pad" style="margin-bottom:12px">'+
       '<div class="row" style="margin-bottom:10px">'+
         '<div style="flex:2"><input class="inp" placeholder="🔍 Tìm theo account, mã, sản phẩm…" value="'+esc(S.filt.q)+'" oninput="S.filt.q=this.value;debOrd()"></div>'+
-        '<div><select class="inp" onchange="S.filt.pic=this.value;pgOrder()">'+opts(S.master.pic,S.filt.pic,"Mọi PIC")+'</select></div>'+
+        '<div><select class="inp" onchange="S.filt.pic=this.value;renderOrder()">'+opts(S.master.pic,S.filt.pic,"Mọi PIC")+'</select></div>'+
       '</div>'+
       '<div class="chipbar"><div class="chip'+(S.filt.month?"":" on")+'" onclick="S.filt.month=\'\';renderOrder()">Cả FY</div>'+
         months.map(function(m){ return '<div class="chip'+(S.filt.month===m?" on":"")+'" onclick="S.filt.month=\''+m+'\';renderOrder()">T'+parseInt(m.slice(4),10)+'</div>'; }).join("")+'</div>'+
@@ -3429,7 +3564,8 @@ function renderAct(){
 var TSTORE={};                 /* tab → {rows, at, key} */
 var TKEY="mmh_dental_tabs_v3";
 
-function tabKey(tab){ return tab+"|"+S.fy+"|"+(S.filt.pic||""); }
+function scopePic(){ return (S.user && S.user.role==="manager") ? "" : (S.user ? S.user.pic : ""); }
+function tabKey(tab){ return tab+"|"+S.fy+"|"+scopePic(); }
 function tGet(tab){
   var e=TSTORE[tab];
   return (e&&e.key===tabKey(tab))?e.rows:null;
@@ -3468,7 +3604,7 @@ function ensureTab(tab,opts,onReady){
   fetchTab(tab,opts,onReady);
 }
 function fetchTab(tab,opts,onReady){
-  var q=Object.assign({tab:tab,fy:S.fy,pic:S.filt.pic||"",limit:5000},opts||{});
+  var q=Object.assign({tab:tab,fy:S.fy,pic:scopePic(),limit:5000},opts||{});
   if(FETCHING[tab]) return FETCHING[tab];
   FETCHING[tab]=apiGet("list",q).then(function(j){
     delete FETCHING[tab];
@@ -3488,7 +3624,7 @@ function prefetchAll(){
   if(S._prefetched) return; S._prefetched=true;
   /* v4.1 — chạy NGAY, chia 2 luồng song song: tab nào xong trước thì dùng trước */
   var pick=function(list){
-    return apiGet("multi",{tabs:list.join(","),fy:S.fy,pic:S.filt.pic||""})
+    return apiGet("multi",{tabs:list.join(","),fy:S.fy,pic:scopePic()})
       .then(function(j){
         var t=j.tabs||{};
         Object.keys(t).forEach(function(k){ tPut(k,(t[k]||{}).rows||[]); });
