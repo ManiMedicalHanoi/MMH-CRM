@@ -1230,7 +1230,7 @@ function buildNav(){
     if(t.grp!==lastGrp){ h+='<div class="grp">'+t.grp+'</div>'; lastGrp=t.grp; }
     h+='<button class="nvi" data-t="'+t.id+'" onclick="go(\''+t.id+'\')"><span class="ic">'+t.ic+'</span><span class="lb">'+t.lb+'</span></button>';
   });
-  h+='<div style="flex:1"></div><div style="padding:10px;font-size:10.5px;color:var(--mute);line-height:1.5">MMH CRM v4.5<br><a href="'+DRIVE_FOLDER+'" target="_blank">📁 Folder ảnh Drive</a></div>';
+  h+='<div style="flex:1"></div><div style="padding:10px;font-size:10.5px;color:var(--mute);line-height:1.5">MMH CRM v4.6<br><a href="'+DRIVE_FOLDER+'" target="_blank">📁 Folder ảnh Drive</a></div>';
   $("side").innerHTML=h;
   /* ⭐ v4.5 — thanh dưới trượt ngang, đủ mọi mục, bỏ nút "Thêm" */
   var map={}; navTabs().forEach(function(t){ map[t.id]=t; });
@@ -2163,7 +2163,7 @@ function openTask(row){
       if(findTask(row)) openTask(row); else toast("Không tìm thấy dòng "+row,"warn");
     }).catch(function(e){ toast(e.message,"err"); });
   }
-  S.task=w; S.taskRow=row; S.dirty={}; S.pending=null; S._delArmed=false;
+  S.task=w; S.taskRow=row; S.dirty={}; S.pending=null; S._delArmed=false; S._meetTarget="tk-result";
   var a=parseAcc(w.account);
   var head='<button class="x" onclick="closeDrw()">✕</button>'
     +'<div class="top"><div class="av">'+esc(initials(a.name||w.pic))+'</div>'
@@ -2297,13 +2297,24 @@ function openMeetPicker(targetId){
 }
 function pickMeet(i){
   var s=(S._stakeList||[])[i]; if(!s) return;
-  var line="Người gặp: "+[s.contact,s.jobTitle,s.specialize].filter(Boolean).join(" - ");
-  var ta=$(S._meetTarget||"tk-result");
-  if(ta){
-    ta.value=line+"\n"+String(ta.value||"").replace(MEET_RE,"").replace(/^\n+/,"");
-    if(ta.id.indexOf("tk-")===0) markDirty(ta.id==="tk-plan"?"plan":"result",ta.value);
-  }
-  closeModal(); toast("Đã chèn người gặp","ok");
+  insertMeetLine("Người gặp: "+[s.contact,s.jobTitle,s.specialize].filter(Boolean).join(" - "));
+}
+/* ⭐ v4.6 — chèn dòng "Người gặp:" vào đúng ô đang soạn.
+   Bắt buộc đóng picker TRƯỚC: khi picker mở, form "Thêm task" đã bị gỡ khỏi DOM,
+   ghi vào lúc đó là ghi vào hư không rồi bị closeModal khôi phục đè lên. */
+function insertMeetLine(line){
+  var id=S._meetTarget||"tk-result";
+  closeModal();                                  /* trả lại form + dữ liệu đang gõ */
+  var ta=$(id);
+  if(!ta){ toast("Không tìm thấy ô Task Result để chèn","warn",5000); return; }
+  ta.value=line+"\n"+String(ta.value||"").replace(MEET_RE,"").replace(/^\n+/,"");
+  if(id.indexOf("tk-")===0) markDirty(id==="tk-plan"?"plan":"result",ta.value);
+  try{
+    ta.focus();
+    ta.setSelectionRange(ta.value.length,ta.value.length);
+    ta.scrollIntoView({block:"center",behavior:"smooth"});
+  }catch(e){}
+  toast("✓ Đã chèn: "+line,"ok",3800);
 }
 /* thêm nhanh Key stakeholder — ghi thẳng vào tab 2. CBC */
 function openStakeAdd(){
@@ -2343,15 +2354,10 @@ function saveStakeAdd(){
     influence:$("ks_inf").value, trust:$("ks_tru").value, note:$("ks_note").value };
   busy(true,"Đang lưu CBC…");
   apiPost({action:"saveCBC",data:d}).then(function(r){
-    busy(false); closeModal(); toast("Đã thêm "+name+" vào CBC","ok",3800);
+    busy(false); toast("Đã thêm "+name+" vào CBC","ok",3800);
     d._row=r.row||0; S.cbcRows=(S.cbcRows||[]).concat([d]);
     afterWrite("cbc", r.row||0, d);
-    var ta=$(S._meetTarget||"tk-result");
-    if(ta){
-      var line="Người gặp: "+[d.contact,d.jobTitle,d.specialize].filter(Boolean).join(" - ");
-      ta.value=line+"\n"+String(ta.value||"").replace(MEET_RE,"").replace(/^\n+/,"");
-      if(ta.id.indexOf("tk-")===0) markDirty("result",ta.value);
-    }
+    insertMeetLine("Người gặp: "+[d.contact,d.jobTitle,d.specialize].filter(Boolean).join(" - "));
   }).catch(function(e){ busy(false); toast(e.message,"err",5000); });
 }
 
@@ -2653,7 +2659,6 @@ function ntMeetPicker(){
   var accName=String($("nt_accName")?$("nt_accName").value:"").trim();
   if(!accName) return toast("Chọn Account trước đã","warn");
   S.task={ account:$("nt_account").value||mkAcc({name:accName}) };
-  S._meetTarget="nt_result";
   openMeetPicker("nt_result");
 }
 function submitNewTask(){
