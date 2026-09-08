@@ -603,6 +603,7 @@ body.modal-on #drw{filter:blur(2px) saturate(.85);opacity:.55}
 .adpc-acts button:hover{background:var(--pale);border-color:var(--blue-l)}
 .adpc-acts button.pri{background:var(--navy);border-color:var(--navy);color:#fff}
 .adpc-kv{display:grid;grid-template-columns:auto 1fr;gap:4px 10px;font-size:12.5px;margin:9px 0;color:var(--sub)}
+.kpi-note{margin-top:6px;font-size:9.5px;line-height:1.45;color:var(--mute);border-top:1px dashed var(--line);padding-top:5px}
 .livetag{font-size:9.5px;font-weight:800;color:var(--ok);background:var(--ok-bg);border-radius:6px;padding:2px 5px;display:inline-block;margin-top:3px;letter-spacing:.2px}
 .adpc-note{margin-top:7px;font-size:10.5px;line-height:1.5;color:var(--sub);background:var(--paler);border:1px dashed var(--line);border-radius:8px;padding:6px 8px}
 .adpc-note b{color:var(--ink)}
@@ -1968,6 +1969,28 @@ var DENTAL_DISTRIBUTORS = [
 ];
 /* Khớp tên NPP: chuỗi dài khớp kiểu "chứa", viết tắt ngắn phải là MỘT TỪ RIÊNG.
    Nếu không tách bạch, "Thailand Co" sẽ dính "nd" và bị tính nhầm cho Nam Dũng. */
+/* ⭐ v5.3 — 2 THẺ THỐNG KÊ SẢN PHẨM (thay cho "Số NPP" và "NPP dẫn đầu" vốn không nói lên gì).
+   Mỗi thẻ khai báo lấy số từ đâu:
+     src:"segment" → cộng Actual/Forecast USD của một Segment Report trong tab SUM TURNOVER
+     src:"jizai"   → cộng dòng Type "2 Jizai Qty" (đơn vị: SỐ LƯỢNG, không phải USD)
+   Đổi nhóm ngành chỉ cần đổi PRODUCT_GROUP bên dưới. */
+var PRODUCT_CARDS = {
+  dental: [
+    { label:"Doanh số Jizai",   src:"jizai",   unit:"qty",
+      note:"File Turnover mới có dòng \"2 Jizai Qty\" ⇒ đây là SỐ LƯỢNG" },
+    { label:"Doanh số hàng MMG", src:"segment", seg:"MMG", unit:"usd" }
+  ],
+  ophthalmic: [
+    { label:"Ophthalmic knife",  src:"segment", seg:"Surgical", unit:"usd" },
+    { label:"Ophthalmic suture", src:"segment", seg:"Eyeless",  unit:"usd" }
+  ],
+  surgical: [
+    { label:"Manipler",          src:"segment", seg:"Surgical", unit:"usd" },
+    { label:"Ophthalmic suture", src:"segment", seg:"Eyeless",  unit:"usd" }
+  ]
+};
+var PRODUCT_GROUP = "dental";     /* CRM này là Dental CRM */
+
 function distributorOf(name){
   var raw=noAcc(name).replace(/[^a-z0-9]+/g," ").replace(/\s+/g," ").trim();
   if(!raw) return null;
@@ -2003,7 +2026,8 @@ function loadTurnover(force){
   S._toLoading = turnoverJsonp({action:"getTurnoverData", _ts:Date.now()}).then(function(j){
     S._toLoading=null; S.turnoverErr="";
     if(!j || !j.ok) throw new Error((j&&j.error)||"File Turnover trả về dữ liệu không hợp lệ");
-    S.turnover={ rows:j.rows||[], at:Date.now() };
+    /* rowsJizai = các dòng Type "2 Jizai Qty" — là SỐ LƯỢNG, không phải tiền */
+    S.turnover={ rows:j.rows||[], jizai:j.rowsJizai||[], at:Date.now() };
     return S.turnover;
   }).catch(function(e){ S._toLoading=null; S.turnoverErr=e.message; throw e; });
   return S._toLoading;
@@ -2049,6 +2073,27 @@ function turnoverByDistributor(months,picOnly){
            fileMonths:Object.keys(allMonths).sort(), segments:Object.keys(segSeen).sort(),
            skipped:Object.keys(skipped).sort() };
 }
+/* Cộng số cho một thẻ sản phẩm, vẫn giới hạn trong 4 NPP và PIC đang chọn. */
+function productStat(card,months,picOnly){
+  var t=S.turnover; if(!t) return null;
+  var src=(card.src==="jizai") ? (t.jizai||[]) : (t.rows||[]);
+  var inM={}; (months||[]).forEach(function(m){ inM[String(m)]=1; });
+  var budget=0, actual=0, hit=0, segSeen={};
+  src.forEach(function(r){
+    var seg=String(r.segment||"");
+    if(card.src==="segment"){
+      segSeen[seg]=1;
+      if(noAcc(seg)!==noAcc(card.seg||"")) return;
+    }
+    var d=distributorOf(r.distributor); if(!d) return;
+    if(picOnly && d.pic!==picOnly) return;
+    if(months && months.length && !inM[String(r.month)]) return;
+    budget+=n(r.budget); actual+=n(r.forecast); hit++;
+  });
+  return { budget:budget, actual:actual, hit:hit, segments:Object.keys(segSeen).sort() };
+}
+function fmtQty(v){ return n(v).toLocaleString("vi-VN"); }
+
 /* tổng Actual/Forecast của đúng 4 NPP — dùng cho dòng "doanh số Dental" ở PHẦN A */
 function turnoverDentalActual(picOnly){
   var g=turnoverByDistributor((S.toRange==="FY")?fyMonths(S.fy):null, picOnly||"");
@@ -2110,10 +2155,31 @@ function turnoverBlock(picSel){
       '<div class="kpi"><div class="lb">Actual / Forecast</div><div class="vl">'+fmtUSD(g.actual)+'</div>'+
         (pct!=null?pb(pct)+'<div class="pbl"><span style="color:'+pctColor(pct)+'">'+Math.round(pct*100)+'%</span><span>'+
           (g.actual>=g.budget?("vượt "+fmtUSD(g.actual-g.budget)):("còn "+fmtUSD(g.budget-g.actual)))+'</span></div>':"")+'</div>'+
-      '<div class="kpi"><div class="lb">Số nhà phân phối</div><div class="vl">'+fmtN(g.list.length)+'</div>'+
-        '<div class="sb">'+esc(g.list.map(function(x){return x.name;}).join(" · "))+'</div></div>'+
-      '<div class="kpi"><div class="lb">NPP dẫn đầu</div><div class="vl" style="font-size:19px">'+esc(g.list[0].name)+'</div>'+
-        '<div class="sb">'+fmtUSD(g.list[0].actual)+' · '+(g.list[0].budget?Math.round(g.list[0].actual/g.list[0].budget*100)+"% mục tiêu":"chưa có budget")+'</div></div>'+
+      (PRODUCT_CARDS[PRODUCT_GROUP]||[]).map(function(c){
+        var st=productStat(c,months,picSel||"");
+        if(!st) return '';
+        var isQty=(c.unit==="qty");
+        var val=isQty?fmtQty(st.actual):fmtUSD(st.actual);
+        var pc=st.budget?st.actual/st.budget:null;
+        var sub;
+        if(!st.hit){
+          sub = (c.src==="segment")
+            ? ('Không có dòng nào thuộc segment <b>'+esc(c.seg)+'</b>'+
+               (st.segments.length?(' · segment trong file: '+esc(st.segments.join(", "))):""))
+            : 'File Turnover chưa có dòng Type "2 Jizai Qty"';
+          return '<div class="kpi"><div class="lb">'+esc(c.label)+'</div><div class="vl" style="color:var(--mute)">—</div>'+
+                 '<div class="sb">'+sub+'</div></div>';
+        }
+        sub = st.budget
+          ? ('Mục tiêu <b>'+(isQty?fmtQty(st.budget):fmtUSD(st.budget))+'</b>')
+          : 'Chưa có budget';
+        return '<div class="kpi"><div class="lb">'+esc(c.label)+(isQty?' <span style="font-weight:600;color:var(--mute)">(số lượng)</span>':"")+'</div>'+
+          '<div class="vl">'+val+'</div>'+
+          '<div class="sb">'+sub+'</div>'+
+          (pc!=null?pb(pc)+'<div class="pbl"><span style="color:'+pctColor(pc)+'">'+Math.round(pc*100)+'%</span><span>'+
+            (st.actual>=st.budget?"đạt":"còn "+(isQty?fmtQty(st.budget-st.actual):fmtUSD(st.budget-st.actual)))+'</span></div>':"")+
+          (c.note?'<div class="kpi-note">'+c.note+'</div>':"")+'</div>';
+      }).join("")+
     '</div>'+
     '<div class="tbwrap"><table class="tb"><thead><tr><th>Nhà phân phối</th>'+
       TURNOVER_SEGMENTS.map(function(sg){ return '<th class="num">'+esc(sg)+'</th>'; }).join("")+
