@@ -177,6 +177,11 @@ table.tb tbody tr.sel td{background:var(--pale)}
 #ov{position:fixed;inset:0;background:rgba(12,24,45,.5);backdrop-filter:blur(3px);z-index:600;display:none;align-items:flex-end;justify-content:center;padding:0}
 #ov.on{display:flex}
 @media(min-width:721px){#ov{align-items:center;padding:22px}}
+/* ⭐ v4.7 — LỚP 2: picker CBC nổi ĐÈ LÊN form nhập, form nhập không bị gỡ khỏi DOM */
+#ov2{position:fixed;inset:0;background:rgba(12,24,45,.55);backdrop-filter:blur(3px);z-index:700;display:none;align-items:flex-end;justify-content:center;padding:0}
+#ov2.on{display:flex}
+@media(min-width:721px){#ov2{align-items:center;padding:22px}}
+#modal2{max-width:620px}
 .modal{background:var(--card);width:100%;max-width:760px;max-height:92vh;border-radius:20px 20px 0 0;display:flex;flex-direction:column;box-shadow:var(--sh-3);animation:up .24s cubic-bezier(.2,.9,.3,1)}
 @media(min-width:721px){.modal{border-radius:var(--r-xl);max-height:88vh}}
 @keyframes up{from{transform:translateY(28px);opacity:.4}to{transform:none;opacity:1}}
@@ -752,6 +757,13 @@ table.tb tbody tr.sel td{background:var(--pale)}
   <div class="mf" id="mFoot"></div>
 </div></div>
 
+<!-- ⭐ v4.7 — lớp modal thứ 2 (picker CBC / thêm Key stakeholder) -->
+<div id="ov2"><div class="modal" id="modal2">
+  <div class="mh"><h3 id="m2Title">…</h3><button class="x" onclick="closeModal2()">✕</button></div>
+  <div class="mb" id="m2Body"></div>
+  <div class="mf" id="m2Foot"></div>
+</div></div>
+
 <!-- ⭐ v2: màn hình phụ (drawer) — xem nhanh khách hàng / lần đi địa bàn -->
 <div id="drw">
   <div class="bd" onclick="closeDrw()"></div>
@@ -900,9 +912,26 @@ function closeModal(){
   S.modalRewire=null;
   $("ov").classList.remove("on"); S.editing=null; S.photos=[];
 }
-function closeAllModals(){ MSTACK=[]; S.modalRewire=null; $("ov").classList.remove("on"); S.editing=null; S.photos=[]; }
-$("ov").addEventListener("click",function(e){ if(e.target===$("ov")) closeModal(); });
-document.addEventListener("keydown",function(e){ if(e.key==="Escape") closeModal(); });
+function closeAllModals(){ MSTACK=[]; S.modalRewire=null; closeModal2(); $("ov").classList.remove("on"); S.editing=null; S.photos=[]; }
+
+/* ⭐ v4.7 — LỚP MODAL 2 (dùng riêng cho picker CBC "Người gặp" + thêm Key stakeholder).
+   Trước đây picker dùng chung 1 modal ⇒ form "Thêm task" bị gỡ khỏi DOM, chèn xong
+   thì closeModal() khôi phục lại HTML cũ và ĐÈ MẤT dòng vừa chèn ⇒ toast báo OK
+   nhưng ô Task Result vẫn trống. Nay picker nổi lên lớp riêng, form giữ nguyên
+   trong DOM nên ghi thẳng vào textarea thật, không thể mất. */
+var M2ON=false;
+function openModal2(title,body,foot){
+  $("m2Title").textContent=title; $("m2Body").innerHTML=body; $("m2Foot").innerHTML=foot||"";
+  $("ov2").classList.add("on"); M2ON=true;
+  try{ $("m2Body").scrollTop=0; }catch(e){}
+}
+function closeModal2(){
+  if(!$("ov2")) return;
+  $("ov2").classList.remove("on"); $("m2Body").innerHTML=""; $("m2Foot").innerHTML=""; M2ON=false;
+}
+$("ov").addEventListener("click",function(e){ if(e.target===$("ov")&&!M2ON) closeModal(); });
+$("ov2").addEventListener("click",function(e){ if(e.target===$("ov2")) closeModal2(); });
+document.addEventListener("keydown",function(e){ if(e.key!=="Escape") return; if(M2ON) closeModal2(); else closeModal(); });
 
 /* ───────── API (JSONP đọc · POST ghi) ───────── */
 var _seq=0;
@@ -2206,7 +2235,7 @@ function taskEditorHTML(w){
       +'<textarea id="tk-result" style="min-height:120px" oninput="markDirty(\'result\',this.value)" placeholder="Đã trao đổi gì, khách phản hồi ra sao, cam kết gì…">'+esc(w.result||"")+'</textarea>'
       +'<div style="font-size:11.5px;color:'+(hasMeet(w)?"var(--ok)":"var(--dang)")+';margin-top:6px;font-weight:700" id="tk-meetflag">'
         +(hasMeet(w)?"✓ Đã ghi CBC (người gặp)":"⚠️ Bắt buộc có dòng “Người gặp:” — bấm nút CBC ở trên")+'</div>'
-      +(stk.length?"":'<button class="mini" style="margin-top:8px;width:100%;justify-content:center;height:34px" onclick="openStakeAdd()">＋ Thêm Key stakeholder cho địa bàn này</button>')+'</div>'
+      +(stk.length?"":'<button class="mini" style="margin-top:8px;width:100%;justify-content:center;height:34px" onclick="openStakeAdd(\'tk-result\')">＋ Thêm Key stakeholder cho địa bàn này</button>')+'</div>'
 
     +'<div class="te-sec"><div class="te-g2">'
       +selT("tk-status","status","Task Status",S.master.status,w.status,1)
@@ -2278,48 +2307,84 @@ function pullPlanToResult(){
   markDirty("result",r.value); toast("Đã chèn người gặp vào kết quả","ok");
 }
 
-/* ───────── picker CBC / Key stakeholder ───────── */
-function openMeetPicker(targetId){
-  S._meetTarget=targetId;
-  var w=S.task||{}, a=parseAcc(w.account||""), list=stakeOf(a.name);
+/* ───────── picker CBC / Key stakeholder (⭐ v4.7 — chạy trên LỚP MODAL 2) ───────── */
+function openMeetPicker(targetId,accStr){
+  S._meetTarget=targetId||"tk-result";
+  var accs=accStr||((S.task&&S.task.account)||"");
+  S._meetAcc=accs;
+  var a=parseAcc(accs), list=stakeOf(a.name);
   S._stakeList=list;
-  var h=list.length
-    ? '<p style="font-size:12.5px;color:var(--sub);margin-bottom:11px">Chọn người gặp tại <b>'+esc(a.name)+'</b>:</p>'
+  var h='';
+  if(!S.cbcRows){                                   /* danh bạ chưa nạp xong */
+    if(typeof ensureCbc==="function") ensureCbc();
+    h+='<div class="empty" style="padding:18px 0"><div class="e">⏳</div><p>Đang nạp danh bạ CBC…</p></div>'
+      +'<button class="btn gho" style="width:100%;margin-bottom:10px" onclick="openMeetPicker(S._meetTarget,S._meetAcc)">↻ Thử lại</button>';
+  }else if(list.length){
+    h+='<p style="font-size:12.5px;color:var(--sub);margin-bottom:11px">Chọn người gặp tại <b>'+esc(a.name)+'</b>:</p>'
       +list.map(function(s,i){
         return '<div class="stko" onclick="pickMeet('+i+')"><div class="av">'+esc(initials(s.contact))+'</div>'
           +'<div style="min-width:0;flex:1"><b>'+esc(s.contact)+'</b>'
           +'<span>'+esc([s.jobTitle,s.specialize,s.phone].filter(Boolean).join(" · ")||"—")+'</span>'
           +'<div class="sc">'+(s.role?'<i>'+esc(s.role)+'</i>':"")+(s.influence?'<i>Influence '+esc(s.influence)+'</i>':"")+(s.trust?'<i>Trust '+esc(s.trust)+'</i>':"")+'</div></div></div>';
-      }).join("")
-    : '<div class="empty" style="padding:22px 0"><div class="e">👤</div><p>Địa bàn <b>'+esc(a.name||"này")+'</b> chưa có CBC nào trong danh mục.</p></div>';
-  h+='<button class="btn gho" style="width:100%;margin-top:10px" onclick="openStakeAdd()">＋ Thêm Key stakeholder cho địa bàn này</button>';
-  openModal("CBC — người gặp tại địa bàn",h,'<button class="btn" onclick="closeModal()">Đóng</button>');
+      }).join("");
+  }else{
+    h+='<div class="empty" style="padding:22px 0"><div class="e">👤</div><p>Địa bàn <b>'+esc(a.name||"này")+'</b> chưa có CBC nào trong danh mục.</p></div>';
+  }
+  h+='<button class="btn gho" style="width:100%;margin-top:10px" onclick="openStakeAdd()">＋ Thêm Key stakeholder cho địa bàn này</button>'
+    +'<div class="fld" style="margin-top:14px;padding-top:13px;border-top:1px dashed var(--line)">'
+      +'<label>Hoặc nhập nhanh tên người gặp (không lưu vào CBC)</label>'
+      +'<div style="display:flex;gap:7px">'
+        +'<input class="inp" id="mp_manual" placeholder="BS. Nguyễn Văn A - Trưởng khoa" style="flex:1">'
+        +'<button class="btn pri" style="flex:none" onclick="pickMeetManual()">Chèn</button>'
+      +'</div></div>';
+  openModal2("CBC — người gặp tại địa bàn",h,'<button class="btn" onclick="closeModal2()">Đóng</button>');
 }
 function pickMeet(i){
   var s=(S._stakeList||[])[i]; if(!s) return;
   insertMeetLine("Người gặp: "+[s.contact,s.jobTitle,s.specialize].filter(Boolean).join(" - "));
 }
-/* ⭐ v4.6 — chèn dòng "Người gặp:" vào đúng ô đang soạn.
-   Bắt buộc đóng picker TRƯỚC: khi picker mở, form "Thêm task" đã bị gỡ khỏi DOM,
-   ghi vào lúc đó là ghi vào hư không rồi bị closeModal khôi phục đè lên. */
+function pickMeetManual(){
+  var el=$("mp_manual"), v=el?String(el.value||"").trim():"";
+  if(!v) return toast("Nhập tên người gặp trước đã","warn");
+  insertMeetLine("Người gặp: "+v.replace(/^Người gặp:\s*/i,""));
+}
+/* ⭐ v4.7 — chèn dòng "Người gặp:" vào đúng ô đang soạn.
+   Picker nằm ở lớp 2 nên form nhập vẫn còn nguyên trong DOM ⇒ ghi thẳng vào
+   textarea thật. Có kiểm tra lại sau khi ghi; nếu vì lý do nào đó vẫn trống thì
+   ghi lại lần 2 và báo rõ cho người dùng thay vì báo thành công giả. */
 function insertMeetLine(line){
   var id=S._meetTarget||"tk-result";
-  closeModal();                                  /* trả lại form + dữ liệu đang gõ */
-  var ta=$(id);
+  closeModal2();                                  /* chỉ đóng picker — KHÔNG đụng form */
+  var ta=$(id) || $("nt_result") || $("tk-result");
   if(!ta){ toast("Không tìm thấy ô Task Result để chèn","warn",5000); return; }
-  ta.value=line+"\n"+String(ta.value||"").replace(MEET_RE,"").replace(/^\n+/,"");
-  if(id.indexOf("tk-")===0) markDirty(id==="tk-plan"?"plan":"result",ta.value);
+  var rid=ta.id;
+  function put(){
+    var cur=String(ta.value||"");
+    ta.value=line+"\n"+cur.replace(MEET_RE,"").replace(/^\n+/,"");
+    try{ ta.dispatchEvent(new Event("input",{bubbles:true})); }catch(e){}
+    if(rid==="tk-plan") markDirty("plan",ta.value);
+    else if(rid==="tk-result") markDirty("result",ta.value);
+    if(typeof ntMeetFlag==="function") ntMeetFlag();
+  }
+  put();
   try{
     ta.focus();
     ta.setSelectionRange(ta.value.length,ta.value.length);
     ta.scrollIntoView({block:"center",behavior:"smooth"});
   }catch(e){}
-  toast("✓ Đã chèn: "+line,"ok",3800);
+  setTimeout(function(){                          /* xác nhận thật sự đã vào ô */
+    var el=$(rid);
+    if(el&&MEET_RE.test(el.value||"")){ toast("✓ Đã chèn: "+line,"ok",3800); return; }
+    if(el){ ta=el; put(); }
+    var el2=$(rid);
+    if(el2&&MEET_RE.test(el2.value||"")) toast("✓ Đã chèn: "+line,"ok",3800);
+    else toast("⚠️ Chưa chèn được — copy dòng này dán vào Task Result: "+line,"warn",9000);
+  },80);
 }
 /* thêm nhanh Key stakeholder — ghi thẳng vào tab 2. CBC */
-function openStakeAdd(){
-  closeModal();
-  var w=S.task||{}, a=parseAcc(w.account||"");
+function openStakeAdd(targetId,accStr){
+  if(targetId){ S._meetTarget=targetId; S._meetAcc=accStr||((S.task&&S.task.account)||""); }
+  var a=parseAcc(S._meetAcc||((S.task&&S.task.account)||""));
   var c=(S.custIndex||[]).filter(function(x){ return String(x.name||"").trim().toLowerCase()===String(a.name||"").trim().toLowerCase(); })[0]||{};
   var nNo=stakeOf(a.name).length+1;
   var h='<div class="card pad" style="background:var(--pale);border-color:var(--lb1);margin-bottom:12px">'
@@ -2341,8 +2406,9 @@ function openStakeAdd(){
     +'<div class="fld"><label>Ghi chú</label><textarea class="inp" id="ks_note"></textarea></div>';
   S._ksCtx={ code:c.code||"", name:a.name||"", type:a.type||c.type||"", address:c.address||"",
              province:a.province||c.province||"", area:a.area||c.area||"", pic:c.pic||S.user.pic, no:nNo };
-  openModal("＋ Thêm Key stakeholder",h,
-    '<button class="btn" onclick="closeModal()">Huỷ</button><button class="btn pri" onclick="saveStakeAdd()">Lưu vào tab CBC</button>');
+  openModal2("＋ Thêm Key stakeholder",h,
+    '<button class="btn" onclick="openMeetPicker(S._meetTarget,S._meetAcc)">← Quay lại</button>'
+   +'<button class="btn pri" onclick="saveStakeAdd()">Lưu vào tab CBC</button>');
 }
 function saveStakeAdd(){
   var x=S._ksCtx||{}, name=$("ks_contact").value.trim();
@@ -2590,10 +2656,11 @@ function formWeekly(w,presetAcc){
     '</div>'+
     '<div class="fld"><label>Plan — dự định làm gì (không bắt buộc)</label><textarea class="inp" id="nt_plan"></textarea></div>'+
     '<div class="fld"><label>Task Result — kết quả thực tế <span class="rq">*</span> <span style="font-weight:600;color:var(--mute)">· phải có dòng “Người gặp:”</span></label>'+
-      '<textarea class="inp" id="nt_result" style="min-height:110px" placeholder="Người gặp: BS. …&#10;Nội dung trao đổi…"></textarea>'+
+      '<textarea class="inp" id="nt_result" style="min-height:110px" oninput="ntMeetFlag()" placeholder="Người gặp: BS. …&#10;Nội dung trao đổi…"></textarea>'+
       '<div style="display:flex;gap:7px;margin-top:7px;flex-wrap:wrap">'+
         '<button class="mini acc" onclick="ntMeetPicker()">👤 CBC — người gặp</button>'+
-        '<button class="mini" onclick="toggleVoice(\'nt_result\',this)">🎤 Nói</button></div></div>'+
+        '<button class="mini" onclick="toggleVoice(\'nt_result\',this)">🎤 Nói</button></div>'+
+      '<div id="nt_meetflag" style="font-size:11.5px;font-weight:700;margin-top:6px;color:var(--dang)">⚠️ Bắt buộc có dòng “Người gặp:” — bấm nút CBC ở trên</div></div>'+
     '<div class="row">'+
       '<div class="fld"><label>Task Status <span class="rq">*</span></label><select class="inp" id="nt_status">'+opts(S.master.status,"Completed","— chọn —")+'</select></div>'+
       '<div class="fld"><label>Customer feedback</label><select class="inp" id="nt_feedback">'+opts(S.master.feedback,"","— chọn —")+'</select></div>'+
@@ -2619,7 +2686,7 @@ function ntWire(){
     if(tt&&$("nt_typeTask")){ $("nt_typeTask").value=tt; $("nt_accHint").textContent+=" · Type task: "+tt; }
     if(isMgmt()&&c.pic&&$("nt_pic")&&$("nt_pic").tagName==="SELECT") $("nt_pic").value=c.pic;
   });
-  ntDraw(); ntPhotoHint();
+  ntDraw(); ntPhotoHint(); ntMeetFlag();
 }
 /* ⭐ v4.4 — Account type ở tab "2. CBC" quyết định Type task
    (Clinic ⇒ Sale-Clinics, Dealer ⇒ Sale-Dealers, Hospital ⇒ Sale-Hospitals…) */
@@ -2658,8 +2725,15 @@ function ntDraw(){
 function ntMeetPicker(){
   var accName=String($("nt_accName")?$("nt_accName").value:"").trim();
   if(!accName) return toast("Chọn Account trước đã","warn");
-  S.task={ account:$("nt_account").value||mkAcc({name:accName}) };
-  openMeetPicker("nt_result");
+  /* ⭐ v4.7 — truyền account trực tiếp, KHÔNG ghi đè S.task của form chi tiết */
+  openMeetPicker("nt_result", ($("nt_account")&&$("nt_account").value)||mkAcc({name:accName}));
+}
+/* ⭐ v4.7 — đèn báo trạng thái dòng "Người gặp:" ngay trong form Thêm task */
+function ntMeetFlag(){
+  var t=$("nt_result"), f=$("nt_meetflag"); if(!t||!f) return;
+  var ok=MEET_RE.test(t.value||"");
+  f.style.color=ok?"var(--ok)":"var(--dang)";
+  f.textContent=ok?"✓ Đã ghi CBC (người gặp) — có thể lưu":"⚠️ Bắt buộc có dòng “Người gặp:” — bấm nút CBC ở trên";
 }
 function submitNewTask(){
   var accName=$("nt_accName").value.trim();
