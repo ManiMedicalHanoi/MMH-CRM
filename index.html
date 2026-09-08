@@ -242,8 +242,9 @@ table.tb tbody tr.sel td{background:var(--pale)}
   body{font-size:14px}
   aside{display:none}
   main{padding:12px 12px calc(var(--nav) + 26px + var(--safe))}
-  nav.mob{display:flex;position:fixed;left:0;right:0;bottom:0;height:calc(var(--nav) + var(--safe));padding-bottom:var(--safe);background:rgba(255,255,255,.97);backdrop-filter:blur(12px);border-top:1px solid var(--line);z-index:120;box-shadow:0 -2px 16px rgba(21,34,56,.07)}
-  nav.mob button{flex:1;border:none;background:none;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;color:var(--mute);font-size:10px;font-weight:700;cursor:pointer;padding-top:6px}
+  nav.mob{display:flex;position:fixed;left:0;right:0;bottom:0;height:calc(var(--nav) + var(--safe));padding-bottom:var(--safe);background:rgba(255,255,255,.97);backdrop-filter:blur(12px);border-top:1px solid var(--line);z-index:120;box-shadow:0 -2px 16px rgba(21,34,56,.07);overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+  nav.mob::-webkit-scrollbar{display:none}
+  nav.mob button{flex:none;min-width:76px;padding-left:4px;padding-right:4px;border:none;background:none;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;color:var(--mute);font-size:10px;font-weight:700;cursor:pointer;padding-top:6px}
   nav.mob button .ic{font-size:19px;line-height:1}
   nav.mob button.on{color:var(--blue)}
   nav.mob button.on .ic{transform:translateY(-1px)}
@@ -620,7 +621,8 @@ table.tb tbody tr.sel td{background:var(--pale)}
 /* nút ＋ nổi: hiện cả trên desktop */
 @media(min-width:721px){ .fab.on{display:grid;place-items:center;bottom:24px;right:24px} }
 /* ══════════════ ⭐ v4.4 — ĐĂNG NHẬP ══════════════ */
-.lgbox{max-width:400px;margin:0 auto;background:var(--card);border:1px solid var(--line);border-radius:var(--r-lg);padding:20px 18px;box-shadow:var(--sh-2)}
+.lgcenter{display:block;width:100%}
+.lgbox{max-width:380px;margin:0 auto;background:var(--card);border:1px solid var(--line);border-radius:var(--r-lg);padding:20px 18px;box-shadow:var(--sh-2)}
 .lgin{height:48px;font-size:16px;text-align:center;letter-spacing:1px;font-weight:700}
 .lgbtn{width:100%;height:46px;margin-top:12px;font-size:14.5px}
 .lgerr{min-height:18px;font-size:12.5px;color:#A82F2C;font-weight:700;margin-top:8px;text-align:center}
@@ -638,11 +640,13 @@ table.tb tbody tr.sel td{background:var(--pale)}
 @media(max-width:520px){ .picgrid2{grid-template-columns:1fr} .lggh i{display:none} }
 
 /* ══════════════ ⭐ v4.4 — ĐỊA BÀN GỌN ══════════════ */
-.trhead{display:flex;align-items:baseline;gap:9px;flex-wrap:wrap;margin-bottom:10px}
+.trhead{display:flex;align-items:flex-start;gap:10px;margin-bottom:10px}
+.trhead .tt{flex:1;min-width:0}
+.trhead .acts{flex:none;display:flex;gap:6px;align-items:center;padding-top:2px}
 .trhead h2{font-size:19px;font-weight:800;color:var(--navy);margin:0}
 .trhead .sub{font-size:12.5px;color:var(--sub);font-weight:600}
 .trbar{background:var(--card);border:1px solid var(--line);border-radius:var(--r-lg);padding:8px 10px;margin-bottom:10px;box-shadow:var(--sh-1)}
-.trbar .r1{display:flex;align-items:center;gap:8px}
+.trseg{width:100%}
 .trseg{display:flex;background:var(--line2);border-radius:10px;padding:2px;gap:2px;overflow-x:auto;-webkit-overflow-scrolling:touch;flex:none}
 .trseg::-webkit-scrollbar{display:none}
 .trseg button{border:none;background:none;padding:6px 12px;border-radius:8px;font-size:12.5px;font-weight:700;color:var(--sub);cursor:pointer;white-space:nowrap}
@@ -697,7 +701,7 @@ table.tb tbody tr.sel td{background:var(--pale)}
   <div class="lgwrap">
     <div class="lghead">
       <div class="mark">MMH</div>
-      <h1>Dental CRM</h1>
+      <h1>MMH CRM</h1>
       <p>MANI Medical Hanoi · Dental Sales Team · Theo dõi khách hàng &amp; KPI</p>
     </div>
     <div class="lglab">Chọn tài khoản của bạn</div>
@@ -1094,6 +1098,7 @@ function showLogin(){
 /* ── bước 1: mật khẩu ── */
 function stepPw(){
   lgLab("Nhập mật khẩu để vào hệ thống");
+  $("picGrid").className="lgcenter";
   $("picGrid").innerHTML='<div class="lgbox">'+
     '<input class="inp lgin" type="password" id="lg_pw" placeholder="Mật khẩu" autocomplete="current-password" inputmode="text">'+
     '<div class="lgerr" id="lg_err"></div>'+
@@ -1115,6 +1120,7 @@ function checkPw(){
 /* ── bước 2: chọn PIC ── */
 function stepPic(){
   lgLab("Bạn là ai?");
+  $("picGrid").className="";
   $("picGrid").innerHTML=ROLE_GROUPS.map(function(g){
     var names=Object.keys(ROLES).filter(function(nm){ return ROLES[nm].grp===g.k; });
     return '<div class="lggrp"><div class="lggh"><span>'+g.ic+'</span><b>'+esc(g.k)+'</b><i>'+esc(g.sub)+'</i></div>'+
@@ -1139,6 +1145,7 @@ function pickPic(pic){
 /* ── bước 3: mã nội bộ cho Management ── */
 function stepCode(pic){
   lgLab("Mã nội bộ cho nhóm Management");
+  $("picGrid").className="lgcenter";
   $("picGrid").innerHTML='<div class="lgbox">'+
     '<div class="lgwho"><div class="av" style="background:'+avColor(pic)+'">'+esc((ROLES[pic]||{}).ini||initials(pic))+'</div>'+
       '<div><b>'+esc(pic)+'</b><span>'+esc((ROLES[pic]||{}).title||"")+'</span></div></div>'+
@@ -1205,15 +1212,17 @@ $("fab").onclick=function(){ formWeekly(null); };
 var TABS=[
   {id:"dash",   ic:"📊", lb:"Dashboard",   grp:"Tổng quan", mob:1},
   {id:"kpi",    ic:"🎯", lb:"KPI & Mục tiêu", grp:"Tổng quan", mob:1},
-  {id:"cust",   ic:"👥", lb:"Khách hàng",  grp:"Dữ liệu", mob:1},
+  {id:"cust",   ic:"👥", lb:"Khách hàng",  mlb:"Khách hàng", grp:"Dữ liệu", mob:1},
   {id:"weekly", ic:"📍", lb:"Cập nhật thông tin địa bàn", mlb:"Địa bàn", grp:"Dữ liệu", mob:1},
-  {id:"order",  ic:"🧾", lb:"Đơn hàng",    grp:"Dữ liệu"},
-  {id:"present",ic:"🎤", lb:"Thuyết trình",grp:"Dữ liệu"},
-  {id:"monthly",ic:"🗓", lb:"Báo cáo tháng",grp:"Dữ liệu"},
-  {id:"adp",    ic:"⭐", lb:"ADP Key account",grp:"Dữ liệu"},
+  {id:"order",  ic:"🧾", lb:"Đơn hàng",    mlb:"Đơn hàng",  grp:"Dữ liệu"},
+  {id:"present",ic:"🎤", lb:"Thuyết trình",mlb:"Thuyết trình", grp:"Dữ liệu"},
+  {id:"monthly",ic:"🗓", lb:"Báo cáo tháng",mlb:"BC tháng",  grp:"Dữ liệu"},
+  {id:"adp",    ic:"⭐", lb:"ADP Key account",mlb:"ADP",     grp:"Dữ liệu"},
   {id:"photos", ic:"🖼️", lb:"Xem ảnh đi địa bàn", mlb:"Ảnh", grp:"Công cụ", mob:0, gate:"gallery"},
-  {id:"report", ic:"📧", lb:"Gửi báo cáo", grp:"Công cụ", mob:1}
+  {id:"report", ic:"📧", lb:"Gửi báo cáo", mlb:"Mail",      grp:"Công cụ", mob:1}
 ];
+/* thứ tự nút ở thanh dưới trên điện thoại */
+var MOB_ORDER=["weekly","cust","order","present","report","monthly","adp","dash","kpi","photos"];
 function navTabs(){ return TABS.filter(function(t){ return t.gate!=="gallery" || canSeeGallery(); }); }
 function buildNav(){
   var h="",lastGrp="";
@@ -1221,11 +1230,16 @@ function buildNav(){
     if(t.grp!==lastGrp){ h+='<div class="grp">'+t.grp+'</div>'; lastGrp=t.grp; }
     h+='<button class="nvi" data-t="'+t.id+'" onclick="go(\''+t.id+'\')"><span class="ic">'+t.ic+'</span><span class="lb">'+t.lb+'</span></button>';
   });
-  h+='<div style="flex:1"></div><div style="padding:10px;font-size:10.5px;color:var(--mute);line-height:1.5">MMH Dental CRM v4.4<br><a href="'+DRIVE_FOLDER+'" target="_blank">📁 Folder ảnh Drive</a></div>';
+  h+='<div style="flex:1"></div><div style="padding:10px;font-size:10.5px;color:var(--mute);line-height:1.5">MMH CRM v4.5<br><a href="'+DRIVE_FOLDER+'" target="_blank">📁 Folder ảnh Drive</a></div>';
   $("side").innerHTML=h;
-  $("navMob").innerHTML=navTabs().filter(function(t){return t.mob;}).map(function(t){
+  /* ⭐ v4.5 — thanh dưới trượt ngang, đủ mọi mục, bỏ nút "Thêm" */
+  var map={}; navTabs().forEach(function(t){ map[t.id]=t; });
+  var seq=MOB_ORDER.filter(function(id){ return map[id]; });
+  navTabs().forEach(function(t){ if(seq.indexOf(t.id)<0) seq.push(t.id); });
+  $("navMob").innerHTML=seq.map(function(id){
+    var t=map[id];
     return '<button data-t="'+t.id+'" onclick="go(\''+t.id+'\')"><span class="ic">'+t.ic+'</span>'+(t.mlb||t.lb.split(" ")[0])+'</button>';
-  }).join("")+'<button data-t="_more" onclick="moreMenu()"><span class="ic">⋯</span>Thêm</button>';
+  }).join("");
 }
 function moreMenu(){
   var h='<div class="list">'+navTabs().filter(function(t){return !t.mob;}).map(function(t){
@@ -2026,20 +2040,21 @@ function renderTerritory(){
   var nAct=(S.filt.q?1:0)+(isMgmt()&&S.filt.pic?1:0)+(S.filt.act?1:0)+(S.filt.status?1:0)+(S.filt.flag?1:0);
 
   $("main").innerHTML='<div class="pg">'+
-    '<div class="trhead"><h2>Cập nhật thông tin địa bàn</h2>'+
-      '<span class="sub">'+esc(r.label)+' · <b>'+rows.length+'</b> task'+(nToday?' · hôm nay <b>'+nToday+'</b>':'')+'</span></div>'+
+    '<div class="trhead">'+
+      '<div class="tt"><h2>Cập nhật thông tin địa bàn</h2>'+
+        '<span class="sub">'+esc(r.label)+' · <b>'+rows.length+'</b> task'+(nToday?' · hôm nay <b>'+nToday+'</b>':'')+'</span></div>'+
+      '<div class="acts">'+
+        (nFlag?'<button class="warnbtn'+(S.filt.flag?" on":"")+'" onclick="S.filt.flag=!S.filt.flag;renderTerritory()" title="Task thiếu dữ liệu">⚠️ '+nFlag+'</button>':"")+
+        '<button class="ftog" onclick="vToday()">Hôm nay</button>'+
+        '<button class="ftog'+(S.fOpen?" on":"")+'" onclick="S.fOpen=!S.fOpen;renderTerritory()">⚙ Lọc'+(nAct?'<span class="n">'+nAct+'</span>':"")+'</button>'+
+      '</div></div>'+
 
     '<div class="trbar">'+
-      '<div class="r1">'+
-        '<div class="trseg">'+VRANGE.map(function(x){
-          return '<button class="'+((S.vMode||"week")===x[0]?"on":"")+'" onclick="vSetMode(\''+x[0]+'\')">'+x[1]+'</button>'; }).join("")+'</div>'+
-        '<div style="flex:1"></div>'+
-        (nFlag?'<button class="warnbtn'+(S.filt.flag?" on":"")+'" onclick="S.filt.flag=!S.filt.flag;renderTerritory()">⚠️ '+nFlag+'</button>':"")+
-        '<button class="ftog'+(S.fOpen?" on":"")+'" onclick="S.fOpen=!S.fOpen;renderTerritory()">⚙ Lọc'+(nAct?'<span class="n">'+nAct+'</span>':"")+'</button>'+
-      '</div>'+
+      '<div class="trseg">'+VRANGE.map(function(x){
+        return '<button class="'+((S.vMode||"week")===x[0]?"on":"")+'" onclick="vSetMode(\''+x[0]+'\')">'+x[1]+'</button>'; }).join("")+'</div>'+
       ((S.vMode||"week")!=="fy"
         ? '<div class="trnav"><button onclick="vShift(-1)">◀</button><span class="lb">'+esc(r.label)+'</span>'+
-          '<button onclick="vShift(1)">▶</button><button class="td" onclick="vToday()">Hôm nay</button></div>'
+          '<button onclick="vShift(1)">▶</button></div>'
         : "")+
       '<div class="fwrap'+(S.fOpen?" on":"")+'">'+
         '<div class="fbar">'+
@@ -2398,7 +2413,7 @@ function compress(file){
 }
 function handleFiles(files){
   if(!files||!files.length) return;
-  var w=S.task||{}, had=(w.photos||[]).length>0;
+  var w=S.task||{}, had=(w.photos||[]).length>0;   /* mọi lần tải lên đều ĐÈ ⇒ luôn đúng 1 ảnh */
   if(had && !confirm("Task này đã có ảnh đi địa bàn.\nẢnh mới sẽ ĐÈ LÊN ảnh cũ (ảnh cũ bị xoá khỏi Drive). Tiếp tục?")){
     try{$("tk-cam").value="";$("tk-pick").value="";}catch(e){} return;
   }
@@ -2431,7 +2446,7 @@ function uploadPending(silent){
   var p=S.pending, w=S.task||{};
   if(!silent) busy(true,"Đang tải ảnh lên Drive…");
   var body={ action:"uploadPhoto", b64:p.dataUrl, mime:"image/jpeg", row:S.taskRow,
-             account:w.account, date:String(w.start).slice(0,10), pic:w.pic||S.user.pic, replace:p.replace?1:0 };
+             account:w.account, date:String(w.start).slice(0,10), pic:w.pic||S.user.pic, replace:1 };
   if(p.gps){ body.lat=p.gps.lat; body.lng=p.gps.lng; body.acc=p.gps.acc; }
   return apiPost(body).then(function(r){
     S.pending=null;
@@ -2670,7 +2685,7 @@ function submitNewTask(){
     if(!S.ntPhoto||!row) return r;
     busy(true,"Đang tải ảnh kèm GPS…");
     var body={ action:"uploadPhoto", b64:S.ntPhoto.dataUrl, mime:"image/jpeg", row:row,
-               account:d.account, date:d.start, pic:d.pic, replace:0 };
+               account:d.account, date:d.start, pic:d.pic, replace:1 };
     if(S.ntPhoto.gps){ body.lat=S.ntPhoto.gps.lat; body.lng=S.ntPhoto.gps.lng; body.acc=S.ntPhoto.gps.acc; }
     return apiPost(body).then(function(){ return r; });
   }).then(function(r){
@@ -2935,7 +2950,14 @@ function selM(id,field,label,options,cur){
   if(cur&&(options||[]).indexOf(cur)<0) o='<option value="'+esc(cur)+'" selected>'+esc(cur)+'</option>'+o;
   return '<div><span class="te-lb">'+esc(label)+'</span><select id="'+id+'" onchange="markDirtyM(\''+field+'\',this.value)">'+o+'</select></div>';
 }
-function markDirtyM(f,v){ S.dirty[f]=v; }
+function markDirtyM(f,v){
+  S.dirty[f]=v;
+  if(f==="pic" && PIC_AREA[v]){                 /* Area đi theo PIC */
+    S.dirty.area=PIC_AREA[v];
+    var el=$("mn-ar"); if(el) el.value=PIC_AREA[v];
+  }
+  if(f==="period") S.dirty.fy=fyOfMonth(v);
+}
 function saveMonthlyDrw(){
   var d={ _row:S.mnEdit.row, fy:S.fy };
   ["typeTask","period","pic","area","plan","result"].forEach(function(f){ if(f in S.dirty) d[f]=S.dirty[f]; });
@@ -2948,28 +2970,55 @@ function saveMonthlyDrw(){
   }).catch(function(e){ busy(false); toast(e.message,"err",5000); });
 }
 /* ── thêm mới ── */
+/* ⭐ v4.5 — Area cố định theo PIC (sửa bảng này nếu phân vùng thay đổi) */
+var PIC_AREA={ "Viet":"North", "Phuong":"South", "Vinh":"Central" };
+function fyOfMonth(ym){
+  var list=(S.fyList&&S.fyList.length)?S.fyList:[S.fy];
+  for(var i=0;i<list.length;i++){ if(fyMonths(list[i]).indexOf(String(ym))>=0) return list[i]; }
+  return S.fy;
+}
+function mnSyncFY(){
+  var p=$("m_period"); if(!p) return;
+  var f=$("m_fy"); if(f) f.value=fyOfMonth(p.value);
+}
+function mnSyncArea(){
+  var p=$("m_pic"); if(!p) return;
+  var a=PIC_AREA[p.value]||"";
+  var box=$("m_areaBox"); if(!box) return;
+  box.innerHTML = a
+    ? '<input class="inp piclock" id="m_area" value="'+esc(a)+'" readonly title="Area cố định theo PIC '+esc(p.value)+'">'
+    : '<select class="inp" id="m_area">'+opts(S.master.area,"","— chọn —")+'</select>';
+}
 function formMonthly(r){
   if(r&&r._row) return openMonthly(r._row);
   var mn=S.mnMonth||ymOf(todayISO());
   var months=fyMonths(S.fy);
   var h='<div class="row">'+
       '<div class="fld"><label>Type task <span class="rq">*</span></label><select class="inp" id="m_typeTask">'+opts(S.master.typeTask,"","— chọn —")+'</select></div>'+
-      '<div class="fld"><label>Kỳ báo cáo <span class="rq">*</span></label><select class="inp" id="m_period">'+opts(months,mn,"—")+'</select></div>'+
+      '<div class="fld"><label>Kỳ báo cáo <span class="rq">*</span></label><select class="inp" id="m_period" onchange="mnSyncFY()">'+opts(months,mn,"—")+'</select></div>'+
     '</div>'+
     '<div class="row">'+
-      '<div class="fld"><label>PIC</label><select class="inp" id="m_pic">'+opts(S.master.pic,S.user.pic,"— chọn —")+'</select></div>'+
-      '<div class="fld"><label>Area</label><select class="inp" id="m_area">'+opts(S.master.area,"","— chọn —")+'</select></div>'+
-      '<div class="fld"><label>FY</label><select class="inp" id="m_fy">'+opts(S.fyList,S.fy,"—")+'</select></div>'+
+      '<div class="fld"><label>PIC</label>'+
+        (isMgmt()?'<select class="inp" id="m_pic" onchange="mnSyncArea()">'+opts(S.master.pic,S.user.pic,"— chọn —")+'</select>'
+                 :'<input class="inp piclock" id="m_pic" value="'+esc(S.user.pic)+'" readonly>')+'</div>'+
+      '<div class="fld"><label>Area</label><div id="m_areaBox"></div></div>'+
+      '<div class="fld"><label>FY (tự theo kỳ)</label><input class="inp piclock" id="m_fy" value="'+esc(fyOfMonth(mn))+'" readonly></div>'+
     '</div>'+
-    '<div class="fld"><label>PLAN — kế hoạch</label><textarea class="inp" id="m_plan" style="min-height:120px"></textarea></div>'+
-    '<div class="fld"><label>RESULT — kết quả (có thể để trống, cập nhật sau)</label><textarea class="inp" id="m_result" style="min-height:130px"></textarea></div>';
+    '<div class="fld"><label>PLAN — kế hoạch</label><textarea class="inp" id="m_plan" style="min-height:120px"></textarea>'+
+      '<button class="mini" style="margin-top:7px" onclick="toggleVoice(\'m_plan\',this)">🎤 Nói</button></div>'+
+    '<div class="fld"><label>RESULT — kết quả (có thể để trống, cập nhật sau)</label><textarea class="inp" id="m_result" style="min-height:130px"></textarea>'+
+      '<button class="mini" style="margin-top:7px" onclick="toggleVoice(\'m_result\',this)">🎤 Nói</button></div>';
   S.editing={ tab:"monthly", row:0 };
   openModal("＋ Thêm hạng mục tháng", h,
     '<button class="btn" onclick="closeModal()">Huỷ</button><button class="btn pri" onclick="saveMonthly()">Lưu</button>', true);
+  mnSyncArea(); mnSyncFY();
+  S.modalRewire=function(){ mnSyncArea(); mnSyncFY(); };
 }
 function saveMonthly(){
-  var d={ _row:0, typeTask:$("m_typeTask").value, pic:$("m_pic").value, area:$("m_area").value,
-    fy:$("m_fy").value, period:$("m_period").value, plan:$("m_plan").value, result:$("m_result").value };
+  var d={ _row:0, typeTask:$("m_typeTask").value, pic:$("m_pic").value,
+    area:($("m_area")?$("m_area").value:""),
+    fy:fyOfMonth($("m_period").value), period:$("m_period").value,
+    plan:$("m_plan").value, result:$("m_result").value };
   if(!d.typeTask||!d.period) return toast("Cần chọn Type task và kỳ báo cáo","warn");
   busy(true,"Đang lưu…");
   apiPost({action:"saveMonthly",data:d}).then(function(r){
@@ -3596,7 +3645,7 @@ function recipientPreview(pic){
   var u=S.picList.filter(function(p){return p.pic===pic;})[0];
   var to=u?S.picList.filter(function(p){return p.team===u.team&&p.email;}).map(function(p){return p.email;}):[];
   if(!to.length&&u&&u.email) to=[u.email];
-  var cc=["tt.tuyen@manimedicalhanoi.com","nt.ha@manimedicalhanoi.com","mmh.product@manimedicalhanoi.com"].filter(function(e){return to.indexOf(e)<0;});
+  var cc=CC_LIST.filter(function(e){return to.indexOf(e)<0;});
   return {to:to,cc:cc};
 }
 function grpByType(rows){
@@ -4472,13 +4521,15 @@ var SENDLB={ self:{t:"Gửi thử cho chính bạn",d:"Email chỉ vào hộp th
              pic :{t:"Gửi thay cho PIC",d:"Gửi báo cáo của một PIC khác dưới danh nghĩa của họ.",c:"pri"},
              all :{t:"Gửi toàn bộ Dental team",d:"Gửi lần lượt báo cáo của tất cả PIC trong nhóm.",c:"pri"},
              download:{t:"Tải PDF",d:"Không gửi email, chỉ tải file PDF về máy.",c:"gho"} };
+/* ⭐ v4.5 — CC cố định của mọi báo cáo */
+var CC_LIST=["tt.tuyen@manimedicalhanoi.com","nt.ha@manimedicalhanoi.com","vtt.hoa@manimedicalhanoi.com"];
 function askSend(option){
   var kind=S.rpKind, who=(S.rpPic||S.user.pic), m=SENDLB[option]||SENDLB.self;
   var to=[],cc=[];
   if(option==="self"){ to=[(S.picList.filter(function(p){return p.pic===S.user.pic;})[0]||{}).email||S.user.email||"(email của bạn)"]; }
   else{
     to=S.picList.filter(function(p){return p.team==="Dental Sales Team"&&p.email;}).map(function(p){return p.email;});
-    cc=S.picList.filter(function(p){return p.level==="hod"||p.level==="director"||/product/i.test(p.email||"");}).map(function(p){return p.email;});
+    cc=CC_LIST.slice();
   }
   var period=kind==="week"?("Tuần "+fmtVN(S.rpFrom)+" – "+fmtVN(S.rpTo)):("Tháng "+String(S.rpMonth).slice(4)+"/"+String(S.rpMonth).slice(0,4));
   var body='<div class="card pad" style="margin-bottom:12px;background:var(--pale);border-color:var(--lb1)">'
