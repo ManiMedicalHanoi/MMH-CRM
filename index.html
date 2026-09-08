@@ -603,6 +603,26 @@ body.modal-on #drw{filter:blur(2px) saturate(.85);opacity:.55}
 .adpc-acts button:hover{background:var(--pale);border-color:var(--blue-l)}
 .adpc-acts button.pri{background:var(--navy);border-color:var(--navy);color:#fff}
 .adpc-kv{display:grid;grid-template-columns:auto 1fr;gap:4px 10px;font-size:12.5px;margin:9px 0;color:var(--sub)}
+/* ⭐ v5.3 — bảng khách hàng: tag phân loại + thanh target/achieve */
+/* ⭐ v5.3 — màn hình Other task */
+.ot-key{margin-bottom:11px}
+.ot-h{display:flex;gap:7px;align-items:center;flex-wrap:wrap;margin-bottom:8px}
+.ot-no{font-size:11px;color:var(--mute);font-weight:700}
+.ot-t{font-size:15px;font-weight:800;color:var(--navy);line-height:1.45;margin-bottom:7px}
+.ot-r{font-size:13px;line-height:1.62;color:var(--ink);background:var(--paler);border-radius:var(--r-md);padding:9px 11px;margin-bottom:7px}
+.ot-r b{color:var(--blue-d)}
+.ot-subs{margin-top:10px;padding-top:10px;border-top:1px dashed var(--line);display:flex;flex-direction:column;gap:9px}
+.ot-sub{border-left:3px solid var(--line2);padding-left:11px}
+.ot-sh{display:flex;gap:7px;align-items:center;flex-wrap:wrap;margin-bottom:5px}
+.ot-sh b{font-size:13.5px;color:var(--ink)}
+.ot-m{font-size:11px;color:var(--mute)}
+.cx-tags{display:flex;gap:4px;flex-wrap:wrap;align-items:center}
+.cx-tags .tag{font-size:10px;padding:2px 7px;white-space:nowrap}
+.cx-sub{font-size:10.5px;color:var(--mute);margin-top:2px}
+.cx-none{font-size:11.5px;color:var(--mute)}
+.cx-sale{font-size:12.5px;font-weight:700;color:var(--ink)}
+#custList .tb td{vertical-align:middle}
+#custList .pbl{font-size:10.5px;margin-top:3px}
 .kpi-note{margin-top:6px;font-size:9.5px;line-height:1.45;color:var(--mute);border-top:1px dashed var(--line);padding-top:5px}
 .livetag{font-size:9.5px;font-weight:800;color:var(--ok);background:var(--ok-bg);border-radius:6px;padding:2px 5px;display:inline-block;margin-top:3px;letter-spacing:.2px}
 .adpc-note{margin-top:7px;font-size:10.5px;line-height:1.5;color:var(--sub);background:var(--paler);border:1px dashed var(--line);border-radius:8px;padding:6px 8px}
@@ -904,7 +924,8 @@ var S = {
   tab:"dash", custIndex:[], custMap:{},
   dash:null, kpi:null,
   cache:{},          /* tab → {rows,total,ts} */
-  filt:{ q:"", pic:"", type:"", area:"", status:"", month:"", from:"", to:"" },
+  filt:{ q:"", pic:"", type:"", area:"", status:"", month:"", from:"", to:"",
+         abcd:"", visit:"", sort:"" },   /* ⭐ v5.3 — lọc theo nhóm ADP / đã gặp / sắp theo doanh số */
   custLimit:60, editing:null, photos:[], detail:null,
   targetDraft:{},
   /* ⭐ v4 */
@@ -912,6 +933,8 @@ var S = {
   task:null, taskRow:0, dirty:{}, pending:null, ntPhoto:null,
   /* ⭐ v5 (Đợt A) */
   vFrom:"", vTo:"",          /* lọc khoảng ngày ở "Cập nhật thông tin địa bàn" */
+  custSort:"",               /* sắp xếp danh sách khách hàng */
+  other:null, otherErr:"", otherPic:"", otherQ:"",   /* Other task đọc từ Report Hub */
   dashG:"all",               /* nhóm thông tin đang xem trên Dashboard */
   adpView:"board",           /* board | list — ADP xem dạng bảng ABCD hay danh sách lớn */
   turnover:null, turnoverErr:"", toRange:"ALL",   /* doanh số NPP đọc từ file MMH Turnover */
@@ -1397,6 +1420,155 @@ window.addEventListener("focus",function(){
 });
 $("fab").onclick=function(){ formWeekly(null); };
 
+
+/* ═══════════ ⭐ v5.3 — OTHER TASK (đầu việc ngoài đi địa bàn) ═══════════
+   Nguồn: file Google Sheet "Sales & Marketing", tab "WEEKYLY new", đọc qua
+   Web App riêng của file đó. Đây là các đầu việc Type "Sales-..." mà sales
+   ghi nhận ngoài hoạt động thăm khách hàng.
+   Màn hình này CHỈ ĐỌC — sửa nội dung vẫn làm bên Report Hub, để tránh
+   hai nơi cùng ghi vào một dòng. */
+var REPORTHUB_URL = "https://script.google.com/macros/s/AKfycbzn-5chMgO7lQPKmot8P7UkP9C40MdCPtiTTa4H1gcKepVsnr1IYfcB7sSdK1_jrZYY/exec";
+var OTHER_TYPE_RE = /sale/i;          /* chỉ lấy đầu việc của khối Sales */
+
+function hubJsonp(params,timeoutMs){
+  return new Promise(function(res,rej){
+    var cb="__mmhhub_"+Date.now()+"_"+(++_seq);
+    var el=document.createElement("script");
+    var t=setTimeout(function(){ done(); rej(new Error("Quá thời gian chờ khi đọc Other task")); }, timeoutMs||45000);
+    function done(){ clearTimeout(t); try{ delete window[cb]; }catch(e){ window[cb]=undefined; }
+                     if(el.parentNode) el.parentNode.removeChild(el); }
+    window[cb]=function(d){ done(); res(d); };
+    params=params||{}; params.callback=cb;
+    var qs=Object.keys(params).map(function(k){ return encodeURIComponent(k)+"="+encodeURIComponent(params[k]==null?"":params[k]); }).join("&");
+    el.src=REPORTHUB_URL+"?"+qs;
+    el.onerror=function(){ done(); rej(new Error("Không đọc được Other task — kiểm tra Web App của file Sales & Marketing đã Deploy quyền “Anyone” chưa.")); };
+    document.body.appendChild(el);
+  });
+}
+function loadOther(force){
+  if(S.other && !force) return Promise.resolve(S.other);
+  if(S._otLoading) return S._otLoading;
+  S._otLoading = hubJsonp({action:"weekly", _ts:Date.now()}).then(function(j){
+    S._otLoading=null; S.otherErr="";
+    if(!j || !j.ok) throw new Error((j&&j.error)||"Report Hub trả về dữ liệu không hợp lệ");
+    S.other={ keys:j.keyTasks||[], at:Date.now() };
+    return S.other;
+  }).catch(function(e){ S._otLoading=null; S.otherErr=e.message; throw e; });
+  return S._otLoading;
+}
+function otherFlat(){
+  var out=[];
+  ((S.other&&S.other.keys)||[]).forEach(function(k){
+    out.push(k);
+    (k.subs||[]).forEach(function(x){ out.push(x); });
+  });
+  return out;
+}
+/* các đầu việc Sales trong FY + PIC đang lọc */
+function otherKeys(){
+  var pic=S.otherPic||(isMgmt()?"":S.user.pic);
+  return ((S.other&&S.other.keys)||[]).filter(function(k){
+    if(String(k.fy||"") && String(k.fy)!==S.fy) return false;
+    if(!OTHER_TYPE_RE.test(String(k.type||""))) return false;
+    if(pic && !picMatch(k.pic,pic)){
+      /* key task của người khác nhưng có subtask của mình thì vẫn giữ */
+      if(!(k.subs||[]).some(function(x){ return picMatch(x.pic,pic); })) return false;
+    }
+    if(S.otherQ){
+      var tk=skTokens(S.otherQ);
+      var hay=noAcc([k.keyTask,k.subTask,k.result,k.type,k.pic,
+        (k.subs||[]).map(function(x){return x.subTask+" "+x.result;}).join(" ")].join(" "));
+      if(!tk.every(function(t){ return hay.indexOf(t)>=0; })) return false;
+    }
+    return true;
+  });
+}
+function otherStatusTag(st,pg){
+  var t=String(st||"").toLowerCase();
+  var cls = /complet|done|xong/.test(t) ? "t-g"
+          : /cancel|huỷ|huy/.test(t)    ? "t-n"
+          : /progress|đang/.test(t)     ? "t-b" : "t-y";
+  return '<span class="tag '+cls+'">'+esc(st||"—")+(pg?" · "+pg+"%":"")+'</span>';
+}
+function setOtherPic(p){ S.otherPic=p; renderOther(); }
+function refreshOther(){ S.other=null; S.otherErr=""; renderOther();
+  loadOther(true).then(function(){ if(S.tab==="other") renderOther(); })
+                 .catch(function(){ if(S.tab==="other") renderOther(); }); }
+function pgOther(){
+  if(!S.other && !S._otLoading && !S.otherErr)
+    loadOther().then(function(){ if(S.tab==="other") renderOther(); })
+               .catch(function(){ if(S.tab==="other") renderOther(); });
+  renderOther();
+}
+function renderOther(){
+  var head='<div class="ph"><div><h2>Other task '+esc(S.fy)+'</h2>'+
+    '<p>Đầu việc ngoài đi địa bàn · nguồn: Google Sheet <b>Sales &amp; Marketing</b> — tab WEEKYLY new</p></div>'+
+    '<div class="sp"></div>'+
+    '<button class="btn sm" onclick="refreshOther()">⟳ Đọc lại</button>'+
+    '<a class="btn sm" href="'+REPORTHUB_URL+'" target="_blank" rel="noopener">↗ Mở Report Hub</a></div>';
+
+  if(S.otherErr){
+    $("main").innerHTML='<div class="pg">'+head+
+      '<div class="card pad"><div class="empty"><div class="e">⚠️</div>'+
+      '<p style="max-width:600px;margin:0 auto">'+esc(S.otherErr)+'</p>'+
+      '<button class="btn sm" style="margin-top:11px" onclick="refreshOther()">Thử lại</button></div></div></div>';
+    return;
+  }
+  if(!S.other){
+    $("main").innerHTML='<div class="pg">'+head+skRows(6,true)+'</div>';
+    return;
+  }
+  var keys=otherKeys();
+  var picList=[]; ((S.other&&S.other.keys)||[]).forEach(function(k){
+    if(k.pic&&picList.indexOf(k.pic)<0) picList.push(k.pic); });
+  var pic=S.otherPic||"";
+  var nSub=0,nDone=0;
+  keys.forEach(function(k){ (k.subs||[]).forEach(function(x){ nSub++;
+    if(/complet|done|xong/i.test(String(x.status||""))) nDone++; }); });
+
+  $("main").innerHTML='<div class="pg">'+head+
+    '<div class="grid g4" style="margin-bottom:13px">'+
+      '<div class="kpi"><div class="lb">Key task</div><div class="vl">'+fmtN(keys.length)+'</div><div class="sb">Trong '+esc(S.fy)+'</div></div>'+
+      '<div class="kpi"><div class="lb">Đầu việc con</div><div class="vl">'+fmtN(nSub)+'</div><div class="sb">Thuộc các key task trên</div></div>'+
+      '<div class="kpi"><div class="lb">Đã hoàn thành</div><div class="vl">'+fmtN(nDone)+'</div>'+
+        (nSub?pb(nDone/nSub)+'<div class="pbl"><span style="color:'+pctColor(nDone/nSub)+'">'+Math.round(nDone/nSub*100)+'%</span><span>còn '+(nSub-nDone)+'</span></div>':"")+'</div>'+
+      '<div class="kpi"><div class="lb">Cập nhật</div><div class="vl" style="font-size:19px">'+
+        new Date(S.other.at).toLocaleTimeString("vi-VN",{hour:"2-digit",minute:"2-digit"})+'</div>'+
+        '<div class="sb">Bấm “Đọc lại” để lấy bản mới</div></div>'+
+    '</div>'+
+    '<div class="card pad" style="margin-bottom:12px">'+
+      '<div class="row"><div style="flex:2"><input class="inp" id="ot_q" autocomplete="off" '+
+        'placeholder="🔍 Tìm trong key task, đầu việc con, kết quả…" value="'+esc(S.otherQ||"")+'" '+
+        'oninput="S.otherQ=this.value;debOther()"></div></div>'+
+      (picList.length>1?'<div class="chipbar" style="margin-bottom:0"><div class="chip'+(pic?"":" on")+'" onclick="setOtherPic(\'\')">Tất cả PIC</div>'+
+        picList.map(function(p){ return '<div class="chip'+(pic===p?" on":"")+'" onclick="setOtherPic(\''+esc(p)+'\')">'+esc(p)+'</div>'; }).join("")+'</div>':"")+
+    '</div>'+
+    (keys.length?keys.map(function(k){
+      return '<div class="card pad ot-key">'+
+        '<div class="ot-h"><span class="tag t-b">'+esc(k.type||"—")+'</span>'+
+          '<span class="tag t-n">'+esc(k.pic||"—")+'</span>'+
+          otherStatusTag(k.status,k.progress)+
+          (k.priority?'<span class="tag t-y">⭐ Ưu tiên</span>':"")+
+          '<span class="sp"></span><span class="ot-no">#'+esc(k.no)+'</span></div>'+
+        '<div class="ot-t">'+esc(k.keyTask||k.subTask||"—")+'</div>'+
+        (k.result?'<div class="ot-r"><b>Kết quả:</b> '+nl2br(String(k.result).slice(0,600))+'</div>':"")+
+        ((k.subs||[]).length?'<div class="ot-subs">'+k.subs.map(function(x){
+          return '<div class="ot-sub"><div class="ot-sh"><span class="ot-no">'+esc(x.no)+'</span>'+
+            '<b>'+esc(x.subTask||"—")+'</b><span class="sp"></span>'+
+            '<span class="tag t-n">'+esc(x.pic||"—")+'</span>'+otherStatusTag(x.status,x.progress)+'</div>'+
+            (x.result?'<div class="ot-r">'+nl2br(String(x.result).slice(0,400))+'</div>':"")+
+            '<div class="ot-m">'+[x.start?("Bắt đầu "+fmtVN(x.start)):"",
+                                  x.planned?("Kế hoạch "+fmtVN(x.planned)):"",
+                                  x.actual?("Hoàn thành "+fmtVN(x.actual)):""].filter(Boolean).map(esc).join(" · ")+'</div>'+
+          '</div>'; }).join("")+'</div>':"")+
+      '</div>';
+    }).join("")
+    :'<div class="card pad"><div class="empty"><div class="e">🗂</div><p>Không có Other task nào của khối Sales trong '+esc(S.fy)+
+      (S.otherQ?' khớp “'+esc(S.otherQ)+'”':"")+'</p></div></div>')+
+  '</div>';
+}
+var _dbot; function debOther(){ clearTimeout(_dbot); _dbot=setTimeout(function(){ keepCaret("ot_q",renderOther); },140); }
+
 /* ───────── NAV ───────── */
 var TABS=[
   {id:"dash",   ic:"📊", lb:"Dashboard",   grp:"Tổng quan", mob:1},
@@ -1407,11 +1579,12 @@ var TABS=[
   {id:"present",ic:"🎤", lb:"Thuyết trình",mlb:"Thuyết trình", grp:"Dữ liệu"},
   {id:"monthly",ic:"🗓", lb:"Báo cáo tháng",mlb:"BC tháng",  grp:"Dữ liệu"},
   {id:"adp",    ic:"⭐", lb:"ADP Key account",mlb:"ADP",     grp:"Dữ liệu"},
+  {id:"other",  ic:"🗂", lb:"Other task",     mlb:"Other",    grp:"Dữ liệu"},
   {id:"photos", ic:"🖼️", lb:"Xem ảnh đi địa bàn", mlb:"Ảnh", grp:"Công cụ", mob:0, gate:"gallery"},
   {id:"report", ic:"📧", lb:"Gửi báo cáo", mlb:"Mail",      grp:"Công cụ", mob:1}
 ];
 /* thứ tự nút ở thanh dưới trên điện thoại */
-var MOB_ORDER=["weekly","cust","order","present","report","monthly","adp","dash","kpi","photos"];
+var MOB_ORDER=["weekly","cust","order","present","report","monthly","adp","other","dash","kpi","photos"];
 function navTabs(){ return TABS.filter(function(t){ return t.gate!=="gallery" || canSeeGallery(); }); }
 function buildNav(){
   var h="",lastGrp="";
@@ -1442,7 +1615,7 @@ function go(tab){
   $("fab").classList.toggle("on", tab==="weekly"||tab==="dash");
   $("fab").title = (tab==="weekly") ? "Thêm task đi địa bàn" : "Ghi nhanh hoạt động";
   $("main").scrollTop=0;
-  ({dash:pgDash,kpi:pgKPI,cust:pgCust,weekly:pgWeekly,order:pgOrder,present:pgPresent,monthly:pgMonthly,adp:pgADP,photos:pgGallery,report:pgReport}[tab]||pgDash)();
+  ({dash:pgDash,kpi:pgKPI,cust:pgCust,weekly:pgWeekly,order:pgOrder,present:pgPresent,monthly:pgMonthly,adp:pgADP,other:pgOther,photos:pgGallery,report:pgReport}[tab]||pgDash)();
 }
 /* ⭐ v2: khung xương thay vì vòng xoay chặn màn hình */
 function loading(msg){
@@ -1974,19 +2147,24 @@ var DENTAL_DISTRIBUTORS = [
      src:"segment" → cộng Actual/Forecast USD của một Segment Report trong tab SUM TURNOVER
      src:"jizai"   → cộng dòng Type "2 Jizai Qty" (đơn vị: SỐ LƯỢNG, không phải USD)
    Đổi nhóm ngành chỉ cần đổi PRODUCT_GROUP bên dưới. */
+/* Nhận diện theo cột "Products" của tab SUM TURNOVER. Giá trị thực trong file:
+     Type "1 Turnover"        → Dental file and bur · Dental Suture · MMG ·
+                                 Manipler · Ophthalmic knife · Ophthalmic Suture · Eyeless needle
+     Type "2 Jizai Qty"       → Jizai      (SỐ LƯỢNG, không phải USD)
+     Type "3 Composite amount"→ Composite                                              */
 var PRODUCT_CARDS = {
   dental: [
-    { label:"Doanh số Jizai",   src:"jizai",   unit:"qty",
-      note:"File Turnover mới có dòng \"2 Jizai Qty\" ⇒ đây là SỐ LƯỢNG" },
-    { label:"Doanh số hàng MMG", src:"segment", seg:"MMG", unit:"usd" }
+    { label:"Doanh số Jizai", src:"jizai", prod:"Jizai", unit:"qty",
+      note:"Tab SUM TURNOVER để Jizai ở dòng Type \"2 Jizai Qty\" ⇒ đây là SỐ LƯỢNG, không phải USD" },
+    { label:"Doanh số hàng MMG", src:"rows", prod:"MMG", unit:"usd" }
   ],
   ophthalmic: [
-    { label:"Ophthalmic knife",  src:"segment", seg:"Surgical", unit:"usd" },
-    { label:"Ophthalmic suture", src:"segment", seg:"Eyeless",  unit:"usd" }
+    { label:"Ophthalmic knife",  src:"rows", prod:"Ophthalmic knife",  unit:"usd" },
+    { label:"Ophthalmic suture", src:"rows", prod:"Ophthalmic Suture", unit:"usd" }
   ],
   surgical: [
-    { label:"Manipler",          src:"segment", seg:"Surgical", unit:"usd" },
-    { label:"Ophthalmic suture", src:"segment", seg:"Eyeless",  unit:"usd" }
+    { label:"Manipler",          src:"rows", prod:"Manipler",          unit:"usd" },
+    { label:"Ophthalmic knife",  src:"rows", prod:"Ophthalmic knife",  unit:"usd" }
   ]
 };
 var PRODUCT_GROUP = "dental";     /* CRM này là Dental CRM */
@@ -2027,7 +2205,7 @@ function loadTurnover(force){
     S._toLoading=null; S.turnoverErr="";
     if(!j || !j.ok) throw new Error((j&&j.error)||"File Turnover trả về dữ liệu không hợp lệ");
     /* rowsJizai = các dòng Type "2 Jizai Qty" — là SỐ LƯỢNG, không phải tiền */
-    S.turnover={ rows:j.rows||[], jizai:j.rowsJizai||[], at:Date.now() };
+    S.turnover={ rows:j.rows||[], jizai:j.rowsJizai||[], composite:j.rowsComposite||[], at:Date.now() };
     return S.turnover;
   }).catch(function(e){ S._toLoading=null; S.turnoverErr=e.message; throw e; });
   return S._toLoading;
@@ -2076,21 +2254,22 @@ function turnoverByDistributor(months,picOnly){
 /* Cộng số cho một thẻ sản phẩm, vẫn giới hạn trong 4 NPP và PIC đang chọn. */
 function productStat(card,months,picOnly){
   var t=S.turnover; if(!t) return null;
-  var src=(card.src==="jizai") ? (t.jizai||[]) : (t.rows||[]);
+  var src = (card.src==="jizai")     ? (t.jizai||[])
+          : (card.src==="composite") ? (t.composite||[])
+          : (t.rows||[]);
   var inM={}; (months||[]).forEach(function(m){ inM[String(m)]=1; });
-  var budget=0, actual=0, hit=0, segSeen={};
+  var want=noAcc(card.prod||"");
+  var budget=0, actual=0, hit=0, seen={}, noCol=false;
   src.forEach(function(r){
-    var seg=String(r.segment||"");
-    if(card.src==="segment"){
-      segSeen[seg]=1;
-      if(noAcc(seg)!==noAcc(card.seg||"")) return;
-    }
+    var pr=String(r.products||"");
+    if(!pr) noCol=true; else seen[pr]=1;
+    if(want && noAcc(pr)!==want) return;
     var d=distributorOf(r.distributor); if(!d) return;
     if(picOnly && d.pic!==picOnly) return;
     if(months && months.length && !inM[String(r.month)]) return;
     budget+=n(r.budget); actual+=n(r.forecast); hit++;
   });
-  return { budget:budget, actual:actual, hit:hit, segments:Object.keys(segSeen).sort() };
+  return { budget:budget, actual:actual, hit:hit, products:Object.keys(seen).sort(), noCol:(noCol&&!hit) };
 }
 function fmtQty(v){ return n(v).toLocaleString("vi-VN"); }
 
@@ -2163,10 +2342,10 @@ function turnoverBlock(picSel){
         var pc=st.budget?st.actual/st.budget:null;
         var sub;
         if(!st.hit){
-          sub = (c.src==="segment")
-            ? ('Không có dòng nào thuộc segment <b>'+esc(c.seg)+'</b>'+
-               (st.segments.length?(' · segment trong file: '+esc(st.segments.join(", "))):""))
-            : 'File Turnover chưa có dòng Type "2 Jizai Qty"';
+          sub = st.noCol
+            ? 'File Turnover chưa gửi cột <b>Products</b> — cập nhật Code.gs của file đó (bản v5.3)'
+            : ('Không có dòng nào thuộc Products <b>'+esc(c.prod)+'</b>'+
+               (st.products.length?(' · Products trong file: '+esc(st.products.join(", "))):""));
           return '<div class="kpi"><div class="lb">'+esc(c.label)+'</div><div class="vl" style="color:var(--mute)">—</div>'+
                  '<div class="sb">'+sub+'</div></div>';
         }
@@ -2346,13 +2525,62 @@ function saveTargets(){
 
 <script>
 /* ═══════════════════════ KHÁCH HÀNG ═══════════════════════ */
+function pgCustEnsure(){
+  /* các chỉ số ADP / doanh số / visit cần 3 nguồn — nạp nền rồi vẽ lại danh sách */
+  if(!tGet("adp"))   ensureTab("adp",{},  function(r,ready){ if(ready&&S.tab==="cust") renderCustList(); });
+  if(!tGet("order")) ensureTab("order",{},function(r,ready){ if(ready&&S.tab==="cust") renderCustList(); });
+  if(!S.cache.weekly) loadTerritoryAll(true).then(function(){ if(S.tab==="cust") renderCustList(); });
+}
 function pgCust(){
+  pgCustEnsure();
   if(!S.custIndex.length){
     skeleton('<div class="ph"><div><h2>Khách hàng</h2><p>Đang tải danh sách…</p></div></div>'+skRows(8,true));
     loadCustomerIndex().then(function(){ if(S.tab==="cust") renderCust(); });
     return;
   }
   renderCust();
+}
+/* ⭐ v5.3 — GOM CHỈ SỐ CHO MÀN HÌNH KHÁCH HÀNG
+   Với mỗi account, tính trong FY đang chọn:
+     · thuộc nhóm ADP nào (A/B/C/D) và FY target
+     · doanh số đã đạt (cộng từ tab 4. ORDER, không phải cột Actual gõ tay trong ADP)
+     · số lượt viếng thăm đã ghi nhận
+   Bộ nhớ đệm theo FY + số dòng nguồn nên đổi FY hoặc có dữ liệu mới là tính lại. */
+var _cxCache=null,_cxKey="";
+function custMetrics(){
+  var wk=terrRows(), od=tGet("order")||[], adp=tGet("adp")||[];
+  var key=[S.fy,wk.length,od.length,adp.length,(S.cache.weekly?S.cache.weekly.at:0)].join("|");
+  if(_cxCache&&_cxKey===key) return _cxCache;
+  var m={};
+  function slot(name){
+    var k=String(name||"").trim().toLowerCase(); if(!k) return null;
+    if(!m[k]) m[k]={ abcd:"", target:0, adpActual:0, sales:0, visits:0, hasAdp:false, adpRow:0 };
+    return m[k];
+  }
+  adp.forEach(function(r){
+    if(String(r.fy||"") && String(r.fy)!==S.fy) return;
+    var o=slot(parseAcc(r.account).name); if(!o) return;
+    o.hasAdp=true; o.adpRow=r._row||0;
+    o.abcd=abcdKey(r.abcd)||o.abcd;
+    o.target+=n(r.targetAmt); o.adpActual+=n(r.actualAmt);
+  });
+  var fym={}; fyMonths(S.fy).forEach(function(x){ fym[String(x)]=1; });
+  od.forEach(function(r){
+    if(!fym[String(r.month||"")]) return;
+    var o=slot(r.name); if(!o) return;
+    o.sales+=n(r.amount);
+  });
+  wk.forEach(function(r){
+    if(String(r.fy||"")!==S.fy) return;
+    if(!isVisiting(r)) return;
+    var o=slot(parseAcc(r.account).name); if(!o) return;
+    o.visits++;
+  });
+  _cxCache=m; _cxKey=key; return m;
+}
+function custMetricOf(name){
+  var m=custMetrics()[String(name||"").trim().toLowerCase()];
+  return m||{ abcd:"", target:0, adpActual:0, sales:0, visits:0, hasAdp:false, adpRow:0 };
 }
 function custFiltered(){
   var f=S.filt, toks=skTokens(f.q||"");
@@ -2361,10 +2589,18 @@ function custFiltered(){
     if(f.pic && c.pic!==f.pic) return;
     if(f.type && c.type!==f.type) return;
     if(f.area && c.area!==f.area) return;
+    var mx=custMetricOf(c.name);
+    if(f.abcd==="ADP"   && !mx.hasAdp) return;
+    else if(f.abcd==="NOADP" && mx.hasAdp) return;
+    else if(f.abcd && "ABCD".indexOf(f.abcd)>=0 && mx.abcd!==f.abcd) return;
+    if(f.visit==="none" && mx.visits>0) return;
+    if(f.visit==="has"  && !mx.visits)  return;
     var sc=skScore(c,toks); if(!sc) return;
-    out.push({c:c,sc:sc});
+    out.push({c:c,sc:sc,mx:mx});
   });
-  if(toks.length) out.sort(function(x,y){
+  if(f.sort==="sales")
+    out.sort(function(x,y){ return (y.mx.sales||y.mx.adpActual)-(x.mx.sales||x.mx.adpActual); });
+  else if(toks.length) out.sort(function(x,y){
     return y.sc-x.sc || String(x.c.name||"").localeCompare(String(y.c.name||""));
   });
   return { rows:out.map(function(x){return x.c;}), toks:toks };
@@ -2387,15 +2623,36 @@ function renderCustList(){
       '</div></div>';
     return;
   }
+  var ABC={}; ABCD_GROUPS.forEach(function(g){ ABC[g.k]=g; });
   box.innerHTML='<div class="tbwrap"><table class="tb"><thead><tr>'+
-    '<th style="width:88px">Mã</th><th>Account</th><th style="width:104px">Loại</th><th style="width:118px">Tỉnh</th>'+
-    '<th style="width:76px">Area</th><th style="width:88px">PIC</th><th class="num" style="width:56px">CBC</th>'+
-    '<th class="num" style="width:60px">Đơn</th></tr></thead><tbody>'+
+    '<th style="width:84px">Mã</th><th>Account</th><th style="width:210px">Phân loại</th>'+
+    '<th style="width:112px">Tỉnh</th><th style="width:80px">PIC</th>'+
+    '<th style="width:230px">Target → Achieve '+esc(S.fy)+'</th>'+
+    '<th class="num" style="width:66px">Visit</th><th class="num" style="width:52px">CBC</th>'+
+    '<th class="num" style="width:56px">Đơn</th></tr></thead><tbody>'+
     shown.map(function(c){
+      var mx=custMetricOf(c.name);
+      var g=ABC[mx.abcd];
+      var achieve=mx.sales||mx.adpActual;          /* ưu tiên doanh số thực từ tab ORDER */
+      var pc=mx.target?achieve/mx.target:null;
+      var bar = mx.hasAdp
+        ? (mx.target
+            ? pb(Math.min(pc,1.2))+'<div class="pbl"><span>'+fmtVND(achieve)+' / '+fmtVND(mx.target)+'</span>'+
+              '<span style="color:'+pctColor(pc)+'">'+Math.round(pc*100)+'%</span></div>'
+            : '<span class="cx-none">Có ADP · chưa đặt target</span>')
+        : (achieve?'<span class="cx-sale">'+fmtVND(achieve)+'</span>':'<span class="cx-none">—</span>');
       return '<tr onclick="openCust(\''+esc(c.code)+'\')" style="cursor:pointer">'+
         '<td class="mono" style="color:var(--blue);font-weight:700">'+skHl(c.code,toks)+'</td>'+
-        '<td><b>'+skHl(c.name,toks)+'</b></td><td><span class="tag t-n">'+esc(c.type)+'</span></td>'+
-        '<td>'+skHl(c.province,toks)+'</td><td>'+esc(c.area)+'</td><td>'+skHl(c.pic,toks)+'</td>'+
+        '<td><b>'+skHl(c.name,toks)+'</b>'+
+          (c.area?'<div class="cx-sub">'+esc(c.area)+'</div>':"")+'</td>'+
+        '<td><div class="cx-tags">'+
+          '<span class="tag t-n">'+esc(c.type)+'</span>'+
+          (mx.hasAdp?'<span class="tag t-y" title="Nằm trong danh sách ADP Key account">⭐ ADP</span>':"")+
+          (g?'<span class="tag" style="background:'+g.bg+';color:'+g.c+'" title="'+esc(g.lb+" · "+g.sub)+'">'+esc(g.k)+' — '+esc(g.lb.split("— ")[1]||g.k)+'</span>':"")+
+        '</div></td>'+
+        '<td>'+skHl(c.province,toks)+'</td><td>'+skHl(c.pic,toks)+'</td>'+
+        '<td>'+bar+'</td>'+
+        '<td class="num"><b'+(mx.visits?'':' style="color:var(--mute)"')+'>'+(mx.visits||0)+'</b></td>'+
         '<td class="num">'+(c.nCbc||0)+'</td><td class="num">'+(c.nOrder||0)+'</td></tr>'; }).join("")+
     '</tbody></table></div>'+
     (rows.length>S.custLimit?'<div style="text-align:center;margin-top:12px">'+
@@ -2422,6 +2679,17 @@ function renderCust(){
           'value="'+esc(f.q)+'" oninput="S.filt.q=this.value;S.custLimit=60;debCust()"></div>'+
         '<div><select class="inp" onchange="custSetFilter(\'type\',this.value)">'+opts(S.master.accountType,f.type,"Mọi loại KH")+'</select></div>'+
         '<div><select class="inp" onchange="custSetFilter(\'area\',this.value)">'+opts(S.master.area,f.area,"Mọi khu vực")+'</select></div>'+
+        '<div><select class="inp" onchange="custSetFilter(\'abcd\',this.value)">'+
+          '<option value=""'+(f.abcd?"":" selected")+'>Mọi nhóm ADP</option>'+
+          '<option value="ADP"'+(f.abcd==="ADP"?" selected":"")+'>⭐ Chỉ account có ADP</option>'+
+          ABCD_GROUPS.map(function(g){ return '<option value="'+g.k+'"'+(f.abcd===g.k?" selected":"")+'>'+esc(g.lb)+'</option>'; }).join("")+
+          '<option value="NOADP"'+(f.abcd==="NOADP"?" selected":"")+'>Không có ADP</option>'+
+        '</select></div>'+
+      '</div>'+
+      '<div class="chipbar" style="margin-bottom:0">'+
+        '<div class="chip'+(f.visit==="none"?" on":"")+'" onclick="custSetFilter(\'visit\',\''+(f.visit==="none"?"":"none")+'\')">Chưa gặp trong '+esc(S.fy)+'</div>'+
+        '<div class="chip'+(f.visit==="has"?" on":"")+'" onclick="custSetFilter(\'visit\',\''+(f.visit==="has"?"":"has")+'\')">Đã gặp</div>'+
+        '<div class="chip'+(f.sort==="sales"?" on":"")+'" onclick="custSetFilter(\'sort\',\''+(f.sort==="sales"?"":"sales")+'\')">Sắp theo doanh số</div>'+
       '</div>'+
       (isMgmt()?'<div class="chipbar" id="custPicBar"><div class="chip'+(f.pic?"":" on")+'" onclick="custPic(\'\')">Tất cả PIC</div>'+
         picChips.map(function(p){ return '<div class="chip'+(f.pic===p?" on":"")+'" onclick="custPic(\''+esc(p)+'\')">'+esc(p)+'</div>'; }).join("")+'</div>':"")+
@@ -4213,7 +4481,7 @@ var ABCD_GROUPS = [
   { k:"A", lb:"A — Further Increase SoW",     sub:"Tăng thị phần trên khách đang mua", c:"#1E9E5A", bg:"#E8F7EF" },
   { k:"B", lb:"B — Open New Doors",           sub:"Mở khách mới / mở cửa mới",         c:"#3A5CAA", bg:"#EDF3FE" },
   { k:"C", lb:"C — Maintain Existing",        sub:"Giữ khách hiện hữu",                c:"#E08A00", bg:"#FFF6E4" },
-  { k:"D", lb:"D — Defend / Recover",         sub:"Giữ thế trận · lấy lại khách",      c:"#B44FA6", bg:"#F7EDF6" }
+  { k:"D", lb:"D — Minimize Effort",          sub:"Giảm nguồn lực đầu tư",             c:"#B44FA6", bg:"#F7EDF6" }
 ];
 function abcdKey(v){ var m=/^\s*([ABCD])\b/.exec(String(v||"")); return m?m[1]:""; }
 
