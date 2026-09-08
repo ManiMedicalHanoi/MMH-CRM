@@ -288,6 +288,12 @@ table.tb tbody tr.sel td{background:var(--pale)}
 
 /* ══════════════ SVG CHARTS (bỏ Chart.js ⇒ tải nhanh hơn nhiều) ══════════════ */
 .cwrap{display:grid;grid-template-columns:repeat(auto-fit,minmax(310px,1fr));gap:14px}
+/* ⭐ v5 — thanh nhóm thông tin trên Dashboard */
+.dashg{display:flex;gap:7px;overflow-x:auto;padding-bottom:3px;margin-bottom:13px;-webkit-overflow-scrolling:touch}
+.dashg::-webkit-scrollbar{display:none}
+.dashg button{flex:none;height:38px;padding:0 15px;border-radius:11px;border:1px solid var(--line);background:var(--card);color:var(--sub);font-size:13px;font-weight:700;cursor:pointer;transition:.15s;white-space:nowrap}
+.dashg button:hover{border-color:var(--blue-l);color:var(--blue-d)}
+.dashg button.on{background:var(--navy);border-color:var(--navy);color:#fff;box-shadow:var(--sh-1)}
 .cbox{background:var(--card);border:1px solid var(--line);border-radius:var(--r-lg);padding:16px 17px;box-shadow:var(--sh-1);min-width:0}
 .cbox h4{font-size:13px;font-weight:800;color:var(--navy);margin-bottom:3px;letter-spacing:-.1px}
 .cbox .csub{font-size:11.5px;color:var(--mute);margin-bottom:12px}
@@ -319,7 +325,7 @@ table.tb tbody tr.sel td{background:var(--pale)}
 #drw.on{display:block}
 #drw .bd{position:absolute;inset:0;background:rgba(16,29,51,.42);backdrop-filter:blur(3px);opacity:0;transition:.25s}
 #drw.on .bd{opacity:1}
-#drw .pn{position:absolute;top:0;right:0;bottom:0;width:min(1180px,100%);background:var(--bg);box-shadow:var(--sh-3);display:flex;flex-direction:column;transform:translateX(24px);opacity:0;transition:.28s cubic-bezier(.32,.72,0,1)}
+#drw .pn{position:absolute;inset:0;width:100%;background:var(--bg);box-shadow:var(--sh-3);display:flex;flex-direction:column;transform:translateX(24px);opacity:0;transition:.28s cubic-bezier(.32,.72,0,1)}
 #drw.on .pn{transform:none;opacity:1}
 .drw-h{background:linear-gradient(118deg,#37538F,var(--blue) 62%,#5B7BC4);color:#fff;padding:16px 18px 15px;flex:none;position:relative}
 .drw-h .x{position:absolute;top:12px;right:12px;width:32px;height:32px;border-radius:10px;border:none;background:rgba(255,255,255,.16);color:#fff;font-size:16px;cursor:pointer;transition:.15s}
@@ -339,8 +345,20 @@ table.tb tbody tr.sel td{background:var(--pale)}
 .drw-tabs button:hover:not(.on){color:var(--sub)}
 .drw-b{flex:1;overflow:auto;padding:15px 17px 40px;-webkit-overflow-scrolling:touch}
 .drw-f{flex:none;border-top:1px solid var(--line);background:var(--card);padding:11px 15px;display:flex;gap:8px;flex-wrap:wrap;padding-bottom:calc(11px + var(--safe))}
-@media(max-width:1240px){ #drw .pn{width:min(960px,100%)} }
-@media(max-width:640px){ #drw .pn{width:100%} .drw-h h2{font-size:16px} }
+@media(max-width:640px){ .drw-h h2{font-size:17px} }
+/* ⭐ v5 — hồ sơ khách hàng xem toàn màn hình: chữ và bảng to hơn hẳn */
+#drw .drw-b{font-size:14px}
+#drw .drw-b .tb{font-size:13.5px}
+#drw .drw-b .tb th{font-size:12px}
+#drw .drw-b .tb td{padding:11px 12px}
+#drw .drw-b .kv{grid-template-columns:210px 1fr;font-size:14px;gap:2px 16px}
+#drw .drw-b .kv dt{font-size:12.5px}
+#drw .drw-b .li .t1 b{font-size:14.5px}
+#drw .drw-b .tli-t{font-size:14.5px}
+#drw .drw-b .tli-b{font-size:13.5px;line-height:1.6}
+#drw .drw-b .mstat .v{font-size:22px}
+#drw .drw-h h2{font-size:22px}
+
 
 /* strip chỉ số nhỏ trong drawer */
 .mstrip{display:grid;grid-template-columns:repeat(auto-fit,minmax(96px,1fr));gap:9px;margin-bottom:15px}
@@ -558,9 +576,48 @@ table.tb tbody tr.sel td{background:var(--pale)}
 .dlt.up{color:#1E9E5A} .dlt.dn{color:#D9433F} .dlt.fl{color:var(--mute)}
 .savebar{position:sticky;bottom:0;background:linear-gradient(0deg,var(--bg) 70%,transparent);padding:12px 0 4px;display:flex;gap:9px;align-items:center;z-index:5}
 /* ══════════════ ⭐ v4.1 — BẢNG ADP 4 CỘT ABCD ══════════════ */
-.adpboard{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;align-items:start}
-@media(max-width:1280px){ .adpboard{grid-template-columns:repeat(2,minmax(0,1fr))} }
-@media(max-width:720px){ .adpboard{grid-template-columns:1fr} }
+.adpboard{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;align-items:start}
+@media(max-width:1440px){ .adpboard{grid-template-columns:repeat(2,minmax(0,1fr))} }
+@media(max-width:820px){ .adpboard{grid-template-columns:1fr} }
+/* ⭐ v5 — ADP xem dạng danh sách lớn: mỗi thẻ rộng, chữ to, đọc thoải mái */
+.adplist{display:grid;grid-template-columns:repeat(auto-fill,minmax(430px,1fr));gap:14px;align-items:start}
+@media(max-width:900px){ .adplist{grid-template-columns:1fr} }
+.adplist .adpc{padding:16px 17px;border-left-width:5px;border-radius:var(--r-lg);box-shadow:var(--sh-1)}
+.adplist .adpc-h b{font-size:16.5px}
+.adplist .adpc-m{font-size:12.5px}
+.adplist .adpc-o{font-size:13.5px;-webkit-line-clamp:6;margin:10px 0}
+.adplist .adpv{font-size:12.5px;padding:7px 10px}
+.adplist .adpc-acts{display:flex}
+.adpc-acts{display:none;gap:7px;margin-top:10px;padding-top:10px;border-top:1px dashed var(--line)}
+.adpc:hover .adpc-acts{display:flex}
+.adpc-acts button{flex:1;height:34px;border-radius:9px;border:1px solid var(--line);background:var(--card);color:var(--blue-d);font-size:12.5px;font-weight:700;cursor:pointer;transition:.15s}
+.adpc-acts button:hover{background:var(--pale);border-color:var(--blue-l)}
+.adpc-acts button.pri{background:var(--navy);border-color:var(--navy);color:#fff}
+.adpc-kv{display:grid;grid-template-columns:auto 1fr;gap:4px 10px;font-size:12.5px;margin:9px 0;color:var(--sub)}
+.adpms{display:flex;gap:4px;align-items:flex-end;margin-top:4px}
+/* ⭐ v5 — thẻ hạng mục báo cáo tháng: 2 cột PLAN | RESULT */
+.photorule{background:#FFF6E4;border:1px solid #F0DCA8;color:#8A5A00;border-radius:var(--r-md);padding:9px 11px;font-size:11.5px;line-height:1.55;margin-bottom:10px}
+.photorule b{color:#6E4700}
+.mn-card{border:1px solid var(--line);border-left:3px solid var(--warn);border-radius:var(--r-md);padding:12px 14px;margin-bottom:10px;cursor:pointer;transition:.15s;background:var(--card)}
+.mn-card.ok{border-left-color:var(--ok)}
+.mn-card:hover{background:var(--paler);border-color:var(--blue-l)}
+.mn-head{display:flex;gap:8px;align-items:center;margin-bottom:10px;flex-wrap:wrap}
+.mn-2col{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:860px){ .mn-2col{grid-template-columns:1fr;gap:12px} }
+.mn-col{min-width:0;border:1px solid var(--line2);border-radius:var(--r-md);padding:10px 12px;background:var(--paler)}
+.mn-lb{font-size:11.5px;font-weight:800;letter-spacing:.2px;margin-bottom:7px;padding-bottom:6px;border-bottom:1px dashed var(--line)}
+.mn-lb.plan{color:var(--blue-d)}
+.mn-lb.res{color:var(--navy)}
+.mn-txt{font-size:13px;line-height:1.65;color:var(--ink);white-space:normal;word-break:break-word}
+.mn-txt.clip{display:-webkit-box;-webkit-line-clamp:9;-webkit-box-orient:vertical;overflow:hidden}
+.mn-empty{font-size:12.5px;color:var(--mute);font-style:italic}
+.mn-more{margin-top:7px;background:none;border:none;color:var(--blue);font-size:12px;font-weight:700;cursor:pointer;padding:0}
+.mn-more:hover{text-decoration:underline}
+.adpms-i{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;min-width:0}
+.adpms-i i{width:100%;border-radius:3px 3px 0 0;display:block}
+.adpms-i span{font-size:9.5px;color:var(--mute);font-weight:700}
+.adpc-kv b{color:var(--ink);font-weight:700}
+.adpc-kv i{color:var(--mute);font-style:normal;font-weight:700}
 .adpcol{background:var(--card);border:1px solid var(--line);border-radius:var(--r-lg);box-shadow:var(--sh-1);overflow:hidden;display:flex;flex-direction:column;min-width:0}
 .adpch{display:flex;align-items:center;gap:9px;padding:11px 12px;border-bottom:1px solid var(--line)}
 .adpch .k{width:28px;height:28px;border-radius:9px;color:#fff;display:grid;place-items:center;font-weight:800;font-size:13px;flex:none}
@@ -657,6 +714,11 @@ table.tb tbody tr.sel td{background:var(--pale)}
 .trseg button{border:none;background:none;padding:6px 12px;border-radius:8px;font-size:12.5px;font-weight:700;color:var(--sub);cursor:pointer;white-space:nowrap}
 .trseg button.on{background:var(--card);color:var(--blue-d);box-shadow:var(--sh-1)}
 .trnav{display:flex;align-items:center;gap:5px;margin-top:8px}
+.trrange{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.trrange label{font-size:12px;font-weight:700;color:var(--sub)}
+.trrange .inp{height:34px;width:auto;min-width:138px;padding:0 9px}
+.trrange .ftog{height:34px}
+@media(max-width:640px){.trrange{width:100%}.trrange .inp{flex:1;min-width:0}}
 .trnav button{width:30px;height:30px;border-radius:9px;border:1px solid var(--line);background:var(--card);cursor:pointer;color:var(--sub);flex:none}
 .trnav .lb{flex:1;text-align:center;font-size:12.5px;font-weight:800;color:var(--navy);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .trnav .td{flex:none;height:30px;padding:0 10px;border-radius:9px;border:1px solid var(--lb1);background:var(--pale);color:var(--blue-d);font-size:11.5px;font-weight:700;cursor:pointer}
@@ -834,8 +896,35 @@ var S = {
   targetDraft:{},
   /* ⭐ v4 */
   vMode:"week", vChart:false, mnPic:"", kpiPic:"", cbcRows:null,
-  task:null, taskRow:0, dirty:{}, pending:null, ntPhoto:null
+  task:null, taskRow:0, dirty:{}, pending:null, ntPhoto:null,
+  /* ⭐ v5 (Đợt A) */
+  vFrom:"", vTo:"",          /* lọc khoảng ngày ở "Cập nhật thông tin địa bàn" */
+  dashG:"all",               /* nhóm thông tin đang xem trên Dashboard */
+  adpView:"board",           /* board | list — ADP xem dạng bảng ABCD hay danh sách lớn */
+  turnover:null, turnoverErr:"", toRange:"ALL",   /* doanh số NPP đọc từ file MMH Turnover */
+  accEdit:false              /* đang sửa hồ sơ khách hàng ngay trong màn hình chi tiết */
 };
+
+/* ⭐ v5 — KHUNG BÁO CÁO TUẦN (guide chữ mờ, gõ vào là mất) */
+var RESULT_GUIDE = ["1. Actions Taken:","2. Current Situation:","3. Customer Feedback:","4. Opportunities / Next Steps:"];
+var RESULT_PH_TXT = "Người gặp: BS. …\n" + RESULT_GUIDE.join("\n");
+function phAttr(t){ return esc(t).replace(/\n/g,"&#10;"); }
+/* chèn sẵn khung 4 mục vào ô kết quả, giữ nguyên dòng "Người gặp:" và nội dung đã gõ */
+function insertResultTpl(id){
+  var ta=$(id); if(!ta) return;
+  var cur=String(ta.value||"");
+  if(RESULT_GUIDE.every(function(g){ return cur.indexOf(g)>=0; }))
+    return toast("Ô kết quả đã có sẵn khung 4 mục","warn");
+  var meet=(MEET_RE.exec(cur)||[""])[0];
+  var rest=cur.replace(MEET_RE,"").replace(/^\n+/,"").trim();
+  var body=RESULT_GUIDE.map(function(g,i){ return g+(i===0&&rest?(" "+rest):""); }).join("\n\n");
+  ta.value=(meet?meet+"\n":"")+body+"\n";
+  try{ ta.dispatchEvent(new Event("input",{bubbles:true})); }catch(e){}
+  if(id==="tk-result") markDirty("result",ta.value);
+  if(typeof ntMeetFlag==="function") ntMeetFlag();
+  try{ ta.focus(); ta.setSelectionRange(ta.value.length,ta.value.length); }catch(e){}
+  toast("✓ Đã chèn khung 4 mục","ok");
+}
 
 /* ───────── utils ───────── */
 function $(id){ return document.getElementById(id); }
@@ -1342,7 +1431,8 @@ function dashPic(p){ S.filt.pic=p; renderDash(); }          /* tức thì, khôn
 
 /* nguồn dữ liệu sẵn có */
 function dashSrc(){
-  return { weekly: terrRows(), order: tGet("order")||[], present: tGet("present")||[], cust: S.custIndex||[] };
+  return { weekly: terrRows(), order: tGet("order")||[], present: tGet("present")||[],
+           cust: S.custIndex||[], cbc: S.cbcRows||[], adp: tGet("adp")||[] };
 }
 function dashMissing(){
   var m=[];
@@ -1350,8 +1440,14 @@ function dashMissing(){
   if(!tGet("order")) m.push("đơn hàng");
   if(!tGet("present")) m.push("thuyết trình");
   if(!(S.custIndex&&S.custIndex.length)) m.push("danh mục khách hàng");
+  if(!S.cbcRows) m.push("người liên hệ (CBC)");
+  if(!tGet("adp")) m.push("ADP key account");
   return m;
 }
+/* nhóm thông tin trên Dashboard */
+var DASH_GROUPS=[["all","📊 Tổng quan"],["cust","🏥 Khách hàng"],["field","📍 Đi địa bàn"],
+                 ["biz","🧾 Kinh doanh"],["adp","⭐ ADP Key account"]];
+function setDashG(g){ S.dashG=g; renderDash(); }
 /* ── tính toàn bộ số liệu dashboard trong trình duyệt ── */
 function dashBuild(){
   var R=dashRange(), months=R.months, src=dashSrc();
@@ -1408,6 +1504,50 @@ function dashBuild(){
     if(i!==undefined) newAcc[i]++;
   });
 
+  /* ── CBC / người liên hệ ──
+     Tab "2. CBC" không có cột ngày tạo ⇒ không đếm được "CBC mới theo tháng" trực tiếp.
+     Thay vào đó: gắn CBC theo NGÀY MỞ ACCOUNT của account tương ứng (proxy đủ dùng),
+     đồng thời vẫn cho biết tổng CBC và phân bổ theo PIC / khu vực. */
+  var accOpenYm={}, accPicMap={};
+  src.cust.forEach(function(c){
+    var k=String(c.name||"").trim().toLowerCase(); if(!k) return;
+    accOpenYm[k]=ymOf(String(c.openDate||"").slice(0,10));
+    accPicMap[k]=c.pic||"";
+  });
+  var cbcTotal=0, newCbc=z(), cbcByPic={}, cbcByArea={}, cbcPerAcc={}, cbcNoAcc=0;
+  src.cbc.forEach(function(b){
+    var owner=String(b.pic||"")||accPicMap[String(b.name||"").trim().toLowerCase()]||"";
+    if(!keep(owner)) return;
+    if(!String(b.contact||"").trim()) return;
+    cbcTotal++;
+    var an=String(b.name||"").trim();
+    if(an){ cbcPerAcc[an]=(cbcPerAcc[an]||0)+1; } else cbcNoAcc++;
+    cbcByPic[String(owner||"—")]=(cbcByPic[String(owner||"—")]||0)+1;
+    var ar=String(b.area||"—")||"—"; cbcByArea[ar]=(cbcByArea[ar]||0)+1;
+    var i=mIdx[accOpenYm[an.toLowerCase()]||""]; if(i!==undefined) newCbc[i]++;
+  });
+
+  /* ── ADP key account theo kỳ ──
+     Tab "8. ADP" có 12 cột tháng m09..m08 ⇒ cộng đúng các tháng nằm trong kỳ đang xem. */
+  var ADP_MK={ "09":"m09","10":"m10","11":"m11","12":"m12","01":"m01","02":"m02",
+               "03":"m03","04":"m04","05":"m05","06":"m06","07":"m07","08":"m08" };
+  var adpRows=[], adpByGrp={A:0,B:0,C:0,D:0,"—":0}, adpTargetFY=0, adpActualFY=0;
+  var adpPeriodAmt=z(), adpPeriodTotal=0, adpNoVisit=0, adpVisitCov=0;
+  src.adp.forEach(function(r){
+    if(!keep(r.pic)) return;
+    if(String(r.fy||"") && String(r.fy)!==S.fy) return;
+    adpRows.push(r);
+    var g=(typeof abcdKey==="function"?abcdKey(r.abcd):"")||"—";
+    adpByGrp[g]=(adpByGrp[g]||0)+1;
+    adpTargetFY+=n(r.targetAmt); adpActualFY+=n(r.actualAmt);
+    months.forEach(function(m,i){
+      var f=ADP_MK[String(m).slice(4,6)];
+      if(f){ var v=n(r[f]); adpPeriodAmt[i]+=v; adpPeriodTotal+=v; }
+    });
+    var an=parseAcc(r.account).name;
+    if(an && visited[an.toLowerCase()]) adpVisitCov++; else adpNoVisit++;
+  });
+
   /* ── thuyết trình ── */
   var presByMonth=z(), attByMonth=z();
   src.present.forEach(function(r){
@@ -1432,7 +1572,13 @@ function dashBuild(){
     byStatus:top(byStatus,10), byProcess:top(byProcess,10), byFeedback:top(byFeedback,6),
     byProduct:top(byProduct,12), byPicVisit:top(byPicVisit,12), byAreaAcc:top(byAreaAcc,6),
     totalAcc:totalAcc, coveredAcc:coveredAcc, totalActivity:total, overdue:overdue,
-    withPhoto:withPhoto, recent:recent };
+    withPhoto:withPhoto, recent:recent,
+    /* ⭐ v5 */
+    cbcTotal:cbcTotal, newCbc:newCbc, cbcByPic:top(cbcByPic,12), cbcByArea:top(cbcByArea,8),
+    cbcPerAcc:top(cbcPerAcc,10), cbcNoAcc:cbcNoAcc,
+    adpCount:adpRows.length, adpByGrp:adpByGrp, adpTargetFY:adpTargetFY, adpActualFY:adpActualFY,
+    adpPeriodAmt:adpPeriodAmt, adpPeriodTotal:adpPeriodTotal,
+    adpNoVisit:adpNoVisit, adpVisitCov:adpVisitCov, adpRows:adpRows };
 }
 
 function pgDash(){
@@ -1446,7 +1592,10 @@ function dashEnsure(force){
   if(!S.cache.weekly || force) loadTerritoryAll(true).then(dashRepaint);
   if(!tGet("order")   || force) ensureTab("order",{},  function(r,ready){ if(ready) dashRepaint(); });
   if(!tGet("present") || force) ensureTab("present",{},function(r,ready){ if(ready) dashRepaint(); });
+  if(!tGet("adp")     || force) ensureTab("adp",{},    function(r,ready){ if(ready) dashRepaint(); });
   if(!(S.custIndex&&S.custIndex.length)) loadCustomerIndex().then(dashRepaint);
+  if(force){ S.cbcRows=null; S._cbcLoading=false; }
+  if(!S.cbcRows){ ensureCbc(); setTimeout(dashRepaint,1400); }
 }
 function dashRepaint(){ if(S.tab==="dash") renderDash(); }
 function refreshDash(){ dashEnsure(true); }
@@ -1497,71 +1646,197 @@ function renderDash(){
                 :'<button class="btn sm" onclick="refreshDash()">⟳ Đồng bộ với Sheet</button>')+
   '</div></div>';
 
-  $("main").innerHTML='<div class="pg">'+
-    '<div class="ph"><div><h2>Tổng quan '+esc(S.fy)+'</h2><p>'+
-      (S.filt.pic?("PIC: <b>"+esc(S.filt.pic)+"</b>"):"Toàn nhóm Dental")+' · '+fmtN(d.totalActivity)+' hoạt động · '+fmtN(d.totalAcc)+' account</p></div>'+
-      '<div class="sp"></div><button class="btn pri sm" onclick="formWeekly(null)">＋ Ghi hoạt động</button></div>'+
-    picBar+ timeBar+
-    '<div class="grid g4" style="margin-bottom:14px">'+
+  /* ── các khối nội dung, gom theo nhóm thông tin ── */
+  var G=S.dashG||"all";
+  function grpBar(){
+    return '<div class="dashg">'+DASH_GROUPS.map(function(x){
+      return '<button class="'+(G===x[0]?"on":"")+'" onclick="setDashG(\''+x[0]+'\')">'+x[1]+'</button>';
+    }).join("")+'</div>';
+  }
+  function card(t,sub,inner){
+    return '<div class="cbox"><h4>'+t+'</h4>'+(sub?'<div class="csub">'+sub+'</div>':"")+inner+'</div>';
+  }
+  function stat(lb,val,sub,color){
+    return '<div class="kpi"><div class="lb">'+lb+'</div><div class="vl"'+(color?' style="color:'+color+'"':"")+'>'+val+'</div>'+
+      (sub?'<div class="sb">'+sub+'</div>':"")+'</div>';
+  }
+
+  /* — KHỐI: tổng quan chỉ tiêu — */
+  var blkKpi='<div class="grid g4" style="margin-bottom:14px">'+
       kpiCard("Doanh số",totalAmt,"amount","vnd")+
       kpiCard("Số đơn hàng",totalOrd,"orders")+
       kpiCard("Lượt viếng thăm",totalVis,"visiting")+
       kpiCard("Account mở mới",totalNew,"newacct")+
-    '</div>'+
+    '</div>';
 
-    '<div class="grid g4" style="margin-bottom:14px">'+
+  /* — KHỐI: khách hàng — */
+  var blkCustStat='<div class="grid g4" style="margin-bottom:14px">'+
+      stat("Tổng account",fmtN(d.totalAcc),"Trong phạm vi đang xem")+
+      stat("Account mở mới",fmtN(totalNew),"Trong "+esc(d.rangeLabel))+
+      stat("Người liên hệ (CBC)",fmtN(d.cbcTotal),
+           d.totalAcc?("Trung bình <b>"+(d.cbcTotal/d.totalAcc).toFixed(1)+"</b> CBC / account"):"")+
       '<div class="kpi"><div class="lb">Độ phủ account</div><div class="vl">'+Math.round(cov*100)+'%</div>'+
         '<div class="sb"><b>'+fmtN(d.coveredAcc)+'</b>/'+fmtN(d.totalAcc)+' account đã tiếp xúc</div>'+pb(cov)+'</div>'+
-      '<div class="kpi"><div class="lb">Buổi thuyết trình</div><div class="vl">'+fmtN(d.presByMonth.reduce(function(s,v){return s+v;},0))+'</div>'+
-        '<div class="sb"><b>'+fmtN(d.attByMonth.reduce(function(s,v){return s+v;},0))+'</b> người tham dự</div></div>'+
-      '<div class="kpi"><div class="lb">Việc quá hạn</div><div class="vl" style="color:'+(d.overdue?"#D9433F":"#1E9E5A")+'">'+fmtN(d.overdue)+'</div>'+
-        '<div class="sb">'+(d.overdue?'Cần cập nhật kết quả':'Không có việc quá hạn')+'</div></div>'+
-      '<div class="kpi"><div class="lb">Hoạt động có ảnh</div><div class="vl">'+fmtN(d.withPhoto)+'</div>'+
-        '<div class="sb">'+(d.totalActivity?Math.round(d.withPhoto/d.totalActivity*100):0)+'% số dòng đã đính ảnh</div></div>'+
+    '</div>';
+  var blkCust='<div class="cwrap" style="margin-bottom:14px">'+
+      card("Account mở mới theo tháng","Số account mới ghi nhận trong kỳ",
+        svgSeries(d.monthLabels,[{name:"Account mới",data:d.newAcc,color:"#1E9E5A"}],"num","bar"))+
+      card("CBC mới theo tháng","Ước theo ngày mở account · <b>tab 2. CBC chưa có cột ngày tạo</b>",
+        svgSeries(d.monthLabels,[{name:"CBC mới",data:d.newCbc,color:"#B44FA6"}],"num","bar"))+
+      card("Account theo khu vực","Phân bổ danh mục khách hàng",
+        svgDonut(toEntries(d.byAreaAcc),fmtN(d.totalAcc),"account"))+
     '</div>'+
-
     '<div class="cwrap" style="margin-bottom:14px">'+
-      '<div class="cbox"><h4>Doanh số theo tháng</h4><div class="csub">Đơn vị VND · '+esc(d.rangeLabel)+'</div>'+
-        svgSeries(d.monthLabels,[{name:"Doanh số",data:d.amtByMonth,color:"#3A5CAA"}],"vnd",d.months.length>2?"line":"bar")+'</div>'+
-      '<div class="cbox"><h4>Viếng thăm &amp; đơn hàng</h4><div class="csub">Số lượt mỗi tháng</div>'+
-        svgSeries(d.monthLabels,[{name:"Viếng thăm",data:d.visByMonth,color:"#5B8DD9"},{name:"Đơn hàng",data:d.ordByMonth,color:"#E8A302"}],"num","bar")+'</div>'+
-    '</div>'+
+      card("CBC theo PIC","Số người liên hệ đang quản lý",
+        svgHBars(toEntries(d.cbcByPic),"num",function(k2){ return avColor(k2); }))+
+      card("CBC theo khu vực","Mật độ quan hệ theo địa bàn",
+        svgHBars(toEntries(d.cbcByArea),"num",function(k2,i){ return PAL[i%PAL.length]; }))+
+      card("Account nhiều CBC nhất","Top 10 theo số người liên hệ",
+        svgHBars(toEntries(d.cbcPerAcc),"num",function(k2,i){ return PAL[i%PAL.length]; }))+
+    '</div>';
 
+  /* — KHỐI: đi địa bàn — */
+  var blkFieldStat='<div class="grid g4" style="margin-bottom:14px">'+
+      stat("Tổng hoạt động",fmtN(d.totalActivity),"Trong "+esc(d.rangeLabel))+
+      stat("Lượt viếng thăm",fmtN(totalVis),"Type action = Visiting")+
+      stat("Hoạt động có ảnh",fmtN(d.withPhoto),
+           (d.totalActivity?Math.round(d.withPhoto/d.totalActivity*100):0)+'% số dòng đã đính ảnh')+
+      stat("Việc quá hạn",fmtN(d.overdue),d.overdue?"Cần cập nhật kết quả":"Không có việc quá hạn",
+           d.overdue?"#D9433F":"#1E9E5A")+
+    '</div>';
+  var blkField='<div class="cwrap" style="margin-bottom:14px">'+
+      card("Viếng thăm &amp; đơn hàng","Số lượt mỗi tháng",
+        svgSeries(d.monthLabels,[{name:"Viếng thăm",data:d.visByMonth,color:"#5B8DD9"},{name:"Đơn hàng",data:d.ordByMonth,color:"#E8A302"}],"num","bar"))+
+      card("Hình thức tiếp xúc","Theo Type action",
+        svgDonut(toEntries(d.actByType),fmtN(d.totalActivity),"hoạt động"))+
+      card("Loại khách hàng viếng thăm","Số lượt theo Account type",
+        svgDonut(toEntries(d.byAccountType),fmtN(totalVis),"lượt"))+
+    '</div>'+
     '<div class="cwrap" style="margin-bottom:14px">'+
-      '<div class="cbox"><h4>Doanh số theo PIC</h4><div class="csub">Xếp hạng · '+esc(d.rangeLabel)+'</div>'+
-        svgHBars(toEntries(d.amtByPic),"vnd",function(k2){ return avColor(k2); })+'</div>'+
-      '<div class="cbox"><h4>Cơ cấu nhóm sản phẩm</h4><div class="csub">Theo doanh số</div>'+
-        svgDonut(toEntries(d.prodAmt),fmtVND(totalAmt),"tổng","vnd")+'</div>'+
-      '<div class="cbox"><h4>Loại khách hàng viếng thăm</h4><div class="csub">Số lượt theo Account type</div>'+
-        svgDonut(toEntries(d.byAccountType),fmtN(totalVis),"lượt")+'</div>'+
+      card("Phễu Sales Process","Vị trí khách hàng trong quy trình",
+        svgHBars(toEntries(d.byProcess),"num",function(k2,i){ return ["#8A97B5","#5B8DD9","#3A5CAA","#1E9E5A","#D9433F","#B44FA6"][i%6]; }))+
+      card("Trạng thái công việc","Tiến độ các đầu việc đã ghi nhận",
+        svgHBars(toEntries(d.byStatus),"num",function(k2){ return /complet/i.test(k2)?"#1E9E5A":/cancel/i.test(k2)?"#8A97B5":/75/.test(k2)?"#3FA64B":/50/.test(k2)?"#3A5CAA":/25/.test(k2)?"#E08A00":"#8A97B5"; }))+
+      card("Phản hồi khách hàng","Cảm nhận sau tiếp xúc",
+        svgHBars(toEntries(d.byFeedback),"num",function(k2){ return /tích/i.test(k2)?"#1E9E5A":/tiêu/i.test(k2)?"#D9433F":/trung/i.test(k2)?"#E8A302":"#8A97B5"; }))+
     '</div>'+
-
     '<div class="cwrap" style="margin-bottom:14px">'+
-      '<div class="cbox"><h4>Phễu Sales Process</h4><div class="csub">Vị trí khách hàng trong quy trình</div>'+
-        svgHBars(toEntries(d.byProcess),"num",function(k2,i){ return ["#8A97B5","#5B8DD9","#3A5CAA","#1E9E5A","#D9433F","#B44FA6"][i%6]; })+'</div>'+
-      '<div class="cbox"><h4>Trạng thái công việc</h4><div class="csub">Tiến độ các đầu việc đã ghi nhận</div>'+
-        svgHBars(toEntries(d.byStatus),"num",function(k2){ return /complet/i.test(k2)?"#1E9E5A":/cancel/i.test(k2)?"#8A97B5":/75/.test(k2)?"#3FA64B":/50/.test(k2)?"#3A5CAA":/25/.test(k2)?"#E08A00":"#8A97B5"; })+'</div>'+
-      '<div class="cbox"><h4>Phản hồi khách hàng</h4><div class="csub">Cảm nhận sau tiếp xúc</div>'+
-        svgHBars(toEntries(d.byFeedback),"num",function(k2){ return /tích/i.test(k2)?"#1E9E5A":/tiêu/i.test(k2)?"#D9433F":/trung/i.test(k2)?"#E8A302":"#8A97B5"; })+'</div>'+
-    '</div>'+
+      card("Lượt đi địa bàn theo PIC","Xếp hạng trong kỳ",
+        svgHBars(toEntries(d.byPicVisit),"num",function(k2){ return avColor(k2); }))+
+      card("Nhóm sản phẩm trao đổi","Số lượt nhắc tới trong task",
+        svgHBars(toEntries(d.byProduct),"num",function(k2,i){ return PAL[i%PAL.length]; }))+
+      card("Buổi thuyết trình","Số buổi &amp; người tham dự theo tháng",
+        svgSeries(d.monthLabels,[{name:"Buổi",data:d.presByMonth,color:"#6B4A9E"},{name:"Người dự",data:d.attByMonth,color:"#0B7480"}],"num","bar"))+
+    '</div>';
 
-    '<div class="grid g2" style="margin-bottom:14px">'+
-      '<div class="card pad"><div class="ct"><span class="dot"></span>Top 10 khách hàng theo doanh số<small>'+esc(d.rangeLabel)+'</small></div>'+
-        '<div class="tbwrap" style="max-height:330px"><table class="tb"><thead><tr><th style="width:34px">#</th><th>Khách hàng</th><th class="num">Doanh số</th></tr></thead><tbody>'+
-        (d.topCustomers.length?d.topCustomers.map(function(x,i){
-          return '<tr style="cursor:pointer" onclick="rAcc(\''+reg({name:x.k})+'\')"><td class="ctr" style="color:var(--mute)">'+(i+1)+'</td><td><b>'+esc(x.k)+'</b></td><td class="num"><b>'+fmtVND(x.v)+'</b></td></tr>'; }).join("")
-          :'<tr><td colspan="3" class="ctr" style="color:var(--mute);padding:20px">Chưa có đơn hàng trong kỳ này</td></tr>')+
-        '</tbody></table></div></div>'+
-      '<div class="card pad"><div class="ct"><span class="dot"></span>Hoạt động gần đây<span class="sp"></span><button class="btn xs" onclick="go(\'weekly\')">Xem tất cả</button></div>'+
-        '<div style="max-height:330px;overflow:auto" class="list">'+
-        (d.recent.length?d.recent.map(function(r){
-          return '<div class="li acc" onclick="openVisitRow('+r._row+')"><div class="t1"><b>'+esc(r.account||"—")+'</b>'+statusTag(r.status)+'</div>'+
-            '<div class="m"><span>'+fmtVN(r.start)+'</span><span>·</span><span>'+esc(r.pic)+'</span><span>·</span><span>'+esc(r.typeAction||"")+'</span>'+
-            (r.photo?'<span class="tag t-b">📷</span>':"")+'</div>'+
-            (r.result?'<div class="d">'+nl2br(String(r.result).slice(0,150))+'</div>':"")+'</div>'; }).join("")
-          :'<div class="empty"><div class="e">📍</div><p>Chưa có hoạt động trong kỳ này</p></div>')+
-        '</div></div>'+
+  /* — KHỐI: kinh doanh — */
+  var blkBiz='<div class="cwrap" style="margin-bottom:14px">'+
+      card("Doanh số theo tháng","Đơn vị VND · "+esc(d.rangeLabel),
+        svgSeries(d.monthLabels,[{name:"Doanh số",data:d.amtByMonth,color:"#3A5CAA"}],"vnd",d.months.length>2?"line":"bar"))+
+      card("Doanh số theo PIC","Xếp hạng · "+esc(d.rangeLabel),
+        svgHBars(toEntries(d.amtByPic),"vnd",function(k2){ return avColor(k2); }))+
+      card("Cơ cấu nhóm sản phẩm","Theo doanh số",
+        svgDonut(toEntries(d.prodAmt),fmtVND(totalAmt),"tổng","vnd"))+
     '</div>'+
+    '<div class="cwrap" style="margin-bottom:14px">'+
+      card("Kênh bán hàng","Theo doanh số",
+        svgDonut(toEntries(d.channel),fmtVND(totalAmt),"tổng","vnd"))+
+      card("Số đơn hàng theo tháng","Đếm số đơn phát sinh",
+        svgSeries(d.monthLabels,[{name:"Đơn hàng",data:d.ordByMonth,color:"#E8A302"}],"num","bar"))+
+    '</div>'+
+    '<div class="card pad" style="margin-bottom:14px"><div class="ct"><span class="dot"></span>Top 10 khách hàng theo doanh số<small>'+esc(d.rangeLabel)+'</small></div>'+
+      '<div class="tbwrap" style="max-height:360px"><table class="tb"><thead><tr><th style="width:34px">#</th><th>Khách hàng</th><th class="num">Doanh số</th></tr></thead><tbody>'+
+      (d.topCustomers.length?d.topCustomers.map(function(x,i){
+        return '<tr style="cursor:pointer" onclick="rAcc(\''+reg({name:x.k})+'\')"><td class="ctr" style="color:var(--mute)">'+(i+1)+'</td><td><b>'+esc(x.k)+'</b></td><td class="num"><b>'+fmtVND(x.v)+'</b></td></tr>'; }).join("")
+        :'<tr><td colspan="3" class="ctr" style="color:var(--mute);padding:20px">Chưa có đơn hàng trong kỳ này</td></tr>')+
+      '</tbody></table></div></div>';
+
+  /* — KHỐI: ADP key account — */
+  var adpPct=d.adpTargetFY?d.adpActualFY/d.adpTargetFY:null;
+  var ABCD_C={A:"#1E9E5A",B:"#3A5CAA",C:"#E8A302",D:"#8A97B5"};
+  var blkAdp='<div class="grid g4" style="margin-bottom:14px">'+
+      stat("Key account (ADP)",fmtN(d.adpCount),"Đang theo dõi trong "+esc(S.fy))+
+      stat("ADP phát sinh trong kỳ",fmtVND(d.adpPeriodTotal),"Cộng các cột tháng thuộc "+esc(d.rangeLabel))+
+      '<div class="kpi"><div class="lb">Target / Actual FY</div><div class="vl">'+fmtVND(d.adpActualFY)+'</div>'+
+        '<div class="sb">Mục tiêu FY <b>'+fmtVND(d.adpTargetFY)+'</b></div>'+
+        (adpPct!=null?pb(adpPct)+'<div class="pbl"><span style="color:'+pctColor(adpPct)+'">'+Math.round(adpPct*100)+'%</span><span>còn '+fmtVND(Math.max(0,d.adpTargetFY-d.adpActualFY))+'</span></div>':"")+'</div>'+
+      stat("Key account chưa gặp",fmtN(d.adpNoVisit),
+           d.adpCount?("<b>"+fmtN(d.adpVisitCov)+"</b>/"+fmtN(d.adpCount)+" đã tiếp xúc trong kỳ"):"",
+           d.adpNoVisit?"#D9433F":"#1E9E5A")+
+    '</div>'+
+    '<div class="cwrap" style="margin-bottom:14px">'+
+      card("ADP theo kỳ","Doanh số key account từng tháng trong "+esc(d.rangeLabel),
+        svgSeries(d.monthLabels,[{name:"ADP",data:d.adpPeriodAmt,color:"#6B4A9E"}],"vnd",d.months.length>2?"line":"bar"))+
+      card("Phân nhóm ABCD","Số key account mỗi nhóm",
+        svgDonut(["A","B","C","D","—"].filter(function(k2){return d.adpByGrp[k2];})
+          .map(function(k2){ return ["Nhóm "+k2, d.adpByGrp[k2]]; }),fmtN(d.adpCount),"account"))+
+    '</div>'+
+    '<div class="card pad" style="margin-bottom:14px"><div class="ct"><span class="dot"></span>Key account — tiến độ ADP'+
+      '<span class="sp"></span><button class="btn xs" onclick="go(\'adp\')">Mở bảng ADP</button></div>'+
+      (d.adpRows.length?'<div class="tbwrap" style="max-height:420px"><table class="tb"><thead><tr>'+
+        '<th style="width:52px">Nhóm</th><th>Account</th><th style="width:88px">PIC</th>'+
+        '<th class="num" style="width:104px">Target FY</th><th class="num" style="width:104px">Actual FY</th>'+
+        '<th style="width:130px">Tiến độ</th><th style="width:110px">Gặp gần nhất</th></tr></thead><tbody>'+
+        d.adpRows.slice().sort(function(x,y){ return n(y.actualAmt)-n(x.actualAmt); }).map(function(r){
+          var A=parseAcc(r.account), g=(typeof abcdKey==="function"?abcdKey(r.abcd):"")||"—";
+          var tg=n(r.targetAmt), ac=n(r.actualAmt), pp=tg?ac/tg:null;
+          var lv=(typeof lastVisitOf==="function")?lastVisitOf(A.name):null;
+          return '<tr style="cursor:pointer" onclick="rAcc(\''+reg({name:A.name})+'\')">'+
+            '<td class="ctr"><span class="tag" style="background:'+((ABCD_C[g]||"#8A97B5")+"22")+';color:'+(ABCD_C[g]||"#8A97B5")+'">'+esc(g)+'</span></td>'+
+            '<td><b>'+esc(A.name||r.account||"—")+'</b><div style="font-size:11px;color:var(--mute)">'+esc([A.type,A.province].filter(Boolean).join(" · "))+'</div></td>'+
+            '<td>'+esc(r.pic||"—")+'</td>'+
+            '<td class="num">'+(tg?fmtVND(tg):"—")+'</td><td class="num"><b>'+(ac?fmtVND(ac):"—")+'</b></td>'+
+            '<td>'+(pp!=null&&pp<=10?pb(pp)+'<div class="pbl"><span style="color:'+pctColor(pp)+'">'+Math.round(pp*100)+'%</span></div>':'<span style="color:var(--mute);font-size:11.5px">—</span>')+'</td>'+
+            '<td>'+(lv?'<span style="font-size:11.5px">'+fmtVN(lv.date)+'</span>':'<span class="tag t-r">chưa gặp</span>')+'</td></tr>';
+        }).join("")+'</tbody></table></div>'
+        :'<div class="empty"><div class="e">⭐</div><p>Chưa có ADP nào trong '+esc(S.fy)+'</p></div>')+
+    '</div>';
+
+  /* — KHỐI: hoạt động gần đây — */
+  var blkRecent='<div class="card pad" style="margin-bottom:14px"><div class="ct"><span class="dot"></span>Hoạt động gần đây<span class="sp"></span><button class="btn xs" onclick="go(\'weekly\')">Xem tất cả</button></div>'+
+    '<div style="max-height:380px;overflow:auto" class="list">'+
+    (d.recent.length?d.recent.map(function(r){
+      return '<div class="li acc" onclick="openVisitRow('+r._row+')"><div class="t1"><b>'+esc(r.account||"—")+'</b>'+statusTag(r.status)+'</div>'+
+        '<div class="m"><span>'+fmtVN(r.start)+'</span><span>·</span><span>'+esc(r.pic)+'</span><span>·</span><span>'+esc(r.typeAction||"")+'</span>'+
+        (r.photo?'<span class="tag t-b">📷</span>':"")+'</div>'+
+        (r.result?'<div class="d">'+nl2br(String(r.result).slice(0,150))+'</div>':"")+'</div>'; }).join("")
+      :'<div class="empty"><div class="e">📍</div><p>Chưa có hoạt động trong kỳ này</p></div>')+
+    '</div></div>';
+
+  var bodyHtml =
+      G==="cust"  ? (blkCustStat+blkCust)
+    : G==="field" ? (blkFieldStat+blkField+blkRecent)
+    : G==="biz"   ? (blkKpi+blkBiz)
+    : G==="adp"   ? blkAdp
+    : (blkKpi+
+       '<div class="grid g4" style="margin-bottom:14px">'+
+         '<div class="kpi"><div class="lb">Độ phủ account</div><div class="vl">'+Math.round(cov*100)+'%</div>'+
+           '<div class="sb"><b>'+fmtN(d.coveredAcc)+'</b>/'+fmtN(d.totalAcc)+' account đã tiếp xúc</div>'+pb(cov)+'</div>'+
+         stat("Người liên hệ (CBC)",fmtN(d.cbcTotal),"Trên "+fmtN(d.totalAcc)+" account")+
+         stat("Key account (ADP)",fmtN(d.adpCount),
+              d.adpNoVisit?('<b style="color:#D9433F">'+fmtN(d.adpNoVisit)+'</b> chưa gặp trong kỳ'):"Đã tiếp xúc hết trong kỳ")+
+         stat("Việc quá hạn",fmtN(d.overdue),d.overdue?"Cần cập nhật kết quả":"Không có việc quá hạn",
+              d.overdue?"#D9433F":"#1E9E5A")+
+       '</div>'+
+       '<div class="cwrap" style="margin-bottom:14px">'+
+         card("Doanh số theo tháng","Đơn vị VND · "+esc(d.rangeLabel),
+           svgSeries(d.monthLabels,[{name:"Doanh số",data:d.amtByMonth,color:"#3A5CAA"}],"vnd",d.months.length>2?"line":"bar"))+
+         card("Viếng thăm &amp; đơn hàng","Số lượt mỗi tháng",
+           svgSeries(d.monthLabels,[{name:"Viếng thăm",data:d.visByMonth,color:"#5B8DD9"},{name:"Đơn hàng",data:d.ordByMonth,color:"#E8A302"}],"num","bar"))+
+       '</div>'+
+       '<div class="cwrap" style="margin-bottom:14px">'+
+         card("Account &amp; CBC mở mới","Theo từng tháng trong kỳ",
+           svgSeries(d.monthLabels,[{name:"Account mới",data:d.newAcc,color:"#1E9E5A"},{name:"CBC mới",data:d.newCbc,color:"#B44FA6"}],"num","bar"))+
+         card("Cơ cấu nhóm sản phẩm","Theo doanh số",
+           svgDonut(toEntries(d.prodAmt),fmtVND(totalAmt),"tổng","vnd"))+
+       '</div>'+
+       blkRecent);
+
+  $("main").innerHTML='<div class="pg">'+
+    '<div class="ph"><div><h2>Tổng quan '+esc(S.fy)+'</h2><p>'+
+      (S.filt.pic?("PIC: <b>"+esc(S.filt.pic)+"</b>"):"Toàn nhóm Dental")+' · '+fmtN(d.totalActivity)+' hoạt động · '+fmtN(d.totalAcc)+' account · '+fmtN(d.cbcTotal)+' CBC</p></div>'+
+      '<div class="sp"></div><button class="btn pri sm" onclick="formWeekly(null)">＋ Ghi hoạt động</button></div>'+
+    picBar+ timeBar+ grpBar()+ bodyHtml+
   '</div>';
 }
 
@@ -1586,6 +1861,9 @@ var KPI_DELTA = { amount:1, present:1, newacct:1 };  /* chỉ tiêu hiện cột
 
 function kpiDirty(){ return Object.keys(S.targetDraft||{}).length>0; }
 function pgKPI(){
+  if(!S.turnover && !S._toLoading && !S.turnoverErr)
+    loadTurnover().then(function(){ if(S.tab==="kpi") renderKPI(); })
+                  .catch(function(){ if(S.tab==="kpi") renderKPI(); });
   if(S.kpi&&S.kpi._fy===S.fy) return renderKPI();
   loading("Đang tổng hợp KPI…");
   apiGet("kpi",{fy:S.fy}).then(function(j){ S.kpi=j; S.kpi._fy=S.fy; renderKPI(); })
@@ -1595,6 +1873,148 @@ function deltaCell(v){
   if(v==null||isNaN(v)) return '<td class="num"><span class="dlt fl">—</span></td>';
   var p=Math.round(v*100), c=p>0?"up":p<0?"dn":"fl";
   return '<td class="num"><span class="dlt '+c+'">'+(p>0?"▲ +":p<0?"▼ ":"")+p+'%</span></td>';
+}
+
+/* ═══════════ ⭐ v5.1 — DOANH SỐ NHÀ PHÂN PHỐI (đọc từ file MMH Turnover) ═══════════
+   Nguồn: tab "SUM TURNOVER" của file MMH_Turnover, đọc qua Web App riêng của file đó
+   bằng JSONP (không cần sửa code file Turnover, chỉ cần deploy Anyone).
+     · Budget Mani USD        → MỤC TIÊU của NPP
+     · Actual/Forecast USD    → ACTUAL, tự nhảy theo file gốc
+   Segment mặc định lấy Dental + MMG (đúng phạm vi nhóm Dental Sales). */
+var TURNOVER_URL = "https://script.google.com/a/macros/manimedicalhanoi.com/s/AKfycbz26knlK_GE2mYlszlx947QWSLvfScrHFeB86XkaPWfDhKHi49cnVfCXS_kPUpkX2Fgww/exec";
+var TURNOVER_SEGMENTS = ["Dental","MMG"];
+
+function turnoverJsonp(params,timeoutMs){
+  return new Promise(function(res,rej){
+    var cb="__mmhto_"+Date.now()+"_"+(++_seq);
+    var el=document.createElement("script");
+    var t=setTimeout(function(){ done(); rej(new Error("Quá thời gian chờ khi đọc file Turnover")); }, timeoutMs||45000);
+    function done(){ clearTimeout(t); try{ delete window[cb]; }catch(e){ window[cb]=undefined; }
+                     if(el.parentNode) el.parentNode.removeChild(el); }
+    window[cb]=function(d){ done(); res(d); };
+    params=params||{}; params.callback=cb;
+    var qs=Object.keys(params).map(function(k){ return encodeURIComponent(k)+"="+encodeURIComponent(params[k]==null?"":params[k]); }).join("&");
+    el.src=TURNOVER_URL+"?"+qs;
+    el.onerror=function(){ done(); rej(new Error("Không đọc được file Turnover — kiểm tra Web App của file đó đã Deploy với quyền “Anyone” chưa.")); };
+    document.body.appendChild(el);
+  });
+}
+function loadTurnover(force){
+  if(S.turnover && !force) return Promise.resolve(S.turnover);
+  if(S._toLoading) return S._toLoading;
+  S._toLoading = turnoverJsonp({action:"getTurnoverData"}).then(function(j){
+    S._toLoading=null;
+    if(!j || !j.ok) throw new Error((j&&j.error)||"File Turnover trả về dữ liệu không hợp lệ");
+    S.turnover={ rows:j.rows||[], at:Date.now() };
+    return S.turnover;
+  }).catch(function(e){ S._toLoading=null; S.turnoverErr=e.message; throw e; });
+  return S._toLoading;
+}
+/* gộp theo NPP trong khoảng tháng đang xem */
+function turnoverByDistributor(months){
+  var t=S.turnover; if(!t) return null;
+  var inM={}; (months||[]).forEach(function(m){ inM[String(m)]=1; });
+  var segOK={}; TURNOVER_SEGMENTS.forEach(function(x){ segOK[String(x).toLowerCase()]=1; });
+  var byD={}, allMonths={}, segSeen={};
+  t.rows.forEach(function(r){
+    var seg=String(r.segment||"");
+    segSeen[seg]=1;
+    if(!segOK[seg.toLowerCase()]) return;
+    allMonths[String(r.month)]=1;
+    if(months && months.length && !inM[String(r.month)]) return;
+    var d=String(r.distributor||"—");
+    if(!byD[d]) byD[d]={ name:d, budget:0, actual:0, bySeg:{} };
+    byD[d].budget+=n(r.budget); byD[d].actual+=n(r.forecast);
+    if(!byD[d].bySeg[seg]) byD[d].bySeg[seg]={budget:0,actual:0};
+    byD[d].bySeg[seg].budget+=n(r.budget); byD[d].bySeg[seg].actual+=n(r.forecast);
+  });
+  var list=Object.keys(byD).map(function(k){ return byD[k]; })
+    .sort(function(a,b){ return b.actual-a.actual; });
+  return { list:list, budget:list.reduce(function(x,r){return x+r.budget;},0),
+           actual:list.reduce(function(x,r){return x+r.actual;},0),
+           fileMonths:Object.keys(allMonths).sort(), segments:Object.keys(segSeen).sort() };
+}
+function fmtUSD(v){
+  var x=n(v);
+  if(Math.abs(x)>=1000) return (x/1000).toFixed(1).replace(/\.0$/,"")+"K USD";
+  return Math.round(x).toLocaleString("vi-VN")+" USD";
+}
+function refreshTurnover(){
+  S.turnover=null; S.turnoverErr="";
+  renderKPI();
+  loadTurnover(true).then(function(){ if(S.tab==="kpi") renderKPI(); })
+                    .catch(function(){ if(S.tab==="kpi") renderKPI(); });
+}
+function setToRange(v){ S.toRange=v; renderKPI(); }
+/* khối hiển thị trong tab KPI */
+function turnoverBlock(){
+  var months = (S.toRange==="FY") ? fyMonths(S.fy) : null;   /* null = lấy toàn bộ tháng có trong file */
+  var head='<div class="ct"><span class="dot"></span>Doanh số nhà phân phối'+
+    '<small>Nguồn: tab "SUM TURNOVER" · '+TURNOVER_SEGMENTS.join(" + ")+'</small><span class="sp"></span>'+
+    '<div class="seg" style="margin-right:8px">'+
+      '<button class="'+(S.toRange==="FY"?"on":"")+'" onclick="setToRange(\'FY\')">Theo '+esc(S.fy)+'</button>'+
+      '<button class="'+(S.toRange!=="FY"?"on":"")+'" onclick="setToRange(\'ALL\')">Toàn bộ file</button>'+
+    '</div>'+
+    '<button class="btn xs" onclick="refreshTurnover()">⟳ Đọc lại</button></div>';
+
+  if(S.turnoverErr)
+    return '<div class="card pad" style="margin-bottom:14px">'+head+
+      '<div class="empty" style="padding:18px 0"><div class="e">⚠️</div><p style="max-width:560px;margin:0 auto">'+
+      esc(S.turnoverErr)+'</p><button class="btn sm" style="margin-top:11px" onclick="refreshTurnover()">Thử lại</button></div></div>';
+  if(!S.turnover)
+    return '<div class="card pad" style="margin-bottom:14px">'+head+
+      '<div class="empty" style="padding:18px 0"><div class="e">⏳</div><p>Đang đọc doanh số NPP từ file MMH Turnover…</p></div></div>';
+
+  var g=turnoverByDistributor(months);
+  if(!g.list.length){
+    var why = (months && g.fileMonths.length)
+      ? ('File Turnover đang chứa dữ liệu các tháng <b>'+esc(g.fileMonths[0])+' → '+esc(g.fileMonths[g.fileMonths.length-1])+
+         '</b>, không trùng tháng nào của '+esc(S.fy)+'. Bấm “Toàn bộ file” để xem, hoặc mở file Turnover sửa <b>CONFIG.FY_FILTER</b> và <b>VALID_MONTHS</b> sang '+esc(S.fy)+'.')
+      : ('Không thấy dòng nào thuộc segment '+TURNOVER_SEGMENTS.join(" / ")+
+         (g.segments.length?('. Segment có trong file: <b>'+esc(g.segments.join(", "))+'</b>'):"")+'.');
+    return '<div class="card pad" style="margin-bottom:14px">'+head+
+      '<div class="empty" style="padding:18px 0"><div class="e">📭</div><p style="max-width:620px;margin:0 auto;line-height:1.65">'+why+'</p></div></div>';
+  }
+  var pct=g.budget?g.actual/g.budget:null;
+  var lbl=(months?("Theo "+S.fy):("Toàn bộ file"+(g.fileMonths.length?(" · "+g.fileMonths[0]+" → "+g.fileMonths[g.fileMonths.length-1]):"")));
+
+  return '<div class="card pad" style="margin-bottom:14px">'+head+
+    '<div class="grid g4" style="margin:4px 0 13px">'+
+      '<div class="kpi"><div class="lb">Mục tiêu MMH (Budget Mani)</div><div class="vl">'+fmtUSD(g.budget)+'</div><div class="sb">'+esc(lbl)+'</div></div>'+
+      '<div class="kpi"><div class="lb">Actual / Forecast</div><div class="vl">'+fmtUSD(g.actual)+'</div>'+
+        (pct!=null?pb(pct)+'<div class="pbl"><span style="color:'+pctColor(pct)+'">'+Math.round(pct*100)+'%</span><span>'+
+          (g.actual>=g.budget?("vượt "+fmtUSD(g.actual-g.budget)):("còn "+fmtUSD(g.budget-g.actual)))+'</span></div>':"")+'</div>'+
+      '<div class="kpi"><div class="lb">Số nhà phân phối</div><div class="vl">'+fmtN(g.list.length)+'</div>'+
+        '<div class="sb">'+esc(g.list.slice(0,3).map(function(x){return x.name;}).join(" · "))+'</div></div>'+
+      '<div class="kpi"><div class="lb">NPP dẫn đầu</div><div class="vl" style="font-size:19px">'+esc(g.list[0].name)+'</div>'+
+        '<div class="sb">'+fmtUSD(g.list[0].actual)+' · '+(g.list[0].budget?Math.round(g.list[0].actual/g.list[0].budget*100)+"% mục tiêu":"chưa có budget")+'</div></div>'+
+    '</div>'+
+    '<div class="tbwrap"><table class="tb"><thead><tr><th>Nhà phân phối</th>'+
+      TURNOVER_SEGMENTS.map(function(sg){ return '<th class="num">'+esc(sg)+'</th>'; }).join("")+
+      '<th class="num">Mục tiêu MMH</th><th class="num">Actual</th><th class="num">Chênh lệch</th>'+
+      '<th style="width:170px">% đạt</th></tr></thead><tbody>'+
+    g.list.map(function(r){
+      var p=r.budget?r.actual/r.budget:null;
+      return '<tr><td><b>'+esc(r.name)+'</b></td>'+
+        TURNOVER_SEGMENTS.map(function(sg){
+          var v=r.bySeg[sg]; return '<td class="num">'+(v&&v.actual?fmtUSD(v.actual):"—")+'</td>'; }).join("")+
+        '<td class="num">'+(r.budget?fmtUSD(r.budget):"—")+'</td>'+
+        '<td class="num"><b>'+fmtUSD(r.actual)+'</b></td>'+
+        '<td class="num" style="color:'+(r.actual>=r.budget?"var(--ok)":"var(--dang)")+'">'+
+          (r.budget?((r.actual>=r.budget?"+":"−")+fmtUSD(Math.abs(r.actual-r.budget))):"—")+'</td>'+
+        '<td>'+(p==null?'<span style="color:var(--mute);font-size:12px">chưa có budget</span>'
+          :pb(p)+'<div class="pbl"><span style="color:'+pctColor(p)+'">'+Math.round(p*100)+'%</span><span>'+
+            (p>=1?"Đạt":p>=.9?"Gần đạt":"Chưa đạt")+'</span></div>')+'</td></tr>';
+    }).join("")+
+    '<tr style="background:var(--pale)"><td><b>TỔNG</b></td>'+
+      TURNOVER_SEGMENTS.map(function(sg){
+        var t2=g.list.reduce(function(x,r){ return x+((r.bySeg[sg]&&r.bySeg[sg].actual)||0); },0);
+        return '<td class="num"><b>'+(t2?fmtUSD(t2):"—")+'</b></td>'; }).join("")+
+      '<td class="num"><b>'+fmtUSD(g.budget)+'</b></td><td class="num"><b>'+fmtUSD(g.actual)+'</b></td>'+
+      '<td class="num"><b style="color:'+(g.actual>=g.budget?"var(--ok)":"var(--dang)")+'">'+
+        (g.actual>=g.budget?"+":"−")+fmtUSD(Math.abs(g.actual-g.budget))+'</b></td>'+
+      '<td>'+(pct==null?"—":pb(pct)+'<div class="pbl"><span style="color:'+pctColor(pct)+'">'+Math.round(pct*100)+'%</span><span></span></div>')+'</td></tr>'+
+    '</tbody></table></div></div>';
 }
 function renderKPI(){
   var k=S.kpi, mgr=S.user.role==="manager";
@@ -1678,6 +2098,7 @@ function renderKPI(){
       '<div class="chip'+(qsel==="M"?" on":"")+'" onclick="setKpiQ(\'M\')">Theo tháng</div></div></div>'+
 
     '<div class="card pad" style="margin-bottom:14px"><div class="ct"><span class="dot"></span>PHẦN A — Tổng mục tiêu MMH Dental</div>'+partA+'</div>'+
+    turnoverBlock()+
 
     '<div style="display:flex;align-items:flex-end;gap:12px;flex-wrap:wrap;margin:16px 4px 10px">'+
       '<div><div style="font-size:12.5px;font-weight:800;color:var(--navy);letter-spacing:.3px">PHẦN B — CHỈ TIÊU PHÂN BỔ THEO SALE</div>'+
@@ -1730,51 +2151,207 @@ function pgCust(){
   }
   renderCust();
 }
+function custFiltered(){
+  var f=S.filt, toks=skTokens(f.q||"");
+  var out=[];
+  (S.custIndex||[]).forEach(function(c){
+    if(f.pic && c.pic!==f.pic) return;
+    if(f.type && c.type!==f.type) return;
+    if(f.area && c.area!==f.area) return;
+    var sc=skScore(c,toks); if(!sc) return;
+    out.push({c:c,sc:sc});
+  });
+  if(toks.length) out.sort(function(x,y){
+    return y.sc-x.sc || String(x.c.name||"").localeCompare(String(y.c.name||""));
+  });
+  return { rows:out.map(function(x){return x.c;}), toks:toks };
+}
+/* ⭐ v5.1 — CHỈ vẽ lại phần danh sách + con số đếm.
+   Ô tìm kiếm và các bộ lọc không bị thay mới ⇒ con trỏ, bàn phím, dấu tiếng Việt
+   đang gõ dở đều giữ nguyên. */
+function renderCustList(){
+  var r=custFiltered(), rows=r.rows, toks=r.toks;
+  var shown=rows.slice(0,S.custLimit);
+  var cnt=$("custCount");
+  if(cnt) cnt.innerHTML='<b>'+fmtN(rows.length)+'</b> account'+
+    (rows.length!==S.custIndex.length?" / "+fmtN(S.custIndex.length):"")+
+    (toks.length?' · khớp từ khoá <b>'+esc(S.filt.q)+'</b>':"");
+  var box=$("custList"); if(!box) return;
+  if(!shown.length){
+    box.innerHTML='<div class="card pad"><div class="empty"><div class="e">🔍</div>'+
+      '<p>Không có account nào khớp'+(S.filt.q?' “<b>'+esc(S.filt.q)+'</b>”':"")+'</p>'+
+      (S.filt.q?'<button class="btn sm" style="margin-top:11px" onclick="custClearQ()">✕ Xoá từ khoá</button>':"")+
+      '</div></div>';
+    return;
+  }
+  box.innerHTML='<div class="tbwrap"><table class="tb"><thead><tr>'+
+    '<th style="width:88px">Mã</th><th>Account</th><th style="width:104px">Loại</th><th style="width:118px">Tỉnh</th>'+
+    '<th style="width:76px">Area</th><th style="width:88px">PIC</th><th class="num" style="width:56px">CBC</th>'+
+    '<th class="num" style="width:60px">Đơn</th></tr></thead><tbody>'+
+    shown.map(function(c){
+      return '<tr onclick="openCust(\''+esc(c.code)+'\')" style="cursor:pointer">'+
+        '<td class="mono" style="color:var(--blue);font-weight:700">'+skHl(c.code,toks)+'</td>'+
+        '<td><b>'+skHl(c.name,toks)+'</b></td><td><span class="tag t-n">'+esc(c.type)+'</span></td>'+
+        '<td>'+skHl(c.province,toks)+'</td><td>'+esc(c.area)+'</td><td>'+skHl(c.pic,toks)+'</td>'+
+        '<td class="num">'+(c.nCbc||0)+'</td><td class="num">'+(c.nOrder||0)+'</td></tr>'; }).join("")+
+    '</tbody></table></div>'+
+    (rows.length>S.custLimit?'<div style="text-align:center;margin-top:12px">'+
+      '<button class="btn" onclick="S.custLimit+=100;renderCustList()">Xem thêm ('+fmtN(rows.length-S.custLimit)+' account)</button></div>':"");
+}
+function custClearQ(){
+  S.filt.q=""; S.custLimit=60;
+  var e=$("cq"); if(e) e.value="";
+  renderCustList();
+  if(e) try{ e.focus(); }catch(err){}
+}
+function custSetFilter(k,v){ S.filt[k]=v; S.custLimit=60; renderCustList(); }
 function renderCust(){
   var f=S.filt;
   var picChips=isMgmt()?(S.master.pic||[]):[];
-  var rows=S.custIndex.filter(function(c){
-    if(f.pic && c.pic!==f.pic) return false;
-    if(f.type && c.type!==f.type) return false;
-    if(f.area && c.area!==f.area) return false;
-    if(f.q){ var q=f.q.toLowerCase();
-      if((c.name+" "+c.code+" "+c.province+" "+c.pic).toLowerCase().indexOf(q)<0) return false; }
-    return true;
-  });
-  var shown=rows.slice(0,S.custLimit);
 
   $("main").innerHTML='<div class="pg">'+
-    '<div class="ph"><div><h2>Khách hàng</h2><p><b>'+fmtN(rows.length)+'</b> account'+(rows.length!==S.custIndex.length?" / "+fmtN(S.custIndex.length):"")+'</p></div>'+
+    '<div class="ph"><div><h2>Khách hàng</h2><p id="custCount">…</p></div>'+
       '<div class="sp"></div><button class="btn pri sm" onclick="formCustomer(null)">＋ Account mới</button></div>'+
     '<div class="card pad" style="margin-bottom:12px">'+
       '<div class="row" style="margin-bottom:10px">'+
-        '<div style="flex:2"><input class="inp" id="cq" placeholder="🔍 Tìm theo tên, mã, tỉnh…" value="'+esc(f.q)+'" oninput="S.filt.q=this.value;S.custLimit=60;debCust()"></div>'+
-        '<div><select class="inp" onchange="S.filt.type=this.value;renderCust()">'+opts(S.master.accountType,f.type,"Mọi loại KH")+'</select></div>'+
-        '<div><select class="inp" onchange="S.filt.area=this.value;renderCust()">'+opts(S.master.area,f.area,"Mọi khu vực")+'</select></div>'+
+        '<div style="flex:2;position:relative"><input class="inp" id="cq" autocomplete="off" '+
+          'placeholder="🔍 Tìm theo tên, mã, tỉnh, PIC… (gõ nhiều từ đều được, không cần dấu)" '+
+          'value="'+esc(f.q)+'" oninput="S.filt.q=this.value;S.custLimit=60;debCust()"></div>'+
+        '<div><select class="inp" onchange="custSetFilter(\'type\',this.value)">'+opts(S.master.accountType,f.type,"Mọi loại KH")+'</select></div>'+
+        '<div><select class="inp" onchange="custSetFilter(\'area\',this.value)">'+opts(S.master.area,f.area,"Mọi khu vực")+'</select></div>'+
       '</div>'+
-      (isMgmt()?'<div class="chipbar"><div class="chip'+(f.pic?"":" on")+'" onclick="S.filt.pic=\'\';renderCust()">Tất cả PIC</div>'+
-        picChips.map(function(p){ return '<div class="chip'+(f.pic===p?" on":"")+'" onclick="S.filt.pic=\''+esc(p)+'\';renderCust()">'+esc(p)+'</div>'; }).join("")+'</div>':"")+
+      (isMgmt()?'<div class="chipbar" id="custPicBar"><div class="chip'+(f.pic?"":" on")+'" onclick="custPic(\'\')">Tất cả PIC</div>'+
+        picChips.map(function(p){ return '<div class="chip'+(f.pic===p?" on":"")+'" onclick="custPic(\''+esc(p)+'\')">'+esc(p)+'</div>'; }).join("")+'</div>':"")+
     '</div>'+
-    (shown.length? '<div class="tbwrap"><table class="tb"><thead><tr>'+
-      '<th style="width:88px">Mã</th><th>Account</th><th style="width:104px">Loại</th><th style="width:118px">Tỉnh</th>'+
-      '<th style="width:76px">Area</th><th style="width:88px">PIC</th><th class="num" style="width:56px">CBC</th><th class="num" style="width:60px">Đơn</th></tr></thead><tbody>'+
-      shown.map(function(c){
-        return '<tr onclick="openCust(\''+esc(c.code)+'\')" style="cursor:pointer">'+
-          '<td class="mono" style="color:var(--blue);font-weight:700">'+esc(c.code)+'</td>'+
-          '<td><b>'+esc(c.name)+'</b></td><td><span class="tag t-n">'+esc(c.type)+'</span></td>'+
-          '<td>'+esc(c.province)+'</td><td>'+esc(c.area)+'</td><td>'+esc(c.pic)+'</td>'+
-          '<td class="num">'+(c.nCbc||0)+'</td><td class="num">'+(c.nOrder||0)+'</td></tr>'; }).join("")+
-      '</tbody></table></div>'+
-      (rows.length>S.custLimit?'<div style="text-align:center;margin-top:12px"><button class="btn" onclick="S.custLimit+=100;renderCust()">Xem thêm ('+fmtN(rows.length-S.custLimit)+' account)</button></div>':"")
-      : '<div class="card pad"><div class="empty"><div class="e">🔍</div><p>Không tìm thấy account nào khớp bộ lọc</p></div></div>')+
+    '<div id="custList"></div>'+
   '</div>';
+  renderCustList();
+}
+/* đổi PIC: chỉ tô lại thanh chip + danh sách, không đụng ô tìm kiếm */
+function custPic(p){
+  S.filt.pic=p; S.custLimit=60;
+  var bar=$("custPicBar");
+  if(bar) Array.prototype.forEach.call(bar.children,function(el,i){
+    var want=(i===0)?"":(S.master.pic||[])[i-1];
+    el.classList.toggle("on", String(want||"")===String(p||""));
+  });
+  renderCustList();
+}
+
+/* ═══════════ ⭐ v5.1 — SMART SEARCH ═══════════
+   Trước đây gõ vào ô tìm kiếm sẽ vẽ lại TOÀN BỘ trang, ô input bị tạo mới nên
+   mất con trỏ — người dùng thấy chữ "bị gián đoạn" khi gõ nhanh.
+   Nay: ô input KHÔNG bị đụng tới, chỉ phần danh sách bên dưới được vẽ lại.
+
+   Thuật toán khớp:
+     · bỏ dấu tiếng Việt   ("xanh pon"  → khớp "Bệnh Viện Đa Khoa Xanh Pôn")
+     · tách nhiều từ khoá  ("pon ha noi" → phải khớp CẢ HAI, không cần liền nhau)
+     · tìm cả mã, tên, tỉnh, khu vực, PIC, địa chỉ
+     · xếp hạng: trùng mã > tên bắt đầu bằng từ khoá > khớp trong tên > khớp nơi khác */
+function skTokens(q){
+  return noAcc(q).split(/[\s,;]+/).filter(function(t){ return t.length>0; });
+}
+/* trả về điểm khớp; 0 = không khớp */
+function skScore(fields, toks){
+  if(!toks.length) return 1;
+  var name=noAcc(fields.name||""), code=noAcc(fields.code||"");
+  var hay=noAcc([fields.name,fields.code,fields.province,fields.area,fields.pic,
+                 fields.type,fields.address,fields.note].filter(Boolean).join(" "));
+  var total=0;
+  for(var i=0;i<toks.length;i++){
+    var t=toks[i], sc=0;
+    if(code===t) sc=1000;
+    else if(code.indexOf(t)===0) sc=700;
+    else if(name.indexOf(t)===0) sc=500;
+    else if(new RegExp("(^|\\s)"+t.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")).test(name)) sc=400;
+    else if(name.indexOf(t)>=0) sc=300;
+    else if(hay.indexOf(t)>=0) sc=100;
+    else return 0;                        /* thiếu 1 từ khoá ⇒ loại */
+    /* khớp càng gần đầu tên càng đáng lên trên */
+    if(sc>=300){ var at=name.indexOf(t); if(at>=0) sc+=Math.max(0,60-at); }
+    total+=sc;
+  }
+  return total;
+}
+/* tô sáng phần khớp, không phá dấu tiếng Việt của chuỗi gốc */
+function skHl(text,toks){
+  var t=String(text||"");
+  if(!toks||!toks.length) return esc(t);
+  var flat=noAcc(t), marks=new Array(t.length).fill(0), found=false;
+  toks.forEach(function(tok){
+    var from=0,i;
+    while((i=flat.indexOf(tok,from))>=0){
+      for(var k=i;k<i+tok.length&&k<marks.length;k++) marks[k]=1;
+      found=true; from=i+tok.length;
+    }
+  });
+  if(!found) return esc(t);
+  var out="",open=false;
+  for(var i2=0;i2<t.length;i2++){
+    if(marks[i2]&&!open){ out+="<mark>"; open=true; }
+    if(!marks[i2]&&open){ out+="</mark>"; open=false; }
+    out+=esc(t[i2]);
+  }
+  return out+(open?"</mark>":"");
+}
+/* giữ nguyên vị trí con trỏ khi buộc phải vẽ lại ô nhập */
+function keepCaret(id,fn){
+  var el=$(id), pos=el?el.selectionStart:null, had=(document.activeElement===el);
+  fn();
+  if(!had) return;
+  var e2=$(id); if(!e2) return;
+  try{ e2.focus(); if(pos!=null) e2.setSelectionRange(pos,pos); }catch(err){}
 }
 var _dbc;
-function debCust(){ clearTimeout(_dbc); _dbc=setTimeout(renderCust,220); }
+/* ⭐ v5.1 — chỉ vẽ lại DANH SÁCH, ô tìm kiếm giữ nguyên ⇒ gõ không bị ngắt */
+function debCust(){ clearTimeout(_dbc); _dbc=setTimeout(renderCustList,90); }
 
 function openCust(code){
   var c=S.custMap[code]||{};
   openAcc(code,c.name||"");
+}
+
+/* ⭐ v5 — sinh mã khách hàng kế tiếp.
+   Đọc toàn bộ mã đang có, tách <chữ cái đầu><số>, lấy số lớn nhất của mỗi tiền tố + 1.
+   Tiền tố mặc định suy từ Account type đang chọn (Clinic→CL, Hospital→HO, Dealer→DL…). */
+function codeParts(code){
+  var m=/^([A-Za-z]*)(\d+)$/.exec(String(code||"").trim());
+  return m?{p:m[1].toUpperCase(),n:parseInt(m[2],10),w:m[2].length}:null;
+}
+function prefixForType(t){
+  var k=noAcc(String(t||"")).replace(/[^a-z]/g,"");
+  if(!k) return "";
+  var pool={}, best="", bestN=0;
+  (S.custIndex||[]).forEach(function(c){
+    if(noAcc(String(c.type||"")).replace(/[^a-z]/g,"")!==k) return;
+    var q=codeParts(c.code); if(!q) return;
+    pool[q.p]=(pool[q.p]||0)+1;
+  });
+  for(var pf in pool) if(pool[pf]>bestN){ bestN=pool[pf]; best=pf; }
+  return best;
+}
+function nextCustCode(type){
+  var pf=prefixForType(type);
+  if(!pf){                                    /* chưa có mã nào cho loại này ⇒ dùng mã phổ biến nhất */
+    var cnt={}, b="", bn=0;
+    (S.custIndex||[]).forEach(function(c){ var q=codeParts(c.code); if(q){ cnt[q.p]=(cnt[q.p]||0)+1; } });
+    for(var k in cnt) if(cnt[k]>bn){ bn=cnt[k]; b=k; }
+    pf=b;
+  }
+  if(!pf) return "";
+  var mx=0, w=4;
+  (S.custIndex||[]).forEach(function(c){
+    var q=codeParts(c.code); if(!q||q.p!==pf) return;
+    if(q.n>mx){ mx=q.n; w=q.w; }
+  });
+  return pf + ("0000000000"+(mx+1)).slice(-Math.max(w,String(mx+1).length));
+}
+function custCodeSuggest(){
+  var t=$("f_type"), e=$("f_code"), h=$("f_codeHint");
+  if(!t||!e) return;
+  if(e.getAttribute("data-touched")==="1") return;   /* người dùng đã tự gõ ⇒ không ghi đè */
+  var v=nextCustCode(t.value);
+  if(v){ e.value=v; if(h) h.textContent="Mã kế tiếp tự đề xuất — sửa được nếu cần"; }
 }
 
 /* ─────── FORM: Customer ─────── */
@@ -1782,8 +2359,9 @@ function formCustomer(c){
   c=c||{};
   var isNew=!c._row;
   var h='<div class="row">'+
-      '<div class="fld"><label>Customer code <span class="rq">*</span></label><input class="inp" id="f_code" value="'+esc(c.code||"")+'" '+(isNew?"":"readonly")+' placeholder="VD: CL1234"></div>'+
-      '<div class="fld"><label>Account type <span class="rq">*</span></label><select class="inp" id="f_type">'+opts(S.master.accountType,c.type,"— chọn —")+'</select></div>'+
+      '<div class="fld"><label>Customer code <span class="rq">*</span></label><input class="inp" id="f_code" value="'+esc(c.code||(isNew?nextCustCode(c.type||""):""))+'" '+(isNew?'oninput="this.setAttribute(\'data-touched\',\'1\')"':"readonly")+' placeholder="VD: CL1234">'+
+        (isNew?'<div class="hint" id="f_codeHint">Mã kế tiếp tự đề xuất — sửa được nếu cần</div>':"")+'</div>'+
+      '<div class="fld"><label>Account type <span class="rq">*</span></label><select class="inp" id="f_type"'+(isNew?' onchange="custCodeSuggest()"':"")+'>'+opts(S.master.accountType,c.type,"— chọn —")+'</select></div>'+
     '</div>'+
     '<div class="fld"><label>Account name <span class="rq">*</span></label><input class="inp" id="f_name" value="'+esc(c.name||"")+'"></div>'+
     '<div class="fld"><label>Địa chỉ</label><input class="inp" id="f_address" value="'+esc(c.address||"")+'"></div>'+
@@ -1832,7 +2410,11 @@ function formCBC(row,code){
   if(row && S.detail) b=(S.detail.cbc||[]).filter(function(x){return x._row===row;})[0]||{};
   var c=(S.detail&&S.detail.customer)||{};
   var isNew=!b._row;
-  var nextNo=isNew?((S.detail?S.detail.cbc.length:0)+1):b.cbcNo;
+  /* ⭐ v5 — STT kế tiếp = số lớn nhất đang có + 1 (không dùng số dòng, tránh trùng khi đã xoá) */
+  var pool=(S.detail&&S.detail.cbc)||((S.acc&&S.acc.cbc)||[]);
+  if((!pool||!pool.length)&&code) pool=(S.cbcRows||[]).filter(function(x){ return String(x.code||"")===String(code); });
+  var mxNo=0; (pool||[]).forEach(function(x){ var v=parseInt(String(x.cbcNo||"").replace(/\D/g,""),10); if(v>mxNo) mxNo=v; });
+  var nextNo=isNew?(mxNo+1):b.cbcNo;
   var h='<div class="row">'+
       '<div class="fld"><label>Customer code</label><input class="inp" id="b_code" value="'+esc(b.code||code||"")+'" readonly></div>'+
       '<div class="fld"><label>CBC code</label><input class="inp" id="b_cbcCode" value="'+esc(b.cbcCode||((code||"")+"-PIC"+nextNo))+'"></div>'+
@@ -2052,8 +2634,13 @@ function renderTerritory(){
   if(S.filt.status) rows=rows.filter(function(w){return w.status===S.filt.status;});
   if(S.filt.act)    rows=rows.filter(function(w){return w.typeAction===S.filt.act;});
   if(S.filt.flag)   rows=rows.filter(function(w){return tkFlag(w).length;});
-  if(S.filt.q){ var q=S.filt.q.toLowerCase();
-    rows=rows.filter(function(w){ return (w.account+" "+w.result+" "+w.plan+" "+w.typeTask+" "+(w.nextAction||"")).toLowerCase().indexOf(q)>=0; }); }
+  if(S.filt.q){
+    var tk=skTokens(S.filt.q);
+    rows=rows.filter(function(w){
+      var hay=noAcc([w.account,w.result,w.plan,w.typeTask,w.nextAction,w.pic,w.product,w.process].filter(Boolean).join(" "));
+      return tk.every(function(t){ return hay.indexOf(t)>=0; });
+    });
+  }
 
   var byDay={},days=[];
   rows.forEach(function(w){ var d=String(w.start).slice(0,10)||"—"; if(!byDay[d]){byDay[d]=[];days.push(d);} byDay[d].push(w); });
@@ -2081,7 +2668,15 @@ function renderTerritory(){
     '<div class="trbar">'+
       '<div class="trseg">'+VRANGE.map(function(x){
         return '<button class="'+((S.vMode||"week")===x[0]?"on":"")+'" onclick="vSetMode(\''+x[0]+'\')">'+x[1]+'</button>'; }).join("")+'</div>'+
-      ((S.vMode||"week")!=="fy"
+      ((S.vMode||"week")==="range"
+        ? '<div class="trrange">'+
+            '<label>Từ</label><input class="inp" type="date" value="'+esc(S.vFrom)+'" max="'+esc(S.vTo)+'" onchange="vSetRange(\'from\',this.value)">'+
+            '<label>đến</label><input class="inp" type="date" value="'+esc(S.vTo)+'" min="'+esc(S.vFrom)+'" onchange="vSetRange(\'to\',this.value)">'+
+            '<button class="ftog" onclick="vQuickRange(7)">7 ngày</button>'+
+            '<button class="ftog" onclick="vQuickRange(30)">30 ngày</button>'+
+            '<button class="ftog" onclick="vQuickRange(90)">90 ngày</button>'+
+          '</div>'
+        : (S.vMode||"week")!=="fy"
         ? '<div class="trnav"><button onclick="vShift(-1)">◀</button><span class="lb">'+esc(r.label)+'</span>'+
           '<button onclick="vShift(1)">▶</button></div>'
         : "")+
@@ -2123,7 +2718,7 @@ function vToday(){
   S.vMode="day"; S.vAnchor=todayISO(); S.wkFrom=mondayOf(todayISO()); S.wkTo=addDays(S.wkFrom,6);
   renderTerritory();
 }
-var _dbw; function debWk(){ clearTimeout(_dbw); _dbw=setTimeout(function(){ renderTerritory(); var e=$("wk_q"); if(e){e.focus(); e.setSelectionRange(e.value.length,e.value.length);} },200); }
+var _dbw; function debWk(){ clearTimeout(_dbw); _dbw=setTimeout(function(){ keepCaret("wk_q",renderTerritory); },160); }
 function wireWkSearch(){
   combo("wk_q",function(){
     var seen={},out=[];
@@ -2230,9 +2825,10 @@ function taskEditorHTML(w){
 
     +'<div class="te-sec"><div class="te-st">✅ Task Result — kết quả thực tế <span class="te-req">*</span><span class="sp"></span>'
       +'<button class="mini acc" onclick="openMeetPicker(\'tk-result\')">👤 CBC — người gặp</button>'
+      +'<button class="mini" onclick="insertResultTpl(\'tk-result\')">📋 Chèn khung 4 mục</button>'
       +'<button class="mini" onclick="pullPlanToResult()">⤵ Lấy từ Plan</button>'
       +'<button class="mini" onclick="toggleVoice(\'tk-result\',this)">🎤 Nói</button></div>'
-      +'<textarea id="tk-result" style="min-height:120px" oninput="markDirty(\'result\',this.value)" placeholder="Đã trao đổi gì, khách phản hồi ra sao, cam kết gì…">'+esc(w.result||"")+'</textarea>'
+      +'<textarea id="tk-result" style="min-height:176px" oninput="markDirty(\'result\',this.value)" placeholder="'+phAttr(RESULT_PH_TXT)+'">'+esc(w.result||"")+'</textarea>'
       +'<div style="font-size:11.5px;color:'+(hasMeet(w)?"var(--ok)":"var(--dang)")+';margin-top:6px;font-weight:700" id="tk-meetflag">'
         +(hasMeet(w)?"✓ Đã ghi CBC (người gặp)":"⚠️ Bắt buộc có dòng “Người gặp:” — bấm nút CBC ở trên")+'</div>'
       +(stk.length?"":'<button class="mini" style="margin-top:8px;width:100%;justify-content:center;height:34px" onclick="openStakeAdd(\'tk-result\')">＋ Thêm Key stakeholder cho địa bàn này</button>')+'</div>'
@@ -2266,13 +2862,12 @@ function taskEditorHTML(w){
     photo+='<div class="pp-cur"><img src="'+esc(ph[0].thumb||ph[0].full)+'" onclick="openLb('+JSON.stringify([ph[0]]).replace(/"/g,"&quot;")+',0)" alt="">'
       +'<button class="del" title="Xoá ảnh" onclick="deleteTaskPhoto(\''+esc(ph[0].id||"")+'\')">🗑</button></div>';
   } else {
-    photo+='<div class="pp-none">'+(isVisiting(w)?'⚠️ Task <b>Visiting</b> bắt buộc có ảnh':'Chưa có ảnh')+'<br>Chụp hoặc chọn ảnh bên dưới</div>';
+    photo+='<div class="pp-none">'+(isVisiting(w)?'⚠️ Task <b>Visiting</b> bắt buộc có ảnh':'Chưa có ảnh')+'<br>Bấm nút bên dưới để mở camera</div>';
   }
-  photo+='<input type="file" id="tk-cam" accept="image/*" capture="environment" style="display:none" onchange="handleFiles(this.files)">'
-    +'<input type="file" id="tk-pick" accept="image/*" style="display:none" onchange="handleFiles(this.files)">'
+  photo+='<div class="photorule">📸 <b>Chụp ngay tại địa bàn.</b> Chỉ nhận ảnh vừa chụp bằng camera — không chọn ảnh có sẵn, không up sau, không dùng lại ảnh cũ.</div>'
+    +'<input type="file" id="tk-cam" accept="image/*" capture="environment" style="display:none" onchange="handleFiles(this.files)">'
     +'<div class="pp-act">'
-      +'<button onclick="$(\'tk-cam\').click()">📷 '+(ph.length?"Chụp đè":"Chụp ảnh")+'</button>'
-      +'<button onclick="$(\'tk-pick\').click()">🖼️ Chọn ảnh</button>'
+      +'<button onclick="$(\'tk-cam\').click()">📷 '+(ph.length?"Chụp đè ảnh mới":"Mở camera chụp ảnh")+'</button>'
     +'</div>'
     +'<div id="tk-pend"></div>'+gps
     +'<div style="font-size:11px;color:var(--mute);margin-top:9px;line-height:1.5">Ảnh nén ≤1600px, lưu tại <a href="'+DRIVE_FOLDER+'" target="_blank">folder Drive</a> kèm toạ độ GPS và địa chỉ nơi chụp.</div>'
@@ -2483,11 +3078,41 @@ function compress(file){
     img.src=url;
   });
 }
+
+/* ═══════════ ⭐ v5 — QUY TẮC ẢNH ĐI ĐỊA BÀN ═══════════
+   Yêu cầu: "Up ảnh tại địa chỉ khi đến địa bàn, không up sau, không dùng lại ảnh cũ."
+   Ép bằng 3 lớp:
+     1) chỉ còn 1 nút mở camera (capture="environment") — đã bỏ nút chọn từ thư viện;
+     2) kiểm tra lastModified của tệp — ảnh vừa chụp luôn có mốc thời gian cách
+        hiện tại vài giây, ảnh cũ trong máy bị chặn ngay tại trình duyệt;
+     3) chặn dán ảnh từ clipboard. */
+var PHOTO_MAX_AGE_MIN = 10;
+function photoFresh(file){
+  if(!file) return { ok:false, why:"Không đọc được tệp ảnh" };
+  var lm = file.lastModified || (file.lastModifiedDate && +file.lastModifiedDate) || 0;
+  if(!lm) return { ok:true };            /* máy không cung cấp mốc thời gian ⇒ cho qua */
+  var ageMin = (Date.now() - lm) / 60000;
+  if(ageMin > PHOTO_MAX_AGE_MIN){
+    var d = new Date(lm);
+    return { ok:false, why:"Ảnh này chụp lúc " +
+      ("0"+d.getHours()).slice(-2)+":"+("0"+d.getMinutes()).slice(-2)+" ngày "+
+      fmtVN(d.getFullYear()+"-"+("0"+(d.getMonth()+1)).slice(-2)+"-"+("0"+d.getDate()).slice(-2))+
+      " — không phải ảnh vừa chụp. Quy định: chụp ngay tại địa bàn, không dùng ảnh cũ." };
+  }
+  if(ageMin < -5) return { ok:false, why:"Đồng hồ máy đang lệch giờ — chỉnh lại rồi chụp lại" };
+  return { ok:true };
+}
+function photoGate(file){
+  var r=photoFresh(file);
+  if(!r.ok) toast("⛔ "+r.why,"err",9000);
+  return r.ok;
+}
 function handleFiles(files){
   if(!files||!files.length) return;
+  if(!photoGate(files[0])){ try{$("tk-cam").value="";}catch(e){} return; }
   var w=S.task||{}, had=(w.photos||[]).length>0;   /* mọi lần tải lên đều ĐÈ ⇒ luôn đúng 1 ảnh */
   if(had && !confirm("Task này đã có ảnh đi địa bàn.\nẢnh mới sẽ ĐÈ LÊN ảnh cũ (ảnh cũ bị xoá khỏi Drive). Tiếp tục?")){
-    try{$("tk-cam").value="";$("tk-pick").value="";}catch(e){} return;
+    try{$("tk-cam").value="";}catch(e){} return;
   }
   var arr=Array.prototype.slice.call(files);
   if(arr.length>1){ arr=[arr[arr.length-1]]; toast("Mỗi task chỉ 1 ảnh — đã lấy ảnh cuối","warn"); }
@@ -2495,13 +3120,17 @@ function handleFiles(files){
   Promise.all([compress(arr[0]),getGps()]).then(function(o){
     S.pending={ dataUrl:o[0], gps:o[1], replace:had };
     busy(false); renderPending();
-    try{$("tk-cam").value="";$("tk-pick").value="";}catch(e){}
+    try{$("tk-cam").value="";}catch(e){}
   }).catch(function(e){ busy(false); toast(e.message,"err"); });
 }
 document.addEventListener("paste",function(e){
   if(!$("drw").classList.contains("on")||!S.taskRow) return;
   var it=(e.clipboardData||{}).items||[];
-  for(var i=0;i<it.length;i++) if(it[i].type.indexOf("image")===0){ handleFiles([it[i].getAsFile()]); e.preventDefault(); return; }
+  for(var i=0;i<it.length;i++) if(it[i].type.indexOf("image")===0){
+    e.preventDefault();
+    toast("⛔ Ảnh đi địa bàn phải chụp trực tiếp bằng camera — không dán từ clipboard","err",8000);
+    return;
+  }
 });
 function renderPending(){
   var z=$("tk-pend"); if(!z) return;
@@ -2656,9 +3285,10 @@ function formWeekly(w,presetAcc){
     '</div>'+
     '<div class="fld"><label>Plan — dự định làm gì (không bắt buộc)</label><textarea class="inp" id="nt_plan"></textarea></div>'+
     '<div class="fld"><label>Task Result — kết quả thực tế <span class="rq">*</span> <span style="font-weight:600;color:var(--mute)">· phải có dòng “Người gặp:”</span></label>'+
-      '<textarea class="inp" id="nt_result" style="min-height:110px" oninput="ntMeetFlag()" placeholder="Người gặp: BS. …&#10;Nội dung trao đổi…"></textarea>'+
+      '<textarea class="inp" id="nt_result" style="min-height:168px" oninput="ntMeetFlag()" placeholder="'+phAttr(RESULT_PH_TXT)+'"></textarea>'+
       '<div style="display:flex;gap:7px;margin-top:7px;flex-wrap:wrap">'+
         '<button class="mini acc" onclick="ntMeetPicker()">👤 CBC — người gặp</button>'+
+        '<button class="mini" onclick="insertResultTpl(\'nt_result\')">📋 Chèn khung 4 mục</button>'+
         '<button class="mini" onclick="toggleVoice(\'nt_result\',this)">🎤 Nói</button></div>'+
       '<div id="nt_meetflag" style="font-size:11.5px;font-weight:700;margin-top:6px;color:var(--dang)">⚠️ Bắt buộc có dòng “Người gặp:” — bấm nút CBC ở trên</div></div>'+
     '<div class="row">'+
@@ -2670,9 +3300,10 @@ function formWeekly(w,presetAcc){
       '<div class="fld" id="nt_stopWrap" style="display:none"><label>Lý do dừng <span class="rq">*</span></label><input class="inp" id="nt_stop"></div>'+
     '</div>'+
     '<div class="sect"><div class="ct" style="margin-bottom:8px"><span class="dot"></span>Ảnh đi địa bàn<span class="sp"></span><small id="nt_phHint">Bắt buộc với Visiting · 1 ảnh · kèm GPS</small></div>'+
+      '<div class="photorule">📸 <b>Chụp ngay tại địa bàn.</b> Chỉ nhận ảnh vừa chụp bằng camera — không chọn ảnh có sẵn, không up sau, không dùng lại ảnh cũ.</div>'+
       '<input type="file" id="nt_file" accept="image/*" capture="environment" style="display:none" onchange="ntFiles(this.files)">'+
       '<div id="nt_phBox"></div>'+
-      '<button class="btn gho" style="width:100%" onclick="$(\'nt_file\').click()">📷 Chụp / chọn ảnh</button></div>';
+      '<button class="btn gho" style="width:100%" onclick="$(\'nt_file\').click()">📷 Mở camera chụp ảnh</button></div>';
   openModal("＋ Thêm task đi địa bàn",h,
     '<button class="btn" onclick="closeModal()">Huỷ</button><button class="btn pri" onclick="submitNewTask()">Lưu vào Google Sheet</button>', true);
   ntWire();
@@ -2707,6 +3338,7 @@ function ntPhotoHint(){
 function ntStopToggle(){ var w=$("nt_stopWrap"); if(w) w.style.display=($("nt_next").value==="Dừng lại")?"":"none"; }
 function ntFiles(files){
   if(!files||!files.length) return;
+  if(!photoGate(files[0])){ try{$("nt_file").value="";}catch(e){} return; }
   busy(true,"Đang nén ảnh & lấy GPS…");
   Promise.all([compress(files[0]),getGps()]).then(function(o){
     S.ntPhoto={dataUrl:o[0],gps:o[1]}; busy(false); ntDraw();
@@ -2813,7 +3445,7 @@ function renderOrder(){
       '<div class="sp"></div><button class="btn pri sm" onclick="formOrder(null)">＋ Đơn hàng mới</button></div>'+
     '<div class="card pad" style="margin-bottom:12px">'+
       '<div class="row" style="margin-bottom:10px">'+
-        '<div style="flex:2"><input class="inp" placeholder="🔍 Tìm theo account, mã, sản phẩm…" value="'+esc(S.filt.q)+'" oninput="S.filt.q=this.value;debOrd()"></div>'+
+        '<div style="flex:2"><input class="inp" id="ord_q" autocomplete="off" placeholder="🔍 Tìm theo account, mã, sản phẩm…" value="'+esc(S.filt.q)+'" oninput="S.filt.q=this.value;debOrd()"></div>'+
         (isMgmt()?'<div><select class="inp" onchange="S.filt.pic=this.value;renderOrder()">'+opts(S.master.pic,S.filt.pic,"Mọi PIC")+'</select></div>':"")+
       '</div>'+
       '<div class="chipbar"><div class="chip'+(S.filt.month?"":" on")+'" onclick="S.filt.month=\'\';renderOrder()">Cả FY</div>'+
@@ -2834,7 +3466,7 @@ function renderOrder(){
       :'<div class="card pad"><div class="empty"><div class="e">🧾</div><p>Chưa có đơn hàng khớp bộ lọc</p></div></div>')+
   '</div>';
 }
-var _dbo; function debOrd(){ clearTimeout(_dbo); _dbo=setTimeout(renderOrder,220); }
+var _dbo; function debOrd(){ clearTimeout(_dbo); _dbo=setTimeout(function(){ keepCaret("ord_q",renderOrder); },140); }
 
 function formOrder(o){
   if(typeof o==="number"){
@@ -2936,7 +3568,8 @@ function renderMonthly(){
 
   var byType={},order=[];
   cur.forEach(function(r){ var t=r.typeTask||"— chưa phân loại —"; if(!byType[t]){byType[t]=[];order.push(t);} byType[t].push(r); });
-  order.sort();
+  /* ⭐ v5 — đúng thứ tự Turnover → Distributor → Dealer → University → Clinics → Hospital → KPI → Event */
+  order.sort(function(a,b){ var x=mnTypeOrder(a), y=mnTypeOrder(b); return x!==y?x-y:String(a).localeCompare(String(b)); });
 
   var picBar=S.user.role==="manager"
     ? '<div class="chipbar" style="margin-top:9px"><div class="chip'+(S.mnPic?"":" on")+'" onclick="S.mnPic=\'\';renderMonthly()">Tất cả PIC</div>'
@@ -2946,6 +3579,7 @@ function renderMonthly(){
   $("main").innerHTML='<div class="pg">'+
     '<div class="ph"><div><h2>Báo cáo tháng</h2><p>Kỳ <b>'+mn.slice(4)+"/"+mn.slice(0,4)+'</b> · '+cur.length+' hạng mục · '+done+' đã có kết quả</p></div>'+
       '<div class="sp"></div>'+
+      '<button class="btn sm" onclick="mnScaffold()">🧩 Tạo đủ khung tháng này</button>'+
       '<button class="btn sm" onclick="mnSeed()">⧉ Lấy kế hoạch tháng trước</button>'+
       '<button class="btn sm" onclick="go(\'report\')">📧 Gửi báo cáo</button>'+
       '<button class="btn pri sm" onclick="formMonthly(null)">＋ Thêm hạng mục</button></div>'+
@@ -2974,26 +3608,166 @@ function renderMonthly(){
         g.map(mnCard).join("")+'</div>'; }).join("")
       : '<div class="card pad"><div class="empty"><div class="e">🗓</div><p>Chưa có hạng mục nào cho kỳ này</p>'+
         '<div style="display:flex;gap:8px;justify-content:center;margin-top:12px;flex-wrap:wrap">'+
+        '<button class="btn pri sm" onclick="mnScaffold()">🧩 Tạo đủ khung tháng này</button>'+
         '<button class="btn sm" onclick="mnSeed()">⧉ Lấy kế hoạch tháng trước</button>'+
-        '<button class="btn pri sm" onclick="formMonthly(null)">＋ Thêm hạng mục</button></div></div></div>')+
+        '<button class="btn sm" onclick="formMonthly(null)">＋ Thêm hạng mục</button></div></div></div>')+
   '</div>';
 }
 function picMatch(a,b){ return String(a||"").toLowerCase().indexOf(String(b||"").toLowerCase())>=0; }
+/* ═══════════ ⭐ v5 — KHUNG NỘI DUNG BÁO CÁO THÁNG (theo file PDF Monthly Report) ═══════════
+   Mỗi Type task có một bộ đề mục cố định. Sales chỉ việc điền vào sau dấu ":".
+   Khung dùng cho cả PLAN và RESULT; hiện mờ làm gợi ý, bấm "📋 Chèn khung" để điền sẵn. */
+var MN_TPL = [
+  { key:"turnover", match:["turnover"], label:"Management-Turnover", text:
+      "1. Single Month\n"+
+      "- Current Sales:  KUSD, vs Mani Budget  %, vs Distributor Budget  %\n"+
+      "- Cumulative Sales:  KUSD, vs Mani Budget  %, vs Distributor Budget  %\n"+
+      "- Reason for shortfall/over achieve:\n"+
+      "  + Possitive factors:\n"+
+      "  + Negative factors:\n"+
+      "\n"+
+      "2. Quarter forecast & action\n"+
+      "- 4Q forecast:  KUSD, vs Mani Budget  %, vs Distributor Budget  %\n"+
+      "- Cumulative 4Q:  KUSD, vs Mani Budget  %, vs Distributor Budget  %\n"+
+      "- Major action to achieve budget:" },
+  { key:"distributor", match:["distributor","npp","nhaphanphoi"], label:"Sale-Distributor", text:
+      "Distributor Name:\n"+
+      "1. Coordination & Support Activities\n"+
+      "- Meeting:\n"+
+      "- Fieldwork:\n"+
+      "- Co-marketing:\n"+
+      "\n"+
+      "2. Distributor sales activities\n"+
+      "- Focus areas:\n"+
+      "- Focus products:\n"+
+      "- Tender:\n"+
+      "\n"+
+      "3. Distributor marketing activities:" },
+  { key:"dealer", match:["dealer","daily"], label:"Sale-Dealer", text:"" },
+  { key:"university", match:["university","truong","school"], label:"Sale-University", text:"" },
+  { key:"clinic", match:["clinic","phongkham"], label:"Sale-Clinics", text:"" },
+  { key:"hospital", match:["hospital","benhvien"], label:"Sale-Hospital", text:"" },
+  { key:"kpi", match:["kpi"], label:"Management-KPI", text:
+      "1. KPI indicator\n"+
+      "- Turnover of Vietnam distributors (Dental + MMG + Eyeless):\n"+
+      "- General sale amount by salemen:\n"+
+      "- No. of customer visiting:\n"+
+      "- Behavior follow:" },
+  { key:"event", match:["event","hoithao","trienlam"], label:"Marketing-Event", text:
+      "Event Name:\n"+
+      "- Event Inf:\n"+
+      "- Activities before Event:\n"+
+      "- Activities in Event:\n"+
+      "- Activities After Event:" }
+];
+/* 4 nhóm khách hàng dùng chung một khung "Customer visit" */
+(function(){
+  var visit =
+      "1. Customer visit:\n"+
+      "- Focus areas:\n"+
+      "- Key Account:\n"+
+      "- Focus products:\n"+
+      "\n"+
+      "2. Key customer Follow up\n"+
+      "- Main Action:\n"+
+      "- Highlight result:\n"+
+      "- Issue and Corrective action:";
+  MN_TPL.forEach(function(t){
+    if(["dealer","university","clinic","hospital"].indexOf(t.key)>=0){
+      t.text = (t.key==="clinic")
+        ? visit.replace("- Highlight result:","- Highlight result / Sale Impact:")
+        : visit;
+    }
+  });
+})();
+function mnTplFor(typeTask){
+  var k=noAcc(String(typeTask||"")).replace(/[^a-z0-9]/g,"");
+  if(!k) return null;
+  for(var i=0;i<MN_TPL.length;i++){
+    for(var j=0;j<MN_TPL[i].match.length;j++)
+      if(k.indexOf(MN_TPL[i].match[j])>=0) return MN_TPL[i];
+  }
+  return null;
+}
+function mnTplText(typeTask){ var t=mnTplFor(typeTask); return t?t.text:""; }
+/* thứ tự hiển thị các nhóm — đúng như file Monthly Report đang dùng */
+function mnTypeOrder(t){
+  var x=mnTplFor(t); if(!x) return 99;
+  return ["turnover","distributor","dealer","university","clinic","hospital","kpi","event"].indexOf(x.key);
+}
+/* chèn khung vào ô đang soạn, không đè nội dung đã gõ */
+function mnInsertTpl(id,typeTaskId,field){
+  var ta=$(id); if(!ta) return;
+  var tt=$(typeTaskId)?$(typeTaskId).value:"";
+  var tpl=mnTplText(tt);
+  if(!tpl) return toast("Type task này chưa có khung mẫu — chọn Type task trước","warn",5000);
+  var cur=String(ta.value||"").trim();
+  if(cur && cur.indexOf(tpl.split("\n")[0])>=0) return toast("Ô này đã có khung rồi","warn");
+  ta.value = cur ? (tpl+"\n\n— Nội dung cũ —\n"+cur) : tpl;
+  try{ ta.dispatchEvent(new Event("input",{bubbles:true})); }catch(e){}
+  if(field) markDirtyM(field,ta.value);
+  try{ ta.focus(); ta.setSelectionRange(0,0); ta.scrollTop=0; }catch(e){}
+  toast("✓ Đã chèn khung "+(mnTplFor(tt).label),"ok");
+}
+/* đổi Type task ⇒ đổi luôn chữ mờ gợi ý của 2 ô Plan / Result */
+function mnSyncTplPh(typeTaskId,planId,resId){
+  var tt=$(typeTaskId)?$(typeTaskId).value:"", tpl=mnTplText(tt);
+  [planId,resId].forEach(function(id){ var e=$(id); if(e) e.placeholder=tpl||"Nhập nội dung…"; });
+}
+
+/* ⭐ v5 — hiển thị 2 cột PLAN | RESULT đúng như file Monthly Report,
+   nội dung dài được thu gọn có nút "Xem đầy đủ" thay vì cắt cụt im lặng. */
+function mnBox(txt,limit){
+  var t=String(txt||"").trim();
+  if(!t) return '<div class="mn-empty">— chưa nhập —</div>';
+  if(t.length<=limit) return '<div class="mn-txt">'+nl2br(t)+'</div>';
+  return '<div class="mn-txt clip">'+nl2br(t)+'</div>'+
+    '<button class="mn-more" onclick="event.stopPropagation();var b=this.previousSibling;'+
+    'b.classList.toggle(\'clip\');this.textContent=b.classList.contains(\'clip\')?\'▾ Xem đầy đủ\':\'▴ Thu gọn\'">▾ Xem đầy đủ</button>';
+}
 function mnCard(r){
   var has=!!String(r.result||"").trim();
-  return '<div style="border:1px solid var(--line);border-left:3px solid '+(has?"var(--ok)":"var(--warn)")+
-    ';border-radius:var(--r-md);padding:11px 13px;margin-bottom:8px;cursor:pointer;transition:.15s" '+
-    'onmouseover="this.style.background=\'var(--paler)\'" onmouseout="this.style.background=\'\'" '+
-    'onclick="openMonthly('+r._row+')">'+
-    '<div style="display:flex;gap:8px;align-items:center;margin-bottom:6px;flex-wrap:wrap">'+
+  return '<div class="mn-card'+(has?" ok":"")+'" onclick="openMonthly('+r._row+')">'+
+    '<div class="mn-head">'+
       '<span class="tag t-b">'+esc(r.pic||"—")+'</span>'+
       (r.area?'<span class="tag t-n">'+esc(r.area)+'</span>':"")+
       '<span class="tag '+(has?"t-g":"t-y")+'">'+(has?"Đã có kết quả":"Chờ kết quả")+'</span>'+
       '<span style="flex:1"></span><span style="font-size:11px;color:var(--mute)">#'+esc(r.no)+'</span></div>'+
-    (r.plan?'<div style="font-size:12.5px;color:var(--sub);margin-bottom:6px;line-height:1.55"><b style="color:var(--blue-d)">PLAN:</b> '+nl2br(String(r.plan).slice(0,320))+'</div>':"")+
-    (has?'<div style="font-size:13px;line-height:1.6"><b style="color:var(--navy)">RESULT:</b> '+nl2br(String(r.result).slice(0,420))+'</div>'
-        :'<div style="font-size:12.5px;color:var(--mute);font-style:italic">Chưa ghi kết quả — bấm để cập nhật</div>')+
-  '</div>';
+    '<div class="mn-2col">'+
+      '<div class="mn-col"><div class="mn-lb plan">📘 PLAN — kế hoạch</div>'+mnBox(r.plan,900)+'</div>'+
+      '<div class="mn-col"><div class="mn-lb res">✅ RESULT — kết quả</div>'+mnBox(r.result,900)+'</div>'+
+    '</div></div>';
+}
+/* ⭐ v5 — tạo sẵn đủ bộ hạng mục theo khung Type task cho kỳ đang xem.
+   Sales chỉ việc mở từng hạng mục lên điền, không phải tự nhớ có bao nhiêu mục. */
+function mnScaffold(){
+  var mn=S.mnMonth||ymOf(todayISO());
+  var pic=(isMgmt()? (S.mnPic||S.user.pic) : S.user.pic);
+  if(!pic) return toast("Chọn PIC trước khi tạo khung","warn");
+  var have={}; mnRows().forEach(function(r){
+    if(r.period===mn && picMatch(r.pic,pic)) have[String(r.typeTask||"").toLowerCase()]=1; });
+  var master=S.master.typeTask||[];
+  /* chỉ tạo những Type task có khung mẫu VÀ có trong MASTER LIST */
+  var todo=master.filter(function(t){ return mnTplFor(t) && !have[String(t).toLowerCase()]; })
+                 .sort(function(a,b){ return mnTypeOrder(a)-mnTypeOrder(b); });
+  if(!todo.length) return toast("Kỳ "+mn.slice(4)+"/"+mn.slice(0,4)+" của "+pic+" đã đủ khung rồi","ok",4200);
+  if(!confirm("Tạo "+todo.length+" hạng mục cho "+pic+" — kỳ "+mn.slice(4)+"/"+mn.slice(0,4)+"?\n\n"+
+              todo.join("\n")+"\n\nMỗi hạng mục sẽ có sẵn khung nội dung để điền.")) return;
+  var area=PIC_AREA[pic]||"", i=0, okN=0;
+  busy(true,"Đang tạo khung 0/"+todo.length+"…");
+  (function next(){
+    if(i>=todo.length){
+      busy(false); toast("✓ Đã tạo "+okN+" hạng mục có sẵn khung","ok",4500);
+      afterWrite("monthly",0,null); fetchTab("monthly",{},function(){ if(S.tab==="monthly") renderMonthly(); });
+      return;
+    }
+    var t=todo[i++];
+    busy(true,"Đang tạo khung "+i+"/"+todo.length+" — "+t+"…");
+    apiPost({action:"saveMonthly",data:{ _row:0, typeTask:t, pic:pic, area:area,
+      fy:fyOfMonth(mn), period:mn, plan:mnTplText(t), result:"" }})
+      .then(function(){ okN++; next(); })
+      .catch(function(e){ busy(false); toast("Dừng ở \""+t+"\": "+e.message,"err",6000); });
+  })();
 }
 /* ── sửa tại chỗ trong drawer ── */
 function openMonthly(row){
@@ -3013,11 +3787,13 @@ function openMonthly(row){
       +selM("mn-ar","area","Area",S.master.area,r.area)
     +'</div></div>'
     +'<div class="te-sec"><div class="te-st">📘 PLAN — kế hoạch<span class="sp"></span>'
+      +'<button class="mini" onclick="mnInsertTpl(\'mn-plan\',\'mn-tt\',\'plan\')">📋 Chèn khung</button>'
       +'<button class="mini" onclick="toggleVoice(\'mn-plan\',this)">🎤 Nói</button></div>'
-      +'<textarea id="mn-plan" oninput="markDirtyM(\'plan\',this.value)" style="min-height:130px">'+esc(r.plan||"")+'</textarea></div>'
+      +'<textarea id="mn-plan" oninput="markDirtyM(\'plan\',this.value)" style="min-height:200px" placeholder="'+phAttr(mnTplText(r.typeTask)||"Kế hoạch trong tháng…")+'">'+esc(r.plan||"")+'</textarea></div>'
     +'<div class="te-sec"><div class="te-st">✅ RESULT — kết quả<span class="sp"></span>'
+      +'<button class="mini" onclick="mnInsertTpl(\'mn-res\',\'mn-tt\',\'result\')">📋 Chèn khung</button>'
       +'<button class="mini" onclick="toggleVoice(\'mn-res\',this)">🎤 Nói</button></div>'
-      +'<textarea id="mn-res" oninput="markDirtyM(\'result\',this.value)" style="min-height:170px" placeholder="Kết quả thực tế đạt được trong tháng…">'+esc(r.result||"")+'</textarea></div>';
+      +'<textarea id="mn-res" oninput="markDirtyM(\'result\',this.value)" style="min-height:240px" placeholder="'+phAttr(mnTplText(r.typeTask)||"Kết quả thực tế đạt được trong tháng…")+'">'+esc(r.result||"")+'</textarea></div>';
   var canDel = S.user.role==="manager" || picMatch(r.pic,S.user.pic);
   var foot='<button class="btn gho" onclick="closeDrw()">Đóng</button><div style="flex:1"></div>'
     +(canDel?'<button class="btn dg" onclick="closeDrw();delRow(\'monthly\','+row+')">🗑 Xoá</button>':"")
@@ -3036,6 +3812,7 @@ function markDirtyM(f,v){
     var el=$("mn-ar"); if(el) el.value=PIC_AREA[v];
   }
   if(f==="period") S.dirty.fy=fyOfMonth(v);
+  if(f==="typeTask") mnSyncTplPh("mn-tt","mn-plan","mn-res");
 }
 function saveMonthlyDrw(){
   var d={ _row:S.mnEdit.row, fy:S.fy };
@@ -3073,7 +3850,7 @@ function formMonthly(r){
   var mn=S.mnMonth||ymOf(todayISO());
   var months=fyMonths(S.fy);
   var h='<div class="row">'+
-      '<div class="fld"><label>Type task <span class="rq">*</span></label><select class="inp" id="m_typeTask">'+opts(S.master.typeTask,"","— chọn —")+'</select></div>'+
+      '<div class="fld"><label>Type task <span class="rq">*</span></label><select class="inp" id="m_typeTask" onchange="mnSyncTplPh(\'m_typeTask\',\'m_plan\',\'m_result\')">'+opts(S.master.typeTask,"","— chọn —")+'</select></div>'+
       '<div class="fld"><label>Kỳ báo cáo <span class="rq">*</span></label><select class="inp" id="m_period" onchange="mnSyncFY()">'+opts(months,mn,"—")+'</select></div>'+
     '</div>'+
     '<div class="row">'+
@@ -3083,15 +3860,19 @@ function formMonthly(r){
       '<div class="fld"><label>Area</label><div id="m_areaBox"></div></div>'+
       '<div class="fld"><label>FY (tự theo kỳ)</label><input class="inp piclock" id="m_fy" value="'+esc(fyOfMonth(mn))+'" readonly></div>'+
     '</div>'+
-    '<div class="fld"><label>PLAN — kế hoạch</label><textarea class="inp" id="m_plan" style="min-height:120px"></textarea>'+
-      '<button class="mini" style="margin-top:7px" onclick="toggleVoice(\'m_plan\',this)">🎤 Nói</button></div>'+
-    '<div class="fld"><label>RESULT — kết quả (có thể để trống, cập nhật sau)</label><textarea class="inp" id="m_result" style="min-height:130px"></textarea>'+
-      '<button class="mini" style="margin-top:7px" onclick="toggleVoice(\'m_result\',this)">🎤 Nói</button></div>';
+    '<div class="fld"><label>PLAN — kế hoạch</label><textarea class="inp" id="m_plan" style="min-height:190px"></textarea>'+
+      '<div style="display:flex;gap:7px;margin-top:7px;flex-wrap:wrap">'+
+        '<button class="mini" onclick="mnInsertTpl(\'m_plan\',\'m_typeTask\')">📋 Chèn khung</button>'+
+        '<button class="mini" onclick="toggleVoice(\'m_plan\',this)">🎤 Nói</button></div></div>'+
+    '<div class="fld"><label>RESULT — kết quả (có thể để trống, cập nhật sau)</label><textarea class="inp" id="m_result" style="min-height:190px"></textarea>'+
+      '<div style="display:flex;gap:7px;margin-top:7px;flex-wrap:wrap">'+
+        '<button class="mini" onclick="mnInsertTpl(\'m_result\',\'m_typeTask\')">📋 Chèn khung</button>'+
+        '<button class="mini" onclick="toggleVoice(\'m_result\',this)">🎤 Nói</button></div></div>';
   S.editing={ tab:"monthly", row:0 };
   openModal("＋ Thêm hạng mục tháng", h,
     '<button class="btn" onclick="closeModal()">Huỷ</button><button class="btn pri" onclick="saveMonthly()">Lưu</button>', true);
-  mnSyncArea(); mnSyncFY();
-  S.modalRewire=function(){ mnSyncArea(); mnSyncFY(); };
+  mnSyncArea(); mnSyncFY(); mnSyncTplPh("m_typeTask","m_plan","m_result");
+  S.modalRewire=function(){ mnSyncArea(); mnSyncFY(); mnSyncTplPh("m_typeTask","m_plan","m_result"); };
 }
 function saveMonthly(){
   var d={ _row:0, typeTask:$("m_typeTask").value, pic:$("m_pic").value,
@@ -3246,7 +4027,7 @@ function pgADP(){
 function adpF(){ S.adpF=S.adpF||{pic:"",type:"",prov:"",area:"",q:""}; return S.adpF; }
 function setAdpF(k,v){ adpF()[k]=v; renderADP(); }
 function renderADP(){
-  var all=((S.cache.adp||{rows:[]}).rows)||[];
+  var all=((S.cache.adp||{rows:null}).rows)||tGet("adp")||[];
   var f=adpF();
 
   /* danh mục lọc dựng từ chính dữ liệu ADP */
@@ -3262,8 +4043,11 @@ function renderADP(){
     if(f.type && a.type!==f.type) return false;
     if(f.prov && a.province!==f.prov) return false;
     if(f.area && a.area!==f.area) return false;
-    if(f.q){ var q=f.q.toLowerCase();
-      if((r.account+" "+(r.objective||"")+" "+(r.keyAction||"")+" "+(r.abcd||"")).toLowerCase().indexOf(q)<0) return false; }
+    if(f.q){
+      var tk=skTokens(f.q);
+      var hay=noAcc([r.account,r.objective,r.keyAction,r.abcd,r.pic,r.tactic,r.caseInfo].filter(Boolean).join(" "));
+      if(!tk.every(function(t){ return hay.indexOf(t)>=0; })) return false;
+    }
     return true;
   });
 
@@ -3294,6 +4078,10 @@ function renderADP(){
       (noVisit?' · <b style="color:#D9433F">'+noVisit+'</b> chưa gặp trong FY':'')+
       ' · Target <b>'+fmtVND(tt)+'</b> · Actual <b>'+fmtVND(ta)+'</b></p></div>'+
       '<div class="sp"></div>'+
+      '<div class="seg" style="margin-right:8px">'+
+        '<button class="'+(S.adpView!=="list"?"on":"")+'" onclick="setAdpView(\'board\')">⊞ Bảng ABCD</button>'+
+        '<button class="'+(S.adpView==="list"?"on":"")+'" onclick="setAdpView(\'list\')">☰ Danh sách lớn</button>'+
+      '</div>'+
       (f.pic||f.type||f.prov||f.area||f.q?'<button class="btn sm" onclick="S.adpF={pic:\'\',type:\'\',prov:\'\',area:\'\',q:\'\'};renderADP()">✕ Bỏ lọc</button>':"")+
       '<button class="btn pri sm" onclick="formADP(null)">＋ Thêm ADP</button></div>'+
 
@@ -3311,16 +4099,27 @@ function renderADP(){
       '</div>'+
     '</div>'+
 
-    '<div class="adpboard">'+
-      ABCD_GROUPS.map(function(g){ return adpCol(g,bucket[g.k]); }).join("")+
-    '</div>'+
+    (S.adpView==="list"
+      ? ABCD_GROUPS.map(function(g){
+          var list=bucket[g.k]; if(!list.length) return "";
+          var t=list.reduce(function(x,r){return x+n(r.targetAmt);},0);
+          var ac2=list.reduce(function(x,r){return x+n(r.actualAmt);},0);
+          return '<div class="card pad" style="margin-bottom:14px">'+
+            '<div class="ct"><span class="dot" style="background:'+g.c+'"></span>'+
+              '<b style="color:'+g.c+'">Nhóm '+g.k+' — '+esc(g.lb)+'</b>'+
+              '<small>'+list.length+' account'+(t?' · Target '+fmtVND(t)+' · Actual '+fmtVND(ac2):'')+'</small></div>'+
+            '<div class="adplist">'+list.map(function(r){ return adpCard(r,g); }).join("")+'</div></div>';
+        }).join("")
+      : '<div class="adpboard">'+
+          ABCD_GROUPS.map(function(g){ return adpCol(g,bucket[g.k]); }).join("")+
+        '</div>')+
     (bucket[""].length?
       '<div class="card pad" style="margin-top:12px"><div class="ct"><span class="dot" style="background:var(--mute)"></span>Chưa gán nhóm ABCD<small>'+bucket[""].length+' account</small></div>'+
-      '<div class="grid gauto">'+bucket[""].map(function(r){return adpCard(r,{c:"#8A97B5",bg:"var(--line2)"});}).join("")+'</div></div>':"")+
+      '<div class="'+(S.adpView==="list"?"adplist":"grid gauto")+'">'+bucket[""].map(function(r){return adpCard(r,{k:"—",c:"#8A97B5",bg:"var(--line2)"});}).join("")+'</div></div>':"")+
   '</div>';
-  var e=$("adp_q"); if(e&&S._adpFocus){ e.focus(); e.setSelectionRange(e.value.length,e.value.length); S._adpFocus=false; }
+
 }
-var _dba; function debAdp(v){ adpF().q=v; S._adpFocus=true; clearTimeout(_dba); _dba=setTimeout(renderADP,220); }
+var _dba; function debAdp(v){ adpF().q=v; clearTimeout(_dba); _dba=setTimeout(function(){ keepCaret("adp_q",renderADP); },160); }
 
 function adpCol(g,list){
   var t=list.reduce(function(s,r){return s+n(r.targetAmt);},0);
@@ -3348,18 +4147,34 @@ function adpCard(r,g){
       +(days!=null?' <span>('+(days===0?"hôm nay":days+" ngày trước")+')</span>':"")
       +' · <b>'+esc(lv.pic||"—")+'</b></div>'
     : '<div class="adpv none">⚠️ Chưa có buổi gặp nào trong '+esc(S.fy)+'</div>';
-  return '<div class="adpc" style="border-left-color:'+g.c+'" onclick="rADP(\''+reg(r)+'\')">'+
-    '<div class="adpc-h"><b>'+esc(a.name||r.account||"—")+'</b><span class="tag t-b">'+esc(r.pic||"—")+'</span></div>'+
+  var big=(S.adpView==="list");
+  var accKey=reg({name:a.name,code:""});
+  /* ⭐ v5 — mở thẳng hồ sơ 360 của account (dòng thời gian · đơn hàng · CBC · ảnh) */
+  return '<div class="adpc" style="border-left-color:'+g.c+'">'+
+    '<div class="adpc-h" onclick="rAcc(\''+accKey+'\')" style="cursor:pointer"><b>'+esc(a.name||r.account||"—")+'</b><span class="tag t-b">'+esc(r.pic||"—")+'</span></div>'+
     '<div class="adpc-m">'+[a.type,a.province,a.area].filter(Boolean).map(esc).join(" · ")+'</div>'+
     vt+
-    (r.objective||r.keyAction?'<div class="adpc-o">'+nl2br(String(r.objective||r.keyAction).slice(0,180))+'</div>':"")+
+    (big?
+      '<div class="adpc-kv">'+
+        (r.abcd?'<i>Nhóm</i><b>'+esc(r.abcd)+'</b>':"")+
+        (r.objective?'<i>Objective</i><b>'+nl2br(String(r.objective).slice(0,260))+'</b>':"")+
+        (r.keyAction?'<i>Key action</i><b>'+nl2br(String(r.keyAction).slice(0,260))+'</b>':"")+
+        (r.tactic?'<i>Tactic</i><b>'+nl2br(String(r.tactic).slice(0,200))+'</b>':"")+
+      '</div>'
+      : (r.objective||r.keyAction?'<div class="adpc-o">'+nl2br(String(r.objective||r.keyAction).slice(0,180))+'</div>':""))+
     (tg
       ? (odd
           ? '<div class="adpc-w">⚠️ Target '+fmtN(tg)+' và Actual '+fmtN(ac)+' lệch đơn vị — kiểm tra lại sheet</div>'
           : pb(p)+'<div class="pbl"><span>'+fmtVND(ac)+' / '+fmtVND(tg)+'</span><span style="color:'+pctColor(p)+'">'+Math.round(p*100)+'%</span></div>')
       : '<div class="adpc-n">Chưa đặt FY target</div>')+
+    '<div class="adpc-acts">'+
+      '<button onclick="event.stopPropagation();rAcc(\''+accKey+'\')">🗂 Dữ liệu account</button>'+
+      '<button onclick="event.stopPropagation();rWeeklyFor(\''+reg(mkAcc(a))+'\')">📍 Ghi hoạt động</button>'+
+      '<button class="pri" onclick="event.stopPropagation();rADP(\''+reg(r)+'\')">✎ Sửa ADP</button>'+
+    '</div>'+
   '</div>';
 }
+function setAdpView(v){ S.adpView=v; renderADP(); }
 
 function formADP(r,presetAcc){
   r=r||{};
@@ -3953,7 +4768,7 @@ function openDrw(head,tabs,body,foot){
   $("drw").classList.add("on");
   $("drwBody").scrollTop=0;
 }
-function closeDrw(){ $("drw").classList.remove("on"); S.drw=null;
+function closeDrw(){ $("drw").classList.remove("on"); S.drw=null; S.accEdit=false;
   if(typeof stopVoice==="function") stopVoice();
   S.task=null; S.taskRow=0; S.pending=null; S.dirty={}; S._delArmed=false; }
 document.addEventListener("keydown",function(e){
@@ -4093,6 +4908,59 @@ function acc360Local(code,name){
             daysSinceVisit: lastVisit?Math.floor((new Date(todayISO())-new Date(lastVisit))/86400000):-1 } };
 }
 function ymIso(ym){ var m=/^(\d{4})(\d{2})$/.exec(String(ym||"").replace(/\D/g,"")); return m?(m[1]+"-"+m[2]+"-01"):""; }
+
+/* ⭐ v5 — dải 12 tháng của 1 bản ADP (Sep → Aug) */
+var ADP_MONTH_FIELDS=[["m09","T9"],["m10","T10"],["m11","T11"],["m12","T12"],["m01","T1"],["m02","T2"],
+                      ["m03","T3"],["m04","T4"],["m05","T5"],["m06","T6"],["m07","T7"],["m08","T8"]];
+function adpMonthStrip(a){
+  var vals=ADP_MONTH_FIELDS.map(function(x){ return n(a[x[0]]); });
+  var mx=Math.max.apply(null,vals.concat([0]))||1;
+  if(!vals.some(function(v){return v;})) return '<span style="color:var(--mute)">Chưa có số theo tháng</span>';
+  return '<div class="adpms">'+ADP_MONTH_FIELDS.map(function(x,i){
+    var v=vals[i], h=v?Math.max(6,Math.round(v/mx*44)):2;
+    return '<div class="adpms-i" title="'+esc(x[1])+': '+fmtVND(v)+'">'+
+      '<i style="height:'+h+'px;background:'+(v?"var(--blue)":"var(--line2)")+'"></i><span>'+x[1]+'</span></div>';
+  }).join("")+'</div>';
+}
+/* ⭐ v5 — sửa hồ sơ account ngay trong màn hình chi tiết */
+function accAutoArea(){
+  var pv=$("ac_province"); if(!pv||!$("ac_area")) return;
+  var f=$("f_province"), keep=f?f.value:null;
+  var tmp=document.createElement("input"); tmp.id="f_province"; tmp.value=pv.value; tmp.style.display="none";
+  var tmp2=document.createElement("input"); tmp2.id="f_area"; tmp2.style.display="none";
+  if(f) f.id="f_province_bak";
+  document.body.appendChild(tmp); document.body.appendChild(tmp2);
+  try{ autoArea(); $("ac_area").value=tmp2.value||$("ac_area").value; }catch(e){}
+  tmp.remove(); tmp2.remove();
+  if(f){ f.id="f_province"; f.value=keep; }
+}
+function saveAccInline(){
+  var j=S.acc; if(!j||!j.customer) return;
+  var c=j.customer;
+  var d={ _row:c._row||0, code:$("ac_code").value.trim(), name:$("ac_name").value.trim(), type:$("ac_type").value,
+    address:$("ac_address").value.trim(), province:$("ac_province").value, area:$("ac_area").value,
+    pic:$("ac_pic").value, fy:$("ac_fy").value, openDate:$("ac_openDate").value, note:$("ac_note").value };
+  if(!d.code||!d.name||!d.type) return toast("Cần có Customer code, Account name và Account type","warn");
+  busy(true,"Đang lưu vào Google Sheet…");
+  apiPost({action:"saveCustomer",data:d}).then(function(r){
+    busy(false); toast(r.message||"Đã lưu hồ sơ account","ok");
+    afterWrite("customer", r.row||d._row, d);
+    S.accEdit=false;
+    /* cập nhật ngay trên máy để màn hình đổi tức thì */
+    S.acc.customer=Object.assign({},c,d,{_row:r.row||d._row});
+    var ak=(d.code||"")+"|"+(c.name||"");
+    if(S.acc360){ S.acc360[ak]=S.acc; S.acc360[(d.code||"")+"|"+d.name]=S.acc; }
+    for(var k=0;k<S.custIndex.length;k++){
+      if(S.custIndex[k]._row===(r.row||d._row)||S.custIndex[k].code===d.code){
+        S.custIndex[k]=Object.assign({},S.custIndex[k],d); S.custMap[d.code]=S.custIndex[k]; break;
+      }
+    }
+    renderAcc();
+    if(S.tab==="cust") renderCust();
+    loadCustomerIndex(true);
+  }).catch(function(e){ busy(false); toast(e.message,"err",5000); });
+}
+function rADPFor(k){ formADP(null, REG[k]||""); }
 function accTab(t){ if(S.drw) S.drw.tab=t; renderAcc(); }
 function renderAcc(){
   var j=S.acc; if(!j||!j.ok) return;
@@ -4176,30 +5044,67 @@ function renderAcc(){
         }).join("")+'</tbody></table></div>':'<div class="empty"><div class="e">🧾</div><p>Chưa có đơn hàng</p></div>');
   }
   else if(tab==="info"){
-    body='<dl class="kv">'
-      +'<dt>Customer code</dt><dd class="mono">'+esc(c.code)+'</dd>'
-      +'<dt>Account name</dt><dd>'+esc(c.name)+'</dd>'
-      +'<dt>Account type</dt><dd>'+esc(c.type||"—")+'</dd>'
-      +'<dt>Địa chỉ</dt><dd>'+esc(c.address||"—")+'</dd>'
-      +'<dt>Tỉnh / Area</dt><dd>'+esc(c.province||"—")+' · '+esc(c.area||"—")+'</dd>'
-      +'<dt>MMH sales PIC</dt><dd>'+esc(c.pic||"—")+'</dd>'
-      +'<dt>FY mở account</dt><dd>'+esc(c.fy||"—")+' · '+(c.openDate?fmtVN(c.openDate):"—")+'</dd>'
-      +'<dt>Ghi chú</dt><dd>'+nl2br(c.note||"—")+'</dd></dl>';
+    if(S.accEdit){
+      /* ⭐ v5 — sửa hồ sơ ngay tại đây, không phải mở popup (giống cách sửa ADP) */
+      body='<div class="card pad"><div class="ct"><span class="dot"></span>Sửa hồ sơ account'
+        +'<small>Ghi thẳng vào tab "1. CUSTOMER CODE"</small></div>'
+        +'<div class="row">'
+          +'<div class="fld"><label>Customer code</label><input class="inp" id="ac_code" value="'+esc(c.code||"")+'" readonly></div>'
+          +'<div class="fld"><label>Account type <span class="rq">*</span></label><select class="inp" id="ac_type">'+opts(S.master.accountType,c.type,"— chọn —")+'</select></div>'
+        +'</div>'
+        +'<div class="fld"><label>Account name <span class="rq">*</span></label><input class="inp" id="ac_name" value="'+esc(c.name||"")+'"></div>'
+        +'<div class="fld"><label>Địa chỉ</label><input class="inp" id="ac_address" value="'+esc(c.address||"")+'"></div>'
+        +'<div class="row">'
+          +'<div class="fld"><label>Province</label><select class="inp" id="ac_province" onchange="accAutoArea()">'+opts(S.master.province,c.province,"— chọn —")+'</select></div>'
+          +'<div class="fld"><label>Area</label><select class="inp" id="ac_area">'+opts(S.master.area,c.area,"— chọn —")+'</select></div>'
+          +'<div class="fld"><label>MMH sales PIC</label><select class="inp" id="ac_pic">'+opts(S.master.pic,c.pic||S.user.pic,"— chọn —")+'</select></div>'
+        +'</div>'
+        +'<div class="row">'
+          +'<div class="fld"><label>FY mở account</label><select class="inp" id="ac_fy">'+opts(S.fyList,c.fy||S.fy,"—")+'</select></div>'
+          +'<div class="fld"><label>Ngày mở account</label><input class="inp" type="date" id="ac_openDate" value="'+esc(String(c.openDate||"").slice(0,10))+'"></div>'
+        +'</div>'
+        +'<div class="fld"><label>Ghi chú</label><textarea class="inp" id="ac_note" style="min-height:96px">'+esc(c.note||"")+'</textarea></div>'
+        +'<div style="display:flex;gap:9px;margin-top:6px">'
+          +'<button class="btn" onclick="S.accEdit=false;renderAcc()">Huỷ</button>'
+          +'<div style="flex:1"></div>'
+          +'<button class="btn pri" onclick="saveAccInline()">Lưu vào Google Sheet</button>'
+        +'</div></div>';
+    } else {
+      body='<div class="card pad"><div class="ct"><span class="dot"></span>Thông tin account'
+        +'<span class="sp"></span><button class="btn sm pri" onclick="S.accEdit=true;renderAcc()">✎ Sửa thông tin</button></div>'
+        +'<dl class="kv">'
+        +'<dt>Customer code</dt><dd class="mono">'+esc(c.code)+'</dd>'
+        +'<dt>Account name</dt><dd>'+esc(c.name)+'</dd>'
+        +'<dt>Account type</dt><dd>'+esc(c.type||"—")+'</dd>'
+        +'<dt>Địa chỉ</dt><dd>'+esc(c.address||"—")+'</dd>'
+        +'<dt>Tỉnh / Area</dt><dd>'+esc(c.province||"—")+' · '+esc(c.area||"—")+'</dd>'
+        +'<dt>MMH sales PIC</dt><dd>'+esc(c.pic||"—")+'</dd>'
+        +'<dt>FY mở account</dt><dd>'+esc(c.fy||"—")+' · '+(c.openDate?fmtVN(c.openDate):"—")+'</dd>'
+        +'<dt>Số CBC</dt><dd><b>'+fmtN((j.cbc||[]).length)+'</b> người liên hệ</dd>'
+        +'<dt>Số ADP</dt><dd><b>'+fmtN((j.adp||[]).length)+'</b> bản ADP</dd>'
+        +'<dt>Ghi chú</dt><dd>'+nl2br(c.note||"—")+'</dd></dl></div>';
+    }
   }
   else if(tab==="adp"){
-    body=j.adp.length?j.adp.map(function(a){
+    body='<button class="btn sm pri" style="margin-bottom:12px" onclick="rADPFor(\''+reg(mkAcc(c))+'\')">＋ Thêm ADP cho account này</button>'
+      +(j.adp.length?j.adp.map(function(a){
       return '<div class="card pad" style="margin-bottom:10px"><div class="ct"><span class="dot"></span>'+esc(a.fy||"")+' — '+esc(a.focus||"—")
         +'<span class="sp"></span><button class="btn xs" onclick=\'formADP('+JSON.stringify(a).replace(/'/g,"&#39;")+')\'>Sửa</button></div>'
         +'<dl class="kv"><dt>Objective</dt><dd>'+nl2br(a.objective||"—")+'</dd>'
         +'<dt>Key action</dt><dd>'+nl2br(a.keyAction||"—")+'</dd>'
-        +'<dt>Target / Actual</dt><dd><b>'+fmtVND(a.targetAmt)+'</b> / '+fmtVND(a.actualAmt)+'</dd></dl></div>';
-    }).join(""):'<div class="empty"><div class="e">⭐</div><p>Account này chưa có ADP</p></div>';
+        +'<dt>Tactic</dt><dd>'+nl2br(a.tactic||"—")+'</dd>'
+        +'<dt>Case info</dt><dd>'+nl2br(a.caseInfo||"—")+'</dd>'
+        +'<dt>Target / Actual</dt><dd><b>'+fmtVND(a.targetAmt)+'</b> / '+fmtVND(a.actualAmt)+'</dd>'
+        +'<dt>Theo tháng</dt><dd>'+adpMonthStrip(a)+'</dd></dl></div>';
+    }).join(""):'<div class="empty"><div class="e">⭐</div><p>Account này chưa có ADP</p></div>');
   }
 
   var foot='<button class="btn gho" onclick="closeDrw()">Đóng</button>'
     +'<div style="flex:1"></div>'
+    +'<button class="btn gho" onclick="formCBC(null,\''+esc(c.code)+'\')">👤 Thêm CBC</button>'
+    +'<button class="btn gho" onclick="rADPFor(\''+reg(mkAcc(c))+'\')">⭐ Thêm ADP</button>'
     +'<button class="btn gho" onclick="rWeeklyFor(\''+reg(mkAcc(c))+'\')">📍 Ghi hoạt động</button>'
-    +'<button class="btn pri" onclick="rCustomer(\''+reg(c)+'\')">Sửa hồ sơ</button>';
+    +'<button class="btn pri" onclick="S.accEdit=true;accTab(\'info\')">✎ Sửa hồ sơ</button>';
 
   openDrw(head,tabs,(tab==="tl"||tab==="od"?stats:"")+body,foot);
 }
@@ -4469,9 +5374,29 @@ function accountCombo(inputId,hiddenId,onPick){
 /* ═══════════════════════════════════════════════════════════════════════
    ⭐ v3 — ĐI ĐỊA BÀN: thống kê & biểu đồ
    ═══════════════════════════════════════════════════════════════════════ */
-var VRANGE=[["day","Ngày"],["week","Tuần"],["month","Tháng"],["quarter","Quý"],["fy","Cả FY"]];
+var VRANGE=[["day","Ngày"],["week","Tuần"],["month","Tháng"],["quarter","Quý"],["fy","Cả FY"],["range","Khoảng ngày"]];
+/* ⭐ v5 — chế độ "Khoảng ngày": tự do chọn từ ngày … đến ngày … */
+function vRangeDefaults(){
+  if(!S.vFrom) S.vFrom=addDays(todayISO(),-29);
+  if(!S.vTo)   S.vTo=todayISO();
+  if(S.vFrom>S.vTo){ var t=S.vFrom; S.vFrom=S.vTo; S.vTo=t; }
+}
+function vSetRange(which,val){
+  if(!val) return;
+  if(which==="from") S.vFrom=val; else S.vTo=val;
+  S.vMode="range"; vRangeDefaults(); renderTerritory();
+}
+function vQuickRange(days){
+  S.vMode="range"; S.vTo=todayISO(); S.vFrom=addDays(S.vTo,-(days-1)); renderTerritory();
+}
 function vRangeCalc(){
   var mode=S.vMode||"week";
+  if(mode==="range"){
+    vRangeDefaults();
+    var nd=Math.round((new Date(S.vTo)-new Date(S.vFrom))/86400000)+1;
+    return { from:S.vFrom, to:S.vTo, label:fmtVN(S.vFrom)+" – "+fmtVN(S.vTo)+" · "+nd+" ngày",
+             step:(nd>92?"month":nd>31?"week":"day") };
+  }
   if(mode==="day"){
     var d0=S.vAnchor||todayISO();
     return {from:d0,to:d0,label:wdOf(d0)+", "+fmtVN(d0)+(d0===todayISO()?" · HÔM NAY":""),step:"day"};
@@ -4507,9 +5432,15 @@ function vShift(k){
     while(m<1){m+=12;y--;} while(m>12){m-=12;y++;}
     S.vAnchor=y+"-"+("0"+m).slice(-2)+"-01";
   }
+  else if(mode==="range"){                     /* dịch cả cửa sổ, giữ nguyên độ dài */
+    vRangeDefaults();
+    var len=Math.round((new Date(S.vTo)-new Date(S.vFrom))/86400000)+1;
+    S.vFrom=addDays(S.vFrom,len*k); S.vTo=addDays(S.vTo,len*k);
+  }
   if(S.tab==="weekly"&&S.cache.weekly) renderTerritory(); else pgWeekly();
 }
 function vSetMode(m){ S.vMode=m; S.vAnchor=S.vAnchor||todayISO();
+  if(m==="range") vRangeDefaults();
   if(S.tab==="weekly"&&S.cache.weekly) renderTerritory(); else pgWeekly(); }
 
 /* nhóm theo bucket thời gian để vẽ tần suất */
