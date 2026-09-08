@@ -623,6 +623,8 @@ body.modal-on #drw{filter:blur(2px) saturate(.85);opacity:.55}
 .cx-sale{font-size:12.5px;font-weight:700;color:var(--ink)}
 #custList .tb td{vertical-align:middle}
 #custList .pbl{font-size:10.5px;margin-top:3px}
+#custList .pb{margin-top:0}
+.pb.rel i{background:var(--blue-l);opacity:.75}
 .kpi-note{margin-top:6px;font-size:9.5px;line-height:1.45;color:var(--mute);border-top:1px dashed var(--line);padding-top:5px}
 .livetag{font-size:9.5px;font-weight:800;color:var(--ok);background:var(--ok-bg);border-radius:6px;padding:2px 5px;display:inline-block;margin-top:3px;letter-spacing:.2px}
 .adpc-note{margin-top:7px;font-size:10.5px;line-height:1.5;color:var(--sub);background:var(--paler);border:1px dashed var(--line);border-radius:8px;padding:6px 8px}
@@ -2624,6 +2626,11 @@ function renderCustList(){
     return;
   }
   var ABC={}; ABCD_GROUPS.forEach(function(g){ ABC[g.k]=g; });
+  /* ⭐ v5.4 — account KHÔNG có ADP vẫn cần thanh trực quan để so sánh nhanh.
+     Không có target thì không bịa ra %, mà vẽ thanh theo thang tương đối so với
+     account doanh số cao nhất đang hiển thị, nhãn ghi rõ đây là doanh số FY. */
+  var maxSales=0;
+  shown.forEach(function(c){ var q=custMetricOf(c.name); var v=q.sales||q.adpActual; if(v>maxSales) maxSales=v; });
   box.innerHTML='<div class="tbwrap"><table class="tb"><thead><tr>'+
     '<th style="width:84px">Mã</th><th>Account</th><th style="width:210px">Phân loại</th>'+
     '<th style="width:112px">Tỉnh</th><th style="width:80px">PIC</th>'+
@@ -2635,12 +2642,20 @@ function renderCustList(){
       var g=ABC[mx.abcd];
       var achieve=mx.sales||mx.adpActual;          /* ưu tiên doanh số thực từ tab ORDER */
       var pc=mx.target?achieve/mx.target:null;
-      var bar = mx.hasAdp
-        ? (mx.target
-            ? pb(Math.min(pc,1.2))+'<div class="pbl"><span>'+fmtVND(achieve)+' / '+fmtVND(mx.target)+'</span>'+
-              '<span style="color:'+pctColor(pc)+'">'+Math.round(pc*100)+'%</span></div>'
-            : '<span class="cx-none">Có ADP · chưa đặt target</span>')
-        : (achieve?'<span class="cx-sale">'+fmtVND(achieve)+'</span>':'<span class="cx-none">—</span>');
+      var bar;
+      if(mx.hasAdp && mx.target){
+        bar = pb(Math.min(pc,1.2))+'<div class="pbl"><span>'+fmtVND(achieve)+' / '+fmtVND(mx.target)+'</span>'+
+              '<span style="color:'+pctColor(pc)+'">'+Math.round(pc*100)+'%</span></div>';
+      } else if(achieve){
+        var rel=maxSales?Math.max(.04,achieve/maxSales):0;
+        bar = '<div class="pb rel"><i style="width:'+Math.round(rel*100)+'%"></i></div>'+
+              '<div class="pbl"><span>'+fmtVND(achieve)+'</span>'+
+              '<span class="cx-none">'+(mx.hasAdp?'ADP · chưa đặt target':'doanh số '+esc(S.fy))+'</span></div>';
+      } else {
+        bar = mx.hasAdp
+          ? '<span class="cx-none">Có ADP · chưa đặt target · chưa có doanh số</span>'
+          : '<span class="cx-none">Chưa có doanh số trong '+esc(S.fy)+'</span>';
+      }
       return '<tr onclick="openCust(\''+esc(c.code)+'\')" style="cursor:pointer">'+
         '<td class="mono" style="color:var(--blue);font-weight:700">'+skHl(c.code,toks)+'</td>'+
         '<td><b>'+skHl(c.name,toks)+'</b>'+
@@ -5324,7 +5339,23 @@ function openAcc(code,name){
     if(S.drw&&S.drw.kind==="acc"){ S.acc=j; renderAcc(); }
   }).catch(function(e){
     if(S.acc360[_ak]) return;
-    $("drwBody").innerHTML='<div class="card pad"><b style="color:#A82F2C">Lỗi:</b> '+esc(e.message)+'</div>';
+    /* ⭐ v5.4 — bản dựng từ dữ liệu trên máy đã hiển thị được thì GIỮ NGUYÊN,
+       không xoá trắng hồ sơ chỉ vì gọi API hỏng. Trước đây một lỗi API là
+       cả trang hồ sơ biến thành dòng chữ đỏ. */
+    var msg=String(e.message||"");
+    if(/unknown action/i.test(msg)){
+      msg='Web App đang chạy bản Code.gs cũ (chưa có "account360"). '+
+          'Vào file MMH_Dental_CRM_FY68 ▸ Extensions ▸ Apps Script ▸ Deploy ▸ '+
+          'Manage deployments ▸ ✎ ▸ Version: New version ▸ Deploy.';
+    }
+    if(S.acc&&S.acc.ok){
+      toast("⚠️ Đang xem hồ sơ dựng từ dữ liệu đã tải. "+msg,"warn",9000);
+      return;
+    }
+    $("drwBody").innerHTML='<div class="card pad"><div class="empty"><div class="e">⚠️</div>'+
+      '<p style="max-width:560px;margin:0 auto;line-height:1.65">'+esc(msg)+'</p>'+
+      '<button class="btn sm" style="margin-top:12px" onclick="openAcc(\''+esc(code||"")+'\',\''+esc((name||"").replace(/'/g,""))+'\')">Thử lại</button>'+
+      '</div></div>';
   });
 }
 /* ⭐ v4.3 — dựng hồ sơ 360 ngay từ dữ liệu đã có trên máy (hiện tức thì),
