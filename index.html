@@ -493,6 +493,10 @@ table.tb tbody tr.sel td{background:var(--pale)}
 .tk-t span{font-size:11.5px;color:var(--mute);font-weight:600}
 .tk-m{display:flex;gap:5px;flex-wrap:wrap;margin-top:9px;align-items:center}
 .tk-rs{font-size:12.5px;color:var(--sub);margin-top:8px;line-height:1.55;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;white-space:pre-wrap}
+.tk-rs b,.tk-pl b{display:block;font-size:10px;font-weight:800;letter-spacing:.6px;color:var(--mute);margin-bottom:3px}
+.tk-rs b{color:var(--navy)}
+.tk-pl{font-size:12.5px;color:var(--sub);margin-top:8px;line-height:1.55;white-space:pre-wrap;background:var(--paler);border-radius:8px;padding:7px 9px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.tk-pl b{color:var(--blue-d)}
 .tk-ph{margin-top:9px;display:flex;gap:6px;align-items:center}
 .tk-ph img{width:56px;height:44px;object-fit:cover;border-radius:8px;border:1px solid var(--line)}
 .tk-warn{margin-top:9px;font-size:11.5px;font-weight:700;color:#A82F2C;background:var(--dang-bg);border:1px solid #F6C9C7;border-radius:8px;padding:5px 9px;display:inline-flex;gap:5px;align-items:center}
@@ -615,6 +619,65 @@ table.tb tbody tr.sel td{background:var(--pale)}
 
 /* nút ＋ nổi: hiện cả trên desktop */
 @media(min-width:721px){ .fab.on{display:grid;place-items:center;bottom:24px;right:24px} }
+/* ══════════════ ⭐ v4.4 — ĐĂNG NHẬP ══════════════ */
+.lgbox{max-width:400px;margin:0 auto;background:var(--card);border:1px solid var(--line);border-radius:var(--r-lg);padding:20px 18px;box-shadow:var(--sh-2)}
+.lgin{height:48px;font-size:16px;text-align:center;letter-spacing:1px;font-weight:700}
+.lgbtn{width:100%;height:46px;margin-top:12px;font-size:14.5px}
+.lgerr{min-height:18px;font-size:12.5px;color:#A82F2C;font-weight:700;margin-top:8px;text-align:center}
+.lghint{font-size:11.5px;color:var(--mute);text-align:center;margin-top:12px;line-height:1.55}
+.lgwho{display:flex;gap:11px;align-items:center;padding:11px;background:var(--pale);border-radius:var(--r-md);margin-bottom:14px}
+.lgwho .av{width:42px;height:42px;border-radius:13px;color:#fff;display:grid;place-items:center;font-weight:800;font-size:14px;flex:none}
+.lgwho b{display:block;font-size:14px;color:var(--navy)}
+.lgwho span{display:block;font-size:11.5px;color:var(--sub);margin-top:2px}
+.lggrp{margin-bottom:18px}
+.lggh{display:flex;align-items:center;gap:8px;margin-bottom:9px;padding:0 2px}
+.lggh span{font-size:16px}
+.lggh b{font-size:12.5px;font-weight:800;color:var(--navy);text-transform:uppercase;letter-spacing:.5px}
+.lggh i{font-style:normal;font-size:11.5px;color:var(--mute);font-weight:600}
+.picgrid2{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:9px}
+@media(max-width:520px){ .picgrid2{grid-template-columns:1fr} .lggh i{display:none} }
+
+/* ══════════════ ⭐ v4.4 — ĐỊA BÀN GỌN ══════════════ */
+.trhead{display:flex;align-items:baseline;gap:9px;flex-wrap:wrap;margin-bottom:10px}
+.trhead h2{font-size:19px;font-weight:800;color:var(--navy);margin:0}
+.trhead .sub{font-size:12.5px;color:var(--sub);font-weight:600}
+.trbar{background:var(--card);border:1px solid var(--line);border-radius:var(--r-lg);padding:8px 10px;margin-bottom:10px;box-shadow:var(--sh-1)}
+.trbar .r1{display:flex;align-items:center;gap:8px}
+.trseg{display:flex;background:var(--line2);border-radius:10px;padding:2px;gap:2px;overflow-x:auto;-webkit-overflow-scrolling:touch;flex:none}
+.trseg::-webkit-scrollbar{display:none}
+.trseg button{border:none;background:none;padding:6px 12px;border-radius:8px;font-size:12.5px;font-weight:700;color:var(--sub);cursor:pointer;white-space:nowrap}
+.trseg button.on{background:var(--card);color:var(--blue-d);box-shadow:var(--sh-1)}
+.trnav{display:flex;align-items:center;gap:5px;margin-top:8px}
+.trnav button{width:30px;height:30px;border-radius:9px;border:1px solid var(--line);background:var(--card);cursor:pointer;color:var(--sub);flex:none}
+.trnav .lb{flex:1;text-align:center;font-size:12.5px;font-weight:800;color:var(--navy);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.trnav .td{flex:none;height:30px;padding:0 10px;border-radius:9px;border:1px solid var(--lb1);background:var(--pale);color:var(--blue-d);font-size:11.5px;font-weight:700;cursor:pointer}
+.ftog{height:32px;padding:0 11px;border-radius:9px;border:1px solid var(--line);background:var(--card);font-size:12px;font-weight:700;color:var(--sub);cursor:pointer;display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.ftog.on{background:var(--lb2);border-color:var(--blue-l);color:var(--blue-d)}
+.ftog .n{background:var(--blue);color:#fff;border-radius:20px;padding:0 6px;font-size:10.5px;min-width:16px;text-align:center}
+.fwrap{display:none;margin-top:9px;padding-top:9px;border-top:1px solid var(--line2)}
+.fwrap.on{display:block}
+.warnbtn{height:32px;padding:0 11px;border-radius:9px;border:1px solid #F6C9C7;background:var(--dang-bg);color:#A82F2C;font-size:12px;font-weight:800;cursor:pointer;white-space:nowrap}
+.warnbtn.on{background:#A82F2C;color:#fff;border-color:#A82F2C}
+
+.strip{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-bottom:12px}
+.strip>div{background:var(--card);border:1px solid var(--line);border-radius:var(--r-md);padding:8px 9px;text-align:center}
+.strip b{display:block;font-size:18px;font-weight:800;color:var(--navy);line-height:1.15}
+.strip span{display:block;font-size:10.5px;color:var(--mute);font-weight:700;margin-top:2px;line-height:1.3}
+.strip .bad b{color:#D9433F}
+@media(max-width:400px){ .strip{gap:5px} .strip b{font-size:16px} .strip>div{padding:7px 5px} }
+
+@media(max-width:720px){
+  .trhead h2{font-size:17px}
+  .tkgrid{grid-template-columns:1fr;gap:9px}
+  .daysec{margin-bottom:13px}
+  .dayhd{top:-12px;padding:5px 0}
+  .tk{padding:11px 12px}
+  .pg{padding-bottom:96px}
+  .modal .bd{padding:14px 14px 8px}
+}
+.retrygps{margin-top:7px;height:30px;width:100%;border-radius:8px;border:1px solid var(--lb1);background:var(--pale);color:var(--blue-d);font-size:11.5px;font-weight:700;cursor:pointer}
+.piclock{background:var(--line2);font-weight:800;color:var(--navy)}
+
 
 
 
@@ -804,11 +867,36 @@ function toast(msg,kind,ms){
   $("toast").appendChild(d); setTimeout(function(){ d.style.opacity=0; d.style.transform="translateY(8px)"; d.style.transition=".3s"; setTimeout(function(){ d.remove(); },320); }, ms||3200);
 }
 function busy(on,txt){ $("busyTxt").textContent=txt||"Đang xử lý…"; $("busy").classList.toggle("on",!!on); }
+/* ⭐ v4.4 — modal xếp chồng: mở picker CBC từ trong form "Thêm task" KHÔNG còn
+   làm mất form đang nhập. Đóng picker sẽ trả lại đúng form cùng dữ liệu đã gõ. */
+var MSTACK=[];
 function openModal(title,body,foot,wide){
+  if($("ov").classList.contains("on")){
+    var st={};
+    Array.prototype.forEach.call($("mBody").querySelectorAll("[id]"),function(el){
+      if(typeof el.value!=="undefined") st[el.id]=el.value;
+    });
+    MSTACK.push({ t:$("mTitle").textContent, b:$("mBody").innerHTML, f:$("mFoot").innerHTML,
+                  w:$("modal").classList.contains("wide"), st:st, rw:S.modalRewire||null, ed:S.editing });
+  }
+  S.modalRewire=null;
   $("mTitle").textContent=title; $("mBody").innerHTML=body; $("mFoot").innerHTML=foot||"";
   $("modal").classList.toggle("wide",!!wide); $("ov").classList.add("on");
 }
-function closeModal(){ $("ov").classList.remove("on"); S.editing=null; S.photos=[]; }
+function closeModal(){
+  if(MSTACK.length){
+    var p=MSTACK.pop();
+    $("mTitle").textContent=p.t; $("mBody").innerHTML=p.b; $("mFoot").innerHTML=p.f;
+    $("modal").classList.toggle("wide",p.w);
+    Object.keys(p.st).forEach(function(id){ var el=$(id); if(el&&typeof el.value!=="undefined") el.value=p.st[id]; });
+    S.editing=p.ed; S.modalRewire=p.rw;
+    if(p.rw){ try{ p.rw(); }catch(e){} }
+    return;
+  }
+  S.modalRewire=null;
+  $("ov").classList.remove("on"); S.editing=null; S.photos=[];
+}
+function closeAllModals(){ MSTACK=[]; S.modalRewire=null; $("ov").classList.remove("on"); S.editing=null; S.photos=[]; }
 $("ov").addEventListener("click",function(e){ if(e.target===$("ov")) closeModal(); });
 document.addEventListener("keydown",function(e){ if(e.key==="Escape") closeModal(); });
 
@@ -893,7 +981,7 @@ function boot(){
     S.fyList=(cache.fyList&&cache.fyList.length)?cache.fyList:((S.master.fy&&S.master.fy.length)?S.master.fy.slice():[S.fy]);
     applyBundle(cache,true);
     $("loader").style.display="none";
-    if(saved&&S.picList.some(function(p){return p.pic===saved;})){ startApp(saved); refreshBundle(true); }
+    if(canAuto(saved)){ startApp(saved); refreshBundle(true); }
     else showLogin();
     return;
   }
@@ -901,12 +989,19 @@ function boot(){
   fetchBundle(saved||"").then(function(b){
     applyBundle(b);
     $("loader").style.display="none";
-    if(saved&&S.picList.some(function(p){return p.pic===saved;})) startApp(saved);
+    if(canAuto(saved)) startApp(saved);
     else showLogin();
   }).catch(function(e){
     $("ldtxt").innerHTML='<span style="color:#A82F2C">'+esc(e.message)+'</span><br><br>'+
       '<button class="btn sm" onclick="location.reload()">Thử lại</button>';
   });
+}
+/* đủ điều kiện tự vào app không? */
+function canAuto(saved){
+  if(!saved || !ROLES[saved]) return false;
+  if(!authOk()) return false;
+  if(ROLES[saved].grp==="Management" && !mgmtOk()) return false;
+  return true;
 }
 function fetchBundle(pic){
   return apiGet("bundle",{pic:pic||"",fy:S.fy||""});
@@ -958,30 +1053,143 @@ function refreshBundle(silent){
     if(!silent) toast(e.message,"err");
   });
 }
+/* ═══════════════════════ ⭐ v4.4 — ĐĂNG NHẬP & PHÂN QUYỀN ═══════════════════════
+   · Bước 1: nhập mật khẩu chung (nhớ trên thiết bị, chỉ nhập 1 lần)
+   · Bước 2: chọn PIC — chia 3 nhóm Management / Dental Sales / Surgical Sales
+   · Bước 3: nhóm Management nhập thêm mã nội bộ (cũng chỉ 1 lần)
+   PIC sau khi chọn là CỐ ĐỊNH: mọi tab chỉ hiển thị dữ liệu của PIC đó,
+   riêng Management xem được toàn nhóm và lọc theo từng PIC.
+   ═══════════════════════════════════════════════════════════════════════════════ */
+var APP_PW    = "mani123@";     /* so sánh sau khi hạ chữ thường ⇒ không phân biệt hoa/thường */
+var MGMT_CODE = "4321";
+var LS_AUTH = "mmh_dental_auth", LS_MGMT = "mmh_dental_mgmt", LS_PIC = "mmh_dental_pic";
+
+var ROLES = {
+  "Nguyen Ha": { grp:"Management",     title:"Director",                     email:"nt.ha@manimedicalhanoi.com",       ini:"NH" },
+  "Tuyen":     { grp:"Management",     title:"Head of Sales & Marketing VN", email:"tt.tuyen@manimedicalhanoi.com",    ini:"TU" },
+  "Hoa":       { grp:"Management",     title:"Human Resources",              email:"vtt.hoa@manimedicalhanoi.com",     ini:"HO" },
+  "Giang":     { grp:"Management",     title:"Product Team Leader",          email:"mmh.product@manimedicalhanoi.com", ini:"GI" },
+  "Viet":      { grp:"Dental Sales",   title:"Dental Sales Team Leader",     email:"mmh.hanoi@manimedicalhanoi.com",   ini:"VI" },
+  "Phuong":    { grp:"Dental Sales",   title:"Dental Sales PIC — South",     email:"mmh.saigon@manimedicalhanoi.com",  ini:"PH" },
+  "Vinh":      { grp:"Dental Sales",   title:"Dental Sales PIC — Central",   email:"mmh.danang@manimedicalhanoi.com",  ini:"VN" },
+  "Khang":     { grp:"Surgical Sales", title:"Surgical Sales PIC",           email:"",                                 ini:"KH" },
+  "Viet Ha":   { grp:"Surgical Sales", title:"Surgical Sales PIC",           email:"",                                 ini:"VH" }
+};
+var ROLE_GROUPS = [
+  { k:"Management",     ic:"🏛", sub:"Xem toàn bộ dữ liệu · cần mã nội bộ" },
+  { k:"Dental Sales",   ic:"🦷", sub:"Chỉ xem và nhập dữ liệu của mình" },
+  { k:"Surgical Sales", ic:"🔬", sub:"Chỉ xem và nhập dữ liệu của mình" }
+];
+function isMgmt(){ return !!(S.user && S.user.grp === "Management"); }
+function canSeeGallery(){ return isMgmt(); }
+function authOk(){ try{ return localStorage.getItem(LS_AUTH)==="1"; }catch(e){ return false; } }
+function mgmtOk(){ try{ return localStorage.getItem(LS_MGMT)==="1"; }catch(e){ return false; } }
+function lgLab(t){ var e=document.querySelector("#login .lglab"); if(e) e.textContent=t; }
+
 function showLogin(){
   $("login").classList.add("on");
-  $("picGrid").innerHTML=S.picList.map(function(p){
-    return '<div class="piccard'+(p.role==="manager"?" mg":"")+'" onclick="startApp(\''+esc(p.pic).replace(/'/g,"\\'")+'\')">'+
-      '<div class="av">'+esc(p.initials||initials(p.pic))+'</div>'+
-      '<div style="min-width:0"><b class="ell">'+esc(p.pic)+'</b><span class="ell">'+esc(p.title||"")+'</span></div></div>';
-  }).join("");
+  if(!authOk()) return stepPw();
+  stepPic();
 }
+/* ── bước 1: mật khẩu ── */
+function stepPw(){
+  lgLab("Nhập mật khẩu để vào hệ thống");
+  $("picGrid").innerHTML='<div class="lgbox">'+
+    '<input class="inp lgin" type="password" id="lg_pw" placeholder="Mật khẩu" autocomplete="current-password" inputmode="text">'+
+    '<div class="lgerr" id="lg_err"></div>'+
+    '<button class="btn pri lgbtn" onclick="checkPw()">Tiếp tục →</button>'+
+    '<div class="lghint">Chỉ cần nhập một lần — lần sau mở app sẽ tự nhớ trên thiết bị này.</div></div>';
+  var e=$("lg_pw");
+  e.onkeydown=function(ev){ if(ev.key==="Enter") checkPw(); };
+  setTimeout(function(){ try{ e.focus(); }catch(x){} },150);
+}
+function checkPw(){
+  var v=String(($("lg_pw")||{}).value||"").trim().toLowerCase();
+  if(v!==APP_PW){
+    $("lg_err").textContent="Mật khẩu chưa đúng. Thử lại nhé.";
+    $("lg_pw").value=""; $("lg_pw").focus(); return;
+  }
+  try{ localStorage.setItem(LS_AUTH,"1"); }catch(e){}
+  stepPic();
+}
+/* ── bước 2: chọn PIC ── */
+function stepPic(){
+  lgLab("Bạn là ai?");
+  $("picGrid").innerHTML=ROLE_GROUPS.map(function(g){
+    var names=Object.keys(ROLES).filter(function(nm){ return ROLES[nm].grp===g.k; });
+    return '<div class="lggrp"><div class="lggh"><span>'+g.ic+'</span><b>'+esc(g.k)+'</b><i>'+esc(g.sub)+'</i></div>'+
+      '<div class="picgrid2">'+names.map(function(nm){
+        var r=ROLES[nm];
+        return '<div class="piccard'+(g.k==="Management"?" mg":"")+'" onclick="pickPic(\''+esc(nm).replace(/'/g,"\\'")+'\')">'+
+          '<div class="av" style="background:'+avColor(nm)+'">'+esc(r.ini||initials(nm))+'</div>'+
+          '<div style="min-width:0"><b class="ell">'+esc(nm)+'</b><span class="ell">'+esc(r.title)+'</span></div></div>';
+      }).join("")+'</div></div>';
+  }).join("")+
+  '<div style="text-align:center;margin-top:14px"><button class="linkbtn" onclick="resetAuth()">Nhập lại mật khẩu</button></div>';
+}
+function resetAuth(){
+  try{ localStorage.removeItem(LS_AUTH); localStorage.removeItem(LS_MGMT); }catch(e){}
+  stepPw();
+}
+function pickPic(pic){
+  var r=ROLES[pic];
+  if(r && r.grp==="Management" && !mgmtOk()) return stepCode(pic);
+  startApp(pic);
+}
+/* ── bước 3: mã nội bộ cho Management ── */
+function stepCode(pic){
+  lgLab("Mã nội bộ cho nhóm Management");
+  $("picGrid").innerHTML='<div class="lgbox">'+
+    '<div class="lgwho"><div class="av" style="background:'+avColor(pic)+'">'+esc((ROLES[pic]||{}).ini||initials(pic))+'</div>'+
+      '<div><b>'+esc(pic)+'</b><span>'+esc((ROLES[pic]||{}).title||"")+'</span></div></div>'+
+    '<input class="inp lgin" type="password" id="lg_code" placeholder="Mã 4 số" inputmode="numeric" maxlength="8">'+
+    '<div class="lgerr" id="lg_err2"></div>'+
+    '<button class="btn pri lgbtn" onclick="checkCode(\''+esc(pic).replace(/'/g,"\\'")+'\')">Vào hệ thống →</button>'+
+    '<div class="lghint">Chỉ nhập một lần trên thiết bị này.</div>'+
+    '<button class="linkbtn" style="margin-top:12px" onclick="stepPic()">← Chọn tài khoản khác</button></div>';
+  var e=$("lg_code");
+  e.onkeydown=function(ev){ if(ev.key==="Enter") checkCode(pic); };
+  setTimeout(function(){ try{ e.focus(); }catch(x){} },150);
+}
+function checkCode(pic){
+  var v=String(($("lg_code")||{}).value||"").trim();
+  if(v!==MGMT_CODE){
+    $("lg_err2").textContent="Mã chưa đúng.";
+    $("lg_code").value=""; $("lg_code").focus(); return;
+  }
+  try{ localStorage.setItem(LS_MGMT,"1"); }catch(e){}
+  startApp(pic);
+}
+/* ── vào app ── */
 function startApp(pic){
-  localStorage.setItem("mmh_dental_pic",pic);
-  var p=S.picList.filter(function(x){return x.pic===pic;})[0]||{pic:pic,role:"pic",title:"Sales PIC"};
-  S.user={ pic:p.pic, role:p.role, title:p.title, email:p.email||"", team:p.team||"", level:p.level||"pic" };
-  if(S.user.role!=="manager") S.filt.pic=S.user.pic;
+  var r=ROLES[pic]||{ grp:"Dental Sales", title:"Sales PIC", email:"", ini:initials(pic) };
+  if(r.grp==="Management" && !mgmtOk()){ $("login").classList.add("on"); return stepCode(pic); }
+  try{ localStorage.setItem(LS_PIC,pic); }catch(e){}
+  var p=(S.picList||[]).filter(function(x){return x.pic===pic;})[0]||{};
+  S.user={ pic:pic, grp:r.grp,
+           role:(r.grp==="Management")?"manager":"pic",
+           title:r.title||p.title||"", email:r.email||p.email||"",
+           team:p.team||r.grp, level:(r.grp==="Management")?"lead":"pic" };
+  if(!isMgmt()) S.filt.pic=S.user.pic;      /* sales: khoá cứng theo PIC của mình */
+  else S.filt.pic="";
   $("login").classList.remove("on");
   $("app").classList.add("on");
-  $("uInit").textContent=p.initials||initials(pic);
-  $("btnUser").title=pic+" — "+(p.title||"");
+  $("uInit").textContent=r.ini||initials(pic);
+  $("btnUser").title=pic+" — "+(r.title||"");
   $("fySel").innerHTML=opts(S.fyList,S.fy);
-  buildNav(); go("dash");
+  buildNav();
+  go("weekly");                              /* mở app là vào ngay màn hình địa bàn */
   if(!S.custIndex.length) loadCustomerIndex();
   if(S.activity&&S.activity.length) $("actDot").style.display="";
   prefetchAll();
+  warmGps();
 }
-$("btnUser").onclick=function(){ if(confirm("Đăng xuất khỏi tài khoản "+S.user.pic+"?")){ localStorage.removeItem("mmh_dental_pic"); location.reload(); } };
+
+$("btnUser").onclick=function(){
+  if(!confirm("Đăng xuất khỏi tài khoản "+S.user.pic+"?\n(Mật khẩu vẫn được nhớ trên thiết bị này)")) return;
+  try{ localStorage.removeItem(LS_PIC); }catch(e){}
+  location.reload();
+};
 $("btnReload").onclick=function(){ S.cache={}; clearTabs(); S.cbcRows=null; S._prefetched=false; refreshBundle(false); prefetchAll(); };
 $("btnAct").onclick=function(){ toggleAct(); };
 $("fySel").onchange=function(){ S.fy=this.value; S.cache={}; S.dash=null; S.kpi=null; S.targetDraft={}; S.kpiPic=""; S.cbcRows=null; S._prefetched=false; go(S.tab); prefetchAll(); };
@@ -1013,7 +1221,7 @@ function buildNav(){
     if(t.grp!==lastGrp){ h+='<div class="grp">'+t.grp+'</div>'; lastGrp=t.grp; }
     h+='<button class="nvi" data-t="'+t.id+'" onclick="go(\''+t.id+'\')"><span class="ic">'+t.ic+'</span><span class="lb">'+t.lb+'</span></button>';
   });
-  h+='<div style="flex:1"></div><div style="padding:10px;font-size:10.5px;color:var(--mute);line-height:1.5">MMH Dental CRM v4.3<br><a href="'+DRIVE_FOLDER+'" target="_blank">📁 Folder ảnh Drive</a></div>';
+  h+='<div style="flex:1"></div><div style="padding:10px;font-size:10.5px;color:var(--mute);line-height:1.5">MMH Dental CRM v4.4<br><a href="'+DRIVE_FOLDER+'" target="_blank">📁 Folder ảnh Drive</a></div>';
   $("side").innerHTML=h;
   $("navMob").innerHTML=navTabs().filter(function(t){return t.mob;}).map(function(t){
     return '<button data-t="'+t.id+'" onclick="go(\''+t.id+'\')"><span class="ic">'+t.ic+'</span>'+(t.mlb||t.lb.split(" ")[0])+'</button>';
@@ -1348,7 +1556,7 @@ function deltaCell(v){
 function renderKPI(){
   var k=S.kpi, mgr=S.user.role==="manager";
   var qsel=S.kpiQ||"FY";
-  var picSel=S.kpiPic||"";
+  var picSel=mgr?(S.kpiPic||""):S.user.pic;   /* sales chỉ xem chỉ tiêu của mình */
 
   /* ── PHẦN A ── */
   var partA='<div class="tbwrap"><table class="tb"><thead><tr>'+
@@ -1431,8 +1639,8 @@ function renderKPI(){
     '<div style="display:flex;align-items:flex-end;gap:12px;flex-wrap:wrap;margin:16px 4px 10px">'+
       '<div><div style="font-size:12.5px;font-weight:800;color:var(--navy);letter-spacing:.3px">PHẦN B — CHỈ TIÊU PHÂN BỔ THEO SALE</div>'+
       '<div style="font-size:11.5px;color:var(--mute);margin-top:2px">Chọn một sales để xem riêng chỉ tiêu của người đó</div></div></div>'+
-    '<div class="kpi-picbar"><div class="chip'+(picSel?"":" on")+'" onclick="setKpiPic(\'\')">Toàn nhóm</div>'+
-      picList.map(function(p){ return '<div class="chip'+(picSel===p?" on":"")+'" onclick="setKpiPic(\''+esc(p)+'\')">'+esc(p)+'</div>'; }).join("")+'</div>'+
+    (mgr?'<div class="kpi-picbar"><div class="chip'+(picSel?"":" on")+'" onclick="setKpiPic(\'\')">Toàn nhóm</div>'+
+      picList.map(function(p){ return '<div class="chip'+(picSel===p?" on":"")+'" onclick="setKpiPic(\''+esc(p)+'\')">'+esc(p)+'</div>'; }).join("")+'</div>':"")+
     blocks+
     (mgr?'<div class="savebar" id="kpiSaveBar" style="display:'+(kpiDirty()?"flex":"none")+'">'+
       '<span style="font-size:12.5px;font-weight:700;color:var(--amber)" id="kpiDirtyTxt">'+Object.keys(S.targetDraft||{}).length+' ô đang sửa — chưa lưu</span>'+
@@ -1481,7 +1689,7 @@ function pgCust(){
 }
 function renderCust(){
   var f=S.filt;
-  var picChips=(S.master.pic||[]).filter(function(p){return ["Viet","Phuong","Vinh"].indexOf(p)>=0||S.user.role==="manager";});
+  var picChips=isMgmt()?(S.master.pic||[]):[];
   var rows=S.custIndex.filter(function(c){
     if(f.pic && c.pic!==f.pic) return false;
     if(f.type && c.type!==f.type) return false;
@@ -1501,8 +1709,8 @@ function renderCust(){
         '<div><select class="inp" onchange="S.filt.type=this.value;renderCust()">'+opts(S.master.accountType,f.type,"Mọi loại KH")+'</select></div>'+
         '<div><select class="inp" onchange="S.filt.area=this.value;renderCust()">'+opts(S.master.area,f.area,"Mọi khu vực")+'</select></div>'+
       '</div>'+
-      '<div class="chipbar"><div class="chip'+(f.pic?"":" on")+'" onclick="S.filt.pic=\'\';renderCust()">Tất cả PIC</div>'+
-        picChips.map(function(p){ return '<div class="chip'+(f.pic===p?" on":"")+'" onclick="S.filt.pic=\''+esc(p)+'\';renderCust()">'+esc(p)+'</div>'; }).join("")+'</div>'+
+      (isMgmt()?'<div class="chipbar"><div class="chip'+(f.pic?"":" on")+'" onclick="S.filt.pic=\'\';renderCust()">Tất cả PIC</div>'+
+        picChips.map(function(p){ return '<div class="chip'+(f.pic===p?" on":"")+'" onclick="S.filt.pic=\''+esc(p)+'\';renderCust()">'+esc(p)+'</div>'; }).join("")+'</div>':"")+
     '</div>'+
     (shown.length? '<div class="tbwrap"><table class="tb"><thead><tr>'+
       '<th style="width:88px">Mã</th><th>Account</th><th style="width:104px">Loại</th><th style="width:118px">Tỉnh</th>'+
@@ -1815,49 +2023,44 @@ function renderTerritory(){
   var accSet={}; rows.forEach(function(w){ var a=parseAcc(w.account).name; if(a) accSet[a]=1; });
   var nToday=terrRows().filter(function(w){ return String(w.start).slice(0,10)===today; }).length;
 
-  var picBar=S.user.role==="manager"
-    ? '<div class="chipbar" style="margin-bottom:10px"><div class="chip'+(S.filt.pic?"":" on")+'" onclick="S.filt.pic=\'\';renderTerritory()">Toàn nhóm</div>'
-      +(S.master.pic||[]).map(function(p){ return '<div class="chip'+(S.filt.pic===p?" on":"")+'" onclick="S.filt.pic=\''+esc(p)+'\';renderTerritory()">'+esc(p)+'</div>'; }).join("")+'</div>'
-    : "";
+  var nAct=(S.filt.q?1:0)+(isMgmt()&&S.filt.pic?1:0)+(S.filt.act?1:0)+(S.filt.status?1:0)+(S.filt.flag?1:0);
 
   $("main").innerHTML='<div class="pg">'+
-    '<div class="ph"><div><h2>Cập nhật thông tin địa bàn</h2>'+
-      '<p>'+esc(r.label)+' · <b>'+rows.length+'</b> task'+(nToday?' · hôm nay <b>'+nToday+'</b> task':'')+'</p></div>'+
-      '<div class="sp"></div>'+
-      '<button class="btn sm" onclick="S.vChart=!S.vChart;renderTerritory()">'+(S.vChart?"Ẩn":"Hiện")+' biểu đồ</button></div>'+
+    '<div class="trhead"><h2>Cập nhật thông tin địa bàn</h2>'+
+      '<span class="sub">'+esc(r.label)+' · <b>'+rows.length+'</b> task'+(nToday?' · hôm nay <b>'+nToday+'</b>':'')+'</span></div>'+
 
-    '<div class="card pad" style="margin-bottom:12px"><div class="tbar">'+
-      '<div class="seg">'+VRANGE.map(function(x){
-        return '<button class="'+((S.vMode||"week")===x[0]?"on":"")+'" onclick="vSetMode(\''+x[0]+'\')">'+x[1]+'</button>'; }).join("")+'</div>'+
+    '<div class="trbar">'+
+      '<div class="r1">'+
+        '<div class="trseg">'+VRANGE.map(function(x){
+          return '<button class="'+((S.vMode||"week")===x[0]?"on":"")+'" onclick="vSetMode(\''+x[0]+'\')">'+x[1]+'</button>'; }).join("")+'</div>'+
+        '<div style="flex:1"></div>'+
+        (nFlag?'<button class="warnbtn'+(S.filt.flag?" on":"")+'" onclick="S.filt.flag=!S.filt.flag;renderTerritory()">⚠️ '+nFlag+'</button>':"")+
+        '<button class="ftog'+(S.fOpen?" on":"")+'" onclick="S.fOpen=!S.fOpen;renderTerritory()">⚙ Lọc'+(nAct?'<span class="n">'+nAct+'</span>':"")+'</button>'+
+      '</div>'+
       ((S.vMode||"week")!=="fy"
-        ? '<div class="nav"><button onclick="vShift(-1)">◀</button><span class="lbl">'+esc(r.label)+'</span><button onclick="vShift(1)">▶</button></div>'
-        : '<span class="lbl">'+esc(r.label)+'</span>')+
-      '<div style="flex:1"></div>'+
-      '<button class="btn sm" onclick="vToday()">Về hôm nay</button>'+
-      (nFlag?'<button class="btn sm '+(S.filt.flag?"acc":"")+'" onclick="S.filt.flag=!S.filt.flag;renderTerritory()">⚠️ '+nFlag+' task thiếu dữ liệu</button>':"")+
-    '</div></div>'+
-
-    '<div class="card pad" style="margin-bottom:12px"><div class="fbar">'+
-      '<div class="sbox">'+
-        '<input class="inp" id="wk_q" placeholder="Tìm account · kết quả · loại việc" value="'+esc(S.filt.q)+'" oninput="S.filt.q=this.value;debWk()"></div>'+
-      (S.user.role==="manager"
-        ? '<select class="inp" onchange="S.filt.pic=this.value;renderTerritory()">'+opts(S.master.pic,S.filt.pic,"Mọi PIC")+'</select>'
+        ? '<div class="trnav"><button onclick="vShift(-1)">◀</button><span class="lb">'+esc(r.label)+'</span>'+
+          '<button onclick="vShift(1)">▶</button><button class="td" onclick="vToday()">Hôm nay</button></div>'
         : "")+
-      '<select class="inp" onchange="S.filt.act=this.value;renderTerritory()">'+opts(S.master.typeAction,S.filt.act||"","Mọi hình thức")+'</select>'+
-      '<select class="inp" onchange="S.filt.status=this.value;renderTerritory()">'+opts(S.master.status,S.filt.status||"","Mọi trạng thái")+'</select>'+
-      (S.filt.q||S.filt.pic||S.filt.act||S.filt.status||S.filt.flag
-        ? '<button class="btn sm fx" onclick="S.filt.q=\'\';S.filt.pic=\'\';S.filt.act=\'\';S.filt.status=\'\';S.filt.flag=false;renderTerritory()">✕ Bỏ lọc</button>' : "")+
-    '</div></div>'+ picBar +
-      '<div class="chipbar"><div class="chip'+(S.filt.status?"":" on")+'" onclick="S.filt.status=\'\';renderTerritory()">Mọi trạng thái</div>'+
-        (S.master.status||[]).map(function(s){ return '<div class="chip'+(S.filt.status===s?" on":"")+'" onclick="S.filt.status=\''+esc(s)+'\';renderTerritory()">'+esc(s)+'</div>'; }).join("")+'</div>'+
+      '<div class="fwrap'+(S.fOpen?" on":"")+'">'+
+        '<div class="fbar">'+
+          '<div class="sbox"><input class="inp" id="wk_q" placeholder="Tìm account · kết quả · loại việc" value="'+esc(S.filt.q)+'" oninput="S.filt.q=this.value;debWk()"></div>'+
+          (isMgmt()?'<select class="inp" onchange="S.filt.pic=this.value;renderTerritory()">'+opts(S.master.pic,S.filt.pic,"Mọi PIC")+'</select>':"")+
+          '<select class="inp" onchange="S.filt.act=this.value;renderTerritory()">'+opts(S.master.typeAction,S.filt.act||"","Mọi hình thức")+'</select>'+
+          '<select class="inp" onchange="S.filt.status=this.value;renderTerritory()">'+opts(S.master.status,S.filt.status||"","Mọi trạng thái")+'</select>'+
+        '</div>'+
+        '<div style="display:flex;gap:7px;margin-top:8px;flex-wrap:wrap">'+
+          (nAct?'<button class="ftog" onclick="S.filt.q=\'\';S.filt.pic=\''+(isMgmt()?"":esc(S.user.pic))+'\';S.filt.act=\'\';S.filt.status=\'\';S.filt.flag=false;renderTerritory()">✕ Bỏ lọc</button>':"")+
+          '<button class="ftog'+(S.vChart?" on":"")+'" onclick="S.vChart=!S.vChart;renderTerritory()">📊 Biểu đồ</button>'+
+          (nPhoto?'<button class="ftog" onclick="openAllPhotos()">📷 Xem tất cả ảnh</button>':"")+
+        '</div>'+
+      '</div>'+
     '</div>'+
 
-    '<div class="grid g4" style="margin-bottom:12px">'+
-      '<div class="kpi"><div class="lb">Task trong kỳ</div><div class="vl">'+rows.length+'</div><div class="sb">'+esc(r.label)+'</div></div>'+
-      '<div class="kpi"><div class="lb">Viếng thăm</div><div class="vl">'+nVisit+'</div><div class="sb"><b>'+Object.keys(accSet).length+'</b> account khác nhau</div></div>'+
-      '<div class="kpi"><div class="lb">Có ảnh minh chứng</div><div class="vl">'+nPhoto+'</div><div class="sb">'+(nVisit?Math.round(nPhoto/nVisit*100):0)+'% số buổi Visiting'+
-        (nPhoto?'<button class="linkbtn" style="display:block;margin-top:6px" onclick="openAllPhotos()">Xem tất cả ảnh</button>':"")+'</div></div>'+
-      '<div class="kpi"><div class="lb">Cần bổ sung</div><div class="vl" style="color:'+(nFlag?"#D9433F":"#1E9E5A")+'">'+nFlag+'</div><div class="sb">task thiếu ảnh / CBC / lý do dừng</div></div>'+
+    '<div class="strip">'+
+      '<div><b>'+rows.length+'</b><span>task trong kỳ</span></div>'+
+      '<div><b>'+nVisit+'</b><span>viếng thăm</span></div>'+
+      '<div><b>'+nPhoto+'</b><span>có ảnh</span></div>'+
+      '<div class="'+(nFlag?"bad":"")+'"><b>'+nFlag+'</b><span>cần bổ sung</span></div>'+
     '</div>'+
 
     (S.vChart?visitStatsHtml(rows,r):"")+
@@ -1922,8 +2125,9 @@ function taskCard(w){
       (w.product?'<span class="ttag" style="background:#FFF6E4;color:#8A5A00">'+esc(w.product)+'</span>':"")+
       (w.nextAction?'<span class="ttag" style="background:'+(w.nextAction==="Dừng lại"?"var(--dang-bg);color:#A82F2C":"var(--ok-bg);color:#15803D")+'">'+esc(w.nextAction)+'</span>':"")+
     '</div>'+
-    (w.result?'<div class="tk-rs">'+esc(String(w.result).slice(0,300))+'</div>'
-      :(w.plan?'<div class="tk-rs" style="color:var(--mute)"><b>Plan:</b> '+esc(String(w.plan).slice(0,220))+'</div>':""))+
+    (w.plan?'<div class="tk-pl"><b>KẾ HOẠCH</b>'+esc(String(w.plan).slice(0,220))+'</div>':"")+
+    (w.result?'<div class="tk-rs"><b>KẾT QUẢ</b>'+esc(String(w.result).slice(0,320))+'</div>'
+      :(w.plan?'':'<div class="tk-rs" style="color:var(--mute);font-style:italic">Chưa ghi kết quả — bấm để cập nhật</div>'))+
     (ph.length?'<div class="tk-ph"><img loading="lazy" src="'+esc(ph[0].thumb||ph[0].full)+'" alt="">'
       +'<span style="font-size:11.5px;color:var(--mute);font-weight:700">📍 '+(w.gpsAddr?esc(String(w.gpsAddr).slice(0,42)):"Ảnh hiện trường")+'</span></div>':"")+
     (miss.length?'<div class="tk-warn">⚠️ '+esc(miss.join(" · "))+'</div>':"")+
@@ -1963,6 +2167,7 @@ function openTask(row){
     +(canDel?'<button class="btn dg" id="tk-del" onclick="deleteTaskFlow()">🗑 Xoá task</button>':"")
     +'<button class="btn pri" id="tk-save" onclick="saveTask()">💾 Cập nhật vào Sheet</button>';
   openDrw(head,"",taskEditorHTML(w),foot);
+  warmGps();
 }
 function selT(id,field,label,options,cur,req){
   var o='<option value="">—</option>'+(options||[]).map(function(x){return '<option'+(x===cur?" selected":"")+'>'+esc(x)+'</option>';}).join("");
@@ -2081,7 +2286,7 @@ function pickMeet(i){
   var ta=$(S._meetTarget||"tk-result");
   if(ta){
     ta.value=line+"\n"+String(ta.value||"").replace(MEET_RE,"").replace(/^\n+/,"");
-    markDirty(ta.id==="tk-plan"?"plan":"result",ta.value);
+    if(ta.id.indexOf("tk-")===0) markDirty(ta.id==="tk-plan"?"plan":"result",ta.value);
   }
   closeModal(); toast("Đã chèn người gặp","ok");
 }
@@ -2126,25 +2331,54 @@ function saveStakeAdd(){
     busy(false); closeModal(); toast("Đã thêm "+name+" vào CBC","ok",3800);
     d._row=r.row||0; S.cbcRows=(S.cbcRows||[]).concat([d]);
     afterWrite("cbc", r.row||0, d);
-    var ta=$("tk-result");
+    var ta=$(S._meetTarget||"tk-result");
     if(ta){
       var line="Người gặp: "+[d.contact,d.jobTitle,d.specialize].filter(Boolean).join(" - ");
       ta.value=line+"\n"+String(ta.value||"").replace(MEET_RE,"").replace(/^\n+/,"");
-      markDirty("result",ta.value);
+      if(ta.id.indexOf("tk-")===0) markDirty("result",ta.value);
     }
   }).catch(function(e){ busy(false); toast(e.message,"err",5000); });
 }
 
 /* ───────── ẢNH: GPS + 1 ảnh / task ───────── */
+/* ⭐ v4.4 — GPS 2 tầng: thử độ chính xác cao trước, hỏng thì hạ xuống định vị
+   thường (wifi/cell) với thời gian chờ dài hơn, cuối cùng mới dùng vị trí đã
+   lấy được gần đây. Trên điện thoại, GPS chính xác cao thường cần >8 giây. */
+function gpsFrom(p){ return {lat:p.coords.latitude,lng:p.coords.longitude,acc:Math.round(p.coords.accuracy||0)}; }
+function warmGps(){                       /* làm nóng sẵn để lần chụp đầu có ngay */
+  if(!("geolocation" in navigator)) return;
+  try{
+    navigator.geolocation.getCurrentPosition(
+      function(p){ S._gps={g:gpsFrom(p),at:Date.now()}; }, function(){},
+      {enableHighAccuracy:false,timeout:20000,maximumAge:300000});
+  }catch(e){}
+}
 function getGps(){
   return new Promise(function(res){
     if(!("geolocation" in navigator)) return res(null);
-    var done=false, t=setTimeout(function(){ if(!done){done=true;res(null);} },8000);
-    navigator.geolocation.getCurrentPosition(function(p){
-      if(done)return; done=true; clearTimeout(t);
-      res({lat:p.coords.latitude,lng:p.coords.longitude,acc:Math.round(p.coords.accuracy||0)});
-    },function(){ if(done)return; done=true; clearTimeout(t); res(null); },
-    {enableHighAccuracy:true,timeout:8000,maximumAge:30000});
+    var done=false;
+    function ok(p){ if(done)return; done=true; var g=gpsFrom(p); S._gps={g:g,at:Date.now()}; res(g); }
+    function fallback(){
+      if(done)return;
+      navigator.geolocation.getCurrentPosition(ok,function(){
+        if(done)return; done=true;
+        var c=S._gps;                      /* dùng lại vị trí lấy được trong 10 phút */
+        res((c&&Date.now()-c.at<600000)?c.g:null);
+      },{enableHighAccuracy:false,timeout:15000,maximumAge:300000});
+    }
+    try{
+      navigator.geolocation.getCurrentPosition(ok,fallback,{enableHighAccuracy:true,timeout:10000,maximumAge:0});
+    }catch(e){ fallback(); }
+  });
+}
+function retryGps(which){
+  busy(true,"Đang lấy vị trí GPS…");
+  getGps().then(function(g){
+    busy(false);
+    if(!g) return toast("Vẫn chưa lấy được vị trí. Kiểm tra: đã BẬT Vị trí (Location) của điện thoại, và cho phép trang này truy cập vị trí.","warn",7000);
+    if(which==="nt"){ if(S.ntPhoto){ S.ntPhoto.gps=g; ntDraw(); } }
+    else if(S.pending){ S.pending.gps=g; renderPending(); }
+    toast("✓ Đã lấy được vị trí","ok");
   });
 }
 function compress(file){
@@ -2189,6 +2423,7 @@ function renderPending(){
   z.innerHTML='<div class="pend"><div class="pt">⏳ Ảnh chờ gửi · '+(g?("📍 "+g.lat.toFixed(5)+", "+g.lng.toFixed(5)+" (±"+g.acc+"m)"):"⚠ không lấy được GPS")+'</div>'
     +'<img src="'+S.pending.dataUrl+'" alt="">'
     +'<div class="rw"><button class="ok" onclick="uploadPending()">✓ Gửi ảnh ngay</button><button class="no" onclick="S.pending=null;renderPending()">Huỷ</button></div>'
+    +(g?"":'<button class="retrygps" onclick="retryGps()">📍 Lấy lại vị trí GPS</button>')
     +'<div style="font-size:11px;color:var(--sub);margin-top:7px">Ảnh cũng được gửi tự động khi bấm <b>Cập nhật vào Sheet</b>.</div></div>';
 }
 function uploadPending(silent){
@@ -2318,7 +2553,11 @@ function formWeekly(w,presetAcc){
       '<div class="hint" id="nt_accHint">Chọn từ danh mục để tự điền Type / Province / Area</div></div>'+
     '<div class="row">'+
       '<div class="fld"><label>Ngày <span class="rq">*</span></label><input class="inp" type="date" id="nt_start" value="'+todayISO()+'"></div>'+
-      '<div class="fld"><label>Sales PIC</label><select class="inp" id="nt_pic">'+opts(S.master.pic,S.user.pic,"— chọn —")+'</select></div>'+
+      '<div class="fld"><label>Sales PIC</label>'+
+        (isMgmt()
+          ? '<select class="inp" id="nt_pic">'+opts(S.master.pic,S.user.pic,"— chọn —")+'</select>'
+          : '<input class="inp piclock" id="nt_pic" value="'+esc(S.user.pic)+'" readonly title="PIC cố định theo tài khoản đăng nhập">')+
+      '</div>'+
     '</div>'+
     '<div class="row">'+
       '<div class="fld"><label>Type task <span class="rq">*</span></label><select class="inp" id="nt_typeTask">'+opts(S.master.typeTask,"","— chọn —")+'</select></div>'+
@@ -2348,11 +2587,30 @@ function formWeekly(w,presetAcc){
       '<button class="btn gho" style="width:100%" onclick="$(\'nt_file\').click()">📷 Chụp / chọn ảnh</button></div>';
   openModal("＋ Thêm task đi địa bàn",h,
     '<button class="btn" onclick="closeModal()">Huỷ</button><button class="btn pri" onclick="submitNewTask()">Lưu vào Google Sheet</button>', true);
+  ntWire();
+  S.modalRewire=ntWire;          /* mở picker CBC rồi quay lại vẫn còn autocomplete */
+  ntPhotoHint(); warmGps();
+}
+function ntWire(){
   accountCombo("nt_accName","nt_account",function(c){
-    $("nt_accHint").textContent=[c.type,c.province,c.area,"PIC "+c.pic].filter(String).join(" · ");
-    if(c.pic&&$("nt_pic")) $("nt_pic").value=c.pic;
+    $("nt_accHint").textContent=[c.type,c.province,c.area,"PIC "+(c.pic||"—")].filter(String).join(" · ");
+    var tt=typeTaskForAcc(c.type);
+    if(tt&&$("nt_typeTask")){ $("nt_typeTask").value=tt; $("nt_accHint").textContent+=" · Type task: "+tt; }
+    if(isMgmt()&&c.pic&&$("nt_pic")&&$("nt_pic").tagName==="SELECT") $("nt_pic").value=c.pic;
   });
-  ntPhotoHint();
+  ntDraw(); ntPhotoHint();
+}
+/* ⭐ v4.4 — Account type ở tab "2. CBC" quyết định Type task
+   (Clinic ⇒ Sale-Clinics, Dealer ⇒ Sale-Dealers, Hospital ⇒ Sale-Hospitals…) */
+function typeTaskForAcc(t){
+  var list=S.master.typeTask||[], key=noAcc(String(t||"")).replace(/[^a-z0-9]/g,"");
+  if(!key) return "";
+  var k1=key, k2=key.replace(/s$/,"");
+  for(var i=0;i<list.length;i++){
+    var k=noAcc(list[i]).replace(/[^a-z0-9]/g,"");
+    if(k.indexOf(k1)>=0||k.indexOf(k2)>=0) return list[i];
+  }
+  return "";
 }
 function ntPhotoHint(){
   var v=$("nt_typeAction")?$("nt_typeAction").value:"";
@@ -2373,7 +2631,8 @@ function ntDraw(){
   var g=S.ntPhoto.gps;
   b.innerHTML='<div class="pp-cur" style="margin-bottom:9px"><img src="'+S.ntPhoto.dataUrl+'" alt="">'
     +'<button class="del" onclick="S.ntPhoto=null;ntDraw()">🗑</button></div>'
-    +'<div class="gpsline" style="margin-bottom:9px">'+(g?("📍 "+g.lat.toFixed(5)+", "+g.lng.toFixed(5)+" (±"+g.acc+"m)"):"⚠ Không lấy được GPS — hãy bật định vị")+'</div>';
+    +'<div class="gpsline" style="margin-bottom:9px">'+(g?("📍 "+g.lat.toFixed(5)+", "+g.lng.toFixed(5)+" (±"+g.acc+"m)"):"⚠ Chưa lấy được vị trí — bật Location rồi bấm lấy lại")+'</div>'
+    +(g?"":'<button class="retrygps" style="margin-bottom:9px" onclick="retryGps(\'nt\')">📍 Lấy lại vị trí GPS</button>');
 }
 function ntMeetPicker(){
   var accName=String($("nt_accName")?$("nt_accName").value:"").trim();
@@ -2461,7 +2720,7 @@ function renderOrder(){
     '<div class="card pad" style="margin-bottom:12px">'+
       '<div class="row" style="margin-bottom:10px">'+
         '<div style="flex:2"><input class="inp" placeholder="🔍 Tìm theo account, mã, sản phẩm…" value="'+esc(S.filt.q)+'" oninput="S.filt.q=this.value;debOrd()"></div>'+
-        '<div><select class="inp" onchange="S.filt.pic=this.value;renderOrder()">'+opts(S.master.pic,S.filt.pic,"Mọi PIC")+'</select></div>'+
+        (isMgmt()?'<div><select class="inp" onchange="S.filt.pic=this.value;renderOrder()">'+opts(S.master.pic,S.filt.pic,"Mọi PIC")+'</select></div>':"")+
       '</div>'+
       '<div class="chipbar"><div class="chip'+(S.filt.month?"":" on")+'" onclick="S.filt.month=\'\';renderOrder()">Cả FY</div>'+
         months.map(function(m){ return '<div class="chip'+(S.filt.month===m?" on":"")+'" onclick="S.filt.month=\''+m+'\';renderOrder()">T'+parseInt(m.slice(4),10)+'</div>'; }).join("")+'</div>'+
@@ -2911,10 +3170,10 @@ function renderADP(){
       '<button class="btn pri sm" onclick="formADP(null)">＋ Thêm ADP</button></div>'+
 
     '<div class="card pad" style="margin-bottom:12px">'+
-      '<div class="chipbar" style="margin-bottom:10px"><div class="chip'+(f.pic?"":" on")+'" onclick="setAdpF(\'pic\',\'\')">Tất cả PIC</div>'+
+      (isMgmt()?'<div class="chipbar" style="margin-bottom:10px"><div class="chip'+(f.pic?"":" on")+'" onclick="setAdpF(\'pic\',\'\')">Tất cả PIC</div>'+
         picList.map(function(p){
           var c=all.filter(function(r){return r.pic===p;}).length;
-          return '<div class="chip'+(f.pic===p?" on":"")+'" onclick="setAdpF(\'pic\',\''+esc(p)+'\')">'+esc(p)+' <span style="opacity:.65">'+c+'</span></div>'; }).join("")+'</div>'+
+          return '<div class="chip'+(f.pic===p?" on":"")+'" onclick="setAdpF(\'pic\',\''+esc(p)+'\')">'+esc(p)+' <span style="opacity:.65">'+c+'</span></div>'; }).join("")+'</div>':"")+
       '<div class="row" style="align-items:flex-end;margin:0">'+
         selBar("adp_type","Loại địa bàn",typeList,f.type,"type")+
         selBar("adp_prov","Tỉnh thành",provList,f.prov,"prov")+
@@ -3037,20 +3296,11 @@ function saveADP(){
    Chỉ 4 tài khoản dưới đây mở được tab này. Xem theo tháng, lọc theo PIC,
    ảnh hiện thẳng trong app, và tải được file Excel thống kê.
    ═══════════════════════════════════════════════════════════════════════════ */
-var GALLERY_EMAILS = [
-  "nt.ha@manimedicalhanoi.com",        /* Director      */
-  "tt.tuyen@manimedicalhanoi.com",     /* Sales Manager */
-  "vtt.hoa@manimedicalhanoi.com",      /* HR            */
-  "mmh.product@manimedicalhanoi.com"   /* Product       */
-];
-function canSeeGallery(){
-  var e=String((S.user&&S.user.email)||"").trim().toLowerCase();
-  return !!e && GALLERY_EMAILS.indexOf(e)>=0;
-}
+/* quyền xem ảnh: dùng canSeeGallery() khai báo ở khối đăng nhập (nhóm Management) */
 function pgGallery(){
   if(!canSeeGallery()){
     $("main").innerHTML='<div class="pg"><div class="card pad"><div class="empty"><div class="e">🔒</div>'+
-      '<p>Mục này chỉ dành cho Director, Sales Manager, HR và Product.</p>'+
+      '<p>Mục này chỉ dành cho nhóm Management (Nguyen Ha · Tuyen · Hoa · Giang).</p>'+
       '<p style="font-size:12px;color:var(--mute);margin-top:6px">Tài khoản đang đăng nhập: '+esc(S.user.email||S.user.pic||"—")+'</p>'+
       '</div></div></div>';
     return;
