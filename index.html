@@ -174,11 +174,13 @@ table.tb tbody tr.sel td{background:var(--pale)}
 .empty p{font-size:13px}
 
 /* modal */
-#ov{position:fixed;inset:0;background:rgba(12,24,45,.5);backdrop-filter:blur(3px);z-index:600;display:none;align-items:flex-end;justify-content:center;padding:0}
+/* ⭐ v5.2 — modal phải nằm TRÊN drawer hồ sơ khách hàng (z-index 840),
+   nếu không thì "Thêm CBC / Thêm ADP / Ghi hoạt động" mở ra sẽ bị trang hồ sơ che mất. */
+#ov{position:fixed;inset:0;background:rgba(12,24,45,.5);backdrop-filter:blur(3px);z-index:860;display:none;align-items:flex-end;justify-content:center;padding:0}
 #ov.on{display:flex}
 @media(min-width:721px){#ov{align-items:center;padding:22px}}
 /* ⭐ v4.7 — LỚP 2: picker CBC nổi ĐÈ LÊN form nhập, form nhập không bị gỡ khỏi DOM */
-#ov2{position:fixed;inset:0;background:rgba(12,24,45,.55);backdrop-filter:blur(3px);z-index:700;display:none;align-items:flex-end;justify-content:center;padding:0}
+#ov2{position:fixed;inset:0;background:rgba(12,24,45,.55);backdrop-filter:blur(3px);z-index:880;display:none;align-items:flex-end;justify-content:center;padding:0}
 #ov2.on{display:flex}
 @media(min-width:721px){#ov2{align-items:center;padding:22px}}
 #modal2{max-width:620px}
@@ -199,7 +201,7 @@ table.tb tbody tr.sel td{background:var(--pale)}
 .tst{background:#182B4A;color:#fff;padding:10px 15px;border-radius:11px;font-size:13px;font-weight:600;box-shadow:var(--sh-3);animation:up .2s;max-width:100%;display:flex;gap:8px;align-items:flex-start}
 .tst.ok{background:#15703F}.tst.err{background:#A82F2C}.tst.warn{background:#8A5A00}
 
-#busy{position:fixed;inset:0;background:rgba(244,247,252,.72);backdrop-filter:blur(2px);z-index:800;display:none;flex-direction:column;align-items:center;justify-content:center;gap:12px}
+#busy{position:fixed;inset:0;background:rgba(244,247,252,.72);backdrop-filter:blur(2px);z-index:890;display:none;flex-direction:column;align-items:center;justify-content:center;gap:12px}
 #busy.on{display:flex}
 #busy .t{font-size:13px;font-weight:650;color:var(--blue-d)}
 
@@ -321,7 +323,8 @@ table.tb tbody tr.sel td{background:var(--pale)}
 .hbar-f{height:100%;border-radius:9px;transition:width .55s cubic-bezier(.32,.72,0,1)}
 
 /* ══════════════ DRAWER (màn hình phụ trượt từ phải) ══════════════ */
-#drw{position:fixed;inset:0;z-index:840;display:none}
+#drw{position:fixed;inset:0;z-index:840;display:none;transition:filter .2s,opacity .2s}
+body.modal-on #drw{filter:blur(2px) saturate(.85);opacity:.55}
 #drw.on{display:block}
 #drw .bd{position:absolute;inset:0;background:rgba(16,29,51,.42);backdrop-filter:blur(3px);opacity:0;transition:.25s}
 #drw.on .bd{opacity:1}
@@ -489,6 +492,12 @@ table.tb tbody tr.sel td{background:var(--pale)}
 
 /* ══════════════ ⭐ v4 — CẬP NHẬT THÔNG TIN ĐỊA BÀN ══════════════ */
 .tbar{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+/* ⭐ v5.2 — style nền cho .seg dùng được ở mọi nơi, không chỉ trong .tbar */
+.seg{display:inline-flex;background:var(--line2);border-radius:11px;padding:3px;gap:2px;flex:none}
+.seg button{border:none;background:none;padding:7px 14px;border-radius:9px;font-size:12.5px;font-weight:700;color:var(--sub);cursor:pointer;transition:.15s;white-space:nowrap;font-family:inherit;line-height:1.2}
+.seg button:hover{color:var(--blue-d)}
+.seg button.on{background:var(--card);color:var(--blue-d);box-shadow:var(--sh-1)}
+@media(max-width:520px){ .seg button{padding:7px 10px;font-size:12px} }
 .tbar .seg{display:flex;background:var(--line2);border-radius:11px;padding:3px;gap:2px}
 .tbar .seg button{border:none;background:none;padding:7px 14px;border-radius:9px;font-size:12.5px;font-weight:700;color:var(--sub);cursor:pointer;transition:.15s;white-space:nowrap}
 .tbar .seg button.on{background:var(--card);color:var(--blue-d);box-shadow:var(--sh-1)}
@@ -594,6 +603,9 @@ table.tb tbody tr.sel td{background:var(--pale)}
 .adpc-acts button:hover{background:var(--pale);border-color:var(--blue-l)}
 .adpc-acts button.pri{background:var(--navy);border-color:var(--navy);color:#fff}
 .adpc-kv{display:grid;grid-template-columns:auto 1fr;gap:4px 10px;font-size:12.5px;margin:9px 0;color:var(--sub)}
+.livetag{font-size:9.5px;font-weight:800;color:var(--ok);background:var(--ok-bg);border-radius:6px;padding:2px 5px;display:inline-block;margin-top:3px;letter-spacing:.2px}
+.adpc-note{margin-top:7px;font-size:10.5px;line-height:1.5;color:var(--sub);background:var(--paler);border:1px dashed var(--line);border-radius:8px;padding:6px 8px}
+.adpc-note b{color:var(--ink)}
 .adpms{display:flex;gap:4px;align-items:flex-end;margin-top:4px}
 /* ⭐ v5 — thẻ hạng mục báo cáo tháng: 2 cột PLAN | RESULT */
 .photorule{background:#FFF6E4;border:1px solid #F0DCA8;color:#8A5A00;border-radius:var(--r-md);padding:9px 11px;font-size:11.5px;line-height:1.55;margin-bottom:10px}
@@ -930,7 +942,58 @@ function insertResultTpl(id){
 function $(id){ return document.getElementById(id); }
 function esc(s){ return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
 function nl2br(s){ return esc(s).replace(/\n/g,"<br>"); }
-function n(v){ if(v===""||v==null) return 0; if(typeof v==="number") return v; var x=parseFloat(String(v).replace(/[^\d.\-]/g,"")); return isNaN(x)?0:x; }
+/* ⭐ v5.2 — ĐỌC SỐ TIỀN KIỂU VIỆT NAM, CHỊU ĐƯỢC Ô LẪN CHỮ.
+   Trước đây "700.000.000 VNĐ100 vỉ jizai150 tuýp comp" bị bóc thành
+   "700.000.000100150" ⇒ parseFloat ra 700 ⇒ app tưởng Target = 700 và
+   báo "lệch đơn vị". Nay:
+     · dấu chấm/phẩy phân cách nghìn được hiểu đúng ("700.000.000" = 700 triệu)
+     · bỏ qua phần chữ, lấy con số tiền thật trong ô
+     · hiểu hậu tố tr / triệu / tỷ / k / nghìn  ("20 triệu" = 20.000.000) */
+function numChunk(t){
+  t=String(t).replace(/\s/g,"");
+  var hasDot=t.indexOf(".")>=0, hasCom=t.indexOf(",")>=0, parts;
+  if(hasDot&&hasCom){
+    if(t.lastIndexOf(",")>t.lastIndexOf(".")) t=t.replace(/\./g,"").replace(/,/g,".");
+    else t=t.replace(/,/g,"");
+  } else if(hasDot){
+    parts=t.split(".");
+    if(parts.length>1&&parts.slice(1).every(function(x){return x.length===3;})) t=parts.join("");
+  } else if(hasCom){
+    parts=t.split(",");
+    t=(parts.length>1&&parts.slice(1).every(function(x){return x.length===3;}))
+      ? parts.join("") : t.replace(/,/g,".");
+  }
+  var x=parseFloat(t); return isNaN(x)?null:x;
+}
+var _NUM_RE=/(-?\d[\d.,]*)\s*(tỷ|ty|triệu|trieu|tr|nghìn|nghin|ngàn|ngan|k|m)?/gi;
+function n(v){
+  if(v===""||v==null) return 0;
+  if(typeof v==="number") return isFinite(v)?v:0;
+  var str=String(v);
+  var plain=numChunk(str);                       /* ô sạch: đi đường nhanh */
+  if(plain!=null && !/[^\d.,\-\s]/.test(str)) return plain;
+  var m, vals=[];
+  _NUM_RE.lastIndex=0;
+  while((m=_NUM_RE.exec(str))!==null){
+    if(!m[1]) continue;
+    var x=numChunk(m[1]); if(x==null) continue;
+    var suf=(m[2]||"").toLowerCase();
+    if(suf==="tỷ"||suf==="ty") x*=1e9;
+    else if(suf==="triệu"||suf==="trieu"||suf==="tr"||suf==="m") x*=1e6;
+    else if(suf==="nghìn"||suf==="nghin"||suf==="ngàn"||suf==="ngan"||suf==="k") x*=1e3;
+    vals.push(x);
+    if(_NUM_RE.lastIndex===m.index) _NUM_RE.lastIndex++;
+  }
+  if(!vals.length) return 0;
+  for(var i=0;i<vals.length;i++) if(Math.abs(vals[i])>=1000) return vals[i];  /* số tiền đầu tiên */
+  return vals[0];
+}
+/* ô có lẫn chữ ⇒ trả về chuỗi gốc để hiển thị chú thích cho người dùng đối chiếu */
+function messyNum(v){
+  if(v==null||typeof v==="number") return "";
+  var str=String(v).trim();
+  return (str && /[^\d.,\-\s]/.test(str)) ? str : "";
+}
 function fmtN(v){ return n(v).toLocaleString("vi-VN"); }
 function fmtVND(v){
   var x=n(v);
@@ -986,7 +1049,7 @@ function openModal(title,body,foot,wide){
   }
   S.modalRewire=null;
   $("mTitle").textContent=title; $("mBody").innerHTML=body; $("mFoot").innerHTML=foot||"";
-  $("modal").classList.toggle("wide",!!wide); $("ov").classList.add("on");
+  $("modal").classList.toggle("wide",!!wide); $("ov").classList.add("on"); modalDim();
 }
 function closeModal(){
   if(MSTACK.length){
@@ -999,9 +1062,16 @@ function closeModal(){
     return;
   }
   S.modalRewire=null;
-  $("ov").classList.remove("on"); S.editing=null; S.photos=[];
+  $("ov").classList.remove("on"); S.editing=null; S.photos=[]; modalDim();
 }
-function closeAllModals(){ MSTACK=[]; S.modalRewire=null; closeModal2(); $("ov").classList.remove("on"); S.editing=null; S.photos=[]; }
+function closeAllModals(){ MSTACK=[]; S.modalRewire=null; closeModal2(); $("ov").classList.remove("on"); S.editing=null; S.photos=[]; modalDim(); }
+/* ⭐ v5.2 — có modal đang mở thì làm mờ trang hồ sơ phía sau */
+function modalDim(){
+  try{
+    var on=$("ov").classList.contains("on")||$("ov2").classList.contains("on");
+    document.body.classList.toggle("modal-on",!!on);
+  }catch(e){}
+}
 
 /* ⭐ v4.7 — LỚP MODAL 2 (dùng riêng cho picker CBC "Người gặp" + thêm Key stakeholder).
    Trước đây picker dùng chung 1 modal ⇒ form "Thêm task" bị gỡ khỏi DOM, chèn xong
@@ -1011,12 +1081,12 @@ function closeAllModals(){ MSTACK=[]; S.modalRewire=null; closeModal2(); $("ov")
 var M2ON=false;
 function openModal2(title,body,foot){
   $("m2Title").textContent=title; $("m2Body").innerHTML=body; $("m2Foot").innerHTML=foot||"";
-  $("ov2").classList.add("on"); M2ON=true;
+  $("ov2").classList.add("on"); M2ON=true; modalDim();
   try{ $("m2Body").scrollTop=0; }catch(e){}
 }
 function closeModal2(){
   if(!$("ov2")) return;
-  $("ov2").classList.remove("on"); $("m2Body").innerHTML=""; $("m2Foot").innerHTML=""; M2ON=false;
+  $("ov2").classList.remove("on"); $("m2Body").innerHTML=""; $("m2Foot").innerHTML=""; M2ON=false; modalDim();
 }
 $("ov").addEventListener("click",function(e){ if(e.target===$("ov")&&!M2ON) closeModal(); });
 $("ov2").addEventListener("click",function(e){ if(e.target===$("ov2")) closeModal2(); });
@@ -1884,6 +1954,32 @@ function deltaCell(v){
 var TURNOVER_URL = "https://script.google.com/a/macros/manimedicalhanoi.com/s/AKfycbz26knlK_GE2mYlszlx947QWSLvfScrHFeB86XkaPWfDhKHi49cnVfCXS_kPUpkX2Fgww/exec";
 var TURNOVER_SEGMENTS = ["Dental","MMG"];
 
+/* ⭐ v5.2 — CHỈ 4 NHÀ PHÂN PHỐI VIỆT NAM CỦA MMH DENTAL SALES.
+   Mọi NPP khác trong file Turnover (nước ngoài, Eyeless, Surgical…) đều bị loại.
+   Cột "pic" quyết định sales nào nhìn thấy NPP nào:
+   khi lọc theo một PIC, chỉ NPP của người đó được tính.
+   ⚠️ Anh Nguyen kiểm tra lại cột pic bên dưới — bảng này lấy theo file
+   Monthly Report 08/2026; sửa 1 dòng ở đây là toàn app đổi theo. */
+var DENTAL_DISTRIBUTORS = [
+  { label:"Nam Dũng",  pic:"Viet",   match:["namdung"],        abbr:["nd"] },
+  { label:"Meci",      pic:"Phuong", match:["meci","merci"],   abbr:[] },
+  { label:"Việt Thái", pic:"Phuong", match:["vietthai"],       abbr:["vtm","vt"] },
+  { label:"SPI",       pic:"Vinh",   match:[],                 abbr:["spi"] }
+];
+/* Khớp tên NPP: chuỗi dài khớp kiểu "chứa", viết tắt ngắn phải là MỘT TỪ RIÊNG.
+   Nếu không tách bạch, "Thailand Co" sẽ dính "nd" và bị tính nhầm cho Nam Dũng. */
+function distributorOf(name){
+  var raw=noAcc(name).replace(/[^a-z0-9]+/g," ").replace(/\s+/g," ").trim();
+  if(!raw) return null;
+  var tight=raw.replace(/ /g,""), words=raw.split(" ");
+  for(var i=0;i<DENTAL_DISTRIBUTORS.length;i++){
+    var d=DENTAL_DISTRIBUTORS[i], j;
+    for(j=0;j<(d.match||[]).length;j++) if(tight.indexOf(d.match[j])>=0) return d;
+    for(j=0;j<(d.abbr||[]).length;j++) if(words.indexOf(d.abbr[j])>=0||tight===d.abbr[j]) return d;
+  }
+  return null;
+}
+
 function turnoverJsonp(params,timeoutMs){
   return new Promise(function(res,rej){
     var cb="__mmhto_"+Date.now()+"_"+(++_seq);
@@ -1902,37 +1998,61 @@ function turnoverJsonp(params,timeoutMs){
 function loadTurnover(force){
   if(S.turnover && !force) return Promise.resolve(S.turnover);
   if(S._toLoading) return S._toLoading;
-  S._toLoading = turnoverJsonp({action:"getTurnoverData"}).then(function(j){
-    S._toLoading=null;
+  /* _ts đổi mỗi lần gọi để trình duyệt và proxy không trả bản cũ.
+     File Turnover còn cache phía server 60 giây nên số mới nhất về chậm nhất sau 1 phút. */
+  S._toLoading = turnoverJsonp({action:"getTurnoverData", _ts:Date.now()}).then(function(j){
+    S._toLoading=null; S.turnoverErr="";
     if(!j || !j.ok) throw new Error((j&&j.error)||"File Turnover trả về dữ liệu không hợp lệ");
     S.turnover={ rows:j.rows||[], at:Date.now() };
     return S.turnover;
   }).catch(function(e){ S._toLoading=null; S.turnoverErr=e.message; throw e; });
   return S._toLoading;
 }
+/* ⭐ v5.2 — tự đọc lại khi đang mở tab KPI, để số bên Turnover đổi là app đổi theo */
+var _toTimer=null;
+function turnoverAutoOn(){
+  turnoverAutoOff();
+  _toTimer=setInterval(function(){
+    if(S.tab!=="kpi"||document.hidden) return;
+    loadTurnover(true).then(function(){ if(S.tab==="kpi") renderKPI(); }).catch(function(){});
+  }, 60000);
+}
+function turnoverAutoOff(){ if(_toTimer){ clearInterval(_toTimer); _toTimer=null; } }
+document.addEventListener("visibilitychange",function(){
+  if(!document.hidden && S.tab==="kpi" && S.turnover && Date.now()-S.turnover.at>60000)
+    loadTurnover(true).then(function(){ if(S.tab==="kpi") renderKPI(); }).catch(function(){});
+});
 /* gộp theo NPP trong khoảng tháng đang xem */
-function turnoverByDistributor(months){
+function turnoverByDistributor(months,picOnly){
   var t=S.turnover; if(!t) return null;
   var inM={}; (months||[]).forEach(function(m){ inM[String(m)]=1; });
   var segOK={}; TURNOVER_SEGMENTS.forEach(function(x){ segOK[String(x).toLowerCase()]=1; });
-  var byD={}, allMonths={}, segSeen={};
+  var byD={}, allMonths={}, segSeen={}, skipped={};
   t.rows.forEach(function(r){
-    var seg=String(r.segment||"");
-    segSeen[seg]=1;
+    var seg=String(r.segment||""); segSeen[seg]=1;
     if(!segOK[seg.toLowerCase()]) return;
+    var d=distributorOf(r.distributor);
+    if(!d){ skipped[String(r.distributor||"—")]=1; return; }   /* ngoài 4 NPP ⇒ bỏ */
+    if(picOnly && d.pic!==picOnly) return;
     allMonths[String(r.month)]=1;
     if(months && months.length && !inM[String(r.month)]) return;
-    var d=String(r.distributor||"—");
-    if(!byD[d]) byD[d]={ name:d, budget:0, actual:0, bySeg:{} };
-    byD[d].budget+=n(r.budget); byD[d].actual+=n(r.forecast);
-    if(!byD[d].bySeg[seg]) byD[d].bySeg[seg]={budget:0,actual:0};
-    byD[d].bySeg[seg].budget+=n(r.budget); byD[d].bySeg[seg].actual+=n(r.forecast);
+    var key=d.label;
+    if(!byD[key]) byD[key]={ name:d.label, pic:d.pic, budget:0, actual:0, bySeg:{} };
+    byD[key].budget+=n(r.budget); byD[key].actual+=n(r.forecast);
+    if(!byD[key].bySeg[seg]) byD[key].bySeg[seg]={budget:0,actual:0};
+    byD[key].bySeg[seg].budget+=n(r.budget); byD[key].bySeg[seg].actual+=n(r.forecast);
   });
   var list=Object.keys(byD).map(function(k){ return byD[k]; })
     .sort(function(a,b){ return b.actual-a.actual; });
   return { list:list, budget:list.reduce(function(x,r){return x+r.budget;},0),
            actual:list.reduce(function(x,r){return x+r.actual;},0),
-           fileMonths:Object.keys(allMonths).sort(), segments:Object.keys(segSeen).sort() };
+           fileMonths:Object.keys(allMonths).sort(), segments:Object.keys(segSeen).sort(),
+           skipped:Object.keys(skipped).sort() };
+}
+/* tổng Actual/Forecast của đúng 4 NPP — dùng cho dòng "doanh số Dental" ở PHẦN A */
+function turnoverDentalActual(picOnly){
+  var g=turnoverByDistributor((S.toRange==="FY")?fyMonths(S.fy):null, picOnly||"");
+  return g?g.actual:null;
 }
 function fmtUSD(v){
   var x=n(v);
@@ -1947,10 +2067,12 @@ function refreshTurnover(){
 }
 function setToRange(v){ S.toRange=v; renderKPI(); }
 /* khối hiển thị trong tab KPI */
-function turnoverBlock(){
+function turnoverBlock(picSel){
   var months = (S.toRange==="FY") ? fyMonths(S.fy) : null;   /* null = lấy toàn bộ tháng có trong file */
+  var stamp = S.turnover ? ('cập nhật '+new Date(S.turnover.at).toLocaleTimeString("vi-VN",{hour:"2-digit",minute:"2-digit"})) : "";
   var head='<div class="ct"><span class="dot"></span>Doanh số nhà phân phối'+
-    '<small>Nguồn: tab "SUM TURNOVER" · '+TURNOVER_SEGMENTS.join(" + ")+'</small><span class="sp"></span>'+
+    '<small>'+TURNOVER_SEGMENTS.join(" + ")+' · 4 NPP Việt Nam'+(picSel?(" · lọc theo "+esc(picSel)):"")+
+      (stamp?(" · "+stamp):"")+'</small><span class="sp"></span>'+
     '<div class="seg" style="margin-right:8px">'+
       '<button class="'+(S.toRange==="FY"?"on":"")+'" onclick="setToRange(\'FY\')">Theo '+esc(S.fy)+'</button>'+
       '<button class="'+(S.toRange!=="FY"?"on":"")+'" onclick="setToRange(\'ALL\')">Toàn bộ file</button>'+
@@ -1965,8 +2087,12 @@ function turnoverBlock(){
     return '<div class="card pad" style="margin-bottom:14px">'+head+
       '<div class="empty" style="padding:18px 0"><div class="e">⏳</div><p>Đang đọc doanh số NPP từ file MMH Turnover…</p></div></div>';
 
-  var g=turnoverByDistributor(months);
+  var g=turnoverByDistributor(months,picSel||"");
   if(!g.list.length){
+    if(picSel && !DENTAL_DISTRIBUTORS.some(function(d){ return d.pic===picSel; }))
+      return '<div class="card pad" style="margin-bottom:14px">'+head+
+        '<div class="empty" style="padding:18px 0"><div class="e">👤</div><p><b>'+esc(picSel)+
+        '</b> chưa được gán nhà phân phối nào. Bấm “Toàn nhóm” để xem cả 4 NPP.</p></div></div>';
     var why = (months && g.fileMonths.length)
       ? ('File Turnover đang chứa dữ liệu các tháng <b>'+esc(g.fileMonths[0])+' → '+esc(g.fileMonths[g.fileMonths.length-1])+
          '</b>, không trùng tháng nào của '+esc(S.fy)+'. Bấm “Toàn bộ file” để xem, hoặc mở file Turnover sửa <b>CONFIG.FY_FILTER</b> và <b>VALID_MONTHS</b> sang '+esc(S.fy)+'.')
@@ -1985,17 +2111,18 @@ function turnoverBlock(){
         (pct!=null?pb(pct)+'<div class="pbl"><span style="color:'+pctColor(pct)+'">'+Math.round(pct*100)+'%</span><span>'+
           (g.actual>=g.budget?("vượt "+fmtUSD(g.actual-g.budget)):("còn "+fmtUSD(g.budget-g.actual)))+'</span></div>':"")+'</div>'+
       '<div class="kpi"><div class="lb">Số nhà phân phối</div><div class="vl">'+fmtN(g.list.length)+'</div>'+
-        '<div class="sb">'+esc(g.list.slice(0,3).map(function(x){return x.name;}).join(" · "))+'</div></div>'+
+        '<div class="sb">'+esc(g.list.map(function(x){return x.name;}).join(" · "))+'</div></div>'+
       '<div class="kpi"><div class="lb">NPP dẫn đầu</div><div class="vl" style="font-size:19px">'+esc(g.list[0].name)+'</div>'+
         '<div class="sb">'+fmtUSD(g.list[0].actual)+' · '+(g.list[0].budget?Math.round(g.list[0].actual/g.list[0].budget*100)+"% mục tiêu":"chưa có budget")+'</div></div>'+
     '</div>'+
     '<div class="tbwrap"><table class="tb"><thead><tr><th>Nhà phân phối</th>'+
       TURNOVER_SEGMENTS.map(function(sg){ return '<th class="num">'+esc(sg)+'</th>'; }).join("")+
-      '<th class="num">Mục tiêu MMH</th><th class="num">Actual</th><th class="num">Chênh lệch</th>'+
+      '<th class="num">Mục tiêu MMH</th><th class="num">Actual / Forecast</th><th class="num">Chênh lệch</th>'+
       '<th style="width:170px">% đạt</th></tr></thead><tbody>'+
     g.list.map(function(r){
       var p=r.budget?r.actual/r.budget:null;
-      return '<tr><td><b>'+esc(r.name)+'</b></td>'+
+      return '<tr><td><b>'+esc(r.name)+'</b>'+
+        '<div style="font-size:11px;color:var(--mute)">PIC: '+esc(r.pic)+'</div></td>'+
         TURNOVER_SEGMENTS.map(function(sg){
           var v=r.bySeg[sg]; return '<td class="num">'+(v&&v.actual?fmtUSD(v.actual):"—")+'</td>'; }).join("")+
         '<td class="num">'+(r.budget?fmtUSD(r.budget):"—")+'</td>'+
@@ -2020,6 +2147,7 @@ function renderKPI(){
   var k=S.kpi, mgr=S.user.role==="manager";
   var qsel=S.kpiQ||"FY";
   var picSel=mgr?(S.kpiPic||""):S.user.pic;   /* sales chỉ xem chỉ tiêu của mình */
+  turnoverAutoOn();
 
   /* ── PHẦN A ── */
   var partA='<div class="tbwrap"><table class="tb"><thead><tr>'+
@@ -2029,17 +2157,26 @@ function renderKPI(){
       var dv=S.targetDraft["A"+a.row];
       var v=dv!==undefined?dv.value:(a.target?fmtN(a.target):"");
       var inp=mgr?'<input class="inp num" style="height:32px;text-align:right" value="'+esc(v)+'" data-scope="A" data-row="'+a.row+'" oninput="tgIn(this)">':('<b>'+(a.target?fmtN(a.target):"—")+'</b>');
+      /* ⭐ v5.2 — dòng doanh số Dental lấy Actual từ tổng 4 NPP bên file Turnover,
+         số bên đó đổi là dòng này đổi theo, không phải nhập tay. */
+      var act=a.actual, pct=a.pct, live=false;
+      if(a.blockId==="amount"){
+        var lv=turnoverDentalActual(picSel);
+        if(lv!=null && lv>0){ act=lv; pct=a.target?lv/a.target:null; live=true; }
+      }
       return '<tr><td class="ctr" style="color:var(--mute)">'+esc(a.no)+'</td><td><b>'+esc(a.objective)+'</b></td><td>'+esc(a.kpi)+' <span style="color:var(--mute)">('+esc(a.unit)+')</span></td>'+
         '<td class="num" style="width:130px">'+inp+'</td>'+
         '<td class="num">'+(a.prevActual?fmtN(a.prevActual):"—")+'</td>'+
         deltaCell(a.growth)+
-        '<td class="num"><b>'+fmtN(a.actual)+'</b></td>'+
-        '<td>'+(a.pct==null?'<span style="color:var(--mute);font-size:12px">chưa đặt mục tiêu</span>':pb(a.pct)+'<div class="pbl"><span style="color:'+pctColor(a.pct)+'">'+Math.round(a.pct*100)+'%</span><span>'+(a.pct>=1?"Đạt":a.pct>=.8?"Gần đạt":"Chưa đạt")+'</span></div>')+'</td></tr>';
+        '<td class="num"><b>'+fmtN(act)+'</b>'+
+          (live?'<div class="livetag" title="Tổng Actual/Forecast của 4 NPP, đọc trực tiếp từ file MMH Turnover">⟳ từ Turnover</div>':"")+'</td>'+
+        '<td>'+(pct==null?'<span style="color:var(--mute);font-size:12px">chưa đặt mục tiêu</span>':pb(pct)+'<div class="pbl"><span style="color:'+pctColor(pct)+'">'+Math.round(pct*100)+'%</span><span>'+(pct>=1?"Đạt":pct>=.8?"Gần đạt":"Chưa đạt")+'</span></div>')+'</td></tr>';
     }).join("")+'</tbody></table></div>';
 
   /* ── PHẦN B ── */
   var picList=[];
   (k.blocks||[]).forEach(function(b){ (b.rows||[]).forEach(function(r){ if(picList.indexOf(r.pic)<0) picList.push(r.pic); }); });
+  DENTAL_DISTRIBUTORS.forEach(function(d){ if(d.pic&&picList.indexOf(d.pic)<0) picList.push(d.pic); });
 
   var blocks=(k.blocks||[]).filter(function(b){ return !KPI_HIDE[b.id]; }).map(function(b){
     var showD=!!KPI_DELTA[b.id];
@@ -2098,7 +2235,7 @@ function renderKPI(){
       '<div class="chip'+(qsel==="M"?" on":"")+'" onclick="setKpiQ(\'M\')">Theo tháng</div></div></div>'+
 
     '<div class="card pad" style="margin-bottom:14px"><div class="ct"><span class="dot"></span>PHẦN A — Tổng mục tiêu MMH Dental</div>'+partA+'</div>'+
-    turnoverBlock()+
+    turnoverBlock(picSel)+
 
     '<div style="display:flex;align-items:flex-end;gap:12px;flex-wrap:wrap;margin:16px 4px 10px">'+
       '<div><div style="font-size:12.5px;font-weight:800;color:var(--navy);letter-spacing:.3px">PHẦN B — CHỈ TIÊU PHÂN BỔ THEO SALE</div>'+
@@ -4140,7 +4277,10 @@ function adpCard(r,g){
   var lv=lastVisitOf(a.name);
   var tg=n(r.targetAmt), ac=n(r.actualAmt);
   var p=tg?ac/tg:null;
-  var odd=(p!=null&&p>10);                       /* target/actual lệch đơn vị ⇒ cảnh báo thay vì vẽ % vô nghĩa */
+  /* ⭐ v5.2 — chỉ cảnh báo khi thật sự lệch bậc đơn vị (Actual gấp >50 lần Target).
+     Ô có lẫn chữ giờ đã đọc đúng số tiền nên không còn báo nhầm. */
+  var odd=(p!=null&&p>50);
+  var msgT=messyNum(r.targetAmt), msgA=messyNum(r.actualAmt);
   var days=lv?Math.round((new Date(todayISO())-new Date(lv.date))/86400000):null;
   var vt = lv
     ? '<div class="adpv'+(days>60?" old":days>30?" mid":"")+'">🕑 Gặp gần nhất <b>'+fmtVN(lv.date)+'</b>'
@@ -4164,9 +4304,14 @@ function adpCard(r,g){
       : (r.objective||r.keyAction?'<div class="adpc-o">'+nl2br(String(r.objective||r.keyAction).slice(0,180))+'</div>':""))+
     (tg
       ? (odd
-          ? '<div class="adpc-w">⚠️ Target '+fmtN(tg)+' và Actual '+fmtN(ac)+' lệch đơn vị — kiểm tra lại sheet</div>'
+          ? '<div class="adpc-w">⚠️ Actual '+fmtVND(ac)+' lớn hơn Target '+fmtVND(tg)+' quá nhiều — kiểm tra lại đơn vị trong sheet</div>'
           : pb(p)+'<div class="pbl"><span>'+fmtVND(ac)+' / '+fmtVND(tg)+'</span><span style="color:'+pctColor(p)+'">'+Math.round(p*100)+'%</span></div>')
       : '<div class="adpc-n">Chưa đặt FY target</div>')+
+    ((msgT||msgA)
+      ? '<div class="adpc-note">ℹ️ Ô trong sheet có lẫn chữ, app đọc là '+
+        (msgT?('Target <b>'+fmtVND(tg)+'</b>'):"")+(msgT&&msgA?" · ":"")+
+        (msgA?('Actual <b>'+fmtVND(ac)+'</b>'):"")+'</div>'
+      : "")+
     '<div class="adpc-acts">'+
       '<button onclick="event.stopPropagation();rAcc(\''+accKey+'\')">🗂 Dữ liệu account</button>'+
       '<button onclick="event.stopPropagation();rWeeklyFor(\''+reg(mkAcc(a))+'\')">📍 Ghi hoạt động</button>'+
