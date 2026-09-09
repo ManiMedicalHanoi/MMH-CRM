@@ -655,6 +655,13 @@ body.modal-on #drw{filter:blur(2px) saturate(.85);opacity:.55}
 .hp-b ul{margin:0;padding-left:17px}
 .hp-b li{font-size:13.5px;line-height:1.68;color:var(--sub);margin-bottom:9px}
 .hp-b li b{color:var(--ink)}
+/* ⭐ v6.0 — bảng Key stakeholder */
+.st-tb{font-size:12.5px}
+.st-tb td{vertical-align:top;padding:10px 11px}
+.st-tb .tag{font-size:10px;padding:2px 6px}
+.st-acts{display:flex;gap:4px;flex-wrap:wrap}
+tr.st-cold td{background:#FFFCF5}
+.tag.t-p{background:#F7EDF6;color:#B44FA6}
 .shtabs{display:flex;gap:4px;margin-bottom:13px;border-bottom:2px solid var(--line);overflow-x:auto;-webkit-overflow-scrolling:touch}
 .shtabs::-webkit-scrollbar{display:none}
 .shtabs button{flex:none;display:flex;align-items:center;gap:7px;height:42px;padding:0 17px;border:1px solid var(--line);border-bottom:none;background:var(--paler);color:var(--sub);font-size:13.5px;font-weight:700;cursor:pointer;border-radius:11px 11px 0 0;margin-bottom:-2px;transition:.15s;white-space:nowrap;font-family:inherit}
@@ -1010,6 +1017,7 @@ var S = {
   vFrom:"", vTo:"",          /* lọc khoảng ngày ở "Cập nhật thông tin địa bàn" */
   custSort:"",               /* sắp xếp danh sách khách hàng */
   other:null, otherErr:"", otherPic:"", otherQ:"", otherStatus:"", otherOpen:{}, otherShowVisit:false,
+  stTab:"all", stQ:"", stEvent:"", stLimit:60, stSort:"", eventSync:null,
   wkTab:(function(){ try{ return localStorage.getItem("mmh_wktab")||"terr"; }catch(e){ return "terr"; } })(),
   dashG:"all",               /* nhóm thông tin đang xem trên Dashboard */
   adpView:"board",           /* board | list — ADP xem dạng bảng ABCD hay danh sách lớn */
@@ -2010,6 +2018,13 @@ var HELP_SECTIONS = [
     ["Sửa thông tin","Trong hồ sơ, tab Thông tin có nút <b>✎ Sửa thông tin</b>, sửa xong bấm lưu."],
     ["Thêm account mới","Mã khách hàng được đề xuất tự động theo số kế tiếp, vẫn sửa được."]
   ]},
+  { ic:"🤝", t:"Key stakeholder &amp; khách từ Event", rows:[
+    ["Danh sách người liên hệ","Mục <b>Key stakeholder</b> nằm ngay dưới Khách hàng, gom toàn bộ CBC kèm điện thoại, chức vụ, Influence, Trust, ngày thêm."],
+    ["Cột Đã làm việc","Đếm số lần bạn ghi nhận gặp người đó trong FY, tách theo 📍 viếng thăm · 📞 gọi điện · 💬 nhắn tin. Đếm dựa vào dòng <b>Người gặp:</b> trong Task Result — ghi đúng tên thì mới tính."],
+    ["Tab Khách hàng Event","Lọc riêng những người thu được tại hội thảo, có tag ghi rõ sự kiện nào và ai chưa được chăm sóc lại."],
+    ["Đồng bộ từ file Event","Bấm <b>⟳ Đồng bộ từ file Event</b> để kéo khách mới từ file dữ liệu sự kiện sang tab 2. CBC. Chạy lại nhiều lần không bị nhân đôi."],
+    ["Khách chưa có Account","Vẫn được thêm với ô Account trống. Mở hồ sơ để gán account thì mới theo dõi được doanh số."]
+  ]},
   { ic:"🗓", t:"Báo cáo tháng", rows:[
     ["Chọn kỳ ở dải tháng","Số nhỏ cạnh tháng là số hạng mục đã có."],
     ["Bấm 🧩 Tạo đủ khung tháng này","App tạo sẵn toàn bộ hạng mục theo khung Type task chuẩn, mỗi hạng mục đã có sẵn đề mục để điền."],
@@ -2050,11 +2065,251 @@ function openHelp(){
 }
 function toggleHelp(i){ var e=$("hpsec-"+i); if(e) e.classList.toggle("open"); }
 
+
+/* ═══════════ ⭐ v6.0 — KEY STAKEHOLDER (CBC) & KHÁCH HÀNG TỪ EVENT ═══════════
+   Nguồn: tab "2. CBC" của file CRM.
+     · Ghi chú (cột R) chứa "Khách hàng từ Event: <tên>" ⇒ nhận ra khách đến từ event nào
+     · Log tạo mới (cột S) chứa mốc thời gian ⇒ biết ngày thêm
+   Số lần làm việc: đếm các task đi địa bàn có dòng "Người gặp:" nhắc tên CBC đó,
+   tách theo Type action (Visiting / Telephone / Message…).
+   Doanh số: cộng đơn hàng của ACCOUNT mà CBC đó thuộc về (đơn hàng ghi theo account,
+   không ghi theo từng người liên hệ) — nhãn trên bảng nói rõ điều này. */
+var EVENT_URL  = "https://script.google.com/macros/s/AKfycbz1qIyw42C1qz_rBlzI0PPGPuDubo1s5r5BT0knuUf84mfROB7U97QbzNLqOWezK-d-/exec";
+var EVENT_NOTE_RE = /Khách hàng từ Event:\s*([^·\n]+)/i;
+
+function eventOfCbc(b){
+  var m = EVENT_NOTE_RE.exec(String(b.note||""));
+  return m ? String(m[1]).trim() : "";
+}
+function stampOfLog(v){
+  var m = /(\d{2})\/(\d{2})\/(\d{4})/.exec(String(v||""));
+  return m ? (m[3]+"-"+m[2]+"-"+m[1]) : "";
+}
+/* gom toàn bộ chỉ số cho từng CBC — có bộ nhớ đệm theo FY + kích thước nguồn */
+var _stCache=null,_stKey="";
+function stakeRows(){
+  var cbc=S.cbcRows||[], wk=terrRows(), od=tGet("order")||[];
+  var key=[S.fy,cbc.length,wk.length,od.length,(S.cache.weekly?S.cache.weekly.at:0)].join("|");
+  if(_stCache&&_stKey===key) return _stCache;
+
+  /* doanh số theo account trong FY đang chọn */
+  var fym={}; fyMonths(S.fy).forEach(function(m){ fym[String(m)]=1; });
+  var salesByAcc={};
+  od.forEach(function(r){
+    if(!fym[String(r.month||"")]) return;
+    var k=noAcc(r.name).trim(); if(!k) return;
+    salesByAcc[k]=(salesByAcc[k]||0)+n(r.amount);
+  });
+
+  /* các buổi làm việc trong FY, gom theo account để dò nhanh */
+  var actByAcc={};
+  wk.forEach(function(w){
+    if(String(w.fy||"")!==S.fy) return;
+    var k=noAcc(parseAcc(w.account).name).trim(); if(!k) return;
+    (actByAcc[k]=actByAcc[k]||[]).push(w);
+  });
+
+  var out=(cbc||[]).filter(function(b){ return String(b.contact||"").trim(); }).map(function(b){
+    var accKey=noAcc(b.name).trim();
+    var list=actByAcc[accKey]||[];
+    var who=noAcc(b.contact).replace(/\s+/g," ").trim();
+    var nVisit=0,nTele=0,nMsg=0,nOther=0,last="";
+    list.forEach(function(w){
+      var meet=(MEET_RE.exec(String(w.result||""))||[""])[0];
+      if(!who || noAcc(meet).indexOf(who)<0) return;      /* task không nhắc tên người này */
+      var ta=noAcc(w.typeAction||"");
+      if(ta.indexOf("visit")>=0) nVisit++;
+      else if(ta.indexOf("tele")>=0||ta.indexOf("phone")>=0||ta.indexOf("goi")>=0) nTele++;
+      else if(ta.indexOf("mess")>=0||ta.indexOf("zalo")>=0||ta.indexOf("mail")>=0||ta.indexOf("chat")>=0) nMsg++;
+      else nOther++;
+      var d=String(w.start||"").slice(0,10);
+      if(d>last) last=d;
+    });
+    return {
+      _row:b._row, code:b.code||"", acc:b.name||"", contact:b.contact||"",
+      phone:b.phone||"", jobTitle:b.jobTitle||"", specialize:b.specialize||"",
+      role:b.role||"", influence:b.influence||"", trust:b.trust||"",
+      area:b.area||"", province:b.province||"", pic:b.pic||"", cbcNo:b.cbcNo||"",
+      note:b.note||"", event:eventOfCbc(b), created:stampOfLog(b.log),
+      nVisit:nVisit, nTele:nTele, nMsg:nMsg, nOther:nOther,
+      nTotal:nVisit+nTele+nMsg+nOther, last:last,
+      sales:salesByAcc[accKey]||0
+    };
+  });
+  _stCache=out; _stKey=key; return out;
+}
+function stakeEvents(){
+  var m={};
+  stakeRows().forEach(function(r){ if(r.event) m[r.event]=(m[r.event]||0)+1; });
+  return Object.keys(m).sort(function(a,b){ return String(b).localeCompare(String(a)); })
+               .map(function(k){ return {ev:k,n:m[k]}; });
+}
+function stakeFiltered(){
+  var rows=stakeRows(), toks=skTokens(S.stQ||"");
+  var mgr=isMgmt(), me=S.user.pic;
+  var out=[];
+  rows.forEach(function(r){
+    if(!mgr && r.pic && !picEq(r.pic,me)) return;        /* sales chỉ xem CBC mình phụ trách */
+    if(S.stTab==="event" && !r.event) return;
+    if(S.stEvent && r.event!==S.stEvent) return;
+    if(toks.length){
+      var hay=noAcc([r.contact,r.acc,r.phone,r.jobTitle,r.specialize,r.province,r.pic,r.event].join(" "));
+      if(!toks.every(function(t){ return hay.indexOf(t)>=0; })) return;
+    }
+    out.push(r);
+  });
+  if(S.stSort==="sales")  out.sort(function(a,b){ return b.sales-a.sales; });
+  else if(S.stSort==="act") out.sort(function(a,b){ return b.nTotal-a.nTotal; });
+  else if(S.stSort==="none") out.sort(function(a,b){ return a.nTotal-b.nTotal; });
+  else out.sort(function(a,b){ return String(a.acc).localeCompare(String(b.acc))
+                                  || String(a.contact).localeCompare(String(b.contact)); });
+  return { rows:out, toks:toks };
+}
+function setStTab(t){ S.stTab=t; S.stLimit=60; renderStake(); }
+function setStFilter(k,v){ S[k]=v; S.stLimit=60; renderStake(); }
+var _dbst; function debStake(){ clearTimeout(_dbst); _dbst=setTimeout(function(){ keepCaret("st_q",renderStake); },140); }
+
+/* gọi backend file Event chạy đồng bộ ngay */
+function syncEventNow(){
+  busy(true,"Đang đọc file khách Event và ghi sang tab 2. CBC…");
+  var cb="__mmhev_"+Date.now()+"_"+(++_seq);
+  var el=document.createElement("script");
+  var t=setTimeout(function(){ done(); busy(false);
+    toast("Quá thời gian chờ — mở file Event rồi chạy menu MMH Event ▸ ② Đồng bộ ngay","warn",8000); },90000);
+  function done(){ clearTimeout(t); try{ delete window[cb]; }catch(e){ window[cb]=undefined; }
+                   if(el.parentNode) el.parentNode.removeChild(el); }
+  window[cb]=function(j){
+    done(); busy(false);
+    if(!j||!j.ok) return toast("Lỗi đồng bộ: "+((j&&j.error)||"không rõ"),"err",8000);
+    S.eventSync=j;
+    toast("✓ "+j.message,"ok",7000);
+    S.cbcRows=null; S._cbcLoading=false; ensureCbc();
+    _stCache=null;
+    setTimeout(function(){ if(S.tab==="stake") renderStake(); },1600);
+  };
+  el.src=EVENT_URL+"?action=sync&callback="+cb+"&_ts="+Date.now();
+  el.onerror=function(){ done(); busy(false);
+    toast("Không gọi được file Event — kiểm tra Web App đã Deploy quyền “Anyone”.","err",8000); };
+  document.body.appendChild(el);
+}
+
+function pgStake(){
+  if(!S.cbcRows){ ensureCbc(); setTimeout(function(){ if(S.tab==="stake") renderStake(); },1500); }
+  if(!tGet("order")) ensureTab("order",{},function(r,ready){ if(ready&&S.tab==="stake"){ _stCache=null; renderStake(); } });
+  if(!S.cache.weekly) loadTerritoryAll(true).then(function(){ if(S.tab==="stake"){ _stCache=null; renderStake(); } });
+  renderStake();
+}
+function stakeTabBar(){
+  var t=S.stTab||"all";
+  var nEv=stakeRows().filter(function(r){ return !!r.event; }).length;
+  return '<div class="shtabs">'+
+    '<button class="'+(t==="all"?"on":"")+'" onclick="setStTab(\'all\')">🤝 Tất cả CBC</button>'+
+    '<button class="'+(t==="event"?"on":"")+'" onclick="setStTab(\'event\')">🎪 Khách hàng Event'+
+      (nEv?'<span class="cnt">'+nEv+'</span>':"")+'</button>'+
+  '</div>';
+}
+function renderStake(){
+  if(!S.cbcRows){
+    $("main").innerHTML='<div class="pg">'+stakeTabBarSafe()+
+      '<div class="ph"><div><h2>Key stakeholder</h2><p>Đang nạp danh bạ CBC…</p></div></div>'+skRows(7,true)+'</div>';
+    return;
+  }
+  var f=stakeFiltered(), rows=f.rows, toks=f.toks, shown=rows.slice(0,S.stLimit);
+  var isEv=(S.stTab==="event");
+  var evs=stakeEvents();
+
+  var nTouched=rows.filter(function(r){ return r.nTotal>0; }).length;
+  var nNone=rows.length-nTouched;
+  var totalSales=rows.reduce(function(x,r){ return x+r.sales; },0);
+  var cov=rows.length?nTouched/rows.length:0;
+
+  $("main").innerHTML='<div class="pg">'+
+    stakeTabBar()+
+    '<div class="trhead compact"><div class="tt"><span class="sub"><b>'+fmtN(rows.length)+'</b> người liên hệ'+
+      (isEv?' từ event':'')+' · '+esc(S.fy)+'</span></div>'+
+      '<div class="acts">'+
+        (isEv?'<button class="btn sm" onclick="syncEventNow()">⟳ Đồng bộ từ file Event</button>':"")+
+        '<button class="btn pri sm" onclick="formCBC(null,\'\')">＋ Thêm CBC</button></div></div>'+
+    '<div class="grid g4" style="margin-bottom:13px">'+
+      '<div class="kpi"><div class="lb">'+(isEv?'Khách từ Event':'Tổng CBC')+'</div><div class="vl">'+fmtN(rows.length)+'</div>'+
+        '<div class="sb">'+(isEv?fmtN(evs.length)+' sự kiện':'Trong phạm vi đang xem')+'</div></div>'+
+      '<div class="kpi"><div class="lb">Đã tiếp xúc</div><div class="vl">'+fmtN(nTouched)+'</div>'+
+        '<div class="sb">Có ít nhất 1 lần làm việc trong '+esc(S.fy)+'</div>'+pb(cov)+
+        '<div class="pbl"><span style="color:'+pctColor(cov)+'">'+Math.round(cov*100)+'%</span><span>còn '+fmtN(nNone)+'</span></div></div>'+
+      '<div class="kpi"><div class="lb">Chưa chăm sóc</div><div class="vl" style="color:'+(nNone?"#D9433F":"#1E9E5A")+'">'+fmtN(nNone)+'</div>'+
+        '<div class="sb">'+(nNone?'Chưa ghi nhận buổi làm việc nào':'Đã tiếp xúc hết')+'</div></div>'+
+      '<div class="kpi"><div class="lb">Doanh số account liên quan</div><div class="vl">'+fmtVND(totalSales)+'</div>'+
+        '<div class="sb">Cộng theo account của các CBC này</div></div>'+
+    '</div>'+
+    '<div class="card pad" style="margin-bottom:12px">'+
+      '<div class="row" style="margin-bottom:9px">'+
+        '<div style="flex:2"><input class="inp" id="st_q" autocomplete="off" '+
+          'placeholder="🔍 Tìm theo tên người, account, số điện thoại, chức vụ…" value="'+esc(S.stQ||"")+'" '+
+          'oninput="S.stQ=this.value;S.stLimit=60;debStake()"></div>'+
+        (evs.length?'<div><select class="inp" onchange="setStFilter(\'stEvent\',this.value)">'+
+          '<option value="">Mọi sự kiện</option>'+
+          evs.map(function(e){ return '<option value="'+esc(e.ev)+'"'+(S.stEvent===e.ev?" selected":"")+'>'+esc(e.ev)+' ('+e.n+')</option>'; }).join("")+
+          '</select></div>':"")+
+      '</div>'+
+      '<div class="chipbar" style="margin-bottom:0">'+
+        '<div class="chip'+(S.stSort==="none"?" on":"")+'" onclick="setStFilter(\'stSort\',\''+(S.stSort==="none"?"":"none")+'\')">Chưa chăm sóc trước</div>'+
+        '<div class="chip'+(S.stSort==="act"?" on":"")+'" onclick="setStFilter(\'stSort\',\''+(S.stSort==="act"?"":"act")+'\')">Nhiều lần làm việc nhất</div>'+
+        '<div class="chip'+(S.stSort==="sales"?" on":"")+'" onclick="setStFilter(\'stSort\',\''+(S.stSort==="sales"?"":"sales")+'\')">Doanh số cao nhất</div>'+
+      '</div></div>'+
+    (shown.length
+      ? '<div class="card pad"><div class="tbwrap" style="max-height:none"><table class="tb st-tb"><thead><tr>'+
+        '<th>Người liên hệ</th><th>Account</th><th style="width:118px">Điện thoại</th>'+
+        '<th style="width:150px">Chức vụ / Chuyên khoa</th><th style="width:132px">Influence · Trust</th>'+
+        (isEv||evs.length?'<th style="width:170px">Nguồn Event</th>':"")+
+        '<th style="width:150px">Đã làm việc</th><th class="num" style="width:110px">Doanh số</th>'+
+        '<th style="width:100px">Ngày thêm</th></tr></thead><tbody>'+
+        shown.map(function(r){ return stakeRow(r,toks,isEv||evs.length); }).join("")+
+        '</tbody></table></div>'+
+        (rows.length>S.stLimit?'<div style="text-align:center;margin-top:12px">'+
+          '<button class="btn" onclick="S.stLimit+=100;renderStake()">Xem thêm ('+fmtN(rows.length-S.stLimit)+' người)</button></div>':"")+
+        '</div>'
+      : '<div class="card pad"><div class="empty"><div class="e">🤝</div>'+
+        '<p>'+(isEv?'Chưa có khách hàng nào từ event trong danh bạ CBC':'Không có người liên hệ nào khớp bộ lọc')+'</p>'+
+        (isEv?'<p style="font-size:12px;color:var(--mute);max-width:480px;margin:8px auto 0;line-height:1.6">'+
+          'Bấm <b>⟳ Đồng bộ từ file Event</b> ở trên để kéo khách từ file dữ liệu event sang tab 2. CBC.</p>'+
+          '<button class="btn sm pri" style="margin-top:11px" onclick="syncEventNow()">⟳ Đồng bộ ngay</button>':"")+
+        '</div></div>')+
+  '</div>';
+}
+function stakeTabBarSafe(){ try{ return stakeTabBar(); }catch(e){ return ""; } }
+function stakeRow(r,toks,showEv){
+  var lv=r.last?Math.round((new Date(todayISO())-new Date(r.last))/86400000):null;
+  var acts=[];
+  if(r.nVisit) acts.push('<span class="tag t-b" title="Viếng thăm">📍 '+r.nVisit+'</span>');
+  if(r.nTele)  acts.push('<span class="tag t-n" title="Gọi điện">📞 '+r.nTele+'</span>');
+  if(r.nMsg)   acts.push('<span class="tag t-n" title="Nhắn tin / email">💬 '+r.nMsg+'</span>');
+  if(r.nOther) acts.push('<span class="tag t-n" title="Hình thức khác">• '+r.nOther+'</span>');
+  return '<tr'+(r.nTotal?"":' class="st-cold"')+' style="cursor:pointer" onclick="openCust(\''+esc(r.code)+'\')">'+
+    '<td><b>'+skHl(r.contact,toks)+'</b>'+
+      (r.role?'<div class="cx-sub">'+esc(r.role)+'</div>':"")+'</td>'+
+    '<td>'+(r.acc?skHl(r.acc,toks):'<span class="cx-none">chưa gán account</span>')+
+      (r.province?'<div class="cx-sub">'+esc(r.province)+(r.pic?' · '+esc(r.pic):"")+'</div>':"")+'</td>'+
+    '<td>'+(r.phone?'<a href="tel:'+esc(String(r.phone).replace(/\s/g,""))+'" onclick="event.stopPropagation()" class="ot-link">'+esc(r.phone)+'</a>':'<span class="cx-none">—</span>')+'</td>'+
+    '<td>'+esc(r.jobTitle||"—")+(r.specialize?'<div class="cx-sub">'+esc(r.specialize)+'</div>':"")+'</td>'+
+    '<td>'+(r.influence||r.trust
+      ? (r.influence?'<span class="tag t-y">'+esc(r.influence)+'</span> ':"")+
+        (r.trust?'<span class="tag t-g">'+esc(r.trust)+'</span>':"")
+      : '<span class="cx-none">chưa đánh giá</span>')+'</td>'+
+    (showEv?'<td>'+(r.event?'<span class="tag t-p" title="'+esc(r.event)+'">🎪 '+esc(String(r.event).slice(0,26))+'</span>':'<span class="cx-none">—</span>')+'</td>':"")+
+    '<td>'+(acts.length
+      ? '<div class="st-acts">'+acts.join("")+'</div>'+
+        (lv!=null?'<div class="cx-sub">'+(lv===0?"hôm nay":lv+" ngày trước")+'</div>':"")
+      : '<span class="tag t-r">chưa chăm sóc</span>')+'</td>'+
+    '<td class="num">'+(r.sales?fmtVND(r.sales):'<span class="cx-none">—</span>')+'</td>'+
+    '<td>'+(r.created?fmtVN(r.created):'<span class="cx-none">—</span>')+'</td></tr>';
+}
+
 /* ───────── NAV ───────── */
 var TABS=[
   {id:"dash",   ic:"📊", lb:"Dashboard",   grp:"Tổng quan", mob:1},
   {id:"kpi",    ic:"🎯", lb:"KPI & Mục tiêu", grp:"Tổng quan", mob:1},
   {id:"cust",   ic:"👥", lb:"Khách hàng",  mlb:"Khách hàng", grp:"Dữ liệu", mob:1},
+  {id:"stake",  ic:"🤝", lb:"Key stakeholder", mlb:"CBC",    grp:"Dữ liệu"},
   {id:"weekly", ic:"📍", lb:"Cập nhật", mlb:"Cập nhật", grp:"Dữ liệu", mob:1},
   {id:"order",  ic:"🧾", lb:"Đơn hàng",    mlb:"Đơn hàng",  grp:"Dữ liệu"},
   {id:"present",ic:"🎤", lb:"Thuyết trình",mlb:"Thuyết trình", grp:"Dữ liệu"},
@@ -2064,7 +2319,7 @@ var TABS=[
   {id:"report", ic:"📧", lb:"Gửi báo cáo", mlb:"Mail",      grp:"Công cụ", mob:1}
 ];
 /* thứ tự nút ở thanh dưới trên điện thoại */
-var MOB_ORDER=["weekly","cust","order","present","report","monthly","adp","dash","kpi","photos"];
+var MOB_ORDER=["weekly","cust","stake","order","present","report","monthly","adp","dash","kpi","photos"];
 function navTabs(){ return TABS.filter(function(t){ return t.gate!=="gallery" || canSeeGallery(); }); }
 function buildNav(){
   var h="",lastGrp="";
@@ -2095,7 +2350,7 @@ function go(tab){
   $("fab").classList.toggle("on", tab==="weekly"||tab==="dash");
   $("fab").title = (tab==="weekly") ? "Thêm task đi địa bàn" : "Ghi nhanh hoạt động";
   $("main").scrollTop=0;
-  ({dash:pgDash,kpi:pgKPI,cust:pgCust,weekly:pgWeekly,order:pgOrder,present:pgPresent,monthly:pgMonthly,adp:pgADP,photos:pgGallery,report:pgReport}[tab]||pgDash)();
+  ({dash:pgDash,kpi:pgKPI,cust:pgCust,stake:pgStake,weekly:pgWeekly,order:pgOrder,present:pgPresent,monthly:pgMonthly,adp:pgADP,photos:pgGallery,report:pgReport}[tab]||pgDash)();
 }
 /* ⭐ v2: khung xương thay vì vòng xoay chặn màn hình */
 function loading(msg){
@@ -2251,12 +2506,46 @@ function dashBuild(){
     var i=mIdx[accOpenYm[an.toLowerCase()]||""]; if(i!==undefined) newCbc[i]++;
   });
 
+  /* ── ⭐ v6.0 — CHĂM SÓC KHÁCH HÀNG TỪ EVENT ──
+     CBC có Ghi chú "Khách hàng từ Event: …" là khách thu được tại sự kiện.
+     Đếm xem sales phụ trách đã tiếp xúc lại bao nhiêu người trong số đó. */
+  var evTotal=0, evTouched=0, evByEvent={}, evTouchByEvent={}, evOrder=0, evNoAcc=0;
+  var evAccSet={};
+  src.cbc.forEach(function(b){
+    var owner=String(b.pic||"")||accPicMap[String(b.name||"").trim().toLowerCase()]||"";
+    if(!keep(owner)) return;
+    if(!String(b.contact||"").trim()) return;
+    var m=/Khách hàng từ Event:\s*([^·\n]+)/i.exec(String(b.note||""));
+    if(!m) return;
+    var ev=String(m[1]).trim();
+    evTotal++;
+    evByEvent[ev]=(evByEvent[ev]||0)+1;
+    var an=String(b.name||"").trim();
+    if(!an){ evNoAcc++; return; }
+    evAccSet[an.toLowerCase()]=1;
+    var who=noAcc(b.contact).replace(/\s+/g," ").trim();
+    var hit=(src.weekly||[]).some(function(w){
+      if(String(w.fy||"")!==S.fy) return false;
+      if(noAcc(parseAcc(w.account).name).trim()!==noAcc(an).trim()) return false;
+      var meet=(MEET_RE.exec(String(w.result||""))||[""])[0];
+      return who && noAcc(meet).indexOf(who)>=0;
+    });
+    if(hit){ evTouched++; evTouchByEvent[ev]=(evTouchByEvent[ev]||0)+1; }
+  });
+  src.order.forEach(function(r){
+    if(!keep(r.pic)) return;
+    if(evAccSet[String(r.name||"").trim().toLowerCase()]) evOrder+=n(r.amount);
+  });
+
   /* ── ADP key account theo kỳ ──
      Tab "8. ADP" có 12 cột tháng m09..m08 ⇒ cộng đúng các tháng nằm trong kỳ đang xem. */
   var ADP_MK={ "09":"m09","10":"m10","11":"m11","12":"m12","01":"m01","02":"m02",
                "03":"m03","04":"m04","05":"m05","06":"m06","07":"m07","08":"m08" };
   var adpRows=[], adpByGrp={A:0,B:0,C:0,D:0,"—":0}, adpTargetFY=0, adpActualFY=0;
   var adpPeriodAmt=z(), adpPeriodTotal=0, adpNoVisit=0, adpVisitCov=0;
+  /* ⭐ v5.9 — "ADP mới" = số bản ADP được TẠO trong kỳ, đọc từ cột AE "Ngày tạo".
+     Trước đây thẻ này cộng tiền các cột tháng nên ra 9,58 tỷ — không phải số lượng. */
+  var adpNewCnt=0, adpNewTarget=0, adpNoStamp=0;
   src.adp.forEach(function(r){
     if(!keep(r.pic)) return;
     if(String(r.fy||"") && String(r.fy)!==S.fy) return;
@@ -2270,6 +2559,11 @@ function dashBuild(){
     });
     var an=parseAcc(r.account).name;
     if(an && visited[an.toLowerCase()]) adpVisitCov++; else adpNoVisit++;
+
+    var made=String(r.created||"").replace(/[^\d-]/g,"").slice(0,7);   /* "YYYY-MM" */
+    var madeYm=made.replace("-","");
+    if(!madeYm){ adpNoStamp++; }
+    else if(mIdx[madeYm]!==undefined){ adpNewCnt++; adpNewTarget+=n(r.targetAmt); }
   });
 
   /* ── thuyết trình ── */
@@ -2298,10 +2592,13 @@ function dashBuild(){
     totalAcc:totalAcc, coveredAcc:coveredAcc, totalActivity:total, overdue:overdue,
     withPhoto:withPhoto, recent:recent,
     /* ⭐ v5 */
+    evTotal:evTotal, evTouched:evTouched, evOrder:evOrder, evNoAcc:evNoAcc,
+    evByEvent:top(evByEvent,10), evTouchByEvent:evTouchByEvent,
     cbcTotal:cbcTotal, newCbc:newCbc, cbcByPic:top(cbcByPic,12), cbcByArea:top(cbcByArea,8),
     cbcPerAcc:top(cbcPerAcc,10), cbcNoAcc:cbcNoAcc,
     adpCount:adpRows.length, adpByGrp:adpByGrp, adpTargetFY:adpTargetFY, adpActualFY:adpActualFY,
     adpPeriodAmt:adpPeriodAmt, adpPeriodTotal:adpPeriodTotal,
+    adpNewCnt:adpNewCnt, adpNewTarget:adpNewTarget, adpNoStamp:adpNoStamp,
     adpNoVisit:adpNoVisit, adpVisitCov:adpVisitCov, adpRows:adpRows };
 }
 
@@ -2402,7 +2699,34 @@ function renderDash(){
       '<div class="kpi"><div class="lb">Độ phủ account</div><div class="vl">'+Math.round(cov*100)+'%</div>'+
         '<div class="sb"><b>'+fmtN(d.coveredAcc)+'</b>/'+fmtN(d.totalAcc)+' account đã tiếp xúc</div>'+pb(cov)+'</div>'+
     '</div>';
-  var blkCust='<div class="cwrap" style="margin-bottom:14px">'+
+  var evCov=d.evTotal?d.evTouched/d.evTotal:0;
+  var blkEvent = d.evTotal
+    ? '<div class="card pad" style="margin-bottom:14px">'+
+        '<div class="ct"><span class="dot"></span>Chăm sóc khách hàng từ Event'+
+          '<small>Khách thu được tại sự kiện · đã tiếp xúc lại trong '+esc(S.fy)+'</small>'+
+          '<span class="sp"></span><button class="btn xs" onclick="go(\'stake\')">Mở danh sách</button></div>'+
+        '<div class="grid g4" style="margin:4px 0 13px">'+
+          stat("Khách từ Event",fmtN(d.evTotal),fmtN((d.evByEvent||[]).length)+" sự kiện")+
+          '<div class="kpi"><div class="lb">Đã chăm sóc lại</div><div class="vl">'+fmtN(d.evTouched)+'</div>'+
+            '<div class="sb">Có buổi làm việc ghi nhận trong '+esc(S.fy)+'</div>'+pb(evCov)+
+            '<div class="pbl"><span style="color:'+pctColor(evCov)+'">'+Math.round(evCov*100)+'%</span>'+
+            '<span>còn '+fmtN(d.evTotal-d.evTouched)+'</span></div></div>'+
+          stat("Chưa gán account",fmtN(d.evNoAcc),
+               d.evNoAcc?"Cần gán để theo dõi được":"Đã gán account hết",d.evNoAcc?"#E08A00":"#1E9E5A")+
+          stat("Doanh số account liên quan",fmtVND(d.evOrder),"Cộng đơn hàng của các account này")+
+        '</div>'+
+        '<div class="tbwrap" style="max-height:300px"><table class="tb"><thead><tr>'+
+          '<th>Sự kiện</th><th class="num" style="width:96px">Số khách</th>'+
+          '<th class="num" style="width:110px">Đã chăm sóc</th><th style="width:150px">Tỉ lệ</th></tr></thead><tbody>'+
+        (d.evByEvent||[]).map(function(x){
+          var t=d.evTouchByEvent[x.k]||0, p2=x.v?t/x.v:0;
+          return '<tr><td><b>'+esc(x.k)+'</b></td><td class="num">'+fmtN(x.v)+'</td>'+
+            '<td class="num"><b>'+fmtN(t)+'</b></td>'+
+            '<td>'+pb(p2)+'<div class="pbl"><span style="color:'+pctColor(p2)+'">'+Math.round(p2*100)+'%</span></div></td></tr>';
+        }).join("")+'</tbody></table></div></div>'
+    : "";
+
+  var blkCust=blkEvent+'<div class="cwrap" style="margin-bottom:14px">'+
       card("Account mở mới theo tháng","Số account mới ghi nhận trong kỳ",
         svgSeries(d.monthLabels,[{name:"Account mới",data:d.newAcc,color:"#1E9E5A"}],"num","bar"))+
       card("CBC mới theo tháng","Ước theo ngày mở account · <b>tab 2. CBC chưa có cột ngày tạo</b>",
@@ -2480,7 +2804,12 @@ function renderDash(){
   var ABCD_C={A:"#1E9E5A",B:"#3A5CAA",C:"#E8A302",D:"#8A97B5"};
   var blkAdp='<div class="grid g4" style="margin-bottom:14px">'+
       stat("Key account (ADP)",fmtN(d.adpCount),"Đang theo dõi trong "+esc(S.fy))+
-      stat("ADP phát sinh trong kỳ",fmtVND(d.adpPeriodTotal),"Cộng các cột tháng thuộc "+esc(d.rangeLabel))+
+      stat("ADP mới",fmtN(d.adpNewCnt),
+           (d.adpNewCnt
+             ? ("Mục tiêu <b>"+fmtVND(d.adpNewTarget)+"</b> · tạo trong "+esc(d.rangeLabel))
+             : ("Không có ADP nào được tạo trong "+esc(d.rangeLabel)))+
+           (d.adpNoStamp?('<div class="kpi-note">'+fmtN(d.adpNoStamp)+
+             ' ADP cũ chưa có ngày tạo — chạy menu MMH CRM ▸ ①b rồi sửa lại để ghi mốc</div>'):""))+
       '<div class="kpi"><div class="lb">Target / Actual FY</div><div class="vl">'+fmtVND(d.adpActualFY)+'</div>'+
         '<div class="sb">Mục tiêu FY <b>'+fmtVND(d.adpTargetFY)+'</b></div>'+
         (adpPct!=null?pb(adpPct)+'<div class="pbl"><span style="color:'+pctColor(adpPct)+'">'+Math.round(adpPct*100)+'%</span><span>còn '+fmtVND(Math.max(0,d.adpTargetFY-d.adpActualFY))+'</span></div>':"")+'</div>'+
@@ -2537,8 +2866,11 @@ function renderDash(){
          '<div class="kpi"><div class="lb">Độ phủ account</div><div class="vl">'+Math.round(cov*100)+'%</div>'+
            '<div class="sb"><b>'+fmtN(d.coveredAcc)+'</b>/'+fmtN(d.totalAcc)+' account đã tiếp xúc</div>'+pb(cov)+'</div>'+
          stat("Người liên hệ (CBC)",fmtN(d.cbcTotal),"Trên "+fmtN(d.totalAcc)+" account")+
-         stat("Key account (ADP)",fmtN(d.adpCount),
-              d.adpNoVisit?('<b style="color:#D9433F">'+fmtN(d.adpNoVisit)+'</b> chưa gặp trong kỳ'):"Đã tiếp xúc hết trong kỳ")+
+         (d.evTotal
+           ? '<div class="kpi"><div class="lb">Khách từ Event</div><div class="vl">'+fmtN(d.evTotal)+'</div>'+
+             '<div class="sb">Đã chăm sóc lại <b>'+fmtN(d.evTouched)+'</b></div>'+pb(d.evTotal?d.evTouched/d.evTotal:0)+'</div>'
+           : stat("Key account (ADP)",fmtN(d.adpCount),
+              d.adpNoVisit?('<b style="color:#D9433F">'+fmtN(d.adpNoVisit)+'</b> chưa gặp trong kỳ'):"Đã tiếp xúc hết trong kỳ"))+
          stat("Việc quá hạn",fmtN(d.overdue),d.overdue?"Cần cập nhật kết quả":"Không có việc quá hạn",
               d.overdue?"#D9433F":"#1E9E5A")+
        '</div>'+
