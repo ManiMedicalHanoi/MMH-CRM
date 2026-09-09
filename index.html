@@ -663,6 +663,10 @@ body.modal-on #drw{filter:blur(2px) saturate(.85);opacity:.55}
 tr.st-cold td{background:#FFFCF5}
 .tag.t-p{background:#F7EDF6;color:#B44FA6}
 .st-sync{font-size:11.5px;color:var(--ok);background:var(--ok-bg);border:1px solid #CBEBD9;border-radius:var(--r-md);padding:8px 11px;margin-bottom:11px}
+.st-diag{max-width:560px;margin:12px auto 0;text-align:left}
+.st-diag .dg-l{font-size:12px;line-height:1.75;color:var(--sub);background:var(--paler);border:1px solid var(--line);border-radius:var(--r-md);padding:11px 13px}
+.st-diag .dg-h{font-size:12.5px;line-height:1.65;color:var(--ink);margin-top:10px}
+.st-diag .dg-b{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:13px}
 .shtabs{display:flex;gap:4px;margin-bottom:13px;border-bottom:2px solid var(--line);overflow-x:auto;-webkit-overflow-scrolling:touch}
 .shtabs::-webkit-scrollbar{display:none}
 .shtabs button{flex:none;display:flex;align-items:center;gap:7px;height:42px;padding:0 17px;border:1px solid var(--line);border-bottom:none;background:var(--paler);color:var(--sub);font-size:13.5px;font-weight:700;cursor:pointer;border-radius:11px 11px 0 0;margin-bottom:-2px;transition:.15s;white-space:nowrap;font-family:inherit}
@@ -2301,12 +2305,59 @@ function renderStakeList(){
         '</div>'
       : '<div class="card pad"><div class="empty"><div class="e">🤝</div>'+
         '<p>'+(isEv?'Chưa có khách hàng nào từ event trong danh bạ CBC':'Không có người liên hệ nào khớp bộ lọc')+'</p>'+
-        (isEv?'<p style="font-size:12px;color:var(--mute);max-width:480px;margin:8px auto 0;line-height:1.6">'+
-          'Bấm <b>🎪 Đồng bộ từ file Event</b> ở trên để kéo khách từ file dữ liệu event sang tab 2. CBC.</p>'+
-          '<button class="btn sm pri" style="margin-top:11px" onclick="syncEventNow()">🎪 Đồng bộ ngay</button>':"")+
+        (isEv?stakeDiag():"")+
         '</div></div>');
 }
 function stakeTabBarSafe(){ try{ return stakeTabBar(); }catch(e){ return ""; } }
+/* ⭐ v6.2 — chẩn đoán khi tab Khách hàng Event trống: chỉ rõ mắc ở khâu nào */
+function stakeDiag(){
+  var all=(S.cbcRows||[]).length;
+  var withNote=(S.cbcRows||[]).filter(function(b){ return /Khách hàng từ Event/i.test(String(b.note||"")); }).length;
+  /* số dòng thực sự thuộc quyền xem của người đang đăng nhập */
+  var mine=stakeRows().filter(function(r){
+    if(!r.event) return false;
+    return isMgmt() || !r.pic || picEq(r.pic,S.user.pic);
+  }).length;
+  var L=[];
+  L.push('Danh bạ CBC app đang giữ: <b>'+fmtN(all)+'</b> dòng');
+  L.push('Trong đó có ghi chú “Khách hàng từ Event”: <b>'+fmtN(withNote)+'</b>');
+  if(!isMgmt()) L.push('Bạn đang xem với quyền sales — chỉ thấy CBC do <b>'+esc(S.user.pic)+'</b> phụ trách ('+fmtN(mine)+' dòng)');
+  var hint;
+  if(!all)
+    hint='App chưa tải được danh bạ. Bấm <b>⟳ Đọc lại</b>.';
+  else if(!withNote)
+    hint='Sheet <b>2. CBC</b> chưa có dòng nào mang ghi chú event. Bấm <b>🎪 Đồng bộ từ file Event</b>, '+
+         'hoặc mở file Event chạy menu <b>MMH Event ▸ ② Đồng bộ ngay</b>.';
+  else if(!mine)
+    hint='Đã có khách từ event nhưng chưa dòng nào ghi PIC là <b>'+esc(S.user.pic)+'</b>. '+
+         'Mở file Event chạy <b>MMH Event ▸ ②b Điền bù Area / PIC</b>.';
+  else
+    hint='Thử bỏ bộ lọc sự kiện hoặc xoá từ khoá tìm kiếm.';
+  return '<div class="st-diag"><div class="dg-l">'+L.join('<br>')+'</div>'+
+    '<div class="dg-h">'+hint+'</div>'+
+    '<div class="dg-b">'+
+      '<button class="btn sm" onclick="refreshStake()">⟳ Đọc lại danh bạ</button>'+
+      '<button class="btn sm pri" onclick="syncEventNow()">🎪 Đồng bộ từ file Event</button>'+
+      '<button class="btn sm" onclick="backfillEventPic()">🔧 Điền bù Area / PIC</button>'+
+    '</div></div>';
+}
+/* gọi backend Event điền bù Area/PIC cho các dòng đã đổ trước đây */
+function backfillEventPic(){
+  busy(true,"Đang điền bù Area / PIC…");
+  var cb="__mmhbf_"+Date.now()+"_"+(++_seq), el=document.createElement("script");
+  var t=setTimeout(function(){ fin(); busy(false); toast("Quá thời gian chờ","warn",6000); },90000);
+  function fin(){ clearTimeout(t); try{ delete window[cb]; }catch(e){ window[cb]=undefined; }
+                  if(el.parentNode) el.parentNode.removeChild(el); }
+  window[cb]=function(j){
+    fin();
+    if(!j||!j.ok){ busy(false); return toast("Lỗi: "+((j&&j.error)||"không rõ"),"err",7000); }
+    busy(true,"Đang nạp lại danh bạ…");
+    reloadCbc(function(){ busy(false); toast("✓ "+j.message,"ok",7000); renderStake(); });
+  };
+  el.src=EVENT_URL+"?action=backfill&callback="+cb+"&_ts="+Date.now();
+  el.onerror=function(){ fin(); busy(false); toast("Không gọi được file Event","err",7000); };
+  document.body.appendChild(el);
+}
 function stakeRow(r,toks,showEv){
   var lv=r.last?Math.round((new Date(todayISO())-new Date(r.last))/86400000):null;
   var acts=[];
