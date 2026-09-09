@@ -636,6 +636,25 @@ body.modal-on #drw{filter:blur(2px) saturate(.85);opacity:.55}
 .ot-t.can:hover{background:var(--pale);color:var(--blue-d)}
 .ot-link{color:var(--blue);text-decoration:underline;word-break:break-all}
 .ot-link:hover{color:var(--blue-d)}
+/* ⭐ v5.9 — hộp Hướng dẫn sử dụng */
+.hp-img{border:1px solid var(--line);border-radius:var(--r-lg);overflow:hidden;background:var(--paler);margin-bottom:16px}
+.hp-img img{width:100%;display:block}
+.hp-err{padding:26px 16px;text-align:center;color:var(--mute);font-size:13px}
+.hp-cap{display:flex;align-items:center;gap:10px;padding:9px 13px;border-top:1px solid var(--line);font-size:11.5px;color:var(--sub);background:var(--card)}
+.hp-cap span{flex:1}
+.hp-cap a{color:var(--blue);font-weight:700;text-decoration:none;white-space:nowrap}
+.hp-h{font-size:11px;font-weight:800;letter-spacing:.5px;color:var(--mute);margin:0 0 9px}
+.hp-sec{border:1px solid var(--line);border-radius:var(--r-md);margin-bottom:8px;overflow:hidden;background:var(--card)}
+.hp-t{display:flex;align-items:center;gap:10px;width:100%;padding:13px 14px;border:none;background:none;cursor:pointer;font-family:inherit;font-size:14.5px;color:var(--navy);text-align:left}
+.hp-t:hover{background:var(--paler)}
+.hp-t .ic{font-size:17px}
+.hp-t .ar{color:var(--mute);transition:.18s;font-size:15px}
+.hp-sec.open .hp-t .ar{transform:rotate(180deg)}
+.hp-b{display:none;padding:0 15px 14px 46px}
+.hp-sec.open .hp-b{display:block}
+.hp-b ul{margin:0;padding-left:17px}
+.hp-b li{font-size:13.5px;line-height:1.68;color:var(--sub);margin-bottom:9px}
+.hp-b li b{color:var(--ink)}
 .shtabs{display:flex;gap:4px;margin-bottom:13px;border-bottom:2px solid var(--line);overflow-x:auto;-webkit-overflow-scrolling:touch}
 .shtabs::-webkit-scrollbar{display:none}
 .shtabs button{flex:none;display:flex;align-items:center;gap:7px;height:42px;padding:0 17px;border:1px solid var(--line);border-bottom:none;background:var(--paler);color:var(--sub);font-size:13.5px;font-weight:700;cursor:pointer;border-radius:11px 11px 0 0;margin-bottom:-2px;transition:.15s;white-space:nowrap;font-family:inherit}
@@ -671,6 +690,12 @@ tr.rp-late td{background:var(--dang-bg)}
 #custList .pb{margin-top:0}
 .pb.rel i{background:var(--blue-l);opacity:.75}
 .kpi-note{margin-top:6px;font-size:9.5px;line-height:1.45;color:var(--mute);border-top:1px dashed var(--line);padding-top:5px}
+/* thẻ KPI: cùng chiều cao, thanh tiến độ luôn nằm sát đáy nên nhìn ngang hàng nhau */
+.grid.g4>.kpi{display:flex;flex-direction:column;height:100%}
+.grid.g4>.kpi .sb{margin-top:2px}
+.grid.g4>.kpi .pb{margin-top:auto}
+.grid.g4>.kpi .pb+.pbl{margin-top:4px}
+.grid.g4{align-items:stretch}
 .unitnote{font-size:9px;font-weight:700;color:var(--mute);margin-top:3px;line-height:1.35;font-weight:600;white-space:normal}
 .adpc-note{margin-top:7px;font-size:10.5px;line-height:1.5;color:var(--sub);background:var(--paler);border:1px dashed var(--line);border-radius:8px;padding:6px 8px}
 .adpc-note b{color:var(--ink)}
@@ -881,6 +906,7 @@ tr.rp-late td{background:var(--dang-bg)}
       <a class="qlink" href="https://manimedicalhanoi.github.io/MMH-FY67-Turnover/" target="_blank" rel="noopener">📈 Doanh số</a>
     </div>
     <select id="fySel" title="Năm tài chính"></select>
+    <button class="hbtn" id="btnHelp" title="Hướng dẫn sử dụng">❓</button>
     <button class="hbtn bell" id="btnAct" title="Bảng tin hoạt động">🔔<span class="dot" id="actDot" style="display:none"></span></button>
     <button class="hbtn" id="btnReload" title="Tải lại dữ liệu">⟳</button>
     <button class="hbtn sel" id="btnUser" title="Đổi tài khoản"><span id="uInit">--</span></button>
@@ -1493,6 +1519,7 @@ window.addEventListener("focus",function(){
   if(Date.now()-(S._lastSync||0)>180000){ S._lastSync=Date.now(); refreshBundle(true); }
 });
 $("fab").onclick=function(){ pickTaskKind(); };
+$("btnHelp").onclick=function(){ openHelp(); };
 
 
 /* ═══════════ ⭐ v5.3 — OTHER TASK (đầu việc ngoài đi địa bàn) ═══════════
@@ -1946,6 +1973,82 @@ function otherSubRow(k,x){
   '</div>';
 }
 var _dbot; function debOther(){ clearTimeout(_dbot); _dbot=setTimeout(function(){ keepCaret("ot_q",renderOther); },140); }
+
+
+/* ═══════════ ⭐ v5.9 — HƯỚNG DẪN SỬ DỤNG TRONG APP ═══════════
+   Ảnh tóm tắt đặt trên Google Drive (xem bằng link chia sẻ), bên dưới là các mục
+   hướng dẫn thao tác chính. Mở bằng nút ❓ trên thanh trên cùng. */
+var HELP_IMG_ID  = "1Wd2h3354f70XEMDEbDuTuJVTmIW5F8dM";
+var HELP_IMG_URL = "https://drive.google.com/thumbnail?id="+HELP_IMG_ID+"&sz=w1600";
+var HELP_IMG_OPEN= "https://drive.google.com/file/d/"+HELP_IMG_ID+"/view";
+
+var HELP_SECTIONS = [
+  { ic:"📍", t:"Ghi việc đi địa bàn", rows:[
+    ["Bấm nút ＋ rồi chọn <b>Đi địa bàn</b>","Nút ＋ nằm ở góc dưới bên phải, hoặc trên đầu màn hình Cập nhật."],
+    ["Chọn Account","Gõ vài chữ trong tên khách hàng rồi chọn từ danh sách gợi ý. Không gõ tay tự do."],
+    ["Điền Task Result","Bắt buộc có dòng <b>Người gặp:</b> thì mới lưu được. Bấm <b>👤 CBC</b> để chọn nhanh, hoặc <b>📋 Chèn khung 4 mục</b> để có sẵn khung Actions Taken / Current Situation / Customer Feedback / Opportunities."],
+    ["Chụp ảnh","Với Type action = Visiting thì bắt buộc 1 ảnh. Chỉ mở camera, ảnh phải vừa chụp."],
+    ["Next action","Bắt buộc chọn. Nếu chọn <b>Dừng lại</b> thì phải ghi lý do."]
+  ]},
+  { ic:"📸", t:"Quy tắc ảnh (bắt buộc)", rows:[
+    ["Chụp ngay tại địa bàn","App chỉ nhận ảnh chụp trong vòng 10 phút. Ảnh cũ trong máy sẽ bị từ chối kèm thông báo giờ chụp."],
+    ["Không chọn từ thư viện","Nút chọn ảnh có sẵn đã được gỡ. Dán ảnh từ clipboard cũng bị chặn."],
+    ["Mỗi lần viếng thăm 1 ảnh","Chụp lại sẽ đè lên ảnh cũ của đúng task đó, không tạo thêm."],
+    ["Tên ảnh tự đặt","Theo mẫu <b>PIC_Ngày_Khách hàng_STT trong tháng</b>, không cần đặt tay."]
+  ]},
+  { ic:"🧩", t:"Công việc khác", rows:[
+    ["Nằm ở tab thứ hai của màn hình Cập nhật","Dùng cho họp, hỗ trợ NPP, hồ sơ thầu, sự kiện — việc không phải đi gặp khách."],
+    ["Tạo Key Task trước, rồi thêm đầu việc con","Bấm <b>＋ Key Task</b>, sau đó <b>＋ Thêm đầu việc</b> trong thẻ vừa tạo."],
+    ["Cập nhật nhanh","Kéo thanh phần trăm hoặc đổi ô trạng thái — tự lưu, không cần bấm nút."],
+    ["Sửa chi tiết","Bấm vào tên đầu việc để mở hộp chỉnh sửa, có nút 🎤 đọc chính tả và 🔗 chèn link tài liệu."],
+    ["Việc đi gặp khách không hiện ở đây","Chúng tự đồng bộ từ tab Thông tin địa bàn. Muốn xem chung thì bật chip <b>Hiện cả việc đi địa bàn</b>."]
+  ]},
+  { ic:"🏥", t:"Khách hàng", rows:[
+    ["Tìm kiếm thông minh","Gõ không dấu vẫn ra: “xanh pon” tìm được “Bệnh Viện Đa Khoa Xanh Pôn”. Gõ nhiều từ rời cũng được."],
+    ["Cột Target → Achieve","Account có ADP thì hiện % đạt so với mục tiêu; account thường hiện doanh số trong FY đang chọn."],
+    ["Mở hồ sơ khách hàng","Bấm vào dòng bất kỳ để xem dòng thời gian, ảnh, người liên hệ, đơn hàng, ADP."],
+    ["Sửa thông tin","Trong hồ sơ, tab Thông tin có nút <b>✎ Sửa thông tin</b>, sửa xong bấm lưu."],
+    ["Thêm account mới","Mã khách hàng được đề xuất tự động theo số kế tiếp, vẫn sửa được."]
+  ]},
+  { ic:"🗓", t:"Báo cáo tháng", rows:[
+    ["Chọn kỳ ở dải tháng","Số nhỏ cạnh tháng là số hạng mục đã có."],
+    ["Bấm 🧩 Tạo đủ khung tháng này","App tạo sẵn toàn bộ hạng mục theo khung Type task chuẩn, mỗi hạng mục đã có sẵn đề mục để điền."],
+    ["Điền nội dung","Mỗi hạng mục có 2 cột PLAN và RESULT. Bấm vào thẻ để mở, dùng nút <b>📋 Chèn khung</b> nếu ô còn trống."],
+    ["⧉ Lấy kế hoạch tháng trước","Sao chép nhanh các hạng mục của kỳ liền trước sang kỳ đang xem."]
+  ]},
+  { ic:"✉️", t:"Gửi báo cáo", rows:[
+    ["Chọn kỳ","Báo cáo tuần mặc định lấy tuần hiện tại; kế hoạch tuần sau tự lấy 7 ngày kế tiếp."],
+    ["Xem nhanh trước khi gửi","Mở bảng để soát toàn bộ việc tuần này và kế hoạch tuần sau: Key task, đầu việc, ngày bắt đầu, deadline, tiến độ, kết quả. Dòng nền đỏ là quá hạn."],
+    ["Gửi thử cho tôi","Nên gửi thử trước để xem email và file PDF trước khi gửi chính thức."]
+  ]},
+  { ic:"⚠️", t:"Lưu ý &amp; xử lý sự cố", rows:[
+    ["Chỉ đăng nhập một tài khoản Google","Máy đang đăng nhập nhiều Gmail sẽ bị Google chặn giữa chừng, app báo không tải được dữ liệu. Dùng cửa sổ ẩn danh là xong."],
+    ["Dữ liệu chưa thấy ngay","Bấm nút ⟳ trên thanh trên cùng để nạp lại từ Google Sheet."],
+    ["Không sửa được việc của người khác","Mỗi người chỉ sửa việc của mình; dòng của người khác hiện biểu tượng 🔒."],
+    ["Chọn đúng năm tài chính","Toàn bộ số liệu trên app lọc theo FY đang chọn ở thanh trên cùng."]
+  ]}
+];
+function openHelp(){
+  var h='<div class="hp-img">'+
+      '<img src="'+HELP_IMG_URL+'" alt="Ảnh hướng dẫn nhanh" loading="lazy" '+
+        'onerror="this.style.display=\'none\';this.parentNode.querySelector(\'.hp-err\').style.display=\'block\'">'+
+      '<div class="hp-err" style="display:none">Không tải được ảnh hướng dẫn — bấm “Mở ảnh gốc” bên dưới.</div>'+
+      '<div class="hp-cap"><span>Ảnh hướng dẫn nhanh — chạm để xem cỡ lớn</span>'+
+        '<a href="'+HELP_IMG_OPEN+'" target="_blank" rel="noopener">Mở ảnh gốc ›</a></div>'+
+    '</div>'+
+    '<div class="hp-h">HƯỚNG DẪN TỪNG MỤC</div>'+
+    HELP_SECTIONS.map(function(sec,i){
+      return '<div class="hp-sec'+(i===0?" open":"")+'" id="hpsec-'+i+'">'+
+        '<button class="hp-t" onclick="toggleHelp('+i+')"><span class="ic">'+sec.ic+'</span>'+
+          '<b>'+sec.t+'</b><span class="sp"></span><span class="ar">⌄</span></button>'+
+        '<div class="hp-b"><ul>'+sec.rows.map(function(r){
+          return '<li><b>'+r[0]+'.</b> '+r[1]+'</li>'; }).join("")+'</ul></div></div>';
+    }).join("");
+  openModal("Hướng dẫn sử dụng",h,
+    '<a class="btn" href="'+HELP_IMG_OPEN+'" target="_blank" rel="noopener">🖼 Mở ảnh gốc</a>'+
+    '<div style="flex:1"></div><button class="btn pri" onclick="closeModal()">Đã hiểu</button>', true);
+}
+function toggleHelp(i){ var e=$("hpsec-"+i); if(e) e.classList.toggle("open"); }
 
 /* ───────── NAV ───────── */
 var TABS=[
@@ -2534,8 +2637,7 @@ var DENTAL_DISTRIBUTORS = [
      Type "3 Composite amount"→ Composite                                              */
 var PRODUCT_CARDS = {
   dental: [
-    { label:"Doanh số Jizai", src:"jizai", prod:"Jizai", unit:"qty",
-      note:"Tab SUM TURNOVER để Jizai ở dòng Type \"2 Jizai Qty\" ⇒ đây là SỐ LƯỢNG, không phải USD" },
+    { label:"Doanh số Jizai", src:"jizai", prod:"Jizai", unit:"qty" },
     { label:"Doanh số hàng MMG", src:"rows", prod:"MMG", unit:"usd" }
   ],
   ophthalmic: [
@@ -4442,6 +4544,8 @@ function pgMonthly(){
   if(!S.custIndex.length) loadCustomerIndex();
 }
 function mnRows(){ return ((S.cache.monthly||{rows:[]}).rows)||[]; }
+/* ⭐ v5.9 — cột "Kỳ" có thể là số hoặc chuỗi ⇒ luôn quy về "YYYYMM" trước khi so */
+function mnPer(r){ return String((r&&r.period)||"").replace(/\D/g,"").slice(0,6); }
 function mnPic(){ return (S.user.role==="manager")?(S.mnPic||""):S.user.pic; }
 function renderMonthly(){
   var all=mnRows();
@@ -4449,9 +4553,9 @@ function renderMonthly(){
   var months=fyMonths(S.fy);
   if(months.indexOf(mn)<0) mn=months[0];
   var pic=mnPic();
-  var cntBy={}; all.forEach(function(r){ if(!pic||picMatch(r.pic,pic)) cntBy[r.period]=(cntBy[r.period]||0)+1; });
+  var cntBy={}; all.forEach(function(r){ if(!pic||picMatch(r.pic,pic)) cntBy[mnPer(r)]=(cntBy[mnPer(r)]||0)+1; });
 
-  var cur=all.filter(function(r){ return r.period===mn && (!pic||picMatch(r.pic,pic)); });
+  var cur=all.filter(function(r){ return mnPer(r)===String(mn) && (!pic||picMatch(r.pic,pic)); });
   var done=cur.filter(function(r){ return String(r.result||"").trim(); }).length;
   var pct=cur.length?done/cur.length:0;
 
@@ -4634,7 +4738,7 @@ function mnScaffold(){
   var pic=(isMgmt()? (S.mnPic||S.user.pic) : S.user.pic);
   if(!pic) return toast("Chọn PIC trước khi tạo khung","warn");
   var have={}; mnRows().forEach(function(r){
-    if(r.period===mn && picMatch(r.pic,pic)) have[String(r.typeTask||"").toLowerCase()]=1; });
+    if(mnPer(r)===String(mn) && picMatch(r.pic,pic)) have[String(r.typeTask||"").toLowerCase()]=1; });
   var master=S.master.typeTask||[];
   /* chỉ tạo những Type task có khung mẫu VÀ có trong MASTER LIST */
   var todo=master.filter(function(t){ return mnTplFor(t) && !have[String(t).toLowerCase()]; })
@@ -4786,9 +4890,9 @@ function mnSeed(){
   var i=months.indexOf(mn);
   if(i<=0) return toast("Không có tháng trước trong FY này","warn");
   var prev=months[i-1], pic=mnPic();
-  var src=mnRows().filter(function(r){ return r.period===prev && (!pic||picMatch(r.pic,pic)); });
+  var src=mnRows().filter(function(r){ return mnPer(r)===String(prev) && (!pic||picMatch(r.pic,pic)); });
   if(!src.length) return toast("Tháng "+prev.slice(4)+"/"+prev.slice(0,4)+" chưa có hạng mục nào","warn");
-  var have={}; mnRows().filter(function(r){return r.period===mn;}).forEach(function(r){ have[(r.typeTask||"")+"|"+(r.pic||"")]=1; });
+  var have={}; mnRows().filter(function(r){return mnPer(r)===String(mn);}).forEach(function(r){ have[(r.typeTask||"")+"|"+(r.pic||"")]=1; });
   var todo=src.filter(function(r){ return !have[(r.typeTask||"")+"|"+(r.pic||"")]; });
   if(!todo.length) return toast("Tháng này đã có đủ hạng mục của tháng trước","ok");
   var h='<div class="card pad" style="background:var(--pale);border-color:var(--lb1);margin-bottom:12px">'
@@ -5515,8 +5619,8 @@ function rpMonthBody(){
   var pics=rpPics(), nMon=nextMonthStr(S.rpMonth);
   var all=tGet("monthly")||[];
   var out=pics.map(function(p){
-    var cur=all.filter(function(r){ return r.period===S.rpMonth && (!r.pic||r.pic===p); });
-    var nxt=all.filter(function(r){ return r.period===nMon   && (!r.pic||r.pic===p); });
+    var cur=all.filter(function(r){ return mnPer(r)===String(S.rpMonth) && (!r.pic||r.pic===p); });
+    var nxt=all.filter(function(r){ return mnPer(r)===String(nMon)       && (!r.pic||r.pic===p); });
     if(!cur.length&&!nxt.length) return "";
     return '<div class="card pad" style="margin-bottom:12px">'+
       '<div class="ct"><span class="av-sm" style="background:'+avColor(p)+'">'+esc(initials(p))+'</span>'+esc(p)+
@@ -6286,15 +6390,36 @@ function prefetchAll(){
 /* Sau khi ghi/xoá: cập nhật NGAY trong bộ nhớ (không chờ mạng), rồi đồng bộ nền.
    Nhờ vậy dòng vừa lưu/xoá hiện đúng tức thì — dữ liệu trên Sheet cũng đã ghi xong
    vì backend dùng LockService + flush đồng bộ. */
-function patchLocal(tab,row,data,isDelete){
-  var e=TSTORE[tab]; if(!e||!e.rows) return;
+/* ⭐ v5.9 — App giữ dữ liệu ở HAI kho: TSTORE (dùng cho Dashboard, hồ sơ account…)
+   và S.cache (dùng cho màn hình Địa bàn, Báo cáo tháng, Đơn hàng…).
+   Trước đây chỉ vá TSTORE nên thêm task xong màn hình vẫn trống cho tới khi
+   tải lại trang. Nay vá cả hai rồi vẽ lại ngay màn hình đang mở. */
+function patchRows(rows,row,data,isDelete){
+  if(!rows) return rows;
   var i=-1;
-  for(var k=0;k<e.rows.length;k++) if(e.rows[k]._row===row){ i=k; break; }
-  if(isDelete){ if(i>=0) e.rows.splice(i,1); }
-  else if(i>=0) e.rows[i]=Object.assign({},e.rows[i],data,{_row:row});
-  else e.rows.unshift(Object.assign({},data,{_row:row}));
-  e.at=0;                      /* đánh dấu cần đồng bộ lại */
-  savTabs();
+  for(var k=0;k<rows.length;k++) if(rows[k]._row===row){ i=k; break; }
+  if(isDelete){ if(i>=0) rows.splice(i,1); }
+  else if(i>=0) rows[i]=Object.assign({},rows[i],data,{_row:row});
+  else if(data) rows.unshift(Object.assign({},data,{_row:row}));
+  return rows;
+}
+function patchLocal(tab,row,data,isDelete){
+  var e=TSTORE[tab];
+  if(e&&e.rows){ patchRows(e.rows,row,data,isDelete); e.at=0; savTabs(); }
+  var c=S.cache[tab];
+  if(c&&c.rows){ patchRows(c.rows,row,data,isDelete); }
+}
+/* vẽ lại đúng màn hình đang mở sau khi dữ liệu đổi */
+function repaintTab(){
+  try{
+    if(S.tab==="weekly"){ if(S.wkTab==="other") renderOther(); else renderTerritory(); }
+    else if(S.tab==="monthly") renderMonthly();
+    else if(S.tab==="order")   renderOrder();
+    else if(S.tab==="present") renderPresent();
+    else if(S.tab==="adp")     renderADP();
+    else if(S.tab==="cust")    renderCustList();
+    else if(S.tab==="report")  renderReport();
+  }catch(e){}
 }
 /* Gọi sau mỗi lần ghi thành công */
 function afterWrite(tab,row,data,isDelete){
@@ -6303,7 +6428,17 @@ function afterWrite(tab,row,data,isDelete){
   if(S.cache.weekly) S.cache.weekly.at=0;   /* v4.1 giu kho FY, chi danh dau can dong bo */
   try{ localStorage.removeItem("mmh_dental_bundle"); }catch(e){}
   if(tab) delete FETCHING[tab];
-  setTimeout(function(){ if(tab) fetchTab(tab); refreshBundle(true); },400);
+  repaintTab();                              /* ⭐ v5.9 — thấy ngay, không chờ tải lại */
+  /* lấy bản chính thức từ máy chủ (có No., FY, Month do sheet tự tính) rồi vẽ lại */
+  setTimeout(function(){
+    if(tab) fetchTab(tab,{},function(rows,ready){
+      if(!ready||!rows) return;
+      if(S.cache[tab]) S.cache[tab]={rows:rows,at:Date.now()};
+      else if(tab==="weekly"||tab==="monthly") S.cache[tab]={rows:rows,at:Date.now()};
+      repaintTab();
+    });
+    refreshBundle(true);
+  },400);
   if($("actRail").classList.contains("on")) setTimeout(function(){ loadActivity(true); },900);
 }
 
