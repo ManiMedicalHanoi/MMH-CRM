@@ -662,6 +662,7 @@ body.modal-on #drw{filter:blur(2px) saturate(.85);opacity:.55}
 .st-acts{display:flex;gap:4px;flex-wrap:wrap}
 tr.st-cold td{background:#FFFCF5}
 .tag.t-p{background:#F7EDF6;color:#B44FA6}
+.st-sync{font-size:11.5px;color:var(--ok);background:var(--ok-bg);border:1px solid #CBEBD9;border-radius:var(--r-md);padding:8px 11px;margin-bottom:11px}
 .shtabs{display:flex;gap:4px;margin-bottom:13px;border-bottom:2px solid var(--line);overflow-x:auto;-webkit-overflow-scrolling:touch}
 .shtabs::-webkit-scrollbar{display:none}
 .shtabs button{flex:none;display:flex;align-items:center;gap:7px;height:42px;padding:0 17px;border:1px solid var(--line);border-bottom:none;background:var(--paler);color:var(--sub);font-size:13.5px;font-weight:700;cursor:pointer;border-radius:11px 11px 0 0;margin-bottom:-2px;transition:.15s;white-space:nowrap;font-family:inherit}
@@ -2166,8 +2167,17 @@ function stakeFiltered(){
   return { rows:out, toks:toks };
 }
 function setStTab(t){ S.stTab=t; S.stLimit=60; renderStake(); }
+function refreshStake(){
+  busy(true,"Đang nạp lại danh bạ CBC…");
+  reloadCbc(function(rows,err){
+    busy(false);
+    if(err) return toast("Không nạp được danh bạ: "+err.message,"err",7000);
+    toast("✓ Đã nạp "+fmtN((rows||[]).length)+" người liên hệ","ok");
+    renderStake();
+  });
+}
 function setStFilter(k,v){ S[k]=v; S.stLimit=60; renderStake(); }
-var _dbst; function debStake(){ clearTimeout(_dbst); _dbst=setTimeout(function(){ keepCaret("st_q",renderStake); },140); }
+var _dbst; function debStake(){ clearTimeout(_dbst); _dbst=setTimeout(renderStakeList,90); }
 
 /* gọi backend file Event chạy đồng bộ ngay */
 function syncEventNow(){
@@ -2179,13 +2189,22 @@ function syncEventNow(){
   function done(){ clearTimeout(t); try{ delete window[cb]; }catch(e){ window[cb]=undefined; }
                    if(el.parentNode) el.parentNode.removeChild(el); }
   window[cb]=function(j){
-    done(); busy(false);
-    if(!j||!j.ok) return toast("Lỗi đồng bộ: "+((j&&j.error)||"không rõ"),"err",8000);
+    done();
+    if(!j||!j.ok){ busy(false); return toast("Lỗi đồng bộ: "+((j&&j.error)||"không rõ"),"err",8000); }
     S.eventSync=j;
-    toast("✓ "+j.message,"ok",7000);
-    S.cbcRows=null; S._cbcLoading=false; ensureCbc();
-    _stCache=null;
-    setTimeout(function(){ if(S.tab==="stake") renderStake(); },1600);
+    /* đọc lại danh bạ CBC ngay, chờ xong mới vẽ ⇒ thấy số liệu mới lập tức */
+    busy(true,"Đang nạp lại danh bạ CBC…");
+    reloadCbc(function(rows){
+      busy(false);
+      toast("✓ "+j.message,"ok",7000);
+      if(S.tab==="stake") renderStake();
+      if(S.tab==="dash"){ S.dash=null; renderDash(); }
+      var nEv=(rows||[]).filter(function(b){ return EVENT_NOTE_RE.test(String(b.note||"")); }).length;
+      if(j.added>0 && !nEv)
+        toast("Đã ghi "+j.added+" dòng sang sheet nhưng app chưa nhận ra khách event — "+
+              "kiểm tra cột Ghi chú (R) của tab 2. CBC có đúng dạng “Khách hàng từ Event: …” không.",
+              "warn",11000);
+    });
   };
   el.src=EVENT_URL+"?action=sync&callback="+cb+"&_ts="+Date.now();
   el.onerror=function(){ done(); busy(false);
@@ -2194,7 +2213,8 @@ function syncEventNow(){
 }
 
 function pgStake(){
-  if(!S.cbcRows){ ensureCbc(); setTimeout(function(){ if(S.tab==="stake") renderStake(); },1500); }
+  if(!S.cbcRows && !S._cbcLoading)
+    reloadCbc(function(){ if(S.tab==="stake") renderStake(); });
   if(!tGet("order")) ensureTab("order",{},function(r,ready){ if(ready&&S.tab==="stake"){ _stCache=null; renderStake(); } });
   if(!S.cache.weekly) loadTerritoryAll(true).then(function(){ if(S.tab==="stake"){ _stCache=null; renderStake(); } });
   renderStake();
@@ -2214,33 +2234,16 @@ function renderStake(){
       '<div class="ph"><div><h2>Key stakeholder</h2><p>Đang nạp danh bạ CBC…</p></div></div>'+skRows(7,true)+'</div>';
     return;
   }
-  var f=stakeFiltered(), rows=f.rows, toks=f.toks, shown=rows.slice(0,S.stLimit);
-  var isEv=(S.stTab==="event");
-  var evs=stakeEvents();
-
-  var nTouched=rows.filter(function(r){ return r.nTotal>0; }).length;
-  var nNone=rows.length-nTouched;
-  var totalSales=rows.reduce(function(x,r){ return x+r.sales; },0);
-  var cov=rows.length?nTouched/rows.length:0;
-
+  var isEv=(S.stTab==="event"), evs=stakeEvents();
   $("main").innerHTML='<div class="pg">'+
     stakeTabBar()+
-    '<div class="trhead compact"><div class="tt"><span class="sub"><b>'+fmtN(rows.length)+'</b> người liên hệ'+
-      (isEv?' từ event':'')+' · '+esc(S.fy)+'</span></div>'+
+    '<div class="trhead compact"><div class="tt"><span class="sub" id="stakeCount">…</span></div>'+
       '<div class="acts">'+
-        (isEv?'<button class="btn sm" onclick="syncEventNow()">⟳ Đồng bộ từ file Event</button>':"")+
+        '<button class="btn sm" onclick="refreshStake()" title="Nạp lại danh bạ CBC từ Google Sheet">⟳ Đọc lại</button>'+
+        (isEv?'<button class="btn sm" onclick="syncEventNow()">🎪 Đồng bộ từ file Event</button>':"")+
         '<button class="btn pri sm" onclick="formCBC(null,\'\')">＋ Thêm CBC</button></div></div>'+
-    '<div class="grid g4" style="margin-bottom:13px">'+
-      '<div class="kpi"><div class="lb">'+(isEv?'Khách từ Event':'Tổng CBC')+'</div><div class="vl">'+fmtN(rows.length)+'</div>'+
-        '<div class="sb">'+(isEv?fmtN(evs.length)+' sự kiện':'Trong phạm vi đang xem')+'</div></div>'+
-      '<div class="kpi"><div class="lb">Đã tiếp xúc</div><div class="vl">'+fmtN(nTouched)+'</div>'+
-        '<div class="sb">Có ít nhất 1 lần làm việc trong '+esc(S.fy)+'</div>'+pb(cov)+
-        '<div class="pbl"><span style="color:'+pctColor(cov)+'">'+Math.round(cov*100)+'%</span><span>còn '+fmtN(nNone)+'</span></div></div>'+
-      '<div class="kpi"><div class="lb">Chưa chăm sóc</div><div class="vl" style="color:'+(nNone?"#D9433F":"#1E9E5A")+'">'+fmtN(nNone)+'</div>'+
-        '<div class="sb">'+(nNone?'Chưa ghi nhận buổi làm việc nào':'Đã tiếp xúc hết')+'</div></div>'+
-      '<div class="kpi"><div class="lb">Doanh số account liên quan</div><div class="vl">'+fmtVND(totalSales)+'</div>'+
-        '<div class="sb">Cộng theo account của các CBC này</div></div>'+
-    '</div>'+
+      (S.eventSync?'<div class="st-sync">✓ Lần đồng bộ gần nhất: '+esc(S.eventSync.message||"")+'</div>':"")+
+    '<div class="grid g4" id="stakeStats" style="margin-bottom:13px"></div>'+
     '<div class="card pad" style="margin-bottom:12px">'+
       '<div class="row" style="margin-bottom:9px">'+
         '<div style="flex:2"><input class="inp" id="st_q" autocomplete="off" '+
@@ -2256,7 +2259,35 @@ function renderStake(){
         '<div class="chip'+(S.stSort==="act"?" on":"")+'" onclick="setStFilter(\'stSort\',\''+(S.stSort==="act"?"":"act")+'\')">Nhiều lần làm việc nhất</div>'+
         '<div class="chip'+(S.stSort==="sales"?" on":"")+'" onclick="setStFilter(\'stSort\',\''+(S.stSort==="sales"?"":"sales")+'\')">Doanh số cao nhất</div>'+
       '</div></div>'+
-    (shown.length
+    '<div id="stakeList"></div>'+
+  '</div>';
+  renderStakeList();
+}
+/* chỉ vẽ lại phần danh sách + các thẻ đếm */
+function renderStakeList(){
+  var f=stakeFiltered(), rows=f.rows, toks=f.toks, shown=rows.slice(0,S.stLimit);
+  var isEv=(S.stTab==="event"), evs=stakeEvents();
+  var nTouched=rows.filter(function(r){ return r.nTotal>0; }).length;
+  var nNone=rows.length-nTouched;
+  var totalSales=rows.reduce(function(x,r){ return x+r.sales; },0);
+  var cov=rows.length?nTouched/rows.length:0;
+
+  var cnt=$("stakeCount");
+  if(cnt) cnt.innerHTML='<b>'+fmtN(rows.length)+'</b> người liên hệ'+(isEv?' từ event':'')+' · '+esc(S.fy);
+  var st=$("stakeStats");
+  if(st) st.innerHTML=
+      '<div class="kpi"><div class="lb">'+(isEv?'Khách từ Event':'Tổng CBC')+'</div><div class="vl">'+fmtN(rows.length)+'</div>'+
+        '<div class="sb">'+(isEv?fmtN(evs.length)+' sự kiện':'Trong phạm vi đang xem')+'</div></div>'+
+      '<div class="kpi"><div class="lb">Đã tiếp xúc</div><div class="vl">'+fmtN(nTouched)+'</div>'+
+        '<div class="sb">Có ít nhất 1 lần làm việc trong '+esc(S.fy)+'</div>'+pb(cov)+
+        '<div class="pbl"><span style="color:'+pctColor(cov)+'">'+Math.round(cov*100)+'%</span><span>còn '+fmtN(nNone)+'</span></div></div>'+
+      '<div class="kpi"><div class="lb">Chưa chăm sóc</div><div class="vl" style="color:'+(nNone?"#D9433F":"#1E9E5A")+'">'+fmtN(nNone)+'</div>'+
+        '<div class="sb">'+(nNone?'Chưa ghi nhận buổi làm việc nào':'Đã tiếp xúc hết')+'</div></div>'+
+      '<div class="kpi"><div class="lb">Doanh số account liên quan</div><div class="vl">'+fmtVND(totalSales)+'</div>'+
+        '<div class="sb">Cộng theo account của các CBC này</div></div>';
+
+  var box=$("stakeList"); if(!box) return;
+  box.innerHTML=(shown.length
       ? '<div class="card pad"><div class="tbwrap" style="max-height:none"><table class="tb st-tb"><thead><tr>'+
         '<th>Người liên hệ</th><th>Account</th><th style="width:118px">Điện thoại</th>'+
         '<th style="width:150px">Chức vụ / Chuyên khoa</th><th style="width:132px">Influence · Trust</th>'+
@@ -2266,15 +2297,14 @@ function renderStake(){
         shown.map(function(r){ return stakeRow(r,toks,isEv||evs.length); }).join("")+
         '</tbody></table></div>'+
         (rows.length>S.stLimit?'<div style="text-align:center;margin-top:12px">'+
-          '<button class="btn" onclick="S.stLimit+=100;renderStake()">Xem thêm ('+fmtN(rows.length-S.stLimit)+' người)</button></div>':"")+
+          '<button class="btn" onclick="S.stLimit+=100;renderStakeList()">Xem thêm ('+fmtN(rows.length-S.stLimit)+' người)</button></div>':"")+
         '</div>'
       : '<div class="card pad"><div class="empty"><div class="e">🤝</div>'+
         '<p>'+(isEv?'Chưa có khách hàng nào từ event trong danh bạ CBC':'Không có người liên hệ nào khớp bộ lọc')+'</p>'+
         (isEv?'<p style="font-size:12px;color:var(--mute);max-width:480px;margin:8px auto 0;line-height:1.6">'+
-          'Bấm <b>⟳ Đồng bộ từ file Event</b> ở trên để kéo khách từ file dữ liệu event sang tab 2. CBC.</p>'+
-          '<button class="btn sm pri" style="margin-top:11px" onclick="syncEventNow()">⟳ Đồng bộ ngay</button>':"")+
-        '</div></div>')+
-  '</div>';
+          'Bấm <b>🎪 Đồng bộ từ file Event</b> ở trên để kéo khách từ file dữ liệu event sang tab 2. CBC.</p>'+
+          '<button class="btn sm pri" style="margin-top:11px" onclick="syncEventNow()">🎪 Đồng bộ ngay</button>':"")+
+        '</div></div>');
 }
 function stakeTabBarSafe(){ try{ return stakeTabBar(); }catch(e){ return ""; } }
 function stakeRow(r,toks,showEv){
@@ -3921,6 +3951,23 @@ function ensureCbc(){
   ensureTab("cbc",{fy:"",pic:""},function(rows,ready){
     if(rows){ S.cbcRows=rows; S._cbcLoading=false; }
     else if(ready){ S._cbcLoading=false; }
+  });
+}
+/* ⭐ v6.1 — BUỘC nạp lại danh bạ CBC từ Google Sheet.
+   ensureCbc() dùng ensureTab(), mà ensureTab thấy cache còn hạn 4 phút thì trả luôn
+   bản cũ và KHÔNG gọi máy chủ — nên sau khi đồng bộ khách event, app vẫn hiện 0 người.
+   Hàm này xoá cache rồi tải thẳng, có callback để biết lúc nào xong. */
+function reloadCbc(done){
+  S._cbcLoading=true;
+  delete TSTORE["cbc"];
+  delete FETCHING["cbc"];
+  _stCache=null;
+  fetchTab("cbc",{fy:"",pic:""},function(rows,ready,err){
+    if(!ready) return;
+    S._cbcLoading=false;
+    if(rows) S.cbcRows=rows;
+    _stCache=null;
+    if(done) done(rows||[],err||null);
   });
 }
 function stakeOf(accName){
