@@ -630,6 +630,12 @@ body.modal-on #drw{filter:blur(2px) saturate(.85);opacity:.55}
 .ot-rg{flex:1;min-width:110px;max-width:230px;accent-color:var(--blue)}
 .ot-pct{font-size:12px;font-weight:800;color:var(--blue-d);min-width:38px}
 .ot-sub.late{border-left-color:var(--dang)}
+.ot-sub.can .ot-sh{cursor:pointer;border-radius:8px;padding:3px 5px;margin:-3px -5px 5px;transition:.13s}
+.ot-sub.can .ot-sh:hover{background:var(--pale)}
+.ot-t.can{cursor:pointer;border-radius:8px;padding:3px 6px;margin-left:-6px;transition:.13s}
+.ot-t.can:hover{background:var(--pale);color:var(--blue-d)}
+.ot-link{color:var(--blue);text-decoration:underline;word-break:break-all}
+.ot-link:hover{color:var(--blue-d)}
 .shtabs{display:flex;gap:4px;margin-bottom:13px;border-bottom:2px solid var(--line);overflow-x:auto;-webkit-overflow-scrolling:touch}
 .shtabs::-webkit-scrollbar{display:none}
 .shtabs button{flex:none;display:flex;align-items:center;gap:7px;height:42px;padding:0 17px;border:1px solid var(--line);border-bottom:none;background:var(--paler);color:var(--sub);font-size:13.5px;font-weight:700;cursor:pointer;border-radius:11px 11px 0 0;margin-bottom:-2px;transition:.15s;white-space:nowrap;font-family:inherit}
@@ -770,6 +776,8 @@ body.modal-on #drw{filter:blur(2px) saturate(.85);opacity:.55}
 
 /* ══════════════ ⭐ v4.4 — ĐỊA BÀN GỌN ══════════════ */
 .trhead{display:flex;align-items:flex-start;gap:10px;margin-bottom:10px}
+.trhead.compact{align-items:center;margin-bottom:8px}
+.trhead.compact .sub{font-size:12.5px}
 .trhead .tt{flex:1;min-width:0}
 .trhead .acts{flex:none;display:flex;gap:6px;align-items:center;padding-top:2px}
 .trhead h2{font-size:19px;font-weight:800;color:var(--navy);margin:0}
@@ -1001,6 +1009,11 @@ function insertResultTpl(id){
 function $(id){ return document.getElementById(id); }
 function esc(s){ return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
 function nl2br(s){ return esc(s).replace(/\n/g,"<br>"); }
+/* ⭐ v5.7 — biến link trong nội dung thành thẻ bấm được (đã escape trước nên an toàn) */
+function linkify(s){
+  return nl2br(s).replace(/(https?:\/\/[^\s<]+)/g,
+    '<a href="$1" target="_blank" rel="noopener" class="ot-link">$1</a>');
+}
 /* ⭐ v5.2 — ĐỌC SỐ TIỀN KIỂU VIỆT NAM, CHỊU ĐƯỢC Ô LẪN CHỮ.
    Trước đây "700.000.000 VNĐ100 vỉ jizai150 tuýp comp" bị bóc thành
    "700.000.000100150" ⇒ parseFloat ra 700 ⇒ app tưởng Target = 700 và
@@ -1153,6 +1166,12 @@ document.addEventListener("keydown",function(e){ if(e.key!=="Escape") return; if
 
 /* ───────── API (JSONP đọc · POST ghi) ───────── */
 var _seq=0;
+function gasAuthMsg(){
+  return "Không đọc được dữ liệu từ Google. Thường gặp khi điện thoại đang đăng nhập "+
+         "nhiều tài khoản Google cùng lúc — Google chuyển sang trang chọn tài khoản nên app "+
+         "không nhận được dữ liệu.\n\nCách xử lý: mở app bằng cửa sổ ẩn danh, hoặc trong "+
+         "Chrome chọn đúng một tài khoản rồi tải lại trang.";
+}
 function jsonp(params,timeoutMs){
   return new Promise(function(res,rej){
     var cb="__mmh_"+Date.now()+"_"+(++_seq);
@@ -1166,7 +1185,20 @@ function jsonp(params,timeoutMs){
     var url=GAS_URL+"?"+qs;
     if(url.length>7000){ done(); rej(new Error("__TOO_LONG__")); return; }
     s.src=url;
-    s.onerror=function(){ done(); rej(new Error("Không tải được dữ liệu — kiểm tra link /exec và quyền Web App phải để 'Anyone'.")); };
+    /* ⭐ v5.7 — thẻ <script> hỏng thường KHÔNG phải do sai link mà do Google chuyển hướng
+       sang trang chọn tài khoản (máy đang đăng nhập nhiều Gmail cùng lúc). Thử lại một
+       lần bằng fetch để lấy đúng nội dung, hỏng nữa mới báo lỗi kèm cách xử lý. */
+    s.onerror=function(){
+      done();
+      fetch(url.replace(/([?&])callback=[^&]*/,"$1_j=1"),{method:"GET",credentials:"omit"})
+        .then(function(r){ return r.text(); })
+        .then(function(t){
+          var m=String(t||"").replace(/^[^{[]*/,"").replace(/\);?\s*$/,"");
+          try{ res(JSON.parse(m)); }
+          catch(e){ rej(new Error(gasAuthMsg())); }
+        })
+        .catch(function(){ rej(new Error(gasAuthMsg())); });
+    };
     document.body.appendChild(s);
   });
 }
@@ -1664,10 +1696,31 @@ function formOtherKey(no){
       +'<div class="fld"><label>Ngày bắt đầu</label><input class="inp" type="date" id="ok_start" value="'+esc(String((k&&k.start)||"").slice(0,10))+'"></div>'
       +'<div class="fld"><label>Hạn hoàn thành</label><input class="inp" type="date" id="ok_planned" value="'+esc(String((k&&k.planned)||"").slice(0,10))+'"></div>'
     +'</div>'
-    +(isNew?"":'<div class="fld"><label>Kết quả / ghi chú</label><textarea class="inp" id="ok_result" style="min-height:96px">'+esc(k.result||"")+'</textarea></div>');
+    +'<div class="fld"><label>Kết quả / ghi chú</label>'
+      +'<textarea class="inp" id="ok_result" style="min-height:110px" placeholder="Đã làm gì, kết quả ra sao…">'+esc((k&&k.result)||"")+'</textarea>'
+      +'<div style="display:flex;gap:7px;margin-top:7px;flex-wrap:wrap">'
+        +'<button class="mini" onclick="toggleVoice(\'ok_result\',this)">🎤 Nói</button>'
+        +'<button class="mini" onclick="addLinkTo(\'ok_result\')">🔗 Chèn link tham chiếu</button></div></div>';
   openModal((isNew?"＋ Thêm Key Task":"✎ Sửa Key Task "+esc(no)),h,
     '<button class="btn" onclick="closeModal()">Huỷ</button><div style="flex:1"></div>'
     +'<button class="btn pri" onclick="saveOtherKey('+(isNew?'""':'"'+esc(no)+'"')+')">Lưu vào Report Hub</button>');
+}
+/* ⭐ v5.7 — chèn link tham chiếu (Drive, báo giá, hồ sơ thầu…) vào ô kết quả.
+   Lưu thẳng trong nội dung nên Report Hub cũng đọc được, không cần cột riêng. */
+function addLinkTo(id){
+  var ta=$(id); if(!ta) return;
+  var url=prompt("Dán link tham chiếu (Drive, Sheet, báo giá, hồ sơ thầu…):","https://");
+  if(!url) return;
+  url=String(url).trim();
+  if(!/^https?:\/\//i.test(url)) return toast("Link phải bắt đầu bằng http:// hoặc https://","warn");
+  var label=prompt("Đặt tên cho link (bỏ trống thì dùng chính link):","")||"";
+  label=String(label).trim();
+  var line=(label? (label+": ") : "")+url;
+  var cur=String(ta.value||"").replace(/\s+$/,"");
+  ta.value=cur ? (cur+"\n🔗 "+line) : ("🔗 "+line);
+  try{ ta.dispatchEvent(new Event("input",{bubbles:true})); ta.focus();
+       ta.setSelectionRange(ta.value.length,ta.value.length); ta.scrollTop=ta.scrollHeight; }catch(e){}
+  toast("✓ Đã chèn link","ok");
 }
 function saveOtherKey(no){
   var name=String($("ok_name").value||"").trim();
@@ -1702,8 +1755,10 @@ function formOtherSub(keyNo,no){
       +'<div class="fld"><label>Hạn hoàn thành</label><input class="inp" type="date" id="os_planned" value="'+esc(String((x&&x.planned)||"").slice(0,10))+'"></div>'
     +'</div>'
     +'<div class="fld"><label>Kết quả / ghi chú</label>'
-      +'<textarea class="inp" id="os_result" style="min-height:110px" placeholder="Đã làm gì, kết quả ra sao, link tài liệu…">'+esc((x&&x.result)||"")+'</textarea>'
-      +'<button class="mini" style="margin-top:7px" onclick="toggleVoice(\'os_result\',this)">🎤 Nói</button></div>';
+      +'<textarea class="inp" id="os_result" style="min-height:120px" placeholder="Đã làm gì, kết quả ra sao…">'+esc((x&&x.result)||"")+'</textarea>'
+      +'<div style="display:flex;gap:7px;margin-top:7px;flex-wrap:wrap">'
+        +'<button class="mini" onclick="toggleVoice(\'os_result\',this)">🎤 Nói</button>'
+        +'<button class="mini" onclick="addLinkTo(\'os_result\')">🔗 Chèn link tham chiếu</button></div></div>';
   openModal((isNew?"＋ Thêm đầu việc":"✎ Sửa đầu việc "+esc(no)),h,
     '<button class="btn" onclick="closeModal()">Huỷ</button><div style="flex:1"></div>'
     +'<button class="btn pri" onclick="saveOtherSub(\''+esc(keyNo)+'\','+(isNew?'""':'"'+esc(no)+'"')+')">Lưu vào Report Hub</button>');
@@ -1737,9 +1792,8 @@ function delOther(no,isKey){
 function renderOther(){
   var r=vRangeCalc();
   var head=wkTabBar()+
-    '<div class="trhead">'+
-      '<div class="tt"><h2>Công việc khác</h2>'+
-        '<p>'+esc(r.label)+' · ghi vào Google Sheet <b>Sales &amp; Marketing</b> — tab WEEKYLY new</p></div>'+
+    '<div class="trhead compact">'+
+      '<div class="tt"><span class="sub">ghi vào <b>Sales &amp; Marketing</b> · WEEKYLY new</span></div>'+
       '<div class="acts">'+
         '<button class="btn sm" onclick="refreshOther()">⟳ Đọc lại</button>'+
         '<button class="btn pri sm" onclick="formOtherKey(\'\')">＋ Key Task</button></div>'+
@@ -1817,12 +1871,13 @@ function otherKeyCard(k){
            '<button class="ot-ic del" title="Xoá Key Task" onclick="delOther(\''+esc(k.no)+'\',true)">🗑</button>'
           :'<span class="ot-lock" title="Chỉ '+esc(k.pic||"PIC")+' sửa được">🔒</span>')+
     '</div>'+
-    '<div class="ot-t">'+esc(k.keyTask||k.subTask||"—")+'</div>'+
-    (k.result?'<div class="ot-r"><b>Kết quả:</b> '+nl2br(String(k.result).slice(0,600))+'</div>':"")+
+    '<div class="ot-t'+(can?" can":"")+'"'+(can?' onclick="formOtherKey(\''+esc(k.no)+'\')" title="Bấm để sửa Key Task"':"")+'>'+
+      esc(k.keyTask||k.subTask||"—")+'</div>'+
+    (k.result?'<div class="ot-r"><b>Kết quả:</b> '+linkify(String(k.result).slice(0,600))+'</div>':"")+
     '<div class="ot-bar">'+
       '<span class="ot-cnt">'+done+'/'+subs.length+' đầu việc xong</span>'+
       (subs.length?pb(done/subs.length):"")+
-      '<button class="btn xs" onclick="formOtherSub(\''+esc(k.no)+'\',\'\')">＋ Đầu việc</button>'+
+      '<button class="btn xs pri" onclick="formOtherSub(\''+esc(k.no)+'\',\'\')">＋ Thêm đầu việc</button>'+
     '</div>'+
     (subs.length?'<div class="ot-subs">'+subs.map(function(x){ return otherSubRow(k,x); }).join("")+'</div>':"")+
   '</div>';
@@ -1831,13 +1886,14 @@ function otherSubRow(k,x){
   var can=canEditOther(x.pic), pct=otherPct(x), no=String(x.no);
   var open=!!S.otherOpen[no];
   var late=(!/complet/i.test(String(x.status||"")) && x.planned && String(x.planned).slice(0,10)<todayISO());
-  return '<div class="ot-sub'+(late?" late":"")+'">'+
-    '<div class="ot-sh"><span class="ot-no">'+esc(no)+'</span>'+
+  return '<div class="ot-sub'+(late?" late":"")+(can?" can":"")+'">'+
+    '<div class="ot-sh"'+(can?' onclick="formOtherSub(\''+esc(k.no)+'\',\''+esc(no)+'\')" title="Bấm để cập nhật"':"")+'>'+
+      '<span class="ot-no">'+esc(no)+'</span>'+
       '<b>'+esc(x.subTask||"—")+'</b><span class="sp"></span>'+
       '<span class="tag t-n">'+esc(x.pic||"—")+'</span>'+
       (late?'<span class="tag t-r">quá hạn</span>':"")+
-      (can?'<button class="ot-ic" title="Sửa" onclick="formOtherSub(\''+esc(k.no)+'\',\''+esc(no)+'\')">✎</button>'+
-           '<button class="ot-ic del" title="Xoá" onclick="delOther(\''+esc(no)+'\',false)">🗑</button>'
+      (can?'<button class="ot-ic" title="Sửa" onclick="event.stopPropagation();formOtherSub(\''+esc(k.no)+'\',\''+esc(no)+'\')">✎</button>'+
+           '<button class="ot-ic del" title="Xoá" onclick="event.stopPropagation();delOther(\''+esc(no)+'\',false)">🗑</button>'
           :'<span class="ot-lock" title="Chỉ '+esc(x.pic||"PIC")+' sửa được">🔒</span>')+
     '</div>'+
     '<div class="ot-ctl">'+
@@ -1853,7 +1909,7 @@ function otherSubRow(k,x){
     '<div class="ot-m">'+[x.start?("Bắt đầu "+fmtVN(x.start)):"",
                           x.planned?("Hạn "+fmtVN(x.planned)):"",
                           x.actual?("Xong "+fmtVN(x.actual)):""].filter(Boolean).map(esc).join(" · ")+'</div>'+
-    (open?'<div class="ot-r">'+(x.result?nl2br(String(x.result)):'<i style="color:var(--mute)">Chưa có kết quả.'+(can?' Bấm ✎ để ghi.':"")+'</i>')+'</div>':"")+
+    (open?'<div class="ot-r">'+(x.result?linkify(String(x.result)):'<i style="color:var(--mute)">Chưa có kết quả.'+(can?' Bấm ✎ để ghi.':"")+'</i>')+'</div>':"")+
   '</div>';
 }
 var _dbot; function debOther(){ clearTimeout(_dbot); _dbot=setTimeout(function(){ keepCaret("ot_q",renderOther); },140); }
@@ -2413,7 +2469,10 @@ function deltaCell(v){
      · Budget Mani USD        → MỤC TIÊU của NPP
      · Actual/Forecast USD    → ACTUAL, tự nhảy theo file gốc
    Segment mặc định lấy Dental + MMG (đúng phạm vi nhóm Dental Sales). */
-var TURNOVER_URL = "https://script.google.com/a/macros/manimedicalhanoi.com/s/AKfycbz26knlK_GE2mYlszlx947QWSLvfScrHFeB86XkaPWfDhKHi49cnVfCXS_kPUpkX2Fgww/exec";
+/* ⭐ v5.7 — PHẢI dùng dạng /macros/s/<ID>/exec.
+   Dạng /a/macros/<tên miền>/s/... chỉ cho tài khoản thuộc chính tên miền đó truy cập,
+   nên sales đăng nhập điện thoại bằng Gmail cá nhân sẽ bị chặn dù Web App đã để "Anyone". */
+var TURNOVER_URL = "https://script.google.com/macros/s/AKfycbz26knlK_GE2mYlszlx947QWSLvfScrHFeB86XkaPWfDhKHi49cnVfCXS_kPUpkX2Fgww/exec";
 var TURNOVER_SEGMENTS = ["Dental","MMG"];
 
 /* ⭐ v5.2 — CHỈ 4 NHÀ PHÂN PHỐI VIỆT NAM CỦA MMH DENTAL SALES.
@@ -3454,9 +3513,8 @@ function renderTerritory(){
 
   $("main").innerHTML='<div class="pg">'+
     wkTabBar()+
-    '<div class="trhead">'+
-      '<div class="tt"><h2>Thông tin địa bàn</h2>'+
-        '<span class="sub">'+esc(r.label)+' · <b>'+rows.length+'</b> task'+(nToday?' · hôm nay <b>'+nToday+'</b>':'')+'</span></div>'+
+    '<div class="trhead compact">'+
+      '<div class="tt"><span class="sub"><b>'+rows.length+'</b> task'+(nToday?' · hôm nay <b>'+nToday+'</b>':'')+'</span></div>'+
       '<div class="acts">'+
         (nFlag?'<button class="warnbtn'+(S.filt.flag?" on":"")+'" onclick="S.filt.flag=!S.filt.flag;renderTerritory()" title="Task thiếu dữ liệu">⚠️ '+nFlag+'</button>':"")+
         '<button class="ftog" onclick="vToday()">Hôm nay</button>'+
