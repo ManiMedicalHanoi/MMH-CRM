@@ -658,7 +658,7 @@ body.modal-on #drw{filter:blur(2px) saturate(.85);opacity:.55}
 #custList .pb{margin-top:0}
 .pb.rel i{background:var(--blue-l);opacity:.75}
 .kpi-note{margin-top:6px;font-size:9.5px;line-height:1.45;color:var(--mute);border-top:1px dashed var(--line);padding-top:5px}
-.livetag{font-size:9.5px;font-weight:800;color:var(--ok);background:var(--ok-bg);border-radius:6px;padding:2px 5px;display:inline-block;margin-top:3px;letter-spacing:.2px}
+.unitnote{font-size:9px;font-weight:700;color:var(--mute);margin-top:3px;line-height:1.35;font-weight:600;white-space:normal}
 .adpc-note{margin-top:7px;font-size:10.5px;line-height:1.5;color:var(--sub);background:var(--paler);border:1px dashed var(--line);border-radius:8px;padding:6px 8px}
 .adpc-note b{color:var(--ink)}
 .adpms{display:flex;gap:4px;align-items:flex-end;margin-top:4px}
@@ -1542,27 +1542,58 @@ function otherTypes(){
 var OTHER_STATUS=["To Do","In Progress","Completed","Cancelled"];
 function otherPct(x){ var v=n(x&&x.progress); return v<=1?Math.round(v*100):Math.round(v); }
 
-/* các đầu việc Sales trong FY + PIC đang lọc */
+/* ⭐ v5.6 — Công việc khác dùng CHUNG bộ lọc thời gian với Thông tin địa bàn.
+   Một đầu việc được tính là "trong kỳ" nếu khoảng [bắt đầu … hạn] giao với kỳ đang xem;
+   việc chưa có ngày nào thì luôn hiện để không bị giấu mất. */
+function otherInRange(x,r){
+  if(!r||!r.from||!r.to) return true;
+  var a=String(x.start||"").slice(0,10);
+  var b=String(x.planned||x.revised||x.actual||"").slice(0,10)||a;
+  if(!a&&!b) return true;
+  if(!a) a=b;
+  if(!b) b=a;
+  if(a>b){ var t=a; a=b; b=t; }
+  return !(b<r.from || a>r.to);
+}
+/* các đầu việc Sales trong FY + PIC + kỳ đang xem.
+   Trả về BẢN SAO của key task với subs đã lọc — key gom nhiều PIC (VD
+   "202606_Dental Customer visiting") sẽ chỉ còn đầu việc của đúng người đang xem. */
 function otherKeys(){
   var pic = isMgmt() ? (S.otherPic||"") : S.user.pic;   /* sales chỉ thấy việc của mình */
-  return ((S.other&&S.other.keys)||[]).filter(function(k){
-    if(String(k.fy||"") && String(k.fy)!==S.fy) return false;
-    if(!OTHER_TYPE_RE.test(String(k.type||""))) return false;
-    if(pic && !picMatch(k.pic,pic)){
-      if(!(k.subs||[]).some(function(x){ return picMatch(x.pic,pic); })) return false;
+  var r = vRangeCalc();
+  var out=[];
+  ((S.other&&S.other.keys)||[]).forEach(function(k){
+    if(String(k.fy||"") && String(k.fy)!==S.fy) return;
+    if(!OTHER_TYPE_RE.test(String(k.type||""))) return;
+
+    var subs=(k.subs||[]).filter(function(x){
+      if(pic && !picMatch(x.pic,pic)) return false;
+      return otherInRange(x,r);
+    });
+    var keyMine = !pic || picMatch(k.pic,pic);
+    /* key task không còn đầu việc nào của mình trong kỳ ⇒ chỉ giữ nếu chính key đó
+       là của mình VÀ nằm trong kỳ (key task đơn lẻ, chưa có đầu việc con) */
+    if(!subs.length){
+      if(!keyMine) return;
+      if((k.subs||[]).length) return;          /* có sub nhưng không sub nào lọt lọc */
+      if(!otherInRange(k,r)) return;
     }
+    var kk={}; Object.keys(k).forEach(function(f){ kk[f]=k[f]; });
+    kk.subs=subs;
+
     if(S.otherStatus){
-      var all=[k].concat(k.subs||[]);
-      if(!all.some(function(x){ return String(x.status||"To Do")===S.otherStatus; })) return false;
+      var all=[kk].concat(subs);
+      if(!all.some(function(x){ return String(x.status||"To Do")===S.otherStatus; })) return;
     }
     if(S.otherQ){
       var tk=skTokens(S.otherQ);
-      var hay=noAcc([k.keyTask,k.subTask,k.result,k.type,k.pic,
-        (k.subs||[]).map(function(x){return x.subTask+" "+x.result+" "+x.pic;}).join(" ")].join(" "));
-      if(!tk.every(function(t){ return hay.indexOf(t)>=0; })) return false;
+      var hay=noAcc([kk.keyTask,kk.subTask,kk.result,kk.type,kk.pic,
+        subs.map(function(x){return x.subTask+" "+x.result+" "+x.pic;}).join(" ")].join(" "));
+      if(!tk.every(function(t){ return hay.indexOf(t)>=0; })) return;
     }
-    return true;
+    out.push(kk);
   });
+  return out;
 }
 function otherStatusTag(st,pg){
   var t=String(st||"To Do").toLowerCase();
@@ -1704,12 +1735,29 @@ function delOther(no,isKey){
 }
 
 function renderOther(){
+  var r=vRangeCalc();
   var head=wkTabBar()+
-    '<div class="ph"><div><h2>Công việc khác</h2>'+
-    '<p>Đầu việc ngoài đi địa bàn · ghi vào Google Sheet <b>Sales &amp; Marketing</b> — tab WEEKYLY new</p></div>'+
-    '<div class="sp"></div>'+
-    '<button class="btn sm" onclick="refreshOther()">⟳ Đọc lại</button>'+
-    '<button class="btn pri sm" onclick="formOtherKey(\'\')">＋ Key Task</button></div>';
+    '<div class="trhead">'+
+      '<div class="tt"><h2>Công việc khác</h2>'+
+        '<p>'+esc(r.label)+' · ghi vào Google Sheet <b>Sales &amp; Marketing</b> — tab WEEKYLY new</p></div>'+
+      '<div class="acts">'+
+        '<button class="btn sm" onclick="refreshOther()">⟳ Đọc lại</button>'+
+        '<button class="btn pri sm" onclick="formOtherKey(\'\')">＋ Key Task</button></div>'+
+    '</div>'+
+    /* dùng CHUNG thanh chọn kỳ với Thông tin địa bàn — đổi kỳ ở tab nào cũng nhớ */
+    '<div class="rangebar">'+
+      '<div class="seg">'+VRANGE.map(function(x){
+        return '<button class="'+((S.vMode||"week")===x[0]?"on":"")+'" onclick="vSetMode(\''+x[0]+'\')">'+esc(x[1])+'</button>'; }).join("")+'</div>'+
+      ((S.vMode||"week")==="range"
+        ? '<div class="trrange">'+
+            '<label>Từ</label><input class="inp" type="date" value="'+esc(S.vFrom)+'" max="'+esc(S.vTo)+'" onchange="vSetRange(\'from\',this.value)">'+
+            '<label>đến</label><input class="inp" type="date" value="'+esc(S.vTo)+'" min="'+esc(S.vFrom)+'" onchange="vSetRange(\'to\',this.value)">'+
+          '</div>'
+        : (S.vMode||"week")!=="fy"
+        ? '<div class="trnav"><button onclick="vShift(-1)">◀</button><span class="lb">'+esc(r.label)+'</span>'+
+          '<button onclick="vShift(1)">▶</button></div>'
+        : "")+
+    '</div>';
 
   if(S.otherErr){
     $("main").innerHTML='<div class="pg">'+head+
@@ -2642,19 +2690,25 @@ function renderKPI(){
       var dv=S.targetDraft["A"+a.row];
       var v=dv!==undefined?dv.value:(a.target?fmtN(a.target):"");
       var inp=mgr?'<input class="inp num" style="height:32px;text-align:right" value="'+esc(v)+'" data-scope="A" data-row="'+a.row+'" oninput="tgIn(this)">':('<b>'+(a.target?fmtN(a.target):"—")+'</b>');
-      /* ⭐ v5.2 — dòng doanh số Dental lấy Actual từ tổng 4 NPP bên file Turnover,
-         số bên đó đổi là dòng này đổi theo, không phải nhập tay. */
-      var act=a.actual, pct=a.pct, live=false;
+      /* ⭐ v5.6 — Actual lấy từ tổng 4 NPP bên file Turnover, NHƯNG chỉ khi ĐƠN VỊ KHỚP.
+         File Turnover tính bằng USD; nếu dòng KPI khai đơn vị VND thì hai con số
+         không so được với nhau (trước đây ghép vào ra 0% vô nghĩa) ⇒ giữ Actual
+         gốc từ tab 3. SALE ORDER và ghi chú lý do. */
+      var act=a.actual, pct=a.pct, live=false, mismatch=false;
       if(a.blockId==="amount"){
         var lv=turnoverDentalActual(picSel);
-        if(lv!=null && lv>0){ act=lv; pct=a.target?lv/a.target:null; live=true; }
+        var isUsd=/usd/i.test(String(a.unit||""));
+        if(lv!=null && lv>0){
+          if(isUsd){ act=(/kusd/i.test(String(a.unit||""))?lv/1000:lv); pct=a.target?act/a.target:null; live=true; }
+          else mismatch=true;
+        }
       }
       return '<tr><td class="ctr" style="color:var(--mute)">'+esc(a.no)+'</td><td><b>'+esc(a.objective)+'</b></td><td>'+esc(a.kpi)+' <span style="color:var(--mute)">('+esc(a.unit)+')</span></td>'+
         '<td class="num" style="width:130px">'+inp+'</td>'+
         '<td class="num">'+(a.prevActual?fmtN(a.prevActual):"—")+'</td>'+
         deltaCell(a.growth)+
         '<td class="num"><b>'+fmtN(act)+'</b>'+
-          (live?'<div class="livetag" title="Tổng Actual/Forecast của 4 NPP, đọc trực tiếp từ file MMH Turnover">⟳ từ Turnover</div>':"")+'</td>'+
+          (mismatch?'<div class="unitnote" title="Doanh số nhà phân phối tính bằng USD, dòng này khai đơn vị '+esc(a.unit||"")+' nên không cộng gộp được. Số đang hiển thị lấy từ tab 3. SALE ORDER.">số từ tab SALE ORDER · đơn vị '+esc(a.unit||"—")+'</div>':"")+'</td>'+
         '<td>'+(pct==null?'<span style="color:var(--mute);font-size:12px">chưa đặt mục tiêu</span>':pb(pct)+'<div class="pbl"><span style="color:'+pctColor(pct)+'">'+Math.round(pct*100)+'%</span><span>'+(pct>=1?"Đạt":pct>=.8?"Gần đạt":"Chưa đạt")+'</span></div>')+'</td></tr>';
     }).join("")+'</tbody></table></div>';
 
@@ -3399,8 +3453,8 @@ function renderTerritory(){
   var nAct=(S.filt.q?1:0)+(isMgmt()&&S.filt.pic?1:0)+(S.filt.act?1:0)+(S.filt.status?1:0)+(S.filt.flag?1:0);
 
   $("main").innerHTML='<div class="pg">'+
+    wkTabBar()+
     '<div class="trhead">'+
-      wkTabBar()+
       '<div class="tt"><h2>Thông tin địa bàn</h2>'+
         '<span class="sub">'+esc(r.label)+' · <b>'+rows.length+'</b> task'+(nToday?' · hôm nay <b>'+nToday+'</b>':'')+'</span></div>'+
       '<div class="acts">'+
@@ -6155,10 +6209,12 @@ function vRangeDefaults(){
 function vSetRange(which,val){
   if(!val) return;
   if(which==="from") S.vFrom=val; else S.vTo=val;
-  S.vMode="range"; vRangeDefaults(); renderTerritory();
+  S.vMode="range"; vRangeDefaults();
+  if(S.wkTab==="other") renderOther(); else renderTerritory();
 }
 function vQuickRange(days){
-  S.vMode="range"; S.vTo=todayISO(); S.vFrom=addDays(S.vTo,-(days-1)); renderTerritory();
+  S.vMode="range"; S.vTo=todayISO(); S.vFrom=addDays(S.vTo,-(days-1));
+  if(S.wkTab==="other") renderOther(); else renderTerritory();
 }
 function vRangeCalc(){
   var mode=S.vMode||"week";
@@ -6208,10 +6264,12 @@ function vShift(k){
     var len=Math.round((new Date(S.vTo)-new Date(S.vFrom))/86400000)+1;
     S.vFrom=addDays(S.vFrom,len*k); S.vTo=addDays(S.vTo,len*k);
   }
+  if(S.tab==="weekly"&&S.wkTab==="other") return renderOther();
   if(S.tab==="weekly"&&S.cache.weekly) renderTerritory(); else pgWeekly();
 }
 function vSetMode(m){ S.vMode=m; S.vAnchor=S.vAnchor||todayISO();
   if(m==="range") vRangeDefaults();
+  if(S.tab==="weekly"&&S.wkTab==="other") return renderOther();
   if(S.tab==="weekly"&&S.cache.weekly) renderTerritory(); else pgWeekly(); }
 
 /* nhóm theo bucket thời gian để vẽ tần suất */
