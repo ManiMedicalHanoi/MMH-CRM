@@ -643,6 +643,13 @@ body.modal-on #drw{filter:blur(2px) saturate(.85);opacity:.55}
 .shtabs button.on{background:var(--card);color:var(--navy);border-color:var(--line);border-bottom:2px solid var(--card);box-shadow:0 -2px 0 var(--navy) inset}
 .shtabs .cnt{background:var(--line2);color:var(--sub);border-radius:20px;padding:1px 8px;font-size:11px}
 .shtabs button.on .cnt{background:var(--navy);color:#fff}
+/* ⭐ v5.8 — bảng xem nhanh trước khi gửi báo cáo */
+.rp-tb{font-size:12.5px}
+.rp-tb td{vertical-align:top;padding:9px 10px}
+.rp-tb .pbl{font-size:10px;margin-top:2px}
+.rp-td{color:var(--sub);line-height:1.55;max-width:300px}
+.rp-sec{font-size:12.5px;font-weight:800;color:var(--navy);margin:4px 0 8px;padding-bottom:6px;border-bottom:1px dashed var(--line)}
+tr.rp-late td{background:var(--dang-bg)}
 .ot-key{margin-bottom:11px}
 .ot-h{display:flex;gap:7px;align-items:center;flex-wrap:wrap;margin-bottom:8px}
 .ot-no{font-size:11px;color:var(--mute);font-weight:700}
@@ -976,7 +983,7 @@ var S = {
   /* ⭐ v5 (Đợt A) */
   vFrom:"", vTo:"",          /* lọc khoảng ngày ở "Cập nhật thông tin địa bàn" */
   custSort:"",               /* sắp xếp danh sách khách hàng */
-  other:null, otherErr:"", otherPic:"", otherQ:"", otherStatus:"", otherOpen:{},
+  other:null, otherErr:"", otherPic:"", otherQ:"", otherStatus:"", otherOpen:{}, otherShowVisit:false,
   wkTab:(function(){ try{ return localStorage.getItem("mmh_wktab")||"terr"; }catch(e){ return "terr"; } })(),
   dashG:"all",               /* nhóm thông tin đang xem trên Dashboard */
   adpView:"board",           /* board | list — ADP xem dạng bảng ABCD hay danh sách lớn */
@@ -1496,6 +1503,15 @@ $("fab").onclick=function(){ pickTaskKind(); };
    hai nơi cùng ghi vào một dòng. */
 var REPORTHUB_URL = "https://script.google.com/macros/s/AKfycbzn-5chMgO7lQPKmot8P7UkP9C40MdCPtiTTa4H1gcKepVsnr1IYfcB7sSdK1_jrZYY/exec";
 var OTHER_TYPE_RE = /sale/i;          /* chỉ lấy đầu việc của khối Sales */
+/* ⭐ v5.8 — Key task "…Customer visiting" do Visiting_Sync tự sinh từ tab 6. WEEKLY REPORT.
+   Sales sửa chúng ở "Thông tin địa bàn", không sửa ở đây ⇒ mặc định ẩn khỏi Công việc khác
+   để tránh trùng lặp và tránh sửa nhầm chỗ. Bật lại bằng nút trong bộ lọc. */
+var VISITING_KEY_RE = /customer\s*visiting/i;
+function isVisitingKey(k){
+  return VISITING_KEY_RE.test(String((k&&k.keyTask)||"")) ||
+         VISITING_KEY_RE.test(String((k&&k.subTask)||""));
+}
+function toggleVisitingKeys(){ S.otherShowVisit=!S.otherShowVisit; renderOther(); }
 
 function hubJsonp(params,timeoutMs){
   return new Promise(function(res,rej){
@@ -1539,9 +1555,18 @@ function pickTaskKind(){
   '</div>';
   openModal("Thêm công việc mới",h,'<button class="btn" onclick="closeModal()">Huỷ</button>');
 }
+/* ⭐ v5.8 — SO KHỚP PIC CHÍNH XÁC.
+   picMatch() dùng indexOf nên "Viet" khớp luôn "Viet Ha" (và "Khang" khớp "Le Thanh Khang"),
+   khiến sales nhìn thấy việc của người khác — kể cả nhóm Surgical. Ở màn Công việc khác
+   phải so bằng tên đã chuẩn hoá, không chấp nhận khớp một phần. */
+function picEq(a,b){
+  a=noAcc(a).replace(/\s+/g," ").trim();
+  b=noAcc(b).replace(/\s+/g," ").trim();
+  return !!a && !!b && a===b;
+}
 function canEditOther(pic){
   if(isMgmt()) return true;
-  return picMatch(pic||"", S.user.pic) || !String(pic||"").trim();
+  return picEq(pic, S.user.pic) || !String(pic||"").trim();
 }
 function hubPost(body){
   var flat={}; Object.keys(body||{}).forEach(function(k){
@@ -1597,12 +1622,13 @@ function otherKeys(){
   ((S.other&&S.other.keys)||[]).forEach(function(k){
     if(String(k.fy||"") && String(k.fy)!==S.fy) return;
     if(!OTHER_TYPE_RE.test(String(k.type||""))) return;
+    if(!S.otherShowVisit && isVisitingKey(k)) return;   /* việc đi địa bàn: xem ở tab bên cạnh */
 
     var subs=(k.subs||[]).filter(function(x){
-      if(pic && !picMatch(x.pic,pic)) return false;
+      if(pic && !picEq(x.pic,pic)) return false;
       return otherInRange(x,r);
     });
-    var keyMine = !pic || picMatch(k.pic,pic);
+    var keyMine = !pic || picEq(k.pic,pic);
     /* key task không còn đầu việc nào của mình trong kỳ ⇒ chỉ giữ nếu chính key đó
        là của mình VÀ nằm trong kỳ (key task đơn lẻ, chưa có đầu việc con) */
     if(!subs.length){
@@ -1701,9 +1727,11 @@ function formOtherKey(no){
       +'<div style="display:flex;gap:7px;margin-top:7px;flex-wrap:wrap">'
         +'<button class="mini" onclick="toggleVoice(\'ok_result\',this)">🎤 Nói</button>'
         +'<button class="mini" onclick="addLinkTo(\'ok_result\')">🔗 Chèn link tham chiếu</button></div></div>';
+  /* ⚠ dùng nháy ĐƠN trong onclick — nháy kép sẽ đóng sớm thuộc tính HTML,
+     nút biến thành saveOtherKey( và bấm không có tác dụng. */
   openModal((isNew?"＋ Thêm Key Task":"✎ Sửa Key Task "+esc(no)),h,
     '<button class="btn" onclick="closeModal()">Huỷ</button><div style="flex:1"></div>'
-    +'<button class="btn pri" onclick="saveOtherKey('+(isNew?'""':'"'+esc(no)+'"')+')">Lưu vào Report Hub</button>');
+    +'<button class="btn pri" onclick="saveOtherKey(\''+esc(no||"")+'\')">Lưu vào Google Sheet</button>');
 }
 /* ⭐ v5.7 — chèn link tham chiếu (Drive, báo giá, hồ sơ thầu…) vào ô kết quả.
    Lưu thẳng trong nội dung nên Report Hub cũng đọc được, không cần cột riêng. */
@@ -1730,11 +1758,11 @@ function saveOtherKey(no){
   if(no){ body.action="updateKey"; body.no=no; body.keyTask=name;
           if($("ok_result")) body.result=$("ok_result").value; }
   else  { body.action="addKey";    body.keyTask=name; }
-  busy(true,"Đang lưu vào Report Hub…");
+  busy(true,"Đang lưu vào Google Sheet…");
   hubPost(body).then(function(r){
     busy(false); closeModal(); toast(r.message||"Đã lưu","ok");
     refreshOther();
-  }).catch(function(e){ busy(false); toast(e.message,"err",6000); });
+  }).catch(function(e){ busy(false); toast(e.message,"err",7000); });
 }
 function formOtherSub(keyNo,no){
   var x=no?otherFindSub(no):null, isNew=!x;
@@ -1761,7 +1789,7 @@ function formOtherSub(keyNo,no){
         +'<button class="mini" onclick="addLinkTo(\'os_result\')">🔗 Chèn link tham chiếu</button></div></div>';
   openModal((isNew?"＋ Thêm đầu việc":"✎ Sửa đầu việc "+esc(no)),h,
     '<button class="btn" onclick="closeModal()">Huỷ</button><div style="flex:1"></div>'
-    +'<button class="btn pri" onclick="saveOtherSub(\''+esc(keyNo)+'\','+(isNew?'""':'"'+esc(no)+'"')+')">Lưu vào Report Hub</button>');
+    +'<button class="btn pri" onclick="saveOtherSub(\''+esc(keyNo)+'\',\''+esc(no||"")+'\')">Lưu vào Google Sheet</button>');
 }
 function saveOtherSub(keyNo,no){
   var name=String($("os_name").value||"").trim();
@@ -1771,11 +1799,11 @@ function saveOtherSub(keyNo,no){
              planned:$("os_planned").value, result:$("os_result").value };
   if(no){ body.action="updateSub"; body.no=no; body.name=name; }
   else  { body.action="addSub"; body.parentNo=keyNo; body.name=name; }
-  busy(true,"Đang lưu vào Report Hub…");
+  busy(true,"Đang lưu vào Google Sheet…");
   hubPost(body).then(function(r){
     busy(false); closeModal(); toast(r.message||"Đã lưu","ok");
     refreshOther();
-  }).catch(function(e){ busy(false); toast(e.message,"err",6000); });
+  }).catch(function(e){ busy(false); toast(e.message,"err",7000); });
 }
 function delOther(no,isKey){
   var x=isKey?otherFindKey(no):otherFindSub(no); if(!x) return;
@@ -1842,18 +1870,23 @@ function renderOther(){
         '<div class="sb">'+(nLate?"Đã qua hạn, chưa xong":"Không có việc quá hạn")+'</div></div>'+
     '</div>'+
     '<div class="card pad" style="margin-bottom:12px">'+
-      '<div class="row"><div style="flex:2"><input class="inp" id="ot_q" autocomplete="off" '+
+      '<div class="row" style="margin-bottom:9px"><div style="flex:2"><input class="inp" id="ot_q" autocomplete="off" '+
         'placeholder="🔍 Tìm trong key task, đầu việc, kết quả…" value="'+esc(S.otherQ||"")+'" '+
         'oninput="S.otherQ=this.value;debOther()"></div></div>'+
-      '<div class="chipbar" style="margin-bottom:'+(isMgmt()&&picList.length>1?"8px":"0")+'">'+
+      '<div class="chipbar" style="margin-bottom:8px">'+
         OTHER_STATUS.map(function(v){ return '<div class="chip'+(S.otherStatus===v?" on":"")+'" onclick="setOtherStatus(\''+esc(v)+'\')">'+esc(v)+'</div>'; }).join("")+
+        '<div class="chip'+(S.otherShowVisit?" on":"")+'" onclick="toggleVisitingKeys()" '+
+          'title="Việc đi gặp khách hàng tự đồng bộ từ tab Thông tin địa bàn — bật để xem cùng ở đây">'+
+          (S.otherShowVisit?"✓ ":"")+'Hiện cả việc đi địa bàn</div>'+
       '</div>'+
       (isMgmt()&&picList.length>1?'<div class="chipbar" style="margin-bottom:0"><div class="chip'+(S.otherPic?"":" on")+'" onclick="setOtherPic(\'\')">Tất cả PIC</div>'+
         picList.map(function(p){ return '<div class="chip'+(S.otherPic===p?" on":"")+'" onclick="setOtherPic(\''+esc(p)+'\')">'+esc(p)+'</div>'; }).join("")+'</div>':"")+
     '</div>'+
     (keys.length?keys.map(otherKeyCard).join("")
-    :'<div class="card pad"><div class="empty"><div class="e">🧩</div><p>Chưa có công việc khác nào trong '+esc(S.fy)+
+    :'<div class="card pad"><div class="empty"><div class="e">🧩</div><p>Chưa có công việc khác nào trong kỳ này'+
       (S.otherQ||S.otherStatus?' khớp bộ lọc':"")+'</p>'+
+      '<p style="font-size:12px;color:var(--mute);max-width:460px;margin:8px auto 0;line-height:1.6">'+
+        'Việc đi gặp khách hàng nằm ở tab <b>Thông tin địa bàn</b> — chúng tự đồng bộ sang đây nên mặc định được ẩn.</p>'+
       '<button class="btn sm pri" style="margin-top:11px" onclick="formOtherKey(\'\')">＋ Thêm Key Task</button></div></div>')+
   '</div>';
 }
@@ -5333,9 +5366,103 @@ function renderReport(){
 
   var body = loading
     ? skRows(5,true)
-    : (kind==="week" ? rpWeekBody() : rpMonthBody());
+    : (kind==="week" ? (rpPreviewTable()+rpWeekBody()) : rpMonthBody());
 
   $("main").innerHTML='<div class="pg">'+head+cfg+actions+body+'</div>';
+  if(kind==="week" && !S.other && !S._otLoading && !S.otherErr)
+    loadOther().then(function(){ if(S.tab==="report") renderReport(); })
+               .catch(function(){ if(S.tab==="report") renderReport(); });
+}
+
+/* ⭐ v5.8 — XEM NHANH TOÀN BỘ CÔNG VIỆC TRONG TUẦN TRƯỚC KHI GỬI MAIL.
+   Gộp cả hai nguồn: hoạt động đi địa bàn (tab 6. WEEKLY REPORT) và Công việc khác
+   (Key task / đầu việc con bên WEEKYLY new), hiển thị đúng các cột anh cần:
+   Key task · Sub task · Ngày bắt đầu · Kế hoạch · Tiến độ · Kết quả · Deadline. */
+function rpPreviewRows(from,to){
+  var pics=rpPics(), inPic={};
+  pics.forEach(function(p){ inPic[noAcc(p).trim()]=1; });
+  var rows=[];
+
+  /* nguồn 1 — đi địa bàn */
+  terrRows().forEach(function(w){
+    if(!inPic[noAcc(w.pic||"").trim()]) return;
+    if(!inRp(w,from,to)) return;
+    var pct=/complet/i.test(String(w.status||"")) ? 100
+          : /75/.test(String(w.status||"")) ? 75
+          : /50/.test(String(w.status||"")) ? 50
+          : /25/.test(String(w.status||"")) ? 25 : 0;
+    rows.push({ src:"Đi địa bàn", pic:w.pic, key:w.typeTask||"Đi địa bàn",
+      sub:parseAcc(w.account).name||w.account, start:String(w.start||"").slice(0,10),
+      plan:w.plan||"", pct:pct, status:w.status||"", result:w.result||"",
+      due:String(w.finish||"").slice(0,10), row:w._row });
+  });
+
+  /* nguồn 2 — công việc khác (bỏ key Customer visiting vì đã đếm ở nguồn 1) */
+  ((S.other&&S.other.keys)||[]).forEach(function(k){
+    if(String(k.fy||"") && String(k.fy)!==S.fy) return;
+    if(!OTHER_TYPE_RE.test(String(k.type||""))) return;
+    if(isVisitingKey(k)) return;
+    var subs=(k.subs||[]);
+    function push(x,isKey){
+      if(!inPic[noAcc(x.pic||"").trim()]) return;
+      var a=String(x.start||"").slice(0,10);
+      var b=String(x.planned||x.revised||x.actual||"").slice(0,10)||a;
+      if(!a&&!b) return;
+      if(!a) a=b; if(!b) b=a;
+      if(a>b){ var t=a; a=b; b=t; }
+      if(b<from || a>to) return;
+      rows.push({ src:"Công việc khác", pic:x.pic, key:k.keyTask||"—",
+        sub:isKey?"(key task)":(x.subTask||"—"), start:String(x.start||"").slice(0,10),
+        plan:"", pct:otherPct(x), status:x.status||"To Do", result:x.result||"",
+        due:String(x.planned||"").slice(0,10), no:x.no });
+    }
+    if(subs.length) subs.forEach(function(x){ push(x,false); });
+    else push(k,true);
+  });
+
+  rows.sort(function(a,b){ return String(a.start).localeCompare(String(b.start)) ||
+                                  String(a.key).localeCompare(String(b.key)); });
+  return rows;
+}
+function rpPreviewTable(){
+  if(!S.rpPreview) return '<div class="card pad" style="margin-bottom:12px">'+
+    '<div class="ct"><span class="dot"></span>Xem nhanh toàn bộ công việc trước khi gửi'+
+    '<span class="sp"></span><button class="btn sm pri" onclick="S.rpPreview=1;renderReport()">👁 Mở bảng xem nhanh</button></div>'+
+    '<div class="hint">Gộp cả hoạt động đi địa bàn và Công việc khác của tuần này &amp; kế hoạch tuần sau.</div></div>';
+
+  var nf=addDays(S.rpFrom,7), nt=addDays(S.rpTo,7);
+  var cur=rpPreviewRows(S.rpFrom,S.rpTo), nxt=rpPreviewRows(nf,nt);
+
+  function tbl(list,empty){
+    if(!list.length) return '<div class="empty" style="padding:16px 0"><p style="font-size:12.5px">'+empty+'</p></div>';
+    return '<div class="tbwrap" style="max-height:460px"><table class="tb rp-tb"><thead><tr>'+
+      '<th style="width:96px">Nguồn</th><th style="width:78px">PIC</th><th>Key task</th><th>Sub task</th>'+
+      '<th style="width:92px">Bắt đầu</th><th style="width:92px">Deadline</th>'+
+      '<th style="width:120px">Tiến độ</th><th>Kế hoạch / Kết quả</th></tr></thead><tbody>'+
+      list.map(function(x){
+        var late=(x.due && x.due<todayISO() && x.pct<100);
+        return '<tr'+(late?' class="rp-late"':"")+'>'+
+          '<td><span class="tag '+(x.src==="Đi địa bàn"?"t-b":"t-n")+'">'+esc(x.src)+'</span></td>'+
+          '<td>'+esc(x.pic||"—")+'</td>'+
+          '<td><b>'+esc(String(x.key).slice(0,90))+'</b></td>'+
+          '<td>'+esc(String(x.sub).slice(0,90))+'</td>'+
+          '<td>'+(x.start?fmtVN(x.start):"—")+'</td>'+
+          '<td>'+(x.due?(fmtVN(x.due)+(late?' <span class="tag t-r">trễ</span>':"")):"—")+'</td>'+
+          '<td>'+pb(x.pct/100)+'<div class="pbl"><span style="color:'+pctColor(x.pct/100)+'">'+x.pct+'%</span>'+
+            '<span>'+esc(String(x.status).slice(0,14))+'</span></div></td>'+
+          '<td class="rp-td">'+nl2br(String(x.result||x.plan||"—").slice(0,220))+'</td></tr>';
+      }).join("")+'</tbody></table></div>';
+  }
+  var done=cur.filter(function(x){ return x.pct>=100; }).length;
+  return '<div class="card pad" style="margin-bottom:12px">'+
+    '<div class="ct"><span class="dot"></span>Xem nhanh trước khi gửi'+
+      '<small>'+cur.length+' việc tuần này · '+done+' đã xong · '+nxt.length+' việc tuần sau</small>'+
+      '<span class="sp"></span><button class="btn sm" onclick="S.rpPreview=0;renderReport()">Thu gọn</button></div>'+
+    '<div class="rp-sec">📅 Tuần này — '+fmtVN(S.rpFrom)+' đến '+fmtVN(S.rpTo)+'</div>'+
+    tbl(cur,"Không có công việc nào trong tuần này")+
+    '<div class="rp-sec" style="margin-top:14px">📘 Kế hoạch tuần sau — '+fmtVN(nf)+' đến '+fmtVN(nt)+'</div>'+
+    tbl(nxt,"Chưa lên kế hoạch nào cho tuần sau")+
+  '</div>';
 }
 function inRp(r,f,t){
   var a=String(r.start).slice(0,10), b=String(r.finish||"").slice(0,10)||a;
