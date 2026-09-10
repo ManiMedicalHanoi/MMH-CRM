@@ -872,6 +872,114 @@ tr.rp-late td{background:var(--dang-bg)}
 .retrygps{margin-top:7px;height:30px;width:100%;border-radius:8px;border:1px solid var(--lb1);background:var(--pale);color:var(--blue-d);font-size:11.5px;font-weight:700;cursor:pointer}
 .piclock{background:var(--line2);font-weight:800;color:var(--navy)}
 
+/* ══════════════════════════════════════════════════════════════════
+   ⭐ v8 — CÁC THÀNH PHẦN MỚI: ô kèm nút, dòng sản phẩm, bảng Report Hub,
+   khung so sánh tháng, Other task trong báo cáo — kèm tối ưu điện thoại.
+   ══════════════════════════════════════════════════════════════════ */
+.pairbtn{display:flex;gap:8px;align-items:stretch}
+.pairbtn>.inp,.pairbtn>div{flex:1;min-width:0}
+.pairbtn>.btn{flex:none;white-space:nowrap}
+.seg.sm button{padding:5px 10px;font-size:11.5px}
+
+/* ── dòng sản phẩm trong đơn hàng ── */
+.oprow{display:grid;grid-template-columns:1.15fr 1.8fr .95fr .58fr 1fr 28px;gap:8px;align-items:end;
+  padding:9px;border:1px solid var(--line);border-radius:12px;background:var(--paler);margin-bottom:8px}
+.oprow .inp{height:36px;font-size:13px;background:var(--card)}
+.oprow select.inp{font-size:12.5px}
+.opc{min-width:0}
+.oplb{display:block;font-size:10.5px;font-weight:700;color:var(--mute);margin-bottom:3px;letter-spacing:.2px}
+.opdel{height:36px;width:28px;border:1px solid var(--line);background:var(--card);border-radius:9px;
+  color:var(--dang);font-weight:800;cursor:pointer;font-size:13px}
+.opdel:disabled{opacity:.3;cursor:not-allowed}
+
+/* ── bảng công việc kiểu Report Hub ── */
+.rh{padding:0;overflow:hidden}
+.rhtb{font-size:13px}
+.rhtb thead th{background:var(--navy);color:#fff;font-size:10.5px;letter-spacing:.4px;font-weight:800;
+  padding:9px 8px;position:sticky;top:0;z-index:2;text-transform:uppercase}
+.rhtb td{padding:9px 8px;vertical-align:middle;border-bottom:1px solid var(--line2)}
+.rhtb tr.rh-k{background:var(--card)}
+.rhtb tr.rh-k:hover{background:var(--paler)}
+.rhtb tr.rh-k.late,.rhtb tr.rh-s.late{background:var(--dang-bg)}
+.rhtb tr.rh-s{background:#FBFDFF}
+.rhtb tr.rh-add-row td{padding:6px 8px 12px;background:#FBFDFF}
+.rh-cv{border:none;background:none;color:var(--sub);font-size:17px;font-weight:800;cursor:pointer;
+  line-height:1;transition:.15s;transform:rotate(0)}
+.rh-cv.on{transform:rotate(90deg);color:var(--blue)}
+.rh-no{color:var(--mute);font-size:11.5px;font-weight:700}
+.rh-type{display:inline-block;background:var(--warn-bg);color:#8A6100;font-size:10px;font-weight:800;
+  padding:2px 7px;border-radius:6px;margin-bottom:3px}
+.rh-t{font-weight:750;line-height:1.35}
+.rh-t.can{cursor:pointer}
+.rh-t.can:hover{color:var(--blue-d)}
+.rh-st{display:flex;align-items:center;gap:7px;font-weight:650}
+.rh-st.can{cursor:pointer}
+.rh-dot{width:7px;height:7px;border-radius:50%;background:var(--blue-l);flex:none}
+.rh-m{font-size:11px;color:var(--mute);margin-top:2px;padding-left:14px}
+.rh-res{font-size:12.5px;color:var(--sub);line-height:1.45;max-height:66px;overflow:hidden}
+.rh-mute{color:var(--mute)}
+.rh-add{border:1px dashed var(--lb1);background:var(--pale);color:var(--blue-d);font-size:11.5px;
+  font-weight:700;border-radius:8px;padding:4px 10px;cursor:pointer}
+.rh-av{display:inline-grid;place-items:center;width:26px;height:26px;border-radius:50%;color:#fff;
+  font-size:10.5px;font-weight:800}
+.rh-pg{display:flex;flex-direction:column;line-height:1.15}
+.rh-pg b{font-size:13px}
+.rh-pg span{font-size:10.5px;color:var(--mute)}
+.rh-rg{display:flex;align-items:center;gap:4px}
+.rh-rg input[type=range]{flex:1;min-width:44px;accent-color:var(--blue)}
+.rh-rg button{width:20px;height:20px;border:1px solid var(--line);background:var(--card);border-radius:6px;
+  color:var(--sub);cursor:pointer;font-size:11px;line-height:1;flex:none}
+.rh-rg b{font-size:11.5px;min-width:32px;text-align:right}
+.rh-sel{height:28px;border:1px solid var(--line);border-radius:8px;background:var(--paler);
+  font-size:11.5px;font-weight:700;padding:0 6px;max-width:100%}
+.rh-ic{border:none;background:none;color:var(--mute);cursor:pointer;font-size:12px;padding:2px 3px}
+.rh-ic:hover{color:var(--blue-d)}
+.rh-ic.del:hover{color:var(--dang)}
+
+/* ── so sánh công việc tháng ── */
+.cmpgrid{display:grid;gap:11px}
+.cmpgrid.c1{grid-template-columns:1fr}
+.cmpgrid.c2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.cmpgrid.c3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.cmpcol{background:var(--card);border:1px solid var(--line);border-radius:var(--r-lg);overflow:hidden;
+  display:flex;flex-direction:column;box-shadow:var(--sh-1)}
+.cmph{background:var(--pale);border-bottom:1px solid var(--line);padding:10px 12px}
+.cmph b{display:block;font-size:13.5px;color:var(--blue-d)}
+.cmph span{font-size:11px;color:var(--mute)}
+.cmpb{padding:12px;font-size:13px;line-height:1.6;flex:1;max-height:460px;overflow:auto;white-space:normal}
+.cmpf{padding:8px 12px;border-top:1px solid var(--line2);background:var(--paler)}
+
+/* ── Other task trong báo cáo tuần ── */
+.rp-subs{margin-top:7px;padding-left:11px;border-left:2px solid var(--lb2);display:flex;flex-direction:column;gap:7px}
+.rp-subi{font-size:12.5px;display:flex;flex-wrap:wrap;align-items:center;gap:6px}
+.rp-subi b{font-weight:700}
+.rp-subi>div{flex-basis:100%}
+
+@media(max-width:720px){
+  .pairbtn{flex-wrap:wrap}
+  .pairbtn>.btn{width:100%}
+  .oprow{grid-template-columns:1fr 1fr;gap:7px;position:relative;padding:10px 10px 12px}
+  .oprow .opc.d{grid-column:1/-1}
+  .oprow .opdel{position:absolute;right:8px;top:8px;width:26px;height:26px}
+  .rhtb{font-size:12px;min-width:640px}
+  .rhtb thead th{font-size:9.5px;padding:8px 6px}
+  .rhtb td{padding:8px 6px}
+  .rh-res{max-height:48px}
+  .cmpgrid.c2,.cmpgrid.c3{grid-template-columns:1fr}
+  .cmpb{max-height:320px}
+  .modal .bd{padding:13px 12px 8px}
+  .fld{margin-bottom:10px}
+  .sect{padding:11px 10px}
+  .tbwrap{-webkit-overflow-scrolling:touch}
+  .chipbar{overflow-x:auto;flex-wrap:nowrap;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+  .chipbar::-webkit-scrollbar{display:none}
+  .ph{flex-wrap:wrap;gap:8px}
+  .ph .btn.sm{flex:1 1 auto}
+  .shtabs{overflow-x:auto;scrollbar-width:none}
+  .shtabs::-webkit-scrollbar{display:none}
+}
+
+
 
 
 
@@ -1639,6 +1747,7 @@ function hubJsonp(params,timeoutMs){
     document.body.appendChild(el);
   });
 }
+(function(){ try{ var v=localStorage.getItem("mmh_otview"); if(v) S.otherView=v; }catch(e){} })();
 function loadOther(force){
   if(S.other && !force) return Promise.resolve(S.other);
   if(S._otLoading) return S._otLoading;
@@ -1734,6 +1843,7 @@ function otherKeys(){
     if(String(k.fy||"") && String(k.fy)!==S.fy) return;
     if(!OTHER_TYPE_RE.test(String(k.type||""))) return;
     if(!S.otherShowVisit && isVisitingKey(k)) return;   /* việc đi địa bàn: xem ở tab bên cạnh */
+    if(S.otherType && String(k.type||"")!==S.otherType) return;   /* ⭐ v8 — lọc theo Loại việc */
 
     var subs=(k.subs||[]).filter(function(x){
       if(pic && !picEq(x.pic,pic)) return false;
@@ -1945,6 +2055,8 @@ function renderOther(){
     '<div class="trhead compact">'+
       '<div class="tt"><span class="sub">ghi vào <b>Sales &amp; Marketing</b> · WEEKYLY new</span></div>'+
       '<div class="acts">'+
+        '<div class="seg sm"><button class="'+((S.otherView||"table")==="table"?"on":"")+'" onclick="setOtherView(\'table\')">▤ Bảng</button>'+
+          '<button class="'+((S.otherView||"table")==="card"?"on":"")+'" onclick="setOtherView(\'card\')">▦ Thẻ</button></div>'+
         '<button class="btn sm" onclick="refreshOther()">⟳ Đọc lại</button>'+
         '<button class="btn pri sm" onclick="formOtherKey(\'\')">＋ Key Task</button></div>'+
     '</div>'+
@@ -1996,6 +2108,11 @@ function renderOther(){
         'placeholder="🔍 Tìm trong key task, đầu việc, kết quả…" value="'+esc(S.otherQ||"")+'" '+
         'oninput="S.otherQ=this.value;debOther()"></div></div>'+
       '<div class="chipbar" style="margin-bottom:8px">'+
+        '<div class="chip'+(S.otherType?"":" on")+'" onclick="S.otherType=\'\';renderOther()">Mọi loại việc</div>'+
+        otherTypes().map(function(v){ return '<div class="chip'+(S.otherType===v?" on":"")+'" onclick="setOtherType(\''+esc(v)+'\')">'+esc(v)+'</div>'; }).join("")+
+      '</div>'+
+      '<div class="chipbar" style="margin-bottom:8px">'+
+        '<div class="chip'+(S.otherStatus?"":" on")+'" onclick="S.otherStatus=\'\';renderOther()">Tất cả tiến độ</div>'+
         OTHER_STATUS.map(function(v){ return '<div class="chip'+(S.otherStatus===v?" on":"")+'" onclick="setOtherStatus(\''+esc(v)+'\')">'+esc(v)+'</div>'; }).join("")+
         '<div class="chip'+(S.otherShowVisit?" on":"")+'" onclick="toggleVisitingKeys()" '+
           'title="Việc đi gặp khách hàng tự đồng bộ từ tab Thông tin địa bàn — bật để xem cùng ở đây">'+
@@ -2004,13 +2121,86 @@ function renderOther(){
       (isMgmt()&&picList.length>1?'<div class="chipbar" style="margin-bottom:0"><div class="chip'+(S.otherPic?"":" on")+'" onclick="setOtherPic(\'\')">Tất cả PIC</div>'+
         picList.map(function(p){ return '<div class="chip'+(S.otherPic===p?" on":"")+'" onclick="setOtherPic(\''+esc(p)+'\')">'+esc(p)+'</div>'; }).join("")+'</div>':"")+
     '</div>'+
-    (keys.length?keys.map(otherKeyCard).join("")
+    (keys.length?((S.otherView||"table")==="table"?otherTable(keys):keys.map(otherKeyCard).join(""))
     :'<div class="card pad"><div class="empty"><div class="e">🧩</div><p>Chưa có công việc khác nào trong kỳ này'+
       (S.otherQ||S.otherStatus?' khớp bộ lọc':"")+'</p>'+
       '<p style="font-size:12px;color:var(--mute);max-width:460px;margin:8px auto 0;line-height:1.6">'+
         'Việc đi gặp khách hàng nằm ở tab <b>Thông tin địa bàn</b> — chúng tự đồng bộ sang đây nên mặc định được ẩn.</p>'+
       '<button class="btn sm pri" style="margin-top:11px" onclick="formOtherKey(\'\')">＋ Thêm Key Task</button></div></div>')+
   '</div>';
+}
+/* ═══════════ ⭐ v8 — BẢNG CÔNG VIỆC KIỂU REPORT HUB ═══════════
+   Đúng bố cục anh gửi: STT · Key task / Sub task · Kết quả / Link · PIC ·
+   Deadline · Tiến độ · Trạng thái. Bấm ▸ để bung đầu việc con.
+   Sales chỉ thấy việc của mình; quản lý có thêm bộ lọc nhân sự.
+   ══════════════════════════════════════════════════════════════ */
+function setOtherView(v){ S.otherView=v; try{ localStorage.setItem("mmh_otview",v); }catch(e){} renderOther(); }
+function setOtherType(v){ S.otherType=(S.otherType===v?"":v); renderOther(); }
+function rhAv(p){ return '<span class="rh-av" style="background:'+avColor(p||"?")+'" title="'+esc(p||"—")+'">'+esc(initials(p||"?"))+'</span>'; }
+function rhLate(x){ return (!/complet|cancel/i.test(String(x.status||"")) && x.planned && String(x.planned).slice(0,10)<todayISO()); }
+function rhResult(x,can,keyNo){
+  var t=String(x.result||"").trim();
+  if(t) return '<div class="rh-res">'+linkify(t.slice(0,400))+'</div>';
+  if(!can) return '<span class="rh-mute">—</span>';
+  return keyNo!=null
+    ? '<button class="rh-add" onclick="event.stopPropagation();formOtherSub(\''+esc(keyNo)+'\',\''+esc(x.no)+'\')">＋ Thêm kết quả</button>'
+    : '<button class="rh-add" onclick="event.stopPropagation();formOtherKey(\''+esc(x.no)+'\')">＋ Thêm kết quả</button>';
+}
+function rhProg(pct,done,total){
+  return '<div class="rh-pg"><b style="color:'+pctColor(pct/100)+'">'+pct+'%</b>'+
+    (total!=null?'<span>'+done+'/'+total+'</span>':"")+'</div>';
+}
+function otherTable(keys){
+  if(!keys.length) return "";
+  return '<div class="card rh"><div class="tbwrap" style="max-height:none"><table class="tb rhtb"><thead><tr>'+
+      '<th style="width:34px"></th><th style="width:42px">STT</th><th>KEY TASK / SUB TASK</th>'+
+      '<th>KẾT QUẢ / LINK</th><th style="width:56px">PIC</th><th style="width:82px">DEADLINE</th>'+
+      '<th style="width:96px">TIẾN ĐỘ</th><th style="width:112px">TRẠNG THÁI</th></tr></thead><tbody>'+
+    keys.map(function(k){
+      var can=canEditOther(k.pic), pct=otherPct(k), subs=k.subs||[];
+      var done=subs.filter(function(x){ return /complet/i.test(String(x.status||"")); }).length;
+      var open=!!S.otherOpen[String(k.no)], late=rhLate(k);
+      var rows='<tr class="rh-k'+(late?" late":"")+'">'+
+        '<td class="ctr"><button class="rh-cv'+(open?" on":"")+'" onclick="toggleOther(\''+esc(k.no)+'\')">›</button></td>'+
+        '<td class="ctr rh-no">'+esc(k.no)+'</td>'+
+        '<td><span class="rh-type">'+esc(k.type||"—")+'</span>'+
+          '<div class="rh-t'+(can?" can":"")+'"'+(can?' onclick="formOtherKey(\''+esc(k.no)+'\')"':"")+'>'+esc(k.keyTask||k.subTask||"—")+
+            (late?' <span class="tag t-r">QUÁ HẠN</span>':"")+
+            (k.priority?' <span class="tag t-y">⭐</span>':"")+'</div></td>'+
+        '<td>'+rhResult(k,can,null)+'</td>'+
+        '<td class="ctr">'+rhAv(k.pic)+'</td>'+
+        '<td class="ctr mono">'+(k.planned?fmtVN(k.planned).slice(0,5):"—")+'</td>'+
+        '<td>'+rhProg(pct,done,subs.length||null)+'</td>'+
+        '<td>'+otherStatusTag(k.status,pct)+
+          (can?'<button class="rh-ic" title="Sửa" onclick="event.stopPropagation();formOtherKey(\''+esc(k.no)+'\')">✎</button>'+
+               '<button class="rh-ic del" title="Xoá" onclick="event.stopPropagation();delOther(\''+esc(k.no)+'\',true)">🗑</button>':"")+'</td></tr>';
+      if(open){
+        rows+=subs.map(function(x){
+          var c2=canEditOther(x.pic), p2=otherPct(x), l2=rhLate(x);
+          return '<tr class="rh-s'+(l2?" late":"")+'"><td></td>'+
+            '<td class="ctr rh-no">'+esc(x.no)+'</td>'+
+            '<td><div class="rh-st'+(c2?" can":"")+'"'+(c2?' onclick="formOtherSub(\''+esc(k.no)+'\',\''+esc(x.no)+'\')"':"")+'>'+
+              '<span class="rh-dot"></span>'+esc(x.subTask||"—")+'</div>'+
+              '<div class="rh-m">'+[x.start?("Bắt đầu "+fmtVN(x.start)):"",x.actual?("Xong "+fmtVN(x.actual)):""].filter(Boolean).map(esc).join(" · ")+'</div></td>'+
+            '<td>'+rhResult(x,c2,k.no)+'</td>'+
+            '<td class="ctr">'+rhAv(x.pic)+'</td>'+
+            '<td class="ctr mono">'+(x.planned?fmtVN(x.planned).slice(0,5):"—")+(l2?' <span class="tag t-r">trễ</span>':"")+'</td>'+
+            '<td>'+(c2
+              ? '<div class="rh-rg"><button onclick="otherCommitProg(\''+esc(x.no)+'\',Math.max(0,'+p2+'-5))">−</button>'+
+                '<input type="range" min="0" max="100" step="5" value="'+p2+'" oninput="otherProgLabel(\''+esc(x.no)+'\',this.value)" onchange="otherCommitProg(\''+esc(x.no)+'\',this.value)">'+
+                '<button onclick="otherCommitProg(\''+esc(x.no)+'\',Math.min(100,'+p2+'+5))">＋</button>'+
+                '<b id="otpct-'+esc(x.no)+'" style="color:'+pctColor(p2/100)+'">'+p2+'%</b></div>'
+              : rhProg(p2))+'</td>'+
+            '<td>'+(c2
+              ? '<select class="rh-sel" onchange="otherSetStatus(\''+esc(x.no)+'\',this.value)">'+opts(OTHER_STATUS,x.status||"To Do","")+'</select>'+
+                '<button class="rh-ic del" title="Xoá" onclick="event.stopPropagation();delOther(\''+esc(x.no)+'\',false)">🗑</button>'
+              : otherStatusTag(x.status,p2))+'</td></tr>';
+        }).join("");
+        rows+='<tr class="rh-add-row"><td></td><td colspan="7">'+
+          '<button class="rh-add" onclick="formOtherSub(\''+esc(k.no)+'\',\'\')">＋ Thêm đầu việc con</button></td></tr>';
+      }
+      return rows;
+    }).join("")+'</tbody></table></div></div>';
 }
 function otherKeyCard(k){
   var can=canEditOther(k.pic), pct=otherPct(k);
@@ -3907,36 +4097,107 @@ function saveCustomer(){
   var d={ _row:S.editing.row, code:$("f_code").value.trim(), name:$("f_name").value.trim(), type:$("f_type").value,
     address:$("f_address").value.trim(), province:$("f_province").value, area:$("f_area").value, pic:$("f_pic").value,
     fy:$("f_fy").value, openDate:$("f_openDate").value, note:$("f_note").value };
-  if(!d.code||!d.name||!d.type) return toast("Cần nhập Customer code, Account name và Account type","warn");
+  if(!d.name||!d.type) return toast("Cần nhập Account name và Account type","warn");
   busy(true,"Đang lưu vào Google Sheet…");
   apiPost({action:"saveCustomer",data:d}).then(function(r){
     busy(false); closeModal(); toast(r.message||"Đã lưu","ok");
     afterWrite("customer", r.row||d._row, d);
     var i=-1; for(var k=0;k<S.custIndex.length;k++) if(S.custIndex[k]._row===(r.row||d._row)){i=k;break;}
-    var slim={_row:r.row||d._row,code:d.code,name:d.name,type:d.type,province:d.province,area:d.area,pic:d.pic,fy:d.fy,openDate:d.openDate,nCbc:0,nOrder:0,note:d.note};
+    var slim={_row:r.row||d._row,code:d.code||r.code||"",name:d.name,type:d.type,province:d.province,area:d.area,pic:d.pic,fy:d.fy,openDate:d.openDate,nCbc:0,nOrder:0,note:d.note};
     if(i>=0) S.custIndex[i]=Object.assign({},S.custIndex[i],slim); else S.custIndex.unshift(slim);
-    S.custMap[d.code]=S.custIndex[i>=0?i:0];
+    S.custMap[slim.code]=S.custIndex[i>=0?i:0];
+    /* ⭐ v8 — mở từ dialog khác ⇒ trả kết quả về đúng dialog cha, không đóng nó */
+    if(SUBDONE){ runSubDone(slim); loadCustomerIndex(true); return; }
     if(S.tab==="cust") renderCust();
     loadCustomerIndex(true).then(function(){ if(S.tab==="cust") renderCust(); });
   }).catch(function(e){ busy(false); toast(e.message,"err",5000); });
 }
 
 /* ─────── FORM: CBC ─────── */
+/* ⭐ v8 — CHỌN ĐỊA BÀN THAY CHO GÕ CUSTOMER CODE.
+   · ô "Địa bàn" là smart-search, chỉ hiện các account PIC đang phụ trách
+   · CBC code / CBC No. tự sinh theo số CBC đã có của chính địa bàn đó
+   · địa bàn chưa có trong danh sách ⇒ nút "＋ Địa bàn mới" mở dialog phụ,
+     lưu xong tự quay lại đúng form CBC đang dở. */
+
+/* việc cần chạy sau khi một dialog phụ lưu xong và trả lại dialog cha */
+var SUBDONE=null;
+function subReturn(fn){ SUBDONE=fn; }
+function runSubDone(d){ var f=SUBDONE; SUBDONE=null; if(f) setTimeout(function(){ try{ f(d); }catch(e){} },80); }
+
+/* danh sách địa bàn PIC đang phụ trách (quản lý thì thấy tất cả) */
+function myTerritories(){
+  var mgr=(S.user&&S.user.role==="manager");
+  var pool=(S.custIndex||[]).filter(function(c){ return mgr || !c.pic || picMatch(c.pic,S.user.pic); });
+  return pool.length?pool:(S.custIndex||[]);
+}
+function terrItems(){
+  return myTerritories().map(function(c){
+    return { v:c.name, label:c.name,
+      meta:[c.code,c.type,c.province,c.area,"PIC "+(c.pic||"—")].filter(Boolean).join(" · "), raw:c };
+  });
+}
+/* số CBC lớn nhất đang có của một địa bàn */
+function cbcMaxNo(code){
+  var mx=0;
+  function scan(list){ (list||[]).forEach(function(x){
+    if(String(x.code||"")!==String(code)) return;
+    var v=parseInt(String(x.cbcNo||"").replace(/\D/g,""),10); if(v>mx) mx=v; }); }
+  scan(S.cbcRows); scan(S.detail&&S.detail.cbc); scan(S.acc&&S.acc.cbc);
+  return mx;
+}
+function cbcSyncCode(){
+  var code=$("b_code")?$("b_code").value:"";
+  var no=code?(cbcMaxNo(code)+1):"";
+  if($("b_cbcNo"))   $("b_cbcNo").value=no||"";
+  if($("b_cbcCode")) $("b_cbcCode").value=code?(code+"-PIC"+no):"";
+}
+function cbcPickAcc(c){
+  if($("b_code")) $("b_code").value=c.code||"";
+  if($("b_accHint")) $("b_accHint").textContent=[c.code,c.type,c.province,c.area,"PIC "+(c.pic||"—")].filter(Boolean).join(" · ");
+  S.editing.ctx={ code:c.code, c:c };
+  cbcSyncCode();
+}
+/* nút "＋ Địa bàn mới" — mở form account, lưu xong quay lại form CBC */
+function cbcNewTerritory(){
+  subReturn(function(c){
+    if($("b_accName")) $("b_accName").value=c.name||"";
+    cbcPickAcc(c);
+    toast("Đã thêm địa bàn — điền tiếp thông tin CBC","ok");
+  });
+  formCustomer(null);
+}
 function formCBC(row,code){
   var b={};
-  if(row && S.detail) b=(S.detail.cbc||[]).filter(function(x){return x._row===row;})[0]||{};
+  if(row){
+    b=((S.detail&&S.detail.cbc)||[]).filter(function(x){return x._row===row;})[0]
+      ||((S.acc&&S.acc.cbc)||[]).filter(function(x){return x._row===row;})[0]
+      ||(S.cbcRows||[]).filter(function(x){return x._row===row;})[0]||{};
+  }
   var c=(S.detail&&S.detail.customer)||{};
   var isNew=!b._row;
-  /* ⭐ v5 — STT kế tiếp = số lớn nhất đang có + 1 (không dùng số dòng, tránh trùng khi đã xoá) */
-  var pool=(S.detail&&S.detail.cbc)||((S.acc&&S.acc.cbc)||[]);
-  if((!pool||!pool.length)&&code) pool=(S.cbcRows||[]).filter(function(x){ return String(x.code||"")===String(code); });
-  var mxNo=0; (pool||[]).forEach(function(x){ var v=parseInt(String(x.cbcNo||"").replace(/\D/g,""),10); if(v>mxNo) mxNo=v; });
-  /* CBC code và CBC No. là công thức trong sheet — app chỉ hiển thị để đối chiếu */
-  var nextNo=isNew?(mxNo+1):b.cbcNo;
-  var h='<div class="row">'+
-      '<div class="fld"><label>Customer code</label><input class="inp" id="b_code" value="'+esc(b.code||code||"")+'" readonly></div>'+
-      '<div class="fld"><label>CBC code</label><input class="inp" id="b_cbcCode" value="'+esc(b.cbcCode||((code||"")+"-PIC"+nextNo))+'"></div>'+
-      '<div class="fld"><label>CBC No.</label><input class="inp" id="b_cbcNo" value="'+esc(nextNo||"")+'"></div>'+
+  var lock=String(b.code||code||"");
+  var accName=b.name||(lock===String(c.code||"")?c.name:"")||"";
+  if(!accName&&lock){ var f=(S.custIndex||[]).filter(function(x){return String(x.code)===lock;})[0]; if(f) accName=f.name; }
+  var nextNo=isNew?(lock?cbcMaxNo(lock)+1:""):b.cbcNo;
+
+  var accBlock = lock
+    ? '<div class="fld"><label>Địa bàn (Account)</label>'+
+        '<input class="inp piclock" id="b_accName" value="'+esc(accName||lock)+'" readonly>'+
+        '<input type="hidden" id="b_code" value="'+esc(lock)+'">'+
+        '<div class="hint" id="b_accHint">Mã địa bàn <b>'+esc(lock)+'</b> — đang thêm CBC cho đúng account này</div></div>'
+    : '<div class="fld sbox"><label>Địa bàn (Account) <span class="rq">*</span></label>'+
+        '<div class="pairbtn"><input class="inp" id="b_accName" autocomplete="off" placeholder="Bấm để xem danh sách · gõ để lọc" value="">'+
+          '<button class="btn sm" type="button" onclick="cbcNewTerritory()">＋ Địa bàn mới</button></div>'+
+        '<input type="hidden" id="b_code" value="">'+
+        '<div class="hint" id="b_accHint">Chỉ hiện các địa bàn bạn đang phụ trách. Chưa có thì bấm <b>＋ Địa bàn mới</b>.</div></div>';
+
+  var h=accBlock+
+    '<div class="row">'+
+      '<div class="fld"><label>CBC code</label><input class="inp piclock" id="b_cbcCode" value="'+esc(b.cbcCode||(lock?(lock+"-PIC"+nextNo):""))+'" readonly>'+
+        '<div class="hint">Tự sinh theo địa bàn</div></div>'+
+      '<div class="fld"><label>CBC No.</label><input class="inp piclock" id="b_cbcNo" value="'+esc(nextNo||"")+'" readonly>'+
+        '<div class="hint">Số thứ tự kế tiếp của địa bàn</div></div>'+
     '</div>'+
     '<div class="row">'+
       '<div class="fld"><label>Tên người liên hệ <span class="rq">*</span></label><input class="inp" id="b_contact" value="'+esc(b.contact||"")+'"></div>'+
@@ -3952,14 +4213,22 @@ function formCBC(row,code){
       '<div class="fld"><label>Trust</label><select class="inp" id="b_trust">'+opts(S.master.influence,b.trust,"— chọn —")+'</select></div>'+
     '</div>'+
     '<div class="fld"><label>Ghi chú</label><textarea class="inp" id="b_note">'+esc(b.note||"")+'</textarea></div>';
-  S.editing={ tab:"cbc", row:b._row||0, ctx:{ code:code, c:c } };
+  S.editing={ tab:"cbc", row:b._row||0, ctx:{ code:lock, c:(lock&&lock===String(c.code||""))?c:((S.custIndex||[]).filter(function(x){return String(x.code)===lock;})[0]||{}) } };
   openModal(isNew?"Thêm người liên hệ (CBC)":"Sửa CBC", h,
     '<button class="btn" onclick="closeModal()">Huỷ</button><button class="btn pri" onclick="saveCBC()">Lưu</button>');
+  if(!lock){
+    ensureCbc();
+    if(!(S.custIndex||[]).length) loadCustomerIndex();
+    combo("b_accName",terrItems,cbcPickAcc,"Bấm để xem danh sách · gõ để lọc");
+    S.modalRewire=function(){ combo("b_accName",terrItems,cbcPickAcc,"Bấm để xem danh sách · gõ để lọc"); };
+  }
 }
 function saveCBC(){
-  var c=S.editing.ctx.c||{};
-  var d={ _row:S.editing.row, code:$("b_code").value.trim(), cbcCode:$("b_cbcCode").value.trim(), cbcNo:$("b_cbcNo").value,
-    type:c.type||"", name:c.name||"", address:c.address||"", province:c.province||"", area:c.area||"", pic:c.pic||S.user.pic,
+  var ctx=(S.editing&&S.editing.ctx)||{}, c=ctx.c||{};
+  var code=$("b_code")?$("b_code").value.trim():"";
+  if(!code) return toast("Chọn địa bàn trước — hoặc bấm ＋ Địa bàn mới","warn");
+  var d={ _row:S.editing.row, code:code, cbcCode:$("b_cbcCode").value.trim(), cbcNo:$("b_cbcNo").value,
+    type:c.type||"", name:c.name||$("b_accName").value.trim(), address:c.address||"", province:c.province||"", area:c.area||"", pic:c.pic||S.user.pic,
     contact:$("b_contact").value.trim(), phone:$("b_phone").value.trim(), jobTitle:$("b_jobTitle").value,
     specialize:$("b_specialize").value.trim(), role:$("b_role").value, influence:$("b_influence").value,
     trust:$("b_trust").value, note:$("b_note").value };
@@ -3967,8 +4236,13 @@ function saveCBC(){
   busy(true,"Đang lưu CBC…");
   apiPost({action:"saveCBC",data:d}).then(function(r){
     busy(false); toast(r.message||"Đã lưu","ok");
-    afterWrite("cbc", r.row||d._row, d);
-    openCust(d.code);
+    d._row=r.row||d._row;
+    afterWrite("cbc", d._row, d);
+    if(!(S.cbcRows||[]).filter(function(x){return x._row===d._row;}).length) (S.cbcRows=S.cbcRows||[]).push(d);
+    _stCache=null;
+    if(SUBDONE){ closeModal(); runSubDone(d); return; }
+    closeModal();
+    if(S.tab==="stake") renderStake(); else openCust(d.code);
   }).catch(function(e){ busy(false); toast(e.message,"err",5000); });
 }
 
@@ -5043,6 +5317,111 @@ function renderOrder(){
 }
 var _dbo; function debOrd(){ clearTimeout(_dbo); _dbo=setTimeout(function(){ keepCaret("ord_q",renderOrder); },140); }
 
+/* ═══════════ ⭐ v8 — DIALOG ĐƠN HÀNG DỰNG LẠI ═══════════
+   · Order No. tự đếm tiếp số lớn nhất đang có trong sheet
+   · Account → Người liên lạc lọc theo CBC của chính account đó
+   · Chức danh / SĐT lấy thẳng từ CBC, không sửa ở đây
+   · thêm Account / CBC ngay trong dialog mà KHÔNG đóng dialog đơn hàng
+   · một đơn nhiều sản phẩm · Amount tự tính · xoá được đơn
+   ═══════════════════════════════════════════════════════════ */
+function nextOrderNo(){
+  var rows=(((S.cache.order||{}).rows)||[]).concat(tGet("order")||[]);
+  var mx=0, pre="No. ";
+  rows.forEach(function(o){
+    var s=String(o.orderNo||""); var m=/(\d+)\s*$/.exec(s.trim()); if(!m) return;
+    var v=parseInt(m[1],10); if(!isFinite(v)) return;
+    if(v>mx){ mx=v; var p=s.trim().slice(0,s.trim().length-m[1].length); pre=p; }
+  });
+  return mx?(pre+(mx+1)):"";
+}
+function ordProds(){ if(!S.ordProds||!S.ordProds.length) S.ordProds=[{ptype:"",detail:"",price:"",qty:""}]; return S.ordProds; }
+function ordSync(){
+  ordProds().forEach(function(p,i){
+    var t=$("op_t"+i), d=$("op_d"+i), u=$("op_u"+i), q=$("op_q"+i);
+    if(t) p.ptype=t.value; if(d) p.detail=d.value;
+    if(u) p.price=u.value;  if(q) p.qty=q.value;
+  });
+}
+function ordRowHtml(p,i,single){
+  return '<div class="oprow">'+
+    '<div class="opc t"><span class="oplb">Product type</span>'+
+      '<select class="inp" id="op_t'+i+'">'+opts(S.master.product,p.ptype,"— chọn —")+'</select></div>'+
+    '<div class="opc d"><span class="oplb">Detail</span>'+
+      '<input class="inp" id="op_d'+i+'" value="'+esc(p.detail||"")+'" placeholder="VD: 025 06 21mm 2 vỉ"></div>'+
+    '<div class="opc n"><span class="oplb">Unit price</span>'+
+      '<input class="inp num" id="op_u'+i+'" inputmode="numeric" value="'+esc(p.price||"")+'" oninput="ordNum(this)"></div>'+
+    '<div class="opc n"><span class="oplb">SL</span>'+
+      '<input class="inp num" id="op_q'+i+'" inputmode="numeric" value="'+esc(p.qty||"")+'" oninput="ordNum(this)"></div>'+
+    '<div class="opc n"><span class="oplb">Amount</span>'+
+      '<input class="inp num piclock" id="op_a'+i+'" readonly value="'+(n(p.price)*n(p.qty)?fmtN(n(p.price)*n(p.qty)):"")+'"></div>'+
+    '<button class="opdel" type="button" title="Bỏ dòng này"'+(single?' disabled':'')+' onclick="ordDelProd('+i+')">✕</button>'+
+  '</div>';
+}
+function ordDraw(){
+  var w=$("o_prodWrap"); if(!w) return;
+  var list=ordProds();
+  w.innerHTML=list.map(function(p,i){ return ordRowHtml(p,i,list.length<2); }).join("");
+  ordCalc();
+}
+function ordAddProd(){ ordSync(); ordProds().push({ptype:"",detail:"",price:"",qty:""}); ordDraw(); }
+function ordDelProd(i){ ordSync(); var l=ordProds(); if(l.length<2) return; l.splice(i,1); ordDraw(); }
+function ordNum(el){ var v=String(el.value||"").replace(/[^\d]/g,""); if(v!==el.value) el.value=v; ordCalc(); }
+/* chỉ cho gõ chữ số — dùng cho các ô số ngoài dialog đơn hàng */
+function numOnly(el){ var v=String(el.value||"").replace(/[^\d]/g,""); if(v!==el.value) el.value=v; }
+function ordCalc(){
+  ordSync(); var tot=0;
+  ordProds().forEach(function(p,i){ var a=n(p.price)*n(p.qty); tot+=a; var el=$("op_a"+i); if(el) el.value=a?fmtN(a):""; });
+  var t=$("o_total"); if(t) t.textContent=fmtVND(tot);
+}
+/* ── người liên lạc: chỉ lấy CBC của đúng account đang chọn ── */
+function ordDrawCbc(sel){
+  var wrap=$("o_cbcWrap"); if(!wrap) return;
+  var acc=(S.editing&&S.editing.ctx&&S.editing.ctx.name)||($("o_accName")?$("o_accName").value:"");
+  var list=stakeOf(acc);
+  if(!acc){
+    wrap.innerHTML='<input class="inp piclock" value="Chọn Account trước" readonly>';
+  }else if(!list.length){
+    wrap.innerHTML='<input class="inp piclock" value="Account này chưa có CBC nào" readonly>';
+  }else{
+    wrap.innerHTML='<select class="inp" id="o_contact" onchange="ordPickCbc()">'+
+      opts(list.map(function(b){return b.contact;}),sel||"","— chọn người liên lạc —")+'</select>';
+  }
+  ordPickCbc();
+}
+function ordPickCbc(){
+  var acc=(S.editing&&S.editing.ctx&&S.editing.ctx.name)||"";
+  var v=$("o_contact")?$("o_contact").value:"";
+  var b=stakeOf(acc).filter(function(x){ return String(x.contact||"")===v; })[0]||{};
+  if($("o_jobTitle")) $("o_jobTitle").value=b.jobTitle||"";
+  if($("o_phone"))    $("o_phone").value=b.phone||"";
+  if(S.editing&&S.editing.ctx) S.editing.ctx.cbcCode=b.cbcCode||"";
+}
+function ordNewAcc(){
+  ordSync();
+  subReturn(function(c){
+    if($("o_accName")) $("o_accName").value=c.name||"";
+    ordSetAcc(c); toast("Đã thêm account — điền tiếp đơn hàng","ok");
+  });
+  formCustomer(null);
+}
+function ordNewCbc(){
+  var ctx=(S.editing&&S.editing.ctx)||{};
+  if(!ctx.code) return toast("Chọn Account trước khi thêm người liên lạc","warn");
+  ordSync();
+  subReturn(function(d){ reloadCbc(function(){ ordDrawCbc(d&&d.contact); }); ordDrawCbc(d&&d.contact); });
+  formCBC(null,ctx.code);
+}
+function ordSetAcc(c){
+  S.editing.ctx=Object.assign({},S.editing.ctx,{ code:c.code, type:c.type, province:c.province, area:c.area, name:c.name, address:c.address||"" });
+  var h=$("o_hint"); if(h) h.textContent=[c.code,c.type,c.province,c.area].filter(String).join(" · ")||"—";
+  if(c.pic&&$("o_pic")) $("o_pic").value=c.pic;
+  ordDrawCbc("");
+}
+function o_syncMonth(){
+  var m=ymOf($("o_day").value);
+  if($("o_month")) $("o_month").value=m;
+  if($("o_fy")) $("o_fy").value=fyOfMonth(m);
+}
 function formOrder(o){
   if(typeof o==="number"){
     var pool=((S.acc&&S.acc.orders)||[]).concat(((S.cache.order||{}).rows)||[]).concat((S.detail&&S.detail.orders)||[]);
@@ -5050,77 +5429,106 @@ function formOrder(o){
   }
   o=o||{};
   var isNew=!o._row;
-  var h='<div class="fld sbox"><label>Account <span class="rq">*</span></label>'+
-      '<input class="inp" id="o_accName" placeholder="Gõ ≥2 ký tự…" value="'+esc(o.name||"")+'" autocomplete="off">'+
+  ensureCbc();
+  S.ordProds=[{ ptype:o.ptype||"", detail:o.detail||"", price:o.price||"", qty:o.qty||"" }];
+  var day=o.day||todayISO(), mon=o.month||ymOf(day);
+  var ono=o.orderNo||nextOrderNo();
+
+  var h='<div class="row">'+
+      '<div class="fld"><label>Order No.</label><input class="inp piclock" id="o_orderNo" value="'+esc(ono)+'" readonly>'+
+        '<div class="hint">'+(isNew?"Tự đếm tiếp số lớn nhất trong sheet":"Số của đơn đang sửa")+'</div></div>'+
+      '<div class="fld"><label>Ngày đặt <span class="rq">*</span></label><input class="inp" type="date" id="o_day" value="'+esc(day)+'" onchange="o_syncMonth()"></div>'+
+      '<div class="fld"><label>Month</label><input class="inp piclock" id="o_month" value="'+esc(mon)+'" readonly></div>'+
+      '<div class="fld"><label>FY</label><input class="inp piclock" id="o_fy" value="'+esc(o.fy||fyOfMonth(mon))+'" readonly></div>'+
+    '</div>'+
+
+    '<div class="fld sbox"><label>Account <span class="rq">*</span></label>'+
+      '<div class="pairbtn"><input class="inp" id="o_accName" placeholder="Bấm để xem danh sách · gõ để lọc" value="'+esc(o.name||"")+'" autocomplete="off">'+
+        '<button class="btn sm" type="button" onclick="ordNewAcc()">＋ Account mới</button></div>'+
       '<input type="hidden" id="o_account" value="">'+
-      '<div class="hint" id="o_hint">'+esc([o.code,o.type,o.province,o.area].filter(String).join(" · "))+'</div></div>'+
+      '<div class="hint" id="o_hint">'+esc([o.code,o.type,o.province,o.area].filter(String).join(" · ")||"—")+'</div></div>'+
+
+    '<div class="row">'+
+      '<div class="fld" style="flex:2"><label>Người liên lạc</label>'+
+        '<div class="pairbtn"><div id="o_cbcWrap" style="flex:1;min-width:0"></div>'+
+          '<button class="btn sm" type="button" onclick="ordNewCbc()">＋ CBC mới</button></div>'+
+        '<div class="hint">Chức danh &amp; SĐT lấy từ hồ sơ CBC, sửa ở tab Key stakeholder</div></div>'+
+      '<div class="fld"><label>Chức danh</label><input class="inp piclock" id="o_jobTitle" value="'+esc(o.jobTitle||"")+'" readonly></div>'+
+      '<div class="fld"><label>SĐT</label><input class="inp piclock" id="o_phone" value="'+esc(o.phone||"")+'" readonly></div>'+
+    '</div>'+
+
+    '<div class="sect"><div class="ct"><span class="dot"></span>Sản phẩm trong đơn'+
+        '<span class="sp"></span><small>Tổng <b id="o_total">'+fmtVND(n(o.price)*n(o.qty))+'</b></small></div>'+
+      '<div id="o_prodWrap"></div>'+
+      (isNew?'<button class="btn sm" type="button" style="margin-top:8px" onclick="ordAddProd()">＋ Thêm sản phẩm</button>':
+             '<div class="hint" style="margin-top:6px">Mỗi dòng trong sheet là một sản phẩm — sửa đơn nhiều sản phẩm thì mở từng dòng.</div>')+
+    '</div>'+
+
     '<div class="row">'+
       '<div class="fld"><label>Kênh</label><select class="inp" id="o_channel">'+opts(S.master.channel,o.channel||"Offline","— chọn —")+'</select></div>'+
-      '<div class="fld"><label>FY</label><select class="inp" id="o_fy">'+opts(S.fyList,o.fy||S.fy,"—")+'</select></div>'+
-      '<div class="fld"><label>Ngày đặt <span class="rq">*</span></label><input class="inp" type="date" id="o_day" value="'+esc(o.day||todayISO())+'" onchange="o_syncMonth()"></div>'+
-      '<div class="fld"><label>Month (auto)</label><input class="inp" id="o_month" value="'+esc(o.month||ymOf(todayISO()))+'" readonly></div>'+
-    '</div>'+
-    '<div class="row">'+
-      '<div class="fld"><label>Order No.</label><input class="inp" id="o_orderNo" value="'+esc(o.orderNo||"")+'"></div>'+
       '<div class="fld"><label>MMH sales PIC</label><select class="inp" id="o_pic">'+opts(S.master.pic,o.pic||S.user.pic,"— chọn —")+'</select></div>'+
-    '</div>'+
-    '<div class="fld"><label>Detail product</label><textarea class="inp" id="o_detail" placeholder="VD: 025 06 21mm 2 vỉ">'+esc(o.detail||"")+'</textarea></div>'+
-    '<div class="row">'+
-      '<div class="fld"><label>Product type</label><select class="inp" id="o_ptype">'+opts(S.master.product,o.ptype,"— chọn —")+'</select></div>'+
-      '<div class="fld"><label>Quantity</label><input class="inp num" id="o_qty" inputmode="numeric" value="'+esc(o.qty||"")+'" oninput="o_num(this)"></div>'+
-      '<div class="fld"><label>Unit price</label><input class="inp num" id="o_price" inputmode="numeric" value="'+esc(o.price||"")+'" oninput="o_num(this)"></div>'+
-      '<div class="fld"><label>Amount (VND)</label><input class="inp num" id="o_amount" value="'+esc(o.amount||"")+'" readonly '+
-        'style="background:var(--line2);color:var(--sub)"><div class="hint">Tự tính = Quantity × Unit price</div></div>'+
-    '</div>'+
-    '<div class="row">'+
-      '<div class="fld"><label>Người liên lạc</label><input class="inp" id="o_contact" value="'+esc(o.contact||"")+'"></div>'+
-      '<div class="fld"><label>Chức danh</label><input class="inp" id="o_jobTitle" value="'+esc(o.jobTitle||"")+'"></div>'+
-      '<div class="fld"><label>SĐT</label><input class="inp" id="o_phone" value="'+esc(o.phone||"")+'" inputmode="tel"></div>'+
-    '</div>'+
-    '<div class="row">'+
-      '<div class="fld"><label>Partner (tên quản lý)</label><input class="inp" id="o_partner" value="'+esc(o.partner||"")+'"></div>'+
+      '<div class="fld"><label>Partner</label><input class="inp" id="o_partner" value="'+esc(o.partner||"")+'"></div>'+
       '<div class="fld"><label>Partner type</label><select class="inp" id="o_partnerType">'+opts(S.master.partnerType,o.partnerType,"— chọn —")+'</select></div>'+
       '<div class="fld"><label>Source</label><input class="inp" id="o_source" value="'+esc(o.source||"")+'"></div>'+
     '</div>'+
     '<div class="fld"><label>Ghi chú</label><textarea class="inp" id="o_note" style="min-height:60px">'+esc(o.note||"")+'</textarea></div>';
-  S.editing={ tab:"order", row:o._row||0, ctx:o };
+
+  var canDel = o._row && (S.user.role==="manager" || picMatch(o.pic||"",S.user.pic));
+  S.editing={ tab:"order", row:o._row||0, ctx:Object.assign({},o) };
   openModal(isNew?"Thêm đơn hàng":"Sửa đơn hàng "+(o.orderNo||""), h,
-    (o._row&&S.user.role==="manager"?'<button class="btn dg" onclick="delRow(\'order\','+o._row+')">Xoá</button>':"")+
+    (canDel?'<button class="btn dg" onclick="delOrder('+o._row+')">🗑 Xoá đơn</button>':"")+
     '<button class="btn" onclick="closeModal()">Huỷ</button><button class="btn pri" onclick="saveOrder()">Lưu</button>', true);
-  accountCombo("o_accName","o_account",function(c){
-    S.editing.ctx=Object.assign({},S.editing.ctx,{ code:c.code, type:c.type, province:c.province, area:c.area, name:c.name });
-    $("o_hint").textContent=[c.code,c.type,c.province,c.area].filter(String).join(" · ");
-    if(c.pic) $("o_pic").value=c.pic;
-  });
+
+  accountCombo("o_accName","o_account",ordSetAcc);
+  ordDraw(); ordDrawCbc(o.contact||"");
+  if(!(S.cbcRows||[]).length) reloadCbc(function(){ ordDrawCbc(o.contact||""); });
+  S.modalRewire=function(){ ordDraw(); };
 }
-function o_syncMonth(){ $("o_month").value=ymOf($("o_day").value); }
-/* chỉ cho nhập chữ số, và luôn tính lại thành tiền */
-function o_num(el){
-  var v=String(el.value||"").replace(/[^\d]/g,"");
-  if(v!==el.value) el.value=v;
-  o_calc();
-}
-function o_calc(){
-  var q=n($("o_qty").value), p=n($("o_price").value), a=$("o_amount");
-  if(a) a.value=(q&&p)?fmtN(q*p):"";
-}
-function saveOrder(){
-  var c=S.editing.ctx||{};
-  var d={ _row:S.editing.row, code:c.code||"", cbcCode:(c.code?c.code+"-PIC1":""), channel:$("o_channel").value,
-    fy:$("o_fy").value, month:$("o_month").value, day:$("o_day").value, orderNo:$("o_orderNo").value,
-    type:c.type||"", name:$("o_accName").value.trim(), address:c.address||"", province:c.province||"", area:c.area||"",
-    contact:$("o_contact").value, jobTitle:$("o_jobTitle").value, phone:$("o_phone").value, pic:$("o_pic").value,
-    detail:$("o_detail").value, ptype:$("o_ptype").value, qty:$("o_qty").value, price:$("o_price").value,
-    amount:$("o_amount").value, partner:$("o_partner").value, partnerType:$("o_partnerType").value,
-    source:$("o_source").value, note:$("o_note").value };
-  if(!d.name) return toast("Cần chọn Account","warn");
-  if(!d.day) return toast("Cần chọn ngày đặt","warn");
-  busy(true,"Đang lưu đơn hàng…");
-  apiPost({action:"saveOrder",data:d}).then(function(r){
-    busy(false); closeModal(); toast(r.message||"Đã lưu","ok");
-    afterWrite("order", r.row||d._row, d);
+function delOrder(row){
+  if(!confirm("Xoá đơn hàng này khỏi sheet Sale Order? Thao tác không hoàn tác được.")) return;
+  busy(true,"Đang xoá đơn hàng…");
+  apiPost({action:"deleteRow",tab:"order",row:row}).then(function(r){
+    busy(false); closeAllModals(); toast(r.message||"Đã xoá đơn hàng","ok");
+    afterWrite("order", row, null, true);
+    if(S.cache.order&&S.cache.order.rows) S.cache.order.rows=S.cache.order.rows.filter(function(x){return x._row!==row;});
     if(S.tab==="order") renderOrder();
   }).catch(function(e){ busy(false); toast(e.message,"err",5000); });
+}
+function saveOrder(){
+  ordSync();
+  var c=S.editing.ctx||{};
+  var accName=$("o_accName").value.trim();
+  if(!accName) return toast("Cần chọn Account","warn");
+  if(!$("o_day").value) return toast("Cần chọn ngày đặt","warn");
+  var list=ordProds().filter(function(p){ return String(p.ptype||"").trim()||String(p.detail||"").trim()||n(p.qty)||n(p.price); });
+  if(!list.length) return toast("Cần nhập ít nhất một sản phẩm","warn");
+
+  var base={ code:c.code||"", cbcCode:c.cbcCode||"", channel:$("o_channel").value,
+    fy:$("o_fy").value, month:$("o_month").value, day:$("o_day").value, orderNo:$("o_orderNo").value,
+    type:c.type||"", name:accName, address:c.address||"", province:c.province||"", area:c.area||"",
+    contact:($("o_contact")?$("o_contact").value:""), jobTitle:$("o_jobTitle").value, phone:$("o_phone").value,
+    pic:$("o_pic").value, partner:$("o_partner").value, partnerType:$("o_partnerType").value,
+    source:$("o_source").value, note:$("o_note").value };
+
+  var q=list.slice(), k=0, first=S.editing.row||0;
+  busy(true,"Đang lưu đơn hàng…");
+  function next(){
+    if(!q.length) return Promise.resolve();
+    var p=q.shift(); k++;
+    var amt=n(p.price)*n(p.qty);
+    var d=Object.assign({},base,{ _row:(k===1?first:0), ptype:p.ptype, detail:p.detail,
+      qty:p.qty, price:p.price, amount:amt?String(amt):"" });
+    busy(true,"Đang lưu sản phẩm "+k+"/"+(k+q.length)+"…");
+    return apiPost({action:"saveOrder",data:d}).then(function(r){
+      afterWrite("order", r.row||d._row, d);
+      return next();
+    });
+  }
+  next().then(function(){
+    busy(false); closeAllModals();
+    toast("✓ Đã lưu "+k+" dòng sản phẩm cho đơn "+base.orderNo,"ok",4200);
+    if(S.tab==="order") renderOrder();
+  }).catch(function(e){ busy(false); toast(e.message,"err",5500); });
 }
 
 /* ═══════════════════════ BÁO CÁO THÁNG ═══════════════════════ */
@@ -5144,7 +5552,112 @@ function mnRows(){ return ((S.cache.monthly||{rows:[]}).rows)||[]; }
 /* ⭐ v5.9 — cột "Kỳ" có thể là số hoặc chuỗi ⇒ luôn quy về "YYYYMM" trước khi so */
 function mnPer(r){ return String((r&&r.period)||"").replace(/\D/g,"").slice(0,6); }
 function mnPic(){ return (S.user.role==="manager")?(S.mnPic||""):S.user.pic; }
+/* ═══════════ ⭐ v8 — TAB "SO SÁNH" TRONG CÔNG VIỆC THÁNG ═══════════
+   · PIC: so cùng một Type task giữa tối đa 3 tháng, xem theo Kết quả hoặc Kế hoạch
+   · Quản lý: thêm chế độ so giữa các PIC trong cùng một tháng
+   ══════════════════════════════════════════════════════════════════ */
+function mnTabBar(){
+  var t=S.mnTab||"list";
+  return '<div class="shtabs">'+
+    '<button class="'+(t==="list"?"on":"")+'" onclick="setMnTab(\'list\')">🗓 Công việc trong tháng</button>'+
+    '<button class="'+(t==="cmp"?"on":"")+'" onclick="setMnTab(\'cmp\')">⚖️ So sánh</button>'+
+  '</div>';
+}
+function setMnTab(t){ S.mnTab=t; renderMonthly(); }
+function mnTypes(){
+  var pic=mnPic(), seen={}, out=[];
+  mnRows().forEach(function(r){
+    if(pic && !picMatch(r.pic,pic)) return;
+    var t=String(r.typeTask||"").trim(); if(!t||seen[t]) return; seen[t]=1; out.push(t);
+  });
+  out.sort(function(a,b){ var x=mnTypeOrder(a),y=mnTypeOrder(b); return x!==y?x-y:a.localeCompare(b); });
+  return out;
+}
+function cmpS(){
+  S.mnCmp=S.mnCmp||{ mode:"month", field:"result", type:"", months:[], pics:[], month:"" };
+  return S.mnCmp;
+}
+function setCmp(k,v){ cmpS()[k]=v; renderMonthly(); }
+function toggleCmpMonth(m){
+  var c=cmpS(), i=c.months.indexOf(m);
+  if(i>=0) c.months.splice(i,1);
+  else { if(c.months.length>=3) return toast("Tối đa 3 tháng một lần","warn"); c.months.push(m); c.months.sort(); }
+  renderMonthly();
+}
+function toggleCmpPic(p){
+  var c=cmpS(), i=c.pics.indexOf(p);
+  if(i>=0) c.pics.splice(i,1);
+  else { if(c.pics.length>=3) return toast("Tối đa 3 PIC một lần","warn"); c.pics.push(p); }
+  renderMonthly();
+}
+function mnFindCell(type,period,pic){
+  var list=mnRows().filter(function(r){
+    return String(r.typeTask||"").trim()===type && mnPer(r)===String(period) && (!pic||picMatch(r.pic,pic));
+  });
+  return list[0]||null;
+}
+function renderMnCompare(){
+  var c=cmpS(), mgr=(S.user.role==="manager"), types=mnTypes(), months=fyMonths(S.fy);
+  if(!c.type) c.type=types[0]||"";
+  if(!c.month) c.month=S.mnMonth||ymOf(todayISO());
+  if(!c.months.length){                      /* mặc định: tháng hiện tại + tháng liền trước */
+    var here=months.indexOf(S.mnMonth||ymOf(todayISO()));
+    if(here<0) here=months.length-1;
+    c.months=(here>0?[months[here-1],months[here]]:[months[here]]).filter(Boolean);
+  }
+  var fieldLb=(c.field==="result")?"✅ RESULT — kết quả":"📘 PLAN — kế hoạch";
+
+  var picPool=[];
+  mnRows().forEach(function(r){ if(r.pic&&picPool.indexOf(r.pic)<0) picPool.push(r.pic); });
+  (S.master.pic||[]).forEach(function(p){ if(picPool.indexOf(p)<0) picPool.push(p); });
+
+  var cols=[];
+  if(c.mode==="pic"){
+    cols=(c.pics.length?c.pics:picPool.slice(0,2)).map(function(p){
+      return { lb:p, sub:"tháng "+c.month.slice(4)+"/"+c.month.slice(0,4), row:mnFindCell(c.type,c.month,p) };
+    });
+  }else{
+    cols=(c.months.length?c.months:[]).map(function(m){
+      return { lb:"Tháng "+m.slice(4)+"/"+m.slice(0,4), sub:(mnPic()||"tất cả PIC"), row:mnFindCell(c.type,m,mnPic()) };
+    });
+  }
+
+  var ctrl='<div class="card pad" style="margin-bottom:12px">'+
+    (mgr?'<div class="chipbar" style="margin-bottom:9px">'+
+      '<div class="chip'+(c.mode==="month"?" on":"")+'" onclick="setCmp(\'mode\',\'month\')">So giữa các tháng</div>'+
+      '<div class="chip'+(c.mode==="pic"?" on":"")+'" onclick="setCmp(\'mode\',\'pic\')">So giữa các PIC</div></div>':"")+
+    '<div class="row" style="margin-bottom:9px">'+
+      '<div class="fld" style="margin:0;flex:2"><label>Type task</label><select class="inp" onchange="setCmp(\'type\',this.value)">'+
+        opts(types,c.type,types.length?"":"— chưa có dữ liệu —")+'</select></div>'+
+      '<div class="fld" style="margin:0"><label>So theo</label><select class="inp" onchange="setCmp(\'field\',this.value)">'+
+        '<option value="result"'+(c.field==="result"?" selected":"")+'>Kết quả (Result)</option>'+
+        '<option value="plan"'+(c.field==="plan"?" selected":"")+'>Kế hoạch (Plan)</option></select></div>'+
+      (c.mode==="pic"?'<div class="fld" style="margin:0"><label>Tháng</label><select class="inp" onchange="setCmp(\'month\',this.value)">'+
+        opts(months,c.month,"")+'</select></div>':"")+
+    '</div>'+
+    (c.mode==="pic"
+      ? '<div class="hint" style="margin-bottom:6px">Chọn tối đa <b>3 PIC</b> để đặt cạnh nhau</div><div class="chipbar">'+
+        picPool.map(function(p){ return '<div class="chip'+(c.pics.indexOf(p)>=0?" on":"")+'" onclick="toggleCmpPic(\''+esc(p)+'\')">'+esc(p)+'</div>'; }).join("")+'</div>'
+      : '<div class="hint" style="margin-bottom:6px">Chọn tối đa <b>3 tháng</b> để đặt cạnh nhau</div><div class="chipbar">'+
+        months.map(function(m){ return '<div class="chip'+(c.months.indexOf(m)>=0?" on":"")+'" onclick="toggleCmpMonth(\''+m+'\')">'+m.slice(4)+"/"+m.slice(2,4)+'</div>'; }).join("")+'</div>')+
+  '</div>';
+
+  var board = cols.length
+    ? '<div class="cmpgrid c'+cols.length+'">'+cols.map(function(x){
+        var txt=x.row?String((c.field==="result")?(x.row.result||""):(x.row.plan||"")).trim():"";
+        return '<div class="cmpcol">'+
+          '<div class="cmph"><b>'+esc(x.lb)+'</b><span>'+esc(x.sub)+'</span></div>'+
+          '<div class="cmpb">'+(txt?nl2br(txt):'<div class="mn-empty">— chưa có nội dung —</div>')+'</div>'+
+          '<div class="cmpf">'+(x.row?('<button class="btn xs" onclick="openMonthly('+x.row._row+')">✎ Mở hạng mục</button>'):'<span style="color:var(--mute);font-size:11.5px">Kỳ này chưa tạo hạng mục</span>')+'</div>'+
+        '</div>'; }).join("")+'</div>'
+    : '<div class="card pad"><div class="empty"><div class="e">⚖️</div><p>Chọn '+(c.mode==="pic"?"ít nhất 2 PIC":"ít nhất 2 tháng")+' ở trên để bắt đầu so sánh</p></div></div>';
+
+  $("main").innerHTML='<div class="pg">'+
+    '<div class="ph"><div><h2>So sánh công việc tháng</h2><p>'+esc(c.type||"—")+' · '+fieldLb+'</p></div></div>'+
+    mnTabBar()+ctrl+board+'</div>';
+}
 function renderMonthly(){
+  if(S.mnTab==="cmp") return renderMnCompare();
   var all=mnRows();
   var mn=S.mnMonth||ymOf(todayISO());
   var months=fyMonths(S.fy);
@@ -5173,7 +5686,7 @@ function renderMonthly(){
       '<button class="btn sm" onclick="mnSeed()">⧉ Lấy kế hoạch tháng trước</button>'+
       '<button class="btn sm" onclick="go(\'report\')">📧 Gửi báo cáo</button>'+
       '<button class="btn pri sm" onclick="formMonthly(null)">＋ Thêm hạng mục</button></div>'+
-
+    mnTabBar()+
     '<div class="card pad" style="margin-bottom:12px"><div class="chipbar">'+
       months.map(function(m){
         var c=cntBy[m]||0;
@@ -5549,47 +6062,107 @@ function renderPresent(){
       :'<div class="card pad"><div class="empty"><div class="e">🎤</div><p>Chưa có buổi thuyết trình nào trong FY</p></div></div>')+
   '</div>';
 }
+/* ═══════════ ⭐ v8 — BUỔI THUYẾT TRÌNH ═══════════
+   · Province / Area khoá theo Account (không gõ tay được nữa)
+   · Account chưa có ⇒ "＋ Account mới" → thêm → tự quay lại và điền sẵn
+   · FY ăn theo Month: T09 năm N đến T08 năm N+1 là một FY
+   · Event review có khung nội dung điền sẵn như ô Task result
+   ═══════════════════════════════════════════════ */
+var EVENT_TPL =
+  "Event name:\n"+
+  "1. Thông tin buổi\n"+
+  "- Hình thức (hội thảo / demo / training):\n"+
+  "- Đối tượng tham dự:\n"+
+  "- Sản phẩm trình bày:\n"+
+  "\n"+
+  "2. Diễn biến\n"+
+  "- Nội dung chính đã trình bày:\n"+
+  "- Câu hỏi / phản hồi của bác sĩ:\n"+
+  "- Đối thủ xuất hiện (nếu có):\n"+
+  "\n"+
+  "3. Kết quả & bước tiếp theo\n"+
+  "- Khách hàng tiềm năng ghi nhận:\n"+
+  "- Cơ hội đơn hàng:\n"+
+  "- Việc cần làm sau buổi:";
+function presInsertTpl(){
+  var ta=$("p_review"); if(!ta) return;
+  var cur=String(ta.value||"").trim();
+  if(cur && cur.indexOf("Event name:")>=0) return toast("Ô này đã có khung rồi","warn");
+  ta.value = cur ? (EVENT_TPL+"\n\n— Nội dung cũ —\n"+cur) : EVENT_TPL;
+  try{ ta.focus(); ta.setSelectionRange(0,0); ta.scrollTop=0; }catch(e){}
+  toast("✓ Đã chèn khung Event review","ok");
+}
+function presSetAcc(c){
+  S.presCtx=Object.assign({},S.presCtx||{},{ code:c.code, type:c.type, province:c.province, area:c.area, name:c.name });
+  if($("p_account")) $("p_account").value=mkAcc(c);
+  if($("p_province")) $("p_province").value=c.province||"";
+  if($("p_area"))     $("p_area").value=c.area||"";
+  if($("p_hint"))     $("p_hint").textContent=[c.code,c.type,c.province,c.area].filter(String).join(" · ")||"—";
+  if(c.pic&&$("p_pic")) $("p_pic").value=c.pic;
+}
+function presNewAcc(){
+  subReturn(function(c){
+    if($("p_accName")) $("p_accName").value=c.name||"";
+    presSetAcc(c); toast("Đã thêm account — điền tiếp thông tin buổi","ok");
+  });
+  formCustomer(null);
+}
 function formPresent(r){
   r=r||{};
   var a=parseAcc(r.account||"");
+  S.presCtx={ code:"", type:a.type||"", province:r.province||a.province||"", area:r.area||a.area||"", name:a.name||"" };
+  var day=r.day||todayISO(), mon=r.month||ymOf(day);
   var h='<div class="fld sbox"><label>Account <span class="rq">*</span></label>'+
-      '<input class="inp" id="p_accName" placeholder="Gõ ≥2 ký tự…" value="'+esc(a.name||"")+'" autocomplete="off">'+
-      '<input type="hidden" id="p_account" value="'+esc(r.account||"")+'"><div class="hint" id="p_hint"></div></div>'+
+      '<div class="pairbtn"><input class="inp" id="p_accName" placeholder="Bấm để xem danh sách · gõ để lọc" value="'+esc(a.name||"")+'" autocomplete="off">'+
+        '<button class="btn sm" type="button" onclick="presNewAcc()">＋ Account mới</button></div>'+
+      '<input type="hidden" id="p_account" value="'+esc(r.account||"")+'"><div class="hint" id="p_hint">'+
+      esc([a.type,r.province||a.province,r.area||a.area].filter(String).join(" · ")||"—")+'</div></div>'+
     '<div class="row">'+
       '<div class="fld"><label>PIC</label><select class="inp" id="p_pic">'+opts(S.master.pic,r.pic||S.user.pic,"— chọn —")+'</select></div>'+
-      '<div class="fld"><label>Ngày <span class="rq">*</span></label><input class="inp" type="date" id="p_day" value="'+esc(r.day||todayISO())+'" onchange="p_sync()"></div>'+
-      '<div class="fld"><label>Month (auto)</label><input class="inp" id="p_month" value="'+esc(r.month||ymOf(todayISO()))+'" readonly></div>'+
-      '<div class="fld"><label>FY</label><select class="inp" id="p_fy">'+opts(S.fyList,r.fy||S.fy,"—")+'</select></div>'+
+      '<div class="fld"><label>Ngày <span class="rq">*</span></label><input class="inp" type="date" id="p_day" value="'+esc(day)+'" onchange="p_sync()"></div>'+
+      '<div class="fld"><label>Month</label><input class="inp piclock" id="p_month" value="'+esc(mon)+'" readonly></div>'+
+      '<div class="fld"><label>FY (theo Month)</label><input class="inp piclock" id="p_fy" value="'+esc(r.fy||fyOfMonth(mon))+'" readonly>'+
+        '<div class="hint">T09 → T08 năm sau</div></div>'+
     '</div>'+
     '<div class="row">'+
-      '<div class="fld"><label>Province</label><select class="inp" id="p_province">'+opts(S.master.province,r.province||a.province,"— chọn —")+'</select></div>'+
-      '<div class="fld"><label>Area</label><select class="inp" id="p_area">'+opts(S.master.area,r.area||a.area,"— chọn —")+'</select></div>'+
-      '<div class="fld"><label>Target participant</label><input class="inp num" id="p_target" inputmode="numeric" value="'+esc(r.target||"")+'"></div>'+
-      '<div class="fld"><label>Actual participant</label><input class="inp num" id="p_actual" inputmode="numeric" value="'+esc(r.actual||"")+'"></div>'+
+      '<div class="fld"><label>Province</label><input class="inp piclock" id="p_province" value="'+esc(r.province||a.province||"")+'" readonly>'+
+        '<div class="hint">Đi theo Account</div></div>'+
+      '<div class="fld"><label>Area</label><input class="inp piclock" id="p_area" value="'+esc(r.area||a.area||"")+'" readonly>'+
+        '<div class="hint">Đi theo Account</div></div>'+
+      '<div class="fld"><label>Target participant</label><input class="inp num" id="p_target" inputmode="numeric" value="'+esc(r.target||"")+'" oninput="numOnly(this)"></div>'+
+      '<div class="fld"><label>Actual participant</label><input class="inp num" id="p_actual" inputmode="numeric" value="'+esc(r.actual||"")+'" oninput="numOnly(this)"></div>'+
     '</div>'+
     '<div class="fld"><label>Link folder tài liệu / ảnh sự kiện</label><input class="inp" id="p_folder" value="'+esc(r.folder||"")+'" placeholder="https://drive.google.com/…"></div>'+
-    '<div class="fld"><label>Event review</label><textarea class="inp" id="p_review" style="min-height:140px" placeholder="- Objective:&#10;- Target audience:&#10;- Content:&#10;- Feedback:">'+esc(r.review||"")+'</textarea></div>';
+    '<div class="fld"><label>Event review</label>'+
+      '<div style="display:flex;gap:7px;margin-bottom:7px;flex-wrap:wrap">'+
+        '<button class="mini" type="button" onclick="presInsertTpl()">📋 Chèn khung</button>'+
+        '<button class="mini" type="button" onclick="toggleVoice(\'p_review\',this)">🎤 Nói</button></div>'+
+      '<textarea class="inp" id="p_review" style="min-height:200px" placeholder="'+phAttr(EVENT_TPL)+'">'+esc(r.review||"")+'</textarea></div>';
   S.editing={ tab:"present", row:r._row||0 };
+  var canDel = r._row && (S.user.role==="manager" || picMatch(r.pic||"",S.user.pic));
   openModal(r._row?"Sửa buổi thuyết trình":"Thêm buổi thuyết trình", h,
-    (r._row&&S.user.role==="manager"?'<button class="btn dg" onclick="delRow(\'present\','+r._row+')">Xoá</button>':"")+
+    (canDel?'<button class="btn dg" onclick="delRow(\'present\','+r._row+')">🗑 Xoá</button>':"")+
     '<button class="btn" onclick="closeModal()">Huỷ</button><button class="btn pri" onclick="savePresent()">Lưu</button>', true);
-  accountCombo("p_accName","p_account",function(c){
-    $("p_hint").textContent=[c.code,c.type,c.province,c.area].filter(String).join(" · ");
-    if($("p_province")) $("p_province").value=c.province||"";
-    if($("p_area")) $("p_area").value=c.area||"";
-    if(c.pic) $("p_pic").value=c.pic;
-  });
+  accountCombo("p_accName","p_account",presSetAcc);
+  S.modalRewire=function(){ accountCombo("p_accName","p_account",presSetAcc); };
 }
-function p_sync(){ $("p_month").value=ymOf($("p_day").value); }
+function p_sync(){
+  var m=ymOf($("p_day").value);
+  if($("p_month")) $("p_month").value=m;
+  if($("p_fy"))    $("p_fy").value=fyOfMonth(m);
+}
 function savePresent(){
-  var d={ _row:S.editing.row, account:$("p_account").value||mkAcc({name:$("p_accName").value.trim()}),
+  var nameV=$("p_accName").value.trim();
+  if(!nameV) return toast("Cần chọn Account","warn");
+  var ctx=S.presCtx||{};
+  var d={ _row:S.editing.row,
+    account:$("p_account").value||mkAcc({name:nameV,type:ctx.type,province:ctx.province,area:ctx.area}),
     pic:$("p_pic").value, province:$("p_province").value, area:$("p_area").value, fy:$("p_fy").value,
     month:$("p_month").value, day:$("p_day").value, folder:$("p_folder").value, review:$("p_review").value,
     target:$("p_target").value, actual:$("p_actual").value };
-  if(!$("p_accName").value.trim()) return toast("Cần chọn Account","warn");
   busy(true,"Đang lưu…");
   apiPost({action:"savePresentation",data:d}).then(function(r){
-    busy(false); closeModal(); toast(r.message||"Đã lưu","ok");
+    busy(false); closeAllModals(); toast(r.message||"Đã lưu","ok");
     afterWrite("present", r.row||d._row, d);
     if(S.tab==="present") renderPresent();
   }).catch(function(e){ busy(false); toast(e.message,"err",5000); });
@@ -5607,6 +6180,74 @@ var ABCD_GROUPS = [
   { k:"C", lb:"C — Maintain Existing",        sub:"Giữ khách hiện hữu",                c:"#E08A00", bg:"#FFF6E4" },
   { k:"D", lb:"D — Minimize Effort",          sub:"Giảm nguồn lực đầu tư",             c:"#B44FA6", bg:"#F7EDF6" }
 ];
+/* ═══════════ ⭐ v8 — ADP TARGET TÁCH THEO PRODUCT TYPE ═══════════
+   Ô "FY Target sales" trong sheet giờ chứa 2 dữ liệu gộp lại: "<Product type> | <số tiền>".
+   Actual sales KHÔNG nhập tay nữa — cộng từ sheet Sale Order của chính account đó,
+   chỉ tính những đơn có product type nằm trong phạm vi của target:
+     · All dental → tính tất cả      · All file → Hand files + Jizai
+     · All MMG    → Composite, Tẩy trắng, Nhựa …
+     · còn lại    → đúng product type đó
+   ══════════════════════════════════════════════════════════════ */
+function adpParseTarget(v){
+  var s=String(v==null?"":v);
+  var m=/^\s*(.*?)\s*[|\uFF5C]\s*([\d.,\s]+)\s*$/.exec(s);
+  if(m) return { ptype:m[1].trim(), amt:n(m[2]) };
+  return { ptype:"", amt:n(s) };
+}
+function adpMergeTarget(ptype,amt){
+  var a=String(amt||"").replace(/[^\d]/g,"");
+  return ptype ? (ptype+" | "+a) : a;
+}
+function adpScopeMatch(scope,p){
+  var s=noAcc(scope||"").trim(), x=noAcc(p||"").trim();
+  if(!s) return true;
+  if(s.indexOf("all dental")>=0||s==="all"||s.indexOf("tat ca")>=0) return true;
+  if(s.indexOf("all file")>=0)  return /file|jizai|tram/.test(x);
+  if(s.indexOf("all mmg")>=0)   return /composite|tay trang|whiten|nhua|resin|bond|mmg/.test(x);
+  if(!x) return false;
+  return x.indexOf(s)>=0 || s.indexOf(x)>=0;
+}
+function adpOrderRows(){
+  var a=(tGet("order")||[]), b=((S.cache.order||{}).rows)||[];
+  if(a.length>=b.length) return a;
+  return b;
+}
+var _adpAct={}, _adpActKey="";
+function adpActualOf(accName,scope){
+  var k=noAcc(accName||"").trim(); if(!k) return 0;
+  /* bộ nhớ đệm — tránh quét lại toàn bộ đơn hàng cho từng thẻ ADP mỗi lần vẽ */
+  var ck=S.fy+"|"+adpOrderRows().length;
+  if(_adpActKey!==ck){ _adpAct={}; _adpActKey=ck; }
+  var ik=k+"\u0001"+noAcc(scope||"");
+  if(ik in _adpAct) return _adpAct[ik];
+  var fym={}; fyMonths(S.fy).forEach(function(m){ fym[String(m)]=1; });
+  var sum=0;
+  adpOrderRows().forEach(function(o){
+    if(!fym[String(o.month||"")]) return;
+    if(noAcc(o.name||"").trim()!==k) return;
+    if(!adpScopeMatch(scope,o.ptype)) return;
+    sum+=n(o.amount);
+  });
+  _adpAct[ik]=sum;
+  return sum;
+}
+/* target + actual đã chuẩn hoá cho một dòng ADP */
+function adpNums(r){
+  var t=adpParseTarget(r.targetAmt);
+  var acc=parseAcc(r.account||"").name||"";
+  var hasOrd=adpOrderRows().length>0;
+  return { ptype:t.ptype, tg:t.amt, ac:(hasOrd?adpActualOf(acc,t.ptype):n(r.actualAmt)), live:hasOrd };
+}
+function adpSyncActual(){
+  var name=$("a_accName")?$("a_accName").value.trim():"";
+  var sc=$("a_tptype")?$("a_tptype").value:"";
+  var v=adpActualOf(name,sc);
+  if($("a_actualAmt")) $("a_actualAmt").value=v?fmtN(v):"0";
+  var h=$("a_actualHint");
+  if(h) h.innerHTML=name
+    ? 'Cộng từ đơn hàng '+esc(S.fy)+' của <b>'+esc(name)+'</b>'+(sc?(' · phạm vi <b>'+esc(sc)+'</b>'):' · mọi product type')
+    : 'Chọn Account để tính';
+}
 function abcdKey(v){ var m=/^\s*([ABCD])\b/.exec(String(v||"")); return m?m[1]:""; }
 
 function pgADP(){
@@ -5618,6 +6259,7 @@ function pgADP(){
   });
   if(!S.custIndex.length) loadCustomerIndex();
   if(!terrRows().length) loadTerritoryAll(true);   /* để có tag "gặp gần nhất" */
+  ensureTab("order",{},function(rows,ready){ if(ready&&S.tab==="adp") renderADP(); });  /* để tính Actual từ đơn hàng */
 }
 function adpF(){ S.adpF=S.adpF||{pic:"",type:"",prov:"",area:"",q:""}; return S.adpF; }
 function setAdpF(k,v){ adpF()[k]=v; renderADP(); }
@@ -5717,8 +6359,8 @@ function renderADP(){
 var _dba; function debAdp(v){ adpF().q=v; clearTimeout(_dba); _dba=setTimeout(function(){ keepCaret("adp_q",renderADP); },160); }
 
 function adpCol(g,list){
-  var t=list.reduce(function(s,r){return s+n(r.targetAmt);},0);
-  var a=list.reduce(function(s,r){return s+n(r.actualAmt);},0);
+  var t=list.reduce(function(s,r){return s+adpNums(r).tg;},0);
+  var a=list.reduce(function(s,r){return s+adpNums(r).ac;},0);
   return '<div class="adpcol">'+
     '<div class="adpch" style="background:'+g.bg+';border-color:'+g.c+'33">'+
       '<div class="k" style="background:'+g.c+'">'+g.k+'</div>'+
@@ -5733,12 +6375,12 @@ function adpCol(g,list){
 function adpCard(r,g){
   var a=parseAcc(r.account);
   var lv=lastVisitOf(a.name);
-  var tg=n(r.targetAmt), ac=n(r.actualAmt);
+  var N=adpNums(r), tg=N.tg, ac=N.ac;
   var p=tg?ac/tg:null;
   /* ⭐ v5.2 — chỉ cảnh báo khi thật sự lệch bậc đơn vị (Actual gấp >50 lần Target).
      Ô có lẫn chữ giờ đã đọc đúng số tiền nên không còn báo nhầm. */
   var odd=(p!=null&&p>50);
-  var msgT=messyNum(r.targetAmt), msgA=messyNum(r.actualAmt);
+  var msgT=false, msgA=false;
   var days=lv?Math.round((new Date(todayISO())-new Date(lv.date))/86400000):null;
   var vt = lv
     ? '<div class="adpv'+(days>60?" old":days>30?" mid":"")+'">🕑 Gặp gần nhất <b>'+fmtVN(lv.date)+'</b>'
@@ -5750,7 +6392,8 @@ function adpCard(r,g){
   /* ⭐ v5 — mở thẳng hồ sơ 360 của account (dòng thời gian · đơn hàng · CBC · ảnh) */
   return '<div class="adpc" style="border-left-color:'+g.c+'">'+
     '<div class="adpc-h" onclick="rAcc(\''+accKey+'\')" style="cursor:pointer"><b>'+esc(a.name||r.account||"—")+'</b><span class="tag t-b">'+esc(r.pic||"—")+'</span></div>'+
-    '<div class="adpc-m">'+[a.type,a.province,a.area].filter(Boolean).map(esc).join(" · ")+'</div>'+
+    '<div class="adpc-m">'+[a.type,a.province,a.area].filter(Boolean).map(esc).join(" · ")+
+      (N.ptype?' <span class="tag t-y">🎯 '+esc(N.ptype)+'</span>':"")+'</div>'+
     vt+
     (big?
       '<div class="adpc-kv">'+
@@ -5779,9 +6422,15 @@ function adpCard(r,g){
 }
 function setAdpView(v){ S.adpView=v; renderADP(); }
 
+function ADP_PTYPES(){
+  var base=["All dental","All file","All MMG"];
+  (S.master.product||[]).forEach(function(p){ if(base.indexOf(p)<0) base.push(p); });
+  return base;
+}
 function formADP(r,presetAcc){
   r=r||{};
   var a=parseAcc(r.account||presetAcc||"");
+  var _tg0=adpParseTarget(r.targetAmt);
   var Q=[["rQ1","Review Q1 (T9-T11)"],["rQ2","Review Q2 (T12-T2)"],["rQ3","Review Q3 (T3-T5)"],["rQ4","Review Q4 (T6-T8)"]];
   var h='<div class="fld sbox"><label>Account <span class="rq">*</span></label>'+
       '<input class="inp" id="a_accName" placeholder="Gõ ≥2 ký tự…" value="'+esc(a.name||"")+'" autocomplete="off">'+
@@ -5792,8 +6441,12 @@ function formADP(r,presetAcc){
       '<div class="fld"><label>ABCD focus</label><select class="inp" id="a_abcd">'+opts(S.master.abcd,r.abcd,"— chọn —")+'</select></div>'+
     '</div>'+
     '<div class="row">'+
-      '<div class="fld"><label>FY Target sales (VND)</label><input class="inp num" id="a_targetAmt" inputmode="numeric" value="'+esc(r.targetAmt||"")+'"></div>'+
-      '<div class="fld"><label>FY Actual sales (VND)</label><input class="inp num" id="a_actualAmt" inputmode="numeric" value="'+esc(r.actualAmt||"")+'"></div>'+
+      '<div class="fld"><label>Target theo Product type</label><select class="inp" id="a_tptype" onchange="adpSyncActual()">'+
+        opts(ADP_PTYPES(),_tg0.ptype,"— chọn nhóm sản phẩm —")+'</select>'+
+        '<div class="hint">All dental tính tất cả · All file gộp Hand files + Jizai · All MMG gộp Composite, Tẩy trắng, Nhựa</div></div>'+
+      '<div class="fld"><label>FY Target sales (VND)</label><input class="inp num" id="a_targetAmt" inputmode="numeric" value="'+esc(_tg0.amt||"")+'" oninput="numOnly(this)"></div>'+
+      '<div class="fld"><label>FY Actual sales (VND)</label><input class="inp num piclock" id="a_actualAmt" readonly value="">'+
+        '<div class="hint" id="a_actualHint">—</div></div>'+
     '</div>'+
     '<div class="fld"><label>Case info — thông tin cơ bản</label><textarea class="inp" id="a_caseInfo" style="min-height:96px">'+esc(r.caseInfo||"")+'</textarea></div>'+
     '<div class="fld"><label>Case analysis (SWOT / Company · Competitor · Customer)</label><textarea class="inp" id="a_analysis" style="min-height:96px">'+esc(r.analysis||"")+'</textarea></div>'+
@@ -5812,14 +6465,18 @@ function formADP(r,presetAcc){
   accountCombo("a_accName","a_account",function(c){
     $("a_hint").textContent=[c.code,c.type,c.province,c.area].filter(String).join(" · ");
     if(c.pic) $("a_pic").value=c.pic;
+    adpSyncActual();
   });
+  adpSyncActual();
+  S.modalRewire=function(){ adpSyncActual(); };
 }
 function saveADP(){
   var d={ _row:S.editing.row, account:$("a_account").value||mkAcc({name:$("a_accName").value.trim()}),
     pic:$("a_pic").value, fy:$("a_fy").value, abcd:$("a_abcd").value,
     caseInfo:$("a_caseInfo").value, analysis:$("a_analysis").value, objective:$("a_objective").value,
     tactic:$("a_tactic").value, keyAction:$("a_keyAction").value,
-    targetAmt:$("a_targetAmt").value, actualAmt:$("a_actualAmt").value,
+    targetAmt:adpMergeTarget($("a_tptype").value,$("a_targetAmt").value),
+    actualAmt:String(adpActualOf($("a_accName").value.trim(),$("a_tptype").value)||""),
     rQ1:$("a_rQ1").value, rQ2:$("a_rQ2").value, rQ3:$("a_rQ3").value, rQ4:$("a_rQ4").value, rFY:$("a_rFY").value };
   if(!$("a_accName").value.trim()) return toast("Cần chọn Account","warn");
   busy(true,"Đang lưu ADP…");
@@ -6129,9 +6786,9 @@ function rpPreviewRows(from,to){
 }
 function rpPreviewTable(){
   if(!S.rpPreview) return '<div class="card pad" style="margin-bottom:12px">'+
-    '<div class="ct"><span class="dot"></span>Xem nhanh toàn bộ công việc trước khi gửi'+
+    '<div class="ct"><span class="dot"></span>Bản xem trước — đúng nội dung email sẽ gửi'+
     '<span class="sp"></span><button class="btn sm pri" onclick="S.rpPreview=1;renderReport()">👁 Mở bảng xem nhanh</button></div>'+
-    '<div class="hint">Gộp cả hoạt động đi địa bàn và Công việc khác của tuần này &amp; kế hoạch tuần sau.</div></div>';
+    '<div class="hint">Gồm cả hoạt động đi địa bàn và Other task của tuần này &amp; kế hoạch tuần sau — giống hệt bản email.</div></div>';
 
   var nf=addDays(S.rpFrom,7), nt=addDays(S.rpTo,7);
   var cur=rpPreviewRows(S.rpFrom,S.rpTo), nxt=rpPreviewRows(nf,nt);
@@ -6171,6 +6828,67 @@ function inRp(r,f,t){
   var a=String(r.start).slice(0,10), b=String(r.finish||"").slice(0,10)||a;
   if(!a)a=b; if(!b)b=a; return a<=t&&b>=f;
 }
+/* ═══════════ ⭐ v8 — OTHER TASK TRONG BÁO CÁO TUẦN ═══════════
+   Trước đây báo cáo tuần chỉ lấy hoạt động đi địa bàn. Nay gộp thêm Key task /
+   đầu việc con bên "Công việc khác", đúng như bảng Report Hub, và gửi kèm dữ liệu
+   này trong yêu cầu gửi mail để Code.gs dựng đúng phần Other task.
+   ══════════════════════════════════════════════════════════════ */
+function rpFit(x,from,to){
+  var a=String(x.start||"").slice(0,10);
+  var b=String(x.planned||x.revised||x.actual||"").slice(0,10)||a;
+  if(!a&&!b) return false;
+  if(!a) a=b; if(!b) b=a;
+  if(a>b){ var t=a; a=b; b=t; }
+  return !(b<from || a>to);
+}
+function rpOtherFor(pic,from,to){
+  var out=[];
+  ((S.other&&S.other.keys)||[]).forEach(function(k){
+    if(String(k.fy||"") && String(k.fy)!==S.fy) return;
+    if(!OTHER_TYPE_RE.test(String(k.type||""))) return;
+    if(isVisitingKey(k)) return;
+    var subs=(k.subs||[]);
+    var mine=subs.filter(function(x){ return (!pic||picEq(x.pic,pic)) && rpFit(x,from,to); });
+    if(mine.length) out.push({ key:k, subs:mine });
+    else if((!pic||picEq(k.pic,pic)) && !subs.length && rpFit(k,from,to)) out.push({ key:k, subs:[] });
+  });
+  return out;
+}
+function rpOtherBlock(list,isPlan){
+  if(!list.length) return '<div class="empty" style="padding:14px 0"><p style="font-size:12.5px">'+
+    (isPlan?"Chưa có Other task nào lên kế hoạch cho tuần sau":"Không có Other task nào trong tuần")+'</p></div>';
+  return list.map(function(g){
+    var k=g.key, pct=otherPct(k);
+    return '<div class="rp-item">'+
+      '<div class="rp-ih"><span class="ttag" style="background:var(--pale);color:var(--blue-d)">'+esc(k.type||"Other")+'</span>'+
+        '<b>'+esc(k.keyTask||k.subTask||"—")+'</b>'+otherStatusTag(k.status,pct)+'</div>'+
+      (!isPlan&&k.result?'<div class="rp-t">'+nl2br(String(k.result).slice(0,600))+'</div>':"")+
+      (g.subs.length?'<div class="rp-subs">'+g.subs.map(function(x){
+          var p=otherPct(x);
+          return '<div class="rp-subi"><span class="rp-d">'+(x.planned?fmtVN(x.planned):"—")+'</span>'+
+            '<b>'+esc(x.subTask||"—")+'</b>'+
+            '<span class="tag t-n">'+esc(x.pic||"—")+'</span>'+
+            '<span class="tag '+(p>=100?"t-g":p>0?"t-b":"t-y")+'">'+p+'% · '+esc(x.status||"To Do")+'</span>'+
+            ((!isPlan&&x.result)?'<div class="rp-t">'+nl2br(String(x.result).slice(0,400))+'</div>':"")+'</div>'; }).join("")+'</div>':"")+
+    '</div>'; }).join("");
+}
+/* dữ liệu Other task gửi kèm lên Code.gs khi bấm gửi mail */
+function rpOtherPayload(){
+  var nf=addDays(S.rpFrom,7), nt=addDays(S.rpTo,7);
+  function pack(list){
+    return list.map(function(g){
+      return { no:g.key.no, type:g.key.type||"", keyTask:g.key.keyTask||"", pic:g.key.pic||"",
+        status:g.key.status||"", progress:otherPct(g.key), result:g.key.result||"",
+        subs:g.subs.map(function(x){ return { no:x.no, subTask:x.subTask||"", pic:x.pic||"",
+          status:x.status||"", progress:otherPct(x), start:x.start||"", planned:x.planned||"", result:x.result||"" }; }) };
+    });
+  }
+  var out={};
+  rpPics().forEach(function(p){
+    out[p]={ cur:pack(rpOtherFor(p,S.rpFrom,S.rpTo)), next:pack(rpOtherFor(p,nf,nt)) };
+  });
+  return out;
+}
 /* ── báo cáo tuần: gom theo PIC ── */
 function rpWeekBody(){
   var pics=rpPics(), nf=addDays(S.rpFrom,7), nt=addDays(S.rpTo,7);
@@ -6179,14 +6897,19 @@ function rpWeekBody(){
     var mine=all.filter(function(w){ return w.pic===p; });
     var cur=mine.filter(function(w){ return inRp(w,S.rpFrom,S.rpTo); });
     var nxt=mine.filter(function(w){ return inRp(w,nf,nt); });
-    if(!cur.length&&!nxt.length) return "";
+    var oCur=rpOtherFor(p,S.rpFrom,S.rpTo), oNxt=rpOtherFor(p,nf,nt);
+    if(!cur.length&&!nxt.length&&!oCur.length&&!oNxt.length) return "";
     var nPh=cur.reduce(function(s,w){ return s+((w.photos||[]).length); },0);
+    var nOs=oCur.reduce(function(s,g){ return s+(g.subs.length||1); },0);
     return '<div class="card pad" style="margin-bottom:12px">'+
       '<div class="ct"><span class="av-sm" style="background:'+avColor(p)+'">'+esc(initials(p))+'</span>'+esc(p)+
-        '<small>'+cur.length+' hoạt động · '+nPh+' ảnh · '+nxt.length+' việc tuần sau</small></div>'+
+        '<small>'+cur.length+' hoạt động · '+nPh+' ảnh · '+nOs+' other task · '+nxt.length+' việc tuần sau</small></div>'+
+      '<div class="rp-sec">① Đi địa bàn — '+fmtVN(S.rpFrom)+' đến '+fmtVN(S.rpTo)+'</div>'+
       rpTaskList(cur,false)+
-      (nxt.length?'<div class="rp-next"><div class="rp-nh">📘 Kế hoạch tuần sau ('+fmtVN(nf)+' – '+fmtVN(nt)+')</div>'+
-        rpTaskList(nxt,true)+'</div>':"")+
+      '<div class="rp-sec" style="margin-top:12px">② Other task — Key task &amp; đầu việc con</div>'+
+      rpOtherBlock(oCur,false)+
+      ((nxt.length||oNxt.length)?'<div class="rp-next"><div class="rp-nh">📘 Kế hoạch tuần sau ('+fmtVN(nf)+' – '+fmtVN(nt)+')</div>'+
+        rpTaskList(nxt,true)+rpOtherBlock(oNxt,true)+'</div>':"")+
     '</div>';
   }).join("");
   return out || '<div class="card pad"><div class="empty"><div class="e">📄</div><p>Không có hoạt động nào trong kỳ '+fmtVN(S.rpFrom)+' – '+fmtVN(S.rpTo)+'</p></div></div>';
@@ -6302,7 +7025,8 @@ function sendReport(option,confirmed){
   if(!confirmed) return askSend(option);
   busy(true, option==="download"?"Đang tạo PDF…":"Đang gửi email + tạo PDF đính kèm…");
   var body = kind==="week"
-    ? { action:"weeklyReport", from:S.rpFrom, to:S.rpTo, option:option, toPic:who }
+    ? { action:"weeklyReport", from:S.rpFrom, to:S.rpTo, option:option, toPic:who,
+        other:JSON.stringify(rpOtherPayload()) }        /* ⭐ v8 — gửi kèm Other task */
     : { action:"monthlyReport", month:S.rpMonth, option:option, toPic:who };
   apiPost(body).then(function(r){
     busy(false);
