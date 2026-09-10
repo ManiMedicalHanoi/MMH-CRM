@@ -343,7 +343,7 @@ body.modal-on #drw{filter:blur(2px) saturate(.85);opacity:.55}
 .dchip.y{background:var(--yellow);color:var(--navy);border-color:var(--yellow)}
 .drw-tabs{display:flex;gap:2px;background:var(--card);border-bottom:1px solid var(--line);padding:0 12px;flex:none;overflow-x:auto;scrollbar-width:none}
 .drw-tabs::-webkit-scrollbar{display:none}
-.drw-tabs button{border:none;background:none;padding:12px 13px 10px;font-size:13px;font-weight:700;color:var(--mute);cursor:pointer;border-bottom:2.5px solid transparent;white-space:nowrap;transition:.15s}
+.drw-tabs button{border:none;background:none;padding:14px 15px 12px;font-size:13px;font-weight:700;color:var(--mute);cursor:pointer;border-bottom:2.5px solid transparent;white-space:nowrap;transition:.15s}
 .drw-tabs button.on{color:var(--blue);border-bottom-color:var(--blue)}
 .drw-tabs button:hover:not(.on){color:var(--sub)}
 .drw-b{flex:1;overflow:auto;padding:15px 17px 40px;-webkit-overflow-scrolling:touch}
@@ -628,6 +628,25 @@ body.modal-on #drw{filter:blur(2px) saturate(.85);opacity:.55}
 .ot-bar{display:flex;align-items:center;gap:11px;margin-top:9px;padding-top:9px;border-top:1px dashed var(--line)}
 .ot-bar .pb{flex:1;margin:0}
 .ot-cnt{font-size:11.5px;font-weight:700;color:var(--sub);white-space:nowrap}
+/* ⭐ v7.2 — nút thêm đầu việc dễ bấm hơn */
+.rh-ic.add.big{width:auto;padding:0 10px;height:28px;font-size:12px;font-weight:800;background:var(--pale);color:var(--blue-d);border-radius:8px}
+.rh-ic.add.big:hover{background:var(--blue);color:#fff}
+.rh-rg{display:flex;align-items:center;gap:5px;min-width:150px}
+.rh-rg input[type=range]{flex:1;min-width:70px;accent-color:var(--blue)}
+.rh-rg button{width:24px;height:24px;border:1px solid var(--line);background:var(--card);border-radius:6px;font-size:14px;line-height:1;cursor:pointer;color:var(--sub);flex:none}
+.rh-rg button:hover{background:var(--pale);color:var(--blue-d)}
+.rh-rg b{font-size:11.5px;min-width:34px;text-align:right}
+/* ── điện thoại: thu gọn màn hình Công việc khác ── */
+@media(max-width:720px){
+  .ot-stats{grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:10px}
+  .ot-stats .kpi{padding:10px 11px}
+  .ot-stats .kpi .vl{font-size:20px}
+  .ot-stats .kpi .lb{font-size:9.5px}
+  .ot-stats .kpi .sb{display:none}
+  .trhead.compact .sub{display:none}
+  .rh-rg{min-width:112px}
+  .rh-rg button{width:26px;height:26px}
+}
 .ot-ctl{display:flex;align-items:center;gap:9px;margin:6px 0;flex-wrap:wrap}
 .ot-st{height:30px;border:1px solid var(--line);border-radius:8px;background:var(--card);font-size:12px;font-weight:700;color:var(--ink);padding:0 8px;font-family:inherit;cursor:pointer}
 .ot-rg{flex:1;min-width:110px;max-width:230px;accent-color:var(--blue)}
@@ -2138,7 +2157,7 @@ function renderOther(){
   var r=vRangeCalc();
   var head=wkTabBar()+
     '<div class="trhead compact">'+
-      '<div class="tt"><span class="sub">ghi vào <b>Sales &amp; Marketing</b> · WEEKYLY new</span></div>'+
+      '<div class="tt"></div>'+
       '<div class="acts">'+
         '<div class="seg sm"><button class="'+((S.otherView||"table")==="table"?"on":"")+'" onclick="setOtherView(\'table\')">▤ Bảng</button>'+
           '<button class="'+((S.otherView||"table")==="card"?"on":"")+'" onclick="setOtherView(\'card\')">▦ Thẻ</button></div>'+
@@ -2179,7 +2198,7 @@ function renderOther(){
     else if(x.planned && String(x.planned).slice(0,10)<today) nLate++; }); });
 
   $("main").innerHTML='<div class="pg">'+head+
-    '<div class="grid g4" style="margin-bottom:13px">'+
+    '<div class="grid g4 ot-stats" style="margin-bottom:13px">'+
       '<div class="kpi"><div class="lb">Key task</div><div class="vl">'+fmtN(keys.length)+'</div><div class="sb">Trong '+esc(S.fy)+
         (isMgmt()?"":" · của "+esc(S.user.pic))+'</div></div>'+
       '<div class="kpi"><div class="lb">Đầu việc con</div><div class="vl">'+fmtN(nSub)+'</div><div class="sb">Thuộc các key task trên</div></div>'+
@@ -2242,7 +2261,7 @@ function otherTable(keys){
       var can=canEditOther(k.pic), pct=otherPct(k), subs=k.subs||[];
       var done=subs.filter(function(x){ return /complet/i.test(String(x.status||"")); }).length;
       var open=!!S.otherOpen[String(k.no)], late=rhLate(k);
-      var rows='<tr class="rh-k'+(late?" late":"")+'">'+
+      var rows='<tr data-key="'+esc(k.no)+'" class="rh-k'+(late?" late":"")+'">'+
         '<td class="ctr"><button class="rh-cv'+(open?" on":"")+'" onclick="toggleOther(\''+esc(k.no)+'\')">›</button></td>'+
         '<td class="ctr rh-no">'+esc(k.no)+'</td>'+
         '<td><span class="rh-type">'+esc(k.type||"—")+'</span>'+
@@ -2254,13 +2273,13 @@ function otherTable(keys){
         '<td class="ctr mono">'+(k.planned?fmtVN(k.planned).slice(0,5):"—")+'</td>'+
         '<td>'+rhProg(pct,done,subs.length||null)+'</td>'+
         '<td>'+otherStatusTag(k.status,pct)+
-          (can?'<button class="rh-ic add" title="Thêm đầu việc con" onclick="event.stopPropagation();S.otherOpen[\''+esc(k.no)+'\']=1;formOtherSub(\''+esc(k.no)+'\',\'\')">＋</button>'+
+          (can?'<button class="rh-ic add big" title="Thêm đầu việc con" onclick="event.stopPropagation();S.otherOpen[\''+esc(k.no)+'\']=1;formOtherSub(\''+esc(k.no)+'\',\'\')">＋ việc</button>'+
                '<button class="rh-ic" title="Sửa" onclick="event.stopPropagation();formOtherKey(\''+esc(k.no)+'\')">✎</button>'+
                '<button class="rh-ic del" title="Xoá" onclick="event.stopPropagation();delOther(\''+esc(k.no)+'\',true)">🗑</button>':"")+'</td></tr>';
       if(open){
         rows+=subs.map(function(x){
           var c2=canEditOther(x.pic), p2=otherPct(x), l2=rhLate(x);
-          return '<tr class="rh-s'+(l2?" late":"")+'"><td></td>'+
+          return '<tr data-key="'+esc(k.no)+'" data-sub="'+esc(x.no)+'" class="rh-s'+(l2?" late":"")+'"><td></td>'+
             '<td class="ctr rh-no">'+esc(x.no)+'</td>'+
             '<td><div class="rh-st'+(c2?" can":"")+'"'+(c2?' onclick="formOtherSub(\''+esc(k.no)+'\',\''+esc(x.no)+'\')"':"")+'>'+
               '<span class="rh-dot"></span>'+esc(x.subTask||"—")+'</div>'+
@@ -2284,6 +2303,19 @@ function otherTable(keys){
       }
       return rows;
     }).join("")+'</tbody></table></div></div>';
+  bindRhDblClick();
+}
+/* ⭐ v7.2 — bấm đúp vào dòng bất kỳ trong bảng công việc là mở hộp sửa,
+   khỏi phải nhắm vào icon nhỏ. Gắn một lần cho cả bảng. */
+function bindRhDblClick(){
+  var box=$("main"); if(!box||box._rhDbl) return; box._rhDbl=1;
+  box.addEventListener("dblclick",function(e){
+    var tr=e.target.closest?e.target.closest("tr"):null; if(!tr) return;
+    if(e.target.closest("input,select,button,textarea,a")) return;
+    var sub=tr.getAttribute("data-sub"), key=tr.getAttribute("data-key");
+    if(sub&&key) formOtherSub(key,sub);
+    else if(key) formOtherKey(key);
+  });
 }
 function otherKeyCard(k){
   var can=canEditOther(k.pic), pct=otherPct(k);
@@ -3972,7 +4004,23 @@ function custClearQ(){
   renderCustList();
   if(e) try{ e.focus(); }catch(err){}
 }
-function custSetFilter(k,v){ S.filt[k]=v; S.custLimit=60; renderCustList(); }
+/* ⭐ v7.2 — chip nằm ngoài #custList nên vẽ lại danh sách không làm chip đổi màu.
+   Nay tô lại chip ngay tại chỗ, không dựng lại cả trang để khỏi mất con trỏ ô tìm kiếm. */
+function custSetFilter(k,v){
+  S.filt[k]=v; S.custLimit=60;
+  paintCustChips();
+  renderCustList();
+}
+function paintCustChips(){
+  var bar=$("custChips"); if(!bar) return;
+  var f=S.filt;
+  Array.prototype.forEach.call(bar.querySelectorAll(".chip"),function(el){
+    var k=el.getAttribute("data-k"), v=el.getAttribute("data-v");
+    el.classList.toggle("on", String(f[k]||"")===v);
+  });
+}
+/* bấm lần nữa vào chip đang bật thì tắt bộ lọc đó */
+function custToggle(k,v){ custSetFilter(k, String(S.filt[k]||"")===v ? "" : v); }
 function custClearAll(){
   S.filt.type=""; S.filt.area=""; S.filt.abcd=""; S.filt.visit=""; S.filt.sort=""; S.filt.q="";
   S.custLimit=60; renderCust();
@@ -4000,10 +4048,10 @@ function renderCust(){
           '<option value="NOADP"'+(f.abcd==="NOADP"?" selected":"")+'>Không có ADP</option>'+
         '</select></div>'+
       '</div>'+
-      '<div class="chipbar" style="margin-bottom:0">'+
-        '<div class="chip'+(f.visit==="none"?" on":"")+'" onclick="custSetFilter(\'visit\',\''+(f.visit==="none"?"":"none")+'\')">Chưa gặp trong '+esc(S.fy)+'</div>'+
-        '<div class="chip'+(f.visit==="has"?" on":"")+'" onclick="custSetFilter(\'visit\',\''+(f.visit==="has"?"":"has")+'\')">Đã gặp</div>'+
-        '<div class="chip'+(f.sort==="sales"?" on":"")+'" onclick="custSetFilter(\'sort\',\''+(f.sort==="sales"?"":"sales")+'\')">Sắp theo doanh số</div>'+
+      '<div class="chipbar" id="custChips" style="margin-bottom:0">'+
+        '<div class="chip'+(f.visit==="none"?" on":"")+'" data-k="visit" data-v="none" onclick="custToggle(\'visit\',\'none\')">Chưa gặp trong '+esc(S.fy)+'</div>'+
+        '<div class="chip'+(f.visit==="has"?" on":"")+'" data-k="visit" data-v="has" onclick="custToggle(\'visit\',\'has\')">Đã gặp</div>'+
+        '<div class="chip'+(f.sort==="sales"?" on":"")+'" data-k="sort" data-v="sales" onclick="custToggle(\'sort\',\'sales\')">Sắp theo doanh số</div>'+
       '</div>'+
       (isMgmt()?'<div class="chipbar" id="custPicBar"><div class="chip'+(f.pic?"":" on")+'" onclick="custPic(\'\')">Tất cả PIC</div>'+
         picChips.map(function(p){ return '<div class="chip'+(f.pic===p?" on":"")+'" onclick="custPic(\''+esc(p)+'\')">'+esc(p)+'</div>'; }).join("")+'</div>':"")+
@@ -4511,11 +4559,15 @@ function reloadCbc(done){
     if(done) done(rows||[],err||null);
   });
 }
+/* ⭐ v7.2 — so khớp tên địa bàn BỎ DẤU và chuẩn hoá khoảng trắng.
+   Trước đây so chuỗi thô nên chỉ cần lệch một dấu cách hoặc khác dấu tiếng Việt
+   là mất người liên hệ — BV có 2 bác sĩ mà picker chỉ hiện 1. */
+function accKeyOf(v){ return noAcc(v).replace(/\s+/g," ").trim(); }
 function stakeOf(accName){
-  var key=String(accName||"").trim().toLowerCase();
+  var key=accKeyOf(accName);
   if(!key) return [];
   return (S.cbcRows||[]).filter(function(c){
-    return String(c.name||"").trim().toLowerCase()===key && String(c.contact||"").trim();
+    return accKeyOf(c.name)===key && String(c.contact||"").trim();
   });
 }
 /* ngày gặp gần nhất của 1 account — dùng cho thẻ ADP */
@@ -4843,10 +4895,16 @@ function openMeetPicker(targetId,accStr){
   var a=parseAcc(accs), list=stakeOf(a.name);
   S._stakeList=list;
   var h='';
-  if(!S.cbcRows){                                   /* danh bạ chưa nạp xong */
-    if(typeof ensureCbc==="function") ensureCbc();
-    h+='<div class="empty" style="padding:18px 0"><div class="e">⏳</div><p>Đang nạp danh bạ CBC…</p></div>'
-      +'<button class="btn gho" style="width:100%;margin-bottom:10px" onclick="openMeetPicker(S._meetTarget,S._meetAcc)">↻ Thử lại</button>';
+  if(!S.cbcRows){
+    /* ⭐ v7.2 — tự nạp rồi mở lại picker khi xong; trên điện thoại trước đây
+       danh bạ chưa kịp về nên picker hiện trống trơn. */
+    if(typeof reloadCbc==="function")
+      reloadCbc(function(){ if(M2ON) openMeetPicker(S._meetTarget,S._meetAcc); });
+    else if(typeof ensureCbc==="function"){
+      ensureCbc();
+      setTimeout(function(){ if(M2ON&&S.cbcRows) openMeetPicker(S._meetTarget,S._meetAcc); },1500);
+    }
+    h+='<div class="empty" style="padding:22px 0"><div class="e">⏳</div><p>Đang nạp danh bạ CBC…</p></div>';
   }else if(list.length){
     h+='<p style="font-size:12.5px;color:var(--sub);margin-bottom:11px">Chọn người gặp tại <b>'+esc(a.name)+'</b>:</p>'
       +list.map(function(s,i){
@@ -4865,7 +4923,9 @@ function openMeetPicker(targetId,accStr){
         +'<input class="inp" id="mp_manual" placeholder="BS. Nguyễn Văn A - Trưởng khoa" style="flex:1">'
         +'<button class="btn pri" style="flex:none" onclick="pickMeetManual()">Chèn</button>'
       +'</div></div>';
-  openModal2("CBC — người gặp tại địa bàn",h,'<button class="btn" onclick="closeModal2()">Đóng</button>');
+  openModal2("CBC — người gặp tại địa bàn",h,
+    '<button class="btn" onclick="reloadCbc(function(){ openMeetPicker(S._meetTarget,S._meetAcc); })">↻ Đọc lại danh bạ</button>'+
+    '<div style="flex:1"></div><button class="btn" onclick="closeModal2()">Đóng</button>');
 }
 function pickMeet(i){
   var s=(S._stakeList||[])[i]; if(!s) return;
@@ -5219,8 +5279,8 @@ function formWeekly(w,presetAcc){
       '<div class="fld"><label>Type action <span class="rq">*</span></label><select class="inp" id="nt_typeAction" onchange="ntPhotoHint();ntAutoStatus()">'+opts(S.master.typeAction,"Visiting","— chọn —")+'</select></div>'+
     '</div>'+
     '<div class="row">'+
-      '<div class="fld"><label>Sales Process</label><select class="inp" id="nt_process">'+opts(S.master.process,"","— chọn —")+'</select></div>'+
-      '<div class="fld"><label>Product group</label><select class="inp" id="nt_product">'+opts(S.master.product,"","— chọn —")+'</select></div>'+
+      '<div class="fld"><label>Sales Process <span class="rq">*</span></label><select class="inp" id="nt_process">'+opts(S.master.process,"","— chọn —")+'</select></div>'+
+      '<div class="fld"><label>Product group <span class="rq">*</span></label><select class="inp" id="nt_product">'+opts(S.master.product,"","— chọn —")+'</select></div>'+
     '</div>'+
     '<div class="fld"><label>Plan — dự định làm gì (không bắt buộc)</label><textarea class="inp" id="nt_plan"></textarea></div>'+
     '<div class="fld"><label>Task Result — kết quả thực tế <span class="rq">*</span> <span style="font-weight:600;color:var(--mute)">· phải có dòng “Người gặp:”</span></label>'+
@@ -5367,6 +5427,8 @@ function submitNewTask(){
      (tức là đã đi gặp thật). Còn đang lên kế hoạch thì để trống thoải mái. */
   if(MEET_RE.test(String(d.result||""))){
     if(!d.nextAction) bad.push("Next action");
+  if(!d.process) bad.push("Sales Process");
+  if(!d.product) bad.push("Product group");
     if(!String(d.feedback||"").trim()) bad.push("Customer feedback");
   }
   /* ⭐ v7.1 — Task Result KHÔNG bắt buộc (PIC lên kế hoạch trước, ghi kết quả sau);
@@ -6566,13 +6628,39 @@ function adpCard(r,g){
 }
 function setAdpView(v){ S.adpView=v; renderADP(); }
 
+/* ⭐ v7.2 — MASTER LIST đã có sẵn các mục "All - Dental", "All - MMG"…
+   Trước đây app còn thêm bộ "All dental / All file / All MMG" của riêng mình nên
+   danh sách hiện hai lần. Nay chỉ giữ dạng có gạch nối lấy từ MASTER LIST;
+   thiếu mục nào mới bổ sung. */
+function ADP_ALL_CANON(){ return ["All - Dental","All - Files","All - Burs","All - MMG"]; }
+function adpIsAll(p){ return /^all\b/i.test(String(p||"").trim()); }
 function ADP_PTYPES(){
-  var base=["All dental","All file","All MMG"];
-  (S.master.product||[]).forEach(function(p){ if(base.indexOf(p)<0) base.push(p); });
-  return base;
+  var master=(S.master.product||[]).map(function(x){ return String(x).trim(); }).filter(Boolean);
+  var alls=[], others=[], seen={};
+  master.forEach(function(p){
+    var k=noAcc(p).replace(/[^a-z]/g,"");
+    if(seen[k]) return; seen[k]=1;
+    (adpIsAll(p)?alls:others).push(p);
+  });
+  /* mục "All" nào chưa có trong MASTER LIST thì thêm theo dạng chuẩn có gạch nối */
+  ADP_ALL_CANON().forEach(function(p){
+    var k=noAcc(p).replace(/[^a-z]/g,"");
+    if(!seen[k]){ seen[k]=1; alls.push(p); }
+  });
+  return alls.concat(others);
 }
 function formADP(r,presetAcc){
   r=r||{};
+  /* nếu mở form THÊM mà account đã có ADP trong FY này thì mở thẳng bản cũ ra sửa */
+  if(!r._row && presetAcc){
+    var nm0=parseAcc(presetAcc).name;
+    var dup0=adpFindDup(nm0,S.fy,0);
+    if(dup0>0){
+      var rows0=((S.cache.adp||{rows:null}).rows)||tGet("adp")||[];
+      var old0=rows0.filter(function(x){ return x._row===dup0; })[0];
+      if(old0){ toast(nm0+" đã có ADP trong "+S.fy+" — mở bản hiện có để sửa","warn",6000); r=old0; }
+    }
+  }
   var a=parseAcc(r.account||presetAcc||"");
   var _tg0=adpParseTarget(r.targetAmt);
   var Q=[["rQ1","Review Q1 (T9-T11)"],["rQ2","Review Q2 (T12-T2)"],["rQ3","Review Q3 (T3-T5)"],["rQ4","Review Q4 (T6-T8)"]];
@@ -6614,6 +6702,17 @@ function formADP(r,presetAcc){
   adpSyncActual();
   S.modalRewire=function(){ adpSyncActual(); };
 }
+/* tìm bản ADP đã có của cùng account + FY (bỏ qua chính dòng đang sửa) */
+function adpFindDup(accName,fy,selfRow){
+  var key=accKeyOf(accName), rows=((S.cache.adp||{rows:null}).rows)||tGet("adp")||[];
+  for(var i=0;i<rows.length;i++){
+    var r=rows[i];
+    if(selfRow && r._row===selfRow) continue;
+    if(String(r.fy||"")!==String(fy||"")) continue;
+    if(accKeyOf(parseAcc(r.account).name)===key) return r._row||-1;
+  }
+  return 0;
+}
 function saveADP(){
   var d={ _row:S.editing.row, account:$("a_account").value||mkAcc({name:$("a_accName").value.trim()}),
     pic:$("a_pic").value, fy:$("a_fy").value, abcd:$("a_abcd").value,
@@ -6622,7 +6721,14 @@ function saveADP(){
     targetAmt:adpMergeTarget($("a_tptype").value,$("a_targetAmt").value),
     actualAmt:String(adpActualOf($("a_accName").value.trim(),$("a_tptype").value)||""),
     rQ1:$("a_rQ1").value, rQ2:$("a_rQ2").value, rQ3:$("a_rQ3").value, rQ4:$("a_rQ4").value, rFY:$("a_rFY").value };
-  if(!$("a_accName").value.trim()) return toast("Cần chọn Account","warn");
+  var accNm=$("a_accName").value.trim();
+  if(!accNm) return toast("Cần chọn Account","warn");
+  /* ⭐ v7.2 — mỗi địa bàn chỉ có MỘT bản ADP trong một FY.
+     Trước đây thêm hai lần thì bảng ABCD hiện account hai chỗ, số liệu cộng đôi. */
+  var dupRow=adpFindDup(accNm,d.fy,d._row);
+  if(dupRow){
+    return toast("⚠️ "+accNm+" đã có ADP trong "+d.fy+" — mở bản đó ra sửa thay vì tạo thêm","warn",7000);
+  }
   busy(true,"Đang lưu ADP…");
   apiPost({action:"saveADP",data:d}).then(function(r){
     busy(false); closeModal(); toast(r.message||"Đã lưu","ok");
@@ -7413,6 +7519,15 @@ function openAcc(code,name){
   if(S.acc360[_ak]){ S.acc=S.acc360[_ak]; renderAcc(); }
   else { var _loc=acc360Local(code,name); if(_loc){ S.acc=_loc; renderAcc(); } }
   apiGet("account360",{code:code||"",name:name||""}).then(function(j){
+    /* ⭐ v7.2 — chỉ nhận khi dữ liệu hợp lệ. Trả về thiếu "ok" mà vẫn gán vào S.acc
+       thì renderAcc() thoát ngay từ dòng đầu, khiến bấm tab nào cũng không đổi. */
+    if(!j || !j.ok || !j.customer){
+      if(!S.acc || !S.acc.ok){
+        var _l2=acc360Local(code,name);
+        if(_l2){ S.acc=_l2; renderAcc(); }
+      }
+      return;
+    }
     S.acc360[_ak]=j;
     if(S.drw&&S.drw.kind==="acc"){ S.acc=j; renderAcc(); }
   }).catch(function(e){
@@ -7549,7 +7664,23 @@ function saveAccInline(){
   }).catch(function(e){ busy(false); toast(e.message,"err",5000); });
 }
 function rADPFor(k){ formADP(null, REG[k]||""); }
-function accTab(t){ if(S.drw) S.drw.tab=t; renderAcc(); }
+function accTab(t){
+  if(!S.drw) S.drw={kind:"acc",tab:t};
+  S.drw.tab=t;
+  if(!S.acc||!S.acc.ok){ toast("Hồ sơ chưa tải xong — thử lại sau giây lát","warn"); return; }
+  renderAcc();
+}
+/* ⭐ v7.2 — uỷ quyền sự kiện cho cả thanh tab: kể cả thuộc tính onclick trong HTML
+   bị mất khi dựng lại, bấm vẫn ăn. Vùng bấm cũng cao hơn cho dễ trúng trên điện thoại. */
+(function(){
+  var bar=$("drwTabs"); if(!bar) return;
+  bar.addEventListener("click",function(e){
+    var b=e.target.closest ? e.target.closest("button") : null;
+    if(!b||!bar.contains(b)) return;
+    var m=/accTab\('([^']+)'\)/.exec(b.getAttribute("onclick")||"");
+    if(m){ e.preventDefault(); accTab(m[1]); }
+  });
+})();
 function renderAcc(){
   var j=S.acc; if(!j||!j.ok) return;
   var c=j.customer, st=j.stats, tab=(S.drw&&S.drw.tab)||"tl";
