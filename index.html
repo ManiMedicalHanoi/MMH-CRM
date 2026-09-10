@@ -1705,8 +1705,8 @@ var ROLES = {
   "Viet":      { grp:"Dental Sales",   title:"Dental Sales Team Leader",     email:"mmh.hanoi@manimedicalhanoi.com",   ini:"VI", team:"dental" },
   "Phuong":    { grp:"Dental Sales",   title:"Dental Sales PIC — South",     email:"mmh.saigon@manimedicalhanoi.com",  ini:"PH", team:"dental" },
   "Vinh":      { grp:"Dental Sales",   title:"Dental Sales PIC — Central",   email:"mmh.danang@manimedicalhanoi.com",  ini:"VN", team:"dental" },
-  "Khang":     { grp:"Surgical Sales", title:"Surgical Sales PIC",           email:"",                                 ini:"KH", team:"surgical" },
-  "Viet Ha":   { grp:"Surgical Sales", title:"Surgical Sales PIC",           email:"",                                 ini:"VH", team:"surgical" }
+  "Khang":     { grp:"Surgical Sales", title:"Surgical Sales PIC — South",   email:"mmh.saigon2@manimedicalhanoi.com", ini:"KH", team:"surgical" },
+  "Viet Ha":   { grp:"Surgical Sales", title:"Surgical Sales PIC — North",   email:"mmh.hanoi2@manimedicalhanoi.com",  ini:"VH", team:"surgical" }
 };
 var ROLE_GROUPS = [
   { k:"Management",     ic:"🏛", sub:"Xem toàn bộ dữ liệu · cần mã nội bộ" },
@@ -3272,7 +3272,7 @@ function renderDash(){
   var picBar = S.user.role==="manager" ?
     '<div class="chipbar" style="margin-bottom:10px">'+
       '<div class="chip'+(S.filt.pic?"":" on")+'" onclick="dashPic(\'\')">Toàn nhóm</div>'+
-      S.picList.filter(function(p){return p.team==="Dental Sales Team";}).map(function(p){
+      S.picList.filter(function(p){return p.team===mailRule().team;}).map(function(p){
         return '<div class="chip'+(S.filt.pic===p.pic?" on":"")+'" onclick="dashPic(\''+esc(p.pic)+'\')">'+esc(p.pic)+'</div>';
       }).join("")+'</div>' : "";
 
@@ -7156,7 +7156,7 @@ function renderReport(){
       '<button class="btn" onclick="sendReport(\'self\')">✉️ Gửi thử cho tôi</button>'+
       '<button class="btn pri" onclick="sendReport(\'team\')">📧 Gửi chính thức tới team</button>'+
       (mgr&&S.rpPic?'<button class="btn gho" onclick="sendReport(\'pic\')">Gửi thay cho '+esc(who)+'</button>':"")+
-      (mgr?'<button class="btn gho" onclick="sendReport(\'all\')">Gửi cho toàn bộ Dental team</button>':"")+
+      (mgr?'<button class="btn gho" onclick="sendReport(\'all\')">Gửi cho toàn bộ '+esc(curTeam().label)+' team</button>':"")+
       '<button class="btn acc" onclick="sendReport(\'download\')">⬇️ Tải PDF</button>'+
     '</div></div>';
 
@@ -7407,11 +7407,12 @@ function rpMonthBody(){
 
 function nextMonthStr(m){ var y=parseInt(String(m).slice(0,4),10), k=parseInt(String(m).slice(4,6),10); k++; if(k>12){k=1;y++;} return y+("0"+k).slice(-2); }
 function recipientPreview(pic){
-  var u=S.picList.filter(function(p){return p.pic===pic;})[0];
-  var to=u?S.picList.filter(function(p){return p.team===u.team&&p.email;}).map(function(p){return p.email;}):[];
-  if(!to.length&&u&&u.email) to=[u.email];
-  var cc=CC_LIST.filter(function(e){return to.indexOf(e)<0;});
-  return {to:to,cc:cc};
+  var mt=mailTargets();
+  if(!mt.to.length){
+    var e=(ROLES[pic]||{}).email||"";
+    if(e) mt.to=[e];
+  }
+  return mt;
 }
 function grpByType(rows){
   var g={},o=[];
@@ -7472,7 +7473,7 @@ function mnPreview(thisM,nextM){
 }
 function sendReport(option,confirmed){
   var kind=S.rpKind, who=(S.rpPic||S.user.pic);
-  var labels={self:"gửi thử cho chính bạn",team:"gửi chính thức tới team (CC: Tuyen, Nguyen Ha, Giang)",pic:"gửi thay cho "+who,all:"gửi cho toàn bộ Dental team",download:"tải PDF"};
+  var labels={self:"gửi thử cho chính bạn",team:"gửi chính thức tới team",pic:"gửi thay cho "+who,all:"gửi cho toàn bộ "+curTeam().label+" team",download:"tải PDF"};
   if(!confirmed) return askSend(option);
   /* ⭐ v8.1 — báo cáo tuần PHẢI kèm Other task. Chưa nạp xong mà bấm gửi thì payload
      "other" rỗng ⇒ email thiếu hẳn phần Công việc khác. Nạp xong rồi mới gửi. */
@@ -8570,20 +8571,42 @@ function visitStatsHtml(rows,r){
    ⭐ v3 — HỘP THOẠI XÁC NHẬN GỬI BÁO CÁO
    ═══════════════════════════════════════════════════════════════════════ */
 var SENDLB={ self:{t:"Gửi thử cho chính bạn",d:"Email chỉ vào hộp thư của bạn để kiểm tra bố cục. Không ai khác nhận được.",c:"gho"},
-             team:{t:"Gửi chính thức tới team",d:"Gửi tới toàn bộ Dental Sales Team, CC quản lý.",c:"pri"},
+             team:{t:"Gửi chính thức tới team",d:"Gửi theo đúng danh sách người nhận của nhóm bên dưới.",c:"pri"},
              pic :{t:"Gửi thay cho PIC",d:"Gửi báo cáo của một PIC khác dưới danh nghĩa của họ.",c:"pri"},
-             all :{t:"Gửi toàn bộ Dental team",d:"Gửi lần lượt báo cáo của tất cả PIC trong nhóm.",c:"pri"},
+             all :{t:"Gửi toàn bộ team",d:"Gửi lần lượt báo cáo của tất cả PIC trong nhóm.",c:"pri"},
              download:{t:"Tải PDF",d:"Không gửi email, chỉ tải file PDF về máy.",c:"gho"} };
-/* ⭐ v4.5 — CC cố định của mọi báo cáo */
-var CC_LIST=["tt.tuyen@manimedicalhanoi.com","nt.ha@manimedicalhanoi.com","vtt.hoa@manimedicalhanoi.com"];
+/* ⭐ v9 — NGƯỜI NHẬN BÁO CÁO TÁCH THEO NHÓM
+   Dental   · To = cả Dental Sales Team          · Cc = Tuyen, Nguyen Ha, Hoa
+   Surgical · To = Tuyen, Nguyen Ha, Giang, Hoa  · Cc = PIC Surgical còn lại
+   (nhóm Surgical chỉ có 2 PIC nên báo cáo gửi thẳng lên quản lý,
+    người cùng nhóm vẫn được Cc để nắm việc của nhau) */
+var MAIL_TUYEN="tt.tuyen@manimedicalhanoi.com", MAIL_HA="nt.ha@manimedicalhanoi.com",
+    MAIL_PROD ="mmh.product@manimedicalhanoi.com", MAIL_HR="vtt.hoa@manimedicalhanoi.com";
+var MAIL_RULE={
+  dental  : { team:"Dental Sales Team",   toTeam:true,  fixed:[MAIL_TUYEN,MAIL_HA,MAIL_HR] },
+  surgical: { team:"Surgical Sales Team", toTeam:false, fixed:[MAIL_TUYEN,MAIL_HA,MAIL_PROD,MAIL_HR] }
+};
+function mailRule(){ return MAIL_RULE[curTeamKey()]||MAIL_RULE.dental; }
+function teamMails(){
+  var k=curTeamKey(), out=[];
+  Object.keys(ROLES).forEach(function(nm){
+    var r=ROLES[nm];
+    if(r.team===k && r.email && out.indexOf(r.email)<0) out.push(r.email);
+  });
+  return out;
+}
+function mailTargets(){
+  var r=mailRule(), tm=teamMails();
+  var to=(r.toTeam?tm:r.fixed).slice().filter(Boolean);
+  var cc=(r.toTeam?r.fixed:tm).slice().filter(function(e){ return e && to.indexOf(e)<0; });
+  return { to:to, cc:cc };
+}
+var CC_LIST=[MAIL_TUYEN,MAIL_HA,MAIL_HR];
 function askSend(option){
   var kind=S.rpKind, who=(S.rpPic||S.user.pic), m=SENDLB[option]||SENDLB.self;
   var to=[],cc=[];
-  if(option==="self"){ to=[(S.picList.filter(function(p){return p.pic===S.user.pic;})[0]||{}).email||S.user.email||"(email của bạn)"]; }
-  else{
-    to=S.picList.filter(function(p){return p.team==="Dental Sales Team"&&p.email;}).map(function(p){return p.email;});
-    cc=CC_LIST.slice();
-  }
+  if(option==="self"){ to=[(ROLES[S.user.pic]||{}).email||S.user.email||"(email của bạn)"]; }
+  else{ var mt=mailTargets(); to=mt.to; cc=mt.cc; }
   var period=kind==="week"?("Tuần "+fmtVN(S.rpFrom)+" – "+fmtVN(S.rpTo)):("Tháng "+String(S.rpMonth).slice(4)+"/"+String(S.rpMonth).slice(0,4));
   var body='<div class="card pad" style="margin-bottom:12px;background:var(--pale);border-color:var(--lb1)">'
     +'<div style="font-size:15px;font-weight:800;color:var(--navy);margin-bottom:4px">'+esc(m.t)+'</div>'
