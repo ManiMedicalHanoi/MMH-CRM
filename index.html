@@ -1702,16 +1702,16 @@ var ROLES = {
   "Tuyen":     { grp:"Management",     title:"Head of Sales & Marketing VN", email:"tt.tuyen@manimedicalhanoi.com",    ini:"TU" },
   "Hoa":       { grp:"Management",     title:"Human Resources",              email:"vtt.hoa@manimedicalhanoi.com",     ini:"HO" },
   "Giang":     { grp:"Management",     title:"Product Team Leader",          email:"mmh.product@manimedicalhanoi.com", ini:"GI" },
-  "Viet":      { grp:"Dental Sales",   title:"Dental Sales Team Leader",     email:"mmh.hanoi@manimedicalhanoi.com",   ini:"VI" },
-  "Phuong":    { grp:"Dental Sales",   title:"Dental Sales PIC — South",     email:"mmh.saigon@manimedicalhanoi.com",  ini:"PH" },
-  "Vinh":      { grp:"Dental Sales",   title:"Dental Sales PIC — Central",   email:"mmh.danang@manimedicalhanoi.com",  ini:"VN" },
-  "Khang":     { grp:"Surgical Sales", title:"Surgical Sales PIC",           email:"",                                 ini:"KH" },
-  "Viet Ha":   { grp:"Surgical Sales", title:"Surgical Sales PIC",           email:"",                                 ini:"VH" }
+  "Viet":      { grp:"Dental Sales",   title:"Dental Sales Team Leader",     email:"mmh.hanoi@manimedicalhanoi.com",   ini:"VI", team:"dental" },
+  "Phuong":    { grp:"Dental Sales",   title:"Dental Sales PIC — South",     email:"mmh.saigon@manimedicalhanoi.com",  ini:"PH", team:"dental" },
+  "Vinh":      { grp:"Dental Sales",   title:"Dental Sales PIC — Central",   email:"mmh.danang@manimedicalhanoi.com",  ini:"VN", team:"dental" },
+  "Khang":     { grp:"Surgical Sales", title:"Surgical Sales PIC",           email:"",                                 ini:"KH", team:"surgical" },
+  "Viet Ha":   { grp:"Surgical Sales", title:"Surgical Sales PIC",           email:"",                                 ini:"VH", team:"surgical" }
 };
 var ROLE_GROUPS = [
   { k:"Management",     ic:"🏛", sub:"Xem toàn bộ dữ liệu · cần mã nội bộ" },
-  { k:"Dental Sales",   ic:"🦷", sub:"Chỉ xem và nhập dữ liệu của mình" },
-  { k:"Surgical Sales", ic:"🔬", sub:"Chỉ xem và nhập dữ liệu của mình" }
+  { k:"Dental Sales",   ic:"🦷", sub:"File dữ liệu Dental · chỉ xem việc của mình" },
+  { k:"Surgical Sales", ic:"🔬", sub:"File dữ liệu Surgical · chỉ xem việc của mình" }
 ];
 function isMgmt(){ return !!(S.user && S.user.grp === "Management"); }
 function afterUserKnown(){ try{ paintTeamBtn(); }catch(e){} }
@@ -1767,9 +1767,31 @@ function resetAuth(){
   try{ localStorage.removeItem(LS_AUTH); localStorage.removeItem(LS_MGMT); }catch(e){}
   stepPw();
 }
+/* ⭐ v9 — MỖI PIC GẮN CỨNG VỚI FILE DỮ LIỆU CỦA NHÓM MÌNH.
+   Trước đây nhóm backend chỉ đổi được bằng nút trên thanh trên cùng, mà nút đó
+   chỉ Management mới thấy ⇒ Khang / Viet Ha đăng nhập xong vẫn đọc file Dental
+   và không có cách nào tự chuyển. Nay chọn PIC là tự nạp đúng Google Sheet.
+   Management không gắn team nên vẫn tự do đổi nhóm như cũ. */
+function teamOfPic(pic){ var r=ROLES[pic]||{}; return TEAMS[r.team]?r.team:""; }
+function ensureTeamFor(pic){
+  var want=teamOfPic(pic);
+  if(!want || want===curTeamKey()) return false;
+  try{ localStorage.setItem(LS_PIC,pic); localStorage.setItem(LS_TEAM,want); }catch(e){}
+  try{ TSTORE={}; FETCHING={}; }catch(e){}
+  try{
+    Object.keys(TEAMS).forEach(function(k){
+      localStorage.removeItem("mmh_bundle_v2_"+k);
+      localStorage.removeItem("mmh_tabs_v4_"+k);
+    });
+  }catch(e){}
+  try{ busy(true,"Đang mở dữ liệu nhóm "+TEAMS[want].label+"…"); }catch(e){}
+  setTimeout(function(){ location.reload(); },200);
+  return true;
+}
 function pickPic(pic){
   var r=ROLES[pic];
   if(r && r.grp==="Management" && !mgmtOk()) return stepCode(pic);
+  if(ensureTeamFor(pic)) return;
   startApp(pic);
 }
 /* ── bước 3: mã nội bộ cho Management ── */
@@ -1801,6 +1823,9 @@ function checkCode(pic){
 function startApp(pic){
   var r=ROLES[pic]||{ grp:"Dental Sales", title:"Sales PIC", email:"", ini:initials(pic) };
   if(r.grp==="Management" && !mgmtOk()){ $("login").classList.add("on"); return stepCode(pic); }
+  /* chặn cả đường tự đăng nhập lại: thiết bị nhớ PIC Surgical nhưng nhóm đang là
+     Dental (bản cũ để lại) thì đổi nhóm rồi nạp lại, không vào app bằng file sai */
+  if(ensureTeamFor(pic)) return;
   try{ localStorage.setItem(LS_PIC,pic); }catch(e){}
   var p=(S.picList||[]).filter(function(x){return x.pic===pic;})[0]||{};
   S.user={ pic:pic, grp:r.grp,
