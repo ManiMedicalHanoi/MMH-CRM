@@ -1209,7 +1209,7 @@ var S = {
   vFrom:"", vTo:"",          /* lọc khoảng ngày ở "Cập nhật thông tin địa bàn" */
   custSort:"",               /* sắp xếp danh sách khách hàng */
   other:null, otherErr:"", otherPic:"", otherQ:"", otherStatus:"", otherOpen:{}, otherShowVisit:false,
-  stTab:"all", stQ:"", stEvent:"", stLimit:60, stSort:"", eventSync:null,
+  stTab:"all", stQ:"", stEvent:"", stProv:"", stLimit:60, stSort:"", eventSync:null,
   wkTab:(function(){ try{ return localStorage.getItem("mmh_wktab")||"terr"; }catch(e){ return "terr"; } })(),
   dashG:"all",               /* nhóm thông tin đang xem trên Dashboard */
   adpView:"board",           /* board | list — ADP xem dạng bảng ABCD hay danh sách lớn */
@@ -2536,6 +2536,17 @@ function stakeRows(){
   });
   _stCache=out; _stKey=key; return out;
 }
+/* danh sách tỉnh có trong danh bạ, kèm số người — dùng cho bộ lọc */
+function stakeProvinces(){
+  var m={};
+  stakeRows().forEach(function(r){
+    if(S.stTab==="event" && !r.event) return;
+    var p=String(r.province||"").trim(); if(!p) return;
+    m[p]=(m[p]||0)+1;
+  });
+  return Object.keys(m).sort(function(a,b){ return m[b]-m[a]||a.localeCompare(b); })
+               .map(function(p){ return {p:p,n:m[p]}; });
+}
 function stakeEvents(){
   var m={};
   stakeRows().forEach(function(r){ if(r.event) m[r.event]=(m[r.event]||0)+1; });
@@ -2550,6 +2561,7 @@ function stakeFiltered(){
     if(!mgr && r.pic && !picEq(r.pic,me)) return;        /* sales chỉ xem CBC mình phụ trách */
     if(S.stTab==="event" && !r.event) return;
     if(S.stEvent && r.event!==S.stEvent) return;
+    if(S.stProv && noAcc(r.province||"").trim()!==noAcc(S.stProv).trim()) return;
     if(toks.length){
       var hay=noAcc([r.contact,r.acc,r.phone,r.jobTitle,r.specialize,r.province,r.pic,r.event].join(" "));
       if(!toks.every(function(t){ return hay.indexOf(t)>=0; })) return;
@@ -2650,6 +2662,10 @@ function renderStake(){
           '<option value="">Mọi sự kiện</option>'+
           evs.map(function(e){ return '<option value="'+esc(e.ev)+'"'+(S.stEvent===e.ev?" selected":"")+'>'+esc(e.ev)+' ('+e.n+')</option>'; }).join("")+
           '</select></div>':"")+
+        '<div><select class="inp" onchange="setStFilter(\'stProv\',this.value)">'+
+          '<option value="">Mọi tỉnh thành</option>'+
+          stakeProvinces().map(function(x){ return '<option value="'+esc(x.p)+'"'+(S.stProv===x.p?" selected":"")+'>'+esc(x.p)+' ('+x.n+')</option>'; }).join("")+
+          '</select></div>'+
       '</div>'+
       '<div class="chipbar" style="margin-bottom:0">'+
         '<div class="chip'+(S.stSort==="none"?" on":"")+'" onclick="setStFilter(\'stSort\',\''+(S.stSort==="none"?"":"none")+'\')">Chưa chăm sóc trước</div>'+
@@ -4537,7 +4553,7 @@ function terrInRange(w, r){
 function ensureCbc(){
   if(S._cbcLoading||S.cbcRows) return;
   S._cbcLoading=true;
-  ensureTab("cbc",{fy:"",pic:""},function(rows,ready){
+  ensureTab("cbc",{fy:"",pic:"",limit:8000},function(rows,ready){
     if(rows){ S.cbcRows=rows; S._cbcLoading=false; }
     else if(ready){ S._cbcLoading=false; }
   });
@@ -4551,7 +4567,7 @@ function reloadCbc(done){
   delete TSTORE["cbc"];
   delete FETCHING["cbc"];
   _stCache=null;
-  fetchTab("cbc",{fy:"",pic:""},function(rows,ready,err){
+  fetchTab("cbc",{fy:"",pic:"",limit:8000},function(rows,ready,err){
     if(!ready) return;
     S._cbcLoading=false;
     if(rows) S.cbcRows=rows;
@@ -5586,8 +5602,16 @@ function ordDrawCbc(sel){
   var list=stakeOf(acc);
   if(!acc){
     wrap.innerHTML='<input class="inp piclock" value="Chọn Account trước" readonly>';
+  }else if(!S.cbcRows){
+    /* ⭐ v7.3 — danh bạ chưa tải mà đã kết luận "chưa có CBC nào" là sai.
+       Nạp xong thì vẽ lại đúng danh sách. */
+    wrap.innerHTML='<input class="inp piclock" value="Đang nạp danh bạ CBC…" readonly>';
+    if(!S._cbcLoading) reloadCbc(function(){ if($("o_cbcWrap")) ordDrawCbc(sel); });
+    return;
   }else if(!list.length){
-    wrap.innerHTML='<input class="inp piclock" value="Account này chưa có CBC nào" readonly>';
+    wrap.innerHTML='<div style="display:flex;gap:7px">'+
+      '<input class="inp piclock" style="flex:1" value="Account này chưa có CBC nào" readonly>'+
+      '<button class="btn sm" style="flex:none" onclick="reloadCbc(function(){ ordDrawCbc(); })">↻</button></div>';
   }else{
     wrap.innerHTML='<select class="inp" id="o_contact" onchange="ordPickCbc()">'+
       opts(list.map(function(b){return b.contact;}),sel||"","— chọn người liên lạc —")+'</select>';
@@ -6404,12 +6428,17 @@ function adpMergeTarget(ptype,amt){
   var a=String(amt||"").replace(/[^\d]/g,"");
   return ptype ? (ptype+" | "+a) : a;
 }
+/* ⭐ v7.3 — chuẩn hoá tên nhóm sản phẩm trước khi so.
+   MASTER LIST ghi "All - MMG" (có gạch nối) nên chuỗi so cũ "all mmg" không bao giờ
+   khớp, khiến chọn All - MMG ra 0 đồng dù account có đơn Composite và Bond. */
+function adpNorm(v){ return noAcc(v).replace(/[^a-z0-9]+/g," ").trim(); }
 function adpScopeMatch(scope,p){
-  var s=noAcc(scope||"").trim(), x=noAcc(p||"").trim();
+  var s=adpNorm(scope), x=adpNorm(p);
   if(!s) return true;
-  if(s.indexOf("all dental")>=0||s==="all"||s.indexOf("tat ca")>=0) return true;
-  if(s.indexOf("all file")>=0)  return /file|jizai|tram/.test(x);
-  if(s.indexOf("all mmg")>=0)   return /composite|tay trang|whiten|nhua|resin|bond|mmg/.test(x);
+  if(/^all$/.test(s) || /^all dental$/.test(s) || /tat ca/.test(s)) return true;
+  if(/^all (file|files)$/.test(s))  return /file|jizai|tram|nong dua|nong rua/.test(x);
+  if(/^all (bur|burs)$/.test(s))    return /bur|khoan|dia|carbide|ipr/.test(x);
+  if(/^all mmg$/.test(s))           return /composite|comp|tay trang|bleach|whiten|nhua|resin|acrylic|bond|mmg/.test(x);
   if(!x) return false;
   return x.indexOf(s)>=0 || s.indexOf(x)>=0;
 }
@@ -8024,14 +8053,32 @@ function syncTabOnEnter(tab){
   var src=TAB_SRC[tab]; if(!src) return;
   var now=Date.now();
   if(_tabSync[src] && now-_tabSync[src]<15000) return;   /* vừa nạp xong thì thôi */
+  if(hasOpenEditor()) return;                            /* đang gõ dở thì đừng đụng vào */
   _tabSync[src]=now;
+
+  /* ⭐ v7.3 — hoạt động đi địa bàn phải nạp bằng visitFeed (kèm ảnh và đủ dòng).
+     Dùng fetchTab("weekly") sẽ trả bản nghèo hơn rồi ghi đè, làm mất ảnh và mất task. */
+  if(src==="weekly"){
+    S._terrLoading=null;
+    loadTerritoryAll(true).then(function(){ if(S.tab===tab) repaintTab(); }).catch(function(){});
+    return;
+  }
   delete FETCHING[src];
   fetchTab(src,{},function(rows,ready){
     if(!ready||!rows) return;
-    if(S.cache[src]||src==="weekly"||src==="monthly") S.cache[src]={rows:rows,at:Date.now()};
+    if(S.cache[src]||src==="monthly") S.cache[src]={rows:rows,at:Date.now()};
     _cxCache=null; _stCache=null;
     if(S.tab===tab) repaintTab();
   });
+}
+/* đang có ô nhập nào được focus hoặc modal đang mở thì hoãn nạp nền,
+   tránh dữ liệu nhảy làm mất nội dung người dùng đang gõ */
+function hasOpenEditor(){
+  try{
+    if($("ov").classList.contains("on")||$("ov2").classList.contains("on")) return true;
+    var a=document.activeElement;
+    return !!(a&&/^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName));
+  }catch(e){ return false; }
 }
 function repaintTab(){
   try{
