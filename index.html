@@ -895,20 +895,20 @@ tr.rp-late td{background:var(--dang-bg)}
 /* ── bảng công việc kiểu Report Hub ── */
 .rh{padding:0;overflow:hidden}
 .rhtb{font-size:13px}
-.rhtb thead th{background:var(--navy);color:#fff;font-size:10.5px;letter-spacing:.4px;font-weight:800;
-  padding:9px 8px;position:sticky;top:0;z-index:2;text-transform:uppercase}
+.rhtb thead th{background:var(--lb3);color:var(--navy);font-size:10.5px;letter-spacing:.4px;font-weight:800;
+  padding:9px 8px;position:sticky;top:0;z-index:2;text-transform:uppercase;border-bottom:1px solid var(--lb1)}
 .rhtb td{padding:9px 8px;vertical-align:middle;border-bottom:1px solid var(--line2)}
 .rhtb tr.rh-k{background:var(--card)}
 .rhtb tr.rh-k:hover{background:var(--paler)}
 .rhtb tr.rh-k.late,.rhtb tr.rh-s.late{background:var(--dang-bg)}
-.rhtb tr.rh-s{background:#FBFDFF}
-.rhtb tr.rh-add-row td{padding:6px 8px 12px;background:#FBFDFF}
+.rhtb tr.rh-s{background:var(--paler)}
+.rhtb tr.rh-add-row td{padding:6px 8px 12px;background:var(--paler)}
 .rh-cv{border:none;background:none;color:var(--sub);font-size:17px;font-weight:800;cursor:pointer;
   line-height:1;transition:.15s;transform:rotate(0)}
 .rh-cv.on{transform:rotate(90deg);color:var(--blue)}
 .rh-no{color:var(--mute);font-size:11.5px;font-weight:700}
-.rh-type{display:inline-block;background:var(--warn-bg);color:#8A6100;font-size:10px;font-weight:800;
-  padding:2px 7px;border-radius:6px;margin-bottom:3px}
+.rh-type{display:inline-block;background:var(--pale);color:var(--blue-d);font-size:10px;font-weight:800;
+  padding:2px 7px;border-radius:6px;margin-bottom:3px;border:1px solid var(--lb2)}
 .rh-t{font-weight:750;line-height:1.35}
 .rh-t.can{cursor:pointer}
 .rh-t.can:hover{color:var(--blue-d)}
@@ -935,6 +935,9 @@ tr.rp-late td{background:var(--dang-bg)}
 .rh-ic{border:none;background:none;color:var(--mute);cursor:pointer;font-size:12px;padding:2px 3px}
 .rh-ic:hover{color:var(--blue-d)}
 .rh-ic.del:hover{color:var(--dang)}
+.rh-ic.add{color:var(--blue-d);font-weight:800;font-size:14px}
+.pgrow{display:flex;align-items:center;gap:8px}
+.pgrow input[type=range]{flex:1;min-width:90px;accent-color:var(--blue)}
 
 /* ── so sánh công việc tháng ── */
 .cmpgrid{display:grid;gap:11px}
@@ -1333,6 +1336,7 @@ function openModal(title,body,foot,wide){
   S.modalRewire=null;
   $("mTitle").textContent=title; $("mBody").innerHTML=body; $("mFoot").innerHTML=foot||"";
   $("modal").classList.toggle("wide",!!wide); $("ov").classList.add("on"); modalDim();
+  S._modalSnap=modalSnap();          /* v8.1 — moc de biet form da duoc nhap hay chua */
 }
 function closeModal(){
   if(MSTACK.length){
@@ -1342,6 +1346,7 @@ function closeModal(){
     Object.keys(p.st).forEach(function(id){ var el=$(id); if(el&&typeof el.value!=="undefined") el.value=p.st[id]; });
     S.editing=p.ed; S.modalRewire=p.rw;
     if(p.rw){ try{ p.rw(); }catch(e){} }
+    S._modalSnap=modalSnap();
     return;
   }
   S.modalRewire=null;
@@ -1371,9 +1376,55 @@ function closeModal2(){
   if(!$("ov2")) return;
   $("ov2").classList.remove("on"); $("m2Body").innerHTML=""; $("m2Foot").innerHTML=""; M2ON=false; modalDim();
 }
-$("ov").addEventListener("click",function(e){ if(e.target===$("ov")&&!M2ON) closeModal(); });
-$("ov2").addEventListener("click",function(e){ if(e.target===$("ov2")) closeModal2(); });
-document.addEventListener("keydown",function(e){ if(e.key!=="Escape") return; if(M2ON) closeModal2(); else closeModal(); });
+/* ⭐ v8.1 — DIALOG KHÔNG CÒN TỰ TẮT KHI ĐANG NHẬP
+   ① Trước đây chỉ nghe "click" trên nền mờ. Bôi đen chữ trong ô rồi nhả chuột ra ngoài
+      khung ⇒ trình duyệt bắn click với target = nền ⇒ đóng luôn form đang gõ dở.
+      Nay phải NHẤN và NHẢ đều ở nền mờ mới đóng.
+   ② Nền mờ chỉ đóng dialog còn trống; đã nhập gì rồi thì hỏi lại.
+   ③ Esc khi đang mở gợi ý Account: chỉ đóng gợi ý, không đóng dialog. */
+var _ovDown=null, _ov2Down=null;
+function modalSnap(){
+  var b=$("mBody"), m={}; if(!b) return m;
+  Array.prototype.forEach.call(b.querySelectorAll("input,textarea,select"),function(el){
+    if(el.id) m[el.id]=String(el.value||"");
+  });
+  return m;
+}
+function modalTouched(){
+  var b=$("mBody"), snap=S._modalSnap||{}; if(!b) return false;
+  var els=b.querySelectorAll("input,textarea,select"), i, el, v;
+  for(i=0;i<els.length;i++){
+    el=els[i];
+    if(el.type==="hidden"||el.readOnly||el.disabled) continue;
+    v=String(el.value||"");
+    if(!(el.id in snap)){ if(v.trim()) return true; continue; }
+    if(v!==String(snap[el.id]||"")) return true;
+  }
+  return false;
+}
+function tryCloseModal(){
+  if(modalTouched() && !confirm("Đóng dialog và bỏ nội dung đang nhập?")) return;
+  closeModal();
+}
+$("ov").addEventListener("pointerdown",function(e){ _ovDown=e.target; });
+$("ov").addEventListener("click",function(e){
+  var d=_ovDown; _ovDown=null;
+  if(M2ON) return;
+  if(e.target!==$("ov")||d!==$("ov")) return;
+  tryCloseModal();
+});
+$("ov2").addEventListener("pointerdown",function(e){ _ov2Down=e.target; });
+$("ov2").addEventListener("click",function(e){
+  var d=_ov2Down; _ov2Down=null;
+  if(e.target!==$("ov2")||d!==$("ov2")) return;
+  closeModal2();
+});
+document.addEventListener("keydown",function(e){
+  if(e.key!=="Escape") return;
+  var cbo=document.querySelector(".cbo.on");
+  if(cbo){ cbo.classList.remove("on"); return; }
+  if(M2ON) closeModal2(); else tryCloseModal();
+});
 
 /* ───────── API (JSONP đọc · POST ghi) ───────── */
 var _seq=0;
@@ -1937,8 +1988,9 @@ function formOtherKey(no){
     +'<div class="row">'
       +'<div class="fld"><label>PIC phụ trách</label><select class="inp" id="ok_pic"'+(isMgmt()?"":" disabled")+'>'
         +opts(picOpts,(k&&k.pic)||S.user.pic,"")+'</select></div>'
-      +'<div class="fld"><label>Trạng thái</label><select class="inp" id="ok_status">'+opts(OTHER_STATUS,(k&&k.status)||"To Do","")+'</select></div>'
+      +'<div class="fld"><label>Trạng thái</label><select class="inp" id="ok_status" onchange="okSyncProg()">'+opts(OTHER_STATUS,(k&&k.status)||"To Do","")+'</select></div>'
     +'</div>'
+    +progFld("ok",(k?otherPct(k):0))
     +'<div class="row">'
       +'<div class="fld"><label>Ngày bắt đầu</label><input class="inp" type="date" id="ok_start" value="'+esc(String((k&&k.start)||"").slice(0,10))+'"></div>'
       +'<div class="fld"><label>Hạn hoàn thành</label><input class="inp" type="date" id="ok_planned" value="'+esc(String((k&&k.planned)||"").slice(0,10))+'"></div>'
@@ -1974,10 +2026,11 @@ function addLinkTo(id){
 function saveOtherKey(no){
   var name=String($("ok_name").value||"").trim();
   if(!name) return toast("Nhập tên Key Task","warn");
+  /* ⭐ v8.1 — thêm mới cũng gửi Kết quả / link và % tiến độ (trước chỉ gửi khi sửa) */
   var body={ type:$("ok_type").value, pic:$("ok_pic").value, status:$("ok_status").value,
-             start:$("ok_start").value, planned:$("ok_planned").value };
-  if(no){ body.action="updateKey"; body.no=no; body.keyTask=name;
-          if($("ok_result")) body.result=$("ok_result").value; }
+             start:$("ok_start").value, planned:$("ok_planned").value,
+             progress:pgVal("ok"), result:($("ok_result")?$("ok_result").value:"") };
+  if(no){ body.action="updateKey"; body.no=no; body.keyTask=name; }
   else  { body.action="addKey";    body.keyTask=name; }
   busy(true,"Đang lưu vào Google Sheet…");
   hubPost(body).then(function(r){
@@ -1997,13 +2050,8 @@ function formOtherSub(keyNo,no){
       +'<div class="fld"><label>PIC phụ trách</label><select class="inp" id="os_pic"'+(isMgmt()?"":" disabled")+'>'
         +opts(picOpts,(x&&x.pic)||S.user.pic,"")+'</select></div>'
       +'<div class="fld"><label>Trạng thái</label><select class="inp" id="os_status" onchange="osSyncProg()">'+opts(OTHER_STATUS,(x&&x.status)||"To Do","")+'</select></div>'
-      /* ⭐ v7.1 — tiến độ đi theo trạng thái: To Do 0% · In Progress 25% · Completed 100%.
-         Muốn con số khác thì kéo thanh tiến độ ngay trên danh sách sau khi đã lưu. */
-      +'<div class="fld"><label>Tiến độ (%)</label>'
-        +'<input class="inp num" id="os_prog" type="number" value="'+(x?otherPct(x):0)+'" readonly '
-        +'style="background:var(--line2);color:var(--sub)">'
-        +'<div class="hint">Tự đặt theo trạng thái — kéo thanh tiến độ ở danh sách để chỉnh số khác</div></div>'
     +'</div>'
+    +progFld("os",(x?otherPct(x):0))
     +'<div class="row">'
       +'<div class="fld"><label>Ngày bắt đầu</label><input class="inp" type="date" id="os_start" value="'+esc(String((x&&x.start)||"").slice(0,10))+'"></div>'
       +'<div class="fld"><label>Hạn hoàn thành</label><input class="inp" type="date" id="os_planned" value="'+esc(String((x&&x.planned)||"").slice(0,10))+'"></div>'
@@ -2017,17 +2065,53 @@ function formOtherSub(keyNo,no){
     '<button class="btn" onclick="closeModal()">Huỷ</button><div style="flex:1"></div>'
     +'<button class="btn pri" onclick="saveOtherSub(\''+esc(keyNo)+'\',\''+esc(no||"")+'\')">Lưu vào Google Sheet</button>');
 }
-/* tiến độ mặc định theo trạng thái đang chọn trong dialog */
-function osSyncProg(){
-  var st=$("os_status"), pg=$("os_prog"); if(!st||!pg) return;
-  var v=String(st.value||"");
-  pg.value = /complet/i.test(v) ? 100 : /progress/i.test(v) ? 25 : 0;
+/* ⭐ v8.1 — Ô TIẾN ĐỘ DÙNG CHUNG cho dialog Key Task (ok_) và Đầu việc con (os_).
+   Kéo thanh ⇒ trạng thái tự theo (100% Completed · >0 In Progress · 0 To Do)
+   và ngược lại đổi trạng thái ⇒ thanh nhảy về đúng mốc. */
+function progFld(px,val){
+  val=Math.max(0,Math.min(100,parseInt(val,10)||0));
+  return '<div class="fld"><label>Tiến độ</label>'
+    +'<div class="pgrow">'
+      +'<button class="mini" type="button" onclick="pgStep(\''+px+'\',-5)">−</button>'
+      +'<input type="range" id="'+px+'_prog" min="0" max="100" step="5" value="'+val+'" '
+        +'oninput="pgLabel(\''+px+'\')" onchange="pgLabel(\''+px+'\')">'
+      +'<button class="mini" type="button" onclick="pgStep(\''+px+'\',5)">＋</button>'
+      +'<b id="'+px+'_pgl" style="min-width:46px;text-align:right;color:'+pctColor(val/100)+'">'+val+'%</b>'
+    +'</div>'
+    +'<div class="hint">Kéo để đặt % · 100% tự chuyển Completed, 0% về To Do</div></div>';
 }
+function pgVal(px){ var e=$(px+"_prog"); return e?(parseInt(e.value,10)||0):0; }
+function pgPaint(px){
+  var v=pgVal(px), b=$(px+"_pgl");
+  if(b){ b.textContent=v+"%"; b.style.color=pctColor(v/100); }
+}
+function pgLabel(px){
+  pgPaint(px);
+  var st=$(px+"_status"); if(!st) return;
+  if(/cancel/i.test(String(st.value||""))) return;
+  var v=pgVal(px);
+  st.value = v>=100 ? "Completed" : v>0 ? "In Progress" : "To Do";
+}
+function pgStep(px,d){
+  var e=$(px+"_prog"); if(!e) return;
+  e.value=Math.max(0,Math.min(100,(parseInt(e.value,10)||0)+d)); pgLabel(px);
+}
+function pgFromStatus(px){
+  var st=$(px+"_status"), e=$(px+"_prog"); if(!st||!e) return;
+  var v=String(st.value||""), cur=parseInt(e.value,10)||0;
+  e.value = /complet/i.test(v) ? 100
+          : /cancel/i.test(v)  ? 0
+          : /progress/i.test(v)? ((cur>0&&cur<100)?cur:25)
+          : 0;
+  pgPaint(px);
+}
+function okSyncProg(){ pgFromStatus("ok"); }
+function osSyncProg(){ pgFromStatus("os"); }
 function saveOtherSub(keyNo,no){
   var name=String($("os_name").value||"").trim();
   if(!name) return toast("Nhập tên đầu việc","warn");
   var body={ pic:$("os_pic").value, status:$("os_status").value,
-             progress:n($("os_prog").value), start:$("os_start").value,
+             progress:pgVal("os"), start:$("os_start").value,
              planned:$("os_planned").value, result:$("os_result").value };
   if(no){ body.action="updateSub"; body.no=no; body.name=name; }
   else  { body.action="addSub"; body.parentNo=keyNo; body.name=name; }
@@ -2050,6 +2134,7 @@ function delOther(no,isKey){
 }
 
 function renderOther(){
+  S.otherType="";                       /* ⭐ v8.1 — bỏ hẳn bộ lọc theo Loại việc */
   var r=vRangeCalc();
   var head=wkTabBar()+
     '<div class="trhead compact">'+
@@ -2107,10 +2192,7 @@ function renderOther(){
       '<div class="row" style="margin-bottom:9px"><div style="flex:2"><input class="inp" id="ot_q" autocomplete="off" '+
         'placeholder="🔍 Tìm trong key task, đầu việc, kết quả…" value="'+esc(S.otherQ||"")+'" '+
         'oninput="S.otherQ=this.value;debOther()"></div></div>'+
-      '<div class="chipbar" style="margin-bottom:8px">'+
-        '<div class="chip'+(S.otherType?"":" on")+'" onclick="S.otherType=\'\';renderOther()">Mọi loại việc</div>'+
-        otherTypes().map(function(v){ return '<div class="chip'+(S.otherType===v?" on":"")+'" onclick="setOtherType(\''+esc(v)+'\')">'+esc(v)+'</div>'; }).join("")+
-      '</div>'+
+      /* ⭐ v8.1 — chỉ còn dải chọn nhanh theo tiến độ */
       '<div class="chipbar" style="margin-bottom:8px">'+
         '<div class="chip'+(S.otherStatus?"":" on")+'" onclick="S.otherStatus=\'\';renderOther()">Tất cả tiến độ</div>'+
         OTHER_STATUS.map(function(v){ return '<div class="chip'+(S.otherStatus===v?" on":"")+'" onclick="setOtherStatus(\''+esc(v)+'\')">'+esc(v)+'</div>'; }).join("")+
@@ -2172,7 +2254,8 @@ function otherTable(keys){
         '<td class="ctr mono">'+(k.planned?fmtVN(k.planned).slice(0,5):"—")+'</td>'+
         '<td>'+rhProg(pct,done,subs.length||null)+'</td>'+
         '<td>'+otherStatusTag(k.status,pct)+
-          (can?'<button class="rh-ic" title="Sửa" onclick="event.stopPropagation();formOtherKey(\''+esc(k.no)+'\')">✎</button>'+
+          (can?'<button class="rh-ic add" title="Thêm đầu việc con" onclick="event.stopPropagation();S.otherOpen[\''+esc(k.no)+'\']=1;formOtherSub(\''+esc(k.no)+'\',\'\')">＋</button>'+
+               '<button class="rh-ic" title="Sửa" onclick="event.stopPropagation();formOtherKey(\''+esc(k.no)+'\')">✎</button>'+
                '<button class="rh-ic del" title="Xoá" onclick="event.stopPropagation();delOther(\''+esc(k.no)+'\',true)">🗑</button>':"")+'</td></tr>';
       if(open){
         rows+=subs.map(function(x){
@@ -4634,13 +4717,32 @@ function openTask(row){
     +(canDel?'<button class="btn dg" id="tk-del" onclick="deleteTaskFlow()">🗑 Xoá task</button>':"")
     +'<button class="btn pri" id="tk-save" onclick="saveTask()">💾 Cập nhật vào Sheet</button>';
   openDrw(head,"",taskEditorHTML(w),foot);
+  S.tkStatusManual=0; tkReqSync();      /* ⭐ v8.1 */
   warmGps();
 }
 function selT(id,field,label,options,cur,req){
   var o='<option value="">—</option>'+(options||[]).map(function(x){return '<option'+(x===cur?" selected":"")+'>'+esc(x)+'</option>';}).join("");
   if(cur&&(options||[]).indexOf(cur)<0) o='<option value="'+esc(cur)+'" selected>'+esc(cur)+'</option>'+o;
-  return '<div><span class="te-lb">'+esc(label)+(req?' <span class="te-req">*</span>':"")+'</span>'
+  /* ⭐ v8.1 — dấu * bật/tắt được để phản ánh luật “chỉ bắt buộc khi đã có CBC” */
+  return '<div><span class="te-lb">'+esc(label)+' <span class="te-req" id="'+id+'-rq" style="display:'+(req?"":"none")+'">*</span></span>'
     +'<select id="'+id+'" onchange="markDirty(\''+field+'\',this.value)">'+o+'</select></div>';
+}
+/* bật/tắt dấu * theo nội dung Task Result + Task Status hiện tại, và tự chuyển Completed */
+function tkReqSync(){
+  var res=curV("tk-result","result"), st=curV("tk-status","status");
+  var hasCbc=MEET_RE.test(String(res||"")), isDone=/complet/i.test(String(st||""));
+  ["tk-next-rq","tk-fb-rq"].forEach(function(id){ var e=$(id); if(e) e.style.display=hasCbc?"":"none"; });
+  var rq=$("tk-result-rq"); if(rq) rq.style.display=isDone?"":"none";
+  var s=$("tk-status");
+  if(s && !S.tkStatusManual && !isDone){
+    var w=S.task||{}, ta=curV("tk-ta","typeAction");
+    var photoOk=(ta!=="Visiting")||!!S.pending||((w.photos||[]).length>0);
+    if(hasCbc && photoOk && String(curV("tk-next","nextAction")).trim()){
+      var want=stDone();
+      if(want && stHas(want)){ s.value=want; S.dirty.status=want;
+        var b=$("tk-save"); if(b) b.classList.add("acc"); }
+    }
+  }
 }
 function taskEditorHTML(w){
   var a=parseAcc(w.account), ph=(w.photos||[]);
@@ -4651,7 +4753,7 @@ function taskEditorHTML(w){
       +'<button class="mini" onclick="toggleVoice(\'tk-plan\',this)">🎤 Nói</button></div>'
       +'<textarea id="tk-plan" oninput="markDirty(\'plan\',this.value)" placeholder="Mục tiêu buổi làm việc… (không bắt buộc)">'+esc(w.plan||"")+'</textarea></div>'
 
-    +'<div class="te-sec"><div class="te-st">✅ Task Result — kết quả thực tế <span class="te-req">*</span><span class="sp"></span>'
+    +'<div class="te-sec"><div class="te-st">✅ Task Result — kết quả thực tế <span class="te-req" id="tk-result-rq" style="display:'+(/complet/i.test(String(w.status||""))?"":"none")+'">*</span><span class="sp"></span>'
       +'<button class="mini acc" onclick="openMeetPicker(\'tk-result\')">👤 CBC — người gặp</button>'
       +'<button class="mini" onclick="insertResultTpl(\'tk-result\')">📋 Chèn khung 4 mục</button>'
       +'<button class="mini" onclick="pullPlanToResult()">⤵ Lấy từ Plan</button>'
@@ -4663,14 +4765,14 @@ function taskEditorHTML(w){
 
     +'<div class="te-sec"><div class="te-g2">'
       +selT("tk-status","status","Task Status",S.master.status,w.status,1)
-      +selT("tk-next","nextAction","Next action (cột T)",NEXT_ACTIONS,w.nextAction,1)
+      +selT("tk-next","nextAction","Next action (cột T)",NEXT_ACTIONS,w.nextAction,MEET_RE.test(String(w.result||""))?1:0)
     +'</div></div>'
     +'<div class="te-sec" id="tk-stop-sec" style="'+(String(w.nextAction||"")==="Dừng lại"||w.stopReason?"":"display:none")+'">'
       +'<div class="te-st">🛑 Lý do dừng chăm sóc <span class="te-req">*</span></div>'
       +'<textarea id="tk-stop" style="min-height:70px" oninput="markDirty(\'stopReason\',this.value)" placeholder="Vì sao dừng theo đuổi account này…">'+esc(w.stopReason||"")+'</textarea></div>'
 
     +'<div class="te-sec"><div class="te-g2">'
-      +selT("tk-fb","feedback","Customer feedback",S.master.feedback,w.feedback)
+      +selT("tk-fb","feedback","Customer feedback",S.master.feedback,w.feedback,MEET_RE.test(String(w.result||""))?1:0)
       +selT("tk-proc","process","Sales Process",S.master.process,w.process)
     +'</div></div>'
     +'<div class="te-sec"><div class="te-g2">'
@@ -4705,6 +4807,7 @@ function taskEditorHTML(w){
 }
 function markDirty(field,val){
   S.dirty[field]=val;
+  if(field==="status") S.tkStatusManual=1;      /* ⭐ v8.1 — người dùng tự chọn thì không tự đổi nữa */
   var b=$("tk-save"); if(b) b.classList.add("acc");
   var el=$({status:"tk-status",nextAction:"tk-next",typeTask:"tk-tt",typeAction:"tk-ta",result:"tk-result",stopReason:"tk-stop"}[field]||"");
   if(el&&String(val||"").trim()) el.classList.remove("bad");
@@ -4714,11 +4817,13 @@ function markDirty(field,val){
   }
   if(field==="result"){
     var f=$("tk-meetflag"); if(f){
-      var ok=MEET_RE.test(val||"");
-      f.style.color=ok?"var(--ok)":"var(--dang)";
-      f.textContent=ok?"✓ Đã ghi CBC (người gặp)":"⚠️ Bắt buộc có dòng “Người gặp:” — bấm nút CBC ở trên";
+      var has=!!String(val||"").trim(), ok=MEET_RE.test(val||"");
+      f.style.color=!has?"var(--mute)":(ok?"var(--ok)":"var(--dang)");
+      f.textContent=!has?"Để trống nếu mới lên kế hoạch — ghi kết quả sau khi đi"
+                   :(ok?"✓ Đã ghi CBC (người gặp)":"⚠️ Đã có nội dung thì bắt buộc dòng “Người gặp:” — bấm nút CBC ở trên");
     }
   }
+  if(field==="result"||field==="status"||field==="nextAction"||field==="typeAction") tkReqSync();
   if(field==="typeAction") renderPending();
 }
 function curV(id,field){ if(field in S.dirty) return S.dirty[field]; var el=$(id); return el?el.value:""; }
@@ -5015,14 +5120,20 @@ function saveTask(){
   var result=curV("tk-result","result"), next=curV("tk-next","nextAction");
   var bad=[];
   function mark(id,ok,lb){ var el=$(id); if(el) el.classList.toggle("bad",!ok); if(!ok) bad.push(lb); }
+  /* ⭐ v8.1 — việc mới lên kế hoạch (chưa có CBC trong kết quả) thì Next action,
+     Customer feedback, kết quả và ảnh đều CHƯA bắt buộc. Chỉ siết khi đã đi gặp thật
+     hoặc khi đã đặt trạng thái Completed. */
+  var hasCbc=MEET_RE.test(String(result||""));
+  var isDone=/complet/i.test(String(status||""));
   mark("tk-status",!!String(status).trim(),"Task Status");
   mark("tk-ta",!!String(typeAction).trim(),"Type action");
   mark("tk-tt",!!String(curV("tk-tt","typeTask")).trim(),"Type task");
-  mark("tk-next",!!String(next).trim(),"Next action");
-  mark("tk-result",!!String(result).trim(),"Task Result");
-  if(String(result).trim() && !MEET_RE.test(result)) bad.push("CBC (dòng “Người gặp:” trong Task Result)");
+  mark("tk-next",hasCbc?!!String(next).trim():true,"Next action");
+  mark("tk-fb",hasCbc?!!String(curV("tk-fb","feedback")).trim():true,"Customer feedback");
+  mark("tk-result",isDone?!!String(result).trim():true,"Task Result");
+  if(String(result).trim() && !hasCbc) bad.push("CBC (dòng “Người gặp:” trong Task Result)");
   if(next==="Dừng lại" && !String(curV("tk-stop","stopReason")).trim()){ mark("tk-stop",false,"Lý do dừng chăm sóc"); }
-  if(typeAction==="Visiting" && !S.pending && !(w.photos||[]).length) bad.push("ảnh đi địa bàn (bắt buộc với Visiting)");
+  if(isDone && typeAction==="Visiting" && !S.pending && !(w.photos||[]).length) bad.push("ảnh đi địa bàn (bắt buộc với Visiting đã hoàn thành)");
   if(bad.length){ toast("⚠️ Cần bổ sung: "+bad.join(", "),"warn",6000); return; }
 
   var hasData=Object.keys(S.dirty).length>0, hasPh=!!S.pending;
@@ -5089,7 +5200,7 @@ function stopVoice(){ if(_rec){try{_rec.stop();}catch(e){} _rec=null;} if(_recB)
 /* ═══════════ THÊM TASK MỚI ═══════════ */
 function formWeekly(w,presetAcc){
   if(w&&w._row) return openTask(w._row);
-  S.ntPhoto=null;
+  S.ntPhoto=null; S.ntStatusManual=0;
   var acc=parseAcc(presetAcc||"");
   var h='<div class="fld sbox"><label>Account <span class="rq">*</span></label>'+
       '<input class="inp" id="nt_accName" placeholder="Bấm để xem danh sách · gõ ≥2 ký tự để tìm" value="'+esc(acc.name||"")+'" autocomplete="off">'+
@@ -5105,7 +5216,7 @@ function formWeekly(w,presetAcc){
     '</div>'+
     '<div class="row">'+
       '<div class="fld"><label>Type task <span class="rq">*</span></label><select class="inp" id="nt_typeTask">'+opts(S.master.typeTask,"","— chọn —")+'</select></div>'+
-      '<div class="fld"><label>Type action <span class="rq">*</span></label><select class="inp" id="nt_typeAction" onchange="ntPhotoHint()">'+opts(S.master.typeAction,"Visiting","— chọn —")+'</select></div>'+
+      '<div class="fld"><label>Type action <span class="rq">*</span></label><select class="inp" id="nt_typeAction" onchange="ntPhotoHint();ntAutoStatus()">'+opts(S.master.typeAction,"Visiting","— chọn —")+'</select></div>'+
     '</div>'+
     '<div class="row">'+
       '<div class="fld"><label>Sales Process</label><select class="inp" id="nt_process">'+opts(S.master.process,"","— chọn —")+'</select></div>'+
@@ -5120,11 +5231,12 @@ function formWeekly(w,presetAcc){
         '<button class="mini" onclick="toggleVoice(\'nt_result\',this)">🎤 Nói</button></div>'+
       '<div id="nt_meetflag" style="font-size:11.5px;font-weight:700;margin-top:6px;color:var(--dang)">⚠️ Bắt buộc có dòng “Người gặp:” — bấm nút CBC ở trên</div></div>'+
     '<div class="row">'+
-      '<div class="fld"><label>Task Status <span class="rq">*</span></label><select class="inp" id="nt_status">'+opts(S.master.status,"Completed","— chọn —")+'</select></div>'+
+      '<div class="fld"><label>Task Status <span class="rq">*</span></label><select class="inp" id="nt_status" onchange="S.ntStatusManual=1">'+opts(S.master.status,stTodo(),"— chọn —")+'</select>'+
+        '<div class="hint" id="nt_stHint">Mới lên kế hoạch — để To Do; điền đủ CBC · ảnh · next action sẽ tự chuyển Completed</div></div>'+
       '<div class="fld"><label>Customer feedback</label><select class="inp" id="nt_feedback">'+opts(S.master.feedback,"","— chọn —")+'</select></div>'+
     '</div>'+
     '<div class="row">'+
-      '<div class="fld"><label>Next action (cột T) <span class="rq">*</span></label><select class="inp" id="nt_next" onchange="ntStopToggle()">'+opts(NEXT_ACTIONS,"","— chọn —")+'</select></div>'+
+      '<div class="fld"><label>Next action (cột T) <span class="rq">*</span></label><select class="inp" id="nt_next" onchange="ntStopToggle();ntAutoStatus()">'+opts(NEXT_ACTIONS,"","— chọn —")+'</select></div>'+
       '<div class="fld" id="nt_stopWrap" style="display:none"><label>Lý do dừng <span class="rq">*</span></label><input class="inp" id="nt_stop"></div>'+
     '</div>'+
     '<div class="sect"><div class="ct" style="margin-bottom:8px"><span class="dot"></span>Ảnh đi địa bàn<span class="sp"></span><small id="nt_phHint">Bắt buộc với Visiting · 1 ảnh · kèm GPS</small></div>'+
@@ -5160,6 +5272,31 @@ function typeTaskForAcc(t){
   }
   return "";
 }
+/* ⭐ v8.1 — dò đúng chữ trong Master của sheet, tránh hardcode sai chính tả */
+function stFind(re,fb){
+  var l=S.master.status||[], i;
+  for(i=0;i<l.length;i++) if(re.test(String(l[i]))) return l[i];
+  return fb;
+}
+function stTodo(){ return stFind(/to\s*-?\s*do|not\s*start|chưa|plan/i,"To do"); }
+function stDone(){ return stFind(/complet|hoàn\s*thành/i,"Completed"); }
+function stHas(v){ return (S.master.status||[]).indexOf(v)>=0; }
+/* đủ dữ liệu ⇒ coi như đã làm xong: có CBC trong kết quả + có ảnh nếu Visiting + có Next action */
+function ntReady(){
+  var res=$("nt_result")?$("nt_result").value:"";
+  if(!MEET_RE.test(res||"")) return false;
+  if(($("nt_typeAction")||{}).value==="Visiting" && !S.ntPhoto) return false;
+  return !!String((($("nt_next")||{}).value)||"").trim();
+}
+function ntAutoStatus(){
+  var s=$("nt_status"); if(!s||S.ntStatusManual) return;
+  var ready=ntReady(), want=ready?stDone():stTodo();
+  if(want && stHas(want) && s.value!==want) s.value=want;
+  var h=$("nt_stHint");
+  if(h) h.textContent=ready
+    ? "✓ Đã đủ CBC · ảnh · next action — tự chuyển Completed"
+    : "Mới lên kế hoạch — để To Do; điền đủ CBC · ảnh · next action sẽ tự chuyển Completed";
+}
 function ntPhotoHint(){
   var v=$("nt_typeAction")?$("nt_typeAction").value:"";
   var h=$("nt_phHint"); if(h) h.innerHTML=(v==="Visiting")?'<b style="color:#A82F2C">Bắt buộc</b> với Visiting · 1 ảnh · kèm GPS':'Không bắt buộc với hình thức này';
@@ -5176,6 +5313,7 @@ function ntFiles(files){
 }
 function ntDraw(){
   var b=$("nt_phBox"); if(!b) return;
+  ntAutoStatus();
   if(!S.ntPhoto){ b.innerHTML=""; return; }
   var g=S.ntPhoto.gps;
   b.innerHTML='<div class="pp-cur" style="margin-bottom:9px"><img src="'+S.ntPhoto.dataUrl+'" alt="">'
@@ -5204,6 +5342,7 @@ function ntMeetFlag(){
     f.textContent=ok?"✓ Đã ghi CBC (người gặp) — có thể lưu"
                     :"⚠️ Đã có nội dung thì bắt buộc dòng “Người gặp:” — bấm nút CBC ở trên";
   }
+  ntAutoStatus();
 }
 function submitNewTask(){
   var accName=$("nt_accName").value.trim();
@@ -5224,7 +5363,12 @@ function submitNewTask(){
   if(!d.typeTask) bad.push("Type task");
   if(!d.typeAction) bad.push("Type action");
   if(!d.status) bad.push("Task Status");
-  if(!d.nextAction) bad.push("Next action");
+  /* ⭐ v8.1 — Next action & Customer feedback CHỈ bắt buộc khi Task Result đã có CBC
+     (tức là đã đi gặp thật). Còn đang lên kế hoạch thì để trống thoải mái. */
+  if(MEET_RE.test(String(d.result||""))){
+    if(!d.nextAction) bad.push("Next action");
+    if(!String(d.feedback||"").trim()) bad.push("Customer feedback");
+  }
   /* ⭐ v7.1 — Task Result KHÔNG bắt buộc (PIC lên kế hoạch trước, ghi kết quả sau);
      nhưng đã viết kết quả thì buộc phải có dòng "Người gặp:".
      Ảnh Visiting cũng không bắt buộc lúc tạo — bổ sung sau khi đi thực địa. */
@@ -7023,6 +7167,13 @@ function sendReport(option,confirmed){
   var kind=S.rpKind, who=(S.rpPic||S.user.pic);
   var labels={self:"gửi thử cho chính bạn",team:"gửi chính thức tới team (CC: Tuyen, Nguyen Ha, Giang)",pic:"gửi thay cho "+who,all:"gửi cho toàn bộ Dental team",download:"tải PDF"};
   if(!confirmed) return askSend(option);
+  /* ⭐ v8.1 — báo cáo tuần PHẢI kèm Other task. Chưa nạp xong mà bấm gửi thì payload
+     "other" rỗng ⇒ email thiếu hẳn phần Công việc khác. Nạp xong rồi mới gửi. */
+  if(kind==="week" && !S.other){
+    busy(true,"Đang nạp Công việc khác…");
+    return loadOther(true).then(function(){ busy(false); sendReport(option,true); })
+      .catch(function(e){ busy(false); toast("Không nạp được Other task: "+e.message,"err",6500); });
+  }
   busy(true, option==="download"?"Đang tạo PDF…":"Đang gửi email + tạo PDF đính kèm…");
   var body = kind==="week"
     ? { action:"weeklyReport", from:S.rpFrom, to:S.rpTo, option:option, toPic:who,
