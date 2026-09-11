@@ -5554,7 +5554,7 @@ function formWeekly(w,presetAcc){
     '</div>'+
     '<div class="row">'+
       '<div class="fld"><label>Sales Process <span class="rq">*</span></label><select class="inp" id="nt_process">'+opts(S.master.process,"","— chọn —")+'</select></div>'+
-      '<div class="fld"><label>Product group <span class="rq">*</span></label><select class="inp" id="nt_product">'+opts(S.master.product,"","— chọn —")+'</select></div>'+
+      '<div class="fld" id="nt_prodWrap"><label>Product group <span class="rq">*</span></label><select class="inp" id="nt_product">'+opts(S.master.product,"","— chọn —")+'</select></div>'+
     '</div>'+
     '<div class="fld" id="nt_planWrap"><label>Plan — dự định làm gì (không bắt buộc)</label>'+
       '<textarea class="inp" id="nt_plan"></textarea></div>'+
@@ -5573,7 +5573,7 @@ function formWeekly(w,presetAcc){
       '<div class="fld"><label>Customer feedback</label><select class="inp" id="nt_feedback">'+opts(S.master.feedback,"","— chọn —")+'</select></div>'+
     '</div>'+
     '<div class="row">'+
-      '<div class="fld"><label>Next action (cột T) <span class="rq">*</span></label><select class="inp" id="nt_next" onchange="ntStopToggle();ntAutoStatus()">'+opts(NEXT_ACTIONS,"","— chọn —")+'</select></div>'+
+      '<div class="fld" id="nt_nextWrap"><label>Next action (cột T) <span class="rq">*</span></label><select class="inp" id="nt_next" onchange="ntStopToggle();ntAutoStatus()">'+opts(NEXT_ACTIONS,"","— chọn —")+'</select></div>'+
       '<div class="fld" id="nt_stopWrap" style="display:none"><label>Lý do dừng <span class="rq">*</span></label><input class="inp" id="nt_stop"></div>'+
     '</div>'+
     '<div class="sect" id="nt_phSect"><div class="ct" style="margin-bottom:8px"><span class="dot"></span>Ảnh đi địa bàn<span class="sp"></span><small id="nt_phHint">Bắt buộc với Visiting · 1 ảnh · kèm GPS</small></div>'+
@@ -5606,6 +5606,11 @@ function ntTbdSync(){
   S.ntTbd=on;
   var pw=$("nt_planWrap"), pk=$("nt_tbdPick"), note=$("nt_tbdNote"),
       rw=$("nt_resWrap"), ps=$("nt_phSect"), hint=$("nt_accHint");
+  /* các ô chỉ có nghĩa khi đã biết account thì ẩn hẳn, tránh hiện dấu * gây hiểu nhầm */
+  ["nt_prodWrap","nt_nextWrap","nt_stopWrap"].forEach(function(id){
+    var e=$(id); if(e&&id!=="nt_stopWrap") e.style.display=on?"none":"";
+    else if(e&&on) e.style.display="none";
+  });
   if(pw) pw.style.display = on?"none":"";
   if(pk){
     pk.style.display = on?"":"none";
@@ -5628,6 +5633,90 @@ function ntTbdSync(){
       fmtVN(from)+' – '+fmtVN(to)+' và hiện dạng <i>“Đã tiếp cận 3 phòng khám, 2 bệnh viện”</i>. '+
       'Không cần ghi kết quả, cũng không cần chụp ảnh cho dòng này.</div></div>'; }
 }
+/* ⭐ v4.4 — Account type ở tab "2. CBC" quyết định Type task
+   (Clinic ⇒ Sale-Clinics, Dealer ⇒ Sale-Dealers, Hospital ⇒ Sale-Hospitals…) */
+function typeTaskForAcc(t){
+  var list=S.master.typeTask||[], key=noAcc(String(t||"")).replace(/[^a-z0-9]/g,"");
+  if(!key) return "";
+  var k1=key, k2=key.replace(/s$/,"");
+  for(var i=0;i<list.length;i++){
+    var k=noAcc(list[i]).replace(/[^a-z0-9]/g,"");
+    if(k.indexOf(k1)>=0||k.indexOf(k2)>=0) return list[i];
+  }
+  return "";
+}
+/* ⭐ v8.1 — dò đúng chữ trong Master của sheet, tránh hardcode sai chính tả */
+function stFind(re,fb){
+  var l=S.master.status||[], i;
+  for(i=0;i<l.length;i++) if(re.test(String(l[i]))) return l[i];
+  return fb;
+}
+function stTodo(){ return stFind(/to\s*-?\s*do|not\s*start|chưa|plan/i,"To do"); }
+function stDone(){ return stFind(/complet|hoàn\s*thành/i,"Completed"); }
+function stHas(v){ return (S.master.status||[]).indexOf(v)>=0; }
+/* đủ dữ liệu ⇒ coi như đã làm xong: có CBC trong kết quả + có ảnh nếu Visiting + có Next action */
+function ntReady(){
+  var res=$("nt_result")?$("nt_result").value:"";
+  if(!MEET_RE.test(res||"")) return false;
+  if(($("nt_typeAction")||{}).value==="Visiting" && !S.ntPhoto) return false;
+  return !!String((($("nt_next")||{}).value)||"").trim();
+}
+function ntAutoStatus(){
+  var s=$("nt_status"); if(!s||S.ntStatusManual) return;
+  var ready=ntReady(), want=ready?stDone():stTodo();
+  if(want && stHas(want) && s.value!==want) s.value=want;
+  var h=$("nt_stHint");
+  if(h) h.textContent=ready
+    ? "✓ Đã đủ CBC · ảnh · next action — tự chuyển Completed"
+    : "Mới lên kế hoạch — để To Do; điền đủ CBC · ảnh · next action sẽ tự chuyển Completed";
+}
+function ntPhotoHint(){
+  var v=$("nt_typeAction")?$("nt_typeAction").value:"";
+  var h=$("nt_phHint"); if(h) h.innerHTML=(v==="Visiting")?'<b style="color:#A82F2C">Bắt buộc</b> với Visiting · 1 ảnh · kèm GPS':'Không bắt buộc với hình thức này';
+}
+function ntStopToggle(){ var w=$("nt_stopWrap"); if(w) w.style.display=($("nt_next").value==="Dừng lại")?"":"none"; }
+function ntFiles(files){
+  if(!files||!files.length) return;
+  if(!photoGate(files[0])){ try{$("nt_file").value="";}catch(e){} return; }
+  busy(true,"Đang nén ảnh & lấy GPS…");
+  Promise.all([compress(files[0]),getGps()]).then(function(o){
+    S.ntPhoto={dataUrl:o[0],gps:o[1]}; busy(false); ntDraw();
+    try{$("nt_file").value="";}catch(e){}
+  }).catch(function(e){ busy(false); toast(e.message,"err"); });
+}
+function ntDraw(){
+  var b=$("nt_phBox"); if(!b) return;
+  ntAutoStatus();
+  if(!S.ntPhoto){ b.innerHTML=""; return; }
+  var g=S.ntPhoto.gps;
+  b.innerHTML='<div class="pp-cur" style="margin-bottom:9px"><img src="'+S.ntPhoto.dataUrl+'" alt="">'
+    +'<button class="del" onclick="S.ntPhoto=null;ntDraw()">🗑</button></div>'
+    +'<div class="gpsline" style="margin-bottom:9px">'+(g?("📍 "+g.lat.toFixed(5)+", "+g.lng.toFixed(5)+" (±"+g.acc+"m)"):"⚠ Chưa lấy được vị trí — bật Location rồi bấm lấy lại")+'</div>'
+    +(g?"":'<button class="retrygps" style="margin-bottom:9px" onclick="retryGps(\'nt\')">📍 Lấy lại vị trí GPS</button>');
+}
+function ntMeetPicker(){
+  var accName=String($("nt_accName")?$("nt_accName").value:"").trim();
+  if(!accName) return toast("Chọn Account trước đã","warn");
+  /* ⭐ v4.7 — truyền account trực tiếp, KHÔNG ghi đè S.task của form chi tiết */
+  openMeetPicker("nt_result", ($("nt_account")&&$("nt_account").value)||mkAcc({name:accName}));
+}
+/* ⭐ v4.7 — đèn báo trạng thái dòng "Người gặp:" ngay trong form Thêm task */
+function ntMeetFlag(){
+  var t=$("nt_result"), f=$("nt_meetflag"); if(!t||!f) return;
+  /* ⭐ v7.1 — để trống thì được (PIC lên kế hoạch trước, ghi kết quả sau).
+     Nhưng đã viết kết quả thì bắt buộc có dòng "Người gặp:". */
+  var has=!!String(t.value||"").trim();
+  var ok=MEET_RE.test(t.value||"");
+  if(!has){
+    f.style.color="var(--mute)";
+    f.textContent="Có thể để trống nếu mới lên kế hoạch — ghi kết quả sau khi đi";
+  }else{
+    f.style.color=ok?"var(--ok)":"var(--dang)";
+    f.textContent=ok?"✓ Đã ghi CBC (người gặp) — có thể lưu"
+                    :"⚠️ Đã có nội dung thì bắt buộc dòng “Người gặp:” — bấm nút CBC ở trên";
+  }
+  ntAutoStatus();
+}
 function submitNewTask(){
   var accName=$("nt_accName").value.trim();
   /* ⭐ v10 — TBD: Plan bắt buộc, Result/ảnh/next action thì không.
@@ -5635,8 +5724,7 @@ function submitNewTask(){
   if(isTbdName(accName)){
     var miss=tbdPickBad("ntb");
     if(miss) return toast("⚠️ Chọn TBD thì bắt buộc chọn: "+miss,"warn",6500);
-    var plan=tbdPlanText("ntb");
-    var t=tbdRow($("nt_start").value, plan, tbdSel("ntb","p")[0]||"", $("nt_pic").value);
+    var t=tbdRow($("nt_start").value, tbdPlanText("ntb"), tbdSel("ntb","p")[0]||"", $("nt_pic").value);
     t.typeTask=$("nt_typeTask").value||t.typeTask;
     if(!t.typeTask) return toast("⚠️ Cần bổ sung: Type task","warn",5000);
     busy(true,"Đang ghi kế hoạch TBD vào Google Sheet…");
@@ -7587,6 +7675,7 @@ function tbdForm(option,who){
     '<button class="btn pri" onclick="tbdFormGo(\''+esc(option)+'\',\''+esc(who)+'\')">Tạo kế hoạch & gửi báo cáo</button>', true);
   tbdPrev("tbb");
 }
+
 function tbdFormGo(option,who){
   var miss=tbdPickBad("tbb");
   if(miss) return toast("⚠️ Bắt buộc chọn: "+miss,"warn",6000);
