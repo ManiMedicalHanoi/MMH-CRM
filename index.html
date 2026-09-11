@@ -1076,16 +1076,10 @@ tr.rp-late td{background:var(--dang-bg)}
     <div class="lghead">
       <div class="mark">MMH</div>
       <h1>MMH CRM</h1>
-      <p>MANI Medical Hanoi · Dental Sales Team · Theo dõi khách hàng &amp; KPI</p>
+      <p>MANI Medical Hanoi · Theo dõi khách hàng &amp; KPI</p>
     </div>
     <div class="lglab">Chọn tài khoản của bạn</div>
     <div class="picgrid" id="picGrid"></div>
-    <div class="card pad" style="margin-top:18px">
-      <div style="font-size:12px;color:var(--sub);line-height:1.6">
-        Dữ liệu đọc/ghi trực tiếp vào Google Sheet <b>MMH_Dental_CRM</b>. Ảnh đi địa bàn lưu tại
-        <a href="https://drive.google.com/drive/folders/107tFJ9w4pXVy5B67HQCgODD2yKx1HfYU" target="_blank">folder Drive Dental Field Photo</a>.
-      </div>
-    </div>
   </div>
 </div>
 
@@ -1665,6 +1659,35 @@ function applyBundle(b,fromCache){
   }
 }
 /* Tải bản mới ở nền — không chặn giao diện */
+/* ═══════════ ⭐ v10 — DỮ LIỆU SỬA TAY TRÊN SHEET PHẢI HIệN NGAY ═══════════
+   Code.gs cache kết quả 6 giờ theo dataVersion(); trước đây version chỉ đổi khi
+   ghi QUA APP, nên thêm / xoá / sửa dòng thủ công trên Google Sheet thì app không
+   thấy. Code.gs v7.0 gắn trigger onChange để tự đổi version; app thăm dò version
+   và tự nạp lại toàn bộ khi thấy khác. */
+var VER_POLL_MS=45000, _verTimer=null, _verBusy=false;
+function verSyncNow(){
+  S.cache={}; clearTabs(); S.cbcRows=null; S._prefetched=false; S.other=null;
+  try{ localStorage.removeItem(bundleKey_()); }catch(e){}
+  refreshBundle(true); prefetchAll();
+}
+function verPoll(){
+  if(_verBusy||document.hidden||!S.user||!S.user.pic) return;
+  _verBusy=true;
+  apiGet("version",{}).then(function(j){
+    _verBusy=false;
+    var v=String((j&&j.ver)||"");
+    if(!v) return;
+    if(!S.verSeen){ S.verSeen=v; return; }
+    if(v===S.verSeen) return;
+    S.verSeen=v; verSyncNow();
+    toast("Google Sheet vừa thay đổi — app đã nạp lại dữ liệu mới","ok",4200);
+  }).catch(function(){ _verBusy=false; });
+}
+function verAutoOn(){ verAutoOff(); _verTimer=setInterval(verPoll,VER_POLL_MS); }
+function verAutoOff(){ if(_verTimer){ clearInterval(_verTimer); _verTimer=null; } }
+document.addEventListener("visibilitychange",function(){ if(!document.hidden) setTimeout(verPoll,300); });
+window.addEventListener("focus",function(){ setTimeout(verPoll,300); });
+
 function refreshBundle(silent){
   if(S._refreshing) return;
   S._refreshing=true;
@@ -1852,7 +1875,8 @@ $("btnUser").onclick=function(){
   try{ localStorage.removeItem(LS_PIC); }catch(e){}
   location.reload();
 };
-$("btnReload").onclick=function(){ S.cache={}; clearTabs(); S.cbcRows=null; S._prefetched=false; refreshBundle(false); prefetchAll(); };
+$("btnReload").onclick=function(){ S.other=null; S.verSeen=""; S.cache={}; clearTabs(); S.cbcRows=null; S._prefetched=false; refreshBundle(false); prefetchAll(); verPoll(); };
+verAutoOn();
 $("btnAct").onclick=function(){ toggleAct(); };
 $("fySel").onchange=function(){ S.fy=this.value; S.cache={}; S.dash=null; S.kpi=null; S.targetDraft={}; S.kpiPic=""; S.cbcRows=null; S._prefetched=false; go(S.tab); prefetchAll(); };
 window.addEventListener("focus",function(){
@@ -2950,7 +2974,8 @@ function buildNav(){
     if(t.grp!==lastGrp){ h+='<div class="grp">'+t.grp+'</div>'; lastGrp=t.grp; }
     h+='<button class="nvi" data-t="'+t.id+'" onclick="go(\''+t.id+'\')"><span class="ic">'+t.ic+'</span><span class="lb">'+t.lb+'</span></button>';
   });
-  h+='<div style="flex:1"></div><div style="padding:10px;font-size:10.5px;color:var(--mute);line-height:1.5">MMH CRM v4.6<br><a href="'+DRIVE_FOLDER+'" target="_blank">📁 Folder ảnh Drive</a></div>';
+  h+='<div style="flex:1"></div><div style="padding:10px;font-size:10.5px;color:var(--mute);line-height:1.5">MMH CRM v10<br>'+
+     (isMgmt()?'<a href="'+DRIVE_FOLDER+'" target="_blank">📁 Folder ảnh Drive</a>':"")+'</div>';
   $("side").innerHTML=h;
   /* ⭐ v4.5 — thanh dưới trượt ngang, đủ mọi mục, bỏ nút "Thêm" */
   var map={}; navTabs().forEach(function(t){ map[t.id]=t; });
@@ -4591,6 +4616,40 @@ function accountPickerOld(inputId,hiddenId,onPick){
    ═══════════════════════════════════════════════════════════════════════════════ */
 
 var NEXT_ACTIONS = ["Tiếp tục chăm - Tăng tốc","Tiếp tục chăm - Duy trì","Chờ - Thử lại sau 30 ngày","Dừng lại"];
+
+/* ═══════════ ⭐ v10 — ACCOUNT "TBD" (chưa xác định) ═══════════
+   Dùng khi sales biết tuần tới có đi địa bàn nhưng chưa chốt được account.
+   · Account type ghi là "TBD" ⇒ không bị đếm nhầm là buổi đi địa bàn thật
+   · Plan BẮT BUỘC, Task Result và ảnh thì không
+   · Ô Task Result do Code.gs điền CÔNG THỨC, tự tổng hợp cuối tuần
+   · Kỳ luôn là trọn tuần: thứ Hai → Chủ nhật */
+var TBD_NAME="TBD", TBD_TYPE="TBD";
+var FIELD_ACC_TYPES=["Hospital","Clinic","Dealer","University","Distributor"];
+var TBD_PLAN_PH="Dự tính tiếp cận nhóm khách hàng nào?\n- Bệnh viện / Phòng khám / Trường Đại học…\n- Khu vực dự kiến:";
+function isTbdName(v){ return String(v||"").trim().toUpperCase()===TBD_NAME; }
+function isTbdAcc(a){ return isTbdName(parseAcc(a).name); }
+function isFieldType(t){
+  var k=noAcc(t||"");
+  return FIELD_ACC_TYPES.some(function(x){ return noAcc(x)===k; });
+}
+function nextMonday(iso){ return addDays(mondayOf(iso||todayISO()),7); }
+function pickOpt(list,re,dflt){
+  var a=(list||[]).filter(function(x){ return re.test(String(x)); });
+  return a.length?a[0]:dflt;
+}
+function tbdProcess(){ return pickOpt(S.master.process,/t[ìi]m\s*hi[ểe]u/i,"TÌM HIỂU"); }
+function tbdAction(){ return pickOpt(S.master.typeAction,/visiting/i,"Visiting"); }
+function tbdTypeTask(cur){ return cur||pickOpt(S.master.typeTask,/^sale/i,(S.master.typeTask||[])[0]||""); }
+/* dựng dữ liệu 1 dòng TBD trọn tuần — dùng chung cho form thủ công và hộp thoại gửi báo cáo */
+function tbdRow(startIso,plan,prov,pic){
+  var from=mondayOf(startIso||nextMonday(todayISO()));
+  return { _row:0,
+    account:[TBD_NAME,TBD_TYPE,prov||"",""].join("/"),
+    start:from, finish:addDays(from,6), pic:pic||S.user.pic,
+    typeTask:tbdTypeTask(""), typeAction:tbdAction(), process:tbdProcess(),
+    product:"", plan:String(plan||""), result:"",
+    status:stTodo(), feedback:"", nextAction:"", stopReason:"" };
+}
 var MEET_RE = /^Người gặp:[^\n]*/m;
 var WD = ["Chủ nhật","Thứ 2","Thứ 3","Thứ 4","Thứ 5","Thứ 6","Thứ 7"];
 
@@ -5025,7 +5084,8 @@ function taskEditorHTML(w){
       +'<button onclick="$(\'tk-cam\').click()">📷 '+(ph.length?"Chụp đè ảnh mới":"Mở camera chụp ảnh")+'</button>'
     +'</div>'
     +'<div id="tk-pend"></div>'+gps
-    +'<div style="font-size:11px;color:var(--mute);margin-top:9px;line-height:1.5">Ảnh nén ≤1600px, lưu tại <a href="'+DRIVE_FOLDER+'" target="_blank">folder Drive</a> kèm toạ độ GPS và địa chỉ nơi chụp.</div>'
+    +'<div style="font-size:11px;color:var(--mute);margin-top:9px;line-height:1.5">Ảnh nén ≤1600px, tự lưu kèm toạ độ GPS và địa chỉ nơi chụp'+
+      (isMgmt()?' tại <a href="'+DRIVE_FOLDER+'" target="_blank">folder Drive</a>':"")+'.</div>'
   +'</div>';
 
   return '<div class="te-split">'+data+photo+'</div>';
@@ -5433,7 +5493,7 @@ function stopVoice(){ if(_rec){try{_rec.stop();}catch(e){} _rec=null;} if(_recB)
 /* ═══════════ THÊM TASK MỚI ═══════════ */
 function formWeekly(w,presetAcc){
   if(w&&w._row) return openTask(w._row);
-  S.ntPhoto=null; S.ntStatusManual=0;
+  S.ntPhoto=null; S.ntStatusManual=0; S.ntTbd=false; S.ntTbdDate=0;
   var acc=parseAcc(presetAcc||"");
   var h='<div class="fld sbox"><label>Account <span class="rq">*</span></label>'+
       '<input class="inp" id="nt_accName" placeholder="Bấm để xem danh sách · gõ ≥2 ký tự để tìm" value="'+esc(acc.name||"")+'" autocomplete="off">'+
@@ -5455,8 +5515,12 @@ function formWeekly(w,presetAcc){
       '<div class="fld"><label>Sales Process <span class="rq">*</span></label><select class="inp" id="nt_process">'+opts(S.master.process,"","— chọn —")+'</select></div>'+
       '<div class="fld"><label>Product group <span class="rq">*</span></label><select class="inp" id="nt_product">'+opts(S.master.product,"","— chọn —")+'</select></div>'+
     '</div>'+
-    '<div class="fld"><label>Plan — dự định làm gì (không bắt buộc)</label><textarea class="inp" id="nt_plan"></textarea></div>'+
-    '<div class="fld"><label>Task Result — kết quả thực tế <span class="rq">*</span> <span style="font-weight:600;color:var(--mute)">· phải có dòng “Người gặp:”</span></label>'+
+    '<div class="fld" id="nt_planWrap"><label id="nt_planLb">Plan — dự định làm gì (không bắt buộc)</label>'+
+      '<div id="nt_tbdProv" style="display:none;margin-bottom:7px"><select class="inp" id="nt_prov" onchange="ntTbdProv()">'+opts(S.master.province,"","— Tỉnh/thành dự kiến (không bắt buộc) —")+'</select></div>'+
+      '<textarea class="inp" id="nt_plan"></textarea>'+
+      '<div class="hint" id="nt_planHint" style="display:none"></div></div>'+
+    '<div id="nt_tbdNote" style="display:none"></div>'+
+    '<div class="fld" id="nt_resWrap"><label>Task Result — kết quả thực tế <span class="rq">*</span> <span style="font-weight:600;color:var(--mute)">· phải có dòng “Người gặp:”</span></label>'+
       '<textarea class="inp" id="nt_result" style="min-height:168px" oninput="S.ntDraft=this.value;ntMeetFlag()" placeholder="'+phAttr(RESULT_PH_TXT)+'">'+esc(S.ntDraft||"")+'</textarea>'+
       '<div style="display:flex;gap:7px;margin-top:7px;flex-wrap:wrap">'+
         '<button class="mini acc" onclick="ntMeetPicker()">👤 CBC — người gặp</button>'+
@@ -5472,7 +5536,7 @@ function formWeekly(w,presetAcc){
       '<div class="fld"><label>Next action (cột T) <span class="rq">*</span></label><select class="inp" id="nt_next" onchange="ntStopToggle();ntAutoStatus()">'+opts(NEXT_ACTIONS,"","— chọn —")+'</select></div>'+
       '<div class="fld" id="nt_stopWrap" style="display:none"><label>Lý do dừng <span class="rq">*</span></label><input class="inp" id="nt_stop"></div>'+
     '</div>'+
-    '<div class="sect"><div class="ct" style="margin-bottom:8px"><span class="dot"></span>Ảnh đi địa bàn<span class="sp"></span><small id="nt_phHint">Bắt buộc với Visiting · 1 ảnh · kèm GPS</small></div>'+
+    '<div class="sect" id="nt_phSect"><div class="ct" style="margin-bottom:8px"><span class="dot"></span>Ảnh đi địa bàn<span class="sp"></span><small id="nt_phHint">Bắt buộc với Visiting · 1 ảnh · kèm GPS</small></div>'+
       '<div class="photorule">📸 <b>Chụp ngay tại địa bàn.</b> Chỉ nhận ảnh vừa chụp bằng camera, không chọn ảnh có sẵn trong máy. '+
         'Lên kế hoạch trước thì để trống, đi xong mở lại task này để chụp bổ sung.</div>'+
       '<input type="file" id="nt_file" accept="image/*" capture="environment" style="display:none" onchange="ntFiles(this.files)">'+
@@ -5490,8 +5554,46 @@ function ntWire(){
     var tt=typeTaskForAcc(c.type);
     if(tt&&$("nt_typeTask")){ $("nt_typeTask").value=tt; $("nt_accHint").textContent+=" · Type task: "+tt; }
     if(isMgmt()&&c.pic&&$("nt_pic")&&$("nt_pic").tagName==="SELECT") $("nt_pic").value=c.pic;
+    ntTbdSync();
   });
-  ntDraw(); ntPhotoHint(); ntMeetFlag();
+  var ai=$("nt_accName");
+  if(ai&&!ai._tbdHook){ ai._tbdHook=1; ai.addEventListener("input",function(){ setTimeout(ntTbdSync,0); }); }
+  ntDraw(); ntPhotoHint(); ntMeetFlag(); ntTbdSync();
+}
+/* ⭐ v10 — bật/tắt chế độ TBD ngay trong form Thêm task */
+function ntTbdSync(){
+  var on=isTbdName($("nt_accName")?$("nt_accName").value:"");
+  S.ntTbd=on;
+  var lb=$("nt_planLb"), ph=$("nt_planHint"), pv=$("nt_tbdProv"), note=$("nt_tbdNote"),
+      rw=$("nt_resWrap"), ps=$("nt_phSect"), hint=$("nt_accHint"), pl=$("nt_plan");
+  if(lb) lb.innerHTML = on ? 'Plan — kế hoạch đi địa bàn <span class="rq">*</span>'
+                           : 'Plan — dự định làm gì (không bắt buộc)';
+  if(pl) pl.placeholder = on ? TBD_PLAN_PH : "Mục tiêu buổi làm việc…";
+  if(pv) pv.style.display = on?"":"none";
+  if(ph){ ph.style.display=on?"":"none";
+    ph.innerHTML='Chưa chốt được account thì ghi rõ <b>nhóm khách hàng dự tính tiếp cận</b> — Bệnh viện / Phòng khám / Trường Đại học — và khu vực. Mục này bắt buộc.'; }
+  if(rw) rw.style.display = on?"none":"";
+  if(ps) ps.style.display = on?"none":"";
+  if(!on){ if(note) note.style.display="none"; ntPhotoHint(); ntMeetFlag(); return; }
+
+  if($("nt_process"))    $("nt_process").value=tbdProcess();
+  if($("nt_typeAction")) $("nt_typeAction").value=tbdAction();
+  if($("nt_typeTask"))   $("nt_typeTask").value=tbdTypeTask($("nt_typeTask").value);
+  if($("nt_start")&&!S.ntTbdDate){ $("nt_start").value=nextMonday(todayISO()); S.ntTbdDate=1; }
+  var from=mondayOf($("nt_start")?$("nt_start").value:todayISO()), to=addDays(from,6);
+  if(hint) hint.innerHTML='<b style="color:var(--blue-d)">Chưa xác định account</b> · kỳ tính trọn tuần '+fmtVN(from)+' → '+fmtVN(to);
+  if(note){ note.style.display="";
+    note.innerHTML='<div class="card pad" style="margin-bottom:12px;background:var(--pale);border-color:var(--lb1)">'+
+      '<div style="font-size:13px;font-weight:800;color:var(--navy);margin-bottom:4px">Task Result để hệ thống tự tổng hợp</div>'+
+      '<div style="font-size:12.5px;color:var(--sub);line-height:1.6">Cuối tuần ô kết quả tự đếm các account bạn thực sự đi trong '+
+      fmtVN(from)+' – '+fmtVN(to)+' và hiện dạng <i>“Đã tiếp cận 3 phòng khám, 2 bệnh viện”</i>. '+
+      'Không cần ghi kết quả, cũng không cần chụp ảnh cho dòng này.</div></div>'; }
+}
+function ntTbdProv(){
+  var sel=$("nt_prov"), t=$("nt_plan"); if(!sel||!t||!sel.value) return;
+  var line="Khu vực dự kiến: "+sel.value, v=String(t.value||"");
+  t.value = /Khu vực dự kiến:/.test(v) ? v.replace(/Khu vực dự kiến:[^\n]*/,line)
+          : (v.trim() ? v.replace(/\s+$/,"")+"\n"+line : TBD_PLAN_PH.split("\n").slice(0,2).join("\n")+"\n"+line);
 }
 /* ⭐ v4.4 — Account type ở tab "2. CBC" quyết định Type task
    (Clinic ⇒ Sale-Clinics, Dealer ⇒ Sale-Dealers, Hospital ⇒ Sale-Hospitals…) */
@@ -5579,6 +5681,23 @@ function ntMeetFlag(){
 }
 function submitNewTask(){
   var accName=$("nt_accName").value.trim();
+  /* ⭐ v10 — TBD: Plan bắt buộc, Result/ảnh/next action thì không.
+     Kỳ ép về trọn tuần; Task Result do Code.gs điền công thức tự tổng hợp. */
+  if(isTbdName(accName)){
+    var plan=String(($("nt_plan")||{}).value||"").trim();
+    if(!plan) return toast("⚠️ Chọn TBD thì bắt buộc ghi Plan — dự tính tiếp cận nhóm khách hàng nào","warn",6500);
+    var t=tbdRow($("nt_start").value, plan, ($("nt_prov")||{}).value||"", $("nt_pic").value);
+    t.typeTask=$("nt_typeTask").value||t.typeTask;
+    if(!t.typeTask) return toast("⚠️ Cần bổ sung: Type task","warn",5000);
+    busy(true,"Đang ghi kế hoạch TBD vào Google Sheet…");
+    return apiPost({action:"saveWeekly",data:t}).then(function(r){
+      busy(false); closeModal(); S.ntDraft=""; S.ntTbd=false;
+      toast("✓ Đã tạo kế hoạch đi địa bàn (chưa xác định account) cho tuần "+fmtVN(t.start)+" – "+fmtVN(t.finish),"ok",5600);
+      afterWrite("weekly", r.row||0, t);
+      S.vMode="week"; S.wkFrom=t.start; S.wkTo=t.finish; S.vAnchor=t.start;
+      terrRefresh();
+    }).catch(function(e){ busy(false); toast(e.message,"err",6000); });
+  }
   var d={ _row:0,
     account:$("nt_account").value||mkAcc({name:accName}),
     start:$("nt_start").value, finish:$("nt_start").value, pic:$("nt_pic").value,
@@ -7235,6 +7354,8 @@ function rpPreviewRows(from,to){
                                   String(a.key).localeCompare(String(b.key)); });
   return rows;
 }
+/* ⭐ v10 — trên báo cáo, dòng TBD hiện là "Đi địa bàn", không hiện chữ TBD */
+function accLabel(a){ return isTbdAcc(a) ? "Đi địa bàn" : (parseAcc(a).name||String(a||"")); }
 function rpPreviewTable(){
   if(!S.rpPreview) return '<div class="card pad" style="margin-bottom:12px">'+
     '<div class="ct"><span class="dot"></span>Bản xem trước — đúng nội dung email sẽ gửi'+
@@ -7471,6 +7592,75 @@ function mnPreview(thisM,nextM){
     '<div class="card pad" style="margin-bottom:12px"><div class="ct"><span class="dot" style="background:var(--amber)"></span>② Kế hoạch tháng '+nMon.slice(4)+"/"+nMon.slice(0,4)+
       '<span class="sp"></span><small>'+nextM.length+' hạng mục</small></div>'+mnTable(nextM,true)+'</div>';
 }
+/* ═══════════ ⭐ v10 — CỔNG KIỂM TRA KẾ HOẠCH ĐI ĐỊA BÀN TUẦN MỚI ═══════════ */
+function tbdNextWeek(){ var f=addDays(S.rpFrom,7); return { from:f, to:addDays(f,6) }; }
+/* đếm các dòng đi địa bàn THẬT của tuần sau (Hospital · Clinic · Dealer · University · Distributor) */
+function tbdPlanCount(rows,who){
+  var w=tbdNextWeek();
+  return (rows||[]).filter(function(r){
+    if(who && String(r.pic||"")!==who) return false;
+    var a=String(r.start||"").slice(0,10), b=String(r.finish||"").slice(0,10)||a;
+    if(!a) return false;
+    if(!(a<=w.to && b>=w.from)) return false;
+    return isFieldType(parseAcc(r.account).type||r.type||"");
+  }).length;
+}
+function tbdGate(option,who){
+  busy(true,"Đang kiểm tra kế hoạch tuần mới…");
+  fetchTab("weekly").then(function(rows){
+    busy(false);
+    if(tbdPlanCount(rows,isMgmt()?"":who)>0){ S._tbdOk=S.rpFrom+"|"+who; return sendReport(option,true); }
+    tbdGateDialog(option,who);
+  }).catch(function(){ busy(false); S._tbdOk=S.rpFrom+"|"+who; sendReport(option,true); });
+}
+function tbdGateDialog(option,who){
+  var w=tbdNextWeek();
+  var h='<div class="card pad" style="background:#FFFBF1;border-color:#F3D69B;margin-bottom:12px">'
+   +'<div style="font-size:14.5px;font-weight:800;color:#8A5A00;margin-bottom:6px">Bạn chưa thêm kế hoạch đi địa bàn cho tuần mới</div>'
+   +'<div style="font-size:13px;color:var(--sub);line-height:1.65">Tuần <b>'+fmtVN(w.from)+' – '+fmtVN(w.to)+'</b> chưa có dòng nào thuộc '
+   +'Hospital · Clinic · Dealer · University · Distributor.<br><br>'
+   +'Nếu <b>đã có kế hoạch</b>, vui lòng quay lại để thêm kế hoạch.<br>'
+   +'Nếu <b>chưa xác định</b>, hãy chọn <b>TBD</b> — vẫn cần ghi rõ dự tính tiếp cận nhóm khách hàng nào.</div></div>';
+  openModal("Kiểm tra kế hoạch tuần mới",h,
+    '<button class="btn" onclick="closeModal();go(\'weekly\')">Quay lại thêm kế hoạch</button>'+
+    '<button class="btn pri" onclick="tbdForm(\''+esc(option)+'\',\''+esc(who)+'\')">Chưa xác định — chọn TBD</button>', true);
+}
+function tbdForm(option,who){
+  var w=tbdNextWeek();
+  var h='<div class="card pad" style="margin-bottom:12px;background:var(--pale);border-color:var(--lb1)">'
+   +'<div style="font-size:13.5px;font-weight:800;color:var(--navy);margin-bottom:4px">Kế hoạch đi địa bàn — chưa xác định account</div>'
+   +'<div style="font-size:12.5px;color:var(--sub);line-height:1.6">Hệ thống tạo một dòng Account <b>TBD</b> cho tuần <b>'
+   +fmtVN(w.from)+' – '+fmtVN(w.to)+'</b>. Cuối tuần, ô kết quả tự tổng hợp các account bạn thực sự đi.</div></div>'
+   +'<div class="fld"><label>Tỉnh/thành dự kiến</label><select class="inp" id="tb_prov" onchange="tbdFormProv()">'
+     +opts(S.master.province,"","— không bắt buộc —")+'</select></div>'
+   +'<div class="fld"><label>Plan — dự tính tiếp cận nhóm khách hàng nào <span class="rq">*</span></label>'
+     +'<textarea class="inp" id="tb_plan" style="min-height:130px" placeholder="'+phAttr(TBD_PLAN_PH)+'"></textarea>'
+     +'<div class="hint">Ví dụ: khảo sát nhóm phòng khám răng hàm mặt khu vực Cầu Giấy, tiếp cận 1–2 bệnh viện tuyến tỉnh.</div></div>';
+  openModal("Tạo kế hoạch TBD cho tuần mới",h,
+    '<button class="btn" onclick="closeModal();go(\'weekly\')">Quay lại thêm kế hoạch</button>'+
+    '<button class="btn pri" onclick="tbdFormGo(\''+esc(option)+'\',\''+esc(who)+'\')">Tạo kế hoạch & gửi báo cáo</button>', true);
+}
+function tbdFormProv(){
+  var sel=$("tb_prov"), t=$("tb_plan"); if(!sel||!t||!sel.value) return;
+  var line="Khu vực dự kiến: "+sel.value, v=String(t.value||"");
+  t.value = /Khu vực dự kiến:/.test(v) ? v.replace(/Khu vực dự kiến:[^\n]*/,line)
+          : (v.trim()? v.replace(/\s+$/,"")+"\n"+line : line);
+}
+function tbdFormGo(option,who){
+  var plan=String(($("tb_plan")||{}).value||"").trim();
+  if(!plan) return toast("⚠️ Bắt buộc ghi Plan — dự tính tiếp cận nhóm khách hàng nào","warn",6000);
+  var w=tbdNextWeek();
+  var t=tbdRow(w.from, plan, ($("tb_prov")||{}).value||"", who||S.user.pic);
+  busy(true,"Đang tạo kế hoạch TBD…");
+  apiPost({action:"saveWeekly",data:t}).then(function(r){
+    busy(false); closeModal();
+    afterWrite("weekly", r.row||0, t);
+    S._tbdOk=S.rpFrom+"|"+who;
+    toast("✓ Đã tạo kế hoạch đi địa bàn tuần "+fmtVN(t.start)+" – "+fmtVN(t.finish),"ok",4600);
+    sendReport(option,true);
+  }).catch(function(e){ busy(false); toast(e.message,"err",6000); });
+}
+
 function sendReport(option,confirmed){
   var kind=S.rpKind, who=(S.rpPic||S.user.pic);
   var labels={self:"gửi thử cho chính bạn",team:"gửi chính thức tới team",pic:"gửi thay cho "+who,all:"gửi cho toàn bộ "+curTeam().label+" team",download:"tải PDF"};
@@ -7482,6 +7672,9 @@ function sendReport(option,confirmed){
     return loadOther(true).then(function(){ busy(false); sendReport(option,true); })
       .catch(function(e){ busy(false); toast("Không nạp được Other task: "+e.message,"err",6500); });
   }
+  /* ⭐ v10 — chưa có kế hoạch đi địa bàn tuần sau thì hỏi trước khi gửi */
+  if(kind==="week" && option!=="download" && S._tbdOk!==(S.rpFrom+"|"+who))
+    return tbdGate(option,who);
   busy(true, option==="download"?"Đang tạo PDF…":"Đang gửi email + tạo PDF đính kèm…");
   var send;
   if(kind==="week"){
@@ -8192,14 +8385,15 @@ function savTabs(){
         /* weekly/order có thể rất lớn — chỉ lưu khi vừa phải */
         if((TSTORE[k].rows||[]).length<=2500) slim[k]=TSTORE[k];
       });
-      localStorage.setItem(TKEY,JSON.stringify({ver:S.ver||"",d:slim}));
+      localStorage.setItem(TKEY_(),JSON.stringify({ver:S.verSeen||S.ver||"",d:slim}));
     }catch(e){}
   },600);
 }
 function loadTabs(){
   try{
-    var v=JSON.parse(localStorage.getItem(TKEY)||"null");
-    if(v&&v.d) TSTORE=v.d;
+    var v=JSON.parse(localStorage.getItem(TKEY_())||"null");
+    /* bản cache của phiên dữ liệu cũ thì bỏ, tránh hiện lại dòng đã xoá trên sheet */
+    if(v&&v.d&&(!S.verSeen||!v.ver||v.ver===S.verSeen)) TSTORE=v.d;
   }catch(e){ TSTORE={}; }
 }
 function clearTabs(){ TSTORE={}; try{ localStorage.removeItem(TKEY_()); }catch(e){} }
