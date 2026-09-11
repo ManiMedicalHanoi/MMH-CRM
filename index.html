@@ -4662,6 +4662,64 @@ function tbdPrev(pfx){
   var t=tbdPlanText(pfx);
   b.textContent = t || "Chọn nhóm khách hàng và tỉnh thành — nội dung Plan sẽ hiện ở đây.";
 }
+/* ═══════════ ⭐ v11 — KẾT QUẢ CỦA DÒNG TBD DO APP TỰ TÍNH ═══════════
+   Bản trước ghi một công thức COUNTIFS vào ô Task Result. Công thức đó luôn báo
+   #ERROR! vì Google Sheet của MMH dùng locale có dấu phân cách tham số là ";",
+   trong khi Apps Script chỉ ghi được công thức kiểu ",". Thay vì chống chế theo
+   locale, app tự đếm rồi ghi THẲNG chuỗi text vào ô — hết phụ thuộc locale, lại
+   lọc được theo Task Status (chỉ tính buổi đã Completed).
+   Thứ tự hiển thị: phòng khám → bệnh viện → trường đại học → đại lý → NPP. */
+var TBD_ORDER=["Clinic","Hospital","University","Dealer","Distributor"];
+var TBD_EMPTY="Chưa ghi nhận hoạt động đi địa bàn nào hoàn thành trong tuần";
+function tbdIsDone(st){ return /complet/i.test(String(st||"")); }
+function tbdResultText(rows,pic,startIso){
+  var from=mondayOf(startIso), to=addDays(from,6), c={};
+  (rows||[]).forEach(function(r){
+    if(isTbdAcc(r.account)) return;                 /* không tự đếm chính mình */
+    if(pic && String(r.pic||"")!==pic) return;
+    var d=String(r.start||"").slice(0,10);
+    if(!d||d<from||d>to) return;
+    if(!tbdIsDone(r.status)) return;
+    var t=noAcc(parseAcc(r.account).type||r.type||"");
+    TBD_ORDER.forEach(function(k){ if(noAcc(k)===t) c[k]=(c[k]||0)+1; });
+  });
+  var parts=TBD_ORDER.filter(function(k){ return c[k]; })
+    .map(function(k){ return c[k]+" "+tbdGroupVn(k).toLowerCase(); });
+  return parts.length ? ("Đã tiếp cận "+parts.join(", ")) : TBD_EMPTY;
+}
+/* Ghi đè kết quả hiển thị của mọi dòng TBD đang có trong bộ nhớ — nhờ vậy
+   danh sách, bản xem trước báo cáo và ô kết quả đều đúng ngay, kể cả khi ô trên
+   sheet còn là #ERROR! của bản cũ chưa kịp đồng bộ. */
+function tbdFixRows(rows){
+  if(!rows||!rows.length) return rows;
+  var any=false;
+  for(var i=0;i<rows.length;i++) if(isTbdAcc(rows[i].account)){ any=true; break; }
+  if(!any) return rows;
+  rows.forEach(function(r){
+    if(!isTbdAcc(r.account)) return;
+    r.result=tbdResultText(rows,String(r.pic||""),String(r.start||"").slice(0,10));
+  });
+  return rows;
+}
+/* Đẩy kết quả đã tính lên Google Sheet cho các dòng TBD của tuần chứa dIso */
+function tbdSyncWeek(dIso,pic){
+  return fetchTab("weekly").then(function(all){
+    var from=mondayOf(dIso), to=addDays(from,6), jobs=[];
+    (all||[]).forEach(function(r){
+      if(!isTbdAcc(r.account)) return;
+      if(pic && String(r.pic||"")!==pic) return;
+      var st=String(r.start||"").slice(0,10);
+      if(!st||st<from||st>to) return;
+      var want=tbdResultText(all,String(r.pic||""),st);
+      if(String(r.result||"").trim()===want) return;
+      jobs.push(apiPost({action:"saveWeekly",data:{
+        _row:r._row, account:r.account, pic:r.pic,
+        start:r.start, finish:r.finish, result:want }}));
+    });
+    if(!jobs.length) return false;
+    return Promise.all(jobs).then(function(){ clearTabs(); return true; });
+  }).catch(function(){ return false; });
+}
 function tbdPickBad(pfx){
   if(!tbdSel(pfx,"g").length) return "Nhóm khách hàng dự kiến tiếp cận";
   if(!tbdSel(pfx,"p").length) return "Tỉnh/thành dự kiến";
@@ -5476,6 +5534,7 @@ function saveTask(){
   var btn=$("tk-save"); if(btn) btn.disabled=true;
   busy(true,"Đang ghi vào Google Sheet…");
   var chain=Promise.resolve();
+  var wkDay=String((w&&w.start)||todayISO()).slice(0,10);   /* ⭐ v11 — tuần cần đếm lại TBD */
   if(hasData){
     var d={_row:S.taskRow};
     ["plan","result","status","nextAction","stopReason","feedback","process","typeTask","typeAction","product","start"].forEach(function(f){
@@ -5491,6 +5550,7 @@ function saveTask(){
     toast("✓ Đã cập nhật task vào Sheet","ok",3800);
     closeDrw();
     afterWrite("weekly", S.taskRow, null);
+    tbdSyncWeek((S.dirty&&S.dirty.start)||wkDay, String((w&&w.pic)||""));   /* ⭐ v11 — TBD cùng tuần đếm lại */
     S.taskRow=0; terrRefresh();
   }).catch(function(e){ busy(false); if(btn) btn.disabled=false; toast(e.message,"err",6000); });
 }
@@ -5732,6 +5792,7 @@ function submitNewTask(){
       busy(false); closeModal(); S.ntDraft=""; S.ntTbd=false;
       toast("✓ Đã tạo kế hoạch đi địa bàn (chưa xác định account) cho tuần "+fmtVN(t.start)+" – "+fmtVN(t.finish),"ok",5600);
       afterWrite("weekly", r.row||0, t);
+      tbdSyncWeek(t.start, t.pic);
       S.vMode="week"; S.wkFrom=t.start; S.wkTo=t.finish; S.vAnchor=t.start;
       terrRefresh();
     }).catch(function(e){ busy(false); toast(e.message,"err",6000); });
@@ -5788,6 +5849,7 @@ function submitNewTask(){
       ? ("✓ Đã lưu kế hoạch cho "+accName+" — nhớ bổ sung "+later.join(" và ")+" sau khi đi")
       : ("✓ Đã thêm task cho "+accName),"ok",5200);
     afterWrite("weekly", r.row||0, d);
+    tbdSyncWeek(d.start, d.pic);      /* ⭐ v11 — dòng TBD cùng tuần phải đếm lại */
     S.vMode="day"; S.vAnchor=d.start; S.wkFrom=mondayOf(d.start); S.wkTo=addDays(S.wkFrom,6);
     terrRefresh();
   }).catch(function(e){ busy(false); toast(e.message,"err",6000); });
@@ -7645,7 +7707,9 @@ function tbdPlanCount(rows,who){
 }
 function tbdGate(option,who){
   busy(true,"Đang kiểm tra kế hoạch tuần mới…");
-  fetchTab("weekly").then(function(rows){
+  /* chốt kết quả các dòng TBD của TUẦN NÀY trước, để email gửi đi không lệch */
+  tbdSyncWeek(S.rpFrom, isMgmt()?"":who).then(function(){ return fetchTab("weekly"); })
+  .then(function(rows){
     busy(false);
     if(tbdPlanCount(rows,isMgmt()?"":who)>0){ S._tbdOk=S.rpFrom+"|"+who; return sendReport(option,true); }
     tbdGateDialog(option,who);
@@ -7685,6 +7749,7 @@ function tbdFormGo(option,who){
   apiPost({action:"saveWeekly",data:t}).then(function(r){
     busy(false); closeModal();
     afterWrite("weekly", r.row||0, t);
+    tbdSyncWeek(t.start, t.pic);
     S._tbdOk=S.rpFrom+"|"+who;
     toast("✓ Đã tạo kế hoạch đi địa bàn tuần "+fmtVN(t.start)+" – "+fmtVN(t.finish),"ok",4600);
     sendReport(option,true);
@@ -8402,6 +8467,7 @@ function tGet(tab){
   return (e&&e.key===tabKey(tab))?e.rows:null;
 }
 function tPut(tab,rows){
+  if(tab==="weekly") tbdFixRows(rows);   /* ⭐ v11 — kết quả dòng TBD tính lại tại chỗ */
   TSTORE[tab]={rows:rows||[],at:Date.now(),key:tabKey(tab)};
   savTabs();
 }
