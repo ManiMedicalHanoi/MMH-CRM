@@ -321,6 +321,14 @@ table.tb tbody tr.sel td{background:var(--pale)}
 .hbar-t .v{font-weight:800;font-variant-numeric:tabular-nums;flex:none}
 .hbar-tr{height:9px;border-radius:9px;background:var(--line2);overflow:hidden}
 .hbar-f{height:100%;border-radius:9px;transition:width .55s cubic-bezier(.32,.72,0,1)}
+/* ⭐ v11 — danh sách tìm tỉnh/thành cho dòng TBD */
+.tbdlist{margin-top:7px;border:1px solid var(--line);border-radius:11px;max-height:186px;
+  overflow-y:auto;-webkit-overflow-scrolling:touch;background:var(--card)}
+.tbdli{padding:10px 13px;font-size:13px;font-weight:600;color:var(--navy);cursor:pointer;
+  border-bottom:1px solid var(--line2)}
+.tbdli:last-child{border-bottom:none}
+.tbdli:active,.tbdli:hover{background:var(--pale);color:var(--blue-d)}
+.tbdli.mute{color:var(--mute);font-weight:600;cursor:default;background:none}
 /* ⭐ v9 — huy hiệu vượt kế hoạch, đặt ngay trên thanh tiến độ */
 .xlnt-w{display:flex;margin-bottom:4px}
 .xlnt{display:inline-flex;align-items:center;gap:3px;font-size:9.5px;font-weight:800;color:#0E7C43;
@@ -4636,16 +4644,49 @@ function tbdPickHTML(pfx){
         TBD_GROUPS.map(function(x){ return '<div class="chip" data-v="'+esc(x[0])+'" onclick="tbdTog(this,\''+pfx+'\')">'+esc(x[1])+'</div>'; }).join("")+
       '</div></div>'+
     '<div class="fld"><label>Tỉnh/thành dự kiến <span class="rq">*</span> '+
-      '<span style="font-weight:600;color:var(--mute)">· chọn được nhiều</span></label>'+
-      '<div class="chipbar" id="'+pfx+'_p" style="margin-bottom:0;max-height:138px;overflow:auto">'+
-        (S.master.province||[]).map(function(p){ return '<div class="chip" data-v="'+esc(p)+'" onclick="tbdTog(this,\''+pfx+'\')">'+esc(p)+'</div>'; }).join("")+
-      '</div></div>'+
+      '<span style="font-weight:600;color:var(--mute)">· gõ để tìm, chọn được nhiều</span></label>'+
+      '<div class="chipbar" id="'+pfx+'_psel" style="margin-bottom:7px"></div>'+
+      '<input class="inp" id="'+pfx+'_pq" autocomplete="off" placeholder="Gõ tên tỉnh/thành…" '+
+        'oninput="tbdProvFilter(\''+pfx+'\')" onfocus="tbdProvFilter(\''+pfx+'\')">'+
+      '<div class="tbdlist" id="'+pfx+'_plist"></div></div>'+
     '<div class="fld"><label>Ghi chú thêm</label>'+
       '<textarea class="inp" id="'+pfx+'_note" style="min-height:66px" oninput="tbdPrev(\''+pfx+'\')" placeholder="Mục tiêu cụ thể, đầu mối liên hệ… (không bắt buộc)"></textarea></div>'+
     '<div class="card pad" id="'+pfx+'_prev" style="background:var(--pale);border-color:var(--lb1);font-size:12.5px;color:var(--sub);line-height:1.6;white-space:pre-wrap"></div>';
 }
+/* ⭐ v11 — danh sách tỉnh quá dài để bày thành chip; dùng ô tìm kiếm + danh sách
+   cuộn dọc, bấm để thêm, bấm chip đã chọn để bỏ. Hợp cả điện thoại lẫn máy tính. */
+function tbdProvSel(pfx){ S.tbdProv=S.tbdProv||{}; if(!S.tbdProv[pfx]) S.tbdProv[pfx]=[]; return S.tbdProv[pfx]; }
+function tbdProvInit(pfx){ S.tbdProv=S.tbdProv||{}; S.tbdProv[pfx]=[]; tbdProvDraw(pfx); tbdProvFilter(pfx); }
+function tbdProvDraw(pfx){
+  var box=$(pfx+"_psel"); if(!box) return;
+  var L=tbdProvSel(pfx);
+  box.innerHTML = L.length
+    ? L.map(function(p,i){ return '<div class="chip on" title="Bỏ chọn" onclick="tbdProvDel(\''+pfx+'\','+i+')">'+esc(p)+' ✕</div>'; }).join("")
+    : '<span style="font-size:12px;color:var(--mute)">Chưa chọn tỉnh/thành nào</span>';
+  tbdPrev(pfx);
+}
+function tbdProvFilter(pfx){
+  var box=$(pfx+"_plist"); if(!box) return;
+  var q=noAcc(String(($(pfx+"_pq")||{}).value||"").trim());
+  var L=tbdProvSel(pfx), all=S.master.province||[], out=[];
+  all.forEach(function(v,i){
+    if(L.indexOf(v)>=0) return;
+    if(q && noAcc(v).indexOf(q)<0) return;
+    out.push('<div class="tbdli" onclick="tbdProvAdd(\''+pfx+'\','+i+')">'+esc(v)+'</div>');
+  });
+  box.innerHTML = out.length ? out.slice(0,60).join("")
+    : '<div class="tbdli mute">'+(q?"Không có tỉnh/thành nào khớp":"Đã chọn hết danh sách")+'</div>';
+}
+function tbdProvAdd(pfx,i){
+  var v=(S.master.province||[])[i]; if(!v) return;
+  var L=tbdProvSel(pfx); if(L.indexOf(v)<0) L.push(v);
+  var q=$(pfx+"_pq"); if(q){ q.value=""; q.focus(); }
+  tbdProvDraw(pfx); tbdProvFilter(pfx);
+}
+function tbdProvDel(pfx,i){ tbdProvSel(pfx).splice(i,1); tbdProvDraw(pfx); tbdProvFilter(pfx); }
 function tbdTog(el,pfx){ el.classList.toggle("on"); tbdPrev(pfx); }
 function tbdSel(pfx,kind){
+  if(kind==="p") return tbdProvSel(pfx).slice();
   var box=$(pfx+"_"+kind); if(!box) return [];
   return [].slice.call(box.querySelectorAll(".chip.on")).map(function(c){ return c.getAttribute("data-v"); });
 }
@@ -4697,6 +4738,7 @@ function tbdFixRows(rows){
   if(!any) return rows;
   rows.forEach(function(r){
     if(!isTbdAcc(r.account)) return;
+    if(r._tbdRaw===undefined) r._tbdRaw=String(r.result||"");   /* giá trị thật trên sheet */
     r.result=tbdResultText(rows,String(r.pic||""),String(r.start||"").slice(0,10));
   });
   return rows;
@@ -4711,7 +4753,9 @@ function tbdSyncWeek(dIso,pic){
       var st=String(r.start||"").slice(0,10);
       if(!st||st<from||st>to) return;
       var want=tbdResultText(all,String(r.pic||""),st);
-      if(String(r.result||"").trim()===want) return;
+      var now=String(r._tbdRaw!==undefined?r._tbdRaw:(r.result||""));   /* so với ô THẬT trên sheet */
+      if(now.trim()===want) return;
+      r._tbdRaw=want;
       jobs.push(apiPost({action:"saveWeekly",data:{
         _row:r._row, account:r.account, pic:r.pic,
         start:r.start, finish:r.finish, result:want }}));
@@ -4858,7 +4902,18 @@ function terrRefresh(){
   if(S.tab==="weekly") renderTerritory(); else go("weekly");
   loadTerritoryAll(true);
 }
+/* ⭐ v11 — mở tab Đi địa bàn là chốt luôn kết quả các dòng TBD của tuần đang xem,
+   để ô trên Google Sheet không bị bỏ rỗng nếu sales chưa lưu thêm gì. */
+function tbdAutoSync(){
+  var d=S.wkFrom||S.vAnchor||todayISO(), pic=isMgmt()?"":scopePic();
+  var k=mondayOf(d)+"|"+pic;
+  S._tbdAuto=S._tbdAuto||{};
+  if(S._tbdAuto[k]) return;
+  S._tbdAuto[k]=1;
+  tbdSyncWeek(d,pic);
+}
 function terrRows(){ return ((S.cache.weekly||{}).rows)||[]; }
+
 function terrInRange(w, r){
   var a=String(w.start).slice(0,10), b=String(w.finish||"").slice(0,10)||a;
   if(!a) a=b; if(!b) b=a;
@@ -4921,6 +4976,7 @@ function lastVisitOf(accName){
 
 function renderTerritory(){
   if(S.wkTab==="other") return renderOther();
+  tbdAutoSync();                 /* ⭐ v11 — chốt kết quả dòng TBD của tuần đang xem */
   var r=vRangeCalc();
   var all=terrRows().filter(function(w){ return terrInRange(w,r); });   /* lọc ngày phía client */
   var rows=all.slice();
@@ -5674,7 +5730,7 @@ function ntTbdSync(){
   if(pw) pw.style.display = on?"none":"";
   if(pk){
     pk.style.display = on?"":"none";
-    if(on && !pk.innerHTML){ pk.innerHTML=tbdPickHTML("ntb"); tbdPrev("ntb"); }
+    if(on && !pk.innerHTML){ pk.innerHTML=tbdPickHTML("ntb"); tbdProvInit("ntb"); }
   }
   if(rw) rw.style.display = on?"none":"";
   if(ps) ps.style.display = on?"none":"";
@@ -7737,7 +7793,7 @@ function tbdForm(option,who){
   openModal("Tạo kế hoạch TBD cho tuần mới",h,
     '<button class="btn" onclick="closeModal();go(\'weekly\')">Quay lại thêm kế hoạch</button>'+
     '<button class="btn pri" onclick="tbdFormGo(\''+esc(option)+'\',\''+esc(who)+'\')">Tạo kế hoạch & gửi báo cáo</button>', true);
-  tbdPrev("tbb");
+  tbdProvInit("tbb");
 }
 
 function tbdFormGo(option,who){
