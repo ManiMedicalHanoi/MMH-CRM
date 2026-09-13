@@ -4713,8 +4713,8 @@ function tbdPrev(pfx){
 var TBD_ORDER=["Clinic","Hospital","University","Dealer","Distributor"];
 var TBD_EMPTY="Chưa ghi nhận hoạt động đi địa bàn nào hoàn thành trong tuần";
 function tbdIsDone(st){ return /complet/i.test(String(st||"")); }
-function tbdResultText(rows,pic,startIso){
-  var from=mondayOf(startIso), to=addDays(from,6), c={};
+function tbdCounts(rows,pic,startIso){
+  var from=mondayOf(startIso), to=addDays(from,6), c={}, n=0;
   (rows||[]).forEach(function(r){
     if(isTbdAcc(r.account)) return;                 /* không tự đếm chính mình */
     if(pic && String(r.pic||"")!==pic) return;
@@ -4722,11 +4722,27 @@ function tbdResultText(rows,pic,startIso){
     if(!d||d<from||d>to) return;
     if(!tbdIsDone(r.status)) return;
     var t=noAcc(parseAcc(r.account).type||r.type||"");
-    TBD_ORDER.forEach(function(k){ if(noAcc(k)===t) c[k]=(c[k]||0)+1; });
+    TBD_ORDER.forEach(function(k){ if(noAcc(k)===t){ c[k]=(c[k]||0)+1; n++; } });
   });
-  var parts=TBD_ORDER.filter(function(k){ return c[k]; })
-    .map(function(k){ return c[k]+" "+tbdGroupVn(k).toLowerCase(); });
+  return { c:c, n:n };
+}
+function tbdResultText(rows,pic,startIso){
+  var x=tbdCounts(rows,pic,startIso);
+  var parts=TBD_ORDER.filter(function(k){ return x.c[k]; })
+    .map(function(k){ return x.c[k]+" "+tbdGroupVn(k).toLowerCase(); });
   return parts.length ? ("Đã tiếp cận "+parts.join(", ")) : TBD_EMPTY;
+}
+/* ⭐ v12 — Task Status của dòng TBD do hệ thống giữ, sales không phải tự đổi:
+     chưa đi buổi nào            → Not Started
+     đã đi ≥ 1 buổi (Completed)  → In Progress 25%
+     từ thứ Năm của tuần đó      → In Progress 50%
+     khi gửi báo cáo tuần        → Completed (chốt số liệu lần cuối) */
+function tbdStatusFor(rows,pic,startIso,cur,finalize){
+  if(finalize) return stDone();
+  if(/complet/i.test(String(cur||""))) return cur;      /* đã chốt thì giữ nguyên */
+  if(!tbdCounts(rows,pic,startIso).n) return stTodo();
+  var pct = (todayISO() >= addDays(mondayOf(startIso),3)) ? 50 : 25;   /* thứ Hai + 3 = thứ Năm */
+  return (stFind(/progress|đang/i,"In Progress")) + " " + pct + "%";
 }
 /* Ghi đè kết quả hiển thị của mọi dòng TBD đang có trong bộ nhớ — nhờ vậy
    danh sách, bản xem trước báo cáo và ô kết quả đều đúng ngay, kể cả khi ô trên
@@ -4738,13 +4754,16 @@ function tbdFixRows(rows){
   if(!any) return rows;
   rows.forEach(function(r){
     if(!isTbdAcc(r.account)) return;
-    if(r._tbdRaw===undefined) r._tbdRaw=String(r.result||"");   /* giá trị thật trên sheet */
-    r.result=tbdResultText(rows,String(r.pic||""),String(r.start||"").slice(0,10));
+    var st0=String(r.start||"").slice(0,10), pic0=String(r.pic||"");
+    if(r._tbdRaw===undefined)   r._tbdRaw=String(r.result||"");   /* giá trị thật trên sheet */
+    if(r._tbdRawSt===undefined) r._tbdRawSt=String(r.status||"");
+    r.result=tbdResultText(rows,pic0,st0);
+    r.status=tbdStatusFor(rows,pic0,st0,r._tbdRawSt,false);
   });
   return rows;
 }
 /* Đẩy kết quả đã tính lên Google Sheet cho các dòng TBD của tuần chứa dIso */
-function tbdSyncWeek(dIso,pic){
+function tbdSyncWeek(dIso,pic,finalize){
   return fetchTab("weekly").then(function(all){
     var from=mondayOf(dIso), to=addDays(from,6), jobs=[];
     (all||[]).forEach(function(r){
@@ -4753,12 +4772,14 @@ function tbdSyncWeek(dIso,pic){
       var st=String(r.start||"").slice(0,10);
       if(!st||st<from||st>to) return;
       var want=tbdResultText(all,String(r.pic||""),st);
+      var curSt=String(r._tbdRawSt!==undefined?r._tbdRawSt:(r.status||""));
+      var wantSt=tbdStatusFor(all,String(r.pic||""),st,curSt,finalize);
       var now=String(r._tbdRaw!==undefined?r._tbdRaw:(r.result||""));   /* so với ô THẬT trên sheet */
-      if(now.trim()===want) return;
-      r._tbdRaw=want;
+      if(now.trim()===want && curSt===wantSt) return;
+      r._tbdRaw=want; r._tbdRawSt=wantSt; r.result=want; r.status=wantSt;
       jobs.push(apiPost({action:"saveWeekly",data:{
         _row:r._row, account:r.account, pic:r.pic,
-        start:r.start, finish:r.finish, result:want }}));
+        start:r.start, finish:r.finish, result:want, status:wantSt }}));
     });
     if(!jobs.length) return false;
     return Promise.all(jobs).then(function(){ clearTabs(); return true; });
@@ -4806,6 +4827,8 @@ function hasPhoto(w){ return !!((w.photos&&w.photos.length)||String(w.photo||"")
 function hasMeet(w){ return MEET_RE.test(String(w.result||"")); }
 function tkFlag(w){ /* task thiếu dữ liệu bắt buộc */
   var miss=[];
+  /* ⭐ v12 — dòng TBD không cần ảnh lẫn CBC; kết quả do hệ thống tự tổng hợp */
+  if(isTbdAcc(w.account)) return miss;
   if(isVisiting(w)&&!hasPhoto(w)) miss.push("thiếu ảnh");
   if(!hasMeet(w)&&!/^MMH/i.test(parseAcc(w.account).name||"")) miss.push("thiếu CBC");
   if(String(w.nextAction||"")==="Dừng lại"&&!String(w.stopReason||"").trim()) miss.push("thiếu lý do dừng");
@@ -5098,13 +5121,14 @@ function openAllPhotos(){
 
 function taskCard(w){
   var a=parseAcc(w.account), pct=statusPct(w.status), ph=w.photos||[];
-  var miss=tkFlag(w);
+  var tbd=isTbdAcc(w.account), miss=tkFlag(w);
   var cls=miss.length?"miss":(/complet/i.test(w.status||"")?"done":/cancel/i.test(w.status||"")?"canc":/progress/i.test(w.status||"")?"prog":"");
   return '<div class="tk '+cls+'" onclick="openTask('+w._row+')">'+
     '<div class="tk-h">'+
-      '<div class="tk-av" style="background:'+avColor(w.pic||a.name)+'">'+esc(initials(a.name||w.pic))+'</div>'+
-      '<div class="tk-t"><b>'+esc(a.name||w.account||"—")+'</b>'+
-        '<span>'+[a.type,a.province,w.pic].filter(Boolean).map(esc).join(" · ")+'</span></div>'+
+      '<div class="tk-av" style="background:'+avColor(w.pic||a.name)+'">'+esc(tbd?"ĐB":initials(a.name||w.pic))+'</div>'+
+      '<div class="tk-t"><b>'+esc(tbd?"Đi địa bàn":(a.name||w.account||"—"))+'</b>'+
+        '<span>'+(tbd?["Chưa xác định account",a.province,w.pic]:[a.type,a.province,w.pic])
+          .filter(Boolean).map(esc).join(" · ")+'</span></div>'+
       statusTag(w.status)+
     '</div>'+
     '<div class="tk-m">'+
@@ -5115,7 +5139,7 @@ function taskCard(w){
       (w.nextAction?'<span class="ttag" style="background:'+(w.nextAction==="Dừng lại"?"var(--dang-bg);color:#A82F2C":"var(--ok-bg);color:#15803D")+'">'+esc(w.nextAction)+'</span>':"")+
     '</div>'+
     (w.plan?'<div class="tk-pl"><b>KẾ HOẠCH</b>'+esc(String(w.plan).slice(0,220))+'</div>':"")+
-    (w.result?'<div class="tk-rs"><b>KẾT QUẢ</b>'+esc(String(w.result).slice(0,320))+'</div>'
+    (w.result?'<div class="tk-rs"><b>'+(tbd?"KẾT QUẢ TỰ TỔNG HỢP":"KẾT QUẢ")+'</b>'+esc(String(w.result).slice(0,320))+'</div>'
       :(w.plan?'':'<div class="tk-rs" style="color:var(--mute);font-style:italic">Chưa ghi kết quả — bấm để cập nhật</div>'))+
     (ph.length?'<div class="tk-ph"><img loading="lazy" src="'+esc(ph[0].thumb||ph[0].full)+'" alt="">'
       +'<span style="font-size:11.5px;color:var(--mute);font-weight:700">📍 '+(w.gpsAddr?esc(String(w.gpsAddr).slice(0,42)):"Ảnh hiện trường")+'</span></div>':"")+
@@ -5734,10 +5758,15 @@ function ntTbdSync(){
   }
   if(rw) rw.style.display = on?"none":"";
   if(ps) ps.style.display = on?"none":"";
-  if(!on){ if(note) note.style.display="none"; ntPhotoHint(); ntMeetFlag(); return; }
+  if(!on){
+    if(note) note.style.display="none";
+    if($("nt_process"))    $("nt_process").disabled=false;
+    if($("nt_typeAction")) $("nt_typeAction").disabled=false;
+    ntPhotoHint(); ntMeetFlag(); return;
+  }
 
-  if($("nt_process"))    $("nt_process").value=tbdProcess();
-  if($("nt_typeAction")) $("nt_typeAction").value=tbdAction();
+  if($("nt_process"))    { $("nt_process").value=tbdProcess();   $("nt_process").disabled=true; }
+  if($("nt_typeAction")) { $("nt_typeAction").value=tbdAction(); $("nt_typeAction").disabled=true; }
   if($("nt_typeTask"))   $("nt_typeTask").value=tbdTypeTask($("nt_typeTask").value);
   if($("nt_start")&&!S.ntTbdDate){ $("nt_start").value=nextMonday(todayISO()); S.ntTbdDate=1; }
   var from=mondayOf($("nt_start")?$("nt_start").value:todayISO()), to=addDays(from,6);
@@ -7826,6 +7855,15 @@ function sendReport(option,confirmed){
   /* ⭐ v10 — chưa có kế hoạch đi địa bàn tuần sau thì hỏi trước khi gửi */
   if(kind==="week" && option!=="download" && S._tbdOk!==(S.rpFrom+"|"+who))
     return tbdGate(option,who);
+  /* ⭐ v12 — người dùng đã xác nhận gửi: chốt lần cuối số account đã đi và
+     chuyển dòng TBD của tuần này sang Completed TRƯỚC khi Code.gs đọc sheet. */
+  if(kind==="week" && option!=="download" && S._tbdFin!==(S.rpFrom+"|"+who)){
+    S._tbdFin=S.rpFrom+"|"+who;
+    busy(true,"Đang chốt kết quả đi địa bàn…");
+    return tbdSyncWeek(S.rpFrom, isMgmt()?"":who, true)
+      .then(function(){ busy(false); sendReport(option,true); })
+      .catch(function(){ busy(false); sendReport(option,true); });
+  }
   busy(true, option==="download"?"Đang tạo PDF…":"Đang gửi email + tạo PDF đính kèm…");
   var send;
   if(kind==="week"){
