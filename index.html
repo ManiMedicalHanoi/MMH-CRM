@@ -723,7 +723,35 @@ body.modal-on #drw{filter:blur(2px) saturate(.85);opacity:.55}
 .hp-cap{display:flex;align-items:center;gap:10px;padding:9px 13px;border-top:1px solid var(--line);font-size:11.5px;color:var(--sub);background:var(--card)}
 .hp-cap span{flex:1}
 .hp-cap a{color:var(--blue);font-weight:700;text-decoration:none;white-space:nowrap}
-.hp-h{font-size:11px;font-weight:800;letter-spacing:.5px;color:var(--mute);margin:0 0 9px}
+.hp-h{font-size:11px;font-weight:800;letter-spacing:.5px;color:var(--mute);margin:14px 0 9px}
+/* ⭐ v12 — hướng dẫn chia chương */
+.hp-lead{font-size:13px;color:var(--sub);line-height:1.6;margin-bottom:14px}
+.hp-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.hp-card{display:flex;flex-direction:column;gap:3px;text-align:left;padding:14px;border:1px solid var(--line);
+  border-radius:var(--r-md);background:var(--card);cursor:pointer;font-family:inherit;transition:.15s}
+.hp-card:hover{border-color:var(--lb1);background:var(--paler);transform:translateY(-1px)}
+.hp-card .hp-ic{font-size:21px;line-height:1.2}
+.hp-nm{font-size:14px;font-weight:800;color:var(--navy)}
+.hp-badge{font-style:normal;font-size:9.5px;font-weight:800;color:#8A5A00;background:#FFF3E0;
+  border:1px solid #F3D69B;border-radius:999px;padding:1px 6px;vertical-align:middle}
+.hp-sb{font-size:12px;color:var(--mute);line-height:1.5}
+.hp-go{font-size:11.5px;font-weight:800;color:var(--blue);margin-top:4px}
+.hp-back{border:none;background:none;color:var(--blue);font-weight:800;font-size:12.5px;
+  font-family:inherit;cursor:pointer;padding:0 0 10px}
+.hp-head{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+.hp-head .hp-ic{font-size:27px}
+.hp-head b{display:block;font-size:17px;color:var(--navy)}
+.hp-head span{display:block;font-size:12.5px;color:var(--mute);margin-top:2px}
+.hp-wait{background:repeating-linear-gradient(135deg,var(--paler),var(--paler) 11px,var(--card) 11px,var(--card) 22px)}
+.hp-steps{margin:0;padding-left:21px;counter-reset:hpc}
+.hp-steps li{margin-bottom:12px}
+.hp-steps li b{font-size:13.5px;color:var(--navy)}
+.hp-steps li div{font-size:13px;line-height:1.65;color:var(--sub);margin-top:2px}
+.hp-tip{margin-top:16px;border:1px solid #A9E3C2;background:#F2FBF6;border-radius:var(--r-md);padding:12px 14px}
+.hp-tip b{font-size:11px;font-weight:800;letter-spacing:.5px;color:#0E7C43;display:block;margin-bottom:6px}
+.hp-tip ul{margin:0;padding-left:17px}
+.hp-tip li{font-size:12.5px;line-height:1.6;color:var(--sub);margin-bottom:5px}
+@media(max-width:640px){ .hp-grid{grid-template-columns:1fr} }
 .hp-sec{border:1px solid var(--line);border-radius:var(--r-md);margin-bottom:8px;overflow:hidden;background:var(--card)}
 .hp-t{display:flex;align-items:center;gap:10px;width:100%;padding:13px 14px;border:none;background:none;cursor:pointer;font-family:inherit;font-size:14.5px;color:var(--navy);text-align:left}
 .hp-t:hover{background:var(--paler)}
@@ -2511,93 +2539,221 @@ function otherSubRow(k,x){
 var _dbot; function debOther(){ clearTimeout(_dbot); _dbot=setTimeout(function(){ keepCaret("ot_q",renderOther); },140); }
 
 
-/* ═══════════ ⭐ v5.9 — HƯỚNG DẪN SỬ DỤNG TRONG APP ═══════════
-   Ảnh tóm tắt đặt trên Google Drive (xem bằng link chia sẻ), bên dưới là các mục
-   hướng dẫn thao tác chính. Mở bằng nút ❓ trên thanh trên cùng. */
-var HELP_IMG_ID  = "1Wd2h3354f70XEMDEbDuTuJVTmIW5F8dM";
-var HELP_IMG_URL = "https://drive.google.com/thumbnail?id="+HELP_IMG_ID+"&sz=w1600";
-var HELP_IMG_OPEN= "https://drive.google.com/file/d/"+HELP_IMG_ID+"/view";
+/* ═══════════ ⭐ v12 — HƯỚNG DẪN SỬ DỤNG, CHIA THEO TỪNG MỤC ═══════════
+   Mỗi chương có một ảnh infographic riêng đặt trên Google Drive. Muốn gắn ảnh,
+   chỉ cần điền file ID của ảnh vào thuộc tính img của chương tương ứng —
+   ID lấy từ link chia sẻ: drive.google.com/file/d/<ID>/view
+   Chương để img rỗng sẽ hiện khung chờ, phần chữ vẫn đọc bình thường.
+   Chương có who:"mgmt" chỉ hiện với tài khoản Management.                     */
 
-var HELP_SECTIONS = [
-  { ic:"📍", t:"Ghi việc đi địa bàn", rows:[
-    ["Bấm nút ＋ rồi chọn <b>Đi địa bàn</b>","Nút ＋ nằm ở góc dưới bên phải, hoặc trên đầu màn hình Cập nhật."],
-    ["Chọn Account","Gõ vài chữ trong tên khách hàng rồi chọn từ danh sách gợi ý. Không gõ tay tự do."],
-    ["Điền Task Result","Bắt buộc có dòng <b>Người gặp:</b> thì mới lưu được. Bấm <b>👤 CBC</b> để chọn nhanh, hoặc <b>📋 Chèn khung 4 mục</b> để có sẵn khung Actions Taken / Current Situation / Customer Feedback / Opportunities."],
-    ["Chụp ảnh","Với Type action = Visiting thì bắt buộc 1 ảnh. Chỉ mở camera, ảnh phải vừa chụp."],
-    ["Next action","Bắt buộc chọn. Nếu chọn <b>Dừng lại</b> thì phải ghi lý do."]
-  ]},
-  { ic:"📸", t:"Quy tắc ảnh (bắt buộc)", rows:[
-    ["Chụp ngay tại địa bàn","App chỉ nhận ảnh chụp trong vòng 10 phút. Ảnh cũ trong máy sẽ bị từ chối kèm thông báo giờ chụp."],
-    ["Không chọn từ thư viện","Nút chọn ảnh có sẵn đã được gỡ. Dán ảnh từ clipboard cũng bị chặn."],
-    ["Mỗi lần viếng thăm 1 ảnh","Chụp lại sẽ đè lên ảnh cũ của đúng task đó, không tạo thêm."],
-    ["Tên ảnh tự đặt","Theo mẫu <b>PIC_Ngày_Khách hàng_STT trong tháng</b>, không cần đặt tay."]
-  ]},
-  { ic:"🧩", t:"Công việc khác", rows:[
-    ["Nằm ở tab thứ hai của màn hình Cập nhật","Dùng cho họp, hỗ trợ NPP, hồ sơ thầu, sự kiện — việc không phải đi gặp khách."],
-    ["Tạo Key Task trước, rồi thêm đầu việc con","Bấm <b>＋ Key Task</b>, sau đó <b>＋ Thêm đầu việc</b> trong thẻ vừa tạo."],
-    ["Cập nhật nhanh","Kéo thanh phần trăm hoặc đổi ô trạng thái — tự lưu, không cần bấm nút."],
+function helpImgUrl(id){ return "https://drive.google.com/thumbnail?id="+id+"&sz=w1600"; }
+function helpImgOpen(id){ return "https://drive.google.com/file/d/"+id+"/view"; }
+
+var HELP_CHAPTERS = [
+{ id:"start", ic:"🚀", t:"Bắt đầu & thanh điều hướng", who:"all", img:"1pQvCna7TI9KKlh6G9ePZoNI33VV04cX-",
+  sub:"Đăng nhập, chọn năm tài chính, tìm đúng mục cần làm",
+  rows:[
+    ["Đăng nhập","Chọn đúng tên mình ở màn hình mở app. Máy sẽ nhớ lựa chọn cho lần sau. Tài khoản Management phải nhập thêm mã."],
+    ["Chọn năm tài chính","Ô <b>FY</b> trên thanh trên cùng quyết định TOÀN BỘ số liệu bạn nhìn thấy. Thấy số 0 bất thường thì kiểm tra ô này trước tiên."],
+    ["Menu bên trái","Chia 3 nhóm: <b>Tổng quan</b> (Dashboard, KPI), <b>Dữ liệu</b> (Khách hàng, CBC, Cập nhật, Đơn hàng, Thuyết trình, CV tháng, ADP), <b>Công cụ</b> (Gửi báo cáo)."],
+    ["Trên điện thoại","Các mục hay dùng nằm ở thanh dưới màn hình. Mục còn lại bấm nút <b>☰</b> để mở."],
+    ["Nút ⟳ nạp lại","Bấm khi vừa có người sửa Google Sheet mà app chưa hiện. Bình thường app tự kiểm tra mỗi 45 giây."],
+    ["Nút ＋","Nút tròn góc dưới bên phải — lối tắt thêm việc đi địa bàn hoặc công việc khác từ bất kỳ màn hình nào."]
+  ],
+  tips:["Mỗi người chỉ sửa được việc của mình. Dòng của người khác hiện khoá 🔒.",
+        "Nhóm Dental và Surgical dùng hai file Google Sheet tách biệt. Tài khoản của bạn tự vào đúng nhóm."]},
+
+{ id:"dash", ic:"📊", t:"Dashboard — đọc số liệu", who:"all", img:"11Sr94GZFvPTUl9MxS9RGMBQM0nunv_GX",
+  sub:"Bức tranh tổng thể doanh số, hoạt động và độ phủ địa bàn",
+  rows:[
+    ["Dải thẻ số trên cùng","Doanh số luỹ kế, số đơn hàng, số lượt đi địa bàn, số buổi thuyết trình, địa bàn mở mới — tất cả trong FY đang chọn."],
+    ["Biểu đồ theo tháng","Cột doanh số và đường hoạt động đi cùng nhau, nhìn ra tháng nào bán tốt mà ít đi, hoặc ngược lại."],
+    ["Độ phủ địa bàn","Tỷ lệ địa bàn đã được ghé thăm ít nhất một lần trong FY trên tổng số địa bàn bạn phụ trách. Đây là chỉ số chăm sóc, không phải doanh số."],
+    ["Top khách hàng & nhóm sản phẩm","Xếp hạng theo doanh số. Dùng để biết nên dồn thời gian vào đâu."],
+    ["Chip lọc theo PIC","Chỉ Management thấy. Bấm tên một PIC để xem toàn bộ dashboard của riêng người đó; bấm lại để bỏ lọc."],
+    ["Việc quá hạn","Số task chưa Completed mà đã qua ngày kết thúc. Bấm vào để nhảy sang danh sách."]
+  ],
+  tips:["Số trên Dashboard lấy từ dữ liệu bạn nhập ở mục Cập nhật và Đơn hàng. Nhập thiếu thì Dashboard sai."]},
+
+{ id:"kpi", ic:"🎯", t:"KPI & Mục tiêu", who:"all", img:"1L90BQUKHGe705eJLB7o7SN2IXNQV-8sj",
+  sub:"Mục tiêu tháng / quý / năm và mức đạt thực tế",
+  rows:[
+    ["Phần A — mục tiêu chung","Các chỉ tiêu lớn của cả nhóm: doanh số, số đơn, lượt viếng thăm, buổi thuyết trình, người tham dự, địa bàn mới."],
+    ["Phần B1–B6 — chia theo PIC","Mỗi chỉ tiêu có bảng riêng, mỗi dòng là một PIC. Cột <b>Target/tháng</b> nhân 12 ra mục tiêu cả năm, nhân 3 ra mục tiêu quý."],
+    ["Cột 12 tháng","Đọc từ T9 đến T8 năm sau. Ô nào trống nghĩa là tháng đó chưa ghi nhận gì."],
+    ["Thanh tiến độ & màu","Dưới 25% đỏ · 25–50% cam · 50–70% vàng · 70–90% xanh nhạt · 90–100% xanh đậm · trên 100% có huy hiệu ⭐ EXCELLENT."],
+    ["Cột so với FY trước","Cho biết bạn đang tăng hay giảm so với cùng chỉ tiêu năm ngoái."],
+    ["Số liệu Actual từ đâu","Máy tự tính lại từ các tab dữ liệu, không ai gõ tay được: viếng thăm lấy từ Cập nhật, doanh số và đơn lấy từ Đơn hàng, thuyết trình lấy từ tab Thuyết trình, account mới lấy từ ngày mở địa bàn."]
+  ],
+  tips:["Sales không sửa được ô mục tiêu — chỉ Management đặt. Thấy target sai thì báo lại, đừng sửa trên Google Sheet."]},
+
+{ id:"terr", ic:"📍", t:"Cập nhật ▸ Đi địa bàn", who:"all", img:"1qnRoPEzXAf_A7XIm1ZMLG6UKcPt8IkoH",
+  sub:"Việc quan trọng nhất mỗi ngày — ghi lại buổi làm việc với khách",
+  rows:[
+    ["Mở form","Bấm ＋ rồi chọn <b>Đi địa bàn</b>. Có thể mở từ bất kỳ màn hình nào."],
+    ["Chọn Địa bàn","Gõ vài chữ rồi chọn từ gợi ý — gõ không dấu vẫn ra. <b>Không gõ tay tự do</b>, vì tên phải khớp đúng để hệ thống cộng doanh số và tính độ phủ."],
+    ["Ngày","Mặc định là hôm nay. Ghi bù cho hôm trước thì chỉnh lại đúng ngày thực tế đã đi, không để ngày hôm nay."],
+    ["Type task / Type action","<b>Type task</b> là loại công việc theo khách hàng (Sale-Hospital, Sale-Clinics…). <b>Type action</b> là hình thức: Visiting, Telephone, Message, Document…"],
+    ["Sales Process","Giai đoạn đang ở với khách: TÌM HIỂU → CHUYỂN ĐỔI → DUY TRÌ… Chọn đúng để Dashboard phản ánh được phễu bán hàng."],
+    ["Plan","Dự định trước khi đi. Để trống cũng lưu được nếu bạn ghi luôn kết quả."],
+    ["Task Result — bắt buộc","Phải có dòng <b>Người gặp:</b> thì mới lưu được. Bấm <b>👤 CBC</b> chọn nhanh người trong danh bạ, hoặc <b>📋 Chèn khung 4 mục</b> để có sẵn Actions Taken / Current Situation / Customer Feedback / Opportunities. Nút <b>🎤 Nói</b> cho phép đọc chính tả."],
+    ["Ảnh hiện trường","Type action = Visiting thì bắt buộc đúng 1 ảnh, và phải vừa chụp. App chỉ mở camera, ảnh trong thư viện bị từ chối."],
+    ["Task Status","<b>To do</b> khi mới lên kế hoạch · <b>In Progress</b> khi đang làm dở · <b>Completed</b> khi đã xong. Điền đủ CBC, ảnh và Next action thì app tự chuyển sang Completed."],
+    ["Next action — bắt buộc","Bốn lựa chọn: Tiếp tục chăm - Tăng tốc · Tiếp tục chăm - Duy trì · Chờ - Thử lại sau 30 ngày · Dừng lại. Chọn <b>Dừng lại</b> thì phải ghi lý do."],
+    ["Sửa lại sau khi lưu","Bấm vào thẻ task để mở, sửa tại chỗ rồi lưu. Việc đã Completed vẫn sửa được cho tới khi gửi báo cáo tuần."]
+  ],
+  tips:["Ghi ngay trong ngày. Để dồn cuối tuần thì quên chi tiết, và thẻ sẽ hiện cảnh báo ⚠️ thiếu ảnh · thiếu CBC.",
+        "Dòng chữ <b>Người gặp:</b> chính là căn cứ để hệ thống đếm số lần chăm sóc từng CBC. Ghi sai tên là mất số liệu."]},
+
+{ id:"tbd", ic:"🧭", t:"TBD — chưa xác định khách hàng", who:"all", img:null,
+  sub:"Dùng khi lên kế hoạch tuần mới mà chưa chốt được địa bàn",
+  rows:[
+    ["Khi nào dùng","Bạn biết tuần tới có đi địa bàn nhưng chưa chốt được đi đâu, hoặc chưa đủ thông tin khách hàng để lên kế hoạch cụ thể. Thay vì bỏ trống kế hoạch tuần, hãy tạo một dòng <b>TBD</b>."],
+    ["Cách tạo — chủ động","Bấm ＋ ▸ Đi địa bàn, ở ô Địa bàn gõ <b>TBD</b>. Form tự đổi sang chế độ kế hoạch."],
+    ["Cách tạo — khi gửi báo cáo","Nếu tuần sau chưa có dòng đi địa bàn nào, lúc bấm gửi báo cáo tuần app sẽ hỏi. Chọn <b>Chưa xác định — chọn TBD</b> rồi điền kế hoạch, app tạo dòng giúp bạn và gửi báo cáo luôn."],
+    ["Phải điền gì","Chỉ hai thứ: <b>Nhóm khách hàng dự kiến tiếp cận</b> (Bệnh viện · Phòng khám · Trường đại học · Đại lý · NPP) và <b>Tỉnh/thành dự kiến</b> — gõ để tìm, chọn được nhiều tỉnh. Ghi chú thêm là tuỳ chọn."],
+    ["Không phải điền gì","Không cần Task Result, không cần ảnh, không cần CBC. Sales Process và Type action bị khoá sẵn ở TÌM HIỂU / Visiting."],
+    ["Kỳ luôn là trọn tuần","Ngày bắt đầu là thứ Hai, kết thúc là Chủ nhật, kể cả khi bạn tạo giữa tuần."],
+    ["Kết quả tự tổng hợp","Ô Task Result do hệ thống tự viết, không gõ tay: <i>“Đã tiếp cận 3 phòng khám, 2 bệnh viện”</i>. Chỉ đếm các buổi đi địa bàn trong tuần đó đã chuyển sang <b>Completed</b>."],
+    ["Trạng thái tự chạy","Chưa đi buổi nào → <b>Not Started</b> · đã đi từ 1 buổi → <b>In Progress 25%</b> · từ thứ Năm → <b>In Progress 50%</b> · gửi báo cáo tuần → <b>Completed</b> và chốt số liệu lần cuối."],
+    ["Trên email báo cáo","Người nhận không thấy chữ TBD. Dòng này hiện là <b>Đi địa bàn</b>, phần kế hoạch là nội dung bạn đã chọn, phần kết quả là câu tổng hợp ở trên."]
+  ],
+  tips:["TBD là kế hoạch tạm, không phải chỗ để trốn việc. Chốt được khách nào thì tạo dòng đi địa bàn thật cho khách đó — dòng TBD sẽ tự đếm vào.",
+        "Mỗi tuần chỉ nên có một dòng TBD. Nhiều dòng cùng tuần sẽ ra cùng một câu kết quả."]},
+
+{ id:"other", ic:"🧩", t:"Cập nhật ▸ Công việc khác", who:"all", img:"154IuabbpQ6Gy_RttgFvVsAE0RFLSl7fc",
+  sub:"Họp, hỗ trợ NPP, hồ sơ thầu, sự kiện — việc không phải đi gặp khách",
+  rows:[
+    ["Vị trí","Tab thứ hai của màn hình <b>Cập nhật</b>, ngay cạnh tab đi địa bàn."],
+    ["Key Task và đầu việc con","Bấm <b>＋ Key Task</b> tạo đầu mục lớn, rồi <b>＋ việc</b> trong thẻ đó để thêm các bước nhỏ. Tiến độ Key Task tự tính từ trung bình các đầu việc con."],
+    ["Cột Tiến độ","Nằm ngay cạnh tên việc, dạng thanh kéo. Kéo hoặc bấm −/＋ là lưu ngay, không cần bấm nút nào khác."],
+    ["Màu thanh tiến độ","Theo đúng thang chung của app: đỏ → cam → vàng → xanh nhạt → xanh đậm; vượt 100% có huy hiệu ⭐."],
     ["Sửa chi tiết","Bấm vào tên đầu việc để mở hộp chỉnh sửa, có nút 🎤 đọc chính tả và 🔗 chèn link tài liệu."],
-    ["Việc đi gặp khách không hiện ở đây","Chúng tự đồng bộ từ tab Thông tin địa bàn. Muốn xem chung thì bật chip <b>Hiện cả việc đi địa bàn</b>."]
-  ]},
-  { ic:"🏥", t:"Khách hàng", rows:[
+    ["Việc đi địa bàn không hiện ở đây","Chúng nằm ở tab bên cạnh. Muốn xem chung thì bật chip <b>Hiện cả việc đi địa bàn</b>."]
+  ],
+  tips:["Công việc khác đi kèm email báo cáo tuần ở mục ② và ④. Không cập nhật thì email thiếu phần này."]},
+
+{ id:"cust", ic:"👥", t:"Thông tin địa bàn", who:"all", img:"10I-qYePQcxR2-xkqWNmtrdVm3Qk_ZagV",
+  sub:"Mục Khách hàng — danh sách địa bàn và hồ sơ từng địa bàn",
+  rows:[
     ["Tìm kiếm thông minh","Gõ không dấu vẫn ra: “xanh pon” tìm được “Bệnh Viện Đa Khoa Xanh Pôn”. Gõ nhiều từ rời cũng được."],
-    ["Cột Target → Achieve","Account có ADP thì hiện % đạt so với mục tiêu; account thường hiện doanh số trong FY đang chọn."],
-    ["Mở hồ sơ khách hàng","Bấm vào dòng bất kỳ để xem dòng thời gian, ảnh, người liên hệ, đơn hàng, ADP."],
-    ["Sửa thông tin","Trong hồ sơ, tab Thông tin có nút <b>✎ Sửa thông tin</b>, sửa xong bấm lưu."],
-    ["Thêm account mới","Mã khách hàng được đề xuất tự động theo số kế tiếp, vẫn sửa được."]
-  ]},
-  { ic:"🔀", t:"Hai nhóm Dental &amp; Surgical", rows:[
-    ["Chọn nhóm ở thanh trên cùng","Nút có hình 🦷 hoặc 👁 bên cạnh chuông. Mỗi nhóm dùng một file Google Sheet riêng."],
-    ["Dữ liệu tách hoàn toàn","Khách hàng, CBC, đơn hàng, ADP, báo cáo, doanh số nhà phân phối — tất cả đều của riêng nhóm đang chọn."],
-    ["Đổi nhóm sẽ tải lại app","App xoá sạch dữ liệu nhóm cũ rồi nạp lại, tránh lẫn số liệu hai bên."],
-    ["Khách từ Event cũng tách","Khách hội thảo nha khoa vào file Dental, nhãn khoa vào file Surgical."]
-  ]},
-  { ic:"🤝", t:"Key stakeholder &amp; khách từ Event", rows:[
-    ["Danh sách người liên hệ","Mục <b>Key stakeholder</b> nằm ngay dưới Khách hàng, gom toàn bộ CBC kèm điện thoại, chức vụ, Influence, Trust, ngày thêm."],
-    ["Cột Đã làm việc","Đếm số lần bạn ghi nhận gặp người đó trong FY, tách theo 📍 viếng thăm · 📞 gọi điện · 💬 nhắn tin. Đếm dựa vào dòng <b>Người gặp:</b> trong Task Result — ghi đúng tên thì mới tính."],
-    ["Tab Khách hàng Event","Lọc riêng những người thu được tại hội thảo, có tag ghi rõ sự kiện nào và ai chưa được chăm sóc lại."],
-    ["Đồng bộ từ file Event","Bấm <b>⟳ Đồng bộ từ file Event</b> để kéo khách mới từ file dữ liệu sự kiện sang tab 2. CBC. Chạy lại nhiều lần không bị nhân đôi."],
-    ["Khách chưa có Account","Vẫn được thêm với ô Account trống. Mở hồ sơ để gán account thì mới theo dõi được doanh số."]
-  ]},
-  { ic:"🗓", t:"Báo cáo tháng", rows:[
-    ["Chọn kỳ ở dải tháng","Số nhỏ cạnh tháng là số hạng mục đã có."],
-    ["Bấm 🧩 Tạo đủ khung tháng này","App tạo sẵn toàn bộ hạng mục theo khung Type task chuẩn, mỗi hạng mục đã có sẵn đề mục để điền."],
-    ["Điền nội dung","Mỗi hạng mục có 2 cột PLAN và RESULT. Bấm vào thẻ để mở, dùng nút <b>📋 Chèn khung</b> nếu ô còn trống."],
-    ["⧉ Lấy kế hoạch tháng trước","Sao chép nhanh các hạng mục của kỳ liền trước sang kỳ đang xem."]
-  ]},
-  { ic:"✉️", t:"Gửi báo cáo", rows:[
-    ["Chọn kỳ","Báo cáo tuần mặc định lấy tuần hiện tại; kế hoạch tuần sau tự lấy 7 ngày kế tiếp."],
-    ["Xem nhanh trước khi gửi","Mở bảng để soát toàn bộ việc tuần này và kế hoạch tuần sau: Key task, đầu việc, ngày bắt đầu, deadline, tiến độ, kết quả. Dòng nền đỏ là quá hạn."],
-    ["Gửi thử cho tôi","Nên gửi thử trước để xem email và file PDF trước khi gửi chính thức."]
-  ]},
-  { ic:"⚠️", t:"Lưu ý &amp; xử lý sự cố", rows:[
-    ["Chỉ đăng nhập một tài khoản Google","Máy đang đăng nhập nhiều Gmail sẽ bị Google chặn giữa chừng, app báo không tải được dữ liệu. Dùng cửa sổ ẩn danh là xong."],
-    ["Dữ liệu chưa thấy ngay","Bấm nút ⟳ trên thanh trên cùng để nạp lại từ Google Sheet."],
-    ["Không sửa được việc của người khác","Mỗi người chỉ sửa việc của mình; dòng của người khác hiện biểu tượng 🔒."],
-    ["Chọn đúng năm tài chính","Toàn bộ số liệu trên app lọc theo FY đang chọn ở thanh trên cùng."]
-  ]}
+    ["Cột Target → Achieve","Địa bàn có ADP thì hiện % đạt so với mục tiêu; địa bàn thường hiện doanh số trong FY đang chọn."],
+    ["Cột Activities","Tổng số lần làm việc với địa bàn đó trong FY, tách rõ 📍 viếng thăm · 📞 gọi điện · 💬 nhắn tin · ✉️ email, kèm khoảng cách từ lần gần nhất."],
+    ["Mở hồ sơ","Bấm vào một dòng để xem: Thông tin, Dòng thời gian, Người liên hệ, Đơn hàng, ADP, Ảnh hiện trường."],
+    ["Tab Đơn hàng trong hồ sơ","Ba biểu đồ cạnh nhau: doanh số theo tháng, cơ cấu nhóm sản phẩm, ai trong địa bàn này mua. Nút <b>＋ Thêm đơn hàng</b> điền sẵn account cho bạn."],
+    ["Sửa thông tin","Tab Thông tin có nút <b>✎ Sửa hồ sơ</b>. Sửa xong bấm lưu, dữ liệu ghi thẳng vào Google Sheet."],
+    ["Thêm địa bàn mới","Mã địa bàn do hệ thống đề xuất theo số kế tiếp, vẫn sửa được nếu cần."]
+  ],
+  tips:["Địa bàn chưa từng có hoạt động nào sẽ nằm cuối danh sách khi sắp theo Activities — đây là danh sách cần ưu tiên đi."]},
+
+{ id:"stake", ic:"🤝", t:"Key stakeholder & Khách hàng Event", who:"all", img:"13rF6Nl-Bf339qzG9EJFDCsOq6K4aRr0K",
+  sub:"Danh bạ người liên hệ và khách thu được từ hội thảo",
+  rows:[
+    ["Danh sách CBC","Gom toàn bộ người liên hệ kèm điện thoại, chức vụ, chuyên khoa, Influence, Trust, ngày thêm. Bấm số điện thoại để gọi luôn."],
+    ["Cột Đã làm việc","Đếm số lần bạn ghi nhận gặp người đó trong FY, tách theo 📍 · 📞 · 💬. Căn cứ là dòng <b>Người gặp:</b> trong Task Result."],
+    ["Tab Khách hàng Event","Lọc riêng người thu được tại hội thảo, có tag ghi rõ sự kiện nào."],
+    ["Lọc theo FY của event","Chip <b>Tất cả FY</b> hoặc <b>Chỉ từ event FY68</b>. Số đếm trên thẻ, danh sách sự kiện và tỉnh thành đều chạy theo lựa chọn này."],
+    ["Thẻ Đã tiếp xúc","Hiện tổng số người đã chăm sóc lại, tách rõ Visit · Telephone · Message · Khác."],
+    ["Chip Chưa chăm sóc","Lọc nhanh những người chưa được liên hệ lần nào — đây là việc cần làm ngay sau mỗi hội thảo."],
+    ["Đồng bộ từ file Event","Bấm <b>⟳ Đồng bộ từ file Event</b> để kéo khách mới sang. Chạy lại nhiều lần không bị nhân đôi."]
+  ],
+  tips:["Khách event chưa gán địa bàn vẫn thêm được, nhưng phải gán địa bàn thì mới theo dõi được doanh số."]},
+
+{ id:"data", ic:"🧾", t:"Các thông tin khác", who:"all", img:"1zAuhmBvxbx1ASw8Vbnc4oN-Anwhy2kfm",
+  sub:"Đơn hàng · Thuyết trình · Công việc tháng · ADP",
+  rows:[
+    ["Đơn hàng — một đơn nhiều mặt hàng","Mỗi mặt hàng là một dòng riêng, nhưng cùng mang một <b>Order No.</b> Đừng gộp nhiều mặt hàng vào một dòng, vì biểu đồ cơ cấu nhóm sản phẩm sẽ sai."],
+    ["Đơn hàng — chọn người mua","Ô <b>Người liên lạc</b> lấy từ danh sách CBC của địa bàn đó. Đây là căn cứ duy nhất để dựng biểu đồ “ai mua từ địa bàn này”, bỏ trống là mất số liệu."],
+    ["Đơn hàng — thành tiền","Số lượng nhân đơn giá ra thành tiền, không gõ tay. Nhập đơn thiếu thì cả KPI lẫn ADP đều trông như chưa đạt."],
+    ["Thuyết trình","Ghi cả <b>số người dự kiến</b> và <b>số người thực tế</b>. Chỉ số thực tế được tính vào KPI. Nhớ đính link folder ảnh và viết phần đánh giá buổi đó."],
+    ["Công việc trong tháng","Bấm <b>🧩 Tạo đủ khung tháng này</b> để sinh sẵn toàn bộ hạng mục theo Type task, hoặc <b>⧉ Lấy kế hoạch tháng trước</b> để sao chép nhanh. Điền PLAN đầu tháng, RESULT cuối tháng."],
+    ["ADP Key account","Dành cho địa bàn trọng điểm: phân loại ABCD, phân tích tình hình, mục tiêu, chiến thuật, hành động chính, mục tiêu cả năm và chỉ tiêu từng tháng."],
+    ["ADP — cột FY Actual","Máy tự cộng từ mục Đơn hàng, không gõ tay được. Thấy ADP đạt thấp thì kiểm tra đơn hàng trước khi kết luận."]
+  ],
+  tips:["ADP là cam kết cả năm với địa bàn lớn — đặt xong thì review theo quý, đừng để trống ô Review.",
+        "Ba mục Đơn hàng, Thuyết trình và ADP đều đổ số vào KPI. Nhập chậm một mục là cả bảng KPI lệch."]},
+
+{ id:"report", ic:"📧", t:"Gửi báo cáo tuần & tháng", who:"all", img:"1cobHn0UAfQ6I1WGCRURp4pPlpEPunqhx",
+  sub:"Soát lại rồi gửi email kèm file PDF",
+  rows:[
+    ["Chọn loại và kỳ","Báo cáo tuần mặc định lấy tuần hiện tại, kế hoạch tuần sau tự lấy 7 ngày kế tiếp. Báo cáo tháng chọn kỳ ở dải tháng."],
+    ["Xem nhanh trước khi gửi","Bảng xem trước liệt kê toàn bộ việc tuần này và kế hoạch tuần sau: địa bàn, ngày, tiến độ, kết quả. <b>Dòng nền đỏ là quá hạn</b> — xử lý trước khi gửi."],
+    ["Hộp kiểm Công việc khác","Cho biết sẽ gửi kèm bao nhiêu Key task và đầu việc con. Số 0 nghĩa là bạn chưa cập nhật tab Công việc khác."],
+    ["Kiểm tra kế hoạch tuần mới","Nếu tuần sau chưa có dòng đi địa bàn nào, app sẽ hỏi trước khi cho gửi. Quay lại thêm kế hoạch, hoặc chọn TBD."],
+    ["Gửi thử cho tôi","<b>Luôn gửi thử trước.</b> Email và file PDF y hệt bản chính thức nhưng chỉ vào hộp thư của bạn."],
+    ["Gửi chính thức","Báo cáo đi tới cả nhóm, CC quản lý. Nội dung email gồm ① Đi địa bàn tuần này ② Công việc khác tuần này ③ Kế hoạch tuần sau ④ Công việc khác tuần sau, kèm PDF khổ ngang."],
+    ["Tải PDF","Nếu chỉ cần file để nộp riêng, chọn <b>Tải PDF</b>, không gửi email cho ai."]
+  ],
+  tips:["Gửi báo cáo tuần sẽ chốt dòng TBD của tuần đó sang Completed. Gửi xong thì số liệu tuần coi như khoá sổ."]},
+
+{ id:"mgmt", ic:"🛡", t:"Dành riêng cho Management", who:"mgmt", img:"1hcy29HDrUeBqrWLVoE-e_fjce_m77Yhi",
+  sub:"Xem ảnh, lọc theo PIC, đặt KPI, gửi thay",
+  rows:[
+    ["Xem ảnh đi địa bàn","Mục <b>🖼️ Xem ảnh đi địa bàn</b> chỉ hiện với tài khoản Management. Xem toàn bộ ảnh hiện trường theo ngày, theo PIC, kèm toạ độ GPS và địa chỉ nơi chụp."],
+    ["Tải ảnh về","Bấm vào ảnh để mở cỡ lớn, có link mở bản gốc trên Drive để tải về phục vụ tracking hoặc báo cáo lên tập đoàn."],
+    ["Kiểm tra tính xác thực","Ảnh chỉ được chấp nhận nếu chụp trong vòng 10 phút và mở trực tiếp bằng camera. Tên file theo mẫu PIC_Ngày_Khách hàng_STT nên đối chiếu rất nhanh."],
+    ["Lọc theo PIC ở mọi mục","Dashboard, KPI, Cập nhật, Khách hàng, Đơn hàng đều có chip chọn PIC. Bấm tên một người để xem đúng phần việc của người đó; bấm lại để về toàn nhóm."],
+    ["Đặt mục tiêu KPI","Vào <b>KPI & Mục tiêu</b>, sửa ô <b>Target/tháng</b> ở Phần B1–B6 cho từng PIC, hoặc ô Target ở Phần A cho chỉ tiêu chung. Bấm lưu là ghi thẳng vào tab 9 của Google Sheet. Sales không sửa được các ô này."],
+    ["Gửi báo cáo thay","Ở mục Gửi báo cáo có thêm lựa chọn <b>gửi thay cho một PIC</b> và <b>gửi cho toàn bộ team</b> — app lần lượt dựng báo cáo của từng người."],
+    ["Xoá dòng","Management xoá được mọi dòng ở mọi tab. Sales chỉ xoá được task đi địa bàn do mình phụ trách."],
+    ["Chuyển nhóm Dental / Surgical","Nút 🦷 / 👁 trên thanh trên cùng. Mỗi nhóm là một file Google Sheet riêng, đổi nhóm sẽ nạp lại toàn bộ dữ liệu."]
+  ],
+  tips:["Đặt target xong nên báo lại cho sales — app không tự gửi thông báo khi mục tiêu thay đổi."]},
+
+{ id:"trouble", ic:"⚠️", t:"Lưu ý & xử lý sự cố", who:"all", img:null,
+  sub:"Những lỗi hay gặp và cách xử lý trong một phút",
+  rows:[
+    ["Không tải được dữ liệu","Gần như luôn do máy đang đăng nhập nhiều tài khoản Google cùng lúc. Mở app bằng cửa sổ ẩn danh, hoặc đăng xuất bớt chỉ để lại một tài khoản."],
+    ["Sửa Google Sheet mà app chưa thấy","App tự kiểm tra mỗi 45 giây. Cần ngay thì bấm nút ⟳ trên thanh trên cùng."],
+    ["Ảnh bị từ chối","Ảnh phải vừa chụp trong vòng 10 phút và mở bằng camera. Ảnh trong thư viện hoặc ảnh chụp màn hình đều không được."],
+    ["Không lưu được task","Kiểm tra ba ô bắt buộc: Task Result có dòng <b>Người gặp:</b>, ảnh với Visiting, và Next action."],
+    ["Số liệu bằng 0 bất thường","Kiểm tra ô FY trên thanh trên cùng, và chip lọc PIC xem có đang lọc nhầm người không."],
+    ["Không sửa được dòng của người khác","Đúng thiết kế. Cần sửa thì nhờ chính người đó, hoặc báo Management."]
+  ],
+  tips:["Lỗi lạ chưa có trong danh sách này thì chụp màn hình kèm giờ xảy ra rồi gửi Product Team."]}
 ];
+
+function helpChapters(){
+  return HELP_CHAPTERS.filter(function(c){ return c.who!=="mgmt" || isMgmt(); });
+}
 function openHelp(){
-  var h='<div class="hp-img">'+
-      '<img src="'+HELP_IMG_URL+'" alt="Ảnh hướng dẫn nhanh" loading="lazy" '+
-        'onerror="this.style.display=\'none\';this.parentNode.querySelector(\'.hp-err\').style.display=\'block\'">'+
-      '<div class="hp-err" style="display:none">Không tải được ảnh hướng dẫn — bấm “Mở ảnh gốc” bên dưới.</div>'+
-      '<div class="hp-cap"><span>Ảnh hướng dẫn nhanh — chạm để xem cỡ lớn</span>'+
-        '<a href="'+HELP_IMG_OPEN+'" target="_blank" rel="noopener">Mở ảnh gốc ›</a></div>'+
-    '</div>'+
-    '<div class="hp-h">HƯỚNG DẪN TỪNG MỤC</div>'+
-    HELP_SECTIONS.map(function(sec,i){
-      return '<div class="hp-sec'+(i===0?" open":"")+'" id="hpsec-'+i+'">'+
-        '<button class="hp-t" onclick="toggleHelp('+i+')"><span class="ic">'+sec.ic+'</span>'+
-          '<b>'+sec.t+'</b><span class="sp"></span><span class="ar">⌄</span></button>'+
-        '<div class="hp-b"><ul>'+sec.rows.map(function(r){
-          return '<li><b>'+r[0]+'.</b> '+r[1]+'</li>'; }).join("")+'</ul></div></div>';
-    }).join("");
+  var L=helpChapters();
+  var h='<div class="hp-lead">Chọn mục bạn muốn xem. Mỗi mục có ảnh hướng dẫn riêng kèm các bước làm chi tiết.</div>'+
+    '<div class="hp-grid">'+L.map(function(c,i){
+      return '<button class="hp-card" onclick="openHelpCh('+i+')">'+
+        '<span class="hp-ic">'+c.ic+'</span>'+
+        '<span class="hp-nm">'+c.t+(c.who==="mgmt"?' <i class="hp-badge">Quản lý</i>':"")+'</span>'+
+        '<span class="hp-sb">'+esc(c.sub)+'</span>'+
+        '<span class="hp-go">'+c.rows.length+' bước ›</span></button>';
+    }).join("")+'</div>';
   openModal("Hướng dẫn sử dụng",h,
-    '<a class="btn" href="'+HELP_IMG_OPEN+'" target="_blank" rel="noopener">🖼 Mở ảnh gốc</a>'+
+    '<div style="flex:1"></div><button class="btn pri" onclick="closeModal()">Đóng</button>', true);
+}
+function openHelpCh(i){
+  var c=helpChapters()[i]; if(!c) return;
+  var img = c.img
+    ? '<div class="hp-img">'+
+        '<img src="'+helpImgUrl(c.img)+'" alt="'+esc(c.t)+'" loading="lazy" '+
+          'onerror="this.style.display=\'none\';this.parentNode.querySelector(\'.hp-err\').style.display=\'block\'">'+
+        '<div class="hp-err" style="display:none">Không tải được ảnh — bấm “Mở ảnh gốc” bên dưới.</div>'+
+        '<div class="hp-cap"><span>Ảnh hướng dẫn — chạm để xem cỡ lớn</span>'+
+          '<a href="'+helpImgOpen(c.img)+'" target="_blank" rel="noopener">Mở ảnh gốc ›</a></div>'+
+      '</div>'
+    : (c.img===null ? "" :
+      '<div class="hp-img hp-wait"><div class="hp-err">🖼️ Ảnh hướng dẫn cho mục này đang được chuẩn bị.<br>'+
+      'Phần hướng dẫn bằng chữ bên dưới đã đầy đủ.</div></div>');
+  var h='<button class="hp-back" onclick="openHelp()">‹ Tất cả mục hướng dẫn</button>'+
+    '<div class="hp-head"><span class="hp-ic">'+c.ic+'</span><div><b>'+c.t+'</b><span>'+esc(c.sub)+'</span></div></div>'+
+    img+
+    '<div class="hp-h">CÁC BƯỚC LÀM</div>'+
+    '<ol class="hp-steps">'+c.rows.map(function(r){
+      return '<li><b>'+r[0]+'</b><div>'+r[1]+'</div></li>'; }).join("")+'</ol>'+
+    ((c.tips&&c.tips.length)?'<div class="hp-tip"><b>Ghi nhớ</b><ul>'+
+      c.tips.map(function(t){ return '<li>'+t+'</li>'; }).join("")+'</ul></div>':"");
+  openModal("Hướng dẫn · "+c.t,h,
+    '<button class="btn" onclick="openHelp()">‹ Quay lại</button>'+
     '<div style="flex:1"></div><button class="btn pri" onclick="closeModal()">Đã hiểu</button>', true);
 }
-function toggleHelp(i){ var e=$("hpsec-"+i); if(e) e.classList.toggle("open"); }
 
 
 /* ═══════════ ⭐ v6.0 — KEY STAKEHOLDER (CBC) & KHÁCH HÀNG TỪ EVENT ═══════════
