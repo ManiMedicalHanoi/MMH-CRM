@@ -3833,7 +3833,9 @@ function deltaCell(v){
    nên sales đăng nhập điện thoại bằng Gmail cá nhân sẽ bị chặn dù Web App đã để "Anyone". */
 var TURNOVER_URL = "https://script.google.com/macros/s/AKfycbz26knlK_GE2mYlszlx947QWSLvfScrHFeB86XkaPWfDhKHi49cnVfCXS_kPUpkX2Fgww/exec";
 /* Segment trong tab SUM TURNOVER dùng cho từng nhóm */
-var TURNOVER_SEG_BY_TEAM = { dental:["Dental","MMG"], surgical:["Surgical","Eyeless"], eyeless:["Eyeless"] };
+/* ⭐ v7.2 — Eyeless đã thành nhóm riêng ⇒ BỎ segment "Eyeless" khỏi nhóm Surgical,
+   tránh cộng trùng doanh số Eyeless vào cả hai nhóm. */
+var TURNOVER_SEG_BY_TEAM = { dental:["Dental","MMG"], surgical:["Surgical"], eyeless:["Eyeless"] };
 function turnoverSegments(){ return TURNOVER_SEG_BY_TEAM[curTeamKey()] || TURNOVER_SEG_BY_TEAM.dental; }
 var TURNOVER_SEGMENTS = ["Dental","MMG"];   /* giữ để tương thích; dùng turnoverSegments() */
 
