@@ -666,7 +666,8 @@ body.modal-on #drw{filter:blur(2px) saturate(.85);opacity:.55}
 /* ⭐ v5.5 — sheet tab kiểu Google Sheet */
 /* ⭐ v5.5 — dialog chia đôi chọn loại công việc */
 .pick2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-@media(max-width:640px){ .pick2{grid-template-columns:1fr} }
+.pick2.pick3{grid-template-columns:repeat(3,1fr)}
+@media(max-width:640px){ .pick2,.pick2.pick3{grid-template-columns:1fr} }
 .pick2-c{display:flex;flex-direction:column;align-items:flex-start;gap:7px;padding:22px 20px;border:2px solid var(--line);border-radius:var(--r-lg);background:var(--card);cursor:pointer;text-align:left;transition:.16s;font-family:inherit}
 .pick2-c:hover{border-color:var(--blue);background:var(--paler);transform:translateY(-2px);box-shadow:var(--sh-2)}
 .pick2-c .ic{font-size:34px;line-height:1}
@@ -1239,22 +1240,31 @@ tr.rp-late td{background:var(--dang-bg)}
    Backend: Google Apps Script (Code.gs)  ·  Deploy: GitHub Pages
    ═══════════════════════════════════════════════════════════════════ */
 
-/* ═══════════ ⭐ v7.0 — HAI BACKEND CRM: DENTAL & SURGICAL ═══════════
+/* ═══════════ ⭐ v7.0 → v7.2 — BA BACKEND CRM: DENTAL · SURGICAL · EYELESS ═══════════
    Mỗi nhóm một file Google Sheet và một Web App riêng. App nhớ nhóm đang chọn;
    mọi lời gọi dữ liệu đi tới đúng backend của nhóm đó. Đổi nhóm là xoá sạch bộ
-   nhớ đệm rồi nạp lại, tránh lẫn dữ liệu hai bên. */
+   nhớ đệm rồi nạp lại, tránh lẫn dữ liệu giữa các nhóm.
+   · taskType : Type task mặc định khi thêm Key Task "Công việc khác" (Report Hub)
+   · crmFile  : tên file Google Sheet hiển thị trong hướng dẫn / thông báo lỗi */
 var TEAMS = {
   dental: {
     key:"dental", label:"Dental", short:"Nha khoa", ic:"🦷",
     url:"https://script.google.com/macros/s/AKfycbyzmhECZZfbOZUyXOK5O70ukwTgQ9DHp70MN-HUAL0wMpOptdTTbaGcvMEmcnCrCji6/exec",
-    eventSrc:"dental"
+    eventSrc:"dental", taskType:"Sales-Dental", crmFile:"MMH_Dental_CRM"
   },
   surgical: {
     key:"surgical", label:"Surgical", short:"Nhãn khoa · Ngoại khoa", ic:"👁",
     url:"https://script.google.com/macros/s/AKfycbxxckrqwkfhE0fszm1XVdpYyEHU_PCKQWMKE_2wBnMTgoJCZ-1nRZ_fhOCPXXsVfEE/exec",
-    eventSrc:"ophthalmic"
+    eventSrc:"ophthalmic", taskType:"Sales-Surgical", crmFile:"MMH_Surgical_CRM"
+  },
+  /* ⭐ v7.2 — nhóm Eyeless Sales (kim liền chỉ) */
+  eyeless: {
+    key:"eyeless", label:"Eyeless", short:"Kim liền chỉ (Eyeless needle)", ic:"🪡",
+    url:"https://script.google.com/macros/s/AKfycbxsoTRbRWZRaf-z7-xRy_oIkM-Yv1HoCOjVRO-K6oRRh3Dr7MMg4v53K0qqpMfZ_K5IAg/exec",
+    eventSrc:"eyeless", taskType:"Sales-Eyeless", crmFile:"MMH_Eyeless_CRM"
   }
 };
+function teamTaskType(){ return curTeam().taskType || ("Sales-"+curTeam().label); }
 var LS_TEAM="mmh_team";
 function curTeamKey(){
   try{ var t=localStorage.getItem(LS_TEAM); if(TEAMS[t]) return t; }catch(e){}
@@ -1279,7 +1289,7 @@ function switchTeam(k){
 }
 function teamPicker(){
   var cur=curTeamKey();
-  var h='<div class="pick2">'+Object.keys(TEAMS).map(function(k){
+  var h='<div class="pick2'+(Object.keys(TEAMS).length>2?" pick3":"")+'">'+Object.keys(TEAMS).map(function(k){
     var t=TEAMS[k];
     return '<button class="pick2-c'+(k===cur?" on":"")+'" onclick="switchTeam(\''+k+'\')">'+
       '<div class="ic">'+t.ic+'</div><div class="ti">'+esc(t.label)+(k===cur?' <span class="tag t-g">đang dùng</span>':'')+'</div>'+
@@ -1764,7 +1774,7 @@ function refreshBundle(silent){
 }
 /* ═══════════════════════ ⭐ v4.4 — ĐĂNG NHẬP & PHÂN QUYỀN ═══════════════════════
    · Bước 1: nhập mật khẩu chung (nhớ trên thiết bị, chỉ nhập 1 lần)
-   · Bước 2: chọn PIC — chia 3 nhóm Management / Dental Sales / Surgical Sales
+   · Bước 2: chọn PIC — chia 4 nhóm Management / Dental Sales / Surgical Sales / Eyeless Sales
    · Bước 3: nhóm Management nhập thêm mã nội bộ (cũng chỉ 1 lần)
    PIC sau khi chọn là CỐ ĐỊNH: mọi tab chỉ hiển thị dữ liệu của PIC đó,
    riêng Management xem được toàn nhóm và lọc theo từng PIC.
@@ -1782,12 +1792,15 @@ var ROLES = {
   "Phuong":    { grp:"Dental Sales",   title:"Dental Sales PIC — South",     email:"mmh.saigon@manimedicalhanoi.com",  ini:"PH", team:"dental" },
   "Vinh":      { grp:"Dental Sales",   title:"Dental Sales PIC — Central",   email:"mmh.danang@manimedicalhanoi.com",  ini:"VN", team:"dental" },
   "Khang":     { grp:"Surgical Sales", title:"Surgical Sales PIC — South",   email:"mmh.saigon2@manimedicalhanoi.com", ini:"KH", team:"surgical" },
-  "Viet Ha":   { grp:"Surgical Sales", title:"Surgical Sales PIC — North",   email:"mmh.hanoi2@manimedicalhanoi.com",  ini:"VH", team:"surgical" }
+  "Viet Ha":   { grp:"Surgical Sales", title:"Surgical Sales PIC — North",   email:"mmh.hanoi2@manimedicalhanoi.com",  ini:"VH", team:"surgical" },
+  /* ⭐ v7.2 — Eyeless Sales */
+  "Trang":     { grp:"Eyeless Sales",  title:"Eyeless Sales PIC",            email:"marketing.mmh2@manimedicalhanoi.com", ini:"TR", team:"eyeless" }
 };
 var ROLE_GROUPS = [
   { k:"Management",     ic:"🏛", sub:"Xem toàn bộ dữ liệu · cần mã nội bộ" },
   { k:"Dental Sales",   ic:"🦷", sub:"File dữ liệu Dental · chỉ xem việc của mình" },
-  { k:"Surgical Sales", ic:"🔬", sub:"File dữ liệu Surgical · chỉ xem việc của mình" }
+  { k:"Surgical Sales", ic:"🔬", sub:"File dữ liệu Surgical · chỉ xem việc của mình" },
+  { k:"Eyeless Sales",  ic:"🪡", sub:"File dữ liệu Eyeless · chỉ xem việc của mình" }
 ];
 function isMgmt(){ return !!(S.user && S.user.grp === "Management"); }
 function afterUserKnown(){ try{ paintTeamBtn(); }catch(e){} }
@@ -1948,8 +1961,12 @@ function paintTeamBtn(){
   if(b) b.style.display = isMgmt() ? "" : "none";
   if(b) b.innerHTML=t.ic+' <b>'+esc(t.label)+'</b>';
   try{
-    var sub=document.querySelector(".brand .sub")||document.querySelector("#brandSub");
+    /* ⭐ v7.2 — header dùng class .bt / .bs (bản cũ tìm nhầm .sub nên luôn hiện "Dental") */
+    var bt=document.querySelector(".brand .bt");
+    if(bt) bt.textContent=t.label+" CRM";
+    var sub=document.querySelector(".brand .bs")||document.querySelector(".brand .sub")||document.querySelector("#brandSub");
     if(sub) sub.textContent="MANI Medical Hanoi · "+t.label+" Sales";
+    document.title="MMH CRM system · "+t.label;
   }catch(e){}
 }
 paintTeamBtn();
@@ -2008,7 +2025,7 @@ function pickTaskKind(){
     '<button class="pick2-c terr" onclick="closeModal();formWeekly(null)">'+
       '<div class="ic">📍</div><div class="ti">Đi địa bàn</div>'+
       '<div class="ds">Viếng thăm khách hàng, gặp bác sĩ, demo sản phẩm — có ảnh chụp tại chỗ và GPS</div>'+
-      '<div class="sh">Ghi vào <b>MMH_Dental_CRM</b> · tab 6. WEEKLY REPORT</div></button>'+
+      '<div class="sh">Ghi vào <b>'+esc(curTeam().crmFile)+'</b> · tab 6. WEEKLY REPORT</div></button>'+
     '<button class="pick2-c other" onclick="closeModal();S.wkTab=\'other\';pgWeekly();setTimeout(function(){formOtherKey(\'\');},260)">'+
       '<div class="ic">🧩</div><div class="ti">Công việc khác</div>'+
       '<div class="ds">Họp, hỗ trợ NPP, hồ sơ thầu, sự kiện, việc nội bộ — không phải đi gặp khách</div>'+
@@ -2054,7 +2071,7 @@ function otherFindKey(no){
 function otherTypes(){
   var t={};
   ((S.other&&S.other.keys)||[]).forEach(function(k){ if(k.type) t[k.type]=1; });
-  ["Sales-Dental","Sales-Surgical"].forEach(function(x){ t[x]=1; });
+  ["Sales-Dental","Sales-Surgical","Sales-Eyeless"].forEach(function(x){ t[x]=1; });   /* ⭐ v7.2 */
   return Object.keys(t).sort();
 }
 var OTHER_STATUS=["To Do","In Progress","Completed","Cancelled"];
@@ -2172,7 +2189,7 @@ function formOtherKey(no){
   if(k&&!canEditOther(k.pic)) return toast("🔒 Chỉ "+(k.pic||"PIC phụ trách")+" mới sửa được","warn");
   var picOpts=isMgmt()?(S.master.pic||[]):[S.user.pic];
   var h='<div class="fld"><label>Loại công việc <span class="rq">*</span></label>'
-      +'<select class="inp" id="ok_type">'+opts(otherTypes(),(k&&k.type)||"Sales-Dental","— chọn —")+'</select></div>'
+      +'<select class="inp" id="ok_type">'+opts(otherTypes(),(k&&k.type)||teamTaskType(),"— chọn —")+'</select></div>'
     +'<div class="fld"><label>Tên Key Task <span class="rq">*</span></label>'
       +'<textarea class="inp" id="ok_name" style="min-height:74px" placeholder="VD: Triển khai mũi khoan 1559L khu vực miền Bắc">'+esc((k&&k.keyTask)||"")+'</textarea></div>'
     +'<div class="row">'
@@ -2578,7 +2595,7 @@ var HELP_CHAPTERS = [
     ["Nút ＋","Nút tròn góc dưới bên phải — lối tắt thêm việc đi địa bàn hoặc công việc khác từ bất kỳ màn hình nào."]
   ],
   tips:["Mỗi người chỉ sửa được việc của mình. Dòng của người khác hiện khoá 🔒.",
-        "Nhóm Dental và Surgical dùng hai file Google Sheet tách biệt. Tài khoản của bạn tự vào đúng nhóm."]},
+        "Nhóm Dental, Surgical và Eyeless dùng ba file Google Sheet tách biệt. Tài khoản của bạn tự vào đúng nhóm."]},
 
 { id:"dash", ic:"📊", t:"Dashboard — đọc số liệu", who:"all", img:"11Sr94GZFvPTUl9MxS9RGMBQM0nunv_GX",
   sub:"Bức tranh tổng thể doanh số, hoạt động và độ phủ địa bàn",
@@ -2712,7 +2729,7 @@ var HELP_CHAPTERS = [
     ["Đặt mục tiêu KPI","Vào <b>KPI & Mục tiêu</b>, sửa ô <b>Target/tháng</b> ở Phần B1–B6 cho từng PIC, hoặc ô Target ở Phần A cho chỉ tiêu chung. Bấm lưu là ghi thẳng vào tab 9 của Google Sheet. Sales không sửa được các ô này."],
     ["Gửi báo cáo thay","Ở mục Gửi báo cáo có thêm lựa chọn <b>gửi thay cho một PIC</b> và <b>gửi cho toàn bộ team</b> — app lần lượt dựng báo cáo của từng người."],
     ["Xoá dòng","Management xoá được mọi dòng ở mọi tab. Sales chỉ xoá được task đi địa bàn do mình phụ trách."],
-    ["Chuyển nhóm Dental / Surgical","Nút 🦷 / 👁 trên thanh trên cùng. Mỗi nhóm là một file Google Sheet riêng, đổi nhóm sẽ nạp lại toàn bộ dữ liệu."]
+    ["Chuyển nhóm Dental / Surgical / Eyeless","Nút 🦷 / 👁 / 🪡 trên thanh trên cùng. Mỗi nhóm là một file Google Sheet riêng, đổi nhóm sẽ nạp lại toàn bộ dữ liệu."]
   ],
   tips:["Đặt target xong nên báo lại cho sales — app không tự gửi thông báo khi mục tiêu thay đổi."]},
 
@@ -3764,7 +3781,7 @@ function renderDash(){
 
   $("main").innerHTML='<div class="pg">'+
     '<div class="ph"><div><h2>Tổng quan '+esc(S.fy)+'</h2><p>'+
-      (S.filt.pic?("PIC: <b>"+esc(S.filt.pic)+"</b>"):"Toàn nhóm Dental")+' · '+fmtN(d.totalActivity)+' hoạt động · '+fmtN(d.totalAcc)+' account · '+fmtN(d.cbcTotal)+' CBC</p></div>'+
+      (S.filt.pic?("PIC: <b>"+esc(S.filt.pic)+"</b>"):("Toàn nhóm "+esc(curTeam().label)))+' · '+fmtN(d.totalActivity)+' hoạt động · '+fmtN(d.totalAcc)+' account · '+fmtN(d.cbcTotal)+' CBC</p></div>'+
       '<div class="sp"></div><button class="btn pri sm" onclick="pickTaskKind()">＋ Thêm task</button></div>'+
     picBar+ timeBar+ grpBar()+ bodyHtml+
   '</div>';
@@ -3816,7 +3833,7 @@ function deltaCell(v){
    nên sales đăng nhập điện thoại bằng Gmail cá nhân sẽ bị chặn dù Web App đã để "Anyone". */
 var TURNOVER_URL = "https://script.google.com/macros/s/AKfycbz26knlK_GE2mYlszlx947QWSLvfScrHFeB86XkaPWfDhKHi49cnVfCXS_kPUpkX2Fgww/exec";
 /* Segment trong tab SUM TURNOVER dùng cho từng nhóm */
-var TURNOVER_SEG_BY_TEAM = { dental:["Dental","MMG"], surgical:["Surgical","Eyeless"] };
+var TURNOVER_SEG_BY_TEAM = { dental:["Dental","MMG"], surgical:["Surgical","Eyeless"], eyeless:["Eyeless"] };
 function turnoverSegments(){ return TURNOVER_SEG_BY_TEAM[curTeamKey()] || TURNOVER_SEG_BY_TEAM.dental; }
 var TURNOVER_SEGMENTS = ["Dental","MMG"];   /* giữ để tương thích; dùng turnoverSegments() */
 
@@ -3838,6 +3855,13 @@ var DISTRIBUTORS_BY_TEAM = {
   surgical: [
     { label:"Hùng Vĩ",   pic:"Viet Ha", match:["hungvi"],      abbr:["hv"] },
     { label:"I-CARE",    pic:"Khang",   match:["icare"],       abbr:[] }
+  ],
+  /* ⭐ v7.2 — Nhóm Eyeless: CHƯA có danh sách NPP chính thức ⇒ tạm nhận MỌI nhà phân phối
+     thuộc segment "Eyeless" trong file Turnover, gán PIC Trang (dòng any:true).
+     Khi chốt danh sách, thêm từng NPP theo mẫu của Dental/Surgical PHÍA TRÊN dòng any:true
+     (hoặc xoá hẳn dòng any:true để chỉ tính đúng các NPP đã khai). */
+  eyeless: [
+    { label:"*", pic:"Trang", any:true }
   ]
 };
 function distributorList(){ return DISTRIBUTORS_BY_TEAM[curTeamKey()] || DISTRIBUTORS_BY_TEAM.dental; }
@@ -3866,22 +3890,34 @@ var PRODUCT_CARDS = {
   surgical: [
     { label:"Manipler",          src:"rows", prod:"Manipler",          unit:"usd" },
     { label:"Ophthalmic knife",  src:"rows", prod:"Ophthalmic knife",  unit:"usd" }
+  ],
+  /* ⭐ v7.2 */
+  eyeless: [
+    { label:"Eyeless needle",    src:"rows", prod:"Eyeless needle",    unit:"usd" }
   ]
 };
 /* ⭐ v7.0 — chọn bộ thẻ sản phẩm theo nhóm đang đăng nhập */
-function productGroup(){ return curTeamKey()==="surgical" ? "surgical" : "dental"; }
+function productGroup(){ var k=curTeamKey(); return PRODUCT_CARDS[k] ? k : "dental"; }
+/* ⭐ v7.2 — nhãn phạm vi NPP: "4 NPP Việt Nam" / "2 NPP Việt Nam" / "mọi NPP segment Eyeless" */
+function nppScopeLabel(){
+  var L=distributorList(), fixed=L.filter(function(d){ return !d.any; }).length;
+  if(L.some(function(d){ return d.any; })) return fixed ? (fixed+" NPP đã khai + NPP khác") : "mọi NPP trong segment";
+  return fixed+" NPP Việt Nam";
+}
 var PRODUCT_GROUP = "dental";     /* giữ để tương thích; dùng productGroup() */
 
 function distributorOf(name){
   var raw=noAcc(name).replace(/[^a-z0-9]+/g," ").replace(/\s+/g," ").trim();
   if(!raw) return null;
   var tight=raw.replace(/ /g,""), words=raw.split(" ");
-  var LST=distributorList();
+  var LST=distributorList(), anyD=null;
   for(var i=0;i<LST.length;i++){
     var d=LST[i], j;
+    if(d.any){ anyD=anyD||d; continue; }          /* ⭐ v7.2 — dòng "nhận mọi NPP" xét sau cùng */
     for(j=0;j<(d.match||[]).length;j++) if(tight.indexOf(d.match[j])>=0) return d;
     for(j=0;j<(d.abbr||[]).length;j++) if(words.indexOf(d.abbr[j])>=0||tight===d.abbr[j]) return d;
   }
+  if(anyD) return { label:String(name).replace(/\s+/g," ").trim(), pic:anyD.pic, any:true };
   return null;
 }
 
@@ -3999,7 +4035,7 @@ function turnoverBlock(picSel){
   var months = (S.toRange==="FY") ? fyMonths(S.fy) : null;   /* null = lấy toàn bộ tháng có trong file */
   var stamp = S.turnover ? ('cập nhật '+new Date(S.turnover.at).toLocaleTimeString("vi-VN",{hour:"2-digit",minute:"2-digit"})) : "";
   var head='<div class="ct"><span class="dot"></span>Doanh số nhà phân phối'+
-    '<small>'+turnoverSegments().join(" + ")+' · 4 NPP Việt Nam'+(picSel?(" · lọc theo "+esc(picSel)):"")+
+    '<small>'+turnoverSegments().join(" + ")+' · '+esc(nppScopeLabel())+(picSel?(" · lọc theo "+esc(picSel)):"")+
       (stamp?(" · "+stamp):"")+'</small><span class="sp"></span>'+
     '<div class="seg" style="margin-right:8px">'+
       '<button class="'+(S.toRange==="FY"?"on":"")+'" onclick="setToRange(\'FY\')">Theo '+esc(S.fy)+'</button>'+
@@ -4020,7 +4056,7 @@ function turnoverBlock(picSel){
     if(picSel && !distributorList().some(function(d){ return d.pic===picSel; }))
       return '<div class="card pad" style="margin-bottom:14px">'+head+
         '<div class="empty" style="padding:18px 0"><div class="e">👤</div><p><b>'+esc(picSel)+
-        '</b> chưa được gán nhà phân phối nào. Bấm “Toàn nhóm” để xem cả 4 NPP.</p></div></div>';
+        '</b> chưa được gán nhà phân phối nào. Bấm “Toàn nhóm” để xem toàn bộ NPP của nhóm.</p></div></div>';
     var why = (months && g.fileMonths.length)
       ? ('File Turnover đang chứa dữ liệu các tháng <b>'+esc(g.fileMonths[0])+' → '+esc(g.fileMonths[g.fileMonths.length-1])+
          '</b>, không trùng tháng nào của '+esc(S.fy)+'. Bấm “Toàn bộ file” để xem, hoặc mở file Turnover sửa <b>CONFIG.FY_FILTER</b> và <b>VALID_MONTHS</b> sang '+esc(S.fy)+'.')
@@ -4189,7 +4225,7 @@ function renderKPI(){
       '<div class="chips"><div class="chip'+(qsel==="FY"?" on":"")+'" onclick="setKpiQ(\'FY\')">Theo quý</div>'+
       '<div class="chip'+(qsel==="M"?" on":"")+'" onclick="setKpiQ(\'M\')">Theo tháng</div></div></div>'+
 
-    '<div class="card pad" style="margin-bottom:14px"><div class="ct"><span class="dot"></span>PHẦN A — Tổng mục tiêu MMH Dental</div>'+partA+'</div>'+
+    '<div class="card pad" style="margin-bottom:14px"><div class="ct"><span class="dot"></span>PHẦN A — Tổng mục tiêu MMH '+esc(curTeam().label)+'</div>'+partA+'</div>'+
     turnoverBlock(picSel)+
 
     '<div style="display:flex;align-items:flex-end;gap:12px;flex-wrap:wrap;margin:16px 4px 10px">'+
@@ -7616,7 +7652,7 @@ function galExcel(){
       XLSX.utils.book_append_sheet(wb,ws,"Anh di dia ban");
       XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(sum),"Tong hop PIC-Thang");
       var tag=(S.galMonth==="ALL"?S.fy:S.galMonth)+(S.galPic?("_"+S.galPic.replace(/\s+/g,"")):"");
-      XLSX.writeFile(wb,"MMH_Dental_AnhDiaBan_"+tag+".xlsx");
+      XLSX.writeFile(wb,"MMH_"+curTeam().label+"_AnhDiaBan_"+tag+".xlsx");
       busy(false); toast("✓ Đã tải file Excel ("+rows.length+" dòng)","ok",4200);
     }catch(e){ busy(false); toast(e.message,"err",5000); }
   });
@@ -7693,7 +7729,7 @@ function renderReport(){
           (S.otherErr?' <b style="color:var(--dang)">'+esc(S.otherErr)+'</b>':"")+'</div>'
         : '<div class="hint">Sẽ gửi kèm <b>'+_nc+'</b> Key task / đầu việc con của tuần này và <b>'+_nn+'</b> mục kế hoạch tuần sau, '+
           'nằm ở mục <b>③ Other tasks</b> trong email.</div>')+
-      '<div class="hint" style="margin-top:6px;color:var(--mute)">Nếu email nhận được vẫn thiếu mục này, file <b>Code.gs</b> của MMH_Dental_CRM_FY68 '+
+      '<div class="hint" style="margin-top:6px;color:var(--mute)">Nếu email nhận được vẫn thiếu mục này, file <b>Code.gs</b> của '+esc(curTeam().crmFile)+' '+
       'đang chạy bản cũ hơn <b>v6.8</b> — cần dán bản vá Code.gs (sendWeeklyReport phải đọc tham số <code>other</code>).</div></div>';
   }
   var body = loading
@@ -8356,7 +8392,7 @@ function openAcc(code,name){
     var msg=String(e.message||"");
     if(/unknown action/i.test(msg)){
       msg='Web App đang chạy bản Code.gs cũ (chưa có "account360"). '+
-          'Vào file MMH_Dental_CRM_FY68 ▸ Extensions ▸ Apps Script ▸ Deploy ▸ '+
+          'Vào file '+curTeam().crmFile+' ▸ Extensions ▸ Apps Script ▸ Deploy ▸ '+
           'Manage deployments ▸ ✎ ▸ Version: New version ▸ Deploy.';
     }
     if(S.acc&&S.acc.ok){
@@ -9179,13 +9215,15 @@ var SENDLB={ self:{t:"Gửi thử cho chính bạn",d:"Email chỉ vào hộp th
 /* ⭐ v9 — NGƯỜI NHẬN BÁO CÁO TÁCH THEO NHÓM
    Dental   · To = cả Dental Sales Team          · Cc = Tuyen, Nguyen Ha, Hoa
    Surgical · To = Tuyen, Nguyen Ha, Giang, Hoa  · Cc = PIC Surgical còn lại
-   (nhóm Surgical chỉ có 2 PIC nên báo cáo gửi thẳng lên quản lý,
+   Eyeless  · To = Tuyen, Nguyen Ha, Giang, Hoa  · Cc = PIC Eyeless   (⭐ v7.2)
+   (nhóm Surgical chỉ có 2 PIC, Eyeless 1 PIC nên báo cáo gửi thẳng lên quản lý,
     người cùng nhóm vẫn được Cc để nắm việc của nhau) */
 var MAIL_TUYEN="tt.tuyen@manimedicalhanoi.com", MAIL_HA="nt.ha@manimedicalhanoi.com",
     MAIL_PROD ="mmh.product@manimedicalhanoi.com", MAIL_HR="vtt.hoa@manimedicalhanoi.com";
 var MAIL_RULE={
   dental  : { team:"Dental Sales Team",   toTeam:true,  fixed:[MAIL_TUYEN,MAIL_HA,MAIL_HR] },
-  surgical: { team:"Surgical Sales Team", toTeam:false, fixed:[MAIL_TUYEN,MAIL_HA,MAIL_PROD,MAIL_HR] }
+  surgical: { team:"Surgical Sales Team", toTeam:false, fixed:[MAIL_TUYEN,MAIL_HA,MAIL_PROD,MAIL_HR] },
+  eyeless : { team:"Eyeless Sales Team",  toTeam:false, fixed:[MAIL_TUYEN,MAIL_HA,MAIL_PROD,MAIL_HR] }
 };
 function mailRule(){ return MAIL_RULE[curTeamKey()]||MAIL_RULE.dental; }
 function teamMails(){
