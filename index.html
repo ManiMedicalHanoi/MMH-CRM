@@ -8,7 +8,7 @@
 <title>MMH CRM system</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
 <style>
 /* ═══════════════ MMH DESIGN TOKENS ═══════════════ */
 :root{
@@ -679,6 +679,16 @@ body.modal-on #drw{filter:blur(2px) saturate(.85);opacity:.55}
 .pick2-c.on{border-color:var(--ok);background:var(--ok-bg)}
 #btnTeam{width:auto;padding:0 12px;gap:5px;font-size:12.5px;white-space:nowrap}
 #btnTeam b{font-weight:800}
+/* ⭐ v13 — bộ chuyển nhóm Dental / Surgical / Eyeless cho Management */
+.tmsw{display:flex;flex-direction:column;gap:3px;margin:2px 0 6px;padding:7px;border:1px solid var(--lb2);border-radius:var(--r-md);background:var(--pale)}
+.tmsw .tl{font-size:10px;font-weight:800;color:var(--mute);letter-spacing:.6px;text-transform:uppercase;padding:1px 5px 4px}
+.tmsw button{display:flex;align-items:center;gap:8px;border:none;background:none;border-radius:9px;padding:7px 9px;font-size:13px;font-weight:700;color:var(--sub);cursor:pointer;text-align:left;font-family:inherit;width:100%}
+.tmsw button:hover{background:var(--card);color:var(--blue-d)}
+.tmsw button.on{background:var(--blue);color:#fff;box-shadow:var(--sh-1)}
+.tmsw button .ic{font-size:15px;line-height:1}
+@media(min-width:721px) and (max-width:1080px){ .tmsw{padding:4px} .tmsw .tl,.tmsw b{display:none} .tmsw button{justify-content:center;padding:8px 0} }
+@media(max-width:520px){ #btnTeam b{display:none} #btnTeam{padding:0 9px} }
+.wkmore{display:flex;justify-content:center;margin:6px 0 18px}
 /* điều khiển nhanh trong đầu việc con */
 .ot-ic{border:none;background:none;cursor:pointer;font-size:13px;padding:3px 5px;border-radius:7px;color:var(--sub);transition:.15s}
 .ot-ic:hover{background:var(--pale);color:var(--blue-d)}
@@ -1271,7 +1281,9 @@ function curTeamKey(){
   return "dental";
 }
 function curTeam(){ return TEAMS[curTeamKey()]; }
-function bundleKey_(){ return "mmh_bundle_v2_"+curTeamKey(); }
+/* ⭐ v13 — khoá bộ nhớ đệm luôn gắn với nhóm ⇒ không bao giờ lẫn dữ liệu Dental / Surgical / Eyeless */
+function ckey(name){ return "k:"+curTeamKey()+":"+name; }
+function bundleKey_(){ return ckey("bundle"); }
 /* Đổi nhóm: dọn sạch mọi thứ thuộc nhóm cũ rồi nạp lại từ đầu */
 function switchTeam(k){
   if(!TEAMS[k] || k===curTeamKey()) return closeModal();
@@ -1284,8 +1296,8 @@ function switchTeam(k){
   S.other=null; S.otherErr=""; S.turnover=null; S.turnoverErr="";
   S.master={}; S.picList=[]; S.detail=null;
   _stCache=null; _cxCache=null;
-  try{ localStorage.removeItem(bundleKey_()); localStorage.removeItem(TKEY_()); }catch(e){}
-  setTimeout(function(){ location.reload(); },200);
+  try{ kvFlush(); }catch(e){}                /* ⭐ v13 — cache mỗi nhóm để riêng, đổi nhóm không xoá ⇒ mở lại tức thì */
+  setTimeout(function(){ location.reload(); },250);
 }
 function teamPicker(){
   var cur=curTeamKey();
@@ -1640,6 +1652,7 @@ function postBody(body){
 }
 function apiPost(body){
   if(!body.action) return Promise.reject(new Error("thiếu action"));
+  S._lastWriteAt=Date.now();                 /* ⭐ v13 — version đổi do chính mình ⇒ không tải lại toàn bộ */
   var flat={}; Object.keys(body).forEach(function(k){ var v=body[k]; flat[k]=(v!==null&&typeof v==="object")?JSON.stringify(v):v; });
   var qs=Object.keys(flat).map(function(k){ return encodeURIComponent(k)+"="+encodeURIComponent(flat[k]==null?"":flat[k]); }).join("&");
   if((gasUrl()+"?"+qs).length>6500) return postBody(body);
@@ -1655,23 +1668,117 @@ function apiPost(body){
 }
 
 /* ───────── BOOT ───────── */
-window.addEventListener("load", boot);
 function lsGet(k){ try{ var v=localStorage.getItem(k); return v?JSON.parse(v):null; }catch(e){ return null; } }
 function lsSet(k,v){ try{ localStorage.setItem(k,JSON.stringify(v)); }catch(e){} }
+
+/* ═══════════ ⭐ v13 — BỘ NHỚ ĐỆM INDEXEDDB (thay localStorage cho dữ liệu lớn) ═══════════
+   localStorage chỉ ~5 MB, ghi/đọc đồng bộ (đứng hình khi JSON lớn) và bản cũ bỏ qua mọi tab
+   > 2.500 dòng (CBC 8.000 dòng, địa bàn > 3.000 dòng) ⇒ lần mở nào cũng phải tải lại từ đầu.
+   Nay: dữ liệu nằm trong IndexedDB (hàng trăm MB, bất đồng bộ), nạp vào RAM một lần lúc mở
+   app, ghi xuống gom lô khi rảnh. Máy không hỗ trợ IndexedDB thì tự quay về localStorage. */
+var KV={ mem:{}, db:null, ok:false, pend:{}, timer:null };
+function kvOpen(){
+  return new Promise(function(res){
+    try{
+      if(!window.indexedDB) return res(null);
+      var rq=indexedDB.open("mmh_crm_cache",1);
+      rq.onupgradeneeded=function(){ try{ rq.result.createObjectStore("kv"); }catch(e){} };
+      rq.onsuccess=function(){ res(rq.result); };
+      rq.onerror=function(){ res(null); };
+      rq.onblocked=function(){ res(null); };
+    }catch(e){ res(null); }
+  });
+}
+function kvReadRange(db,prefix){
+  return new Promise(function(res){
+    try{
+      var tx=db.transaction("kv","readonly"), st=tx.objectStore("kv");
+      var cur=st.openCursor(IDBKeyRange.bound(prefix,prefix+"\uffff"));
+      cur.onsuccess=function(){ var c=cur.result; if(c){ KV.mem[c.key]=c.value; c.continue(); } else res(); };
+      cur.onerror=function(){ res(); };
+    }catch(e){ res(); }
+  });
+}
+function kvWarm(){
+  return new Promise(function(res){
+    var done=false;
+    function fin(){ if(done) return; done=true; res(); }
+    setTimeout(fin,1800);                       /* IndexedDB chậm bất thường ⇒ vẫn mở app */
+    kvOpen().then(function(db){
+      if(!db) return fin();
+      KV.db=db; KV.ok=true;
+      Promise.all([kvReadRange(db,"k:"+curTeamKey()+":"), kvReadRange(db,"k:*:")]).then(function(){
+        kvMigrateLegacy(); fin();
+      });
+    });
+  });
+}
+/* chuyển cache cũ trong localStorage sang IndexedDB một lần rồi giải phóng dung lượng */
+function kvMigrateLegacy(){
+  try{
+    var tk=curTeamKey();
+    [["mmh_bundle_v2_"+tk,"bundle"],["mmh_tabs_v4_"+tk,"tabs"]].forEach(function(p){
+      var raw=localStorage.getItem(p[0]); if(!raw || KV.mem[ckey(p[1])]) return;
+      try{ KV.mem[ckey(p[1])]=JSON.parse(raw); kvQueue(ckey(p[1])); }catch(e){}
+    });
+    var drop=[];
+    for(var i=0;i<localStorage.length;i++){
+      var k=localStorage.key(i);
+      if(/^mmh_(bundle_v2_|tabs_v4_|terr_)/.test(k||"")) drop.push(k);
+    }
+    drop.forEach(function(k){ try{ localStorage.removeItem(k); }catch(e){} });
+  }catch(e){}
+}
+function kvGet(k){
+  if(k in KV.mem) return KV.mem[k];
+  if(!KV.ok){ var v=lsGet(k); if(v!=null) KV.mem[k]=v; return v; }
+  return null;
+}
+function kvSet(k,v){ KV.mem[k]=v; kvQueue(k); }
+function kvDel(k){ KV.mem[k]=undefined; kvQueue(k); }
+function kvQueue(k){ KV.pend[k]=1; clearTimeout(KV.timer); KV.timer=setTimeout(kvFlush,900); }
+function kvFlush(){
+  clearTimeout(KV.timer);
+  var keys=Object.keys(KV.pend); if(!keys.length) return; KV.pend={};
+  if(KV.ok && KV.db){
+    try{
+      var tx=KV.db.transaction("kv","readwrite"), st=tx.objectStore("kv");
+      keys.forEach(function(k){
+        try{ if(KV.mem[k]===undefined){ st.delete(k); delete KV.mem[k]; } else st.put(KV.mem[k],k); }catch(e){}
+      });
+      tx.onerror=function(){};
+    }catch(e){}
+    return;
+  }
+  keys.forEach(function(k){
+    try{
+      if(KV.mem[k]===undefined){ localStorage.removeItem(k); delete KV.mem[k]; return; }
+      var s=JSON.stringify(KV.mem[k]);
+      if(s.length<2400000) localStorage.setItem(k,s);
+    }catch(e){}
+  });
+}
+window.addEventListener("pagehide",function(){ try{ kvFlush(); }catch(e){} });
+document.addEventListener("visibilitychange",function(){ if(document.hidden){ try{ kvFlush(); }catch(e){} } });
+
+/* ⭐ v13 — khởi động ngay khi HTML sẵn sàng (không đợi font / ảnh tải xong như sự kiện "load") */
+function bootWarm(){ kvWarm().then(boot,boot); }
+if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",bootWarm);
+else setTimeout(bootWarm,0);
 
 /* ⭐ v2: mở app bằng DỮ LIỆU ĐÃ LƯU trước (hiện ngay lập tức), rồi mới
    tải bản mới ở nền. Người dùng không còn phải ngồi nhìn vòng xoay. */
 function boot(){
   loadTabs();
   var saved=localStorage.getItem("mmh_dental_pic");
-  var cache=lsGet(bundleKey_());
+  var cache=kvGet(bundleKey_());
   if(cache&&cache.picList&&cache.picList.length){
     S.picList=cache.picList; S.master=cache.master||{}; S.driveFolder=cache.driveFolder||"";
     S.fy=cache.fyCurrent||"FY68";
     S.fyList=(cache.fyList&&cache.fyList.length)?cache.fyList:((S.master.fy&&S.master.fy.length)?S.master.fy.slice():[S.fy]);
     applyBundle(cache,true);
     $("loader").style.display="none";
-    if(canAuto(saved)){ startApp(saved); refreshBundle(true); }
+    if(canAuto(saved)) startApp(saved);        /* ⭐ v13 — startApp tự quyết có cần tải lại hay không */
     else showLogin();
     return;
   }
@@ -1694,6 +1801,7 @@ function canAuto(saved){
   return true;
 }
 function fetchBundle(pic){
+  S._lastBundlePic=pic||"";
   return apiGet("bundle",{pic:pic||"",fy:S.fy||""});
 }
 /* Áp dữ liệu bundle vào state. fromCache=true ⇒ không ghi đè localStorage. */
@@ -1713,11 +1821,15 @@ function applyBundle(b,fromCache){
   if(b.kpi){ S.kpi=b.kpi; S.kpi._fy=b.fyCurrent||S.fy; }
   if(b.activity) S.activity=b.activity;
   S.ver=b.ver||S.ver||"";
-  if(!fromCache){
-    lsSet(bundleKey_(),{
+  normTeamPics();                             /* ⭐ v13 — danh sách PIC đúng theo nhóm */
+  if(fromCache){ S._bundlePic=b._pic; }
+  else{
+    S._bundleAt=Date.now(); S._bundlePic=S._lastBundlePic||"";
+    kvSet(bundleKey_(),{
       picList:S.picList, master:S.master, driveFolder:S.driveFolder,
       fyCurrent:b.fyCurrent, fyList:S.fyList,
-      cidxCols:b.cidxCols, cidx:b.cidx, dash:b.dash, kpi:b.kpi, activity:b.activity, ver:b.ver
+      cidxCols:b.cidxCols, cidx:b.cidx, dash:b.dash, kpi:b.kpi, activity:b.activity, ver:b.ver,
+      _pic:S._bundlePic, _at:Date.now()
     });
   }
 }
@@ -1728,22 +1840,34 @@ function applyBundle(b,fromCache){
    thấy. Code.gs v7.0 gắn trigger onChange để tự đổi version; app thăm dò version
    và tự nạp lại toàn bộ khi thấy khác. */
 var VER_POLL_MS=45000, _verTimer=null, _verBusy=false;
+/* ⭐ v13 — ĐỒNG BỘ MỀM: không xoá trắng dữ liệu đang hiển thị nữa.
+   Bản cũ xoá sạch bộ nhớ rồi tải lại TẤT CẢ mỗi khi version đổi — kể cả khi chính mình
+   vừa lưu 1 task ⇒ 6–7 request cùng lúc, màn hình nhảy khung xương, app ì hẳn.
+   Nay: giữ nguyên dữ liệu đang xem, tải bản mới ở nền, có bản mới là vẽ lại tại chỗ;
+   thay đổi do CHÍNH mình ghi thì bỏ qua (afterWrite đã cập nhật ngay trên máy). */
 function verSyncNow(){
-  S.cache={}; clearTabs(); S.cbcRows=null; S._prefetched=false; S.other=null;
-  try{ localStorage.removeItem(bundleKey_()); }catch(e){}
-  refreshBundle(true); prefetchAll();
+  Object.keys(TSTORE).forEach(function(k){ if(TSTORE[k]) TSTORE[k].at=0; });
+  if(S.cache.weekly){ S.cache.weekly.at=0; S.cache.weekly.fresh=false; }
+  S._bundleAt=0; _tabSync={}; _cxCache=null; _stCache=null;
+  return fullSync();
 }
 function verPoll(){
-  if(_verBusy||document.hidden||!S.user||!S.user.pic) return;
+  if(_verBusy||document.hidden||!S.user||!S.user.pic||GATE) return;
   _verBusy=true;
   apiGet("version",{}).then(function(j){
-    _verBusy=false;
+    _verBusy=false; S._verOkAt=Date.now();
     var v=String((j&&j.ver)||"");
     if(!v) return;
     if(!S.verSeen){ S.verSeen=v; return; }
     if(v===S.verSeen) return;
-    S.verSeen=v; verSyncNow();
-    toast("Google Sheet vừa thay đổi — app đã nạp lại dữ liệu mới","ok",4200);
+    var prev=S.verSeen; S.verSeen=v;
+    if(Date.now()-(S._lastWriteAt||0)<30000){
+      /* version đổi vì chính mình vừa lưu ⇒ không tải lại toàn bộ */
+      var m=kvGet(metaKey_()); if(m&&m.ver===prev) kvSet(metaKey_(),{ver:v,at:Date.now()});
+      return;
+    }
+    verSyncNow();
+    toast("Google Sheet vừa thay đổi — đang cập nhật dữ liệu mới…","ok",3200);
   }).catch(function(){ _verBusy=false; });
 }
 function verAutoOn(){ verAutoOff(); _verTimer=setInterval(verPoll,VER_POLL_MS); }
@@ -1752,25 +1876,25 @@ document.addEventListener("visibilitychange",function(){ if(!document.hidden) se
 window.addEventListener("focus",function(){ setTimeout(verPoll,300); });
 
 function refreshBundle(silent){
-  if(S._refreshing) return;
-  S._refreshing=true;
+  if(S._refreshing) return S._refreshing;
   if(!silent) toast("Đang tải lại dữ liệu…");
   var badge=$("stale"); if(badge) badge.style.display="";
-  fetchBundle(S.user?S.user.pic:"").then(function(b){
-    S._refreshing=false;
+  S._refreshing=fetchBundle(S.user?S.user.pic:"").then(function(b){
+    S._refreshing=null;
     applyBundle(b);
-    var _keepW=S.cache.weekly; S.cache={}; if(_keepW) S.cache.weekly=_keepW;
-    /* ⭐ v4: đang sửa mục tiêu hoặc đang mở màn hình phụ ⇒ KHÔNG vẽ lại, tránh nhảy tab */
-    var busyEdit=(S.tab==="kpi"&&typeof kpiDirty==="function"&&kpiDirty())
-                 || $("drw").classList.contains("on") || $("ov").classList.contains("on");
-    if(!busyEdit && (S.tab==="dash"||S.tab==="kpi"||S.tab==="cust")) go(S.tab);
+    /* ⭐ v13 — không xoá S.cache nữa (trước đây làm các tab Đơn hàng/ADP… trống tạm thời) và
+       không gọi go() vẽ lại cả trang; softRepaint tự tránh lúc đang gõ / đang sửa KPI */
+    if(S.tab==="dash"||S.tab==="kpi"||S.tab==="cust") softRepaint();
     var bd=$("stale"); if(bd) bd.style.display="none";
     if(!silent) toast("✓ Đã cập nhật dữ liệu mới","ok");
+    return true;
   }).catch(function(e){
-    S._refreshing=false;
+    S._refreshing=null;
     var bd=$("stale"); if(bd) bd.style.display="none";
     if(!silent) toast(e.message,"err");
+    return false;
   });
+  return S._refreshing;
 }
 /* ═══════════════════════ ⭐ v4.4 — ĐĂNG NHẬP & PHÂN QUYỀN ═══════════════════════
    · Bước 1: nhập mật khẩu chung (nhớ trên thiết bị, chỉ nhập 1 lần)
@@ -1803,6 +1927,37 @@ var ROLE_GROUPS = [
   { k:"Eyeless Sales",  ic:"🪡", sub:"File dữ liệu Eyeless · chỉ xem việc của mình" }
 ];
 function isMgmt(){ return !!(S.user && S.user.grp === "Management"); }
+/* ⭐ v13 — DANH SÁCH PIC THEO NHÓM
+   Dental: Viet · Vinh · Phuong  ·  Surgical: Viet Ha · Khang  ·  Eyeless: Trang
+   Danh sách PIC trong MASTER LIST của file Surgical/Eyeless có thể còn tên của Dental (file
+   được nhân bản từ template) ⇒ bộ lọc, form, báo cáo hiện sai người. Nay luôn lấy PIC của
+   đúng nhóm làm chuẩn, loại tên thuộc nhóm khác, giữ thêm tên lạ có trong sheet (nếu có). */
+function teamPicNames(k){ k=k||curTeamKey(); return Object.keys(ROLES).filter(function(nm){ return ROLES[nm].team===k; }); }
+function picKey_(s){ return String(s||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/\s+/g," ").trim(); }
+function normTeamPics(){
+  try{
+    var k=curTeamKey(), mine=teamPicNames(k), other={}, seen={}, out=mine.slice();
+    Object.keys(ROLES).forEach(function(nm){ if(ROLES[nm].team!==k) other[picKey_(nm)]=1; });
+    mine.forEach(function(nm){ seen[picKey_(nm)]=1; });
+    ((S.master&&S.master.pic)||[]).forEach(function(p){
+      var q=String(p||"").trim(), key=picKey_(q);
+      if(!q||seen[key]||other[key]) return;
+      seen[key]=1; out.push(q);
+    });
+    S.master=S.master||{}; S.master.pic=out;
+  }catch(e){}
+}
+/* ô "MMH sales PIC" dùng chung cho mọi form thêm / sửa:
+   · Sales  → hiện sẵn đúng PIC đang đăng nhập, khoá, không phải chọn
+   · Management → chọn trong danh sách PIC của nhóm đang xem */
+function picFld(id,cur,label,extra){
+  label=label||"MMH sales PIC";
+  if(!isMgmt()) return '<div class="fld"><label>'+esc(label)+'</label><input class="inp piclock" id="'+id+'" value="'+esc(S.user.pic)+'" readonly title="PIC cố định theo tài khoản đăng nhập"></div>';
+  var list=(S.master.pic||[]).slice(); if(cur && list.indexOf(cur)<0) list.unshift(cur);
+  return '<div class="fld"><label>'+esc(label)+'</label><select class="inp" id="'+id+'"'+(extra||"")+'>'+opts(list,cur||"","— chọn —")+'</select></div>';
+}
+/* gán PIC theo account vừa chọn — CHỈ áp cho Management (sales đã khoá theo mình) */
+function setPicSel(id,v){ var el=$(id); if(v && el && el.tagName==="SELECT") el.value=v; }
 function afterUserKnown(){ try{ paintTeamBtn(); }catch(e){} }
 function canSeeGallery(){ return isMgmt(); }
 function authOk(){ try{ return localStorage.getItem(LS_AUTH)==="1"; }catch(e){ return false; } }
@@ -1867,12 +2022,7 @@ function ensureTeamFor(pic){
   if(!want || want===curTeamKey()) return false;
   try{ localStorage.setItem(LS_PIC,pic); localStorage.setItem(LS_TEAM,want); }catch(e){}
   try{ TSTORE={}; FETCHING={}; }catch(e){}
-  try{
-    Object.keys(TEAMS).forEach(function(k){
-      localStorage.removeItem("mmh_bundle_v2_"+k);
-      localStorage.removeItem("mmh_tabs_v4_"+k);
-    });
-  }catch(e){}
+  try{ kvFlush(); }catch(e){}                /* ⭐ v13 — cache đã tách riêng theo nhóm, không cần xoá */
   try{ busy(true,"Đang mở dữ liệu nhóm "+TEAMS[want].label+"…"); }catch(e){}
   setTimeout(function(){ location.reload(); },200);
   return true;
@@ -1923,16 +2073,17 @@ function startApp(pic){
            team:p.team||r.grp, level:(r.grp==="Management")?"lead":"pic" };
   if(!isMgmt()) S.filt.pic=S.user.pic;      /* sales: khoá cứng theo PIC của mình */
   else S.filt.pic="";
+  afterUserKnown();                          /* ⭐ v13 — hiện nút đổi nhóm cho Management (bản cũ quên gọi ⇒ kẹt ở Dental) */
   $("login").classList.remove("on");
   $("app").classList.add("on");
   $("uInit").textContent=r.ini||initials(pic);
   $("btnUser").title=pic+" — "+(r.title||"");
   $("fySel").innerHTML=opts(S.fyList,S.fy);
   buildNav();
+  startSync();                               /* ⭐ v13 — hỏi version trước: dữ liệu không đổi thì KHÔNG tải lại */
   go("weekly");                              /* mở app là vào ngay màn hình địa bàn */
   if(!S.custIndex.length) loadCustomerIndex();
   if(S.activity&&S.activity.length) $("actDot").style.display="";
-  prefetchAll();
   warmGps();
 }
 
@@ -1941,15 +2092,22 @@ $("btnUser").onclick=function(){
   try{ localStorage.removeItem(LS_PIC); }catch(e){}
   location.reload();
 };
-$("btnReload").onclick=function(){ S.other=null; S.verSeen=""; S.cache={}; clearTabs(); S.cbcRows=null; S._prefetched=false; refreshBundle(false); prefetchAll(); verPoll(); };
+$("btnReload").onclick=function(){
+  /* ⭐ v13 — tải lại ở nền, giữ nguyên màn hình đang xem */
+  toast("Đang tải lại dữ liệu mới nhất…");
+  if(S.other) loadOther(true).then(softRepaint).catch(function(){});
+  verSyncNow().then(function(ok){ toast(ok?"✓ Đã cập nhật dữ liệu mới":"Một phần dữ liệu chưa tải được — thử lại sau",ok?"ok":"warn"); });
+};
 verAutoOn();
 $("btnAct").onclick=function(){ toggleAct(); };
-$("fySel").onchange=function(){ S.fy=this.value; S.cache={}; S.dash=null; S.kpi=null; S.targetDraft={}; S.kpiPic=""; S.cbcRows=null; S._prefetched=false; go(S.tab); prefetchAll(); };
+$("fySel").onchange=function(){ S.fy=this.value; S.cache={}; S.dash=null; S.kpi=null; S.targetDraft={}; S.kpiPic=""; S.cbcRows=null; S._bundleAt=0; go(S.tab); fullSync(); };
+/* ⭐ v13 — bỏ việc tự tải lại bundle mỗi 3 phút khi quay lại cửa sổ: thăm dò version (ở trên)
+   đã biết chính xác lúc nào sheet đổi. Chỉ tải lại khi thăm dò version không chạy được. */
 window.addEventListener("focus",function(){
   if(!S.user) return;
   if($("ov").classList.contains("on")||$("drw").classList.contains("on")) return;   /* đang nhập liệu */
   if(typeof kpiDirty==="function"&&kpiDirty()) return;
-  if(Date.now()-(S._lastSync||0)>180000){ S._lastSync=Date.now(); refreshBundle(true); }
+  if(Date.now()-(S._verOkAt||0)>600000 && Date.now()-(S._lastSync||0)>600000){ S._lastSync=Date.now(); refreshBundle(true); }
 });
 $("fab").onclick=function(){ pickTaskKind(); };
 $("btnHelp").onclick=function(){ openHelp(); };
@@ -1959,7 +2117,7 @@ function paintTeamBtn(){
   var t=curTeam(), b=$("btnTeam");
   /* ⭐ v7.1 — sales đã đăng nhập theo PIC nên nhóm là hiển nhiên; chỉ quản lý mới cần đổi nhóm */
   if(b) b.style.display = isMgmt() ? "" : "none";
-  if(b) b.innerHTML=t.ic+' <b>'+esc(t.label)+'</b>';
+  if(b) b.innerHTML=t.ic+' <b>'+esc(t.label)+'</b> ▾';
   try{
     /* ⭐ v7.2 — header dùng class .bt / .bs (bản cũ tìm nhầm .sub nên luôn hiện "Dental") */
     var bt=document.querySelector(".brand .bt");
@@ -2006,16 +2164,39 @@ function hubJsonp(params,timeoutMs){
   });
 }
 (function(){ try{ var v=localStorage.getItem("mmh_otview"); if(v) S.otherView=v; }catch(e){} })();
+/* ⭐ v13 — Công việc khác: hiện ngay bản đã lưu, đọc lại Report Hub ở nền khi quá 2 phút */
+var OTHER_KEY="k:*:other";
+function otherHydrate(){
+  if(S.other) return;
+  var c=kvGet(OTHER_KEY);
+  if(c && c.keys){ S.other={ keys:c.keys, at:c.at||0 }; S.otherErr=""; }
+}
 function loadOther(force){
-  if(S.other && !force) return Promise.resolve(S.other);
+  otherHydrate();
+  if(S.other && !force){
+    if(Date.now()-(S.other.at||0)>120000 && !S._otLoading)
+      loadOther(true).then(function(){ softRepaint(); }).catch(function(){});
+    return Promise.resolve(S.other);
+  }
   if(S._otLoading) return S._otLoading;
   S._otLoading = hubJsonp({action:"weekly", _ts:Date.now()}).then(function(j){
     S._otLoading=null; S.otherErr="";
     if(!j || !j.ok) throw new Error((j&&j.error)||"Report Hub trả về dữ liệu không hợp lệ");
     S.other={ keys:j.keyTasks||[], at:Date.now() };
+    kvSet(OTHER_KEY,S.other);
     return S.other;
-  }).catch(function(e){ S._otLoading=null; S.otherErr=e.message; throw e; });
+  }).catch(function(e){ S._otLoading=null; if(!S.other) S.otherErr=e.message; throw e; });
   return S._otLoading;
+}
+/* Management xem Công việc khác của ĐÚNG nhóm đang chọn (Dental / Surgical / Eyeless) */
+function otherTeamOk(k){
+  if(!isMgmt()) return true;
+  var me=curTeamKey(), t=picKey_(k.type||""), hit="";
+  if(/eyeless/.test(t)) hit="eyeless"; else if(/surgical|ophthal/.test(t)) hit="surgical"; else if(/dental/.test(t)) hit="dental";
+  if(hit) return hit===me;
+  var team=teamPicNames(me);
+  var pics=[k.pic].concat((k.subs||[]).map(function(x){ return x.pic; }));
+  return pics.some(function(p){ return team.some(function(nm){ return picEq(p,nm); }); });
 }
 /* ── quyền: sales chỉ sửa việc của mình, quản lý sửa được tất cả ── */
 /* ⭐ v5.5 — bấm ＋ thì hỏi trước: ghi hoạt động đi địa bàn hay việc khác.
@@ -2100,6 +2281,7 @@ function otherKeys(){
   ((S.other&&S.other.keys)||[]).forEach(function(k){
     if(String(k.fy||"") && String(k.fy)!==S.fy) return;
     if(!OTHER_TYPE_RE.test(String(k.type||""))) return;
+    if(!otherTeamOk(k)) return;                          /* ⭐ v13 */
     if(!S.otherShowVisit && isVisitingKey(k)) return;   /* việc đi địa bàn: xem ở tab bên cạnh */
     if(S.otherType && String(k.type||"")!==S.otherType) return;   /* ⭐ v8 — lọc theo Loại việc */
 
@@ -2145,6 +2327,9 @@ function refreshOther(){ S.other=null; S.otherErr=""; renderOther();
   loadOther(true).then(function(){ if(S.tab==="weekly") renderOther(); })
                  .catch(function(){ if(S.tab==="weekly") renderOther(); }); }
 function pgOther(){
+  otherHydrate();
+  if(S.other && Date.now()-(S.other.at||0)>120000 && !S._otLoading)
+    loadOther(true).then(function(){ softRepaint(); }).catch(function(){});
   if(!S.other && !S._otLoading && !S.otherErr)
     loadOther().then(function(){ if(S.tab==="weekly") renderOther(); })
                .catch(function(){ if(S.tab==="weekly") renderOther(); });
@@ -2378,6 +2563,7 @@ function renderOther(){
 
   var keys=otherKeys();
   var picList=[]; ((S.other&&S.other.keys)||[]).forEach(function(k){
+    if(!otherTeamOk(k)) return;
     if(k.pic&&picList.indexOf(k.pic)<0) picList.push(k.pic);
     (k.subs||[]).forEach(function(x){ if(x.pic&&picList.indexOf(x.pic)<0) picList.push(x.pic); }); });
   var nSub=0,nDone=0,nLate=0,today=todayISO();
@@ -3212,11 +3398,19 @@ var MOB_ORDER=["weekly","cust","stake","order","present","report","monthly","adp
 function navTabs(){ return TABS.filter(function(t){ return t.gate!=="gallery" || canSeeGallery(); }); }
 function buildNav(){
   var h="",lastGrp="";
+  if(isMgmt()){
+    var ck=curTeamKey();
+    h+='<div class="tmsw"><div class="tl">Nhóm đang xem</div>'+Object.keys(TEAMS).map(function(k){
+      var tm=TEAMS[k];
+      return '<button class="'+(k===ck?"on":"")+'" title="'+esc(tm.short)+'" onclick="'+(k===ck?"":"switchTeam(\''+k+'\')")+'">'+
+        '<span class="ic">'+tm.ic+'</span><b>'+esc(tm.label)+'</b></button>';
+    }).join("")+'</div>';
+  }
   navTabs().forEach(function(t){
     if(t.grp!==lastGrp){ h+='<div class="grp">'+t.grp+'</div>'; lastGrp=t.grp; }
     h+='<button class="nvi" data-t="'+t.id+'" onclick="go(\''+t.id+'\')"><span class="ic">'+t.ic+'</span><span class="lb">'+t.lb+'</span></button>';
   });
-  h+='<div style="flex:1"></div><div style="padding:10px;font-size:10.5px;color:var(--mute);line-height:1.5">MMH CRM v10<br>'+
+  h+='<div style="flex:1"></div><div style="padding:10px;font-size:10.5px;color:var(--mute);line-height:1.5">MMH CRM v13<br>'+
      (isMgmt()?'<a href="'+DRIVE_FOLDER+'" target="_blank">📁 Folder ảnh Drive</a>':"")+'</div>';
   $("side").innerHTML=h;
   /* ⭐ v4.5 — thanh dưới trượt ngang, đủ mọi mục, bỏ nút "Thêm" */
@@ -3252,11 +3446,15 @@ function loading(msg){
 /* ───────── customer index ───────── */
 function loadCustomerIndex(force){
   if(S.custIndex.length&&!force) return Promise.resolve(S.custIndex);
-  return apiGet("customerIndex").then(function(j){
+  /* ⭐ v13 — gom các lần gọi trùng (trước đây mở app bắn 3–4 request customerIndex cùng lúc) */
+  if(S._ciLoading){ return force ? S._ciLoading.then(function(){ return loadCustomerIndex(true); }) : S._ciLoading; }
+  S._ciLoading=apiGet("customerIndex").then(function(j){
+    S._ciLoading=null;
     S.custIndex=j.rows||[]; S.custMap={};
     S.custIndex.forEach(function(c){ S.custMap[c.code]=c; });
     return S.custIndex;
-  }).catch(function(){ return []; });
+  }).catch(function(){ S._ciLoading=null; return S.custIndex||[]; });
+  return S._ciLoading;
 }
 /* ⭐ v2: loading không chặn — dùng khung xương thay vòng xoay toàn màn hình */
 function skeleton(html){ $("main").innerHTML='<div class="pg">'+html+'</div>'; }
@@ -3509,7 +3707,8 @@ function dashEnsure(force){
   if(force){ S.cbcRows=null; S._cbcLoading=false; }
   if(!S.cbcRows){ ensureCbc(); setTimeout(dashRepaint,1400); }
 }
-function dashRepaint(){ if(S.tab==="dash") renderDash(); }
+var _drT=null;
+function dashRepaint(){ clearTimeout(_drT); _drT=setTimeout(function(){ if(S.tab==="dash") renderDash(); },120); }   /* ⭐ v13 — 5 nguồn về gần nhau chỉ vẽ 1 lần */
 function refreshDash(){ dashEnsure(true); }
 
 function renderDash(){
@@ -4667,7 +4866,7 @@ function formCustomer(c){
     '<div class="row">'+
       '<div class="fld"><label>Province</label><select class="inp" id="f_province" onchange="autoArea()">'+opts(S.master.province,c.province,"— chọn —")+'</select></div>'+
       '<div class="fld"><label>Area</label><select class="inp" id="f_area">'+opts(S.master.area,c.area,"— chọn —")+'</select></div>'+
-      '<div class="fld"><label>MMH sales PIC</label><select class="inp" id="f_pic">'+opts(S.master.pic,c.pic||S.user.pic,"— chọn —")+'</select></div>'+
+      picFld("f_pic",c.pic||"")+
     '</div>'+
     '<div class="row">'+
       '<div class="fld"><label>FY mở account</label><select class="inp" id="f_fy">'+opts(S.fyList,c.fy||S.fy,"—")+'</select></div>'+
@@ -4748,6 +4947,7 @@ function cbcPickAcc(c){
   if($("b_code")) $("b_code").value=c.code||"";
   if($("b_accHint")) $("b_accHint").textContent=[c.code,c.type,c.province,c.area,"PIC "+(c.pic||"—")].filter(Boolean).join(" · ");
   S.editing.ctx={ code:c.code, c:c };
+  if($("b_pic") && !$("b_pic").value) setPicSel("b_pic",c.pic);
   cbcSyncCode();
 }
 /* nút "＋ Địa bàn mới" — mở form account, lưu xong quay lại form CBC */
@@ -4792,6 +4992,9 @@ function formCBC(row,code){
         '<div class="hint">Số thứ tự kế tiếp của địa bàn</div></div>'+
     '</div>'+
     '<div class="row">'+
+      picFld("b_pic",b.pic||(lock&&lock===String(c.code||"")?c.pic:"")||(((S.custIndex||[]).filter(function(x){ return String(x.code)===lock; })[0])||{}).pic||"")+
+    '</div>'+
+    '<div class="row">'+
       '<div class="fld"><label>Tên người liên hệ <span class="rq">*</span></label><input class="inp" id="b_contact" value="'+esc(b.contact||"")+'"></div>'+
       '<div class="fld"><label>Điện thoại</label><input class="inp" id="b_phone" value="'+esc(b.phone||"")+'" inputmode="tel"></div>'+
     '</div>'+
@@ -4820,7 +5023,8 @@ function saveCBC(){
   var code=$("b_code")?$("b_code").value.trim():"";
   if(!code) return toast("Chọn địa bàn trước — hoặc bấm ＋ Địa bàn mới","warn");
   var d={ _row:S.editing.row, code:code, cbcCode:$("b_cbcCode").value.trim(), cbcNo:$("b_cbcNo").value,
-    type:c.type||"", name:c.name||$("b_accName").value.trim(), address:c.address||"", province:c.province||"", area:c.area||"", pic:c.pic||S.user.pic,
+    type:c.type||"", name:c.name||$("b_accName").value.trim(), address:c.address||"", province:c.province||"", area:c.area||"",
+    pic:(isMgmt()?(($("b_pic")&&$("b_pic").value)||c.pic||""):S.user.pic),
     contact:$("b_contact").value.trim(), phone:$("b_phone").value.trim(), jobTitle:$("b_jobTitle").value,
     specialize:$("b_specialize").value.trim(), role:$("b_role").value, influence:$("b_influence").value,
     trust:$("b_trust").value, note:$("b_note").value };
@@ -4968,7 +5172,25 @@ function tbdPrev(pfx){
 var TBD_ORDER=["Clinic","Hospital","University","Dealer","Distributor"];
 var TBD_EMPTY="Chưa ghi nhận hoạt động đi địa bàn nào hoàn thành trong tuần";
 function tbdIsDone(st){ return /complet/i.test(String(st||"")); }
-function tbdCounts(rows,pic,startIso){
+/* ⭐ v13 — đếm một lần cho mọi (PIC, tuần) thay vì quét toàn bộ dòng cho từng dòng TBD */
+function tbdIndex(rows){
+  var idx={};
+  (rows||[]).forEach(function(r){
+    if(isTbdAcc(r.account)) return;
+    if(!tbdIsDone(r.status)) return;
+    var d=String(r.start||"").slice(0,10); if(!d) return;
+    var t=noAcc(parseAcc(r.account).type||r.type||""), hit="";
+    for(var i=0;i<TBD_ORDER.length;i++) if(noAcc(TBD_ORDER[i])===t){ hit=TBD_ORDER[i]; break; }
+    if(!hit) return;
+    var mon=mondayOf(d);
+    [String(r.pic||"")+"|"+mon, "*|"+mon].forEach(function(k){
+      var e=idx[k]||(idx[k]={c:{},n:0}); e.c[hit]=(e.c[hit]||0)+1; e.n++;
+    });
+  });
+  return idx;
+}
+function tbdCounts(rows,pic,startIso,idx){
+  if(idx) return idx[(pic||"*")+"|"+mondayOf(startIso)]||{c:{},n:0};
   var from=mondayOf(startIso), to=addDays(from,6), c={}, n=0;
   (rows||[]).forEach(function(r){
     if(isTbdAcc(r.account)) return;                 /* không tự đếm chính mình */
@@ -4981,8 +5203,8 @@ function tbdCounts(rows,pic,startIso){
   });
   return { c:c, n:n };
 }
-function tbdResultText(rows,pic,startIso){
-  var x=tbdCounts(rows,pic,startIso);
+function tbdResultText(rows,pic,startIso,idx){
+  var x=tbdCounts(rows,pic,startIso,idx);
   var parts=TBD_ORDER.filter(function(k){ return x.c[k]; })
     .map(function(k){ return x.c[k]+" "+tbdGroupVn(k).toLowerCase(); });
   return parts.length ? ("Đã tiếp cận "+parts.join(", ")) : TBD_EMPTY;
@@ -4992,10 +5214,10 @@ function tbdResultText(rows,pic,startIso){
      đã đi ≥ 1 buổi (Completed)  → In Progress 25%
      từ thứ Năm của tuần đó      → In Progress 50%
      khi gửi báo cáo tuần        → Completed (chốt số liệu lần cuối) */
-function tbdStatusFor(rows,pic,startIso,cur,finalize){
+function tbdStatusFor(rows,pic,startIso,cur,finalize,idx){
   if(finalize) return stDone();
   if(/complet/i.test(String(cur||""))) return cur;      /* đã chốt thì giữ nguyên */
-  if(!tbdCounts(rows,pic,startIso).n) return stTodo();
+  if(!tbdCounts(rows,pic,startIso,idx).n) return stTodo();
   var pct = (todayISO() >= addDays(mondayOf(startIso),3)) ? 50 : 25;   /* thứ Hai + 3 = thứ Năm */
   return (stFind(/progress|đang/i,"In Progress")) + " " + pct + "%";
 }
@@ -5007,28 +5229,40 @@ function tbdFixRows(rows){
   var any=false;
   for(var i=0;i<rows.length;i++) if(isTbdAcc(rows[i].account)){ any=true; break; }
   if(!any) return rows;
+  var idx=tbdIndex(rows);
   rows.forEach(function(r){
     if(!isTbdAcc(r.account)) return;
     var st0=String(r.start||"").slice(0,10), pic0=String(r.pic||"");
     if(r._tbdRaw===undefined)   r._tbdRaw=String(r.result||"");   /* giá trị thật trên sheet */
     if(r._tbdRawSt===undefined) r._tbdRawSt=String(r.status||"");
-    r.result=tbdResultText(rows,pic0,st0);
-    r.status=tbdStatusFor(rows,pic0,st0,r._tbdRawSt,false);
+    r.result=tbdResultText(rows,pic0,st0,idx);
+    r.status=tbdStatusFor(rows,pic0,st0,r._tbdRawSt,false,idx);
   });
   return rows;
 }
 /* Đẩy kết quả đã tính lên Google Sheet cho các dòng TBD của tuần chứa dIso */
+/* ⭐ v13 — bản cũ gọi fetchTab("weekly") (tải TOÀN BỘ tab 6 của FY) mỗi lần mở tuần mới và mỗi
+   lần lưu task. Nay dùng dữ liệu địa bàn đã có trong máy nếu còn mới; chỉ tải khi sheet đã đổi. */
+function tbdSrcRows(){
+  var c=S.cache.weekly;
+  if(c && c._k===terrKey() && c.fresh && !dataStale(c.at)) return Promise.resolve(c.rows);
+  return loadTerritoryAll(true).then(function(){
+    var c2=S.cache.weekly;
+    return (S._terrOk && c2 && c2._k===terrKey()) ? c2.rows : null;
+  });
+}
 function tbdSyncWeek(dIso,pic,finalize){
-  return fetchTab("weekly").then(function(all){
-    var from=mondayOf(dIso), to=addDays(from,6), jobs=[];
+  return tbdSrcRows().then(function(all){
+    if(!all) return false;
+    var from=mondayOf(dIso), to=addDays(from,6), jobs=[], idx=tbdIndex(all);
     (all||[]).forEach(function(r){
       if(!isTbdAcc(r.account)) return;
       if(pic && String(r.pic||"")!==pic) return;
       var st=String(r.start||"").slice(0,10);
       if(!st||st<from||st>to) return;
-      var want=tbdResultText(all,String(r.pic||""),st);
+      var want=tbdResultText(all,String(r.pic||""),st,idx);
       var curSt=String(r._tbdRawSt!==undefined?r._tbdRawSt:(r.status||""));
-      var wantSt=tbdStatusFor(all,String(r.pic||""),st,curSt,finalize);
+      var wantSt=tbdStatusFor(all,String(r.pic||""),st,curSt,finalize,idx);
       var now=String(r._tbdRaw!==undefined?r._tbdRaw:(r.result||""));   /* so với ô THẬT trên sheet */
       if(now.trim()===want && curSt===wantSt) return;
       r._tbdRaw=want; r._tbdRawSt=wantSt; r.result=want; r.status=wantSt;
@@ -5037,7 +5271,10 @@ function tbdSyncWeek(dIso,pic,finalize){
         start:r.start, finish:r.finish, result:want, status:wantSt }}));
     });
     if(!jobs.length) return false;
-    return Promise.all(jobs).then(function(){ clearTabs(); return true; });
+    return Promise.all(jobs).then(function(){
+      if(TSTORE.weekly){ delete TSTORE.weekly; savTabs(); }     /* ⭐ v13 — chỉ bỏ bản tab 6, không xoá mọi tab */
+      return true;
+    });
   }).catch(function(){ return false; });
 }
 function tbdPickBad(pfx){
@@ -5096,23 +5333,19 @@ function tkFlag(w){ /* task thiếu dữ liệu bắt buộc */
    Dữ liệu còn được ghi xuống localStorage nên mở lại app là thấy ngay. */
 function terrScopePic(){ return (S.user && S.user.role === "manager") ? "" : (S.user ? S.user.pic : ""); }
 function terrKey(){ return "TERR|" + S.fy + "|" + terrScopePic(); }
-function terrLsKey(){ return "mmh_terr_" + S.fy + "_" + (terrScopePic() || "ALL"); }
+function terrLsKey(){ return ckey("terr:" + S.fy + ":" + (terrScopePic() || "ALL")); }   /* ⭐ v13 — gắn theo nhóm */
 function fyRange(){
   var ms = fyMonths(S.fy), a = ms[0], b = ms[11];
   var y = +b.slice(0,4), m = +b.slice(4,6), ld = new Date(y, m, 0).getDate();
   return { from: a.slice(0,4)+"-"+a.slice(4,6)+"-01", to: y+"-"+("0"+m).slice(-2)+"-"+("0"+ld).slice(-2) };
 }
 function terrSave(rows){
-  try{
-    if((rows||[]).length<=3000) localStorage.setItem(terrLsKey(), JSON.stringify({at:Date.now(),rows:rows}));
-  }catch(e){}
+  if(!KV.ok && (rows||[]).length>3000) return;
+  kvSet(terrLsKey(),{at:Date.now(),rows:rows||[]});
 }
 function terrLoadLs(){
-  try{
-    var v=JSON.parse(localStorage.getItem(terrLsKey())||"null");
-    if(v&&v.rows&&v.rows.length) return v;
-  }catch(e){}
-  return null;
+  var v=kvGet(terrLsKey());
+  return (v&&v.rows&&v.rows.length)?v:null;
 }
 /* ⭐ v5.5 — hai "sheet tab" trong màn hình Cập nhật:
      · Thông tin địa bàn — toàn bộ chức năng cũ
@@ -5136,13 +5369,15 @@ function pgWeekly(){
   var k = terrKey();
   if(S.cache.weekly && S.cache.weekly._k === k){
     renderTerritory();
-    if(Date.now()-(S.cache.weekly.at||0) > 240000) loadTerritoryAll(true);
+    afterGate(function(){ if(S.cache.weekly && dataStale(S.cache.weekly.at)) loadTerritoryAll(true); });
     return;
   }
   var ls = terrLoadLs();
-  if(ls){                                   /* có bản lưu ⇒ vẽ ngay, làm mới ở nền */
+  if(ls){                                   /* có bản lưu ⇒ vẽ ngay, chỉ làm mới khi sheet đã đổi */
     S.cache.weekly = { rows:ls.rows, _k:k, at:ls.at }; S.visits=S.cache.weekly;
-    renderTerritory(); loadTerritoryAll(true); ensureCbc(); return;
+    renderTerritory();
+    afterGate(function(){ if(S.cache.weekly && dataStale(S.cache.weekly.at)) loadTerritoryAll(true); });
+    ensureCbc(); return;
   }
   var r = vRangeCalc();
   skeleton('<div class="ph"><div><h2>Cập nhật thông tin địa bàn</h2><p>'+esc(r.label)+' · đang nạp dữ liệu '+esc(S.fy)+'…</p></div></div>'
@@ -5153,20 +5388,23 @@ function pgWeekly(){
 /* nạp 1 lần cho cả năm tài chính — mọi thao tác sau đó đều offline */
 function loadTerritoryAll(silent){
   if(S._terrLoading) return S._terrLoading;
-  var k = terrKey(), fr = fyRange();
+  var k = terrKey(), fr = fyRange(), t0 = Date.now();
   S._terrLoading = apiGet("visitFeed",{ pic: terrScopePic(), from: fr.from, to: fr.to })
     .then(function(x){
-      S._terrLoading = null;
-      S.cache.weekly = { rows: x.rows||[], _k:k, at:Date.now() };
+      S._terrLoading = null; S._terrOk = true;
+      S.cache.weekly = { rows: x.rows||[], _k:k, at:Date.now(), fresh:true };
       S.visits = S.cache.weekly;
       terrSave(S.cache.weekly.rows);
-      if(S.tab==="weekly") renderTerritory();
+      _lvMap=null;
+      if(S.tab==="weekly") softRepaint();
+      /* vừa lưu task trong lúc request này đang chạy ⇒ nạp lại lần nữa cho chắc có dòng mới */
+      if((S._terrDirtyAt||0)>t0) setTimeout(function(){ loadTerritoryAll(true); },300);
       if(!S.custIndex.length) loadCustomerIndex();
       ensureCbc();
       return S.cache.weekly.rows;
     })
     .catch(function(e){
-      S._terrLoading = null;
+      S._terrLoading = null; S._terrOk = false;
       if(silent) return [];
       $("main").innerHTML='<div class="pg"><div class="card pad"><b style="color:#A82F2C">Lỗi:</b> '+esc(e.message)
         +'<div style="margin-top:10px"><button class="btn sm" onclick="pgWeekly()">Thử lại</button></div></div></div>';
@@ -5188,7 +5426,8 @@ function tbdAutoSync(){
   S._tbdAuto=S._tbdAuto||{};
   if(S._tbdAuto[k]) return;
   S._tbdAuto[k]=1;
-  tbdSyncWeek(d,pic);
+  /* ⭐ v13 — đợi dữ liệu mở app ổn định rồi mới chốt, không tranh request với lúc khởi động */
+  afterGate(function(){ setTimeout(function(){ tbdSyncWeek(d,pic); },1500); });
 }
 function terrRows(){ return ((S.cache.weekly||{}).rows)||[]; }
 
@@ -5198,6 +5437,9 @@ function terrInRange(w, r){
   return !(b < r.from || a > r.to);
 }
 /* danh bạ CBC — nạp nền 1 lần, dùng cho picker "Người gặp" */
+/* ⭐ v13 — tra người liên hệ theo account bằng chỉ mục (trước đây lọc 8.000 dòng CBC mỗi lần gọi) */
+var _stkIdx=null,_stkSrc=null,_stkLen=-1;
+function stakeIdxReset(){ _stkSrc=null; }
 function ensureCbc(){
   if(S._cbcLoading||S.cbcRows) return;
   S._cbcLoading=true;
@@ -5230,9 +5472,16 @@ function accKeyOf(v){ return noAcc(v).replace(/\s+/g," ").trim(); }
 function stakeOf(accName){
   var key=accKeyOf(accName);
   if(!key) return [];
-  return (S.cbcRows||[]).filter(function(c){
-    return accKeyOf(c.name)===key && String(c.contact||"").trim();
-  });
+  var src=S.cbcRows||[];
+  if(_stkSrc!==src || _stkLen!==src.length){
+    _stkIdx={};
+    src.forEach(function(c){
+      if(!String(c.contact||"").trim()) return;
+      var k=accKeyOf(c.name); (_stkIdx[k]=_stkIdx[k]||[]).push(c);
+    });
+    _stkSrc=src; _stkLen=src.length;
+  }
+  return (_stkIdx[key]||[]).slice();
 }
 /* ngày gặp gần nhất của 1 account — dùng cho thẻ ADP */
 var _lvMap=null,_lvStamp="";
@@ -5265,10 +5514,13 @@ function renderTerritory(){
   if(S.filt.q){
     var tk=skTokens(S.filt.q);
     rows=rows.filter(function(w){
-      var hay=noAcc([w.account,w.result,w.plan,w.typeTask,w.nextAction,w.pic,w.product,w.process].filter(Boolean).join(" "));
+      var hay=wkHay(w);
       return tk.every(function(t){ return hay.indexOf(t)>=0; });
     });
   }
+  /* ⭐ v13 — mỗi lần chỉ vẽ WK_PAGE thẻ (xem cả FY có thể cả nghìn task ⇒ trang rất nặng) */
+  var _sig=[r.from,r.to,S.filt.pic,S.filt.status,S.filt.act,S.filt.flag,S.filt.q,S.fy].join("|");
+  if(S._wkSig!==_sig){ S._wkSig=_sig; S.wkLimit=WK_PAGE; }
 
   var byDay={},days=[];
   rows.forEach(function(w){ var d=String(w.start).slice(0,10)||"—"; if(!byDay[d]){byDay[d]=[];days.push(d);} byDay[d].push(w); });
@@ -5332,15 +5584,38 @@ function renderTerritory(){
 
     (S.vChart?visitStatsHtml(rows,r):"")+
 
-    (days.length? days.map(function(d){
-      return '<div class="daysec"><div class="dayhd'+(d===today?" today":"")+'">'+
-        '<span class="dt">'+fmtVN(d)+'</span><span class="wd">'+esc(wdOf(d))+(d===today?" · HÔM NAY":"")+'</span>'+
-        '<span class="tag t-b">'+byDay[d].length+' task</span><span class="ln"></span></div>'+
-        '<div class="tkgrid">'+byDay[d].map(taskCard).join("")+'</div></div>'; }).join("")
+    (days.length? wkDaysHtml(days,byDay,today,rows.length)
       : '<div class="card pad"><div class="empty"><div class="e">📍</div><p>Chưa có task nào trong kỳ này</p>'+
         '<button class="btn pri sm" style="margin-top:12px" onclick="formWeekly(null)">＋ Thêm task đầu tiên</button></div></div>')+
   '</div>';
   wireWkSearch();
+}
+var WK_PAGE=60;
+var _hayWM=(typeof WeakMap!=="undefined")?new WeakMap():null;
+function wkHay(w){
+  var h=_hayWM?_hayWM.get(w):undefined;
+  if(h!==undefined) return h;
+  h=noAcc([w.account,w.result,w.plan,w.typeTask,w.nextAction,w.pic,w.product,w.process].filter(Boolean).join(" "));
+  if(_hayWM) _hayWM.set(w,h);
+  return h;
+}
+function wkDaysHtml(days,byDay,today,total){
+  var limit=S.wkLimit||WK_PAGE, shown=0, out="";
+  for(var i=0;i<days.length && shown<limit;i++){
+    var d=days[i], list=byDay[d], take=list.slice(0,limit-shown);
+    shown+=take.length;
+    out+='<div class="daysec"><div class="dayhd'+(d===today?" today":"")+'">'+
+      '<span class="dt">'+fmtVN(d)+'</span><span class="wd">'+esc(wdOf(d))+(d===today?" · HÔM NAY":"")+'</span>'+
+      '<span class="tag t-b">'+list.length+' task</span><span class="ln"></span></div>'+
+      '<div class="tkgrid">'+take.map(taskCard).join("")+'</div></div>';
+  }
+  if(total>shown) out+='<div class="wkmore"><button class="btn sm" onclick="wkMore()">Xem thêm '+Math.min(WK_PAGE,total-shown)+' task · còn '+(total-shown)+'</button></div>';
+  return out;
+}
+function wkMore(){
+  var y=$("main").scrollTop;
+  S.wkLimit=(S.wkLimit||WK_PAGE)+WK_PAGE; renderTerritory();
+  try{ $("main").scrollTop=y; }catch(e){}
 }
 function vToday(){
   S.vMode="day"; S.vAnchor=todayISO(); S.wkFrom=mondayOf(todayISO()); S.wkTo=addDays(S.wkFrom,6);
@@ -5939,7 +6214,7 @@ function formWeekly(w,presetAcc){
       '<div class="fld"><label>Ngày <span class="rq">*</span></label><input class="inp" type="date" id="nt_start" value="'+todayISO()+'"></div>'+
       '<div class="fld"><label>Sales PIC</label>'+
         (isMgmt()
-          ? '<select class="inp" id="nt_pic">'+opts(S.master.pic,S.user.pic,"— chọn —")+'</select>'
+          ? '<select class="inp" id="nt_pic">'+opts(S.master.pic,"","— chọn —")+'</select>'
           : '<input class="inp piclock" id="nt_pic" value="'+esc(S.user.pic)+'" readonly title="PIC cố định theo tài khoản đăng nhập">')+
       '</div>'+
     '</div>'+
@@ -6360,7 +6635,7 @@ function ordNewCbc(){
 function ordSetAcc(c){
   S.editing.ctx=Object.assign({},S.editing.ctx,{ code:c.code, type:c.type, province:c.province, area:c.area, name:c.name, address:c.address||"" });
   var h=$("o_hint"); if(h) h.textContent=[c.code,c.type,c.province,c.area].filter(String).join(" · ")||"—";
-  if(c.pic&&$("o_pic")) $("o_pic").value=c.pic;
+  setPicSel("o_pic",c.pic);
   ordDrawCbc("");
 }
 function o_syncMonth(){
@@ -6412,7 +6687,7 @@ function formOrder(o){
 
     '<div class="row">'+
       '<div class="fld"><label>Kênh</label><select class="inp" id="o_channel">'+opts(S.master.channel,o.channel||"Offline","— chọn —")+'</select></div>'+
-      '<div class="fld"><label>MMH sales PIC</label><select class="inp" id="o_pic">'+opts(S.master.pic,o.pic||S.user.pic,"— chọn —")+'</select></div>'+
+      picFld("o_pic",o.pic||"")+
       '<div class="fld"><label>Partner</label><input class="inp" id="o_partner" value="'+esc(o.partner||"")+'"></div>'+
       '<div class="fld"><label>Partner type</label><select class="inp" id="o_partnerType">'+opts(S.master.partnerType,o.partnerType,"— chọn —")+'</select></div>'+
       '<div class="fld"><label>Source</label><input class="inp" id="o_source" value="'+esc(o.source||"")+'"></div>'+
@@ -6837,7 +7112,8 @@ function openMonthly(row){
       +selM("mn-pe","period","Kỳ báo cáo",months,r.period)
     +'</div></div>'
     +'<div class="te-sec"><div class="te-g2">'
-      +selM("mn-pic","pic","PIC",S.master.pic,r.pic)
+      +(isMgmt()?selM("mn-pic","pic","PIC",S.master.pic,r.pic)
+               :'<div><span class="te-lb">PIC</span><input class="inp piclock" id="mn-pic" value="'+esc(S.user.pic)+'" readonly></div>')
       +selM("mn-ar","area","Area",S.master.area,r.area)
     +'</div></div>'
     +'<div class="te-sec"><div class="te-st">📘 PLAN — kế hoạch<span class="sp"></span>'
@@ -6881,7 +7157,7 @@ function saveMonthlyDrw(){
 }
 /* ── thêm mới ── */
 /* ⭐ v4.5 — Area cố định theo PIC (sửa bảng này nếu phân vùng thay đổi) */
-var PIC_AREA={ "Viet":"North", "Phuong":"South", "Vinh":"Central" };
+var PIC_AREA={ "Viet":"North", "Phuong":"South", "Vinh":"Central", "Viet Ha":"North", "Khang":"South" };
 function fyOfMonth(ym){
   var list=(S.fyList&&S.fyList.length)?S.fyList:[S.fy];
   for(var i=0;i<list.length;i++){ if(fyMonths(list[i]).indexOf(String(ym))>=0) return list[i]; }
@@ -6909,7 +7185,7 @@ function formMonthly(r){
     '</div>'+
     '<div class="row">'+
       '<div class="fld"><label>PIC</label>'+
-        (isMgmt()?'<select class="inp" id="m_pic" onchange="mnSyncArea()">'+opts(S.master.pic,S.user.pic,"— chọn —")+'</select>'
+        (isMgmt()?'<select class="inp" id="m_pic" onchange="mnSyncArea()">'+opts(S.master.pic,"","— chọn —")+'</select>'
                  :'<input class="inp piclock" id="m_pic" value="'+esc(S.user.pic)+'" readonly>')+'</div>'+
       '<div class="fld"><label>Area</label><div id="m_areaBox"></div></div>'+
       '<div class="fld"><label>FY (tự theo kỳ)</label><input class="inp piclock" id="m_fy" value="'+esc(fyOfMonth(mn))+'" readonly></div>'+
@@ -7044,7 +7320,7 @@ function presSetAcc(c){
   if($("p_province")) $("p_province").value=c.province||"";
   if($("p_area"))     $("p_area").value=c.area||"";
   if($("p_hint"))     $("p_hint").textContent=[c.code,c.type,c.province,c.area].filter(String).join(" · ")||"—";
-  if(c.pic&&$("p_pic")) $("p_pic").value=c.pic;
+  setPicSel("p_pic",c.pic);
 }
 function presNewAcc(){
   subReturn(function(c){
@@ -7064,7 +7340,7 @@ function formPresent(r){
       '<input type="hidden" id="p_account" value="'+esc(r.account||"")+'"><div class="hint" id="p_hint">'+
       esc([a.type,r.province||a.province,r.area||a.area].filter(String).join(" · ")||"—")+'</div></div>'+
     '<div class="row">'+
-      '<div class="fld"><label>PIC</label><select class="inp" id="p_pic">'+opts(S.master.pic,r.pic||S.user.pic,"— chọn —")+'</select></div>'+
+      picFld("p_pic",r.pic||"","PIC")+
       '<div class="fld"><label>Ngày <span class="rq">*</span></label><input class="inp" type="date" id="p_day" value="'+esc(day)+'" onchange="p_sync()"></div>'+
       '<div class="fld"><label>Month</label><input class="inp piclock" id="p_month" value="'+esc(mon)+'" readonly></div>'+
       '<div class="fld"><label>FY (theo Month)</label><input class="inp piclock" id="p_fy" value="'+esc(r.fy||fyOfMonth(mon))+'" readonly>'+
@@ -7413,7 +7689,7 @@ function formADP(r,presetAcc){
       '<input class="inp" id="a_accName" placeholder="Gõ ≥2 ký tự…" value="'+esc(a.name||"")+'" autocomplete="off">'+
       '<input type="hidden" id="a_account" value="'+esc(r.account||presetAcc||"")+'"><div class="hint" id="a_hint"></div></div>'+
     '<div class="row">'+
-      '<div class="fld"><label>SALE PIC</label><select class="inp" id="a_pic">'+opts(S.master.pic,r.pic||S.user.pic,"— chọn —")+'</select></div>'+
+      picFld("a_pic",r.pic||"","SALE PIC")+
       '<div class="fld"><label>FY</label><select class="inp" id="a_fy">'+opts(S.fyList,r.fy||S.fy,"—")+'</select></div>'+
       '<div class="fld"><label>ABCD focus</label><select class="inp" id="a_abcd">'+opts(S.master.abcd,r.abcd,"— chọn —")+'</select></div>'+
     '</div>'+
@@ -7441,7 +7717,7 @@ function formADP(r,presetAcc){
     '<button class="btn" onclick="closeModal()">Huỷ</button><button class="btn pri" onclick="saveADP()">Lưu</button>', true);
   accountCombo("a_accName","a_account",function(c){
     $("a_hint").textContent=[c.code,c.type,c.province,c.area].filter(String).join(" · ");
-    if(c.pic) $("a_pic").value=c.pic;
+    setPicSel("a_pic",c.pic);
     adpSyncActual();
   });
   adpSyncActual();
@@ -7661,6 +7937,7 @@ function galExcel(){
 }
 
 function pgReport(){
+  otherHydrate();
   if(!S.rpFrom){ S.rpFrom=mondayOf(todayISO()); S.rpTo=addDays(S.rpFrom,6); }
   if(!S.rpMonth) S.rpMonth=ymOf(todayISO());
   if(!S.rpKind)  S.rpKind="week";
@@ -8667,7 +8944,7 @@ function renderAcc(){
         +'<div class="row">'
           +'<div class="fld"><label>Province</label><select class="inp" id="ac_province" onchange="accAutoArea()">'+opts(S.master.province,c.province,"— chọn —")+'</select></div>'
           +'<div class="fld"><label>Area</label><select class="inp" id="ac_area">'+opts(S.master.area,c.area,"— chọn —")+'</select></div>'
-          +'<div class="fld"><label>MMH sales PIC</label><select class="inp" id="ac_pic">'+opts(S.master.pic,c.pic||S.user.pic,"— chọn —")+'</select></div>'
+          +picFld("ac_pic",c.pic||"")
         +'</div>'
         +'<div class="row">'
           +'<div class="fld"><label>FY mở account</label><select class="inp" id="ac_fy">'+opts(S.fyList,c.fy||S.fy,"—")+'</select></div>'
@@ -8807,7 +9084,7 @@ function renderAct(){
           = vẽ lại từ bộ nhớ ⇒ tức thì. Dữ liệu mới tải ngầm ở nền.
    ═══════════════════════════════════════════════════════════════════════ */
 var TSTORE={};                 /* tab → {rows, at, key} */
-function TKEY_(){ return "mmh_tabs_v4_"+curTeamKey(); }
+function TKEY_(){ return ckey("tabs"); }
 
 function scopePic(){ return (S.user && S.user.role==="manager") ? "" : (S.user ? S.user.pic : ""); }
 function tabKey(tab){ return tab+"|"+S.fy+"|"+scopePic(); }
@@ -8825,39 +9102,48 @@ function savTabs(){
   clearTimeout(_savT);
   _savT=setTimeout(function(){
     try{
-      var slim={};
-      Object.keys(TSTORE).forEach(function(k){
-        /* weekly/order có thể rất lớn — chỉ lưu khi vừa phải */
-        if((TSTORE[k].rows||[]).length<=2500) slim[k]=TSTORE[k];
-      });
-      localStorage.setItem(TKEY_(),JSON.stringify({ver:S.verSeen||S.ver||"",d:slim}));
+      var d=TSTORE;
+      if(!KV.ok){                               /* localStorage dự phòng: chỉ lưu tab vừa phải */
+        d={}; Object.keys(TSTORE).forEach(function(k){ if((TSTORE[k].rows||[]).length<=2500) d[k]=TSTORE[k]; });
+      }
+      kvSet(TKEY_(),{ver:S.verSeen||S.ver||"",d:d});
     }catch(e){}
   },600);
 }
 function loadTabs(){
   try{
-    var v=JSON.parse(localStorage.getItem(TKEY_())||"null");
+    var v=kvGet(TKEY_());
     /* bản cache của phiên dữ liệu cũ thì bỏ, tránh hiện lại dòng đã xoá trên sheet */
     if(v&&v.d&&(!S.verSeen||!v.ver||v.ver===S.verSeen)) TSTORE=v.d;
   }catch(e){ TSTORE={}; }
 }
-function clearTabs(){ TSTORE={}; try{ localStorage.removeItem(TKEY_()); }catch(e){} }
+function clearTabs(){ TSTORE={}; kvDel(TKEY_()); }
 
 /* Lấy 1 tab: trả ngay nếu có sẵn, đồng thời làm mới ngầm nếu đã cũ */
 function ensureTab(tab,opts,onReady){
   var have=tGet(tab);
-  if(have){ onReady(have,true); if(Date.now()-(TSTORE[tab].at||0)>240000) fetchTab(tab,opts); return; }
+  if(have){
+    onReady(have,true);
+    afterGate(function(){ var e=TSTORE[tab]; if(e && dataStale(e.at)) fetchTab(tab,opts).catch(function(){}); });
+    return;
+  }
   onReady(null,false);
   fetchTab(tab,opts,onReady);
 }
 function fetchTab(tab,opts,onReady){
   var q=Object.assign({tab:tab,fy:S.fy,pic:scopePic(),limit:5000},opts||{});
-  if(FETCHING[tab]) return FETCHING[tab];
+  if(FETCHING[tab]){
+    /* ⭐ v13 — đang có request cùng tab: vẫn báo lại cho người gọi sau (bản cũ bỏ quên
+       callback ⇒ màn hình kẹt ở khung xương cho tới khi bấm tab khác) */
+    if(onReady) FETCHING[tab].then(function(rows){ onReady(rows,true); },function(e){ onReady([],true,e); });
+    return FETCHING[tab];
+  }
   FETCHING[tab]=apiGet("list",q).then(function(j){
     delete FETCHING[tab];
     tPut(tab,j.rows||[]);
+    if(tab==="cbc"){ S.cbcRows=tGet("cbc")||j.rows||[]; S._cbcLoading=false; _stCache=null; }
     if(onReady) onReady(j.rows||[],true);
-    else if(S.tab===TAB_OF[tab]) go(S.tab);
+    else if(S.tab===TAB_OF[tab]) softRepaint();
     return j.rows||[];
   }).catch(function(e){ delete FETCHING[tab]; if(onReady) onReady([],true,e); throw e; });
   return FETCHING[tab];
@@ -8865,23 +9151,126 @@ function fetchTab(tab,opts,onReady){
 var FETCHING={};
 var TAB_OF={order:"order",monthly:"monthly",present:"present",adp:"adp",weekly:"weekly",cbc:"cust"};
 
-/* Nạp sẵn ở nền — chạy sau khi app đã hiện, không làm chậm lần mở đầu */
-function prefetchAll(){
-  if(typeof ensureCbc==="function") ensureCbc();   /* v4: danh ba CBC cho picker Nguoi gap */
-  if(S._prefetched) return; S._prefetched=true;
-  /* v4.1 — chạy NGAY, chia 2 luồng song song: tab nào xong trước thì dùng trước */
-  var pick=function(list){
-    return apiGet("multi",{tabs:list.join(","),fy:S.fy,pic:scopePic()})
-      .then(function(j){
-        var t=j.tabs||{};
-        Object.keys(t).forEach(function(k){ tPut(k,(t[k]||{}).rows||[]); });
-        if(list.indexOf(S.tab)>=0) go(S.tab);
-      }).catch(function(){});
-  };
-  setTimeout(function(){
-    pick(["adp","monthly"]);
-    pick(["order","present"]);
-    if(typeof loadTerritoryAll==="function") loadTerritoryAll(true);
+/* ═══════════════════════════════════════════════════════════════════════
+   ⭐ v13 — ĐỒNG BỘ THÔNG MINH THEO VERSION
+   Mở app: vẽ ngay từ bộ nhớ đệm, đồng thời hỏi Code.gs "version" (request rất nhẹ).
+     · version TRÙNG lần đồng bộ trước ⇒ sheet chưa đổi ⇒ KHÔNG tải lại gì cả
+     · version KHÁC ⇒ tải lại ở nền (bundle + 4 tab + địa bàn + CBC), vẽ lại tại chỗ
+   Trong lúc chờ version (tối đa 8 giây) mọi lệnh "làm mới nền" được xếp hàng (afterGate)
+   để không bắn trùng request.
+   ═══════════════════════════════════════════════════════════════════════ */
+var GATE=null;
+function afterGate(fn){ if(GATE) GATE.then(function(){ try{ fn(); }catch(e){} }); else fn(); }
+/* dữ liệu cũ khi nào? thăm dò version đang chạy tốt ⇒ 10 phút; mất liên lạc ⇒ 4 phút như cũ */
+function dataStale(at){
+  var ttl=(Date.now()-(S._verOkAt||0)<150000)?600000:240000;
+  return Date.now()-(at||0)>ttl;
+}
+function metaKey_(){ return ckey("meta:"+S.fy+":"+(scopePic()||"ALL")); }
+function touchCaches(){
+  var now=Date.now();
+  Object.keys(TSTORE).forEach(function(k){ var e=TSTORE[k]; if(e && e.key===tabKey(k)) e.at=now; });
+  var w=S.cache.weekly; if(w && w._k===terrKey()){ w.at=now; w.fresh=true; }
+}
+function hydrateTerr(fresh){
+  if(S.cache.weekly && S.cache.weekly._k===terrKey()){ if(fresh){ S.cache.weekly.at=Date.now(); S.cache.weekly.fresh=true; } return true; }
+  var ls=terrLoadLs(); if(!ls) return false;
+  S.cache.weekly={ rows:ls.rows, _k:terrKey(), at:fresh?Date.now():ls.at, fresh:!!fresh };
+  S.visits=S.cache.weekly;
+  return true;
+}
+function startSync(){
+  if(GATE) return GATE;
+  var meta=kvGet(metaKey_())||{}, bc=kvGet(bundleKey_())||{};
+  var myPic=S.user?S.user.pic:"";
+  GATE=new Promise(function(res){
+    var settled=false;
+    function fin(fresh,v){
+      if(settled) return; settled=true;
+      GATE=null;
+      if(v){ S.verSeen=v; S._verOkAt=Date.now(); }
+      if(fresh){ touchCaches(); syncMissing(); }
+      else fullSync();
+      res();
+    }
+    setTimeout(function(){ fin(false,""); },8000);
+    apiGet("version",{}).then(function(j){
+      var v=String((j&&j.ver)||"");
+      fin(!!(v && meta.ver && meta.ver===v && bc._pic===myPic), v);
+    }).catch(function(){ fin(false,""); });
+  });
+  return GATE;
+}
+/* sheet chưa đổi: chỉ tải những phần máy chưa từng lưu */
+function syncMissing(){
+  var need=["adp","monthly","order","present"].filter(function(t){ return !tGet(t); });
+  if(need.length) prefetchTabs(need);
+  if(!hydrateTerr(true)) loadTerritoryAll(true);
+  ensureCbc();
+  if(!S.custIndex.length) loadCustomerIndex();
+}
+function prefetchTabs(list){
+  var half=Math.ceil(list.length/2), groups=[list.slice(0,half),list.slice(half)].filter(function(g){ return g.length; });
+  return Promise.all(groups.map(function(g){
+    return apiGet("multi",{tabs:g.join(","),fy:S.fy,pic:scopePic()}).then(function(j){
+      var t=j.tabs||{};
+      Object.keys(t).forEach(function(k){ tPut(k,(t[k]||{}).rows||[]); });
+      if(g.indexOf(S.tab)>=0 || S.tab==="dash" || S.tab==="cust" || S.tab==="stake") softRepaint();
+      return true;
+    }).catch(function(){ return false; });
+  })).then(function(r){ return r.every(Boolean); });
+}
+function cbcRefresh(){
+  var e=TSTORE.cbc;
+  if(e && e.key===tabKey("cbc") && Date.now()-(e.at||0)<60000) return Promise.resolve(true);   /* vừa tải xong */
+  return fetchTab("cbc",{fy:"",pic:"",limit:8000}).then(function(){ return true; },function(){ return false; });
+}
+/* tải lại mọi nguồn chính ở nền — KHÔNG xoá dữ liệu đang hiển thị */
+function fullSync(){
+  if(S._fullSync) return S._fullSync;
+  var v0=S.verSeen||"", key=metaKey_(), jobs=[];
+  jobs.push(Date.now()-(S._bundleAt||0)>60000 ? refreshBundle(true) : Promise.resolve(true));
+  jobs.push(prefetchTabs(["adp","monthly","order","present"]));
+  jobs.push(loadTerritoryAll(true).then(function(){ return !!S._terrOk; }));
+  jobs.push(new Promise(function(r){ setTimeout(r,1200); }).then(cbcRefresh));   /* CBC nặng nhất ⇒ đi sau */
+  if(!S.custIndex.length) jobs.push(loadCustomerIndex().then(function(){ return true; }));
+  S._fullSync=Promise.all(jobs.map(function(p){ return Promise.resolve(p).then(function(x){ return x!==false; },function(){ return false; }); }))
+    .then(function(res){
+      S._fullSync=null;
+      var ok=res.every(Boolean);
+      if(ok && v0 && metaKey_()===key) kvSet(key,{ver:v0,at:Date.now()});
+      softRepaint();
+      return ok;
+    });
+  return S._fullSync;
+}
+/* giữ tên cũ cho các chỗ còn gọi */
+function prefetchAll(){ return fullSync(); }
+
+/* ⭐ v13 — VẼ LẠI MỀM: gom nhiều lần dữ liệu về thành 1 lần vẽ, không vẽ khi đang gõ ở màn hình
+   chính (tránh mất chữ / nhảy con trỏ), tự thử lại sau 1,5 giây. */
+var _srT=null;
+function mainTyping(){
+  try{
+    var a=document.activeElement;
+    return !!(a && /^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName) && $("main").contains(a));
+  }catch(e){ return false; }
+}
+function softRepaint(){
+  clearTimeout(_srT);
+  _srT=setTimeout(function(){
+    if(!S.user) return;
+    if(mainTyping()){ _srT=setTimeout(softRepaint,1500); return; }
+    ["order","present","adp","monthly"].forEach(function(t){
+      var r=tGet(t); if(r && S.cache[t] && S.cache[t].rows!==r) S.cache[t]={rows:r,at:Date.now()};
+    });
+    _cxCache=null; _stCache=null; _lvMap=null;
+    try{
+      if(S.tab==="dash") renderDash();
+      else if(S.tab==="kpi"){ if(!(typeof kpiDirty==="function"&&kpiDirty()) && S.kpi && S.kpi._fy===S.fy) renderKPI(); }
+      else if(S.tab==="stake") renderStake();
+      else repaintTab();
+    }catch(e){}
   },150);
 }
 
@@ -8902,6 +9291,7 @@ function patchRows(rows,row,data,isDelete){
   return rows;
 }
 function patchLocal(tab,row,data,isDelete){
+  if(tab==="cbc") stakeIdxReset();
   var e=TSTORE[tab];
   if(e&&e.rows){ patchRows(e.rows,row,data,isDelete); e.at=0; savTabs(); }
   var c=S.cache[tab];
@@ -8913,26 +9303,31 @@ function patchLocal(tab,row,data,isDelete){
    hoặc xoá tay trên Google Sheet thì app cập nhật theo mà không phải F5. */
 var TAB_SRC={ weekly:"weekly", monthly:"monthly", order:"order", present:"present", adp:"adp" };
 var _tabSync={};
+/* ⭐ v13 — chuyển tab chỉ tải lại khi dữ liệu thật sự cũ. Thay đổi trên Google Sheet (kể cả sửa
+   tay) đã được thăm dò version phát hiện trong ≤ 45 giây, nên không cần bắn request mỗi lần bấm tab.
+   Bản cũ còn huỷ request đang chạy (S._terrLoading=null / delete FETCHING) ⇒ gọi trùng 2–3 lần. */
 function syncTabOnEnter(tab){
   var src=TAB_SRC[tab]; if(!src) return;
-  var now=Date.now();
-  if(_tabSync[src] && now-_tabSync[src]<15000) return;   /* vừa nạp xong thì thôi */
-  if(hasOpenEditor()) return;                            /* đang gõ dở thì đừng đụng vào */
-  _tabSync[src]=now;
-
-  /* ⭐ v7.3 — hoạt động đi địa bàn phải nạp bằng visitFeed (kèm ảnh và đủ dòng).
-     Dùng fetchTab("weekly") sẽ trả bản nghèo hơn rồi ghi đè, làm mất ảnh và mất task. */
-  if(src==="weekly"){
-    S._terrLoading=null;
-    loadTerritoryAll(true).then(function(){ if(S.tab===tab) repaintTab(); }).catch(function(){});
-    return;
-  }
-  delete FETCHING[src];
-  fetchTab(src,{},function(rows,ready){
-    if(!ready||!rows) return;
-    if(S.cache[src]||src==="monthly") S.cache[src]={rows:rows,at:Date.now()};
-    _cxCache=null; _stCache=null;
-    if(S.tab===tab) repaintTab();
+  afterGate(function(){
+    var now=Date.now();
+    if(_tabSync[src] && now-_tabSync[src]<15000) return;   /* vừa nạp xong thì thôi */
+    if(hasOpenEditor()) return;                            /* đang gõ dở thì đừng đụng vào */
+    /* ⭐ v7.3 — hoạt động đi địa bàn phải nạp bằng visitFeed (kèm ảnh và đủ dòng). */
+    if(src==="weekly"){
+      var w=S.cache.weekly;
+      if(w && w._k===terrKey() && !dataStale(w.at)) return;
+      _tabSync[src]=now;
+      loadTerritoryAll(true).then(function(){ if(S.tab===tab) softRepaint(); }).catch(function(){});
+      return;
+    }
+    var e=TSTORE[src];
+    if(e && e.key===tabKey(src) && !dataStale(e.at)) return;
+    _tabSync[src]=now;
+    fetchTab(src,{}).then(function(rows){
+      if(S.cache[src]||src==="monthly") S.cache[src]={rows:tGet(src)||rows,at:Date.now()};
+      _cxCache=null; _stCache=null;
+      if(S.tab===tab) softRepaint();
+    }).catch(function(){});
   });
 }
 /* đang có ô nhập nào được focus hoặc modal đang mở thì hoãn nạp nền,
@@ -8959,20 +9354,29 @@ function repaintTab(){
 function afterWrite(tab,row,data,isDelete){
   patchLocal(tab,row,data,isDelete);
   S.dash=null; S.kpi=null; S.acc=null; S.acc360=null; S.activity=null;
-  if(S.cache.weekly) S.cache.weekly.at=0;   /* v4.1 giu kho FY, chi danh dau can dong bo */
-  try{ localStorage.removeItem(bundleKey_()); }catch(e){}
   if(tab) delete FETCHING[tab];
   repaintTab();                              /* ⭐ v5.9 — thấy ngay, không chờ tải lại */
-  /* lấy bản chính thức từ máy chủ (có No., FY, Month do sheet tự tính) rồi vẽ lại */
-  setTimeout(function(){
-    if(tab) fetchTab(tab,{},function(rows,ready){
-      if(!ready||!rows) return;
-      if(S.cache[tab]) S.cache[tab]={rows:rows,at:Date.now()};
-      else if(tab==="weekly"||tab==="monthly") S.cache[tab]={rows:rows,at:Date.now()};
-      repaintTab();
-    });
-    refreshBundle(true);
-  },400);
+  if(tab==="weekly"){
+    /* ⭐ v13 — hoạt động địa bàn: chỉ nạp lại bằng visitFeed (đủ ảnh). Bản cũ gọi thêm
+       fetchTab("weekly") tải cả tab 6 rồi ghi đè S.cache.weekly bằng bản thiếu ảnh. */
+    if(S.cache.weekly){ S.cache.weekly.at=0; S.cache.weekly.fresh=false; }
+    S._terrDirtyAt=Date.now();
+    if(TSTORE.weekly){ delete TSTORE.weekly; savTabs(); }
+    setTimeout(function(){ var w=S.cache.weekly; if(!w || (w.at||0)<S._terrDirtyAt) loadTerritoryAll(true); },400);
+  } else if(tab){
+    /* lấy bản chính thức từ máy chủ (có No., FY, Month do sheet tự tính) rồi vẽ lại */
+    setTimeout(function(){
+      fetchTab(tab,{},function(rows,ready){
+        if(!ready||!rows) return;
+        if(S.cache[tab]) S.cache[tab]={rows:tGet(tab)||rows,at:Date.now()};
+        else if(tab==="monthly") S.cache[tab]={rows:tGet(tab)||rows,at:Date.now()};
+        repaintTab();
+      });
+    },400);
+  }
+  /* ⭐ v13 — lưu liên tiếp nhiều lần chỉ tải lại bundle (dashboard, danh mục KH) 1 lần */
+  clearTimeout(S._awBundleT);
+  S._awBundleT=setTimeout(function(){ S._bundleAt=0; refreshBundle(true); },2500);
   if($("actRail").classList.contains("on")) setTimeout(function(){ loadActivity(true); },900);
 }
 
@@ -8988,8 +9392,14 @@ function hl(txt,q){
   if(i<0) return esc(t);
   return esc(t.slice(0,i))+'<mark>'+esc(t.slice(i,i+q.length))+'</mark>'+esc(t.slice(i+q.length));
 }
+/* ⭐ v13 — ghi nhớ kết quả bỏ dấu (hàm được gọi hàng trăm nghìn lần khi lọc CBC / địa bàn / thẻ ADP) */
+var _naM=(typeof Map!=="undefined")?new Map():null;
 function noAcc(s){
-  return String(s||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/đ/g,"d").replace(/Đ/g,"D").toLowerCase();
+  s=String(s||"");
+  if(_naM && s.length<=160){ var v=_naM.get(s); if(v!==undefined) return v; }
+  var o=s.normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/đ/g,"d").replace(/Đ/g,"D").toLowerCase();
+  if(_naM && s.length<=160){ if(_naM.size>40000) _naM.clear(); _naM.set(s,o); }
+  return o;
 }
 /* items: [{v, label, meta, raw}] */
 function combo(inputId,getItems,onPick,ph){
