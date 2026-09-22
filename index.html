@@ -1282,8 +1282,8 @@ tr.rp-late td{background:var(--dang-bg)}
 
 <script>
 /* ═══════════════════════════════════════════════════════════════════
-   MMH CRM — Frontend v14
-   Backend: Google Apps Script (Code.gs v8.0)  ·  Deploy: GitHub Pages
+   MMH CRM — Frontend v15
+   Backend: Google Apps Script (Code.gs v8.1)  ·  Deploy: GitHub Pages
    ───────────────────────────────────────────────────────────────────
    ⭐ v14 — BẢN TĂNG TỐC & DANH MỤC MÃ SẢN PHẨM
     ① Ảnh đi địa bàn nén về ≤ 280 KB (trước 0,9–1,6 MB) và không chặn giao diện;
@@ -1299,6 +1299,15 @@ tr.rp-late td{background:var(--dang-bg)}
     ⑦ Nút "＋ Địa bàn mới" ngay trong dialog thêm task và dialog đơn hàng,
        kèm người liên lạc đầu tiên, không đóng dialog đang dở.
     ⑧ Xoá task là xoá luôn ảnh trên Drive, có báo lại số ảnh đã xoá.
+   ───────────────────────────────────────────────────────────────────
+   ⭐ v15 — ẢNH & CÔNG VIỆC KHÁC
+    ⑨ Lưu task và tải ảnh đi CHUNG một lượt gọi (trước là hai lượt nối tiếp, mỗi
+       lượt phải khởi động lại Apps Script và mở lại Google Sheet).
+    ⑩ Ảnh hạ về 1.152px, đích ~190 KB (thực đo 70–150 KB).
+    ⑪ Đọc "Công việc khác": thẻ <script> hỏng thì thử lại bằng fetch, tự thử thêm
+       một lần, và báo ĐÚNG nguyên nhân thay vì luôn đổ cho "chưa Deploy Anyone".
+    ⑫ "Công việc khác" nạp ngầm ngay từ lúc mở app ⇒ bấm vào tab là có sẵn;
+       đọc hỏng thì vẫn hiện bản đã lưu kèm ghi chú, không xoá trắng màn hình.
    ═══════════════════════════════════════════════════════════════════ */
 
 /* ═══════════ ⭐ v7.0 → v7.2 — BA BACKEND CRM: DENTAL · SURGICAL · EYELESS ═══════════
@@ -2279,20 +2288,59 @@ function isVisitingKey(k){
 }
 function toggleVisitingKeys(){ S.otherShowVisit=!S.otherShowVisit; renderOther(); }
 
+/* ═══════════ ⭐ v15 — ĐỌC OTHER TASK: CÓ ĐƯỜNG DỰ PHÒNG ═══════════
+   Bản cũ chỉ nạp bằng thẻ <script>. Thẻ này hỏng là báo ngay "chưa Deploy quyền
+   Anyone" — nhưng thực tế phần lớn không phải vậy: Google chuyển hướng sang trang
+   chọn tài khoản (máy đang đăng nhập nhiều Gmail), hoặc Report Hub trả lời chậm quá
+   nên trình duyệt cắt kết nối. Cả hai trường hợp đều hiện đúng một câu sai nguyên nhân.
+
+   Nay giống hệt cách app đọc file CRM: thẻ <script> hỏng thì thử lại bằng fetch để
+   lấy đúng nội dung, hỏng nữa mới báo lỗi — và báo đúng thứ đã xảy ra. */
+var HUB_TIMEOUT=60000;
 function hubJsonp(params,timeoutMs){
   return new Promise(function(res,rej){
     var cb="__mmhhub_"+Date.now()+"_"+(++_seq);
-    var el=document.createElement("script");
-    var t=setTimeout(function(){ done(); rej(new Error("Quá thời gian chờ khi đọc Other task")); }, timeoutMs||45000);
+    var el=document.createElement("script"), settled=false;
+    var t=setTimeout(function(){
+      if(settled) return; settled=true; done();
+      rej(new Error("__HUB_TIMEOUT__"));
+    }, timeoutMs||HUB_TIMEOUT);
     function done(){ clearTimeout(t); try{ delete window[cb]; }catch(e){ window[cb]=undefined; }
                      if(el.parentNode) el.parentNode.removeChild(el); }
-    window[cb]=function(d){ done(); res(d); };
+    window[cb]=function(d){ if(settled) return; settled=true; done(); res(d); };
     params=params||{}; params.callback=cb;
     var qs=Object.keys(params).map(function(k){ return encodeURIComponent(k)+"="+encodeURIComponent(params[k]==null?"":params[k]); }).join("&");
-    el.src=REPORTHUB_URL+"?"+qs;
-    el.onerror=function(){ done(); rej(new Error("Không đọc được Other task — kiểm tra Web App của file Sales & Marketing đã Deploy quyền “Anyone” chưa.")); };
+    var url=REPORTHUB_URL+"?"+qs;
+    el.src=url;
+    el.onerror=function(){
+      if(settled) return; settled=true; done();
+      /* thử lại bằng fetch — lấy JSON thô, không cần thẻ script */
+      fetch(url.replace(/([?&])callback=[^&]*/,"$1_j=1"),{method:"GET",credentials:"omit"})
+        .then(function(r){ return r.text(); })
+        .then(function(txt){
+          var m=String(txt||"").replace(/^[^{[]*/,"").replace(/\);?\s*$/,"");
+          try{ res(JSON.parse(m)); }
+          catch(e){ rej(new Error("__HUB_BLOCKED__")); }
+        })
+        .catch(function(){ rej(new Error("__HUB_BLOCKED__")); });
+    };
     document.body.appendChild(el);
   });
+}
+/* Dịch mã lỗi sang câu nói đúng nguyên nhân + việc cần làm */
+function hubErrText(e){
+  var m=String((e&&e.message)||e||"");
+  if(m==="__HUB_TIMEOUT__")
+    return "Report Hub phản hồi quá lâu (hơn "+Math.round(HUB_TIMEOUT/1000)+" giây) nên app tạm dừng chờ.\n\n"+
+           "Thường gặp khi file Sales & Marketing đang chạy đồng bộ nền, hoặc sheet WEEKYLY new đã quá nhiều dòng. "+
+           "Bấm “Thử lại” sau khoảng một phút — dữ liệu cũ vẫn dùng được trong lúc chờ.";
+  if(m==="__HUB_BLOCKED__")
+    return "Không đọc được Other task từ Report Hub.\n\n"+
+           "Hai nguyên nhân thường gặp:\n"+
+           "① Máy đang đăng nhập nhiều tài khoản Google cùng lúc — Google chuyển sang trang chọn tài khoản. "+
+           "Mở app bằng cửa sổ ẩn danh, hoặc chỉ để lại một tài khoản rồi tải lại trang.\n"+
+           "② Web App của file Sales & Marketing chưa Deploy với quyền “Anyone”.";
+  return m||"Không đọc được Other task";
 }
 (function(){ try{ var v=localStorage.getItem("mmh_otview"); if(v) S.otherView=v; }catch(e){} })();
 /* ⭐ v13 — Công việc khác: hiện ngay bản đã lưu, đọc lại Report Hub ở nền khi quá 2 phút */
@@ -2310,13 +2358,29 @@ function loadOther(force){
     return Promise.resolve(S.other);
   }
   if(S._otLoading) return S._otLoading;
-  S._otLoading = hubJsonp({action:"weekly", _ts:Date.now()}).then(function(j){
-    S._otLoading=null; S.otherErr="";
+  /* ⭐ v15 — thử một lần nữa trước khi kết luận lỗi: lần đọc đầu hay vướng lúc Report Hub
+     đang chạy đồng bộ nền, đợi 3 giây rồi hỏi lại thường là được ngay. */
+  function ask(n){
+    return hubJsonp({action:"weekly", _ts:Date.now()}).catch(function(e){
+      /* chỉ thử lại khi thẻ <script> hỏng (hay gặp, thử lại là được).
+         Hết thời gian chờ thì KHÔNG thử lại — chờ thêm một phút nữa cũng vô ích. */
+      if(n<=0 || String((e&&e.message)||"")==="__HUB_TIMEOUT__") throw e;
+      return new Promise(function(r){ setTimeout(r,3000); }).then(function(){ return ask(n-1); });
+    });
+  }
+  S._otLoading = ask(1).then(function(j){
+    S._otLoading=null; S.otherErr=""; S.otherStale="";
     if(!j || !j.ok) throw new Error((j&&j.error)||"Report Hub trả về dữ liệu không hợp lệ");
     S.other={ keys:j.keyTasks||[], at:Date.now() };
     kvSet(OTHER_KEY,S.other);
     return S.other;
-  }).catch(function(e){ S._otLoading=null; if(!S.other) S.otherErr=e.message; throw e; });
+  }).catch(function(e){
+    S._otLoading=null;
+    /* còn bản đã lưu thì cứ hiện bản đó, chỉ ghi chú là chưa đọc được bản mới */
+    if(!S.other) S.otherErr=hubErrText(e);
+    else S.otherStale=hubErrText(e);
+    throw e;
+  });
   return S._otLoading;
 }
 /* Management xem Công việc khác của ĐÚNG nhóm đang chọn (Dental / Surgical / Eyeless) */
@@ -2478,16 +2542,24 @@ function otherStatusTag(st,pg){
 function setOtherPic(p){ S.otherPic=p; renderOther(); }
 function setOtherStatus(v){ S.otherStatus=(S.otherStatus===v?"":v); renderOther(); }
 function toggleOther(no){ S.otherOpen[no]=!S.otherOpen[no]; renderOther(); }
-function refreshOther(){ S.other=null; S.otherErr=""; renderOther();
-  loadOther(true).then(function(){ if(S.tab==="weekly") renderOther(); })
-                 .catch(function(){ if(S.tab==="weekly") renderOther(); }); }
+/* ⭐ v15 — KHÔNG xoá trắng dữ liệu đang xem trước khi đọc lại.
+   Bản cũ đặt S.other=null rồi mới gọi mạng: đọc hỏng là mất luôn bản đã lưu,
+   màn hình chỉ còn mỗi thông báo lỗi dù trong máy vẫn có dữ liệu dùng được. */
+function refreshOther(){
+  S.otherErr=""; S.otherStale="";
+  renderOther();
+  toast("Đang đọc lại Công việc khác…");
+  loadOther(true).then(function(){ if(S.tab==="weekly") renderOther(); toast("✓ Đã cập nhật Công việc khác","ok"); })
+                 .catch(function(e){ if(S.tab==="weekly") renderOther(); toast(hubErrText(e).split("\n")[0],"err",6000); }); }
 function pgOther(){
   otherHydrate();
+  /* ⭐ v15 — lỗi cũ hơn 30 giây thì thử lại khi quay vào tab, đỡ phải bấm tay */
+  if(S.otherErr && Date.now()-(S._otErrAt||0)>30000) S.otherErr="";
   if(S.other && Date.now()-(S.other.at||0)>120000 && !S._otLoading)
     loadOther(true).then(function(){ softRepaint(); }).catch(function(){});
   if(!S.other && !S._otLoading && !S.otherErr)
     loadOther().then(function(){ if(S.tab==="weekly") renderOther(); })
-               .catch(function(){ if(S.tab==="weekly") renderOther(); });
+               .catch(function(){ S._otErrAt=Date.now(); if(S.tab==="weekly") renderOther(); });
   renderOther();
 }
 
@@ -2710,11 +2782,23 @@ function renderOther(){
   if(S.otherErr){
     $("main").innerHTML='<div class="pg">'+head+
       '<div class="card pad"><div class="empty"><div class="e">⚠️</div>'+
-      '<p style="max-width:600px;margin:0 auto">'+esc(S.otherErr)+'</p>'+
-      '<button class="btn sm" style="margin-top:11px" onclick="refreshOther()">Thử lại</button></div></div></div>';
+      '<p style="max-width:620px;margin:0 auto;text-align:left;line-height:1.65">'+nl2br(S.otherErr)+'</p>'+
+      '<div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:13px">'+
+        '<button class="btn pri sm" onclick="refreshOther()">⟳ Thử lại</button>'+
+        '<a class="btn sm" href="'+esc(REPORTHUB_URL)+'?action=weekly" target="_blank" rel="noopener">Mở Report Hub để kiểm tra</a>'+
+      '</div>'+
+      '<div style="font-size:11.5px;color:var(--mute);margin-top:10px;max-width:620px">'+
+        'Bấm “Mở Report Hub để kiểm tra”: hiện ra một trang đầy chữ JSON là Web App vẫn chạy tốt — '+
+        'lỗi nằm ở đường truyền hoặc tài khoản Google trên máy. Hiện trang đăng nhập hoặc báo lỗi quyền '+
+        'thì mới là do Deploy.</div>'+
+      '</div></div></div>';
     return;
   }
   if(!S.other){ $("main").innerHTML='<div class="pg">'+head+skRows(6,true)+'</div>'; return; }
+  /* đang dùng bản đã lưu vì lần đọc mới nhất chưa xong — nói rõ thay vì im lặng */
+  if(S.otherStale) head+='<div class="card pad" style="margin-bottom:10px;background:#FFFBF1;border-color:#F3D69B">'+
+    '<div style="font-size:12.5px;color:#8A5A00;line-height:1.55"><b>Đang hiện bản đã lưu trên máy.</b> '+
+    'Chưa đọc được bản mới từ Report Hub — bấm <b>⟳ Đọc lại</b> để thử lần nữa.</div></div>';
 
   var keys=otherKeys();
   var picList=[]; ((S.other&&S.other.keys)||[]).forEach(function(k){
@@ -6320,8 +6404,10 @@ function retryGps(which){
      · vẽ qua createImageBitmap khi máy hỗ trợ ⇒ không chiếm luồng giao diện, app không đứng
      · tự hạ chất lượng theo từng nấc cho tới khi ≤ 280 KB, cùng lắm hạ tiếp kích thước
    Kết quả thực tế: 150–280 KB, tức nhẹ hơn 5–8 lần, gửi xong trong 2–5 giây. */
-var PHOTO_MAX_PX = 1280;
-var PHOTO_MAX_KB = 280;
+/* ⭐ v15 — hạ thêm một nấc. Ảnh chứng minh đã tới địa bàn cần đọc được biển hiệu và
+   nhận ra người gặp, 1.152px là quá đủ; mỗi 100 KB bớt đi là bớt vài giây chờ trên 4G. */
+var PHOTO_MAX_PX = 1152;
+var PHOTO_MAX_KB = 190;
 function photoSizeKB(dataUrl){ return Math.round(String(dataUrl||"").length*0.75/1024); }
 function drawToCanvas_(src,w,h){
   var c=document.createElement("canvas"); c.width=w; c.height=h;
@@ -6507,9 +6593,8 @@ function saveTask(){
   if(!hasData&&!hasPh) return toast("Chưa có thay đổi nào");
 
   var btn=$("tk-save"); if(btn) btn.disabled=true;
-  busy(true,"Đang ghi vào Google Sheet…");
-  var chain=Promise.resolve();
   var wkDay=String((w&&w.start)||todayISO()).slice(0,10);   /* ⭐ v11 — tuần cần đếm lại TBD */
+  var chain;
   if(hasData){
     var d={_row:S.taskRow};
     ["plan","result","status","nextAction","stopReason","feedback","process","typeTask","typeAction","product","start"].forEach(function(f){
@@ -6517,14 +6602,36 @@ function saveTask(){
     });
     if(d.start) d.finish=d.start;
     if(("nextAction" in d)&&d.nextAction!=="Dừng lại") d.stopReason="";
-    chain=chain.then(function(){ return apiPost({action:"saveWeekly",data:d}); });
+    /* ⭐ v15 — sửa nội dung và ảnh đi chung một lượt gọi, không còn chờ hai lần */
+    var pay={action:"saveWeekly",data:d};
+    if(hasPh){
+      var pp=S.pending;
+      pay.photo={ b64:pp.dataUrl, mime:"image/jpeg" };
+      if(pp.gps){ pay.photo.lat=pp.gps.lat; pay.photo.lng=pp.gps.lng; pay.photo.acc=pp.gps.acc; }
+      pay.data.account=pay.data.account||w.account;
+      pay.data.pic=pay.data.pic||w.pic;
+      busy(true,"Đang ghi task và tải ảnh ("+photoSizeKB(pp.dataUrl)+" KB)…");
+    }else busy(true,"Đang ghi vào Google Sheet…");
+    chain=apiPost(pay).then(function(r){
+      if(r&&r.photo&&r.photo.url&&S.task){
+        S.task.photos=[{id:r.photo.id,thumb:r.photo.thumb,full:r.photo.thumb,open:r.photo.url}];
+        S.task.photo=r.photo.url; S.task.gps=r.photo.gps||""; S.task.gpsAddr=r.photo.gpsAddr||"";
+        S.pending=null;
+      }
+      if(r&&r.photoError) toast("Task đã lưu nhưng ảnh chưa lên được: "+r.photoError,"warn",7000);
+      return r;
+    });
+  }else{
+    busy(true,"Đang tải ảnh lên Drive…");
+    chain=uploadPending(true);      /* chỉ có ảnh, không sửa nội dung */
   }
-  chain.then(function(){ if(hasPh){ busy(true,"Đang tải ảnh kèm GPS…"); return uploadPending(true); } })
-  .then(function(){
+  chain.then(function(){
     busy(false); if(btn) btn.disabled=false;
     toast("✓ Đã cập nhật task vào Sheet","ok",3800);
     closeDrw();
-    afterWrite("weekly", S.taskRow, null);
+    /* ⭐ v15 — vá luôn nội dung vừa sửa vào bộ nhớ để danh sách đổi ngay,
+       không phải đợi lượt tải lại nền xong mới thấy */
+    afterWrite("weekly", S.taskRow, (typeof d!=="undefined"&&d)?d:null);
     tbdSyncWeek((S.dirty&&S.dirty.start)||wkDay, String((w&&w.pic)||""));   /* ⭐ v11 — TBD cùng tuần đếm lại */
     S.taskRow=0; terrRefresh();
   }).catch(function(e){ busy(false); if(btn) btn.disabled=false; toast(e.message,"err",6000); });
@@ -6843,15 +6950,19 @@ function submitNewTask(){
   if(!String(d.result).trim()) later.push("kết quả");
   if(d.typeAction==="Visiting"&&!S.ntPhoto) later.push("ảnh chụp tại địa bàn");
 
-  busy(true,"Đang ghi vào Google Sheet…");
-  apiPost({action:"saveWeekly",data:d}).then(function(r){
-    var row=r.row||0;
-    if(!S.ntPhoto||!row) return r;
-    busy(true,"Đang tải ảnh kèm GPS…");
-    var body={ action:"uploadPhoto", b64:S.ntPhoto.dataUrl, mime:"image/jpeg", row:row,
-               account:d.account, date:d.start, pic:d.pic, replace:1 };
-    if(S.ntPhoto.gps){ body.lat=S.ntPhoto.gps.lat; body.lng=S.ntPhoto.gps.lng; body.acc=S.ntPhoto.gps.acc; }
-    return apiPost(body).then(function(){ return r; });
+  /* ⭐ v15 — GỬI TASK VÀ ẢNH TRONG MỘT LƯỢT.
+     Bản cũ gọi saveWeekly rồi uploadPhoto nối tiếp: hai lần khởi động Apps Script,
+     hai lần mở Google Sheet cho cùng một thao tác. Nay ảnh đi kèm ngay trong lần lưu. */
+  var pay={action:"saveWeekly",data:d};
+  if(S.ntPhoto){
+    pay.photo={ b64:S.ntPhoto.dataUrl, mime:"image/jpeg" };
+    if(S.ntPhoto.gps){ pay.photo.lat=S.ntPhoto.gps.lat; pay.photo.lng=S.ntPhoto.gps.lng; pay.photo.acc=S.ntPhoto.gps.acc; }
+    busy(true,"Đang ghi task và tải ảnh ("+photoSizeKB(S.ntPhoto.dataUrl)+" KB)…");
+  }else busy(true,"Đang ghi vào Google Sheet…");
+  apiPost(pay).then(function(r){
+    if(r&&r.photo&&r.photo.url){ d.photo=r.photo.url; d.gps=r.photo.gps||""; d.gpsAddr=r.photo.gpsAddr||""; }
+    if(r&&r.photoError) toast("Task đã lưu nhưng ảnh chưa lên được: "+r.photoError,"warn",7000);
+    return r;
   }).then(function(r){
     busy(false); closeModal(); S.ntPhoto=null; S.ntDraft="";
     toast(later.length
@@ -9860,6 +9971,23 @@ function syncMissing(){
   if(!hydrateTerr(true)) loadTerritoryAll(true);
   ensureCbc();
   if(!S.custIndex.length) loadCustomerIndex();
+  warmOther();
+}
+/* ⭐ v15 — NẠP SẴN "CÔNG VIỆC KHÁC" NGAY TỪ LÚC MỞ APP.
+   Report Hub là một file Apps Script khác, đọc mất vài giây tới vài chục giây tuỳ lúc.
+   Bản cũ chỉ bắt đầu đọc khi bấm vào tab ⇒ người dùng ngồi nhìn khung xương đúng ngần
+   ấy thời gian. Nay đọc ngầm sau khi dữ liệu CRM đã ổn định (chậm 4 giây để không tranh
+   đường truyền), nên lúc bấm vào tab là có sẵn. */
+function warmOther(){
+  if(S._otWarm) return; S._otWarm=1;
+  setTimeout(function(){
+    otherHydrate();
+    if(S._otLoading) return;
+    if(S.other && Date.now()-(S.other.at||0)<120000) return;   /* bản lưu còn mới */
+    loadOther(true).then(function(){
+      if(S.tab==="weekly"&&S.wkTab==="other") renderOther();
+    }).catch(function(){ /* im lặng — bấm vào tab sẽ báo lỗi kèm cách xử lý */ });
+  },4000);
 }
 function prefetchTabs(list){
   var half=Math.ceil(list.length/2), groups=[list.slice(0,half),list.slice(half)].filter(function(g){ return g.length; });
@@ -9892,6 +10020,7 @@ function fullSync(){
   jobs.push(loadTerritoryAll(true).then(function(){ return !!S._terrOk; }));
   jobs.push(new Promise(function(r){ setTimeout(r,1200); }).then(cbcRefresh));   /* CBC nặng nhất ⇒ đi sau */
   if(!S.custIndex.length) jobs.push(loadCustomerIndex().then(function(){ return true; }));
+  warmOther();                     /* ⭐ v15 — Công việc khác nạp ngầm, không chặn phần còn lại */
   S._fullSync=Promise.all(jobs.map(function(p){ return Promise.resolve(p).then(function(x){ return x!==false; },function(){ return false; }); }))
     .then(function(res){
       S._fullSync=null;
