@@ -1015,8 +1015,11 @@ tr.rp-late td{background:var(--dang-bg)}
 .seg.sm button{padding:5px 10px;font-size:11.5px}
 
 /* ── dòng sản phẩm trong đơn hàng ── */
-.oprow{display:grid;grid-template-columns:1.15fr 1.8fr .95fr .58fr 1fr 28px;gap:8px;align-items:end;
+/* ⭐ v14 — Detail nay là hộp chọn nhiều mã nên chiếm trọn một hàng riêng bên dưới */
+.oprow{display:grid;grid-template-columns:1.3fr 1fr .62fr 1fr 28px;gap:8px;align-items:end;
   padding:9px;border:1px solid var(--line);border-radius:12px;background:var(--paler);margin-bottom:8px}
+.oprow .opc.d{grid-column:1/-1;order:9}
+.oprow .opdel{order:8}
 .oprow .inp{height:36px;font-size:13px;background:var(--card)}
 .oprow select.inp{font-size:12.5px}
 .opc{min-width:0}
@@ -1024,6 +1027,39 @@ tr.rp-late td{background:var(--dang-bg)}
 .opdel{height:36px;width:28px;border:1px solid var(--line);background:var(--card);border-radius:9px;
   color:var(--dang);font-weight:800;cursor:pointer;font-size:13px}
 .opdel:disabled{opacity:.3;cursor:not-allowed}
+
+/* ── ⭐ v14 · hộp chọn mã sản phẩm (Detail) ── */
+.pcbox{border:1px solid var(--line);border-radius:10px;background:var(--card);padding:6px}
+.pcsel{display:flex;flex-wrap:wrap;gap:5px;max-height:104px;overflow:auto}
+.pcchip{display:inline-flex;align-items:center;gap:4px;background:var(--pale);border:1px solid var(--lb2);
+  color:var(--blue-d);font-size:11.5px;font-weight:700;padding:3px 8px;border-radius:7px;cursor:pointer;
+  line-height:1.3;max-width:100%;word-break:break-word}
+.pcchip:hover{background:var(--dang-bg);border-color:#F6C9C7;color:#A82F2C}
+.pcchip.on{cursor:default}
+.pcchip.on:hover{background:var(--pale);border-color:var(--lb2);color:var(--blue-d)}
+.pcempty{font-size:12px;color:var(--mute);padding:6px 2px}
+.pcwrap{display:flex;flex-direction:column;gap:9px}
+.pchead{position:sticky;top:0;background:var(--card);z-index:3;padding-bottom:6px}
+.pcnote{font-size:11.5px;color:var(--sub);margin-top:6px;line-height:1.5}
+.pclist{max-height:46vh;overflow:auto;border:1px solid var(--line);border-radius:11px;padding:6px;background:var(--paler)}
+.pcgh{display:flex;align-items:center;gap:7px;font-size:12px;font-weight:800;color:var(--navy);
+  background:var(--lb3);border:1px solid var(--lb2);border-radius:9px;padding:7px 9px;margin:6px 0 4px;cursor:pointer}
+.pcgh:first-child{margin-top:0}
+.pcgh .ar{color:var(--blue);font-size:11px;width:10px}
+.pcgh .cnt{font-size:10.5px;font-weight:700;color:var(--sub)}
+.pcit{display:flex;align-items:flex-start;gap:8px;padding:7px 9px;border-radius:9px;cursor:pointer;
+  border:1px solid transparent;background:var(--card);margin-bottom:3px}
+.pcit:hover{border-color:var(--lb2);background:var(--pale)}
+.pcit.on{border-color:var(--blue);background:var(--pale)}
+.pcit .bx{flex:none;width:16px;height:16px;border:2px solid var(--lb1);border-radius:5px;margin-top:2px;position:relative}
+.pcit.on .bx{border-color:var(--blue);background:var(--blue)}
+.pcit.on .bx:after{content:"✓";position:absolute;inset:0;color:#fff;font-size:11px;font-weight:900;
+  display:flex;align-items:center;justify-content:center;line-height:1}
+.pcit .tx{min-width:0}
+.pcit .nm{font-size:12.5px;font-weight:650;line-height:1.35;word-break:break-word}
+.pcit .sub{font-size:10.5px;color:var(--mute);font-family:ui-monospace,Menlo,Consolas,monospace;margin-top:1px}
+.pcfoot{border-top:1px solid var(--line);padding-top:8px}
+.pcsum{font-size:12px;color:var(--sub);margin-bottom:6px;display:flex;align-items:center;gap:9px}
 
 /* ── bảng công việc kiểu Report Hub ── */
 .rh{padding:0;overflow:hidden}
@@ -1246,8 +1282,23 @@ tr.rp-late td{background:var(--dang-bg)}
 
 <script>
 /* ═══════════════════════════════════════════════════════════════════
-   MMH DENTAL CRM — Frontend v4.0
-   Backend: Google Apps Script (Code.gs)  ·  Deploy: GitHub Pages
+   MMH CRM — Frontend v14
+   Backend: Google Apps Script (Code.gs v8.0)  ·  Deploy: GitHub Pages
+   ───────────────────────────────────────────────────────────────────
+   ⭐ v14 — BẢN TĂNG TỐC & DANH MỤC MÃ SẢN PHẨM
+    ① Ảnh đi địa bàn nén về ≤ 280 KB (trước 0,9–1,6 MB) và không chặn giao diện;
+       không bắt chờ GPS mới hiện ảnh; tải xong KHÔNG nạp lại cả năm dữ liệu nữa.
+    ② Mọi lời gọi đọc dữ liệu gửi kèm mã phiên bản: sheet chưa đổi thì máy chủ trả
+       ~50 byte và không mở Spreadsheet ⇒ dò dữ liệu mới 15 giây/lần vẫn nhẹ.
+    ③ Sheet đổi ở đâu chỉ nạp lại đúng chỗ đó (bảng phiên bản theo từng tab),
+       thay vì nạp lại 6–7 nguồn như bản cũ.
+    ④ Dữ liệu danh sách truyền dạng nén (mảng-của-mảng) — nhẹ hơn ~60%.
+    ⑤ Ô Detail của đơn hàng: chọn từ danh mục "12. PRODUCT CODE", gom nhóm theo
+       dòng sản phẩm, chọn nhiều mã cho cùng một mức giá. Cả đơn lưu 1 lần gọi.
+    ⑥ Dòng TBD: bỏ chọn Type task / nhóm khách hàng, mỗi tuần chỉ một dòng / PIC.
+    ⑦ Nút "＋ Địa bàn mới" ngay trong dialog thêm task và dialog đơn hàng,
+       kèm người liên lạc đầu tiên, không đóng dialog đang dở.
+    ⑧ Xoá task là xoá luôn ảnh trên Drive, có báo lại số ảnh đã xoá.
    ═══════════════════════════════════════════════════════════════════ */
 
 /* ═══════════ ⭐ v7.0 → v7.2 — BA BACKEND CRM: DENTAL · SURGICAL · EYELESS ═══════════
@@ -1621,20 +1672,46 @@ function jsonp(params,timeoutMs){
     document.body.appendChild(s);
   });
 }
+/* ═══════════ ⭐ v14 — HỎI "CÓ GÌ MỚI KHÔNG" THAY VÌ TẢI LẠI TẤT CẢ ═══════════
+   Mỗi lần nhận dữ liệu, app nhớ luôn mã phiên bản (_ver) kèm theo câu hỏi đó.
+   Lần sau gửi mã này lên; nếu Google Sheet chưa đổi, backend trả đúng một chữ
+   "unchanged" (~50 byte) và KHÔNG hề mở Spreadsheet. Nhờ vậy việc làm mới nền
+   mỗi 15 giây gần như không tốn gì, mà dữ liệu sửa tay trên sheet vẫn hiện nhanh. */
+var CVER={};
+function cvKey_(action,extra){
+  var e=extra||{}, ks=Object.keys(e).filter(function(k){ return k!=="cv"&&k!=="callback"&&k!=="_ts"; }).sort();
+  return action+"|"+ks.map(function(k){ return k+"="+String(e[k]==null?"":e[k]); }).join("&");
+}
+/* Quên mã phiên bản của một câu hỏi ⇒ lần sau backend gửi lại dữ liệu đầy đủ.
+   BẮT BUỘC gọi khi bộ nhớ trong máy không còn giữ dữ liệu của câu hỏi đó, nếu không
+   backend sẽ trả "chưa đổi" trong khi app đã chẳng còn gì để hiển thị. */
+function cvDrop(action,extra){ delete CVER[cvKey_(action,extra)]; }
 function apiGet(action,extra){
   var p={action:action}; if(extra) Object.keys(extra).forEach(function(k){ p[k]=extra[k]; });
-  return jsonp(p).then(function(j){ if(j&&j.ok===false) throw new Error(j.error||"Lỗi không rõ"); return j; })
-    .catch(function(e){ if(e&&e.message==="__TIMEOUT__") throw new Error("Máy chủ phản hồi chậm. Thử lại sau."); throw e; });
+  var ck=cvKey_(action,extra);
+  if(CVER[ck]) p.cv=CVER[ck];
+  return jsonp(p).then(function(j){
+    if(j&&j.ok===false) throw new Error(j.error||"Lỗi không rõ");
+    if(j&&j._ver) CVER[ck]=j._ver;
+    return j;
+  })
+    .catch(function(e){
+      if(e&&e.message==="__TIMEOUT__"){ delete CVER[ck]; throw new Error("Máy chủ phản hồi chậm. Thử lại sau."); }
+      throw e;
+    });
 }
 /* POST body — dùng cho payload dài (ảnh base64, text nhiều dòng).
    Thăm dò 1 lần xem GAS có trả CORS header không; sau đó CHỈ dùng đúng 1 cách
    ⇒ không bao giờ gửi lặp request (tránh ghi trùng dòng / trùng ảnh). */
-var CORS_OK=null;
+/* ⭐ v14 — kết quả thăm dò CORS nhớ luôn trên máy. Bản cũ thăm dò lại ở MỖI lần mở app,
+   nghĩa là trước mỗi lần gửi ảnh đầu tiên phải mất thêm một vòng gọi Apps Script (2–5 giây). */
+var CORS_OK=null, LS_CORS="mmh_cors_ok";
+(function(){ try{ var v=localStorage.getItem(LS_CORS); if(v==="1") CORS_OK=true; else if(v==="0") CORS_OK=false; }catch(e){} })();
 function probeCors(){
   if(CORS_OK!==null) return Promise.resolve(CORS_OK);
   return fetch(gasUrl(),{ method:"POST", headers:{"Content-Type":"text/plain;charset=utf-8"}, body:JSON.stringify({action:"ping"}), redirect:"follow" })
     .then(function(r){ return r.json(); })
-    .then(function(j){ CORS_OK=!!(j&&j.ok); return CORS_OK; })
+    .then(function(j){ CORS_OK=!!(j&&j.ok); try{ localStorage.setItem(LS_CORS,CORS_OK?"1":"0"); }catch(e){} return CORS_OK; })
     .catch(function(){ CORS_OK=false; return false; });
 }
 function postBody(body){
@@ -1802,7 +1879,10 @@ function canAuto(saved){
 }
 function fetchBundle(pic){
   S._lastBundlePic=pic||"";
-  return apiGet("bundle",{pic:pic||"",fy:S.fy||""});
+  var q={pic:pic||"",fy:S.fy||""};
+  /* chưa có danh mục khách hàng trong máy ⇒ đừng hỏi "có gì mới không", xin hẳn bản đầy đủ */
+  if(!(S.custIndex&&S.custIndex.length)) cvDrop("bundle",q);
+  return apiGet("bundle",q);
 }
 /* Áp dữ liệu bundle vào state. fromCache=true ⇒ không ghi đè localStorage. */
 function applyBundle(b,fromCache){
@@ -1839,7 +1919,7 @@ function applyBundle(b,fromCache){
    ghi QUA APP, nên thêm / xoá / sửa dòng thủ công trên Google Sheet thì app không
    thấy. Code.gs v7.0 gắn trigger onChange để tự đổi version; app thăm dò version
    và tự nạp lại toàn bộ khi thấy khác. */
-var VER_POLL_MS=45000, _verTimer=null, _verBusy=false;
+var VER_POLL_MS=15000, _verTimer=null, _verBusy=false;
 /* ⭐ v13 — ĐỒNG BỘ MỀM: không xoá trắng dữ liệu đang hiển thị nữa.
    Bản cũ xoá sạch bộ nhớ rồi tải lại TẤT CẢ mỗi khi version đổi — kể cả khi chính mình
    vừa lưu 1 task ⇒ 6–7 request cùng lúc, màn hình nhảy khung xương, app ì hẳn.
@@ -1851,6 +1931,45 @@ function verSyncNow(){
   S._bundleAt=0; _tabSync={}; _cxCache=null; _stCache=null;
   return fullSync();
 }
+/* ═══════════ ⭐ v14 — ĐỒNG BỘ ĐÚNG THỨ VỪA ĐỔI, KHÔNG TẢI LẠI TẤT CẢ ═══════════
+   Backend v8 trả kèm bảng phiên bản của TỪNG tab. So với bảng đang giữ là biết ngay
+   ai vừa đổi: sửa một dòng đi địa bàn thì chỉ nạp lại tab đó, danh bạ CBC 8.000 dòng
+   và danh mục khách hàng nằm yên. Bản cũ thấy "version khác" là nạp lại 6–7 nguồn
+   cùng lúc ⇒ app khựng vài giây mỗi 45 giây.
+   Nhờ nhẹ như vậy mới dám rút chu kỳ dò từ 45 giây xuống 15 giây — sửa trên Google
+   Sheet là app thấy gần như ngay lập tức. */
+var VTAB_JOB={
+  weekly  : function(){ if(S.cache.weekly){ S.cache.weekly.at=0; S.cache.weekly.fresh=false; } return loadTerritoryAll(true); },
+  cbc     : function(){ return cbcRefresh(); },
+  order   : function(){ return fetchTab("order",{}); },
+  monthly : function(){ return fetchTab("monthly",{}); },
+  present : function(){ return fetchTab("present",{}); },
+  adp     : function(){ return fetchTab("adp",{}); },
+  customer: function(){ S._bundleAt=0; return refreshBundle(true); },
+  master  : function(){ S._bundleAt=0; return refreshBundle(true); },
+  kpi     : function(){ S._bundleAt=0; return refreshBundle(true); },
+  pcode   : function(){ return loadProductCodes(true); }
+};
+function verApply(vers,mine){
+  var prev=S.verMap||{}, changed=[], jobs=[], seen={};
+  Object.keys(vers||{}).forEach(function(k){
+    if(k==="_all") return;
+    if(prev[k]===vers[k]) return;
+    changed.push(k);
+  });
+  S.verMap=vers;
+  if(!Object.keys(prev).length) return [];   /* lần đầu: chỉ ghi nhận, không nạp lại */
+  changed.forEach(function(k){
+    var f=VTAB_JOB[k]; if(!f||seen[k]) return;
+    seen[k]=1;
+    /* customer / master / kpi cùng gọi refreshBundle ⇒ chỉ chạy một lần */
+    if(/^(customer|master|kpi)$/.test(k)){ if(seen._bundle) return; seen._bundle=1; }
+    try{ jobs.push(f()); }catch(e){}
+  });
+  if(jobs.length) Promise.all(jobs.map(function(p){ return Promise.resolve(p).catch(function(){}); }))
+    .then(function(){ softRepaint(); });
+  return changed;
+}
 function verPoll(){
   if(_verBusy||document.hidden||!S.user||!S.user.pic||GATE) return;
   _verBusy=true;
@@ -1858,14 +1977,20 @@ function verPoll(){
     _verBusy=false; S._verOkAt=Date.now();
     var v=String((j&&j.ver)||"");
     if(!v) return;
-    if(!S.verSeen){ S.verSeen=v; return; }
-    if(v===S.verSeen) return;
+    var first=!S.verSeen;
     var prev=S.verSeen; S.verSeen=v;
-    if(Date.now()-(S._lastWriteAt||0)<30000){
-      /* version đổi vì chính mình vừa lưu ⇒ không tải lại toàn bộ */
-      var m=kvGet(metaKey_()); if(m&&m.ver===prev) kvSet(metaKey_(),{ver:v,at:Date.now()});
+    if(first){ S.verMap=(j&&j.vers)||{}; return; }
+    if(v===prev) return;
+
+    var mine=Date.now()-(S._lastWriteAt||0)<12000;   /* vừa do chính mình ghi */
+    var m=kvGet(metaKey_()); if(m&&m.ver===prev) kvSet(metaKey_(),{ver:v,at:Date.now()});
+
+    if(j&&j.vers){
+      var ch=verApply(j.vers,mine);
+      if(ch.length&&!mine) toast("Google Sheet vừa thay đổi — đang cập nhật "+ch.length+" mục…","ok",2600);
       return;
     }
+    if(mine) return;                                  /* backend đời cũ, không có bảng tab */
     verSyncNow();
     toast("Google Sheet vừa thay đổi — đang cập nhật dữ liệu mới…","ok",3200);
   }).catch(function(){ _verBusy=false; });
@@ -1881,6 +2006,12 @@ function refreshBundle(silent){
   var badge=$("stale"); if(badge) badge.style.display="";
   S._refreshing=fetchBundle(S.user?S.user.pic:"").then(function(b){
     S._refreshing=null;
+    if(b&&b.unchanged){                      /* ⭐ v14 — chưa có gì mới thì thôi */
+      S._bundleAt=Date.now();
+      var bd0=$("stale"); if(bd0) bd0.style.display="none";
+      if(!silent) toast("✓ Dữ liệu đang là bản mới nhất","ok");
+      return true;
+    }
     applyBundle(b);
     /* ⭐ v13 — không xoá S.cache nữa (trước đây làm các tab Đơn hàng/ADP… trống tạm thời) và
        không gọi go() vẽ lại cả trang; softRepaint tự tránh lúc đang gõ / đang sửa KPI */
@@ -2235,6 +2366,30 @@ function hubPost(body){
     if(!j||j.ok===false) throw new Error((j&&j.error)||"Lỗi khi ghi vào Report Hub");
     return j;
   });
+}
+/* ═══════════ ⭐ v14 — ĐẨY ĐƠN HÀNG SANG KEY TASK "TƯ VẤN BÁN HÀNG" NGAY ═══════════
+   Report Hub tự đồng bộ 10 phút/lần. Sau khi sales lưu một đơn, app gọi thẳng để dòng
+   "Đơn hàng Tuần n Tháng xx từ <PIC>" cập nhật trong vài giây thay vì chờ tới lượt,
+   rồi nạp lại phần Công việc khác để màn hình hiện đúng số liệu mới.
+   Gọi tối đa 1 lần / 45 giây; lỗi mạng thì im lặng bỏ qua — trigger vẫn chạy như cũ. */
+function syncOrderTasks(){
+  var now=Date.now();
+  if(S._osAt && now-S._osAt<45000) return Promise.resolve(false);
+  S._osAt=now;
+  function reload(){
+    return loadOther(true).then(function(){
+      if(S.tab==="weekly"&&S.wkTab==="other") renderOther();
+      return true;
+    }).catch(function(){ return false; });
+  }
+  return hubJsonp({action:"syncVisiting",only:"orders",pic:(S.user&&S.user.pic)||"",_ts:now},70000)
+    .then(function(j){ if(!j||j.ok===false) return false; return reload(); })
+    .catch(function(){
+      /* Report Hub chạy lâu hơn thời gian chờ ⇒ việc vẫn đang tiếp tục bên đó,
+         chỉ là app không nhận được trả lời. Đọc lại sau 20 giây cho chắc. */
+      setTimeout(reload,20000);
+      return false;
+    });
 }
 function otherFindSub(no){
   var f=null;
@@ -5097,12 +5252,13 @@ var TBD_GROUPS=[["Hospital","Bệnh viện"],["Clinic","Phòng khám"],["Univers
                 ["Dealer","Đại lý"],["Distributor","Nhà phân phối"]];
 function tbdGroupVn(k){ var f=TBD_GROUPS.filter(function(x){return x[0]===k;})[0]; return f?f[1]:k; }
 /* Plan của dòng TBD không phải ô tự do — chọn nhóm khách hàng và tỉnh thành (nhiều được) */
+/* ⭐ v14 — BỎ ô "Nhóm khách hàng dự kiến tiếp cận".
+   Dòng TBD nghĩa là CHƯA xác định đi đâu, gặp ai — bắt chọn trước nhóm khách hàng chỉ
+   tạo ra một con số phỏng đoán rồi chẳng ai đối chiếu. Cuối tuần ô Task Result tự tổng
+   hợp đúng những nơi đã đi ("Đã tiếp cận 3 phòng khám, 2 bệnh viện"), nên phần khai báo
+   chỉ còn giữ đúng thứ thật sự biết trước: tỉnh/thành dự kiến. */
 function tbdPickHTML(pfx){
-  return '<div class="fld"><label>Nhóm khách hàng dự kiến tiếp cận <span class="rq">*</span></label>'+
-      '<div class="chipbar" id="'+pfx+'_g" style="margin-bottom:0">'+
-        TBD_GROUPS.map(function(x){ return '<div class="chip" data-v="'+esc(x[0])+'" onclick="tbdTog(this,\''+pfx+'\')">'+esc(x[1])+'</div>'; }).join("")+
-      '</div></div>'+
-    '<div class="fld"><label>Tỉnh/thành dự kiến <span class="rq">*</span> '+
+  return '<div class="fld"><label>Tỉnh/thành dự kiến <span class="rq">*</span> '+
       '<span style="font-weight:600;color:var(--mute)">· gõ để tìm, chọn được nhiều</span></label>'+
       '<div class="chipbar" id="'+pfx+'_psel" style="margin-bottom:7px"></div>'+
       '<input class="inp" id="'+pfx+'_pq" autocomplete="off" placeholder="Gõ tên tỉnh/thành…" '+
@@ -5150,17 +5306,15 @@ function tbdSel(pfx,kind){
   return [].slice.call(box.querySelectorAll(".chip.on")).map(function(c){ return c.getAttribute("data-v"); });
 }
 function tbdPlanText(pfx){
-  var g=tbdSel(pfx,"g").map(tbdGroupVn), p=tbdSel(pfx,"p"),
-      note=String(($(pfx+"_note")||{}).value||"").trim(), L=[];
-  if(g.length) L.push("Nhóm khách hàng dự kiến tiếp cận: "+g.join(", "));
-  if(p.length) L.push("Tỉnh/thành: "+p.join(", "));
+  var p=tbdSel(pfx,"p"), note=String(($(pfx+"_note")||{}).value||"").trim(), L=[];
+  if(p.length) L.push("Tỉnh/thành dự kiến: "+p.join(", "));
   if(note) L.push(note);
   return L.join("\n");
 }
 function tbdPrev(pfx){
   var b=$(pfx+"_prev"); if(!b) return;
   var t=tbdPlanText(pfx);
-  b.textContent = t || "Chọn nhóm khách hàng và tỉnh thành — nội dung Plan sẽ hiện ở đây.";
+  b.textContent = t || "Chọn tỉnh/thành dự kiến — nội dung Plan sẽ hiện ở đây.";
 }
 /* ═══════════ ⭐ v11 — KẾT QUẢ CỦA DÒNG TBD DO APP TỰ TÍNH ═══════════
    Bản trước ghi một công thức COUNTIFS vào ô Task Result. Công thức đó luôn báo
@@ -5278,9 +5432,30 @@ function tbdSyncWeek(dIso,pic,finalize){
   }).catch(function(){ return false; });
 }
 function tbdPickBad(pfx){
-  if(!tbdSel(pfx,"g").length) return "Nhóm khách hàng dự kiến tiếp cận";
   if(!tbdSel(pfx,"p").length) return "Tỉnh/thành dự kiến";
   return "";
+}
+/* ⭐ v14 — MỖI TUẦN CHỈ MỘT DÒNG TBD CHO MỘT PIC.
+   Trả về dòng TBD đã có của tuần chứa startIso (hoặc null). Backend cũng chặn y hệt,
+   nhưng chặn ngay tại app thì sales biết trước khi bấm Lưu và được mở thẳng dòng cũ. */
+function tbdExistingRow(startIso,pic,skipRow){
+  var from=mondayOf(startIso||todayISO()), to=addDays(from,6);
+  var key=noAcc(pic||"").replace(/\s+/g," ").trim();
+  var hit=null;
+  terrRows().forEach(function(r){
+    if(hit||!isTbdAcc(r.account)) return;
+    if(skipRow && r._row===skipRow) return;
+    if(key && noAcc(r.pic||"").replace(/\s+/g," ").trim()!==key) return;
+    var d=String(r.start||"").slice(0,10);
+    if(!d||d<from||d>to) return;
+    hit=r;
+  });
+  return hit;
+}
+function tbdDupMsg(r){
+  var from=mondayOf(String(r.start||"").slice(0,10));
+  return "Tuần "+fmtVN(from)+" – "+fmtVN(addDays(from,6))+" đã có một dòng kế hoạch đi địa bàn "+
+         "chưa xác định account của "+(r.pic||"PIC này")+". Mỗi tuần chỉ tạo một dòng.";
 }
 function isTbdName(v){ return String(v||"").trim().toUpperCase()===TBD_NAME; }
 function isTbdAcc(a){ return isTbdName(parseAcc(a).name); }
@@ -5389,9 +5564,18 @@ function pgWeekly(){
 function loadTerritoryAll(silent){
   if(S._terrLoading) return S._terrLoading;
   var k = terrKey(), fr = fyRange(), t0 = Date.now();
-  S._terrLoading = apiGet("visitFeed",{ pic: terrScopePic(), from: fr.from, to: fr.to })
+  var vq = { pic: terrScopePic(), from: fr.from, to: fr.to };
+  if(!(S.cache.weekly && S.cache.weekly._k===k && (S.cache.weekly.rows||[]).length)) cvDrop("visitFeed",vq);
+  S._terrLoading = apiGet("visitFeed",vq)
     .then(function(x){
       S._terrLoading = null; S._terrOk = true;
+      /* ⭐ v14 — sheet chưa đổi ⇒ giữ nguyên dữ liệu đang xem, không vẽ lại, không nhấp nháy */
+      if(x && x.unchanged && S.cache.weekly && S.cache.weekly._k===k){
+        S.cache.weekly.at=Date.now(); S.cache.weekly.fresh=true;
+        return S.cache.weekly.rows;
+      }
+      /* ⭐ v14 — backend không gửi mảng photos nữa (mỗi dòng nhẹ đi ~200 byte); dựng lại ở máy */
+      (x.rows||[]).forEach(function(r){ r.photos=photoObjsOf(r.photo); });
       S.cache.weekly = { rows: x.rows||[], _k:k, at:Date.now(), fresh:true };
       S.visits = S.cache.weekly;
       terrSave(S.cache.weekly.rows);
@@ -5430,6 +5614,20 @@ function tbdAutoSync(){
   afterGate(function(){ setTimeout(function(){ tbdSyncWeek(d,pic); },1500); });
 }
 function terrRows(){ return ((S.cache.weekly||{}).rows)||[]; }
+/* ⭐ v14 — dựng danh sách ảnh từ ô "Photo link (Drive)" ngay tại máy
+   (trước đây backend gửi kèm 4 đường dẫn dài cho mỗi dòng, dù mỗi task chỉ 1 ảnh) */
+function driveIdOf(u){ var m=/[-\w]{25,}/.exec(String(u||"")); return m?m[0]:""; }
+function photoObjsOf(cellVal){
+  var raw=String(cellVal==null?"":cellVal).trim();
+  if(!raw) return [];
+  return raw.split(/[\s,;\n]+/).filter(function(x){ return /^https?:/.test(x); }).map(function(u){
+    var id=driveIdOf(u);
+    return { id:id,
+      thumb: id?("https://drive.google.com/thumbnail?id="+id+"&sz=w400"):u,
+      full : id?("https://drive.google.com/thumbnail?id="+id+"&sz=w1600"):u,
+      open : u };
+  });
+}
 
 function terrInRange(w, r){
   var a=String(w.start).slice(0,10), b=String(w.finish||"").slice(0,10)||a;
@@ -5957,6 +6155,111 @@ function saveStakeAdd(){
   }).catch(function(e){ busy(false); toast(e.message,"err",5000); });
 }
 
+/* ═══════════════════════════════════════════════════════════════════════════════
+   ⭐ v14 — THÊM ĐỊA BÀN MỚI NGAY TRONG DIALOG (không đóng dialog đang dở)
+   Trước đây gặp một phòng khám chưa có trong danh mục thì phải thoát ra tab Khách
+   hàng, thêm account, rồi mở lại form task và gõ lại từ đầu. Nay bấm "＋ Địa bàn mới"
+   mở một lớp nổi bên trên: điền địa bàn, tiện thể khai luôn người liên lạc đầu tiên
+   (không bắt buộc), lưu xong quay lại đúng form cũ với account đã được chọn sẵn.
+   Cả hai việc ghi vào hai tab khác nhau nhưng chỉ tốn MỘT lần gọi máy chủ.
+   ═══════════════════════════════════════════════════════════════════════════════ */
+function openNewAccount(opt){
+  opt=opt||{};
+  S._naDone=opt.onDone||null;
+  S._naCbc=!!opt.withCbc;
+  var nm=String(opt.name||"").trim();
+  var h='<div class="card pad" style="background:var(--pale);border-color:var(--lb1);margin-bottom:12px;font-size:12.5px;color:var(--sub);line-height:1.6">'+
+      'Địa bàn mới sẽ được ghi vào tab <b>1. CUSTOMER CODE</b>. Mã khách hàng do công thức trong sheet tự sinh theo Khu vực + Tỉnh + Loại KH.</div>'+
+    '<div class="fld"><label>Tên địa bàn / Account name <span class="rq">*</span></label>'+
+      '<input class="inp" id="na_name" value="'+esc(nm)+'" placeholder="VD: Nha khoa Alpha"></div>'+
+    '<div class="row">'+
+      '<div class="fld"><label>Account type <span class="rq">*</span></label><select class="inp" id="na_type">'+opts(S.master.accountType,"","— chọn —")+'</select></div>'+
+      '<div class="fld"><label>Province <span class="rq">*</span></label><select class="inp" id="na_province" onchange="naArea()">'+opts(S.master.province,"","— chọn —")+'</select></div>'+
+      '<div class="fld"><label>Area</label><select class="inp" id="na_area">'+opts(S.master.area,"","— chọn —")+'</select></div>'+
+    '</div>'+
+    '<div class="fld"><label>Địa chỉ</label><input class="inp" id="na_address" placeholder="Số nhà, đường, phường/xã"></div>'+
+    '<div class="row">'+
+      picFld("na_pic",S.user.pic||"")+
+      '<div class="fld"><label>Ngày mở account</label><input class="inp" type="date" id="na_openDate" value="'+todayISO()+'"></div>'+
+      '<div class="fld"><label>FY mở account</label><select class="inp" id="na_fy">'+opts(S.fyList,S.fy,"—")+'</select></div>'+
+    '</div>'+
+    '<div class="sect"><div class="ct" style="margin-bottom:8px"><span class="dot"></span>Người liên lạc đầu tiên (CBC)'+
+      '<span class="sp"></span><small>không bắt buộc — ghi vào tab 2. CBC</small></div>'+
+      '<div class="row">'+
+        '<div class="fld"><label>Tên người liên hệ</label><input class="inp" id="na_contact" placeholder="BS. Nguyen Van A"></div>'+
+        '<div class="fld"><label>Điện thoại</label><input class="inp" id="na_phone" inputmode="tel"></div>'+
+      '</div>'+
+      '<div class="row">'+
+        '<div class="fld"><label>Job title</label><select class="inp" id="na_job">'+opts(S.master.jobTitle,"","— chọn —")+'</select></div>'+
+        '<div class="fld"><label>Chuyên khoa</label><input class="inp" id="na_spec"></div>'+
+      '</div>'+
+      '<div class="hint">Để trống nếu chưa biết — thêm sau ở tab Key stakeholder cũng được.</div></div>';
+  openModal2("＋ Thêm địa bàn mới",h,
+    '<button class="btn" onclick="closeModal2()">Huỷ</button>'+
+    '<button class="btn pri" onclick="saveNewAccount()">Lưu địa bàn</button>');
+  setTimeout(function(){ var e=$("na_name"); if(e){ e.focus(); } },60);
+}
+function naArea(){
+  var pv=($("na_province")||{}).value||"";
+  var NORTH=["Hanoi","Ha Giang","Cao Bang","Bac Kan","Tuyen Quang","Lao Cai","Dien Bien","Lai Chau","Son La","Yen Bai","Hoa Binh","Thai Nguyen","Lang Son","Quang Ninh","Bac Giang","Phu Tho","Vinh Phuc","Bac Ninh","Hai Duong","Hai Phong","Hung Yen","Thai Binh","Ha Nam","Nam Dinh","Ninh Binh","Thanh Hoa","Nghe An","Ha Tinh","Ha Noi"];
+  var CENTRAL=["Quang Binh","Quang Tri","Thua Thien-Hue","Da Nang","Quang Nam","Quang Ngai","Binh Dinh","Phu Yen","Khanh Hoa","Ninh Thuan","Binh Thuan","Kon Tum","Gia Lai","Dak Lak","Dak Nong","Lam Dong"];
+  var a=NORTH.indexOf(pv)>=0?"North":CENTRAL.indexOf(pv)>=0?"Central":pv?"South":"";
+  if(a && $("na_area")) $("na_area").value=a;
+}
+function saveNewAccount(){
+  var name=($("na_name")||{}).value||"", type=($("na_type")||{}).value||"", prov=($("na_province")||{}).value||"";
+  name=name.trim();
+  if(!name)  return toast("Cần nhập tên địa bàn","warn");
+  if(!type)  return toast("Cần chọn Account type","warn");
+  if(!prov)  return toast("Cần chọn Province","warn");
+  /* trùng tên thì dùng lại account cũ, tránh đẻ ra hai mã cho cùng một phòng khám */
+  var dup=(S.custIndex||[]).filter(function(c){ return accKeyOf(c.name)===accKeyOf(name); })[0];
+  if(dup){
+    toast("Địa bàn “"+dup.name+"” đã có trong danh mục (mã "+dup.code+") — dùng lại địa bàn này.","warn",6000);
+    closeModal2();
+    var f0=S._naDone; S._naDone=null;
+    if(f0) f0(dup,null);
+    return;
+  }
+  var cus={ _row:0, name:name, type:type, province:prov,
+    area:($("na_area")||{}).value||"", address:(($("na_address")||{}).value||"").trim(),
+    pic:($("na_pic")||{}).value||S.user.pic, fy:($("na_fy")||{}).value||S.fy,
+    openDate:($("na_openDate")||{}).value||todayISO() };
+  var ct=(($("na_contact")||{}).value||"").trim();
+  var cbc=ct ? { _row:0, contact:ct, phone:(($("na_phone")||{}).value||"").trim(),
+                 jobTitle:($("na_job")||{}).value||"", specialize:(($("na_spec")||{}).value||"").trim(),
+                 cbcNo:1, logSource:"App — thêm nhanh khi tạo task" } : null;
+
+  busy(true,"Đang thêm địa bàn vào Google Sheet…");
+  apiPost({ action:"saveCustomerCbc", customer:cus, cbc:cbc }).then(function(r){
+    busy(false); closeModal2();
+    var slim=Object.assign({ _row:r.row||0, code:r.code||"", nCbc:cbc?1:0, nOrder:0, note:"" }, cus);
+    if(r.customer) slim=Object.assign(slim,r.customer);
+    S.custIndex=(S.custIndex||[]); S.custIndex.unshift(slim);
+    S.custMap=(S.custMap||{}); if(slim.code) S.custMap[slim.code]=slim;
+    if(r.cbc){ S.cbcRows=(S.cbcRows||[]).concat([r.cbc]); stakeIdxReset(); _stCache=null; }
+    afterWrite("customer", r.row||0, slim);
+    if(r.cbc) afterWrite("cbc", r.cbcRow||0, r.cbc);
+    toast("✓ "+(r.message||("Đã thêm địa bàn "+name)),"ok",5200);
+    if(r.cbcWarn) toast("Địa bàn đã lưu, nhưng chưa thêm được người liên lạc: "+r.cbcWarn,"warn",7000);
+    var f=S._naDone; S._naDone=null;
+    if(f) f(slim, r.cbc||null);
+  }).catch(function(e){ busy(false); toast(e.message,"err",6000); });
+}
+/* từ dialog "Thêm task đi địa bàn" */
+function ntNewAcc(){
+  openNewAccount({ name:($("nt_accName")||{}).value||"", withCbc:true, onDone:function(c){
+    var el=$("nt_accName"); if(el) el.value=c.name||"";
+    var hid=$("nt_account"); if(hid) hid.value=mkAcc(c);
+    var hint=$("nt_accHint");
+    if(hint) hint.textContent=[c.type,c.province,c.area,"PIC "+(c.pic||"—")].filter(String).join(" · ");
+    var tt=typeTaskForAcc(c.type);
+    if(tt&&$("nt_typeTask")){ $("nt_typeTask").value=tt; if(hint) hint.textContent+=" · Type task: "+tt; }
+    if(isMgmt()&&c.pic&&$("nt_pic")&&$("nt_pic").tagName==="SELECT") $("nt_pic").value=c.pic;
+    ntTbdSync();
+  }});
+}
+
 /* ───────── ẢNH: GPS + 1 ảnh / task ───────── */
 /* ⭐ v4.4 — GPS 2 tầng: thử độ chính xác cao trước, hỏng thì hạ xuống định vị
    thường (wifi/cell) với thời gian chờ dài hơn, cuối cùng mới dùng vị trí đã
@@ -5973,6 +6276,15 @@ function warmGps(){                       /* làm nóng sẵn để lần chụp
 function getGps(){
   return new Promise(function(res){
     if(!("geolocation" in navigator)) return res(null);
+    /* ⭐ v14 — vừa lấy được vị trí trong 2 phút thì DÙNG LUÔN, không bắt người dùng
+       đứng chờ thêm 10 giây định vị độ chính xác cao (sales vẫn đang ở đúng chỗ đó).
+       Vị trí mới hơn vẫn được lấy ngầm để lần chụp sau chính xác hơn. */
+    var c0=S._gps;
+    if(c0 && Date.now()-c0.at<120000){
+      try{ navigator.geolocation.getCurrentPosition(function(p){ S._gps={g:gpsFrom(p),at:Date.now()}; },function(){},
+           {enableHighAccuracy:true,timeout:12000,maximumAge:0}); }catch(e){}
+      return res(c0.g);
+    }
     var done=false;
     function ok(p){ if(done)return; done=true; var g=gpsFrom(p); S._gps={g:g,at:Date.now()}; res(g); }
     function fallback(){
@@ -5998,16 +6310,63 @@ function retryGps(which){
     toast("✓ Đã lấy được vị trí","ok");
   });
 }
+/* ═══════════ ⭐ v14 — NÉN ẢNH MẠNH TAY: ĐÂY LÀ LÝ DO "LOAD MÃI KHÔNG XONG" ═══════════
+   Ảnh điện thoại bây giờ 4.000 × 3.000 (4–12 MB). Bản cũ chỉ hạ về 1.600px chất lượng
+   0.82 ⇒ chuỗi base64 gửi lên khoảng 900 KB – 1,6 MB. Trên 4G ở phòng khám, riêng
+   việc đẩy ngần ấy dữ liệu qua Apps Script đã mất 15–40 giây, chưa kể Drive ghi file.
+
+   Nay:
+     · hạ về tối đa 1.280px (đủ nhìn rõ biển hiệu, mặt tiền, người gặp)
+     · vẽ qua createImageBitmap khi máy hỗ trợ ⇒ không chiếm luồng giao diện, app không đứng
+     · tự hạ chất lượng theo từng nấc cho tới khi ≤ 280 KB, cùng lắm hạ tiếp kích thước
+   Kết quả thực tế: 150–280 KB, tức nhẹ hơn 5–8 lần, gửi xong trong 2–5 giây. */
+var PHOTO_MAX_PX = 1280;
+var PHOTO_MAX_KB = 280;
+function photoSizeKB(dataUrl){ return Math.round(String(dataUrl||"").length*0.75/1024); }
+function drawToCanvas_(src,w,h){
+  var c=document.createElement("canvas"); c.width=w; c.height=h;
+  var ctx=c.getContext("2d");
+  ctx.imageSmoothingEnabled=true;
+  try{ ctx.imageSmoothingQuality="high"; }catch(e){}
+  ctx.drawImage(src,0,0,w,h);
+  return c;
+}
+function fitBox_(w,h,mx){
+  if(w<=mx&&h<=mx) return [w,h];
+  return (w>h) ? [mx,Math.round(h*mx/w)] : [Math.round(w*mx/h),mx];
+}
+function encodeBest_(src,sw,sh){
+  var wh=fitBox_(sw,sh,PHOTO_MAX_PX);
+  var c=drawToCanvas_(src,wh[0],wh[1]);
+  var q=[.72,.62,.52,.44], out="";
+  for(var i=0;i<q.length;i++){
+    out=c.toDataURL("image/jpeg",q[i]);
+    if(photoSizeKB(out)<=PHOTO_MAX_KB) return out;
+  }
+  /* vẫn nặng (ảnh nhiều chi tiết) ⇒ hạ thêm kích thước một nấc nữa */
+  var wh2=fitBox_(sw,sh,960);
+  var c2=drawToCanvas_(src,wh2[0],wh2[1]);
+  var out2=c2.toDataURL("image/jpeg",.6);
+  return photoSizeKB(out2)<photoSizeKB(out)?out2:out;
+}
 function compress(file){
+  /* createImageBitmap giải mã ảnh ở luồng nền ⇒ màn hình không khựng lúc chụp xong */
+  if(window.createImageBitmap){
+    return createImageBitmap(file).then(function(bm){
+      var out=encodeBest_(bm,bm.width,bm.height);
+      try{ bm.close(); }catch(e){}
+      return out;
+    }).catch(function(){ return compressImgTag_(file); });
+  }
+  return compressImgTag_(file);
+}
+function compressImgTag_(file){
   return new Promise(function(res,rej){
     var img=new Image(), url=URL.createObjectURL(file);
     img.onload=function(){
-      var mx=1600,w=img.width,h=img.height;
-      if(w>mx||h>mx){ if(w>h){ h=Math.round(h*mx/w); w=mx; } else { w=Math.round(w*mx/h); h=mx; } }
-      var c=document.createElement("canvas"); c.width=w; c.height=h;
-      c.getContext("2d").drawImage(img,0,0,w,h);
+      var out=encodeBest_(img,img.width,img.height);
       URL.revokeObjectURL(url);
-      res(c.toDataURL("image/jpeg",.82));
+      res(out);
     };
     img.onerror=function(){ URL.revokeObjectURL(url); rej(new Error("Không đọc được ảnh")); };
     img.src=url;
@@ -6051,11 +6410,13 @@ function handleFiles(files){
   }
   var arr=Array.prototype.slice.call(files);
   if(arr.length>1){ arr=[arr[arr.length-1]]; toast("Mỗi task chỉ 1 ảnh — đã lấy ảnh cuối","warn"); }
-  busy(true,"Đang nén ảnh & lấy vị trí GPS…");
-  Promise.all([compress(arr[0]),getGps()]).then(function(o){
-    S.pending={ dataUrl:o[0], gps:o[1], replace:had };
+  busy(true,"Đang nén ảnh…");
+  /* ⭐ v14 — hiện ảnh ngay khi nén xong, KHÔNG bắt chờ GPS. Toạ độ về sau thì gắn thêm. */
+  compress(arr[0]).then(function(d){
+    S.pending={ dataUrl:d, gps:(S._gps&&Date.now()-S._gps.at<600000)?S._gps.g:null, replace:had };
     busy(false); renderPending();
     try{$("tk-cam").value="";}catch(e){}
+    if(!S.pending.gps) getGps().then(function(g){ if(S.pending&&g){ S.pending.gps=g; renderPending(); } });
   }).catch(function(e){ busy(false); toast(e.message,"err"); });
 }
 document.addEventListener("paste",function(e){
@@ -6080,7 +6441,8 @@ function renderPending(){
 function uploadPending(silent){
   if(!S.pending) return Promise.resolve();
   var p=S.pending, w=S.task||{};
-  if(!silent) busy(true,"Đang tải ảnh lên Drive…");
+  var kb=photoSizeKB(p.dataUrl);
+  if(!silent) busy(true,"Đang tải ảnh lên Drive ("+kb+" KB)…");
   var body={ action:"uploadPhoto", b64:p.dataUrl, mime:"image/jpeg", row:S.taskRow,
              account:w.account, date:String(w.start).slice(0,10), pic:w.pic||S.user.pic, replace:1 };
   if(p.gps){ body.lat=p.gps.lat; body.lng=p.gps.lng; body.acc=p.gps.acc; }
@@ -6095,15 +6457,18 @@ function uploadPending(silent){
     return r;
   }).catch(function(e){ if(!silent) busy(false); throw e; });
 }
+/* ⭐ v14 — sau khi tải ảnh: VÁ TẠI CHỖ rồi thôi.
+   Bản cũ gọi loadTerritoryAll() nạp lại TOÀN BỘ hoạt động đi địa bàn cả năm tài chính
+   chỉ vì vừa đổi một ô ảnh — thêm 5–15 giây chờ nữa ngay sau khi vừa chờ tải ảnh. */
 function openTaskAfterSync(){
   var row=S.taskRow;
   if(S.task && row){                       /* vá tại chỗ ⇒ drawer mở lại tức thì */
     terrRows().forEach(function(w,i){ if(w._row===row) S.cache.weekly.rows[i]=S.task; });
     terrSave(terrRows());
   }
-  if(S.cache.weekly) S.cache.weekly.at=0;
   if($("drw").classList.contains("on")&&row) openTask(row);
-  loadTerritoryAll(true);
+  _lvMap=null;
+  if(S.tab==="weekly") softRepaint();
 }
 function deleteTaskPhoto(fileId){
   if(!confirm("Xoá ảnh này khỏi Drive và khỏi sheet?")) return;
@@ -6167,14 +6532,21 @@ function saveTask(){
 function deleteTaskFlow(){
   var b=$("tk-del"); if(!b) return;
   if(!S._delArmed){
-    S._delArmed=true; b.textContent="⚠️ Bấm lần nữa để XÁC NHẬN xoá";
+    var ph=((S.task&&S.task.photos)||[]).length>0||!!String((S.task&&S.task.photo)||"").trim();
+    S._delArmed=true;
+    b.textContent=ph?"⚠️ Bấm lần nữa — xoá cả ẢNH trên Drive":"⚠️ Bấm lần nữa để XÁC NHẬN xoá";
     setTimeout(function(){ if(S._delArmed&&$("tk-del")){ S._delArmed=false; $("tk-del").textContent="🗑 Xoá task"; } },4000);
     return;
   }
   S._delArmed=false; b.disabled=true;
-  busy(true,"Đang xoá task…");
+  var hadPh=((S.task&&S.task.photos)||[]).length>0||!!String((S.task&&S.task.photo)||"").trim();
+  busy(true,hadPh?"Đang xoá task và ảnh trên Drive…":"Đang xoá task…");
   apiPost({action:"deleteRow",tab:"weekly",row:S.taskRow}).then(function(r){
-    busy(false); toast(r.message||"Đã xoá task","ok");
+    busy(false);
+    /* ⭐ v14 — xoá task là xoá luôn ảnh trong folder Drive; báo rõ để sales yên tâm */
+    var nPh=(r&&r.photosDeleted)||0;
+    toast((r&&r.message)||"Đã xoá task"+(nPh?(" · đã xoá "+nPh+" ảnh khỏi Drive"):""),"ok",4200);
+    if(hadPh&&!nPh) toast("⚠️ Task đã xoá nhưng ảnh trên Drive có thể chưa xoá được — kiểm tra lại folder ảnh.","warn",7000);
     closeDrw(); afterWrite("weekly",S.taskRow,null,true);
     S.taskRow=0; terrRefresh();
   }).catch(function(e){ busy(false); b.disabled=false; toast(e.message,"err",5000); });
@@ -6207,20 +6579,21 @@ function formWeekly(w,presetAcc){
   S.ntPhoto=null; S.ntStatusManual=0; S.ntTbd=false; S.ntTbdDate=0;
   var acc=parseAcc(presetAcc||"");
   var h='<div class="fld sbox"><label>Account <span class="rq">*</span></label>'+
-      '<input class="inp" id="nt_accName" placeholder="Bấm để xem danh sách · gõ ≥2 ký tự để tìm" value="'+esc(acc.name||"")+'" autocomplete="off">'+
+      '<div class="pairbtn"><input class="inp" id="nt_accName" placeholder="Bấm để xem danh sách · gõ ≥2 ký tự để tìm" value="'+esc(acc.name||"")+'" autocomplete="off">'+
+        '<button class="btn sm" type="button" onclick="ntNewAcc()">＋ Địa bàn mới</button></div>'+
       '<input type="hidden" id="nt_account" value="'+esc(presetAcc||"")+'">'+
-      '<div class="hint" id="nt_accHint">Chọn từ danh mục để tự điền Type / Province / Area</div></div>'+
+      '<div class="hint" id="nt_accHint">Chọn từ danh mục để tự điền Type / Province / Area · chưa có trong danh sách thì bấm <b>＋ Địa bàn mới</b></div></div>'+
     '<div class="row">'+
-      '<div class="fld"><label>Ngày <span class="rq">*</span></label><input class="inp" type="date" id="nt_start" value="'+todayISO()+'"></div>'+
+      '<div class="fld"><label>Ngày <span class="rq">*</span></label><input class="inp" type="date" id="nt_start" value="'+todayISO()+'" onchange="ntTbdSync()"></div>'+
       '<div class="fld"><label>Sales PIC</label>'+
         (isMgmt()
-          ? '<select class="inp" id="nt_pic">'+opts(S.master.pic,"","— chọn —")+'</select>'
+          ? '<select class="inp" id="nt_pic" onchange="ntTbdSync()">'+opts(S.master.pic,"","— chọn —")+'</select>'
           : '<input class="inp piclock" id="nt_pic" value="'+esc(S.user.pic)+'" readonly title="PIC cố định theo tài khoản đăng nhập">')+
       '</div>'+
     '</div>'+
     '<div class="row">'+
-      '<div class="fld"><label>Type task <span class="rq">*</span></label><select class="inp" id="nt_typeTask">'+opts(S.master.typeTask,"","— chọn —")+'</select></div>'+
-      '<div class="fld"><label>Type action <span class="rq">*</span></label><select class="inp" id="nt_typeAction" onchange="ntPhotoHint();ntAutoStatus()">'+opts(S.master.typeAction,"Visiting","— chọn —")+'</select></div>'+
+      '<div class="fld" id="nt_ttWrap"><label>Type task <span class="rq">*</span></label><select class="inp" id="nt_typeTask">'+opts(S.master.typeTask,"","— chọn —")+'</select></div>'+
+      '<div class="fld" id="nt_taWrap"><label>Type action <span class="rq">*</span></label><select class="inp" id="nt_typeAction" onchange="ntPhotoHint();ntAutoStatus()">'+opts(S.master.typeAction,"Visiting","— chọn —")+'</select></div>'+
     '</div>'+
     '<div class="row">'+
       '<div class="fld"><label>Sales Process <span class="rq">*</span></label><select class="inp" id="nt_process">'+opts(S.master.process,"","— chọn —")+'</select></div>'+
@@ -6276,8 +6649,10 @@ function ntTbdSync(){
   S.ntTbd=on;
   var pw=$("nt_planWrap"), pk=$("nt_tbdPick"), note=$("nt_tbdNote"),
       rw=$("nt_resWrap"), ps=$("nt_phSect"), hint=$("nt_accHint");
-  /* các ô chỉ có nghĩa khi đã biết account thì ẩn hẳn, tránh hiện dấu * gây hiểu nhầm */
-  ["nt_prodWrap","nt_nextWrap","nt_stopWrap"].forEach(function(id){
+  /* các ô chỉ có nghĩa khi đã biết account thì ẩn hẳn, tránh hiện dấu * gây hiểu nhầm.
+     ⭐ v14 — ẩn thêm "Type task" và "Type action": dòng TBD là kế hoạch chưa biết gặp ai,
+     hai ô này không có gì để chọn và hệ thống đã tự tổng hợp ở ô kết quả cuối tuần. */
+  ["nt_prodWrap","nt_nextWrap","nt_stopWrap","nt_ttWrap","nt_taWrap"].forEach(function(id){
     var e=$(id); if(e&&id!=="nt_stopWrap") e.style.display=on?"none":"";
     else if(e&&on) e.style.display="none";
   });
@@ -6301,12 +6676,22 @@ function ntTbdSync(){
   if($("nt_start")&&!S.ntTbdDate){ $("nt_start").value=nextMonday(todayISO()); S.ntTbdDate=1; }
   var from=mondayOf($("nt_start")?$("nt_start").value:todayISO()), to=addDays(from,6);
   if(hint) hint.innerHTML='<b style="color:var(--blue-d)">Chưa xác định account</b> · kỳ tính trọn tuần '+fmtVN(from)+' → '+fmtVN(to);
+
+  /* ⭐ v14 — cảnh báo NGAY nếu tuần đó đã có một dòng TBD của chính PIC này */
+  var whoNt=($("nt_pic")&&$("nt_pic").value)||S.user.pic;
+  var dup=tbdExistingRow(from,isMgmt()?whoNt:S.user.pic,0);
   if(note){ note.style.display="";
-    note.innerHTML='<div class="card pad" style="margin-bottom:12px;background:var(--pale);border-color:var(--lb1)">'+
-      '<div style="font-size:13px;font-weight:800;color:var(--navy);margin-bottom:4px">Task Result để hệ thống tự tổng hợp</div>'+
-      '<div style="font-size:12.5px;color:var(--sub);line-height:1.6">Cuối tuần ô kết quả tự đếm các account bạn thực sự đi trong '+
-      fmtVN(from)+' – '+fmtVN(to)+' và hiện dạng <i>“Đã tiếp cận 3 phòng khám, 2 bệnh viện”</i>. '+
-      'Không cần ghi kết quả, cũng không cần chụp ảnh cho dòng này.</div></div>'; }
+    note.innerHTML = dup
+      ? ('<div class="card pad" style="margin-bottom:12px;background:#FFFBF1;border-color:#F3D69B">'+
+         '<div style="font-size:13px;font-weight:800;color:#8A5A00;margin-bottom:4px">Tuần này đã có kế hoạch TBD rồi</div>'+
+         '<div style="font-size:12.5px;color:var(--sub);line-height:1.6">'+esc(tbdDupMsg(dup))+' '+
+         'Bấm nút dưới để mở dòng đã có ra sửa, hoặc đổi sang tuần khác.</div>'+
+         '<button class="btn sm" style="margin-top:9px" onclick="closeModal();openTask('+dup._row+')">Mở dòng đã có (dòng '+dup._row+')</button></div>')
+      : ('<div class="card pad" style="margin-bottom:12px;background:var(--pale);border-color:var(--lb1)">'+
+         '<div style="font-size:13px;font-weight:800;color:var(--navy);margin-bottom:4px">Task Result để hệ thống tự tổng hợp</div>'+
+         '<div style="font-size:12.5px;color:var(--sub);line-height:1.6">Cuối tuần ô kết quả tự đếm các account bạn thực sự đi trong '+
+         fmtVN(from)+' – '+fmtVN(to)+' và hiện dạng <i>“Đã tiếp cận 3 phòng khám, 2 bệnh viện”</i>. '+
+         'Không cần chọn Type task, không cần ghi kết quả, cũng không cần chụp ảnh cho dòng này.</div></div>'); }
 }
 /* ⭐ v4.4 — Account type ở tab "2. CBC" quyết định Type task
    (Clinic ⇒ Sale-Clinics, Dealer ⇒ Sale-Dealers, Hospital ⇒ Sale-Hospitals…) */
@@ -6353,10 +6738,12 @@ function ntStopToggle(){ var w=$("nt_stopWrap"); if(w) w.style.display=($("nt_ne
 function ntFiles(files){
   if(!files||!files.length) return;
   if(!photoGate(files[0])){ try{$("nt_file").value="";}catch(e){} return; }
-  busy(true,"Đang nén ảnh & lấy GPS…");
-  Promise.all([compress(files[0]),getGps()]).then(function(o){
-    S.ntPhoto={dataUrl:o[0],gps:o[1]}; busy(false); ntDraw();
+  busy(true,"Đang nén ảnh…");
+  compress(files[0]).then(function(d){
+    S.ntPhoto={ dataUrl:d, gps:(S._gps&&Date.now()-S._gps.at<600000)?S._gps.g:null };
+    busy(false); ntDraw();
     try{$("nt_file").value="";}catch(e){}
+    if(!S.ntPhoto.gps) getGps().then(function(g){ if(S.ntPhoto&&g){ S.ntPhoto.gps=g; ntDraw(); } });
   }).catch(function(e){ busy(false); toast(e.message,"err"); });
 }
 function ntDraw(){
@@ -6400,8 +6787,15 @@ function submitNewTask(){
     var miss=tbdPickBad("ntb");
     if(miss) return toast("⚠️ Chọn TBD thì bắt buộc chọn: "+miss,"warn",6500);
     var t=tbdRow($("nt_start").value, tbdPlanText("ntb"), tbdSel("ntb","p")[0]||"", $("nt_pic").value);
-    t.typeTask=$("nt_typeTask").value||t.typeTask;
-    if(!t.typeTask) return toast("⚠️ Cần bổ sung: Type task","warn",5000);
+    /* ⭐ v14 — Type task không còn phải chọn tay; lấy mặc định để không vướng
+       Data Validation của cột trên Google Sheet. */
+    t.typeTask=($("nt_typeTask")&&$("nt_typeTask").value)||tbdTypeTask("");
+    /* ⭐ v14 — MỘT TUẦN CHỈ MỘT DÒNG TBD CHO MỘT PIC */
+    var dupT=tbdExistingRow(t.start,t.pic,0);
+    if(dupT){
+      toast("⚠️ "+tbdDupMsg(dupT)+" Đang mở dòng đã có để bạn sửa.","warn",7000);
+      closeModal(); return openTask(dupT._row);
+    }
     busy(true,"Đang ghi kế hoạch TBD vào Google Sheet…");
     return apiPost({action:"saveWeekly",data:t}).then(function(r){
       busy(false); closeModal(); S.ntDraft=""; S.ntTbd=false;
@@ -6472,7 +6866,8 @@ function submitNewTask(){
 
 /* xoá dòng chung cho các tab khác */
 function delRow(tab,row){
-  if(!confirm("Xoá dòng này khỏi Google Sheet? Thao tác không hoàn tác được.")) return;
+  if(!confirm("Xoá dòng này khỏi Google Sheet? Thao tác không hoàn tác được."+
+              (tab==="weekly"?"\n\nẢnh đi địa bàn của dòng này cũng bị xoá khỏi folder Drive.":""))) return;
   busy(true,"Đang xoá…");
   apiPost({action:"deleteRow",tab:tab,row:row}).then(function(r){
     busy(false); closeModal(); toast(r.message||"Đã xoá","ok");
@@ -6547,20 +6942,118 @@ function nextOrderNo(){
   });
   return mx?(pre+(mx+1)):"";
 }
-function ordProds(){ if(!S.ordProds||!S.ordProds.length) S.ordProds=[{ptype:"",detail:"",price:"",qty:""}]; return S.ordProds; }
-function ordSync(){
-  ordProds().forEach(function(p,i){
-    var t=$("op_t"+i), d=$("op_d"+i), u=$("op_u"+i), q=$("op_q"+i);
-    if(t) p.ptype=t.value; if(d) p.detail=d.value;
-    if(u) p.price=u.value;  if(q) p.qty=q.value;
+/* ═══════════════════════════════════════════════════════════════════════════════
+   ⭐ v14 — DANH MỤC MÃ SẢN PHẨM  (tab "12. PRODUCT CODE" · cột I "Detail")
+   Ô Detail trước đây gõ tay nên mỗi người viết một kiểu ("025 06 21mm 2 vỉ",
+   "REAMER 21 #06"…) — không tổng hợp nổi theo sản phẩm. Nay chọn từ danh mục chuẩn,
+   gom nhóm sẵn theo cột Type (REAMERS · K-FILES · JIZAI FILES · DIA-BURS …), chọn
+   được nhiều mã cùng lúc cho những dòng có CÙNG đơn giá và CÙNG quy cách đóng gói.
+   Danh mục nạp một lần rồi nằm trong máy, mở lại app không phải tải lại.
+   ═══════════════════════════════════════════════════════════════════════════════ */
+function pcodeKey_(){ return ckey("pcode"); }
+function loadProductCodes(force){
+  if(S._pcLoading) return S._pcLoading;
+  if(!force && S.pcode && S.pcode.items) return Promise.resolve(S.pcode);
+  if(!force){
+    var c=kvGet(pcodeKey_());
+    if(c && c.items && c.items.length){
+      S.pcode=c;
+      if(Date.now()-(c.at||0)<86400000) return Promise.resolve(S.pcode);
+    }
+  }
+  S._pcLoading=apiGet("productCodes",{}).then(function(j){
+    S._pcLoading=null;
+    if(j&&j.unchanged) return S.pcode;
+    if(j&&j.missing){ S.pcodeErr=j.message||"Chưa có tab 12. PRODUCT CODE"; return null; }
+    S.pcodeErr="";
+    S.pcode={ groups:j.groups||[], items:j.items||[], total:j.total||0, at:Date.now() };
+    kvSet(pcodeKey_(),S.pcode);
+    return S.pcode;
+  }).catch(function(e){ S._pcLoading=null; S.pcodeErr=e.message; return null; });
+  return S._pcLoading;
+}
+/* Nhóm nào "hợp" với Product type đang chọn — dùng để mở sẵn đúng nhóm cần.
+   VD Product type "All - Files" ⇒ mở sẵn K-FILES, H-FILES, RT FILES, JIZAI FILES…
+      Product type "Jizai"       ⇒ mở sẵn JIZAI FILES. */
+var PC_STOP=/^(all|mani|va|và|cac|các|nhom|nhóm|other|khac|khác|product|san|sản|pham|phẩm)$/;
+/* Product type trong MASTER LIST đặt theo cách gọi của MMH, còn cột Type của tab
+   "12. PRODUCT CODE" đặt theo tên dòng sản phẩm. Bảng dưới nối hai cách gọi đó lại,
+   nhờ vậy chọn "All - Files" là mở sẵn cả REAMERS, BROACHES, FINDERS… chứ không chỉ
+   những nhóm có đúng chữ "FILES" trong tên. */
+var PC_ALIAS={
+  file   : ["file","reamer","broach","finder","spreader","plugger","jizai","flare","rt ","ultrasonic"],
+  files  : ["file","reamer","broach","finder","spreader","plugger","jizai","flare","rt ","ultrasonic"],
+  tram   : ["file","reamer","broach","jizai"],
+  endo   : ["file","reamer","broach","finder","jizai","paste carrier","steri endo"],
+  bur    : ["bur","drill","peeso","gates","metalbur"],
+  burs   : ["bur","drill","peeso","gates","metalbur"],
+  khoan  : ["bur","drill","peeso","gates"],
+  mmg    : ["bond","bulk","flo","micro","nano","gingiva","acryl","bleach","mixing","application","eg","veins"],
+  composite:["micro","nano","flo","bulk"],
+  suture : ["suture"],
+  sutures: ["suture"],
+  chi    : ["suture"],
+  knife  : ["knife"],
+  dao    : ["knife"],
+  ghim   : ["manipler"],
+  manipler:["manipler"]
+};
+function pcTokens(v){
+  var base=noAcc(String(v||"")).split(/[^a-z0-9]+/)
+    .filter(function(x){ return x.length>2 && !PC_STOP.test(x); });
+  var out=base.slice();
+  base.forEach(function(t){
+    (PC_ALIAS[t]||[]).forEach(function(x){ if(out.indexOf(x)<0) out.push(x); });
+  });
+  return out;
+}
+function pcGroupFits(gName,toks){
+  if(!toks.length) return false;
+  var g=noAcc(gName);
+  return toks.some(function(t){
+    if(g.indexOf(t)>=0) return true;
+    if(t.length>4 && t.slice(0,-1) && g.indexOf(t.slice(0,-1))>=0) return true;   /* files ⇄ file */
+    return false;
   });
 }
+
+function ordProds(){ if(!S.ordProds||!S.ordProds.length) S.ordProds=[{ptype:"",detail:"",details:[],price:"",qty:""}]; return S.ordProds; }
+/* Detail lưu trong sheet là danh sách XUỐNG DÒNG; SL là một ô chung cho cả dòng */
+function pcSplit(v){
+  return String(v==null?"":v).split(/\r?\n|;/).map(function(x){ return x.trim(); }).filter(Boolean);
+}
+function ordSync(){
+  ordProds().forEach(function(p,i){
+    var t=$("op_t"+i), u=$("op_u"+i), q=$("op_q"+i);
+    if(t) p.ptype=t.value;
+    if(u) p.price=u.value;  if(q) p.qty=q.value;
+    if(!p.details) p.details=pcSplit(p.detail);
+    p.detail=(p.details||[]).join("\n");
+  });
+}
+function ordDetailBox(p,i){
+  var L=p.details||pcSplit(p.detail);
+  var body = L.length
+    ? '<div class="pcsel">'+L.map(function(d,k){
+        return '<span class="pcchip" title="Bỏ mã này" onclick="ordDelDetail('+i+','+k+')">'+esc(d)+' ✕</span>';
+      }).join("")+'</div>'
+    : '<div class="pcempty">Chưa chọn mã sản phẩm</div>';
+  return '<div class="pcbox" id="op_dbox'+i+'">'+body+
+    '<button class="btn sm" type="button" style="width:100%;margin-top:6px" onclick="openDetailPicker('+i+')">'+
+      (L.length?('✎ Sửa danh sách · '+L.length+' mã'):'＋ Chọn mã sản phẩm')+'</button></div>';
+}
+function ordDelDetail(i,k){
+  ordSync(); var p=ordProds()[i]; if(!p) return;
+  (p.details||[]).splice(k,1); p.detail=(p.details||[]).join("\n");
+  ordDraw();
+}
 function ordRowHtml(p,i,single){
+  var nD=(p.details||pcSplit(p.detail)).length;
   return '<div class="oprow">'+
     '<div class="opc t"><span class="oplb">Product type</span>'+
-      '<select class="inp" id="op_t'+i+'">'+opts(S.master.product,p.ptype,"— chọn —")+'</select></div>'+
-    '<div class="opc d"><span class="oplb">Detail</span>'+
-      '<input class="inp" id="op_d'+i+'" value="'+esc(p.detail||"")+'" placeholder="VD: 025 06 21mm 2 vỉ"></div>'+
+      '<select class="inp" id="op_t'+i+'" onchange="ordPtypeChg('+i+')">'+opts(S.master.product,p.ptype,"— chọn —")+'</select></div>'+
+    '<div class="opc d"><span class="oplb">Detail'+(nD>1?(' · '+nD+' mã chung một mức giá'):'')+'</span>'+
+      ordDetailBox(p,i)+'</div>'+
     '<div class="opc n"><span class="oplb">Unit price</span>'+
       '<input class="inp num" id="op_u'+i+'" inputmode="numeric" value="'+esc(p.price||"")+'" oninput="ordNum(this)"></div>'+
     '<div class="opc n"><span class="oplb">SL</span>'+
@@ -6570,13 +7063,128 @@ function ordRowHtml(p,i,single){
     '<button class="opdel" type="button" title="Bỏ dòng này"'+(single?' disabled':'')+' onclick="ordDelProd('+i+')">✕</button>'+
   '</div>';
 }
+function ordPtypeChg(i){ ordSync(); }
 function ordDraw(){
   var w=$("o_prodWrap"); if(!w) return;
   var list=ordProds();
   w.innerHTML=list.map(function(p,i){ return ordRowHtml(p,i,list.length<2); }).join("");
   ordCalc();
 }
-function ordAddProd(){ ordSync(); ordProds().push({ptype:"",detail:"",price:"",qty:""}); ordDraw(); }
+
+/* ───────── hộp thoại chọn mã sản phẩm ───────── */
+function openDetailPicker(i){
+  ordSync();
+  S.pcRow=i; S.pcQ=""; S.pcOpen={}; S.pcAll=false;
+  var p=ordProds()[i]||{};
+  S.pcPick={}; (p.details||[]).forEach(function(d){ S.pcPick[d]=1; });
+
+  var h='<div class="pcwrap">'+
+    '<div class="pchead">'+
+      '<input class="inp" id="pc_q" autocomplete="off" placeholder="🔍 Gõ tên hoặc mã sản phẩm…" oninput="pcSearch()">'+
+      '<div class="pcnote" id="pc_note"></div>'+
+    '</div>'+
+    '<div class="pclist" id="pc_list"><div class="pcempty">Đang nạp danh mục…</div></div>'+
+    '<div class="pcfoot" id="pc_foot"></div></div>';
+  openModal2("Chọn mã sản phẩm (Detail)",h,
+    '<button class="btn" onclick="closeModal2()">Huỷ</button>'+
+    '<button class="btn pri" onclick="pcApply()">Xong</button>');
+  loadProductCodes().then(function(){ pcDraw(); });
+}
+function pcSearch(){ clearTimeout(S._pcT); S._pcT=setTimeout(function(){ S.pcQ=($("pc_q")||{}).value||""; pcDraw(true); },120); }
+function pcToggleAll(){ S.pcAll=!S.pcAll; pcDraw(); }
+function pcToggleGroup(gi){ S.pcOpen[gi]=!S.pcOpen[gi]; pcDraw(); }
+function pcPickItem(idx,el){
+  var it=((S.pcode||{}).items||[])[idx]; if(!it) return;
+  var d=it[0];
+  if(S.pcPick[d]){ delete S.pcPick[d]; if(el) el.classList.remove("on"); }
+  else { S.pcPick[d]=1; if(el) el.classList.add("on"); }
+  pcFoot();
+}
+function pcClear(){ S.pcPick={}; pcDraw(); }
+function pcCount(){ return Object.keys(S.pcPick||{}).length; }
+function pcFoot(){
+  var f=$("pc_foot"); if(!f) return;
+  var L=Object.keys(S.pcPick||{});
+  f.innerHTML='<div class="pcsum"><b>'+L.length+'</b> mã đã chọn'+
+    (L.length?' <button class="mini" onclick="pcClear()">Bỏ hết</button>':'')+'</div>'+
+    (L.length?'<div class="pcsel">'+L.slice(0,40).map(function(d){
+        return '<span class="pcchip on">'+esc(d)+'</span>'; }).join("")+
+      (L.length>40?('<span class="pcchip">+'+(L.length-40)+' mã nữa</span>'):'')+'</div>':'');
+  /* cập nhật nhãn nút "Xong" của modal 2 */
+  var b=document.querySelector("#m2Foot .btn.pri");
+  if(b) b.textContent=L.length?("Xong · "+L.length+" mã"):"Xong";
+}
+function pcDraw(keepCaret){
+  var box=$("pc_list"); if(!box) return;
+  var pc=S.pcode;
+  if(!pc||!pc.items||!pc.items.length){
+    box.innerHTML='<div class="pcempty">'+esc(S.pcodeErr||
+      ('Chưa đọc được danh mục. Hãy tạo tab "12. PRODUCT CODE" trong file '+curTeam().crmFile+
+       ' rồi dán nội dung file PRODUCT_CODE vào (tiêu đề ở hàng 1).'))+'</div>';
+    pcFoot(); return;
+  }
+  var q=noAcc(String(S.pcQ||"").trim());
+  var toks=pcTokens((ordProds()[S.pcRow]||{}).ptype);
+  var items=pc.items, out=[], shown=0;
+
+  if(q){
+    var hits=[];
+    for(var i=0;i<items.length && hits.length<300;i++){
+      var it=items[i];
+      if(noAcc(it[0]).indexOf(q)>=0 || noAcc(it[1]).indexOf(q)>=0) hits.push(i);
+    }
+    shown=hits.length;
+    out.push('<div class="pcgh">Kết quả tìm kiếm · '+hits.length+(hits.length>=300?"+":"")+' mã</div>');
+    out.push(hits.map(pcItemHtml).join("")||'<div class="pcempty">Không có mã nào khớp</div>');
+  }else{
+    var fit=[], rest=[];
+    pc.groups.forEach(function(g,gi){ (pcGroupFits(g[0],toks)?fit:rest).push(gi); });
+    if(!fit.length){ fit=rest; rest=[]; }
+    /* nhóm hợp với Product type: mở sẵn · nhóm còn lại: thu gọn, bấm để mở */
+    fit.forEach(function(gi,k){ if(S.pcOpen[gi]===undefined) S.pcOpen[gi]=(k<3); });
+    var list=S.pcAll?fit.concat(rest):fit;
+    list.forEach(function(gi){
+      var g=pc.groups[gi], open=!!S.pcOpen[gi];
+      var nSel=g[1].filter(function(ix){ return S.pcPick[items[ix][0]]; }).length;
+      out.push('<div class="pcgh'+(open?" open":"")+'" onclick="pcToggleGroup('+gi+')">'+
+        '<span class="ar">'+(open?"▾":"▸")+'</span>'+esc(g[0])+
+        '<span class="sp"></span><span class="cnt">'+g[1].length+' mã'+(nSel?(' · chọn '+nSel):'')+'</span></div>');
+      if(open){ out.push(g[1].map(pcItemHtml).join("")); shown+=g[1].length; }
+    });
+    if(rest.length && !S.pcAll)
+      out.push('<button class="btn gho sm" style="width:100%;margin-top:8px" onclick="pcToggleAll()">'+
+        'Hiện tất cả '+pc.groups.length+' nhóm sản phẩm ('+rest.length+' nhóm khác)</button>');
+    else if(rest.length===0 && S.pcAll)
+      out.push('<button class="btn gho sm" style="width:100%;margin-top:8px" onclick="pcToggleAll()">Chỉ hiện nhóm liên quan</button>');
+  }
+  box.innerHTML=out.join("");
+  var nt=$("pc_note");
+  if(nt) nt.innerHTML= q ? '' :
+    (toks.length?('Đang mở sẵn nhóm hợp với Product type <b>'+esc((ordProds()[S.pcRow]||{}).ptype||"")+'</b>. Gõ để tìm trong toàn bộ '+pc.total+' mã.')
+                :('Danh mục '+pc.total+' mã. Chọn Product type trước để hệ thống mở sẵn đúng nhóm.'));
+  pcFoot();
+  if(keepCaret){ var el=$("pc_q"); if(el) el.focus(); }
+}
+function pcItemHtml(ix){
+  var it=((S.pcode||{}).items||[])[ix]; if(!it) return "";
+  var on=!!S.pcPick[it[0]];
+  return '<div class="pcit'+(on?" on":"")+'" onclick="pcPickItem('+ix+',this)">'+
+    '<span class="bx"></span>'+
+    '<div class="tx"><div class="nm">'+esc(it[0])+'</div>'+
+    '<div class="sub">'+esc(it[1]||"")+(it[2]?(' · '+esc(it[2])):"")+'</div></div></div>';
+}
+function pcApply(){
+  var i=S.pcRow, p=ordProds()[i];
+  if(p){
+    p.details=Object.keys(S.pcPick||{});
+    p.detail=p.details.join("\n");
+  }
+  closeModal2();
+  ordDraw();
+  if(p && p.details.length>1)
+    toast("Đã chọn "+p.details.length+" mã — nhớ kiểm tra đơn giá và quy cách đóng gói phải giống nhau","ok",5200);
+}
+function ordAddProd(){ ordSync(); ordProds().push({ptype:"",detail:"",details:[],price:"",qty:""}); ordDraw(); }
 function ordDelProd(i){ ordSync(); var l=ordProds(); if(l.length<2) return; l.splice(i,1); ordDraw(); }
 function ordNum(el){ var v=String(el.value||"").replace(/[^\d]/g,""); if(v!==el.value) el.value=v; ordCalc(); }
 /* chỉ cho gõ chữ số — dùng cho các ô số ngoài dialog đơn hàng */
@@ -6617,13 +7225,17 @@ function ordPickCbc(){
   if($("o_phone"))    $("o_phone").value=b.phone||"";
   if(S.editing&&S.editing.ctx) S.editing.ctx.cbcCode=b.cbcCode||"";
 }
+/* ⭐ v14 — dùng chung dialog "Thêm địa bàn mới" (lớp nổi) để form đơn hàng không bị
+   dựng lại: nội dung đang gõ dở và các dòng sản phẩm vẫn còn nguyên. */
 function ordNewAcc(){
   ordSync();
-  subReturn(function(c){
+  openNewAccount({ name:($("o_accName")||{}).value||"", withCbc:true, onDone:function(c,cbc){
     if($("o_accName")) $("o_accName").value=c.name||"";
-    ordSetAcc(c); toast("Đã thêm account — điền tiếp đơn hàng","ok");
-  });
-  formCustomer(null);
+    ordSetAcc(c);
+    if(cbc){ ordDrawCbc(cbc.contact||""); }
+    ordDraw();
+    toast("Đã thêm địa bàn — điền tiếp đơn hàng","ok");
+  }});
 }
 function ordNewCbc(){
   var ctx=(S.editing&&S.editing.ctx)||{};
@@ -6651,7 +7263,8 @@ function formOrder(o){
   o=o||{};
   var isNew=!o._row;
   ensureCbc();
-  S.ordProds=[{ ptype:o.ptype||"", detail:o.detail||"", price:o.price||"", qty:o.qty||"" }];
+  loadProductCodes();          /* ⭐ v14 — nạp sẵn danh mục Detail, mở picker là có ngay */
+  S.ordProds=[{ ptype:o.ptype||"", detail:o.detail||"", details:pcSplit(o.detail), price:o.price||"", qty:o.qty||"" }];
   var day=o.day||todayISO(), mon=o.month||ymOf(day);
   var ono=o.orderNo||nextOrderNo();
 
@@ -6711,6 +7324,7 @@ function delOrder(row){
   apiPost({action:"deleteRow",tab:"order",row:row}).then(function(r){
     busy(false); closeAllModals(); toast(r.message||"Đã xoá đơn hàng","ok");
     afterWrite("order", row, null, true);
+    setTimeout(syncOrderTasks,600);
     if(S.cache.order&&S.cache.order.rows) S.cache.order.rows=S.cache.order.rows.filter(function(x){return x._row!==row;});
     if(S.tab==="order") renderOrder();
   }).catch(function(e){ busy(false); toast(e.message,"err",5000); });
@@ -6721,8 +7335,14 @@ function saveOrder(){
   var accName=$("o_accName").value.trim();
   if(!accName) return toast("Cần chọn Account","warn");
   if(!$("o_day").value) return toast("Cần chọn ngày đặt","warn");
-  var list=ordProds().filter(function(p){ return String(p.ptype||"").trim()||String(p.detail||"").trim()||n(p.qty)||n(p.price); });
+  var list=ordProds().filter(function(p){
+    return String(p.ptype||"").trim()||String(p.detail||"").trim()||(p.details&&p.details.length)||n(p.qty)||n(p.price); });
   if(!list.length) return toast("Cần nhập ít nhất một sản phẩm","warn");
+  /* ⭐ v14 — chọn nhiều mã trên cùng một dòng thì đơn giá và SL là DÙNG CHUNG,
+     nên phải chắc chắn người nhập đã điền đủ hai ô đó. */
+  var badLine=0;
+  list.forEach(function(p,k){ if((p.details||[]).length>1 && (!n(p.price)||!n(p.qty))) badLine=k+1; });
+  if(badLine) return toast("Dòng sản phẩm "+badLine+" đang chọn nhiều mã — cần điền Unit price và SL dùng chung cho cả dòng","warn",6000);
 
   var base={ code:c.code||"", cbcCode:c.cbcCode||"", channel:$("o_channel").value,
     fy:$("o_fy").value, month:$("o_month").value, day:$("o_day").value, orderNo:$("o_orderNo").value,
@@ -6731,24 +7351,26 @@ function saveOrder(){
     pic:$("o_pic").value, partner:$("o_partner").value, partnerType:$("o_partnerType").value,
     source:$("o_source").value, note:$("o_note").value };
 
-  var q=list.slice(), k=0, first=S.editing.row||0;
-  busy(true,"Đang lưu đơn hàng…");
-  function next(){
-    if(!q.length) return Promise.resolve();
-    var p=q.shift(); k++;
+  /* ⭐ v14 — GỬI CẢ ĐƠN TRONG MỘT LẦN GỌI.
+     Bản cũ gửi nối tiếp từng sản phẩm: đơn 4 dòng = 4 vòng gọi Apps Script, mỗi vòng
+     mở lại Spreadsheet, chờ khoá, flush và xoá bộ nhớ đệm ⇒ 15–30 giây đứng hình.
+     Nay backend ghi liền khối, chỉ khoá và flush đúng một lần. */
+  var first=S.editing.row||0;
+  var rows=list.map(function(p,k){
     var amt=n(p.price)*n(p.qty);
-    var d=Object.assign({},base,{ _row:(k===1?first:0), ptype:p.ptype, detail:p.detail,
+    return Object.assign({},base,{ _row:(k===0?first:0), ptype:p.ptype,
+      detail:(p.details&&p.details.length?p.details.join("\n"):p.detail||""),
       qty:p.qty, price:p.price, amount:amt?String(amt):"" });
-    busy(true,"Đang lưu sản phẩm "+k+"/"+(k+q.length)+"…");
-    return apiPost({action:"saveOrder",data:d}).then(function(r){
-      afterWrite("order", r.row||d._row, d);
-      return next();
-    });
-  }
-  next().then(function(){
+  });
+  busy(true,"Đang lưu đơn hàng ("+rows.length+" dòng sản phẩm)…");
+  apiPost({action:"saveOrders",rows:rows}).then(function(r){
+    var got=(r&&r.rows)||[];
+    rows.forEach(function(d,k){ afterWrite("order", got[k]||d._row||0, d); });
     busy(false); closeAllModals();
-    toast("✓ Đã lưu "+k+" dòng sản phẩm cho đơn "+base.orderNo,"ok",4200);
+    toast("✓ Đã lưu "+rows.length+" dòng sản phẩm cho đơn "+base.orderNo,"ok",4200);
     if(S.tab==="order") renderOrder();
+    /* key task "Tư vấn bán hàng" của tháng cập nhật ngay, không chờ trigger 10 phút */
+    setTimeout(syncOrderTasks,600);
   }).catch(function(e){ busy(false); toast(e.message,"err",5500); });
 }
 
@@ -8362,6 +8984,14 @@ function tbdFormGo(option,who){
   if(miss) return toast("⚠️ Bắt buộc chọn: "+miss,"warn",6000);
   var w=tbdNextWeek();
   var t=tbdRow(w.from, tbdPlanText("tbb"), tbdSel("tbb","p")[0]||"", who||S.user.pic);
+  /* ⭐ v14 — tuần đó đã có dòng TBD rồi thì dùng luôn, không tạo thêm dòng thứ hai */
+  var dup=tbdExistingRow(t.start,t.pic,0);
+  if(dup){
+    closeModal();
+    S._tbdOk=S.rpFrom+"|"+who;
+    toast("Tuần này đã có sẵn kế hoạch đi địa bàn — dùng luôn dòng đó.","ok",4200);
+    return sendReport(option,true);
+  }
   busy(true,"Đang tạo kế hoạch TBD…");
   apiPost({action:"saveWeekly",data:t}).then(function(r){
     busy(false); closeModal();
@@ -9117,7 +9747,7 @@ function loadTabs(){
     if(v&&v.d&&(!S.verSeen||!v.ver||v.ver===S.verSeen)) TSTORE=v.d;
   }catch(e){ TSTORE={}; }
 }
-function clearTabs(){ TSTORE={}; kvDel(TKEY_()); }
+function clearTabs(){ TSTORE={}; CVER={}; kvDel(TKEY_()); }
 
 /* Lấy 1 tab: trả ngay nếu có sẵn, đồng thời làm mới ngầm nếu đã cũ */
 function ensureTab(tab,opts,onReady){
@@ -9130,8 +9760,20 @@ function ensureTab(tab,opts,onReady){
   onReady(null,false);
   fetchTab(tab,opts,onReady);
 }
+/* ⭐ v14 — giải nén dạng LEAN (mảng-của-mảng + một dòng tên cột).
+   Payload nhẹ hơn ~60% so với gửi tên cột lặp lại ở từng dòng. */
+function unlean(j){
+  if(!j) return [];
+  if(j.rows) return j.rows;
+  if(!j.lean||!j.cols) return [];
+  var C=j.cols, nC=C.length;
+  return j.lean.map(function(a){
+    var o={}; for(var i=0;i<nC;i++) o[C[i]]=a[i]; return o;
+  });
+}
 function fetchTab(tab,opts,onReady){
-  var q=Object.assign({tab:tab,fy:S.fy,pic:scopePic(),limit:5000},opts||{});
+  var q=Object.assign({tab:tab,fy:S.fy,pic:scopePic(),limit:5000,lean:1},opts||{});
+  if(!tGet(tab)) cvDrop("list",q);     /* trong máy không còn dữ liệu ⇒ phải xin bản đầy đủ */
   if(FETCHING[tab]){
     /* ⭐ v13 — đang có request cùng tab: vẫn báo lại cho người gọi sau (bản cũ bỏ quên
        callback ⇒ màn hình kẹt ở khung xương cho tới khi bấm tab khác) */
@@ -9140,11 +9782,20 @@ function fetchTab(tab,opts,onReady){
   }
   FETCHING[tab]=apiGet("list",q).then(function(j){
     delete FETCHING[tab];
-    tPut(tab,j.rows||[]);
-    if(tab==="cbc"){ S.cbcRows=tGet("cbc")||j.rows||[]; S._cbcLoading=false; _stCache=null; }
-    if(onReady) onReady(j.rows||[],true);
+    /* dữ liệu chưa đổi ⇒ giữ nguyên bản đang có, chỉ đánh dấu là còn mới */
+    if(j&&j.unchanged){
+      var e0=TSTORE[tab]; if(e0) e0.at=Date.now();
+      var keep=tGet(tab)||[];
+      if(tab==="cbc"){ S.cbcRows=keep; S._cbcLoading=false; }
+      if(onReady) onReady(keep,true);
+      return keep;
+    }
+    var rows=unlean(j);
+    tPut(tab,rows);
+    if(tab==="cbc"){ S.cbcRows=tGet("cbc")||rows; S._cbcLoading=false; _stCache=null; }
+    if(onReady) onReady(rows,true);
     else if(S.tab===TAB_OF[tab]) softRepaint();
-    return j.rows||[];
+    return rows;
   }).catch(function(e){ delete FETCHING[tab]; if(onReady) onReady([],true,e); throw e; });
   return FETCHING[tab];
 }
@@ -9196,6 +9847,7 @@ function startSync(){
     setTimeout(function(){ fin(false,""); },8000);
     apiGet("version",{}).then(function(j){
       var v=String((j&&j.ver)||"");
+      if(j&&j.vers) S.verMap=j.vers;        /* ⭐ v14 — mốc so sánh cho các lần dò sau */
       fin(!!(v && meta.ver && meta.ver===v && bc._pic===myPic), v);
     }).catch(function(){ fin(false,""); });
   });
@@ -9212,9 +9864,15 @@ function syncMissing(){
 function prefetchTabs(list){
   var half=Math.ceil(list.length/2), groups=[list.slice(0,half),list.slice(half)].filter(function(g){ return g.length; });
   return Promise.all(groups.map(function(g){
-    return apiGet("multi",{tabs:g.join(","),fy:S.fy,pic:scopePic()}).then(function(j){
+    var q={tabs:g.join(","),fy:S.fy,pic:scopePic(),lean:1};
+    if(g.some(function(k){ return !tGet(k); })) cvDrop("multi",q);
+    return apiGet("multi",q).then(function(j){
+      if(j&&j.unchanged){
+        g.forEach(function(k){ var e=TSTORE[k]; if(e) e.at=Date.now(); });
+        return true;
+      }
       var t=j.tabs||{};
-      Object.keys(t).forEach(function(k){ tPut(k,(t[k]||{}).rows||[]); });
+      Object.keys(t).forEach(function(k){ tPut(k,unlean(t[k])); });
       if(g.indexOf(S.tab)>=0 || S.tab==="dash" || S.tab==="cust" || S.tab==="stake") softRepaint();
       return true;
     }).catch(function(){ return false; });
@@ -9290,12 +9948,34 @@ function patchRows(rows,row,data,isDelete){
   else if(data) rows.unshift(Object.assign({},data,{_row:row}));
   return rows;
 }
+/* ⭐ v14 — dòng vừa lưu phải hiện ĐẦY ĐỦ ngay, không chờ tải lại.
+   Màn hình Địa bàn đọc các trường accName / accType / accProv / photos do backend
+   dựng thêm; dòng vừa ghi chưa có chúng nên trước đây hiện thiếu tên, thiếu ảnh,
+   có khi lọc ra mất luôn — chính là cảnh "thêm task xong, view task chẳng thấy gì". */
+function enrichWeekly_(r){
+  if(!r) return r;
+  var a=parseAcc(r.account||"");
+  if(r.accName===undefined)  r.accName=a.name;
+  if(r.accType===undefined)  r.accType=a.type||r.type||"";
+  if(r.accProv===undefined)  r.accProv=a.province||r.province||"";
+  if(!r.photos) r.photos=photoObjsOf(r.photo);
+  return r;
+}
 function patchLocal(tab,row,data,isDelete){
   if(tab==="cbc") stakeIdxReset();
+  if(tab==="weekly" && data) enrichWeekly_(data);
   var e=TSTORE[tab];
   if(e&&e.rows){ patchRows(e.rows,row,data,isDelete); e.at=0; savTabs(); }
   var c=S.cache[tab];
-  if(c&&c.rows){ patchRows(c.rows,row,data,isDelete); }
+  if(c&&c.rows){
+    patchRows(c.rows,row,data,isDelete);
+    if(tab==="weekly"){
+      c.rows.forEach(enrichWeekly_);
+      tbdFixRows(c.rows);                 /* kết quả dòng TBD của tuần đó tính lại ngay */
+      _lvMap=null;
+      try{ terrSave(c.rows); }catch(_e){}
+    }
+  }
 }
 /* vẽ lại đúng màn hình đang mở sau khi dữ liệu đổi */
 /* ⭐ v7.1 — mỗi lần chuyển tab: vẽ ngay bằng dữ liệu đang có (không chờ),
@@ -9358,21 +10038,27 @@ function afterWrite(tab,row,data,isDelete){
   repaintTab();                              /* ⭐ v5.9 — thấy ngay, không chờ tải lại */
   if(tab==="weekly"){
     /* ⭐ v13 — hoạt động địa bàn: chỉ nạp lại bằng visitFeed (đủ ảnh). Bản cũ gọi thêm
-       fetchTab("weekly") tải cả tab 6 rồi ghi đè S.cache.weekly bằng bản thiếu ảnh. */
+       fetchTab("weekly") tải cả tab 6 rồi ghi đè S.cache.weekly bằng bản thiếu ảnh.
+       ⭐ v14 — GOM CÁC LẦN LƯU LIÊN TIẾP. Trước đây lưu 3 task là 3 lần tải lại toàn bộ
+       hoạt động cả năm; nay chờ 2,2 giây sau lần lưu cuối rồi tải đúng một lần. */
     if(S.cache.weekly){ S.cache.weekly.at=0; S.cache.weekly.fresh=false; }
     S._terrDirtyAt=Date.now();
     if(TSTORE.weekly){ delete TSTORE.weekly; savTabs(); }
-    setTimeout(function(){ var w=S.cache.weekly; if(!w || (w.at||0)<S._terrDirtyAt) loadTerritoryAll(true); },400);
+    clearTimeout(S._awTerrT);
+    S._awTerrT=setTimeout(function(){
+      var w=S.cache.weekly; if(!w || (w.at||0)<S._terrDirtyAt) loadTerritoryAll(true);
+    },2200);
   } else if(tab){
     /* lấy bản chính thức từ máy chủ (có No., FY, Month do sheet tự tính) rồi vẽ lại */
-    setTimeout(function(){
+    clearTimeout(S._awTabT);
+    S._awTabT=setTimeout(function(){
       fetchTab(tab,{},function(rows,ready){
         if(!ready||!rows) return;
         if(S.cache[tab]) S.cache[tab]={rows:tGet(tab)||rows,at:Date.now()};
         else if(tab==="monthly") S.cache[tab]={rows:tGet(tab)||rows,at:Date.now()};
         repaintTab();
       });
-    },400);
+    },1200);
   }
   /* ⭐ v13 — lưu liên tiếp nhiều lần chỉ tải lại bundle (dashboard, danh mục KH) 1 lần */
   clearTimeout(S._awBundleT);
