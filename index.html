@@ -1282,9 +1282,17 @@ tr.rp-late td{background:var(--dang-bg)}
 
 <script>
 /* ═══════════════════════════════════════════════════════════════════
-   MMH CRM — Frontend v15
-   Backend: Google Apps Script (Code.gs v8.1)  ·  Deploy: GitHub Pages
+   MMH CRM — Frontend v16
+   Backend: Google Apps Script (Code.gs v8.2)  ·  Deploy: GitHub Pages
    ───────────────────────────────────────────────────────────────────
+   ⭐ v16 — LỊCH CÔNG VIỆC + CÔNG TÁC · ĐƠN GÕ TAY TRÊN SHEET HIỆN TRÊN APP
+    ① Cập nhật ▸ 📅 Lịch công việc: tuần / tháng / danh sách, gộp đi địa bàn (file CRM)
+       + công việc khác + chuyến công tác (Report Hub). Bấm vào việc ⇒ cập nhật ngay;
+       bấm ngày trống / "＋ Thêm việc" ⇒ thêm việc đúng ngày đó.
+    ② ✈️ Đề xuất công tác ghi thẳng vào file Business Trip + gửi email xin duyệt;
+       xem chuyến đi, nhập báo cáo công tác cho chuyến đã Approved.
+    ③ FY tính theo ngày (T9 → T8): sang tháng 9 app tự mở FY mới — trước đây kẹt FY67
+       nên đơn FY68 sales gõ trên sheet bị lọc mất.
    ⭐ v14 — BẢN TĂNG TỐC & DANH MỤC MÃ SẢN PHẨM
     ① Ảnh đi địa bàn nén về ≤ 280 KB (trước 0,9–1,6 MB) và không chặn giao diện;
        không bắt chờ GPS mới hiện ảnh; tải xong KHÔNG nạp lại cả năm dữ liệu nữa.
@@ -1860,7 +1868,7 @@ function boot(){
   var cache=kvGet(bundleKey_());
   if(cache&&cache.picList&&cache.picList.length){
     S.picList=cache.picList; S.master=cache.master||{}; S.driveFolder=cache.driveFolder||"";
-    S.fy=cache.fyCurrent||"FY68";
+    S.fy=fyNewest_(cache.fyCurrent,fyToday());
     S.fyList=(cache.fyList&&cache.fyList.length)?cache.fyList:((S.master.fy&&S.master.fy.length)?S.master.fy.slice():[S.fy]);
     applyBundle(cache,true);
     $("loader").style.display="none";
@@ -1898,9 +1906,14 @@ function applyBundle(b,fromCache){
   S.picList  = b.picList||S.picList||[];
   S.master   = b.master||S.master||{};
   S.driveFolder = b.driveFolder||S.driveFolder||"";
-  S.fy       = S.fy||b.fyCurrent||"FY68";
-  S.fyList   = (b.fyList&&b.fyList.length)?b.fyList:((S.master.fy&&S.master.fy.length)?S.master.fy.slice():[S.fy]);
-  if(S.fyList.indexOf(S.fy)<0) S.fyList.unshift(S.fy);
+  /* ⭐ v16 — FY đang xem luôn ≥ FY của ngày hôm nay (trừ khi người dùng tự chọn FY khác).
+     Bản cũ giữ mãi FY lưu trong máy ⇒ sang tháng 9 vẫn mở FY67, đơn FY68 gõ trên sheet bị lọc mất. */
+  var _fy0=S.fy;
+  S.fy       = S._fyUser ? (S.fy||b.fyCurrent) : fyNewest_(S.fy, b.fyCurrent, fyToday());
+  if(_fy0&&_fy0!==S.fy){ S.cache={}; S.kpi=null; }
+  S.fyList   = (b.fyList&&b.fyList.length)?b.fyList.slice():((S.master.fy&&S.master.fy.length)?S.master.fy.slice():[S.fy]);
+  [fyToday(),S.fy].forEach(function(f){ if(f&&S.fyList.indexOf(f)<0) S.fyList.unshift(f); });
+  S.fyList.sort(function(a,b){ return String(b).localeCompare(String(a)); });
   if(b.cidx&&b.cidxCols){
     var C=b.cidxCols;
     S.custIndex=b.cidx.map(function(r){ var o={}; for(var i=0;i<C.length;i++) o[C[i]]=r[i]; return o; });
@@ -2240,7 +2253,7 @@ $("btnReload").onclick=function(){
 };
 verAutoOn();
 $("btnAct").onclick=function(){ toggleAct(); };
-$("fySel").onchange=function(){ S.fy=this.value; S.cache={}; S.dash=null; S.kpi=null; S.targetDraft={}; S.kpiPic=""; S.cbcRows=null; S._bundleAt=0; go(S.tab); fullSync(); };
+$("fySel").onchange=function(){ S.fy=this.value; S._fyUser=true; S.cache={}; S.dash=null; S.kpi=null; S.targetDraft={}; S.kpiPic=""; S.cbcRows=null; S._bundleAt=0; go(S.tab); fullSync(); };
 /* ⭐ v13 — bỏ việc tự tải lại bundle mỗi 3 phút khi quay lại cửa sổ: thăm dò version (ở trên)
    đã biết chính xác lúc nào sheet đổi. Chỉ tải lại khi thăm dò version không chạy được. */
 window.addEventListener("focus",function(){
@@ -7389,7 +7402,7 @@ function formOrder(o){
 
     '<div class="fld sbox"><label>Account <span class="rq">*</span></label>'+
       '<div class="pairbtn"><input class="inp" id="o_accName" placeholder="Bấm để xem danh sách · gõ để lọc" value="'+esc(o.name||"")+'" autocomplete="off">'+
-        '<button class="btn sm" type="button" onclick="ordNewAcc()">＋ Account mới</button></div>'+
+        '<button class="btn sm" type="button" onclick="ordNewAcc()">＋ Địa bàn mới</button></div>'+
       '<input type="hidden" id="o_account" value="">'+
       '<div class="hint" id="o_hint">'+esc([o.code,o.type,o.province,o.area].filter(String).join(" · ")||"—")+'</div></div>'+
 
@@ -7891,11 +7904,15 @@ function saveMonthlyDrw(){
 /* ── thêm mới ── */
 /* ⭐ v4.5 — Area cố định theo PIC (sửa bảng này nếu phân vùng thay đổi) */
 var PIC_AREA={ "Viet":"North", "Phuong":"South", "Vinh":"Central", "Viet Ha":"North", "Khang":"South" };
+/* ⭐ v16 — FY suy THẲNG từ tháng (T9 → T8 năm sau). Bản cũ dò trong danh sách FY của
+   MASTER LIST: danh sách chưa có FY68 thì đơn tháng 9/2026 bị gán FY67. */
 function fyOfMonth(ym){
-  var list=(S.fyList&&S.fyList.length)?S.fyList:[S.fy];
-  for(var i=0;i<list.length;i++){ if(fyMonths(list[i]).indexOf(String(ym))>=0) return list[i]; }
-  return S.fy;
+  var y=parseInt(String(ym).slice(0,4),10), mm=parseInt(String(ym).slice(4,6),10);
+  if(!y||!mm) return S.fy;
+  return "FY"+(((mm>=9)?y:y-1)-1958);
 }
+function fyToday(){ var d=new Date(); return fyOfMonth(String(d.getFullYear()*100+d.getMonth()+1)); }
+function fyNewest_(){ var b=""; for(var i=0;i<arguments.length;i++){ var f=String(arguments[i]||""); if(/^FY\d{2}$/.test(f)&&f>b) b=f; } return b||"FY68"; }
 function mnSyncFY(){
   var p=$("m_period"); if(!p) return;
   var f=$("m_fy"); if(f) f.value=fyOfMonth(p.value);
@@ -8055,12 +8072,13 @@ function presSetAcc(c){
   if($("p_hint"))     $("p_hint").textContent=[c.code,c.type,c.province,c.area].filter(String).join(" · ")||"—";
   setPicSel("p_pic",c.pic);
 }
+/* ⭐ v15 — dùng chung dialog "Thêm địa bàn mới" (lớp nổi) như form task và form đơn hàng:
+   cùng một tên nút, cùng một thao tác, và form đang dở không bị dựng lại. */
 function presNewAcc(){
-  subReturn(function(c){
+  openNewAccount({ name:($("p_accName")||{}).value||"", withCbc:true, onDone:function(c){
     if($("p_accName")) $("p_accName").value=c.name||"";
-    presSetAcc(c); toast("Đã thêm account — điền tiếp thông tin buổi","ok");
-  });
-  formCustomer(null);
+    presSetAcc(c); toast("Đã thêm địa bàn — điền tiếp thông tin buổi","ok");
+  }});
 }
 function formPresent(r){
   r=r||{};
@@ -8069,7 +8087,7 @@ function formPresent(r){
   var day=r.day||todayISO(), mon=r.month||ymOf(day);
   var h='<div class="fld sbox"><label>Account <span class="rq">*</span></label>'+
       '<div class="pairbtn"><input class="inp" id="p_accName" placeholder="Bấm để xem danh sách · gõ để lọc" value="'+esc(a.name||"")+'" autocomplete="off">'+
-        '<button class="btn sm" type="button" onclick="presNewAcc()">＋ Account mới</button></div>'+
+        '<button class="btn sm" type="button" onclick="presNewAcc()">＋ Địa bàn mới</button></div>'+
       '<input type="hidden" id="p_account" value="'+esc(r.account||"")+'"><div class="hint" id="p_hint">'+
       esc([a.type,r.province||a.province,r.area||a.area].filter(String).join(" · ")||"—")+'</div></div>'+
     '<div class="row">'+
@@ -10498,6 +10516,1012 @@ function doSend(option){
 
 </script>
 
+
+<style>
+/* ═══════════════════════════════════════════════════════════════════════
+   ⭐ v16 — LỊCH CÔNG VIỆC (đi địa bàn + công việc khác + công tác)
+   ═══════════════════════════════════════════════════════════════════════ */
+.cal-head{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+.cal-head h2{font-size:19px;font-weight:800;color:var(--navy);margin-right:4px;letter-spacing:-.2px}
+.cal-ib{width:38px;height:38px;border-radius:10px;border:1px solid var(--line);background:var(--card);display:inline-flex;align-items:center;justify-content:center;color:var(--navy);cursor:pointer;font-size:15px;font-weight:800;flex:none}
+.cal-ib:hover{border-color:var(--blue);color:var(--blue)}
+.cal-sp{flex:1}
+.cal-bar{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-bottom:10px}
+.cal-chip{display:inline-flex;align-items:center;gap:6px;height:32px;border:1px solid var(--line);background:var(--card);border-radius:20px;padding:0 12px;font-size:12.5px;font-weight:700;color:var(--sub);cursor:pointer;white-space:nowrap;font-family:inherit}
+.cal-chip i{width:9px;height:9px;border-radius:3px;display:inline-block}
+.cal-chip.on{border-color:var(--navy);background:var(--navy);color:#fff}
+.cal-chip.off{opacity:.55;text-decoration:line-through}
+.cal-chip b{font-size:11px;opacity:.8}
+.cal-chip .av{width:22px;height:22px;border-radius:50%;color:#fff;font-size:9.5px;font-weight:800;display:inline-flex;align-items:center;justify-content:center;margin-left:-8px}
+.cal-od{display:inline-flex;align-items:center;gap:6px;height:32px;border:1.5px solid #F2B8B5;background:#FFF3F2;color:#B3261E;border-radius:20px;padding:0 12px;font-size:12.5px;font-weight:800;cursor:pointer;font-family:inherit}
+.cal-sum{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.cal-kpi{flex:1 1 150px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:9px 12px;box-shadow:var(--sh-1);min-width:0}
+.cal-kpi span{display:block;font-size:11px;font-weight:800;color:var(--mute);text-transform:uppercase;letter-spacing:.4px}
+.cal-kpi b{font-size:19px;color:var(--navy)}
+.cal-kpi small{font-size:11.5px;color:var(--sub);margin-left:5px}
+.cal-kpi .pbx{height:6px;border-radius:5px;background:var(--line2);margin-top:6px;overflow:hidden}
+.cal-kpi .pbx i{display:block;height:100%;border-radius:5px}
+.cal-note{background:var(--pale);border:1px solid var(--lb2);border-radius:12px;padding:8px 12px;font-size:12.5px;color:var(--sub);margin-bottom:10px}
+/* tuần */
+.cal-week{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:8px}
+.cal-wc{background:var(--card);border:1px solid var(--line);border-radius:15px;box-shadow:var(--sh-1);display:flex;flex-direction:column;min-height:calc(100vh - 330px);overflow:hidden;min-width:0}
+.cal-wc.today{border-color:var(--blue);box-shadow:0 0 0 2px rgba(58,92,170,.18)}
+.cal-wc.we{background:#FCFDFF}
+.cal-wh{display:flex;align-items:baseline;justify-content:space-between;gap:6px;padding:9px 10px;border-bottom:1px solid var(--line);background:var(--paler);cursor:pointer}
+.cal-wh span{font-size:11.5px;font-weight:800;color:var(--sub);text-transform:uppercase}
+.cal-wh b{font-size:15px;color:var(--navy)}
+.cal-wc.today .cal-wh b,.cal-wc.today .cal-wh span{color:var(--blue)}
+.cal-wb{padding:7px;display:flex;flex-direction:column;gap:6px;flex:1;cursor:copy}
+.cal-empty{color:#C2CEDC;text-align:center;font-size:12.5px;padding:10px 0}
+.cal-add{border:1.5px dashed var(--lb1);background:none;border-radius:10px;color:var(--mute);font-size:12.5px;font-weight:800;padding:7px;margin-top:auto;cursor:pointer;font-family:inherit}
+.cal-add:hover,.cal-wc:hover .cal-add{border-color:var(--blue);color:var(--blue)}
+.cal-card{border:1px solid var(--line);border-left:4px solid var(--c);border-radius:11px;padding:7px 9px;background:var(--card);cursor:pointer;transition:.12s;min-width:0;text-align:left;font-family:inherit;width:100%}
+.cal-card:hover{box-shadow:var(--sh-2);transform:translateY(-1px)}
+.cal-card .tg{display:inline-block;font-size:9.5px;font-weight:800;letter-spacing:.3px;border-radius:6px;padding:1px 6px;margin-bottom:3px;background:color-mix(in srgb,var(--c) 14%,#fff);color:var(--c)}
+.cal-card b{display:block;font-size:13px;line-height:1.35;color:var(--ink);overflow:hidden;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;word-break:break-word}
+.cal-card .k{font-size:11.5px;color:var(--sub);margin-top:2px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.cal-card .m{display:flex;align-items:center;gap:6px;margin-top:5px;font-size:11px;flex-wrap:wrap}
+.cal-card .st{font-weight:800;border-radius:8px;padding:1px 7px;white-space:nowrap}
+.cal-card .pc{margin-left:auto;font-weight:800}
+.cal-card .av{width:18px;height:18px;border-radius:50%;color:#fff;font-size:8px;font-weight:800;display:inline-flex;align-items:center;justify-content:center;flex:none}
+.cal-card.done b{text-decoration:line-through;opacity:.6}
+.cal-card.od{background:#FFF6F5}
+.cal-card.ro{background:#FBFCFF}
+.cal-more{border:none;background:none;color:var(--blue);font-size:12px;font-weight:800;padding:3px;cursor:pointer;font-family:inherit}
+/* tháng */
+.cal-month{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));background:var(--card);border-radius:16px;box-shadow:var(--sh-1);border:1px solid var(--line);overflow:hidden}
+.cal-month .dh{padding:8px;font-size:12px;font-weight:800;color:var(--sub);text-align:center;border-bottom:1px solid var(--line);background:var(--paler)}
+.cal-month .dc{min-height:118px;padding:5px;border-right:1px solid var(--line);border-bottom:1px solid var(--line);cursor:copy;min-width:0}
+.cal-month .dc:nth-child(7n){border-right:0}
+.cal-month .dc.out{background:#FAFBFD}
+.cal-month .dc.out .dn{color:#C2CEDC}
+.cal-month .dc.we{background:#FCFCFE}
+.cal-month .dn{font-size:12.5px;font-weight:800;color:var(--sub);width:25px;height:25px;display:grid;place-items:center;border-radius:50%;margin-bottom:3px}
+.cal-month .dc.today .dn{background:var(--blue);color:#fff}
+.cal-ev{display:flex;align-items:center;gap:4px;width:100%;text-align:left;font-size:11.5px;font-weight:650;padding:3px 5px;border-radius:6px;margin-bottom:3px;
+  background:color-mix(in srgb,var(--c) 13%,#fff);color:var(--navy);border:none;border-left:3px solid var(--c);cursor:pointer;min-width:0;font-family:inherit}
+.cal-ev .t{overflow:hidden;white-space:nowrap;text-overflow:ellipsis;flex:1;min-width:0}
+.cal-ev.done .t{text-decoration:line-through;opacity:.6}
+.cal-dots{display:none;gap:3px;flex-wrap:wrap;justify-content:center}
+.cal-dots i{width:6px;height:6px;border-radius:50%;background:var(--c)}
+/* danh sách */
+.cal-lday{font-size:12px;font-weight:800;color:var(--sub);text-transform:uppercase;letter-spacing:.4px;padding:13px 4px 6px;display:flex;align-items:center;gap:8px}
+.cal-lday.today{color:var(--blue)}
+.cal-lday button{margin-left:auto}
+.cal-lr{display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--line);border-left:4px solid var(--c);border-radius:12px;padding:9px 12px;margin-bottom:6px;cursor:pointer;width:100%;text-align:left;font-family:inherit}
+.cal-lr:hover{box-shadow:var(--sh-2)}
+.cal-lr .mn{flex:1;min-width:0}
+.cal-lr .mn b{display:block;font-size:14px;color:var(--ink);line-height:1.35}
+.cal-lr .mn .k{font-size:12px;color:var(--sub);overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.cal-lr .ic{font-size:18px;flex:none}
+/* chọn loại việc khi thêm */
+.cal-pick{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.cal-pick button{border:1.5px solid var(--line);background:var(--card);border-radius:14px;padding:14px 12px;text-align:left;cursor:pointer;font-family:inherit;display:flex;flex-direction:column;gap:4px}
+.cal-pick button:hover{border-color:var(--blue);box-shadow:var(--sh-2)}
+.cal-pick .ic{font-size:24px}
+.cal-pick .ti{font-size:14.5px;font-weight:800;color:var(--navy)}
+.cal-pick .ds{font-size:12px;color:var(--sub);line-height:1.45}
+.cal-keys{display:flex;flex-direction:column;gap:6px;max-height:44vh;overflow:auto;margin-top:6px}
+.cal-key{display:flex;align-items:center;gap:8px;border:1px solid var(--line);background:var(--card);border-radius:11px;padding:9px 11px;text-align:left;cursor:pointer;font-family:inherit;width:100%}
+.cal-key:hover{border-color:var(--blue);background:var(--pale)}
+.cal-key b{flex:1;font-size:13px;color:var(--ink);font-weight:650;min-width:0}
+.cal-key span{font-size:11px;color:var(--mute);white-space:nowrap}
+/* cập nhật nhanh */
+.q16-st{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin:4px 0 12px}
+.q16-st button{border:1.5px solid var(--line);background:var(--card);border-radius:10px;padding:9px 4px;font-size:12.5px;font-weight:800;color:var(--sub);cursor:pointer;font-family:inherit}
+.q16-st button.on{background:var(--navy);border-color:var(--navy);color:#fff}
+.q16-meta{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;font-size:12px;color:var(--sub)}
+.q16-meta span{background:var(--line2);border-radius:8px;padding:3px 9px}
+.q16-ro{background:var(--line2);border-radius:10px;padding:10px 12px;white-space:pre-wrap;word-break:break-word;font-size:13.5px}
+.od-row{display:flex;align-items:center;gap:10px;border:1px solid var(--line);border-left:4px solid #D9433F;border-radius:12px;padding:9px 11px;margin-bottom:7px;flex-wrap:wrap}
+.od-row .mn{flex:1 1 220px;min-width:0}
+.od-row .mn b{display:block;font-size:13.5px}
+.od-row .mn span{font-size:11.5px;color:var(--sub)}
+.od-row .n{font-size:11.5px;font-weight:800;color:#B3261E;white-space:nowrap}
+.od-row .a{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.od-ext{position:relative;display:inline-flex;align-items:center;gap:4px;height:29px;padding:0 10px;border-radius:8px;border:1px solid var(--lb1);background:var(--pale);color:var(--blue-d);font-size:11.5px;font-weight:700;cursor:pointer;overflow:hidden}
+.od-ext input{position:absolute;inset:0;opacity:0;cursor:pointer}
+/* công tác */
+.tp-days{font-size:12.5px;font-weight:800;color:var(--blue);margin:-4px 0 10px}
+.tp-hint{font-weight:600;color:var(--mute);font-size:11px;margin-left:4px}
+.tp-box{background:var(--pale);border:1px solid var(--lb2);border-radius:12px;padding:9px 12px;font-size:12.5px;color:var(--navy);margin-bottom:12px;line-height:1.55}
+.tp-err{background:#FFF1F0;border:1.5px solid #F2B8B5;color:#8A1C17;border-radius:12px;padding:10px 12px;font-size:13px;line-height:1.5;margin:10px 0 0}
+.tp-err a{color:#8A1C17;font-weight:800}
+.ms{position:relative;display:flex;flex-wrap:wrap;align-items:center;gap:5px;min-height:42px;border:1px solid var(--line);border-radius:10px;padding:4px 8px;background:#fff;cursor:text}
+.ms:focus-within{border-color:var(--blue);box-shadow:0 0 0 3px rgba(58,92,170,.12)}
+.ms-chips{display:contents}
+.ms-chip{display:inline-flex;align-items:center;gap:4px;background:var(--lb2);color:var(--navy);border-radius:8px;padding:2px 4px 2px 9px;font-size:12.5px;font-weight:700}
+.ms-chip button{border:none;background:none;color:var(--sub);font-size:15px;line-height:1;cursor:pointer;padding:0 3px}
+.ms-in{flex:1;min-width:110px;border:none;outline:none;padding:5px 2px;font:inherit;font-size:14px;background:transparent}
+.ms-dd{display:none;position:absolute;left:-1px;right:-1px;top:calc(100% + 4px);background:#fff;border:1px solid var(--line);border-radius:10px;box-shadow:var(--sh-3);max-height:230px;overflow:auto;z-index:50;padding:4px}
+.ms-dd.on{display:block}
+.ms-op{padding:8px 10px;border-radius:7px;font-size:13px;cursor:pointer}
+.ms-op.hi,.ms-op:hover{background:var(--pale)}
+.ms-op.add{color:var(--blue);font-weight:700}
+.ms-op.none{color:var(--mute);cursor:default}
+.tpc{display:flex;flex-direction:column;gap:6px}
+.tpc-row{display:flex;gap:6px;align-items:center}
+.tpc-row .tpc-d{flex:1.6;min-width:0}
+.tpc-a{flex:1;display:flex;align-items:center;position:relative;min-width:0}
+.tpc-a input{width:100%;text-align:right;padding-right:24px;font-variant-numeric:tabular-nums}
+.tpc-a span{position:absolute;right:10px;color:var(--mute);font-size:12px;font-weight:700}
+.tpc-x{flex:none;width:34px;height:38px;border:1px solid var(--line);border-radius:9px;background:#fff;color:var(--sub);cursor:pointer}
+.tpc-foot{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:6px;flex-wrap:wrap}
+.tpc-sum{font-size:13px;color:var(--sub);font-weight:700}
+.tpc-sum b{font-size:16px;color:var(--navy)}
+.tr6-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:8px}
+.tr6-dest{font-size:17px;font-weight:800;color:var(--navy)}
+.tr6-date{font-size:12.5px;color:var(--sub);margin-top:3px}
+.tr6-ap{flex:none;font-size:12px;font-weight:800;border-radius:8px;padding:4px 10px}
+.tr6-ap.ok{background:#E6F4EA;color:#1E7B45}.tr6-ap.wait{background:#FFF4D6;color:#8A5A00}.tr6-ap.rej{background:#FEECEC;color:#B3261E}
+.tr6-cmt{background:var(--pale);border-radius:9px;padding:7px 10px;font-size:12.5px;color:var(--sub);margin-bottom:8px}
+.tr6-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+.tr6-i{background:var(--line2);border-radius:10px;padding:8px 10px;min-width:0}
+.tr6-i span{display:block;font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.4px;color:var(--mute);margin-bottom:3px}
+.tr6-i b{font-size:13px;font-weight:600;color:var(--ink);word-break:break-word}
+.tr6-lock{background:#FFF8E6;border:1px solid #F5DDA0;border-radius:11px;padding:9px 12px;font-size:12.5px;color:#7A5200}
+.tr6-rep{border-top:1px solid var(--line);padding-top:10px}
+.tr6-rh{font-size:14px;font-weight:800;color:var(--navy);margin-bottom:8px}
+.tr6-note{font-size:11.5px;color:var(--sub);margin-top:6px}
+
+@media(max-width:1100px){ .cal-week{grid-template-columns:repeat(4,minmax(0,1fr))} .cal-wc{min-height:220px} }
+@media(max-width:720px){
+  .cal-head h2{font-size:16.5px;flex:1 1 auto;min-width:0}
+  .cal-head .seg{order:5;width:100%;display:flex}
+  .cal-head .seg button{flex:1}
+  .cal-head .btn.hide-m{display:none}
+  .cal-bar{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;padding-bottom:2px}
+  .cal-bar::-webkit-scrollbar{display:none}
+  .cal-sum{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin-bottom:10px}
+  .cal-kpi{padding:6px 8px;border-radius:12px}
+  .cal-kpi span{font-size:9.5px;letter-spacing:.2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .cal-kpi b{font-size:16px}
+  .cal-kpi small{display:block;margin:0;font-size:10.5px;line-height:1.3}
+  .cal-kpi .pbx{margin-top:4px}
+  .cal-week{grid-template-columns:1fr;gap:8px}
+  .cal-wc{min-height:0}
+  .cal-wb{cursor:default}
+  .cal-empty{display:none}
+  .cal-wc .cal-add{margin-top:2px;padding:6px}
+  .cal-month .dh{padding:6px 0;font-size:10.5px}
+  .cal-month .dc{min-height:64px;padding:3px 2px;text-align:center}
+  .cal-month .dn{width:24px;height:24px;font-size:12px;margin:0 auto 3px}
+  .cal-month .cal-ev,.cal-month .cal-more{display:none}
+  .cal-month .cal-dots{display:flex}
+  .cal-pick{grid-template-columns:1fr}
+  .q16-st{grid-template-columns:repeat(2,1fr)}
+  .tr6-grid{grid-template-columns:1fr}
+  .tpc-row{flex-wrap:wrap}
+  .tpc-row .tpc-d{flex:1 1 100%}
+}
+</style>
+<script>
+/* ═══════════════════════════════════════════════════════════════════════════════
+   ⭐ v16 — LỊCH CÔNG VIỆC  (Cập nhật ▸ 📅 Lịch công việc)
+   Gộp 3 nguồn vào CÙNG MỘT LỊCH, cách hiển thị giống Report Hub:
+     📍 Đi địa bàn   — tab 6. WEEKLY REPORT của file CRM (bấm vào ⇒ mở task để cập nhật)
+     🧩 Việc khác    — sheet WEEKYLY new của Report Hub (bấm ⇒ cập nhật nhanh trạng thái,
+                       % tiến độ, hạn, kết quả ngay trên lịch)
+     ✈️ Công tác     — file Business Trip (qua Report Hub): xem chuyến đi, nhập báo cáo;
+                       nút “✈️ Đề xuất công tác” ghi thẳng vào file Business Trip + gửi email xin duyệt
+   Bấm vào ô trống của một ngày ⇒ thêm việc cho đúng ngày đó.
+   Điện thoại: tuần hiện dạng danh sách dọc theo ngày; tháng hiện chấm màu, chạm ngày ⇒ mở danh sách.
+   ═══════════════════════════════════════════════════════════════════════════════ */
+var CAL={ view:"week", ref:null, pics:null, show:{v:1,o:1,t:1}, hideDone:false, exp:{}, map:{} };
+(function(){ try{ var v=localStorage.getItem("mmh_calview"); if(v) CAL.view=v;
+  var h=localStorage.getItem("mmh_calhide"); CAL.hideDone=h==="1";
+  var s=JSON.parse(localStorage.getItem("mmh_calshow")||"null"); if(s) CAL.show=s; }catch(e){} })();
+var CAL_WD=["CN","T2","T3","T4","T5","T6","T7"];
+var CAL_WDF=["Chủ nhật","Thứ 2","Thứ 3","Thứ 4","Thứ 5","Thứ 6","Thứ 7"];
+var CAL_COL={ v:"#0E8A7E", t:"#7A4FD6" };
+function calMob(){ try{ return window.matchMedia("(max-width:720px)").matches; }catch(e){ return false; } }
+function calISO(d){ return d.getFullYear()+"-"+("0"+(d.getMonth()+1)).slice(-2)+"-"+("0"+d.getDate()).slice(-2); }
+function calDate(iso){ var m=/^(\d{4})-(\d{2})-(\d{2})/.exec(String(iso||"")); return m?new Date(+m[1],+m[2]-1,+m[3]):null; }
+function calD(v){ var s=String(v||"").slice(0,10); return /^\d{4}-\d{2}-\d{2}$/.test(s)?s:""; }
+function calQ(s){ return String(s==null?"":s).replace(/\\/g,"\\\\").replace(/'/g,"\\'"); }
+function calDM(iso){ var d=calDate(iso); return d?(d.getDate()+"/"+(d.getMonth()+1)):""; }
+function calCanTeam(){ return isMgmt() || !!(S.user && S.user.role==="manager"); }
+function calPics(){
+  if(!calCanTeam()) return [S.user.pic];
+  if(CAL.pics===null) CAL.pics = isMgmt() ? [] : [S.user.pic];
+  return CAL.pics;
+}
+function calPicOk(p){
+  var sel=calPics(); if(!sel.length) return true;
+  return sel.some(function(x){ return picEq(x,p); });
+}
+function calStatusKey(st){
+  var s=String(st||"").toLowerCase();
+  if(/complet|done|hoàn thành/.test(s)) return "done";
+  if(/cancel|huỷ|hủy/.test(s)) return "cancel";
+  if(/progress|đang/.test(s)) return "prog";
+  return "todo";
+}
+function calStColor(st, od){
+  if(od) return "#D9433F";
+  var k=calStatusKey(st);
+  return k==="done"?"#1E9E5A":k==="prog"?"#3A5CAA":k==="cancel"?"#9AA3B5":"#E08A00";
+}
+function calIsTrip(o){ return !!(o && /^trip/.test(String(o.vSrc||""))); }
+function calEff(s){ return calD(s.revised)||calD(s.planned)||""; }
+
+/* ── gom dữ liệu thành các mục trên lịch ── */
+function calItems(){
+  var out=[], today=todayISO(), map={};
+  /* 📍 đi địa bàn */
+  if(CAL.show.v){
+    terrRows().forEach(function(w){
+      if(!calPicOk(w.pic)) return;
+      var st=calD(w.start); if(!st) return;
+      var a=parseAcc(w.account), tbd=/^tbd$/i.test(a.name||"");
+      var done=calStatusKey(w.status)==="done";
+      if(CAL.hideDone && done) return;
+      var it={ id:"v"+w._row, kind:"v", d:st, st:st, en:calD(w.finish)||st, pic:w.pic,
+        title: tbd?"Đi địa bàn (chưa chốt account)":(a.name||w.accName||"—"),
+        sub: tbd?("Cả tuần · "+(a.province||w.province||"")):[w.typeAction,a.province||w.accProv||w.province].filter(Boolean).join(" · "),
+        status:w.status||"", pct:statusPct(w.status), done:done, od:false, tbd:tbd, color:CAL_COL.v, w:w };
+      map[it.id]=it; out.push(it);
+    });
+  }
+  /* 🧩 việc khác + ✈️ công tác (Report Hub) */
+  ((S.other&&S.other.keys)||[]).forEach(function(k){
+    var trip=calIsTrip(k)||(k.subs||[]).some(calIsTrip);
+    if(!trip){
+      if(!OTHER_TYPE_RE.test(String(k.type||""))) return;
+      if(isVisitingKey(k)) return;                       /* đi địa bàn đã lấy thẳng từ file CRM */
+      if(!otherTeamOk(k)) return;
+    }
+    var subs=(k.subs||[]);
+    var list=subs.length?subs.map(function(s){ return {s:s,key:false}; }):[{s:k,key:true}];
+    list.forEach(function(o){
+      var s=o.s, isT=calIsTrip(s);
+      if(isT && !CAL.show.t) return;
+      if(!isT && !CAL.show.o) return;
+      if(/visit/i.test(String(s.vSrc||""))) return;
+      if(isT && /key/i.test(String(s.vSrc||""))) return;   /* dòng key "Lịch công tác" */
+      if(!calPicOk(s.pic)) return;
+      var sk=calStatusKey(s.status), done=(sk==="done"||sk==="cancel");
+      if(CAL.hideDone && done) return;
+      var stD=calD(s.start), en=calEff(s)||stD;
+      if(!stD) stD=en;
+      if(stD && en && en<stD){ var t=stD; stD=en; en=t; }
+      var od=!isT && !done && !!en && en<today;
+      var pct=otherPct(s); if(sk==="done") pct=100;
+      var it={ id:(isT?"t":"o")+s.no, kind:isT?"t":"o", st:stD, en:en, pic:s.pic||k.pic,
+        title:(o.key?(k.keyTask||""):(s.subTask||s.name||"")), sub:o.key?"Key task":(k.keyTask||""),
+        status:s.status||"To Do", pct:pct, done:sk==="done", cancel:sk==="cancel", od:od, key:o.key,
+        ro: isT || (!!s.vSrc) || !canEditOther(s.pic||k.pic), s:s, k:k,
+        color: isT?CAL_COL.t:calStColor(s.status, od) };
+      /* ngày hiển thị: đang làm ⇒ ngày hạn; đã xong/huỷ ⇒ ngày hạn; chưa làm ⇒ ngày bắt đầu */
+      it.d = isT ? stD : (sk==="prog" ? (en||stD) : (done ? (en||stD) : (stD||en)));
+      map[it.id]=it; out.push(it);
+    });
+  });
+  CAL.map=map;
+  return out;
+}
+function calRange(){
+  var ref=CAL.ref||new Date();
+  if(CAL.view==="week"){ var mon=calDate(mondayOf(calISO(ref))); var sun=new Date(mon); sun.setDate(mon.getDate()+6); return {from:calISO(mon), to:calISO(sun)}; }
+  return {from:calISO(new Date(ref.getFullYear(),ref.getMonth(),1)), to:calISO(new Date(ref.getFullYear(),ref.getMonth()+1,0))};
+}
+/* đặt từng mục vào ngày: chuyến công tác nhiều ngày ⇒ hiện trên từng ngày đi;
+   việc quá hạn KHÔNG nằm rải rác trên lịch mà gom vào nút “🔴 quá hạn” */
+function calByDay(items){
+  var by={}, today=todayISO();
+  items.forEach(function(it){
+    if(it.od) return;
+    if(it.kind==="t" && it.st && it.en && it.en>it.st){
+      var d=calDate(it.st), n=0;
+      while(calISO(d)<=it.en && n<45){ (by[calISO(d)]=by[calISO(d)]||[]).push(it); d.setDate(d.getDate()+1); n++; }
+      return;
+    }
+    if(!it.d) return;
+    (by[it.d]=by[it.d]||[]).push(it);
+  });
+  var rank={t:0,v:1,o:2};
+  Object.keys(by).forEach(function(d){ by[d].sort(function(a,b){
+    if(a.done!==b.done) return a.done?1:-1;
+    if(rank[a.kind]!==rank[b.kind]) return rank[a.kind]-rank[b.kind];
+    return String(a.title).localeCompare(String(b.title));
+  }); });
+  return by;
+}
+function calTag(it){
+  if(it.kind==="v") return it.tbd?"📍 KẾ HOẠCH TUẦN":"📍 ĐI ĐỊA BÀN";
+  if(it.kind==="t") return "✈️ CÔNG TÁC";
+  return it.key?"🧩 KEY TASK":"🧩 VIỆC KHÁC";
+}
+function calAv(p){ return '<span class="av" style="background:'+avColor(p)+'">'+esc(initials(p))+'</span>'; }
+function calStTag(it){
+  var c=calStColor(it.status,it.od);
+  return '<span class="st" style="background:'+c+'1A;color:'+c+'">'+esc(it.status||"—")+'</span>';
+}
+function calCard(it, multi){
+  var c=it.kind==="v"?CAL_COL.v:it.color;
+  return '<button type="button" class="cal-card'+(it.done?" done":"")+(it.od?" od":"")+(it.ro?" ro":"")+'" style="--c:'+c+'" onclick="event.stopPropagation();calOpen(\''+calQ(it.id)+'\')">'
+    +'<span class="tg">'+calTag(it)+'</span>'
+    +'<b>'+esc(it.title||"—")+'</b>'
+    +(it.sub?'<div class="k">'+(it.kind==="o"&&!it.key?"📂 ":"")+esc(it.sub)+'</div>':'')
+    +'<div class="m">'+(multi?calAv(it.pic):'')+calStTag(it)
+      +(it.kind==="o"?'<span class="pc" style="color:'+pctColor(it.pct/100)+'">'+it.pct+'%</span>':'')
+      +(it.kind==="t"&&it.st&&it.en&&it.en>it.st?'<span class="pc" style="color:'+CAL_COL.t+'">'+calDM(it.st)+'→'+calDM(it.en)+'</span>':'')
+    +'</div></button>';
+}
+function calChipEv(it){
+  var c=it.kind==="v"?CAL_COL.v:it.color;
+  return '<button type="button" class="cal-ev'+(it.done?" done":"")+'" style="--c:'+c+'" onclick="event.stopPropagation();calOpen(\''+calQ(it.id)+'\')" title="'+esc(it.title+" · "+(it.pic||"")+" · "+(it.status||""))+'">'
+    +'<span>'+(it.kind==="v"?"📍":it.kind==="t"?"✈️":"🧩")+'</span><span class="t">'+esc(it.title||"—")+'</span></button>';
+}
+function calSummary(items){
+  var rg=calRange(), v=0, vd=0, o=0, od=0, op=0, tdays=0, overdue=0;
+  items.forEach(function(it){
+    if(it.od){ overdue++; return; }
+    if(it.kind==="t"){ if(it.st<=rg.to && it.en>=rg.from){ var a=it.st<rg.from?rg.from:it.st, b=it.en>rg.to?rg.to:it.en; tdays+=Math.round((calDate(b)-calDate(a))/86400000)+1; } return; }
+    if(!it.d || it.d<rg.from || it.d>rg.to) return;
+    if(it.kind==="v"){ if(it.tbd) return; v++; if(it.done) vd++; }
+    else if(!it.cancel){ o++; if(it.done) od++; else if(calStatusKey(it.status)==="prog") op++; }
+  });
+  var box=function(lb,val,sub,pct,col){ return '<div class="cal-kpi"><span>'+lb+'</span><b>'+val+'</b><small>'+sub+'</small>'
+    +(pct!=null?'<div class="pbx"><i style="width:'+pct+'%;background:'+col+'"></i></div>':'')+'</div>'; };
+  var h='';
+  if(CAL.show.v) h+=box("📍 Đi địa bàn",v,"lượt · ✓ "+vd+" hoàn thành", v?Math.round(vd*100/v):0, CAL_COL.v);
+  if(CAL.show.o) h+=box("🧩 Việc khác",o,"✓ "+od+" · ◐ "+op+" đang làm", o?Math.round(od*100/o):0, "#3A5CAA");
+  if(CAL.show.t) h+=box("✈️ Công tác",tdays,"ngày đi công tác", null);
+  return {html:'<div class="cal-sum">'+h+'</div>', overdue:overdue};
+}
+function calPeopleNames(){
+  var set={}, out=[];
+  var add=function(p){ p=String(p||"").trim(); var k=picKey_(p); if(!p||set[k]) return; set[k]=1; out.push(p); };
+  try{ teamPicNames(curTeamKey()).forEach(add); }catch(e){}
+  terrRows().forEach(function(w){ add(w.pic); });
+  if(isMgmt()) add(S.user.pic);
+  return out.sort();
+}
+
+/* ── vẽ ── */
+function pgCal(){
+  wkEnsureData_();
+  renderCal();
+}
+function wkEnsureData_(){
+  /* dữ liệu đi địa bàn (cả FY, đã lưu trong máy) */
+  var k=terrKey();
+  if(!(S.cache.weekly && S.cache.weekly._k===k)){
+    var ls=terrLoadLs();
+    if(ls){ S.cache.weekly={ rows:ls.rows, _k:k, at:ls.at }; S.visits=S.cache.weekly; }
+    if(!S._terrLoading) loadTerritoryAll(true).then(function(){ if(S.tab==="weekly"&&S.wkTab==="cal") renderCal(); });
+  } else if(dataStale(S.cache.weekly.at) && !S._terrLoading){
+    afterGate(function(){ loadTerritoryAll(true); });
+  }
+  /* việc khác + công tác */
+  otherHydrate();
+  if(!S._otLoading && (!S.other || Date.now()-(S.other.at||0)>120000) && !(S.otherErr && Date.now()-(S._otErrAt||0)<30000)){
+    loadOther(!!S.other).then(function(){ if(S.tab==="weekly"&&S.wkTab==="cal") renderCal(); })
+      .catch(function(){ S._otErrAt=Date.now(); if(S.tab==="weekly"&&S.wkTab==="cal") renderCal(); });
+  }
+}
+function renderCal(){
+  if(!S.user) return;
+  if(!CAL.ref) CAL.ref=new Date();
+  var mob=calMob(), view=CAL.view, ref=CAL.ref, today=todayISO();
+  var items=calItems(), by=calByDay(items), sel=calPics(), multi=(sel.length!==1);
+  var sum=calSummary(items);
+  var title, body;
+  if(view==="week"){
+    var mon=calDate(mondayOf(calISO(ref))), days=[];
+    for(var i=0;i<7;i++){ var d=new Date(mon); d.setDate(mon.getDate()+i); days.push(d); }
+    title="Tuần "+calDM(calISO(days[0]))+" – "+fmtVN(calISO(days[6]));
+    var LIM=mob?50:6;
+    body='<div class="cal-week">'+days.map(function(d){
+      var iso=calISO(d), ev=by[iso]||[], open=!!CAL.exp[iso], shown=open?ev:ev.slice(0,LIM), we=(d.getDay()===0||d.getDay()===6);
+      if(mob && !ev.length && iso!==today && we) return '';   /* điện thoại: bỏ T7/CN trống cho gọn */
+      return '<div class="cal-wc'+(iso===today?" today":"")+(we?" we":"")+'">'
+        +'<div class="cal-wh" onclick="calDay(\''+iso+'\')" title="Xem cả ngày"><span>'+(mob?CAL_WDF[d.getDay()]:CAL_WD[d.getDay()])+(iso===today?' · Hôm nay':'')+'</span><b>'+d.getDate()+'/'+(d.getMonth()+1)+'</b></div>'
+        +'<div class="cal-wb" onclick="calEmpty(event,\''+iso+'\')">'
+        +(shown.length?shown.map(function(it){ return calCard(it,multi); }).join(""):'<div class="cal-empty">—</div>')
+        +(ev.length>LIM?'<button class="cal-more" onclick="event.stopPropagation();CAL.exp[\''+iso+'\']=!CAL.exp[\''+iso+'\'];renderCal()">'+(open?'Thu gọn ▴':'＋ '+(ev.length-LIM)+' việc khác')+'</button>':'')
+        +'<button class="cal-add" onclick="event.stopPropagation();calAdd(\''+iso+'\')">＋ Thêm việc</button></div></div>';
+    }).join("")+'</div>';
+  } else if(view==="list"){
+    var y=ref.getFullYear(), mo=ref.getMonth();
+    title="Tháng "+(mo+1)+", "+y;
+    var from=calISO(new Date(y,mo,1)), to=calISO(new Date(y,mo+1,0));
+    var ds=Object.keys(by).filter(function(d){ return d>=from && d<=to; }).sort();
+    body=ds.length?ds.map(function(d){
+      var dd=calDate(d);
+      return '<div class="cal-lday'+(d===today?" today":"")+'">'+CAL_WDF[dd.getDay()]+', '+fmtVN(d)+(d===today?' · Hôm nay':'')
+        +'<button class="mini" onclick="calAdd(\''+d+'\')">＋ Thêm</button></div>'
+        +by[d].map(function(it){
+          var c=it.kind==="v"?CAL_COL.v:it.color;
+          return '<button type="button" class="cal-lr" style="--c:'+c+'" onclick="calOpen(\''+calQ(it.id)+'\')">'
+            +'<span class="ic">'+(it.kind==="v"?"📍":it.kind==="t"?"✈️":"🧩")+'</span>'
+            +'<div class="mn"><b>'+esc(it.title||"—")+'</b><div class="k">'+(multi?esc(it.pic||"")+' · ':'')+esc(it.sub||"")+'</div></div>'
+            +calStTag(it)+(it.kind==="o"?'<b style="color:'+pctColor(it.pct/100)+';font-size:13px;min-width:38px;text-align:right">'+it.pct+'%</b>':'')+'</button>';
+        }).join("");
+    }).join(""):'<div class="card pad"><div class="empty"><div class="e">📅</div><p>Không có công việc trong tháng này.</p>'
+      +'<button class="btn pri sm" style="margin-top:10px" onclick="calAdd(todayISO())">＋ Thêm việc</button></div></div>';
+  } else {
+    var d0=new Date(ref.getFullYear(), ref.getMonth(), 1);
+    var start=new Date(d0); start.setDate(1-((d0.getDay()+6)%7));
+    title="Tháng "+(d0.getMonth()+1)+", "+d0.getFullYear();
+    var cells="", maxShow=3;
+    for(var j=0;j<42;j++){
+      var dd=new Date(start); dd.setDate(start.getDate()+j);
+      var iso=calISO(dd), out=dd.getMonth()!==d0.getMonth();
+      if(j===35 && out) break;
+      var ev=by[iso]||[], we=(dd.getDay()===0||dd.getDay()===6);
+      cells+='<div class="dc'+(out?" out":"")+(we?" we":"")+(iso===today?" today":"")+'" onclick="calCell(event,\''+iso+'\')">'
+        +'<div class="dn">'+dd.getDate()+'</div>'
+        +ev.slice(0,maxShow).map(calChipEv).join("")
+        +(ev.length>maxShow?'<button class="cal-more" onclick="event.stopPropagation();calDay(\''+iso+'\')">+'+(ev.length-maxShow)+' việc</button>':'')
+        +'<div class="cal-dots">'+ev.slice(0,6).map(function(it){ return '<i style="--c:'+(it.kind==="v"?CAL_COL.v:it.color)+'"></i>'; }).join("")+'</div>'
+        +'</div>';
+    }
+    body='<div class="cal-month">'+["T2","T3","T4","T5","T6","T7","CN"].map(function(x){ return '<div class="dh">'+x+'</div>'; }).join("")+cells+'</div>';
+  }
+
+  /* bộ lọc nguồn + nhân sự */
+  var chip=function(k,lb,col){ return '<button class="cal-chip'+(CAL.show[k]?"":" off")+'" onclick="calToggle(\''+k+'\')"><i style="background:'+col+'"></i>'+lb+'</button>'; };
+  var bar='<div class="cal-bar">'
+    +chip("v","📍 Đi địa bàn",CAL_COL.v)+chip("o","🧩 Việc khác","#3A5CAA")+chip("t","✈️ Công tác",CAL_COL.t)
+    +'<button class="cal-chip'+(CAL.hideDone?" on":"")+'" onclick="calHide()">'+(CAL.hideDone?"✓ ":"")+'Ẩn việc đã xong</button>'
+    +(sum.overdue?'<button class="cal-od" onclick="calOverdue()">🔴 '+sum.overdue+' việc quá hạn ›</button>':'');
+  if(calCanTeam()){
+    var names=calPeopleNames();
+    bar+='<span style="width:1px;height:22px;background:var(--line);flex:none;margin:0 3px"></span>'
+      +'<button class="cal-chip'+(!sel.length?" on":"")+'" onclick="calSetPics(\'all\')">👥 Cả đội</button>'
+      +names.map(function(p){ var on=sel.some(function(x){ return picEq(x,p); });
+        return '<button class="cal-chip'+(on?" on":"")+'" onclick="calTogglePic(\''+calQ(p)+'\')"><span class="av" style="background:'+avColor(p)+';margin-left:-6px">'+esc(initials(p))+'</span>'+esc(p)+(picEq(p,S.user.pic)?' (tôi)':'')+'</button>'; }).join("");
+  }
+  bar+='</div>';
+
+  var notes=[];
+  if(S._otLoading && !S.other) notes.push("⏳ Đang đọc Công việc khác / lịch công tác từ Report Hub…");
+  else if(S.otherErr && !S.other) notes.push("⚠️ Chưa đọc được Công việc khác từ Report Hub — lịch đang chỉ hiện đi địa bàn. <a href=\"javascript:void(0)\" onclick=\"refreshCal()\">Thử lại</a>");
+  if(S._terrLoading && !terrRows().length) notes.push("⏳ Đang nạp dữ liệu đi địa bàn "+esc(S.fy)+"…");
+  var rg=calRange(), fr=fyRange();
+  if(CAL.show.v && (rg.to<fr.from || rg.from>fr.to)) notes.push("ℹ️ Khoảng đang xem nằm ngoài "+esc(S.fy)+" — đổi FY ở góc trên để xem lịch đi địa bàn của năm đó.");
+
+  $("main").innerHTML='<div class="pg">'+wkTabBar()
+    +'<div class="cal-head"><h2>'+title+'</h2>'
+    +'<button class="cal-ib" onclick="calNav(-1)" title="Trước">‹</button>'
+    +'<button class="cal-ib" onclick="calNav(1)" title="Sau">›</button>'
+    +'<button class="btn sm" onclick="calNav(0)">Hôm nay</button>'
+    +'<div class="seg">'+[["week","Tuần"],["month","Tháng"],["list","Danh sách"]].map(function(x){ return '<button class="'+(view===x[0]?"on":"")+'" onclick="calView(\''+x[0]+'\')">'+x[1]+'</button>'; }).join("")+'</div>'
+    +'<div class="cal-sp"></div>'
+    +'<button class="btn sm" onclick="refreshCal(this)" title="Đọc lại dữ liệu + đồng bộ lịch công tác">⟳</button>'
+    +'<button class="btn sm hide-m" onclick="tripProposeOpen()">✈️ Đề xuất công tác</button>'
+    +'<button class="btn pri sm" onclick="calAdd(todayISO())">＋ Thêm việc</button>'
+    +'</div>'
+    +bar+sum.html
+    +(notes.length?'<div class="cal-note">'+notes.join("<br>")+'</div>':'')
+    +body
+    +(mob?'<div style="display:flex;gap:8px;margin-top:12px"><button class="btn" style="flex:1" onclick="tripProposeOpen()">✈️ Đề xuất công tác</button></div>':'')
+    +'<div style="height:70px"></div></div>';
+}
+function calNav(n){
+  if(!n) CAL.ref=new Date();
+  else if(CAL.view==="week"){ var x=new Date(CAL.ref||new Date()); x.setDate(x.getDate()+7*n); CAL.ref=x; }
+  else { var r=CAL.ref||new Date(); CAL.ref=new Date(r.getFullYear(), r.getMonth()+n, 1); }
+  renderCal();
+}
+function calView(v){ CAL.view=v; try{ localStorage.setItem("mmh_calview",v); }catch(e){} renderCal(); }
+function calToggle(k){ CAL.show[k]=CAL.show[k]?0:1; try{ localStorage.setItem("mmh_calshow",JSON.stringify(CAL.show)); }catch(e){} renderCal(); }
+function calHide(){ CAL.hideDone=!CAL.hideDone; try{ localStorage.setItem("mmh_calhide",CAL.hideDone?"1":"0"); }catch(e){} renderCal(); }
+function calSetPics(m){ CAL.pics = m==="me" ? [S.user.pic] : []; renderCal(); }
+function calTogglePic(p){
+  var a=calPics().slice(), i=-1;
+  a.forEach(function(x,j){ if(picEq(x,p)) i=j; });
+  if(i>=0) a.splice(i,1); else a.push(p);
+  CAL.pics=a; renderCal();
+}
+function refreshCal(btn){
+  if(btn) btn.disabled=true;
+  toast("Đang đọc lại lịch…");
+  var done=function(){ if(btn) btn.disabled=false; if(S.tab==="weekly"&&S.wkTab==="cal") renderCal(); };
+  /* đồng bộ lịch công tác bên Report Hub trước, rồi đọc lại cả hai nguồn */
+  var trip=hubJsonp({action:"tripSync", pic:S.user.pic, actor:S.user.pic, _ts:Date.now()},70000).catch(function(){ return null; });
+  Promise.all([
+    trip.then(function(){ return loadOther(true); }).catch(function(e){ toast(hubErrText(e).split("\n")[0],"err",6000); }),
+    loadTerritoryAll(true)
+  ]).then(function(){ done(); toast("✓ Đã cập nhật lịch","ok"); }, done);
+}
+/* bấm chỗ trống ⇒ thêm việc ngày đó */
+function calEmpty(ev, iso){
+  var t=ev.target; if(t.closest && t.closest("button,a,.cal-card")) return;
+  if(calMob()) return;                     /* điện thoại: dùng nút “＋ Thêm việc” để khỏi bấm nhầm khi cuộn */
+  calAdd(iso);
+}
+function calCell(ev, iso){
+  var t=ev.target; if(t.closest && t.closest("button,a")) return;
+  var n=(calByDay(calItems())[iso]||[]).length;
+  if(calMob()){ calDay(iso); return; }
+  if(n) calDay(iso); else calAdd(iso);
+}
+function calDay(iso){
+  var list=calByDay(calItems())[iso]||[], d=calDate(iso), multi=(calPics().length!==1);
+  openModal("📅 "+CAL_WDF[d.getDay()]+", "+fmtVN(iso),
+    '<div style="display:flex;flex-direction:column;gap:7px">'
+    +(list.length?list.map(function(it){ return calCard(it,multi); }).join(""):'<div class="cal-empty" style="display:block;padding:18px 0">Chưa có việc nào trong ngày này.</div>')
+    +'</div>',
+    '<button class="btn" onclick="closeModal()">Đóng</button><div style="flex:1"></div>'
+    +'<button class="btn pri" onclick="closeModal();calAdd(\''+iso+'\')">＋ Thêm việc ngày này</button>');
+}
+
+/* ── mở một mục để xem / cập nhật ── */
+function calOpen(id){
+  var it=CAL.map[id]; if(!it){ calItems(); it=CAL.map[id]; }
+  if(!it) return toast("Không tìm thấy việc này — bấm ⟳ để đọc lại","warn");
+  if($("ov").classList.contains("on") && /^📅/.test($("mTitle").textContent||"")) closeModal();
+  if(it.kind==="v") return openTask(it.w._row);
+  if(it.kind==="t") return tripView(it);
+  return calQuick(it);
+}
+var Q16=null;
+function calQuick(it){
+  var s=it.s, k=it.k;
+  Q16={ id:it.id, no:s.no, key:it.key, status:s.status||"To Do" };
+  var meta='<div class="q16-meta"><span>#'+esc(s.no)+'</span><span>👤 '+esc(it.pic||"")+'</span>'
+    +(it.key?'':'<span>📂 '+esc(k.keyTask||"")+'</span>')
+    +(it.od?'<span style="background:#FEECEC;color:#B3261E;font-weight:800">QUÁ HẠN</span>':'')
+    +(s.vSrc?'<span>🔄 Tự đồng bộ</span>':'')+'</div>';
+  if(it.ro){
+    openModal("👁️ Chi tiết công việc", meta
+      +'<h3 style="font-size:16px;color:var(--navy);margin-bottom:8px">'+esc(it.title)+'</h3>'
+      +'<div class="q16-meta"><span>Bắt đầu: '+(calD(s.start)?fmtVN(s.start):"—")+'</span><span>Hạn: '+(calEff(s)?fmtVN(calEff(s)):"—")+'</span><span>'+esc(s.status||"To Do")+' · '+it.pct+'%</span></div>'
+      +'<div class="fld"><label>Kết quả / Ghi chú</label><div class="q16-ro">'+(s.result?linkify(s.result):'—')+'</div></div>'
+      +(s.vSrc?'<div class="hint">Việc này do hệ thống tự tạo (đồng bộ từ đơn hàng / file khác) nên không sửa trực tiếp ở đây.</div>':'<div class="hint">🔒 Chỉ '+esc(it.pic||"PIC phụ trách")+' mới sửa được.</div>'),
+      '<button class="btn" onclick="closeModal()">Đóng</button>');
+    return;
+  }
+  var st=String(s.status||"To Do"), cur=calStatusKey(st);
+  var stBtn=function(v,lb,kk){ return '<button type="button" data-st="'+v+'" class="'+(cur===kk?"on":"")+'" onclick="q16St(this)">'+lb+'</button>'; };
+  openModal("⚡ Cập nhật nhanh", meta
+    +'<div class="fld"><label>Tên việc</label><textarea class="inp" id="q16_name" style="min-height:54px">'+esc(it.title)+'</textarea></div>'
+    +'<div class="fld"><label>Trạng thái</label><div class="q16-st">'
+      +stBtn("To Do","○ To Do","todo")+stBtn("In Progress","◐ Đang làm","prog")+stBtn("Completed","✓ Xong","done")+stBtn("Cancelled","⊘ Huỷ","cancel")+'</div></div>'
+    +progFld("q16", it.pct)
+    +'<div class="row">'
+      +'<div class="fld"><label>Ngày bắt đầu</label><input class="inp" type="date" id="q16_start" value="'+esc(calD(s.start))+'"></div>'
+      +'<div class="fld"><label>Hạn hoàn thành</label><input class="inp" type="date" id="q16_due" value="'+esc(calEff(s))+'"></div>'
+    +'</div>'
+    +'<div class="fld"><label>Kết quả / ghi chú</label>'
+      +'<textarea class="inp" id="q16_result" style="min-height:110px" placeholder="Đã làm gì, kết quả ra sao…">'+esc(s.result||"")+'</textarea>'
+      +'<div style="display:flex;gap:7px;margin-top:7px;flex-wrap:wrap">'
+        +'<button class="mini" onclick="toggleVoice(\'q16_result\',this)">🎤 Nói</button>'
+        +'<button class="mini" onclick="addLinkTo(\'q16_result\')">🔗 Chèn link</button></div></div>',
+    '<button class="btn" onclick="closeModal()">Huỷ</button>'
+    +(it.key?'':'<button class="btn" onclick="closeModal();formOtherSub(\''+calQ(k.no)+'\',\''+calQ(s.no)+'\')" title="Mở form đầy đủ">Form đầy đủ</button>')
+    +'<div style="flex:1"></div><button class="btn pri" id="q16_save" onclick="q16Save()">Lưu</button>');
+  /* thanh % đổi ⇒ nút trạng thái đổi theo */
+  var pr=$("q16_prog"); if(pr) pr.addEventListener("input",function(){ var v=pgVal("q16"); if(Q16.status==="Cancelled") return;
+    Q16.status = v>=100?"Completed":v>0?"In Progress":"To Do"; q16Paint(); });
+}
+function q16Paint(){
+  var k=calStatusKey(Q16.status);
+  Array.prototype.forEach.call(document.querySelectorAll(".q16-st button"),function(b){ b.classList.toggle("on", calStatusKey(b.getAttribute("data-st"))===k); });
+}
+function q16St(b){
+  Q16.status=b.getAttribute("data-st"); q16Paint();
+  var e=$("q16_prog"), cur=pgVal("q16");
+  if(!e) return;
+  e.value = /complet/i.test(Q16.status)?100 : /cancel|to\s*do/i.test(Q16.status)?0 : ((cur>0&&cur<100)?cur:25);
+  pgPaint("q16");
+}
+function q16Save(){
+  var it=CAL.map[Q16.id]; if(!it) return;
+  var s=it.s, name=String($("q16_name").value||"").trim();
+  if(!name) return toast("Nhập tên việc","warn");
+  var due=$("q16_due").value, start=$("q16_start").value, prog=pgVal("q16"), st=Q16.status;
+  var body={ action:"updateSub", no:s.no, pic:s.pic||it.pic||S.user.pic, actor:S.user.pic,
+             status:st, progress:prog, start:start, result:$("q16_result").value };
+  if(it.key){ body.action="updateKey"; body.keyTask=name; body.type=it.k.type||""; body.planned=due; }
+  else {
+    body.name=name;
+    /* đổi hạn: có “hạn điều chỉnh” thì sửa hạn điều chỉnh, chưa có thì sửa hạn kế hoạch */
+    if(due!==calEff(s)){ if(calD(s.revised)||(calD(s.planned)&&due>calD(s.planned))) body.revised=due; else body.planned=due; }
+  }
+  var b=$("q16_save"); if(b){ b.disabled=true; b.textContent="Đang lưu…"; }
+  /* hiện ngay trên lịch, lưu ở nền */
+  s.status=st; s.progress=prog/100; s.start=start; s.result=body.result;
+  if(body.revised) s.revised=due; if(body.planned) s.planned=due;
+  if(it.key) s.keyTask=name; else s.subTask=name;
+  try{ kvSet(OTHER_KEY,S.other); }catch(e){}
+  closeModal(); renderCal();
+  hubPost(body).then(function(r){ toast((r&&r.message)||"✓ Đã lưu","ok"); })
+    .catch(function(e){ toast("⚠️ Lưu thất bại: "+e.message,"err",7000); loadOther(true).then(renderCal).catch(function(){}); });
+}
+/* ── danh sách việc quá hạn: hoàn thành / gia hạn ngay tại chỗ ── */
+function calOverdue(){
+  var list=calItems().filter(function(it){ return it.od; }).sort(function(a,b){ return String(a.en).localeCompare(String(b.en)); });
+  var tmr=addDays(todayISO(),1), multi=(calPics().length!==1);
+  var rows=list.map(function(it){
+    var n=Math.round((calDate(todayISO())-calDate(it.en))/86400000);
+    return '<div class="od-row"><div class="mn"><b>'+esc(it.title)+'</b><span>'+(multi?esc(it.pic||"")+' · ':'')+(it.key?'Key task':'📂 '+esc(it.sub))+' · '+esc(it.status)+' '+it.pct+'%</span></div>'
+      +'<span class="n">🔴 Quá hạn '+n+' ngày</span>'
+      +(it.ro?'<div class="a"><button class="mini" onclick="calOpen(\''+calQ(it.id)+'\')">Xem</button></div>'
+        :'<div class="a"><button class="mini" onclick="calOdDone(\''+calQ(it.id)+'\')">✓ Hoàn thành</button>'
+        +'<label class="od-ext">📅 Gia hạn<input type="date" min="'+tmr+'" onchange="calOdExt(\''+calQ(it.id)+'\',this.value)"></label>'
+        +'<button class="mini" onclick="calOpen(\''+calQ(it.id)+'\')">✏️</button></div>')
+      +'</div>';
+  }).join("");
+  openModal("🔴 Việc quá hạn ("+list.length+")",
+    '<div class="hint" style="margin-bottom:10px">Việc quá hạn không rải trên lịch để lịch gọn hơn. <b>✓ Hoàn thành</b> ⇒ việc hiện ở ngày hôm nay · <b>📅 Gia hạn</b> ⇒ việc quay lại lịch ở ngày hạn mới.</div>'
+    +(rows||'<div class="cal-empty" style="display:block;padding:20px 0">🎉 Không còn việc quá hạn.</div>'),
+    '<button class="btn" onclick="closeModal()">Đóng</button>', true);
+}
+function calOdSave(it, patch, msg){
+  var s=it.s, body={ action:it.key?"updateKey":"updateSub", no:s.no, pic:s.pic||it.pic||S.user.pic, actor:S.user.pic };
+  if(it.key){
+    /* key task đơn lẻ: backend ghi lại đủ các ô ⇒ gửi kèm giá trị hiện có */
+    if(patch.revised){ patch.planned=patch.revised; delete patch.revised; }
+    body.keyTask=s.keyTask||it.title; body.type=it.k.type||"";
+    body.start=calD(s.start); body.result=s.result||""; body.planned=patch.planned||calD(s.planned);
+    if(patch.status===undefined){ body.status=s.status||"To Do"; body.progress=it.pct; }
+  }
+  Object.keys(patch).forEach(function(f){ body[f]=patch[f]; s[f]=(f==="progress")?patch[f]/100:patch[f]; });
+  try{ kvSet(OTHER_KEY,S.other); }catch(e){}
+  toast(msg,"ok");
+  hubPost(body).catch(function(e){ toast("⚠️ Lưu thất bại: "+e.message,"err",7000); loadOther(true).then(renderCal).catch(function(){}); });
+  closeModal(); renderCal();
+  if(calItems().some(function(x){ return x.od; })) setTimeout(calOverdue,250);
+}
+function calOdDone(id){ var it=CAL.map[id]; if(!it) return;
+  calOdSave(it,{ status:"Completed", progress:100, revised:todayISO() },"✓ Đã hoàn thành “"+it.title+"”"); }
+function calOdExt(id, iso){ var it=CAL.map[id]; if(!it||!iso) return;
+  if(iso<=todayISO()) return toast("Hạn mới phải sau hôm nay","warn");
+  var p={ revised:iso }; if(calStatusKey(it.status)!=="prog"){ p.status="In Progress"; p.progress=Math.max(25,it.pct||0); }
+  calOdSave(it,p,"📅 Đã gia hạn “"+it.title+"” tới "+fmtVN(iso)); }
+
+/* ── thêm việc cho một ngày ── */
+function calAdd(iso){
+  iso=iso||todayISO();
+  var d=calDate(iso);
+  openModal("＋ Thêm việc · "+CAL_WDF[d.getDay()]+" "+fmtVN(iso),
+    '<div class="cal-pick">'
+    +'<button onclick="calAddVisit(\''+iso+'\')"><span class="ic">📍</span><span class="ti">Đi địa bàn</span><span class="ds">Viếng thăm khách hàng, gặp bác sĩ, demo — ghi vào tab 6. WEEKLY REPORT</span></button>'
+    +'<button onclick="calAddOther(\''+iso+'\')"><span class="ic">🧩</span><span class="ti">Công việc khác</span><span class="ds">Họp, hỗ trợ NPP, hồ sơ thầu, sự kiện… — ghi vào Report Hub</span></button>'
+    +'<button onclick="closeModal();tripProposeOpen(\''+iso+'\')"><span class="ic">✈️</span><span class="ti">Đề xuất công tác</span><span class="ds">Ghi vào file Business Trip và gửi email xin duyệt ngay</span></button>'
+    +'</div>',
+    '<button class="btn" onclick="closeModal()">Huỷ</button>');
+}
+function calAddVisit(iso){
+  closeModal();
+  formWeekly(null);
+  setTimeout(function(){ var e=$("nt_start"); if(e){ e.value=iso; try{ ntTbdSync(); }catch(x){} } },30);
+}
+/* Công việc khác: chọn Key Task để thêm đầu việc, hoặc tạo Key Task mới */
+function calAddOther(iso){
+  var mine=((S.other&&S.other.keys)||[]).filter(function(k){
+    if(!OTHER_TYPE_RE.test(String(k.type||""))||isVisitingKey(k)||calIsTrip(k)||k.vSrc) return false;
+    if(!otherTeamOk(k)) return false;
+    if(!canEditOther(k.pic)) return false;
+    var sk=calStatusKey(k.status); if(sk==="done"||sk==="cancel") return false;
+    return true;
+  }).sort(function(a,b){ return String(b.start||"").localeCompare(String(a.start||"")); }).slice(0,40);
+  closeModal();
+  openModal("🧩 Công việc khác · "+fmtVN(iso),
+    '<div class="hint">Chọn Key Task để thêm đầu việc ngày <b>'+fmtVN(iso)+'</b>, hoặc tạo Key Task mới.</div>'
+    +'<div class="cal-keys">'
+    +'<button class="cal-key" style="border-style:dashed;border-color:var(--blue)" onclick="calNewKey(\''+iso+'\')"><b style="color:var(--blue)">＋ Tạo Key Task mới</b></button>'
+    +(mine.length?mine.map(function(k){ return '<button class="cal-key" onclick="calNewSub(\''+calQ(k.no)+'\',\''+iso+'\')"><b>'+esc(k.keyTask||"")+'</b><span>'+esc(k.pic||"")+' · '+(k.subs||[]).length+' việc</span></button>'; }).join("")
+      :(S.other?'<div class="cal-empty" style="display:block">Chưa có Key Task nào đang mở — tạo Key Task mới.</div>':'<div class="cal-empty" style="display:block">⏳ Đang đọc Report Hub…</div>'))
+    +'</div>',
+    '<button class="btn" onclick="closeModal()">Huỷ</button>');
+}
+function calNewSub(keyNo, iso){
+  closeModal(); formOtherSub(keyNo,"");
+  setTimeout(function(){ if($("os_start")) $("os_start").value=iso; if($("os_planned")) $("os_planned").value=iso; },30);
+}
+function calNewKey(iso){
+  closeModal(); formOtherKey("");
+  setTimeout(function(){ if($("ok_start")) $("ok_start").value=iso; if($("ok_planned")) $("ok_planned").value=iso; },30);
+}
+
+/* ═════════════ ✈️ CÔNG TÁC — nối thẳng hệ thống Business Trip qua Report Hub ═════════════ */
+var TRIP_SHEET_URL="https://docs.google.com/spreadsheets/d/15dAQYOG1aJRX-jByVmRFeSFOIPRtdVW7wDvwC_nxJUA/edit";
+function calRid(){ return Date.now().toString(36)+"-"+Math.random().toString(36).slice(2,9); }
+/* gọi Report Hub: nội dung ngắn đi GET (đọc được kết quả), dài quá thì POST (không đọc được
+   kết quả ⇒ trả {posted:true} để nơi gọi tự kiểm tra lại) */
+function tripHub(body, ms){
+  var flat={}; Object.keys(body||{}).forEach(function(k){ var v=body[k]; flat[k]=(v!==null&&typeof v==="object")?JSON.stringify(v):v; });
+  flat.pic=flat.pic||S.user.pic; flat.actor=flat.actor||S.user.pic;
+  var qs=Object.keys(flat).map(function(k){ return encodeURIComponent(k)+"="+encodeURIComponent(flat[k]==null?"":flat[k]); }).join("&");
+  if(qs.length>6800){
+    return fetch(REPORTHUB_URL,{ method:"POST", mode:"no-cors", headers:{"Content-Type":"text/plain;charset=utf-8"}, body:JSON.stringify(flat) })
+      .then(function(){ return { ok:true, posted:true }; });
+  }
+  return hubJsonp(flat, ms||60000).then(function(j){
+    if(!j || j.ok===false) throw new Error((j&&j.error)||"Report Hub không trả lời");
+    return j;
+  });
+}
+function tripErr(e){
+  var m=String((e&&e.message)||e||"");
+  if(/Unknown action|không hỗ trợ|unsupported/i.test(m)) return "Report Hub (file Sales & Marketing) chưa có tính năng công tác — trong Apps Script của Report Hub cần có file ReportHub_Trip_Mail và Deploy ▸ Manage deployments ▸ Edit ▸ New version.";
+  if(/^__HUB_/.test(m)) return hubErrText(e).split("\n")[0];
+  return m;
+}
+var TP={ master:null, rid:null, sig:null };
+function tripProposeOpen(iso){
+  TP.iso=iso||"";
+  openModal("✈️ Đề xuất công tác",'<div class="cal-empty" style="display:block;padding:26px 0">Đang tải danh mục điểm đến, người đi cùng, thiết bị từ file Business Trip…</div>',
+    '<button class="btn" onclick="closeModal()">Huỷ</button>', true);
+  var go=function(r){ TP.master=r; tripProposeForm(r); };
+  if(TP.master && TP.master.forPic===S.user.pic && Date.now()-(TP.master.at||0)<900000) return go(TP.master);
+  tripHub({ action:"tripMaster", forPic:S.user.pic }, 45000).then(function(r){ r.forPic=S.user.pic; r.at=Date.now(); go(r); })
+    .catch(function(e){
+      $("mBody").innerHTML='<div class="tp-err">⚠️ <b>Chưa mở được form đề xuất.</b> '+esc(tripErr(e))+'</div>';
+      $("mFoot").innerHTML='<a class="btn" href="'+TRIP_SHEET_URL+'" target="_blank" rel="noopener">Mở file Business Trip ↗</a><div style="flex:1"></div>'
+        +'<button class="btn pri" onclick="closeModal();tripProposeOpen(\''+calQ(TP.iso)+'\')">↻ Thử lại</button>';
+    });
+}
+var TPC=[], MS={};
+var TPC_SUGGEST=["Vé máy bay","Công tác phí","Khách sạn","Taxi / Grab","Vé tàu / xe","Tiếp khách","Phí hội thảo","Chi phí khác"];
+function tripProposeForm(r){
+  var m=(r&&r.master)||{destinations:[],coTravelers:[],equipment:[]}, d0=TP.iso||todayISO();
+  TPC=[{d:"Công tác phí",a:0},{d:"",a:0}];
+  $("mBody").innerHTML=
+     '<div class="tp-box">Đề xuất được ghi thẳng vào file <b>Business Trip</b> (Approval Status = <b>Not Yet</b>) và gửi email xin duyệt '
+    +'<b>To:</b> '+esc(r.to||"")+(r.cc?' · <b>CC:</b> '+esc(r.cc):'')+'. Quản lý duyệt bằng <b>HOD Menu</b> trên Google Sheet như bình thường; '
+    +'sau khi gửi, chuyến đi hiện ngay trên <b>Lịch công việc</b>.</div>'
+    +'<div class="row"><div class="fld"><label>Start date <span class="rq">*</span></label><input class="inp" type="date" id="tp-start" value="'+d0+'" onchange="tpDays()"></div>'
+      +'<div class="fld"><label>Finish date <span class="rq">*</span></label><input class="inp" type="date" id="tp-finish" value="'+d0+'" min="'+d0+'" onchange="tpDays()"></div></div>'
+    +'<div class="tp-days" id="tp-days">1 ngày</div>'
+    +'<div class="row"><div class="fld"><label>Destination <span class="rq">*</span><span class="tp-hint">chọn được nhiều tỉnh</span></label>'+msHtml("dest","Gõ tên tỉnh / thành để tìm…")+'</div>'
+      +'<div class="fld"><label>Co-traveler <span class="rq">*</span><span class="tp-hint">để trống = No</span></label>'+msHtml("co","Gõ tên người đi cùng…")+'</div></div>'
+    +'<div class="fld"><label>Purpose (Mục đích) <span class="rq">*</span></label><textarea class="inp" id="tp-purpose" style="min-height:60px"></textarea></div>'
+    +'<div class="fld"><label>Expected result (Kết quả mong đợi) <span class="rq">*</span></label><textarea class="inp" id="tp-expect" style="min-height:60px"></textarea></div>'
+    +'<div class="fld"><label>Estimated costs VND <span class="rq">*</span><span class="tp-hint">mỗi dòng 1 khoản — mô tả + số tiền</span></label>'
+      +'<div id="tp-costs" class="tpc"></div>'
+      +'<datalist id="tp-dl-costd">'+TPC_SUGGEST.map(function(x){ return '<option value="'+esc(x)+'">'; }).join("")+'</datalist>'
+      +'<div class="tpc-foot"><button type="button" class="mini" onclick="tpCostAdd()">＋ Thêm khoản chi phí</button>'
+      +'<div class="tpc-sum">Tổng dự trù: <b id="tp-total">0 đ</b></div></div></div>'
+    +'<div class="fld"><label>Schedule (Lịch trình) <span class="rq">*</span></label><textarea class="inp" id="tp-sched" style="min-height:60px" placeholder="24/9: HN - HP - HN"></textarea></div>'
+    +'<div class="fld"><label>Equipment-assets in/out <span class="rq">*</span></label>'+msHtml("eq","Gõ để tìm thiết bị…")+'</div>';
+  $("mFoot").innerHTML='<button class="btn" onclick="closeModal()">Huỷ</button><div style="flex:1"></div><button class="btn pri" id="tp-send" onclick="tripProposeSend()">📨 Gửi đề xuất</button>';
+  msInit("dest", m.destinations, []);
+  msInit("co", ["No"].concat(m.coTravelers||[]), [], { none:"No" });
+  msInit("eq", m.equipment, (m.equipment||[]).indexOf("Laptop")>=0?["Laptop"]:[]);
+  tpCostPaint(); tpDays();
+}
+function tpDays(){
+  var a=$("tp-start").value, b=$("tp-finish").value;
+  if(a){ $("tp-finish").min=a; if(b && b<a){ $("tp-finish").value=a; b=a; } }
+  var n=(a&&b)?Math.round((calDate(b)-calDate(a))/86400000)+1:0;
+  $("tp-days").textContent=n>0?(n+" ngày"):"";
+}
+function tpNum(v){ var n=parseInt(String(v==null?"":v).replace(/[^\d]/g,""),10); return isNaN(n)?0:n; }
+function tpFmt(n){ return n?Number(n).toLocaleString("vi-VN"):""; }
+function tpCostPaint(){
+  var box=$("tp-costs"); if(!box) return;
+  box.innerHTML=TPC.map(function(r,i){
+    return '<div class="tpc-row"><input class="inp tpc-d" list="tp-dl-costd" placeholder="Mô tả — vd: Vé máy bay" value="'+esc(r.d)+'" oninput="TPC['+i+'].d=this.value">'
+      +'<div class="tpc-a"><input class="inp" inputmode="numeric" placeholder="Số tiền" value="'+esc(tpFmt(r.a))+'" oninput="tpCostAmt('+i+',this)"><span>đ</span></div>'
+      +'<button type="button" class="tpc-x" title="Xoá dòng" onclick="TPC.splice('+i+',1);if(!TPC.length)TPC.push({d:\'\',a:0});tpCostPaint()">✕</button></div>';
+  }).join("");
+  tpCostTotal();
+}
+function tpCostAmt(i, el){
+  var n=tpNum(el.value); TPC[i].a=n;
+  var pos=el.value.length-(el.selectionStart||0); el.value=tpFmt(n);
+  try{ var p=Math.max(0, el.value.length-pos); el.setSelectionRange(p,p); }catch(_){}
+  tpCostTotal();
+}
+function tpCostAdd(){ TPC.push({d:"",a:0}); tpCostPaint(); var r=document.querySelectorAll("#tp-costs .tpc-d"); if(r.length) r[r.length-1].focus(); }
+function tpCostTotal(){ var s=TPC.reduce(function(a,r){ return a+(r.a||0); },0); var t=$("tp-total"); if(t) t.textContent=s?s.toLocaleString("vi-VN")+" đ":"0 đ"; return s; }
+/* ô chọn nhiều có tìm kiếm (không cần gõ dấu) */
+function msNorm(v){ return String(v==null?"":v).normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/đ/gi,"d").toLowerCase().trim(); }
+function msHtml(id, ph){
+  return '<div class="ms" id="ms-'+id+'" onclick="msFocus(\''+id+'\')"><span class="ms-chips" id="ms-c-'+id+'"></span>'
+    +'<input class="ms-in" id="ms-i-'+id+'" data-ph="'+esc(ph||"")+'" placeholder="'+esc(ph||"")+'" autocomplete="off" oninput="msFilter(\''+id+'\')" onfocus="msFilter(\''+id+'\')" onblur="msBlur(\''+id+'\')" onkeydown="msKey(event,\''+id+'\')">'
+    +'<div class="ms-dd" id="ms-d-'+id+'"></div></div>';
+}
+function msInit(id, opts, sel, o){
+  o=o||{};
+  MS[id]={ opts:(opts||[]).filter(function(x,i,a){ return x && a.indexOf(x)===i; }), sel:(sel||[]).slice(), hi:0, list:[], none:o.none||"" };
+  msPaint(id);
+}
+function msPaint(id){
+  var m=MS[id], c=$("ms-c-"+id); if(!m||!c) return;
+  c.innerHTML=m.sel.map(function(v,i){ return '<span class="ms-chip">'+esc(v)+'<button type="button" onmousedown="event.preventDefault()" onclick="event.stopPropagation();msDel(\''+id+'\','+i+')">×</button></span>'; }).join("");
+  var inp=$("ms-i-"+id); if(inp) inp.placeholder=m.sel.length?"":(inp.getAttribute("data-ph")||"");
+}
+function msFocus(id){ var i=$("ms-i-"+id); if(i) i.focus(); }
+function msBlur(id){ setTimeout(function(){ var d=$("ms-d-"+id); if(d) d.classList.remove("on"); }, 180); }
+function msFilter(id){
+  var m=MS[id], inp=$("ms-i-"+id), d=$("ms-d-"+id); if(!m||!inp||!d) return;
+  var q=msNorm(inp.value), sel=m.sel.map(msNorm);
+  var list=m.opts.filter(function(x){ return sel.indexOf(msNorm(x))<0 && (!q || msNorm(x).indexOf(q)>=0); });
+  if(q) list.sort(function(a,b){ return (msNorm(a).indexOf(q)===0?0:1)-(msNorm(b).indexOf(q)===0?0:1); });
+  list=list.slice(0,40);
+  var exact=m.opts.some(function(x){ return msNorm(x)===q; });
+  if(q && !exact && sel.indexOf(q)<0) list.push({add:inp.value.trim()});
+  m.list=list; if(m.hi>=list.length) m.hi=0;
+  d.innerHTML=list.length ? list.map(function(x,i){
+      var txt=typeof x==="string"?x:x.add;
+      return '<div class="ms-op'+(i===m.hi?" hi":"")+(typeof x==="string"?"":" add")+'" onmousedown="event.preventDefault();msPick(\''+id+'\','+i+')">'+(typeof x==="string"?esc(txt):'＋ Thêm “'+esc(txt)+'”')+'</div>';
+    }).join("") : '<div class="ms-op none">Không có gợi ý</div>';
+  d.classList.add("on");
+}
+function msPick(id, i){
+  var m=MS[id], x=m.list[i]; if(x==null) return;
+  var v=typeof x==="string"?x:x.add; if(!v) return;
+  if(m.none){
+    if(msNorm(v)===msNorm(m.none)) m.sel=[];
+    else m.sel=m.sel.filter(function(s){ return msNorm(s)!==msNorm(m.none); });
+  }
+  if(m.sel.map(msNorm).indexOf(msNorm(v))<0) m.sel.push(v);
+  var inp=$("ms-i-"+id); inp.value=""; m.hi=0; msPaint(id); msFilter(id); inp.focus();
+}
+function msDel(id, i){ var m=MS[id]; m.sel.splice(i,1); msPaint(id); }
+function msKey(ev, id){
+  var m=MS[id]; if(!m) return;
+  if(ev.key==="ArrowDown"){ ev.preventDefault(); m.hi=Math.min(m.hi+1, m.list.length-1); msFilter(id); }
+  else if(ev.key==="ArrowUp"){ ev.preventDefault(); m.hi=Math.max(m.hi-1,0); msFilter(id); }
+  else if(ev.key==="Enter"||ev.key===","||ev.key===";"){ if(m.list.length){ ev.preventDefault(); msPick(id,m.hi); } }
+  else if(ev.key==="Backspace" && !ev.target.value && m.sel.length){ m.sel.pop(); msPaint(id); msFilter(id); }
+  else if(ev.key==="Escape"){ var d=$("ms-d-"+id); if(d) d.classList.remove("on"); }
+}
+function tripProposeSend(){
+  var b=$("tp-send"); if(!b || b.disabled) return;
+  var eb=$("tp-err"); if(eb) eb.remove();
+  ["dest","co","eq"].forEach(function(id){ var i=$("ms-i-"+id); if(i && i.value.trim()){ var m=MS[id]; if(m.sel.map(msNorm).indexOf(msNorm(i.value))<0) m.sel.push(i.value.trim()); i.value=""; msPaint(id); } });
+  var lines=TPC.filter(function(r){ return String(r.d||"").trim() || r.a; });
+  var total=tpCostTotal();
+  var f={ startDate:$("tp-start").value, finishDate:$("tp-finish").value,
+    destination:MS.dest.sel.join(", "), coTraveler:(MS.co.sel.length?MS.co.sel:["No"]).join(", "),
+    purpose:$("tp-purpose").value.trim(), expectedResult:$("tp-expect").value.trim(),
+    estimatedCost:lines.map(function(r){ return (String(r.d||"").trim()||"Chi phí")+": "+tpFmt(r.a||0); }).join("\n"),
+    totalCost:String(total||""), schedule:$("tp-sched").value.trim(), equipment:MS.eq.sel.join(", "),
+    costLines:lines.map(function(r){ return { d:String(r.d||"").trim(), a:r.a||0 }; }) };
+  var miss=[];
+  if(!f.startDate||!f.finishDate) miss.push("ngày đi / về");
+  if(!f.destination) miss.push("Destination"); if(!f.purpose) miss.push("Purpose"); if(!f.expectedResult) miss.push("Expected result");
+  if(!lines.length || !total) miss.push("Estimated costs (ít nhất 1 khoản có số tiền)"); if(!f.schedule) miss.push("Schedule"); if(!f.equipment) miss.push("Equipment");
+  if(lines.some(function(r){ return !r.a; })) miss.push("số tiền cho mọi khoản chi phí");
+  if(miss.length){ toast("Vui lòng điền: "+miss.join(", "),"warn",6000); return; }
+  b.disabled=true; b.textContent="Đang gửi… (khoảng 10 giây)";
+  var sig=JSON.stringify(f); if(TP.sig!==sig || !TP.rid){ TP.sig=sig; TP.rid=calRid(); }
+  var ok=function(msg){
+    TP.rid=null; TP.sig=null;
+    closeModal(); toast("✈️ "+msg,"ok",7000);
+    /* hiện ngay trên lịch: đọc lại Report Hub (đề xuất đã tự đồng bộ vào Lịch công tác) */
+    setTimeout(function(){ loadOther(true).then(function(){ if(S.tab==="weekly"&&S.wkTab==="cal") renderCal(); }).catch(function(){}); }, 1500);
+  };
+  tripHub({ action:"tripPropose", trip:sig, rid:TP.rid }, 90000)
+    .then(function(r){ ok((r&&!r.posted&&r.message)||"Đã gửi đề xuất công tác — chờ phê duyệt trên file Business Trip"); })
+    .catch(function(e){
+      if(String((e&&e.message)||"")==="__HUB_TIMEOUT__"){ ok("Report Hub phản hồi chậm — đề xuất có thể đã được gửi. Bấm ⟳ trên lịch sau 1 phút để kiểm tra trước khi gửi lại."); return; }
+      b.disabled=false; b.textContent="↻ Gửi lại";
+      var box=document.createElement("div"); box.id="tp-err"; box.className="tp-err";
+      box.innerHTML='⚠️ <b>Chưa gửi được đề xuất.</b> '+esc(tripErr(e))
+        +'<div style="margin-top:6px">Dữ liệu bạn nhập vẫn còn nguyên — sửa xong bấm <b>↻ Gửi lại</b>, hoặc <a href="'+TRIP_SHEET_URL+'" target="_blank" rel="noopener">mở file Business Trip ↗</a> để nhập tay.</div>';
+      $("mBody").appendChild(box); box.scrollIntoView({block:"nearest"});
+    });
+}
+/* ── xem chuyến công tác · nhập báo cáo (chuyến đã Approved) ── */
+var TR6=null;
+function tripSplitReport(txt){
+  var o={ka:"",kf:"",fu:""}, t=String(txt||"");
+  var m=/\*\*\s*I\.\s*Key Activities\s*\*\*([\s\S]*?)(?=\*\*\s*II\.|$)/i.exec(t); if(m) o.ka=m[1].trim();
+  m=/\*\*\s*II\.\s*Key Findings\s*\*\*([\s\S]*?)(?=\*\*\s*III\.|$)/i.exec(t); if(m) o.kf=m[1].trim();
+  m=/\*\*\s*III\.\s*Follow Up Actions\s*\*\*([\s\S]*)$/i.exec(t); if(m) o.fu=m[1].trim();
+  if(!o.ka && !o.kf && !o.fu && t.trim()) o.ka=t.trim();
+  return o;
+}
+function tripView(it){
+  var s=it.s, meta=s.vMeta||{};
+  if(typeof meta==="string"){ try{ meta=JSON.parse(meta); }catch(e){ meta={}; } }
+  TR6={ it:it, id:meta.id||"", r:meta.r||"" };
+  openModal("✈️ Chuyến công tác",'<div class="cal-empty" style="display:block;padding:26px 0">Đang tải thông tin chuyến đi từ file Business Trip…</div>',
+    '<button class="btn" onclick="closeModal()">Đóng</button>', true);
+  tripHub({ action:"tripInfo", id:TR6.id, r:TR6.r }, 45000).then(function(r){ tripViewPaint(r.trip); })
+    .catch(function(e){
+      $("mBody").innerHTML='<div class="tp-err">⚠️ <b>Chưa tải được thông tin chuyến đi.</b> '+esc(tripErr(e))+'</div>'
+        +'<div class="fld" style="margin-top:10px"><label>'+esc(it.title)+' · '+fmtVN(it.st)+' → '+fmtVN(it.en)+'</label><div class="q16-ro">'+(s.result?linkify(s.result):"—")+'</div></div>';
+      $("mFoot").innerHTML='<a class="btn" href="'+TRIP_SHEET_URL+'" target="_blank" rel="noopener">Mở file Business Trip ↗</a><div style="flex:1"></div><button class="btn pri" onclick="closeModal();tripView(TR6.it)">↻ Thử lại</button>';
+    });
+}
+function tripViewPaint(t){
+  if(!t){ $("mBody").innerHTML='<div class="tp-err">Không tìm thấy chuyến đi này trên file Business Trip.</div>'; return; }
+  TR6.trip=t;
+  var ap=String(t.approval||"Not Yet"), apCls=t.approved?"ok":(/reject|từ chối/i.test(ap)?"rej":"wait");
+  var costs=String(t.estCost||"").split(/\n+/).filter(Boolean);
+  var row=function(l,v){ return '<div class="tr6-i"><span>'+l+'</span><b>'+(v||"—")+'</b></div>'; };
+  var info='<div class="tr6-head"><div><div class="tr6-dest">📍 '+esc(t.dest||"—")+'</div>'
+      +'<div class="tr6-date">'+fmtVN(t.start)+' → '+fmtVN(t.finish)+' · '+(t.days||"")+' ngày · 👤 '+esc(t.hubPic||t.pic||"")+'</div></div>'
+      +'<span class="tr6-ap '+apCls+'">'+(t.approved?"✓ ":apCls==="rej"?"✕ ":"⏳ ")+esc(ap)+'</span></div>'
+    +(t.comment?'<div class="tr6-cmt">💬 Ý kiến quản lý: '+esc(t.comment)+'</div>':'')
+    +'<div class="tr6-grid">'
+      +row("Người đi cùng", esc(t.co||"No"))+row("Thiết bị", esc(t.equip||"—"))
+      +row("Mục đích", esc(t.purpose))+row("Kết quả mong đợi", esc(t.expect))
+      +row("Lịch trình", esc(t.schedule).replace(/\n/g,"<br>"))
+      +row("Chi phí dự trù", costs.map(esc).join("<br>")+(t.total?'<div style="margin-top:4px;font-weight:800">Tổng: '+Number(t.total).toLocaleString("vi-VN")+' đ</div>':''))
+      +(t.folder?row("Folder", '<a href="'+esc(t.folder)+'" target="_blank" rel="noopener">📁 Mở folder chuyến đi</a>'):'')
+    +'</div>';
+  var rep="";
+  if(!t.approved){
+    rep='<div class="tr6-lock">'+(apCls==="rej"?'✕ Chuyến đi <b>không được duyệt</b>.'
+        :'⏳ Chuyến đi <b>đang chờ phê duyệt</b>. Phần <b>Báo cáo công tác</b> mở sau khi quản lý chọn <b>Approved</b> trên file Business Trip.')+'</div>';
+  } else if(!t.canReport){
+    rep='<div class="fld"><label>📋 Business trip Report</label><div class="q16-ro">'+(t.report?esc(String(t.report).replace(/\*\*/g,"")):'<i>Chưa có báo cáo</i>')+'</div></div>';
+  } else {
+    var o=tripSplitReport(t.report);
+    rep='<div class="tr6-rep"><div class="tr6-rh">📋 Báo cáo công tác'+(t.report?' <span class="tp-hint">Đã nộp'+(t.reportDate?' '+fmtVN(t.reportDate):'')+' — sửa & lưu để cập nhật</span>':'')+'</div>'
+      +'<div class="fld"><label>Key Activities <span class="rq">*</span></label><textarea class="inp" id="tr6-ka" style="min-height:80px" maxlength="5000" placeholder="Các hoạt động chính trong chuyến đi…">'+esc(o.ka)+'</textarea>'
+        +'<button class="mini" style="margin-top:6px" onclick="toggleVoice(\'tr6-ka\',this)">🎤 Nói</button></div>'
+      +'<div class="fld"><label>Key Findings <span class="rq">*</span></label><textarea class="inp" id="tr6-kf" style="min-height:80px" maxlength="5000" placeholder="Những phát hiện / thông tin quan trọng…">'+esc(o.kf)+'</textarea>'
+        +'<button class="mini" style="margin-top:6px" onclick="toggleVoice(\'tr6-kf\',this)">🎤 Nói</button></div>'
+      +'<div class="fld"><label>Follow Up Actions <span class="rq">*</span></label><textarea class="inp" id="tr6-fu" style="min-height:80px" maxlength="5000" placeholder="Việc cần làm tiếp theo…">'+esc(o.fu)+'</textarea>'
+        +'<button class="mini" style="margin-top:6px" onclick="toggleVoice(\'tr6-fu\',this)">🎤 Nói</button></div>'
+      +'<label style="display:flex;gap:8px;align-items:center;font-size:13px;font-weight:600"><input type="checkbox" id="tr6-mail"'+(t.report?'':' checked')+'> Gửi email báo cáo cho Director (CC HOD)</label>'
+      +'<div class="tr6-note">Khi lưu: tạo file <b>Google Doc báo cáo</b> trong folder chuyến đi, ghi vào cột <b>Business trip Report</b> trên file Business Trip; chuyến đi trên lịch tự chuyển <b>Completed</b>.</div></div>';
+  }
+  $("mBody").innerHTML=info+rep;
+  $("mFoot").innerHTML='<a class="btn" href="'+TRIP_SHEET_URL+'" target="_blank" rel="noopener">Mở file Business Trip ↗</a><div style="flex:1"></div>'
+    +(t.approved&&t.canReport?'<button class="btn pri" id="tr6-save" onclick="tripReportSave()">📄 Lưu báo cáo</button>':'<button class="btn" onclick="closeModal()">Đóng</button>');
+}
+function tripReportSave(){
+  var b=$("tr6-save"); if(!b||b.disabled||!TR6||!TR6.trip) return;
+  var eb=$("tr6-err"); if(eb) eb.remove();
+  var ka=$("tr6-ka").value.trim(), kf=$("tr6-kf").value.trim(), fu=$("tr6-fu").value.trim();
+  if(!ka||!kf||!fu){ toast("Vui lòng điền đủ Key Activities, Key Findings và Follow Up Actions","warn"); return; }
+  var body={ action:"tripReport", id:TR6.trip.id, r:TR6.trip.row, keyActivities:ka, keyFindings:kf, followUp:fu, sendEmail:$("tr6-mail").checked?"true":"false" };
+  var sig=JSON.stringify(body); if(TR6.sig!==sig||!TR6.rid){ TR6.sig=sig; TR6.rid=calRid(); } body.rid=TR6.rid;
+  b.disabled=true; b.textContent="Đang lưu… (~10–20 giây)";
+  var fail=function(msg){
+    b.disabled=false; b.textContent="↻ Lưu lại";
+    var box=document.createElement("div"); box.id="tr6-err"; box.className="tp-err";
+    box.innerHTML='⚠️ <b>Chưa lưu được báo cáo.</b> '+esc(msg)+'<div style="margin-top:6px">Nội dung bạn nhập vẫn còn nguyên — bấm <b>↻ Lưu lại</b> (không bị lưu trùng).</div>';
+    $("mBody").appendChild(box); box.scrollIntoView({block:"nearest"});
+  };
+  var ok=function(r){
+    TR6.rid=null; TR6.sig=null; closeModal();
+    toast("📋 "+((r&&r.message)||"Đã lưu báo cáo công tác"),"ok",6000);
+    setTimeout(function(){ loadOther(true).then(function(){ if(S.tab==="weekly"&&S.wkTab==="cal") renderCal(); }).catch(function(){}); },1500);
+  };
+  tripHub(body, 90000).then(function(r){
+    if(r && r.posted){                       /* nội dung dài ⇒ gửi dạng POST, kiểm tra lại trên file */
+      var n=0, t0=TR6.trip;
+      (function poll(){
+        n++;
+        tripHub({ action:"tripInfo", id:t0.id, r:t0.row }, 30000).then(function(x){
+          var t=x&&x.trip; if(t && t.report && String(t.report).indexOf(ka.slice(0,30))>=0) return ok({ message:"Đã lưu báo cáo công tác" });
+          if(n<8) setTimeout(poll, 3000); else fail("Máy chủ chưa xác nhận — mở file Business Trip để kiểm tra cột Report.");
+        }).catch(function(){ if(n<8) setTimeout(poll,3000); else fail("Không kiểm tra được kết quả."); });
+      })();
+      return;
+    }
+    ok(r);
+  }).catch(function(e){ fail(tripErr(e)); });
+}
+
+/* ═════════════ gắn Lịch công việc vào màn hình “Cập nhật” ═════════════ */
+wkTabBar=function(){
+  var t=S.wkTab||"terr";
+  var nOther=(S.other&&S.other.keys)?otherKeys().length:null;
+  return '<div class="shtabs">'+
+    '<button class="'+(t==="cal"?"on":"")+'" onclick="setWkTab(\'cal\')">📅 Lịch công việc</button>'+
+    '<button class="'+(t==="terr"?"on":"")+'" onclick="setWkTab(\'terr\')">📍 Thông tin địa bàn</button>'+
+    '<button class="'+(t==="other"?"on":"")+'" onclick="setWkTab(\'other\')">🧩 Công việc khác'+
+      (nOther!=null?'<span class="cnt">'+nOther+'</span>':"")+'</button>'+
+  '</div>';
+};
+(function(){
+  var pw=pgWeekly, rt=renderTerritory, ro=renderOther;
+  pgWeekly=function(){ if(S.wkTab==="cal") return pgCal(); return pw.apply(this,arguments); };
+  renderTerritory=function(){ if(S.wkTab==="cal") return renderCal(); return rt.apply(this,arguments); };
+  renderOther=function(){ if(S.wkTab==="cal") return renderCal(); return ro.apply(this,arguments); };
+  /* đổi cỡ màn hình (xoay ngang điện thoại, thu nhỏ cửa sổ) ⇒ vẽ lại đúng bố cục */
+  var _rz, _wasMob=calMob();
+  window.addEventListener("resize",function(){ clearTimeout(_rz); _rz=setTimeout(function(){
+    var m=calMob(); if(m!==_wasMob){ _wasMob=m; if(S.tab==="weekly"&&S.wkTab==="cal"&&!$("ov").classList.contains("on")) renderCal(); } },200); });
+})();
+/* nút ＋ (thêm việc) — thêm lựa chọn Đề xuất công tác */
+pickTaskKind=function(){ calAdd(todayISO()); };
+</script>
 
 </body>
 </html>
