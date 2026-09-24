@@ -10664,6 +10664,27 @@ function doSend(option){
 .tr6-rh{font-size:14px;font-weight:800;color:var(--navy);margin-bottom:8px}
 .tr6-note{font-size:11.5px;color:var(--sub);margin-top:6px}
 
+.cal-kpi .pbrow{display:flex;align-items:center;gap:8px;margin-top:6px}
+.cal-kpi .pbrow .pbx{flex:1;margin-top:0;height:8px}
+.cal-kpi .pbrow em{font-style:normal;font-size:13px;font-weight:800;min-width:38px;text-align:right}
+.cal-due{display:inline-block;margin-top:5px;font-size:10.5px;font-weight:800;border-radius:7px;padding:1px 7px;background:#EDF3FE;color:var(--blue-d)}
+.cal-due.near{background:#FFF4D6;color:#8A5A00}
+.cal-due.today{background:#FFE9D6;color:#A34A00}
+.cal-gh{border:1.5px dashed #F5C46B;background:#FFFBF0;border-radius:11px;padding:6px 7px}
+.cal-gh-h{font-size:11px;font-weight:800;color:#8A5A00;margin-bottom:4px}
+.cal-ghr{display:flex;align-items:center;gap:5px;width:100%;border:none;background:none;text-align:left;font-family:inherit;font-size:11.5px;padding:3px 2px;cursor:pointer;border-radius:6px;opacity:.85}
+.cal-ghr:hover{background:#FFF1CC;opacity:1}
+.cal-ghr .t{flex:1;min-width:0;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;font-weight:650;color:var(--ink)}
+.cal-ghr .n{font-size:10.5px;font-weight:800;color:#8A5A00;white-space:nowrap}
+.cal-ghr.near .n{color:#B3261E}
+.cal-ghr .av{width:16px;height:16px;border-radius:50%;color:#fff;font-size:7.5px;font-weight:800;display:inline-flex;align-items:center;justify-content:center;flex:none}
+/* toàn màn hình: ẩn thanh trên, menu bên, menu dưới */
+body.cal-full header,body.cal-full aside,body.cal-full nav.mob,body.cal-full .fab,body.cal-full .shtabs{display:none!important}
+body.cal-full main{padding:10px 14px 20px}
+body.cal-full .pg{max-width:none}
+body.cal-full .cal-wc{min-height:calc(100vh - 230px)}
+body.cal-full .cal-month .dc{min-height:calc((100vh - 200px) / 5)}
+.cal-fullbtn.on{background:var(--navy);border-color:var(--navy);color:#fff}
 @media(max-width:1100px){ .cal-week{grid-template-columns:repeat(4,minmax(0,1fr))} .cal-wc{min-height:220px} }
 @media(max-width:720px){
   .cal-head h2{font-size:16.5px;flex:1 1 auto;min-width:0}
@@ -10677,7 +10698,10 @@ function doSend(option){
   .cal-kpi span{font-size:9.5px;letter-spacing:.2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .cal-kpi b{font-size:16px}
   .cal-kpi small{display:block;margin:0;font-size:10.5px;line-height:1.3}
-  .cal-kpi .pbx{margin-top:4px}
+  .cal-kpi .pbrow{margin-top:4px;gap:5px}
+  .cal-kpi .pbrow em{font-size:11.5px;min-width:30px}
+  body.cal-full .cal-wc{min-height:0}
+  body.cal-full .cal-month .dc{min-height:64px}
   .cal-week{grid-template-columns:1fr;gap:8px}
   .cal-wc{min-height:0}
   .cal-wb{cursor:default}
@@ -10709,7 +10733,7 @@ function doSend(option){
    ═══════════════════════════════════════════════════════════════════════════════ */
 var CAL={ view:"week", ref:null, pics:null, show:{v:1,o:1,t:1}, hideDone:false, exp:{}, map:{} };
 (function(){ try{ var v=localStorage.getItem("mmh_calview"); if(v) CAL.view=v;
-  var h=localStorage.getItem("mmh_calhide"); CAL.hideDone=h==="1";
+  var h=localStorage.getItem("mmh_calhide"); CAL.hideDone=h==="1"; CAL.compact=localStorage.getItem("mmh_calcompact")==="1";
   var s=JSON.parse(localStorage.getItem("mmh_calshow")||"null"); if(s) CAL.show=s; }catch(e){} })();
 var CAL_WD=["CN","T2","T3","T4","T5","T6","T7"];
 var CAL_WDF=["Chủ nhật","Thứ 2","Thứ 3","Thứ 4","Thứ 5","Thứ 6","Thứ 7"];
@@ -10749,7 +10773,7 @@ function calEff(s){ return calD(s.revised)||calD(s.planned)||""; }
 function calItems(){
   var out=[], today=todayISO(), map={};
   /* 📍 đi địa bàn */
-  if(CAL.show.v){
+  if(CAL.show.v && !CAL.onlyIP){
     terrRows().forEach(function(w){
       if(!calPicOk(w.pic)) return;
       var st=calD(w.start); if(!st) return;
@@ -10782,6 +10806,7 @@ function calItems(){
       if(!calPicOk(s.pic)) return;
       var sk=calStatusKey(s.status), done=(sk==="done"||sk==="cancel");
       if(CAL.hideDone && done) return;
+      if(CAL.onlyIP && (isT || sk!=="prog")) return;
       var stD=calD(s.start), en=calEff(s)||stD;
       if(!stD) stD=en;
       if(stD && en && en<stD){ var t=stD; stD=en; en=t; }
@@ -10846,7 +10871,31 @@ function calCard(it, multi){
     +'<div class="m">'+(multi?calAv(it.pic):'')+calStTag(it)
       +(it.kind==="o"?'<span class="pc" style="color:'+pctColor(it.pct/100)+'">'+it.pct+'%</span>':'')
       +(it.kind==="t"&&it.st&&it.en&&it.en>it.st?'<span class="pc" style="color:'+CAL_COL.t+'">'+calDM(it.st)+'→'+calDM(it.en)+'</span>':'')
-    +'</div></button>';
+    +'</div>'+calDueTag(it)+'</button>';
+}
+/* việc đang thực hiện: đếm ngày còn lại tới hạn (giống Report Hub) */
+function calDaysLeft(it){ if(!it.en) return null; return Math.round((calDate(it.en)-calDate(todayISO()))/86400000); }
+function calDueTag(it){
+  if(it.kind!=="o" || calStatusKey(it.status)!=="prog" || it.od) return "";
+  var n=calDaysLeft(it); if(n===null||n<0) return "";
+  if(n===0) return '<span class="cal-due today">⏰ Đến hạn hôm nay</span>';
+  return '<span class="cal-due'+(n<=2?' near':'')+'">⏳ Còn '+n+' ngày</span>';
+}
+/* 🔔 Sắp đến hạn: việc đang thực hiện còn 1–7 ngày tới hạn ⇒ nhắc ở cột HÔM NAY */
+function calGhosts(items){
+  return items.filter(function(it){ if(it.kind!=="o"||it.od||calStatusKey(it.status)!=="prog") return false;
+    var n=calDaysLeft(it); it._n=n; return n!==null && n>=1 && n<=7; })
+    .sort(function(a,b){ return a._n-b._n; });
+}
+function calGhostBlock(gh, multi){
+  if(!gh.length) return "";
+  var open=!!CAL.ghOpen, LIM=4, list=open?gh:gh.slice(0,LIM);
+  return '<div class="cal-gh" onclick="event.stopPropagation()"><div class="cal-gh-h">🔔 Sắp đến hạn · '+gh.length+'</div>'
+    +list.map(function(it){ return '<button type="button" class="cal-ghr'+(it._n<=2?' near':'')+'" onclick="calOpen(\''+calQ(it.id)+'\')" title="'+esc(it.title+' · '+(it.pic||'')+' · '+it.pct+'%')+'">'
+      +(multi?'<span class="av" style="background:'+avColor(it.pic)+'">'+esc(initials(it.pic))+'</span>':'')
+      +'<span class="t">'+esc(it.title)+'</span><span class="n">còn '+it._n+' ngày</span></button>'; }).join("")
+    +(gh.length>LIM?'<button type="button" class="cal-more" onclick="CAL.ghOpen=!CAL.ghOpen;renderCal()">'+(open?'Thu gọn ▴':'＋ '+(gh.length-LIM)+' việc khác')+'</button>':'')
+    +'</div>';
 }
 function calChipEv(it){
   var c=it.kind==="v"?CAL_COL.v:it.color;
@@ -10854,21 +10903,24 @@ function calChipEv(it){
     +'<span>'+(it.kind==="v"?"📍":it.kind==="t"?"✈️":"🧩")+'</span><span class="t">'+esc(it.title||"—")+'</span></button>';
 }
 function calSummary(items){
-  var rg=calRange(), v=0, vd=0, o=0, od=0, op=0, tdays=0, overdue=0;
+  var rg=calRange(), v=0, vd=0, o=0, od=0, op=0, osum=0, tdays=0, overdue=0, ip=0;
   items.forEach(function(it){
     if(it.od){ overdue++; return; }
+    if(it.kind==="o" && calStatusKey(it.status)==="prog") ip++;
     if(it.kind==="t"){ if(it.st<=rg.to && it.en>=rg.from){ var a=it.st<rg.from?rg.from:it.st, b=it.en>rg.to?rg.to:it.en; tdays+=Math.round((calDate(b)-calDate(a))/86400000)+1; } return; }
     if(!it.d || it.d<rg.from || it.d>rg.to) return;
     if(it.kind==="v"){ if(it.tbd) return; v++; if(it.done) vd++; }
-    else if(!it.cancel){ o++; if(it.done) od++; else if(calStatusKey(it.status)==="prog") op++; }
+    else if(!it.cancel){ o++; osum+=(it.done?100:(calStatusKey(it.status)==="todo"?0:it.pct)); if(it.done) od++; else if(calStatusKey(it.status)==="prog") op++; }
   });
-  var box=function(lb,val,sub,pct,col){ return '<div class="cal-kpi"><span>'+lb+'</span><b>'+val+'</b><small>'+sub+'</small>'
-    +(pct!=null?'<div class="pbx"><i style="width:'+pct+'%;background:'+col+'"></i></div>':'')+'</div>'; };
+  var bar=function(pct){ var c=pctColor(pct/100);
+    return '<div class="pbrow"><div class="pbx"><i style="width:'+pct+'%;background:'+c+'"></i></div><em style="color:'+c+'">'+pct+'%</em></div>'; };
+  var box=function(lb,val,sub,pct,title){ return '<div class="cal-kpi"'+(title?' title="'+esc(title)+'"':'')+'><span>'+lb+'</span><b>'+val+'</b><small>'+sub+'</small>'
+    +(pct!=null?bar(pct):'')+'</div>'; };
   var h='';
-  if(CAL.show.v) h+=box("📍 Đi địa bàn",v,"lượt · ✓ "+vd+" hoàn thành", v?Math.round(vd*100/v):0, CAL_COL.v);
-  if(CAL.show.o) h+=box("🧩 Việc khác",o,"✓ "+od+" · ◐ "+op+" đang làm", o?Math.round(od*100/o):0, "#3A5CAA");
-  if(CAL.show.t) h+=box("✈️ Công tác",tdays,"ngày đi công tác", null);
-  return {html:'<div class="cal-sum">'+h+'</div>', overdue:overdue};
+  if(CAL.show.v && !CAL.onlyIP) h+=box("📍 Đi địa bàn",v,"lượt · ✓ "+vd+" hoàn thành", v?Math.round(vd*100/v):0, "% = số lượt đã Completed / tổng lượt đi địa bàn trong khoảng đang xem");
+  if(CAL.show.o) h+=box("🧩 Việc khác",o,"việc · ✓ "+od+" xong · ◐ "+op+" đang làm", o?Math.round(osum/o):0, "% = trung bình tiến độ các việc trong khoảng đang xem (To Do = 0%, bỏ việc đã huỷ)");
+  if(CAL.show.t && !CAL.onlyIP) h+=box("✈️ Công tác",tdays,"ngày đi công tác", null);
+  return {html:(h?'<div class="cal-sum">'+h+'</div>':''), overdue:overdue, ip:ip};
 }
 function calPeopleNames(){
   var set={}, out=[];
@@ -10912,14 +10964,15 @@ function renderCal(){
     var mon=calDate(mondayOf(calISO(ref))), days=[];
     for(var i=0;i<7;i++){ var d=new Date(mon); d.setDate(mon.getDate()+i); days.push(d); }
     title="Tuần "+calDM(calISO(days[0]))+" – "+fmtVN(calISO(days[6]));
-    var LIM=mob?50:6;
+    var LIM=mob?50:5, ghosts=calGhosts(items);
     body='<div class="cal-week">'+days.map(function(d){
       var iso=calISO(d), ev=by[iso]||[], open=!!CAL.exp[iso], shown=open?ev:ev.slice(0,LIM), we=(d.getDay()===0||d.getDay()===6);
       if(mob && !ev.length && iso!==today && we) return '';   /* điện thoại: bỏ T7/CN trống cho gọn */
       return '<div class="cal-wc'+(iso===today?" today":"")+(we?" we":"")+'">'
         +'<div class="cal-wh" onclick="calDay(\''+iso+'\')" title="Xem cả ngày"><span>'+(mob?CAL_WDF[d.getDay()]:CAL_WD[d.getDay()])+(iso===today?' · Hôm nay':'')+'</span><b>'+d.getDate()+'/'+(d.getMonth()+1)+'</b></div>'
         +'<div class="cal-wb" onclick="calEmpty(event,\''+iso+'\')">'
-        +(shown.length?shown.map(function(it){ return calCard(it,multi); }).join(""):'<div class="cal-empty">—</div>')
+        +(iso===today?calGhostBlock(ghosts,multi):'')
+        +(shown.length?shown.map(function(it){ return calCard(it,multi); }).join(""):((iso===today&&ghosts.length)?'':'<div class="cal-empty">—</div>'))
         +(ev.length>LIM?'<button class="cal-more" onclick="event.stopPropagation();CAL.exp[\''+iso+'\']=!CAL.exp[\''+iso+'\'];renderCal()">'+(open?'Thu gọn ▴':'＋ '+(ev.length-LIM)+' việc khác')+'</button>':'')
         +'<button class="cal-add" onclick="event.stopPropagation();calAdd(\''+iso+'\')">＋ Thêm việc</button></div></div>';
     }).join("")+'</div>';
@@ -10966,6 +11019,7 @@ function renderCal(){
   var bar='<div class="cal-bar">'
     +chip("v","📍 Đi địa bàn",CAL_COL.v)+chip("o","🧩 Việc khác","#3A5CAA")+chip("t","✈️ Công tác",CAL_COL.t)
     +'<button class="cal-chip'+(CAL.hideDone?" on":"")+'" onclick="calHide()">'+(CAL.hideDone?"✓ ":"")+'Ẩn việc đã xong</button>'
+    +'<button class="cal-chip'+(CAL.onlyIP?" on":"")+'" onclick="CAL.onlyIP=!CAL.onlyIP;renderCal()" title="Chỉ xem việc đang thực hiện">📌 Đang thực hiện <b>'+sum.ip+'</b>'+(CAL.onlyIP?' ✕':'')+'</button>'
     +(sum.overdue?'<button class="cal-od" onclick="calOverdue()">🔴 '+sum.overdue+' việc quá hạn ›</button>':'');
   if(calCanTeam()){
     var names=calPeopleNames();
@@ -10991,10 +11045,12 @@ function renderCal(){
     +'<div class="seg">'+[["week","Tuần"],["month","Tháng"],["list","Danh sách"]].map(function(x){ return '<button class="'+(view===x[0]?"on":"")+'" onclick="calView(\''+x[0]+'\')">'+x[1]+'</button>'; }).join("")+'</div>'
     +'<div class="cal-sp"></div>'
     +'<button class="btn sm" onclick="refreshCal(this)" title="Đọc lại dữ liệu + đồng bộ lịch công tác">⟳</button>'
+    +'<button class="btn sm'+(CAL.compact?' cal-fullbtn on':'')+'" onclick="calCompact()" title="Ẩn / hiện bộ lọc và thống kê">'+(CAL.compact?'☰ Hiện bộ lọc':'☰ Ẩn bộ lọc')+'</button>'
+    +'<button class="btn sm cal-fullbtn'+(CAL.full?' on':'')+'" onclick="calFull()" title="'+(CAL.full?'Thoát toàn màn hình (Esc)':'Ẩn menu bên, thanh trên — xem lịch toàn màn hình')+'">'+(CAL.full?'✕ Thu nhỏ':'⛶ Toàn màn hình')+'</button>'
     +'<button class="btn sm hide-m" onclick="tripProposeOpen()">✈️ Đề xuất công tác</button>'
     +'<button class="btn pri sm" onclick="calAdd(todayISO())">＋ Thêm việc</button>'
     +'</div>'
-    +bar+sum.html
+    +(CAL.compact?(sum.overdue?'<div class="cal-bar"><button class="cal-od" onclick="calOverdue()">🔴 '+sum.overdue+' việc quá hạn ›</button></div>':''):(bar+sum.html))
     +(notes.length?'<div class="cal-note">'+notes.join("<br>")+'</div>':'')
     +body
     +(mob?'<div style="display:flex;gap:8px;margin-top:12px"><button class="btn" style="flex:1" onclick="tripProposeOpen()">✈️ Đề xuất công tác</button></div>':'')
@@ -11006,6 +11062,13 @@ function calNav(n){
   else { var r=CAL.ref||new Date(); CAL.ref=new Date(r.getFullYear(), r.getMonth()+n, 1); }
   renderCal();
 }
+function calFull(on){
+  CAL.full=(on===undefined)?!CAL.full:!!on;
+  document.body.classList.toggle("cal-full", CAL.full);
+  if(S.tab==="weekly"&&S.wkTab==="cal") renderCal();
+}
+function calCompact(){ CAL.compact=!CAL.compact; try{ localStorage.setItem("mmh_calcompact",CAL.compact?"1":"0"); }catch(e){} renderCal(); }
+document.addEventListener("keydown",function(e){ if(e.key==="Escape" && CAL.full && !$("ov").classList.contains("on") && !$("drw").classList.contains("on")) calFull(false); });
 function calView(v){ CAL.view=v; try{ localStorage.setItem("mmh_calview",v); }catch(e){} renderCal(); }
 function calToggle(k){ CAL.show[k]=CAL.show[k]?0:1; try{ localStorage.setItem("mmh_calshow",JSON.stringify(CAL.show)); }catch(e){} renderCal(); }
 function calHide(){ CAL.hideDone=!CAL.hideDone; try{ localStorage.setItem("mmh_calhide",CAL.hideDone?"1":"0"); }catch(e){} renderCal(); }
@@ -11121,6 +11184,8 @@ function q16Save(){
     body.name=name;
     /* đổi hạn: có “hạn điều chỉnh” thì sửa hạn điều chỉnh, chưa có thì sửa hạn kế hoạch */
     if(due!==calEff(s)){ if(calD(s.revised)||(calD(s.planned)&&due>calD(s.planned))) body.revised=due; else body.planned=due; }
+    /* bấm Completed ⇒ hạn điều chỉnh = hôm nay, việc hiện ở đúng ngày hoàn thành (như Report Hub) */
+    else if(calStatusKey(st)==="done" && !it.done){ body.revised=todayISO(); due=todayISO(); }
   }
   var b=$("q16_save"); if(b){ b.disabled=true; b.textContent="Đang lưu…"; }
   /* hiện ngay trên lịch, lưu ở nền */
@@ -11259,8 +11324,24 @@ function tripProposeOpen(iso){
 }
 var TPC=[], MS={};
 var TPC_SUGGEST=["Vé máy bay","Công tác phí","Khách sạn","Taxi / Grab","Vé tàu / xe","Tiếp khách","Phí hội thảo","Chi phí khác"];
+/* dự phòng khi Report Hub còn chạy bản cũ (đọc nhầm cột: Equipment ra danh sách tỉnh thành) */
+var TRIP_EQ_FB=["Laptop","Mẫu hàm full","Mẫu hàm rời","Đèn quang trùng hợp","Đèn thực hành","Mini motor","Micro motor","Lèn dọc EQ Condenser","Tay rung rửa sóng âm","Máy rung rửa siêu âm","Gương","Cây trám Composite (vàng)","Cây trám Composite (bạc)","Kẹp gắp","Thám trâm","Dụng cụ trám xanh dương","Dụng cụ trám vàng","Thám trâm 2 đầu khác nhau","Cây đo túi lợi","Máy bơm gutta (lèn nhiệt)","Máy cắt cone","Tay khoan nhanh","Tay khoan chậm khuỷu","Khay Inox - Hình chữ nhật","Khay Inox - Hạt đậu","Giá cắm trâm Mani Endo Guard","Giá cắm trâm Mani Bur Guard","Giá cắm trâm Trung Quốc","Giá cắm mũi khoan","Bộ đặt đam","Máy nội nha","Máy chiếu vật thể","Cây đưa MTA","None"];
+var TRIP_CO_FB=["Nguyen Ha","Dao","Hoa","Tuyen","Vu Phuong","Thuong","Long","Hau","Giang","Phuong","Hoang","Dam Ha","Ngoc","Hang","Sui","Innotech","DDI","Minh Viet","SPI","Dam Viet","Vinh","Bui Trang","Viet Ha","Khang","Thao"];
+var PROV_RE=/^(ha ?noi|hanoi|ho chi minh|hcm|da nang|hai phong|ha giang|cao bang|bac kan|lao cai|tuyen quang|can tho|bangkok)/;
+function tripMasterFix(m){
+  m=m||{};
+  var d=(m.destinations||[]).slice(), c=(m.coTravelers||[]).slice(), e=(m.equipment||[]).slice();
+  var provIn=function(a){ return a.filter(function(x){ return PROV_RE.test(msNorm(x)); }).length>=3; };
+  if(provIn(e) && !provIn(d)){ if(!d.length) d=e; e=[]; }
+  if(provIn(c) && !d.length){ d=c; c=[]; }
+  if(!e.length) e=TRIP_EQ_FB.slice();
+  if(!c.length) c=TRIP_CO_FB.slice();
+  c=c.filter(function(x){ return !/^(test|no)$/i.test(String(x).trim()); });
+  e=e.filter(function(x){ return !/^none$/i.test(String(x).trim()); });
+  return { destinations:d, coTravelers:c, equipment:e };
+}
 function tripProposeForm(r){
-  var m=(r&&r.master)||{destinations:[],coTravelers:[],equipment:[]}, d0=TP.iso||todayISO();
+  var m=tripMasterFix(r&&r.master), d0=TP.iso||todayISO();
   TPC=[{d:"Công tác phí",a:0},{d:"",a:0}];
   $("mBody").innerHTML=
      '<div class="tp-box">Đề xuất được ghi thẳng vào file <b>Business Trip</b> (Approval Status = <b>Not Yet</b>) và gửi email xin duyệt '
@@ -11511,7 +11592,8 @@ wkTabBar=function(){
 };
 (function(){
   var pw=pgWeekly, rt=renderTerritory, ro=renderOther;
-  pgWeekly=function(){ if(S.wkTab==="cal") return pgCal(); return pw.apply(this,arguments); };
+  pgWeekly=function(){ if(S.wkTab==="cal") return pgCal(); if(CAL.full) calFull(false); return pw.apply(this,arguments); };
+  var g0=go; go=function(t){ if(CAL.full && t!=="weekly") calFull(false); return g0.apply(this,arguments); };
   renderTerritory=function(){ if(S.wkTab==="cal") return renderCal(); return rt.apply(this,arguments); };
   renderOther=function(){ if(S.wkTab==="cal") return renderCal(); return ro.apply(this,arguments); };
   /* đổi cỡ màn hình (xoay ngang điện thoại, thu nhỏ cửa sổ) ⇒ vẽ lại đúng bố cục */
