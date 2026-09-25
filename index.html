@@ -851,6 +851,10 @@ tr.rp-late td{background:var(--dang-bg)}
 /* ⭐ v5 — thẻ hạng mục báo cáo tháng: 2 cột PLAN | RESULT */
 .photorule{background:#FFF6E4;border:1px solid #F0DCA8;color:#8A5A00;border-radius:var(--r-md);padding:9px 11px;font-size:11.5px;line-height:1.55;margin-bottom:10px}
 .photorule b{color:#6E4700}
+/* ⭐ v18 — Thailand Surgical: không có ảnh đi địa bàn, không có Thầu / Doanh số VN */
+body.th-mode .pp, body.th-mode #nt_phSect, body.th-mode .photorule{display:none!important}
+body.th-mode .te-split{grid-template-columns:1fr}
+body.th-mode .qlink[href*="Tender-Result"], body.th-mode .qlink[href*="Turnover"]{display:none}
 .mn-card{border:1px solid var(--line);border-left:3px solid var(--warn);border-radius:var(--r-md);padding:12px 14px;margin-bottom:10px;cursor:pointer;transition:.15s;background:var(--card)}
 .mn-card.ok{border-left-color:var(--ok)}
 .mn-card:hover{background:var(--paler);border-color:var(--blue-l)}
@@ -1160,6 +1164,185 @@ tr.rp-late td{background:var(--dang-bg)}
 
 
 </style>
+<script>
+/* ⭐ v18 — từ điển Việt → Anh cho giao diện nhóm Thailand Surgical */
+var DICT_EN={"\" readonly title=\"Area cố định theo PIC":"\" readonly title=\"Area fixed by PIC","% = số lượt đã Completed / tổng lượt đi địa bàn trong khoảng đang xem":"% = number of Completed visits / total field visits in the period being viewed","% = trung bình tiến độ các việc trong khoảng đang xem (To Do = 0%, bỏ việc đã huỷ)":"% = average progress of tasks in the period being viewed (To Do = 0%, cancelled tasks excluded)","% có GPS":"% with GPS","% doanh số theo product type":"% of sales by product type","% hoàn thành":"% completed","% số buổi":"% of sessions","% số dòng đã đính ảnh":"% of rows with photos attached","% số ảnh":"% of photos","% đạt":"% achieved","% đạt FY":"% achieved FY","')\" title=\"Bấm để cập nhật\"":"')\" title=\"Click to update\"","')\" title=\"Bấm để sửa Key Task\"":"')\" title=\"Click to edit Key Task\"","(Bệnh viện · Phòng khám · Trường đại học · Đại lý · NPP) và":"(Hospital · Clinic · University · Dealer · Distributor) and","(Gửi báo cáo).":"(Send report).","(Khách hàng, CBC, Cập nhật, Đơn hàng, Thuyết trình, CV tháng, ADP),":"(Customer, CBC, Updates, Sales order, Presentation, Monthly tasks, ADP),","(Mật khẩu vẫn được nhớ trên thiết bị này)":"(Password is still remembered on this device)","(chưa ghi người mua)":"(buyer not recorded)","(chưa ghi nhóm)":"(group not recorded)","(chưa ghi)":"(not recorded)","(dòng":"(row","(email của bạn)":"(your email)","(khác)":"(other)","(không bị lưu trùng).":"(won't be saved as duplicate).","(không có GPS)":"(no GPS)","(không rõ)":"(unknown)","(số lượng)":"(quantity)","(tôi)":"(me)","(đã nhận email xin duyệt trước đó)":"(previously received approval request email)",") và gửi email xin duyệt":") and send approval request email",") — dùng lại địa bàn này.":") — reuse this area.",", hoặc":", or",", hoặc tạo Key Task mới.":", or create a new Key Task.",", hãy chọn":", please select",", không gửi email cho ai.":", without sending email to anyone.",", không trùng tháng nào của":", not overlapping any month of",", lấy Type task / PIC / Area từ kỳ":", taking Type task / PIC / Area from the period",", ngay cạnh tab đi địa bàn.":", right next to the field visit tab.",", phần kế hoạch là nội dung bạn đã chọn, phần kết quả là câu tổng hợp ở trên.":", the plan part is the content you selected, the result part is the summary sentence above.",", sửa ô":", edit the cell",", trạng thái":", status",", vui lòng quay lại để thêm kế hoạch.":", please come back to add a plan.",", vì tên phải khớp đúng để hệ thống cộng doanh số và tính độ phủ.":", because the name must match exactly for the system to add up sales and calculate coverage.",", ảnh với Visiting, và Next action.":", photos with Visiting, and Next action.","- Câu hỏi / phản hồi của bác sĩ:":"- Doctor's questions / feedback:","- Cơ hội đơn hàng:":"- Order opportunity:","- Hình thức (hội thảo / demo / training):":"- Format (seminar / demo / training):","- Khách hàng tiềm năng ghi nhận:":"- Potential customers recorded:","- Nội dung chính đã trình bày:":"- Main content presented:","- Sản phẩm trình bày:":"- Products presented:","- Việc cần làm sau buổi:":"- Follow-up tasks after the session:","- Đối thủ xuất hiện (nếu có):":"- Competitors present (if any):","- Đối tượng tham dự:":"- Attendees:",". Bấm “Toàn bộ file” để xem, hoặc mở file Turnover sửa":". Click “Full file” to view, or open the Turnover file to edit",". Chỉ số thực tế được tính vào KPI. Nhớ đính link folder ảnh và viết phần đánh giá buổi đó.":". Actual figures are counted into KPI. Remember to attach the photo folder link and write the evaluation for that session.",". Chỉ đếm các buổi đi địa bàn trong tuần đó đã chuyển sang":". Only counts field visits in that week that have changed to",". Cuối tuần, ô kết quả tự tổng hợp các account bạn thực sự đi.":". At the end of the week, the result cell automatically summarizes the accounts you actually visited.",". Có thể mở từ bất kỳ màn hình nào.":". Can be opened from any screen.",". Form tự đổi sang chế độ kế hoạch.":". The form automatically switches to plan mode.",". Gõ để tìm trong toàn bộ":". Type to search across all",". Mã khách hàng do công thức trong sheet tự sinh theo Khu vực + Tỉnh + Loại KH.":". Customer code is auto-generated by a formula in the sheet based on Area + Province + Customer type.",". Mỗi tuần chỉ tạo một dòng.":". Only one row is created per week.",". Phần":". The",". Phần PLAN chép sang, phần RESULT để trống.":". The PLAN part is copied over, the RESULT part is left blank.",". Quản lý duyệt bằng":". Manager approves using",". Segment có trong file:":". Segments included in the file:",". Số đếm trên thẻ, danh sách sự kiện và tỉnh thành đều chạy theo lựa chọn này.":". The counts on the card, event list and provinces all follow this selection.",". Sửa xong bấm lưu, dữ liệu ghi thẳng vào Google Sheet.":". After editing, click save — data is written directly to Google Sheet.","0 đ":"0 VND","1 ngày":"1 day","1 ảnh / task":"1 photo / task","1. Thông tin buổi":"1. Session information","2. Diễn biến":"2. Details","3 tháng":"3 months","3. Kết quả & bước tiếp theo":"3. Results & next steps","30 ngày":"30 days","7 ngày":"7 days","90 ngày":"90 days","ADP cũ chưa có ngày tạo — chạy menu MMH CRM ▸ ①b rồi sửa lại để ghi mốc":"Old ADP has no creation date — run menu MMH CRM ▸ ①b then edit again to record the date","ADP là cam kết cả năm với địa bàn lớn — đặt xong thì review theo quý, đừng để trống ô Review.":"ADP is a full-year commitment for key accounts — once set, review it quarterly, don't leave the Review cell blank.","ADP mới":"New ADP","ADP theo kỳ":"ADP by period","ADP · chưa đặt target":"ADP · target not set","ADP — cột FY Actual":"ADP — FY Actual column","Account & CBC mở mới":"New Account & CBC","Account mới":"New account","Account mở mới":"New account opened","Account mở mới theo tháng":"New accounts by month","Account nhiều CBC nhất":"Account with the most CBC","Account này chưa có ADP":"This account has no ADP yet","Account theo khu vực":"Account by region","All dental tính tất cả · All file gộp Hand files + Jizai · All MMG gộp Composite, Tẩy trắng, Nhựa":"All dental counts everything · All file combines Hand files + Jizai · All MMG combines Composite, Whitening, Resin","App chưa tải được danh bạ. Bấm":"App failed to load contacts. Click","App tự kiểm tra mỗi 45 giây. Cần ngay thì bấm nút ⟳ trên thanh trên cùng.":"The app checks automatically every 45 seconds. If you need it now, click the ⟲ button on the top bar.","App — thêm nhanh khi tạo task":"App — quick add when creating a task","Ba biểu đồ cạnh nhau: doanh số theo tháng, cơ cấu nhóm sản phẩm, ai trong địa bàn này mua. Nút":"Three charts side by side: sales by month, product group mix, who in this area buys. Button","Ba mục Đơn hàng, Thuyết trình và ADP đều đổ số vào KPI. Nhập chậm một mục là cả bảng KPI lệch.":"The three items Sales order, Presentation and ADP all feed into the KPI. Entering one late throws off the whole KPI table.","Biểu đồ theo tháng":"Monthly chart","Buổi":"Session","Buổi chưa có ảnh vẫn có slide, ô ảnh để trống kèm hướng dẫn chèn ảnh.":"Sessions without photos still get a slide, with the photo box left blank along with instructions for inserting a photo.","Buổi có ảnh hiện trường":"Session with on-site photos","Buổi thuyết trình":"Presentation session","Buổi đi địa bàn":"Field visit session","Buổi đã Completed":"Completed sessions","Buổi đưa vào file":"Sessions included in the file","BÁO CÁO ĐI ĐỊA BÀN":"FIELD VISIT REPORT","Báo cáo":"Report","Báo cáo công tác":"Business trip report","Báo cáo tháng":"Monthly report","Báo cáo tuần":"Weekly report","Báo cáo tuần mặc định lấy tuần hiện tại, kế hoạch tuần sau tự lấy 7 ngày kế tiếp. Báo cáo tháng chọn kỳ ở dải tháng.":"Weekly report defaults to the current week, next week's plan automatically takes the next 7 days. Monthly report selects the period from the month range.","Báo cáo đi tới cả nhóm, CC quản lý. Nội dung email gồm ① Đi địa bàn tuần này ② Công việc khác tuần này ③ Kế hoạch tuần sau ④ Công việc khác tuần sau, kèm PDF khổ ngang.":"The report goes to the whole team, CC to the manager. Email content includes ① This week's field visits ② This week's other tasks ③ Next week's plan ④ Next week's other tasks, with a landscape PDF attached.","Báo cáo đi địa bàn":"Field visit report","Bạn biết tuần tới có đi địa bàn nhưng chưa chốt được đi đâu, hoặc chưa đủ thông tin để lên kế hoạch cụ thể. Thay vì bỏ trống kế hoạch tuần, hãy tạo một dòng":"You know you'll have a field visit next week but haven't decided where, or don't have enough information for a specific plan yet. Instead of leaving the weekly plan blank, create a row","Bạn chưa thêm kế hoạch đi địa bàn cho tuần mới":"You haven't added a field visit plan for the new week","Bạn là ai?":"Who are you?","Bạn đang xem với quyền sales — chỉ thấy CBC do":"You are viewing with sales permissions — only seeing CBC created by","Bản xem trước — đúng nội dung email sẽ gửi":"Preview — exact content of the email to be sent","Bảng tin hoạt động":"Activity feed","Bảng xem trước liệt kê toàn bộ việc tuần này và kế hoạch tuần sau: địa bàn, ngày, tiến độ, kết quả.":"The preview table lists all of this week's tasks and next week's plan: area, date, progress, result.","Bấm":"Click","Bấm khi vừa có người sửa Google Sheet mà app chưa hiện. Bình thường app tự kiểm tra mỗi 45 giây.":"Click when someone has just edited the Google Sheet but the app hasn't shown it yet. Normally the app checks automatically every 45 seconds.","Bấm nút bên dưới để mở camera":"Click the button below to open the camera","Bấm nút dưới để mở dòng đã có ra sửa, hoặc đổi sang tuần khác.":"Click the button below to open an existing row for editing, or switch to another week.","Bấm vào một dòng để xem: Thông tin, Dòng thời gian, Người liên hệ, Đơn hàng, ADP, Ảnh hiện trường.":"Click a row to view: Information, Timeline, Contact person, Sales order, ADP, On-site photos.","Bấm vào thẻ task để mở, sửa tại chỗ rồi lưu. Việc đã Completed vẫn sửa được cho tới khi gửi báo cáo tuần.":"Click a task card to open, edit in place, then save. Completed tasks can still be edited until the weekly report is sent.","Bấm vào tên đầu việc để mở hộp chỉnh sửa, có nút 🎤 đọc chính tả và 🔗 chèn link tài liệu.":"Click the task name to open the edit box, with a 🎤 dictation button and a 🔗 button to insert a document link.","Bấm vào ảnh để mở cỡ lớn, có link mở bản gốc trên Drive để tải về phục vụ tracking hoặc báo cáo lên tập đoàn.":"Click a photo to open it full size, with a link to open the original on Drive to download for tracking or reporting to headquarters.","Bấm để mở hồ sơ 360°":"Click to open the 360° profile","Bấm để xem danh sách · gõ để lọc":"Click to view the list · type to filter","Bấm “Mở Report Hub để kiểm tra”: hiện ra một trang đầy chữ JSON là Web App vẫn chạy tốt —":"Click “Open Report Hub to check”: if a page full of JSON text appears, the Web App is still running fine —","Bấm “Thử lại” sau khoảng một phút — dữ liệu cũ vẫn dùng được trong lúc chờ.":"Click “Retry” after about a minute — the old data is still usable while you wait.","Bấm ✎ để ghi.":"Click ✎ to record.","Bấm ＋ rồi chọn":"Click ＋ then select","Bấm ＋ ▸ Đi địa bàn, ở ô Địa bàn gõ":"Click ＋ ▸ Field visit, in the Area field type","Bắt buộc":"Required","Bắt buộc với Visiting · 1 ảnh · kèm GPS":"Required for Visiting · 1 photo · with GPS","Bắt đầu":"Start","Bắt đầu & thanh điều hướng":"Start & navigation bar","Bắt đầu:":"Start:","Bệnh viện":"Hospital","Bỏ hết":"Clear all","Bốn lựa chọn: Tiếp tục chăm - Tăng tốc · Tiếp tục chăm - Duy trì · Chờ - Thử lại sau 30 ngày · Dừng lại. Chọn":"Four options: Keep nurturing - Accelerate · Keep nurturing - Maintain · Wait - Retry after 30 days · Stop. Select","Bộ đặt đam":"Rubber dam placement kit","Bức tranh tổng thể doanh số, hoạt động và độ phủ địa bàn":"Overall picture of sales, activity and field coverage","CBC (dòng “Người gặp:” trong Task Result)":"CBC (the “Person met:” line in Task Result)","CBC mới":"New CBC","CBC mới theo tháng":"New CBC by month","CBC theo khu vực":"CBC by region","CBC — dòng “Người gặp:” trong Task Result":"CBC — the “Person met:” line in Task Result","CBC — người gặp tại địa bàn":"CBC — person met in the field","CV tháng":"Monthly tasks","Case info — thông tin cơ bản":"Case info — basic information","Chi phí":"Cost","Chi phí dự trù":"Estimated cost","Chi phí khác":"Other costs","Chia 3 nhóm:":"Split into 3 groups:","Chip Chưa chăm sóc":"“Not followed up” chip","Chip lọc theo PIC":"Filter chip by PIC","Cho biết bạn đang tăng hay giảm so với cùng chỉ tiêu năm ngoái.":"Shows whether you are up or down compared to the same target last year.","Cho biết sẽ gửi kèm bao nhiêu Key task và đầu việc con. Số 0 nghĩa là bạn chưa cập nhật tab Công việc khác.":"Shows how many Key tasks and subtasks will be included. 0 means you haven't updated the Other tasks tab.","Chrome chọn đúng một tài khoản rồi tải lại trang.":"Chrome, select the correct account then reload the page.","Chuyên khoa":"Specialty","Chuyển nhóm Dental / Surgical / Eyeless":"Switch group Dental / Surgical / Eyeless","Chuyển nhóm kinh doanh":"Switch business group","Chèn":"Insert","Chèn ảnh: Insert ▸ Pictures, kéo vào khung này":"Insert photo: Insert ▸ Pictures, drag into this frame","Chênh lệch":"Difference","Chúng nằm ở tab bên cạnh. Muốn xem chung thì bật chip":"They are in the tab next to it. To view them together, turn on the chip","Chăm sóc khách hàng từ Event":"Follow up with customers from Event","Chưa chăm sóc":"Not followed up","Chưa chọn mã sản phẩm":"No product code selected","Chưa chọn tỉnh/thành nào":"No province/city selected","Chưa có ADP nào trong":"No ADP yet in","Chưa có CBC":"No CBC yet","Chưa có Key Task nào đang mở — tạo Key Task mới.":"No Key Task is open yet — create a new Key Task.","Chưa có Other task nào lên kế hoạch cho tuần sau":"No Other task planned for next week yet","Chưa có account nào ở nhóm này":"No accounts in this group yet","Chưa có budget":"No budget yet","Chưa có buổi thuyết trình nào trong FY":"No presentation sessions in this FY yet","Chưa có báo cáo":"No report yet","Chưa có chỉ tiêu cho":"No target yet for","Chưa có công việc khác nào trong kỳ này":"No other tasks in this period yet","Chưa có doanh số trong":"No sales yet in","Chưa có dữ liệu":"No data yet","Chưa có hoạt động nào":"No activity yet","Chưa có hoạt động trong kỳ":"No activity in this period","Chưa có hoạt động trong kỳ này":"No activity in this period yet","Chưa có hoạt động trong tuần này":"No activity this week yet","Chưa có hạng mục nào cho kỳ":"No items yet for the period","Chưa có hạng mục nào cho kỳ này":"No items yet for this period","Chưa có khách hàng nào từ event trong danh bạ CBC":"No customers from events in the CBC contact list yet","Chưa có kế hoạch cho tuần sau":"No plan for next week yet","Chưa có kế hoạch tháng sau":"No plan for next month yet","Chưa có kết quả.":"No result yet.","Chưa có nội dung tháng này":"No content for this month yet","Chưa có số theo tháng":"No monthly figures yet","Chưa có tab 12. PRODUCT CODE":"No \"12. PRODUCT CODE\" tab yet","Chưa có task nào trong kỳ này":"No tasks in this period yet","Chưa có thay đổi nào":"No changes yet","Chưa có tương tác nào được ghi nhận":"No interactions recorded yet","Chưa có việc nào trong ngày này.":"No tasks on this day yet.","Chưa có đơn hàng":"No sales order yet","Chưa có đơn hàng khớp bộ lọc":"No sales orders match the filter","Chưa có đơn hàng trong kỳ này":"No sales orders in this period yet","Chưa có ảnh":"No photos yet","Chưa có ảnh hiện trường":"No on-site photos yet","Chưa có ảnh nào":"No photos yet","Chưa có ảnh nào trong kỳ này":"No photos in this period yet","Chưa cập nhật":"Not updated yet","Chưa ghi kết quả":"Result not recorded yet","Chưa ghi kết quả — bấm để cập nhật":"Result not recorded yet — click to update","Chưa ghi nhận buổi làm việc nào":"No work sessions recorded yet","Chưa ghi nhận hoạt động đi địa bàn nào hoàn thành trong tuần":"No completed field visit activity recorded this week","Chưa gán account":"No account assigned yet","Chưa gán nhóm ABCD":"No ABCD group assigned yet","Chưa gặp trong":"Not met in","Chưa gửi được đề xuất.":"Could not send the proposal.","Chưa lên kế hoạch nào cho tuần sau":"No plan made yet for next week","Chưa lưu được báo cáo.":"Could not save the report.","Chưa lưu được.":"Could not save.","Chưa mở được form đề xuất.":"Could not open the proposal form.","Chưa nạp xong dữ liệu Report Hub. Bấm gửi thì app sẽ tự nạp trước khi gửi.":"Report Hub data hasn't finished loading. Clicking send will make the app load it first before sending.","Chưa tải được thông tin chuyến đi.":"Could not load trip information.","Chưa từng đi địa bàn":"Never visited the field","Chưa xác định account":"Account not identified yet","Chưa xác định — chọn TBD":"Not determined — select TBD","Chưa đi buổi nào →":"No sessions visited yet →","Chưa đạt":"Not achieved","Chưa đặt FY target":"FY target not set","Chưa đặt mục tiêu FY":"FY target not set","Chưa đọc được bản mới từ Report Hub — bấm":"Could not read the new version from Report Hub — click","Chưa đọc được danh mục. Hãy tạo tab \"12. PRODUCT CODE\" trong file":"Could not read the catalog. Please create the tab \"12. PRODUCT CODE\" in the file","Chỉ Management thấy. Bấm tên một PIC để xem toàn bộ dashboard của riêng người đó; bấm lại để bỏ lọc.":"Only Management can see this. Click a PIC's name to view that person's entire dashboard; click again to clear the filter.","Chỉ buổi có ảnh":"Sessions with photos only","Chỉ cần nhập một lần — lần sau mở app sẽ tự nhớ trên thiết bị này.":"You only need to enter it once — next time you open the app it will remember automatically on this device.","Chỉ hai thứ:":"Just two things:","Chỉ hiện các địa bàn bạn đang phụ trách. Chưa có thì bấm":"Only shows the areas you are in charge of. If none yet, click","Chỉ hiện nhóm liên quan":"Show only related group","Chỉ nhận ảnh vừa chụp bằng camera — không chọn ảnh có sẵn, không up sau, không dùng lại ảnh cũ.":"Only accepts photos just taken with the camera — no choosing existing photos, no uploading later, no reusing old photos.","Chỉ nhận ảnh vừa chụp bằng camera, không chọn ảnh có sẵn trong máy.":"Only accepts photos just taken with the camera, not photos already on the device.","Chỉ nhập một lần trên thiết bị này.":"Only enter it once on this device.","Chỉ số":"Metric","Chỉ từ event":"From events only","Chỉ từ event FY68":"From FY68 events only","Chọn":"Select","Chọn Account trước khi thêm người liên lạc":"Select an Account before adding a contact person","Chọn Account trước đã":"Select an Account first","Chọn Account để tính":"Select an Account to calculate","Chọn Key Task để thêm đầu việc ngày":"Select a Key Task to add a daily subtask","Chọn PIC":"Select PIC","Chọn PIC trước khi tạo khung":"Select a PIC before creating the frame","Chọn loại và kỳ":"Select type and period","Chọn mã sản phẩm (Detail)":"Select product code (Detail)","Chọn một sales để xem riêng chỉ tiêu của người đó":"Select a sales rep to view their target alone","Chọn người gặp tại":"Select the person met at","Chọn nhóm kinh doanh":"Select business group","Chọn năm tài chính":"Select fiscal year","Chọn tháng…":"Select month…","Chọn tài khoản của bạn":"Select your account","Chọn tỉnh/thành dự kiến — nội dung Plan sẽ hiện ở đây.":"Select the expected province/city — the Plan content will appear here.","Chọn tối đa":"Select up to","Chọn từ danh mục để tự điền Type / Province / Area · chưa có trong danh sách thì bấm":"Select from the catalog to auto-fill Type / Province / Area · if not in the list yet, click","Chọn ít nhất một PIC":"Select at least one PIC","Chọn Địa bàn":"Select Area","Chọn đúng tên mình ở màn hình mở app. Máy sẽ nhớ lựa chọn cho lần sau. Tài khoản Management phải nhập thêm mã.":"Select your own name on the app's opening screen. The device will remember the choice for next time. Management accounts must also enter a code.","Chọn địa bàn trước — hoặc bấm ＋ Địa bàn mới":"Select an area first — or click ＋ New area","Chờ - Thử lại sau 30 ngày":"Wait - Retry after 30 days","Chờ kết quả":"Awaiting result","Chụp ngay tại địa bàn.":"Take the photo right at the site.","Chủ nhật":"Sunday","Chức danh":"Title","Chức danh & SĐT lấy từ hồ sơ CBC, sửa ở tab Key stakeholder":"Title & phone number are taken from the CBC profile, edit them in the Key stakeholder tab","Chức năng khác":"Other functions","Chức vụ / Chuyên khoa":"Position / Specialty","Cuối tuần ô kết quả tự đếm các account bạn thực sự đi trong":"At the end of the week, the result cell automatically counts the accounts you actually visited in","CÁC BƯỚC LÀM":"STEPS TO FOLLOW","Các chỉ tiêu lớn của cả nhóm: doanh số, số đơn, lượt viếng thăm, buổi thuyết trình, người tham dự, địa bàn mới.":"Key metrics for the whole team: sales, number of orders, visits, presentations, attendees, new areas.","Các mục hay dùng nằm ở thanh dưới màn hình. Mục còn lại bấm nút":"Frequently used items are on the bar at the bottom of the screen. For the rest, click the button","Các thông tin khác":"Other information","Cách tạo — chủ động":"How to create — proactively","Cách tạo — khi gửi báo cáo":"How to create — when sending a report","Cách xử lý: mở app bằng cửa sổ ẩn danh, hoặc trong":"How to fix: open the app in an incognito window, or in","Cây trám Composite (bạc)":"Composite filling instrument (silver)","Cây trám Composite (vàng)":"Composite filling instrument (gold)","Cây đo túi lợi":"Periodontal probe","Cây đưa MTA":"MTA carrier","Có ADP · chưa đặt target · chưa có doanh số":"Has ADP · target not set · no sales yet","Có GPS":"Has GPS","Có buổi làm việc ghi nhận trong":"Has a work session recorded in","Có thể để trống nếu mới lên kế hoạch — ghi kết quả sau khi đi":"Can be left blank if just planning — record the result after the visit","Có toạ độ GPS":"Has GPS coordinates","Có ít nhất 1 lần làm việc trong":"Has at least 1 work session in","Có ảnh":"Has photos","Công cụ":"Tools","Công tác phí":"Travel expenses","Công việc khác":"Other tasks","Công việc khác đi kèm email báo cáo tuần ở mục ② và ④. Không cập nhật thì email thiếu phần này.":"Other tasks are included in the weekly report email at items ② and ④. If not updated, the email will be missing this part.","Công việc khác đính kèm email":"Other tasks attached to email","Công việc trong tháng":"Monthly tasks","Cơ cấu nhóm sản phẩm":"Product group mix","Cả":"All","Cả FY":"Whole FY","Cả năm tài chính":"Whole fiscal year","Cả tuần ·":"Whole week ·","Cảm nhận sau tiếp xúc":"Impression after contact","Cần chọn Account":"Account must be selected","Cần chọn Account type":"Account type must be selected","Cần chọn Province":"Province must be selected","Cần chọn Type task và kỳ báo cáo":"Type task and report period must be selected","Cần chọn ngày đặt":"A set date must be selected","Cần có Customer code, Account name và Account type":"Customer code, Account name and Account type are required","Cần cập nhật kết quả":"Result needs to be updated","Cần gán để theo dõi được":"Must be assigned to be tracked","Cần nhập Account name và Account type":"Account name and Account type must be entered","Cần nhập tên người liên hệ":"Contact person's name must be entered","Cần nhập tên địa bàn":"Area name must be entered","Cần nhập ít nhất một sản phẩm":"At least one product must be entered","Cập nhật":"Update","Cập nhật thông tin địa bàn":"Update area information","Cập nhật vào Sheet":"Update to Sheet","Cập nhật ▸ Công việc khác":"Updates ▸ Other tasks","Cập nhật ▸ Đi địa bàn":"Updates ▸ Field visit","Cộng theo account của các CBC này":"Summed by account of these CBCs","Cộng từ đơn hàng":"Summed from sales orders","Cộng đơn hàng của các account này":"Sum of sales orders for these accounts","Cột 12 tháng":"12-month column","Cột Activities":"Activities column","Cột Target → Achieve":"Target → Achieve column","Cột Tiến độ":"Progress column","Cột doanh số và đường hoạt động đi cùng nhau, nhìn ra tháng nào bán tốt mà ít đi, hoặc ngược lại.":"The sales column and activity line move together, so you can spot months with good sales but few visits, or vice versa.","Cột so với FY trước":"Column vs previous FY","Cột Đã làm việc":"Worked column","Danh bạ CBC app đang giữ:":"CBC contacts the app currently holds:","Danh bạ người liên hệ và khách thu được từ hội thảo":"Contact list of people and customers collected from seminars","Danh mục":"Catalog","Danh sách":"List","Danh sách CBC":"CBC list","Dashboard — đọc số liệu":"Dashboard — read the figures","Dashboard, KPI, Cập nhật, Khách hàng, Đơn hàng đều có chip chọn PIC. Bấm tên một người để xem đúng phần việc của người đó; bấm lại để về toàn nhóm.":"Dashboard, KPI, Updates, Customer, Sales order all have a PIC selection chip. Click a person's name to see exactly their part of the work; click again to return to the whole team.","Doanh số":"Sales","Doanh số Jizai":"Jizai sales","Doanh số account liên quan":"Sales of related accounts","Doanh số cao nhất":"Highest sales","Doanh số hàng MMG":"MMG sales","Doanh số key account từng tháng trong":"Key account sales by month in","Doanh số luỹ kế, số đơn hàng, số lượt đi địa bàn, số buổi thuyết trình, địa bàn mở mới — tất cả trong FY đang chọn.":"Cumulative sales, number of orders, number of field visits, number of presentations, newly opened areas — all within the selected FY.","Doanh số nhà phân phối":"Distributor sales","Doanh số theo PIC":"Sales by PIC","Doanh số theo người liên lạc trên đơn":"Sales by contact person on the order","Doanh số theo tháng":"Sales by month","Dành cho địa bàn trọng điểm: phân loại ABCD, phân tích tình hình, mục tiêu, chiến thuật, hành động chính, mục tiêu cả năm và chỉ tiêu từng tháng.":"For key accounts: ABCD classification, situation analysis, objectives, tactics, key actions, annual goal and monthly targets.","Dành riêng cho Management":"For Management only","Dán link tham chiếu (Drive, Sheet, báo giá, hồ sơ thầu…):":"Paste a reference link (Drive, Sheet, quotation, tender file…):","Dòng chữ":"Text line","Dòng này trên file":"This row on the file","Dòng nền đỏ là quá hạn":"Red background row means overdue","Dòng sản phẩm":"Product line","Dòng thời gian":"Timeline","Dưới 25% đỏ · 25–50% cam · 50–70% vàng · 70–90% xanh nhạt · 90–100% xanh đậm · trên 100% có huy hiệu ⭐ EXCELLENT.":"Under 25% red · 25–50% orange · 50–70% yellow · 70–90% light green · 90–100% dark green · over 100% gets an ⭐ EXCELLENT badge.","Dải thẻ số trên cùng":"Top row of number cards","Dụng cụ trám vàng":"Gold filling instrument","Dụng cụ trám xanh dương":"Blue filling instrument","Dừng lại":"Stop","Dừng ở \"":"Stopped at \"","Dữ liệu":"Data","Dữ liệu bạn nhập vẫn còn nguyên — sửa xong bấm":"The data you entered is still there — after fixing it, tap","Dự định trước khi đi. Để trống cũng lưu được nếu bạn ghi luôn kết quả.":"Plan before you go. You can also leave it blank if you record the result right away.","Email + PDF đính kèm theo đúng template MMH Report Hub":"Email + PDF attachment following the MMH Report Hub template","Email chỉ vào hộp thư của bạn để kiểm tra bố cục. Không ai khác nhận được.":"The email only goes to your own inbox to check the layout. No one else receives it.","Email và file PDF y hệt bản chính thức nhưng chỉ vào hộp thư của bạn.":"The email and PDF are identical to the official version but only go to your inbox.","Estimated costs (ít nhất 1 khoản có số tiền)":"Estimated costs (at least 1 item with an amount)","Expected result (Kết quả mong đợi)":"Expected result","FY (tự theo kỳ)":"FY (auto by period)","FY mở account":"FY account opened","File Google Sheet và dữ liệu riêng của nhóm":"Google Sheet file and data specific to the team","File Turnover chưa gửi cột":"Turnover file has not sent the column","File Turnover trả về dữ liệu không hợp lệ":"Turnover file returned invalid data","File Turnover đang chứa dữ liệu các tháng":"Turnover file contains data for the months","File dữ liệu Dental · chỉ xem việc của mình":"Dental data file · only your own tasks","File dữ liệu Eyeless · chỉ xem việc của mình":"Eyeless data file · only your own tasks","File dữ liệu Surgical · chỉ xem việc của mình":"Surgical data file · only your own tasks","Form đầy đủ":"Full form","Ghi chú":"Note","Ghi chú thêm":"Additional note","Ghi cả":"Record both","Ghi ngay trong ngày. Để dồn cuối tuần thì quên chi tiết, và thẻ sẽ hiện cảnh báo ⚠️ thiếu ảnh · thiếu CBC.":"Log it the same day. Leaving it to the end of the week means forgetting details, and the card will show a ⚠️ warning for missing photo · missing CBC.","Ghi nhanh hoạt động":"Quick activity log","Ghi nhớ":"Remember","Ghi thẳng vào tab \"1. CUSTOMER CODE\"":"Write directly into the \"1. CUSTOMER CODE\" tab","Ghi vào":"Recorded in","Ghi vào file Business Trip và gửi email xin duyệt ngay":"Log it into the Business Trip file and send an approval request email right away","Giai đoạn bán hàng":"Sales stage","Giai đoạn đang ở với khách: TÌM HIỂU → CHUYỂN ĐỔI → DUY TRÌ… Chọn đúng để Dashboard phản ánh được phễu bán hàng.":"Current stage with the customer: IDENTIFY → ENGAGE → CONVERT → MAINTAIN. Choose the right one so the Dashboard reflects the sales funnel.","Giá cắm mũi khoan":"Bur stand","Giá cắm trâm Mani Bur Guard":"Mani Bur Guard file stand","Giá cắm trâm Mani Endo Guard":"Mani Endo Guard file stand","Giá cắm trâm Trung Quốc":"China file stand","Giảm nguồn lực đầu tư":"Reduce investment resources","Giữ khách hiện hữu":"Retain existing customers","Gom toàn bộ người liên hệ kèm điện thoại, chức vụ, chuyên khoa, Influence, Trust, ngày thêm. Bấm số điện thoại để gọi luôn.":"Collects all contacts with phone number, position, specialty, Influence, Trust, date added. Tap the phone number to call directly.","Google Doc báo cáo":"Report Google Doc","Google Sheet vừa thay đổi — đang cập nhật":"Google Sheet just changed — updating","Google Sheet vừa thay đổi — đang cập nhật dữ liệu mới…":"Google Sheet just changed — updating new data…","Gõ không dấu vẫn ra: “xanh pon” tìm được “Bệnh Viện Đa Khoa Xanh Pôn”. Gõ nhiều từ rời cũng được.":"Typing without accents still works: \"xanh pon\" finds \"Bệnh Viện Đa Khoa Xanh Pôn\". Typing several separate words also works.","Gõ tên người đi cùng…":"Type the name of the person accompanying you…","Gõ tên tỉnh / thành để tìm…":"Type a province / city name to search…","Gõ vài chữ rồi chọn từ gợi ý — gõ không dấu vẫn ra.":"Type a few letters then pick from the suggestions — works without accents too.","Gõ để tìm thiết bị…":"Type to search for a device…","Gương":"Mirror","Gần như luôn do máy đang đăng nhập nhiều tài khoản Google cùng lúc. Mở app bằng cửa sổ ẩn danh, hoặc đăng xuất bớt chỉ để lại một tài khoản.":"Almost always because the device is signed into multiple Google accounts at once. Open the app in an incognito window, or sign out and keep only one account.","Gần đạt":"Close to target","Gặp gần nhất":"Last met","Gồm cả hoạt động đi địa bàn và Other task của tuần này & kế hoạch tuần sau — giống hệt bản email.":"Includes both field visit activities and Other tasks for this week & next week's plan — identical to the email version.","Gửi báo cáo":"Send report","Gửi báo cáo của một PIC khác dưới danh nghĩa của họ.":"Send another PIC's report on their behalf.","Gửi báo cáo thay":"Send report on behalf","Gửi báo cáo tháng":"Send monthly report","Gửi báo cáo tuần":"Send weekly report","Gửi báo cáo tuần & tháng":"Send weekly & monthly report","Gửi báo cáo tuần sẽ chốt dòng TBD của tuần đó sang Completed. Gửi xong thì số liệu tuần coi như khoá sổ.":"Sending the weekly report will move that week's TBD row to Completed. Once sent, the week's figures are considered closed.","Gửi cho toàn bộ":"Send to all","Gửi chính thức":"Send officially","Gửi chính thức tới team":"Send officially to the team","Gửi email báo cáo cho Director (CC HOD)":"Send report email to Director (CC HOD)","Gửi email báo huỷ cho người duyệt":"Send cancellation email to the approver","Gửi email báo người duyệt":"Send notification email to the approver","Gửi lần lượt báo cáo của tất cả PIC trong nhóm.":"Send reports for all PICs in the team one by one.","Gửi thay cho":"Send on behalf of","Gửi thay cho PIC":"Send on behalf of PIC","Gửi theo đúng danh sách người nhận của nhóm bên dưới.":"Send using the team's recipient list below exactly.","Gửi thử cho chính bạn":"Send a test to yourself","Gửi thử cho tôi":"Send a test to me","Gửi toàn bộ team":"Send to the whole team","Gửi tới (To)":"Send to (To)","Hai nguyên nhân thường gặp:":"Two common causes:","Hiện cả việc đi địa bàn":"Also show field visit tasks","Hiện tất cả":"Show all","Hiện tổng số người đã chăm sóc lại, tách rõ Visit · Telephone · Message · Khác.":"Shows the total number of people followed up with, broken down by Visit · Telephone · Message · Other.","Hoạt động có ảnh":"Activities with photos","Hoạt động gần đây":"Recent activity","Hoặc nhập nhanh tên người gặp (không lưu vào CBC)":"Or quickly enter the name of the person met (not saved to CBC)","Huỷ":"Cancel","Huỷ thay đổi":"Cancel changes","Hình thức tiếp xúc":"Contact method","Hôm nay":"Today","Hùng Vĩ":"Hùng Vĩ","Hướng dẫn sử dụng":"User guide","Hạn":"Deadline","Hạn hoàn thành":"Due date","Hạn mới phải sau hôm nay":"New deadline must be after today","Hạn:":"Deadline:","Hạng mục tháng":"Monthly category","Hạng mục trong kỳ":"Category in period","Hệ thống tạo một dòng Account":"The system creates an Account row","Họp, hỗ trợ NPP, hồ sơ thầu, sự kiện — việc không phải đi gặp khách":"Meetings, distributor support, tender documents, events — tasks that aren't customer visits","Họp, hỗ trợ NPP, hồ sơ thầu, sự kiện, việc nội bộ — không phải đi gặp khách":"Meetings, distributor support, tender documents, events, internal tasks — not customer visits","Họp, hỗ trợ NPP, hồ sơ thầu, sự kiện… — ghi vào Report Hub":"Meetings, distributor support, tender documents, events… — logged into Report Hub","Hồ sơ chưa tải xong — thử lại sau giây lát":"Record hasn't finished loading — try again in a moment","Hộp kiểm Công việc khác":"Other tasks checkbox","KPI & Mục tiêu":"KPI & Target","Key Task và đầu việc con":"Key task and sub tasks","Key account chưa gặp":"Key account not yet met","Key account — tiến độ ADP":"Key account — ADP progress","Key stakeholder & Khách hàng Event":"Key stakeholder & Event customers","Key task / đầu việc con của tuần này và":"Key task / sub task for this week and","Khay Inox - Hình chữ nhật":"Stainless steel tray - Rectangular","Khay Inox - Hạt đậu":"Stainless steel tray - Kidney","Khi lưu: tạo file":"On save: creates file","Khi nào dùng":"When to use","Khoảng ngày":"Date range","Khu vực":"Area","Khác":"Other","Khách event chưa gán địa bàn vẫn thêm được, nhưng phải gán địa bàn thì mới theo dõi được doanh số.":"Event customers not yet assigned to a territory can still be added, but a territory must be assigned to track sales.","Khách gặp nhiều nhất":"Most visited customers","Khách hàng":"Customer","Khách hàng đã gặp":"Customers met","Khách sạn":"Hotel","Khách thu được tại sự kiện · đã tiếp xúc lại trong":"Customers collected at the event · re-contacted within","Khách từ Event":"Customers from Event","Không bắt buộc với hình thức này":"Not required for this method","Không có ADP":"No ADP","Không có ADP nào được tạo trong":"No ADP created in","Không có Other task nào trong tuần":"No Other tasks this week","Không có account nào khớp":"No matching accounts","Không có buổi nào trong phạm vi đã chọn":"No sessions in the selected range","Không có công việc nào trong tuần này":"No tasks this week","Không có công việc trong tháng này.":"No tasks this month.","Không có dòng nào thuộc Products":"No rows belong to Products","Không có dữ liệu":"No data","Không có gợi ý":"No suggestions","Không có hoạt động nào trong kỳ":"No activity in this period","Không có mã nào khớp":"No matching code","Không có người liên hệ nào khớp bộ lọc":"No contacts match the filter","Không có tháng trước trong FY này":"No previous month in this FY","Không có tỉnh/thành nào khớp":"No matching province/city","Không có việc quá hạn":"No overdue tasks","Không cần Task Result, không cần ảnh, không cần CBC. Sales Process và Type action bị khoá sẵn ở TÌM HIỂU / Visiting.":"No Task Result, photo or CBC needed. Sales Process and Type action are preset to IDENTIFY / Visiting.","Không cần chọn Type task, không cần ghi kết quả, cũng không cần chụp ảnh cho dòng này.":"No need to choose Type task, record a result, or take a photo for this row.","Không gõ tay tự do":"Free typing not allowed","Không gọi được file Event":"Couldn't load the Event file","Không gọi được file Event — kiểm tra Web App đã Deploy quyền “Anyone”.":"Couldn't load the Event file — check that the Web App has been deployed with \"Anyone\" access.","Không gửi email, chỉ tải file PDF về máy.":"Doesn't send an email, only downloads the PDF file to your device.","Không khớp mục nào":"No matching item","Không kiểm tra được kết quả.":"Couldn't verify the result.","Không lưu được task":"Couldn't save the task","Không nạp được Other task:":"Couldn't load Other tasks:","Không nạp được danh bạ:":"Couldn't load the contact list:","Không phải điền gì":"Nothing to fill in","Không rõ thời gian":"Time unknown","Không sửa được dòng của người khác":"Can't edit another person's row","Không thấy dòng nào thuộc segment":"No rows found for this segment","Không thể hoàn tác.":"Can't be undone.","Không tìm thấy chuyến đi này trên file Business Trip.":"This trip wasn't found in the Business Trip file.","Không tìm thấy dòng":"Row not found","Không tìm thấy việc này — bấm ⟳ để đọc lại":"This task wasn't found — tap ⟳ to reload","Không tìm thấy ô Task Result để chèn":"Couldn't find the Task Result cell to insert into","Không tìm thấy — kiểm tra lại tên hoặc tạo account mới":"Not found — check the name again or create a new account","Không tạo được file:":"Couldn't create the file:","Không tải được dữ liệu":"Couldn't load data","Không tải được nhật ký":"Couldn't load the log","Không tải được thư viện Excel":"Couldn't load the Excel library","Không tải được thư viện PowerPoint — kiểm tra mạng rồi thử lại":"Couldn't load the PowerPoint library — check your connection and try again","Không tải được ảnh — bấm “Mở ảnh gốc” bên dưới.":"Couldn't load the photo — tap \"Open original photo\" below.","Không xoá":"Don't delete","Không đọc được Other task":"Couldn't read Other tasks","Không đọc được Other task từ Report Hub.":"Couldn't read Other tasks from Report Hub.","Không đọc được dữ liệu từ Google. Thường gặp khi điện thoại đang đăng nhập":"Couldn't read data from Google. This usually happens when the phone is signed into","Không đọc được file Turnover — kiểm tra Web App của file đó đã Deploy với quyền “Anyone” chưa.":"Couldn't read the Turnover file — check whether that file's Web App has been deployed with \"Anyone\" access.","Không đọc được tệp ảnh":"Couldn't read the image file","Không đọc được ảnh":"Couldn't read the photo","Kim liền chỉ (Eyeless needle)":"Eyeless needle","Kiểm tra ba ô bắt buộc: Task Result có dòng":"Check the three required fields: Task Result has a line","Kiểm tra kế hoạch tuần mới":"Check the new week's plan","Kiểm tra tính xác thực":"Check authenticity","Kiểm tra ô FY trên thanh trên cùng, và chip lọc PIC xem có đang lọc nhầm người không.":"Check the FY field on the top bar, and the PIC filter chip to see if it's filtering the wrong person.","Kéo để đặt % · 100% tự chuyển Completed, 0% về To Do":"Drag to set % · 100% auto-moves to Completed, 0% back to To Do","Kênh":"Channel","Kênh bán hàng":"Sales channel","Kẹp gắp":"Tweezers","KẾ HOẠCH":"PLAN","KẾT QUẢ":"RESULT","KẾT QUẢ / LINK":"RESULT / LINK","KẾT QUẢ TỰ TỔNG HỢP":"AUTO-SUMMARIZED RESULT","Kế hoạch (Plan)":"Plan","Kế hoạch / Kết quả":"Plan / Result","Kế hoạch tháng sau tự lấy từ kỳ":"Next month's plan is auto-taken from the period","Kế hoạch trong tháng…":"Plan for the month…","Kế hoạch tuần sau tự lấy từ":"Next week's plan is auto-taken from","Kế hoạch đi địa bàn — chưa xác định account":"Field visit plan — account not yet determined","Kết quả":"Result","Kết quả (Result)":"Result","Kết quả / Ghi chú":"Result / Note","Kết quả / ghi chú":"Result / note","Kết quả mong đợi":"Expected result","Kết quả thu được":"Result obtained","Kết quả thực tế đạt được trong tháng…":"Actual result achieved in the month…","Kết quả tìm kiếm ·":"Search results ·","Kết quả tự tổng hợp":"Auto-summarized result","Kết quả:":"Result:","Kỳ":"Period","Kỳ báo cáo":"Report period","Kỳ báo cáo tháng":"Monthly report period","Kỳ báo cáo tuần":"Weekly report period","Kỳ luôn là trọn tuần":"The period is always a full week","Kỳ này chưa có ảnh nào":"No photos yet this period","Kỳ này chưa có ảnh để xuất":"No photos to export this period","Kỳ này chưa tạo hạng mục":"No category created this period","Link folder tài liệu / ảnh sự kiện":"Link to document / event photo folder","Link phải bắt đầu bằng http:// hoặc https://":"Link must start with http:// or https://","Link url ảnh":"Photo URL link","Link ảnh Drive":"Drive photo link","Loại KH":"Customer type","Loại báo cáo":"Report type","Loại công việc":"Task type","Loại khách hàng viếng thăm":"Type of customer visited","Loại địa bàn":"Territory type","Luôn gửi thử trước.":"Always send a test first.","Làm mới":"Refresh","Lèn dọc EQ Condenser":"EQ Condenser vertical plugger","Lên kế hoạch trước thì để trống, đi xong mở lại task này để chụp bổ sung.":"If planning ahead, leave it blank — after the visit, reopen this task to add photos.","Lên kế hoạch tuần mới mà chưa chốt được đi đâu thì dùng cách này":"Use this when planning a new week but you haven't decided where to go yet","Lý do dừng":"Reason for stopping","Lý do dừng chăm sóc":"Reason for stopping follow-up","Lý do dừng:":"Reason for stopping:","Lý do huỷ (ghi vào email, không bắt buộc)":"Reason for cancellation (included in the email, optional)","Lưu":"Save","Lưu vào Google Sheet":"Save to Google Sheet","Lưu vào tab CBC":"Save to CBC tab","Lưu ý & xử lý sự cố":"Notes & troubleshooting","Lưu địa bàn":"Save territory","Lượt gặp":"Meetings","Lượt tiếp xúc":"Contacts","Lượt viếng thăm":"Visits","Lượt đi địa bàn theo PIC":"Field visits by PIC","Lịch công việc":"Work calendar","Lịch trình":"Schedule","Lọc nhanh những người chưa được liên hệ lần nào — đây là việc cần làm ngay sau mỗi hội thảo.":"Quickly filter people who have never been contacted — this is a must-do right after every seminar.","Lọc riêng người thu được tại hội thảo, có tag ghi rõ sự kiện nào.":"Filter separately for people collected at a seminar, tagged with which event.","Lọc theo FY của event":"Filter by the event's FY","Lọc theo PIC ở mọi mục":"Filter by PIC in every section","Lỗi":"Error","Lỗi khi ghi vào Report Hub":"Error writing to Report Hub","Lỗi khi xuất file:":"Error exporting file:","Lỗi không rõ":"Unknown error","Lỗi lạ chưa có trong danh sách này thì chụp màn hình kèm giờ xảy ra rồi gửi Product Team.":"For an unusual error not in this list, take a screenshot with the time it happened and send it to the Product Team.","Lỗi đồng bộ:":"Sync error:","Lỗi:":"Error:","MANI Medical Hanoi · Theo dõi khách hàng & KPI":"MANI Medical Hanoi · Customer & KPI tracking","MMH Event ▸ ② Đồng bộ ngay":"MMH Event ▸ ② Sync now","MMH Event ▸ ②b Điền bù Area / PIC":"MMH Event ▸ ②b Fill in missing Area / PIC","Management xoá được mọi dòng ở mọi tab. Sales chỉ xoá được task đi địa bàn do mình phụ trách.":"Management can delete any row in any tab. Sales can only delete field visit tasks they're responsible for.","Menu bên trái":"Left menu","Màu thanh tiến độ":"Progress bar color","Máy bơm gutta (lèn nhiệt)":"Gutta-percha injector (thermal)","Máy chiếu vật thể":"Document camera","Máy chủ chưa xác nhận — mở file Business Trip để kiểm tra cột Report.":"Server hasn't confirmed yet — open the Business Trip file to check the Report column.","Máy chủ phản hồi chậm. Thử lại sau.":"Server is responding slowly. Try again later.","Máy cắt cone":"Cone cutter","Máy nội nha":"Endo motor","Máy rung rửa siêu âm":"Ultrasonic cleaner","Máy tự cộng từ mục Đơn hàng, không gõ tay được. Thấy ADP đạt thấp thì kiểm tra đơn hàng trước khi kết luận.":"Automatically totaled from Sales orders — can't be typed manually. If ADP achievement looks low, check the sales orders before concluding anything.","Máy tự tính lại từ các tab dữ liệu, không ai gõ tay được: viếng thăm lấy từ Cập nhật, doanh số và đơn lấy từ Đơn hàng, thuyết trình lấy từ tab Thuyết trình, account mới lấy từ ngày mở địa bàn.":"Automatically recalculated from the data tabs — no one can type it manually: visits come from Updates, sales and orders come from Sales orders, presentations come from the Presentation tab, new accounts come from the territory opening date.","Mã":"Code","Mã chưa đúng.":"Code is incorrect.","Mã do công thức trong sheet quản lý, không sửa tại đây":"Code is managed by a formula in the sheet, don't edit it here","Mã kế tiếp tự đề xuất — sửa được nếu cần":"Next code is auto-suggested — editable if needed","Mã nội bộ cho nhóm Management":"Internal code for the Management group","Mã tự sinh theo Khu vực + Tỉnh + Loại KH, ví dụ":"Code auto-generated from Area + Province + Customer type, e.g.","Mã địa bàn":"Territory code","Mã địa bàn do hệ thống đề xuất theo số kế tiếp, vẫn sửa được nếu cần.":"Territory code is suggested by the system based on the next number, still editable if needed.","Mẫu hàm full":"Full jaw model","Mẫu hàm rời":"Single arch jaw model","Mật khẩu chưa đúng. Thử lại nhé.":"Incorrect password. Please try again.","Mật độ quan hệ theo địa bàn":"Relationship density by territory","Mặc định là hôm nay. Ghi bù cho hôm trước thì chỉnh lại đúng ngày thực tế đã đi, không để ngày hôm nay.":"Defaults to today. If logging for a previous day, change it to the actual visit date — don't leave it as today.","Mọi PIC":"All PICs","Mọi hành động":"All actions","Mọi hình thức":"All methods","Mọi khu vực":"All areas","Mọi loại KH":"All customer types","Mọi nhóm ADP":"All ADP groups","Mọi sự kiện":"All events","Mọi trạng thái":"All statuses","Mọi tỉnh thành":"All provinces/cities","Mỗi chỉ tiêu có bảng riêng, mỗi dòng là một PIC. Cột":"Each metric has its own table, each row is one PIC. Column","Mỗi dòng trong sheet là một sản phẩm — sửa đơn nhiều sản phẩm thì mở từng dòng.":"Each row in the sheet is one product — to edit an order with multiple products, open each row.","Mỗi hạng mục sẽ có sẵn khung nội dung để điền.":"Each category comes with a ready-made content frame to fill in.","Mỗi mặt hàng là một dòng riêng, nhưng cùng mang một":"Each item is its own row, but shares the same","Mỗi người chỉ sửa được việc của mình. Dòng của người khác hiện khoá 🔒.":"Each person can only edit their own tasks. Other people's rows show a 🔒 lock.","Mỗi nhóm dùng một file dữ liệu riêng: khách hàng, CBC, đơn hàng, ADP, báo cáo đều tách bạch.":"Each team uses its own data file: customers, CBC, sales orders, ADP, and reports are all kept separate.","Mỗi task chỉ 1 ảnh — đã lấy ảnh cuối":"Each task allows only 1 photo — the latest one was used","Mỗi tuần chỉ nên có một dòng TBD. Nhiều dòng cùng tuần sẽ ra cùng một câu kết quả.":"Each week should have only one TBD row. Multiple rows in the same week will produce the same result text.","Một phần dữ liệu chưa tải được — thử lại sau":"Some data failed to load — try again later","Mới lên kế hoạch — để To Do; điền đủ CBC · ảnh · next action sẽ tự chuyển Completed":"Just planned — leave as To Do; fill in CBC · photo · next action and it will auto-move to Completed","Mở":"Open","Mở Report Hub để kiểm tra":"Open Report Hub to check","Mở app bằng cửa sổ ẩn danh, hoặc chỉ để lại một tài khoản rồi tải lại trang.":"Open the app in an incognito window, or keep only one account and reload the page.","Mở bảng ADP":"Open ADP table","Mở danh sách":"Open list","Mở dòng đã có (dòng":"Open existing row (row","Mở file Business Trip ↗":"Open Business Trip file ↗","Mở file Event chạy":"Open the running Event file","Mở form":"Open form","Mở hồ sơ":"Open record","Mở khách mới / mở cửa mới":"Open new customer / new outlet","Mở task →":"Open task →","Mở trong Drive":"Open in Drive","Mở ảnh gốc ›":"Open original photo ›","Mở ảnh trên Google Drive":"Open photo on Google Drive","Mục":"Section","Mục Khách hàng — danh sách địa bàn và hồ sơ từng địa bàn":"Customers section — list of territories and each territory's profile","Mục này chỉ dành cho nhóm Management (Nguyen Ha · Tuyen · Hoa · Giang).":"This section is for the Management group only (Nguyen Ha · Tuyen · Hoa · Giang).","Mục này dành cho nhóm Management và Team Leader.":"This section is for Management and Team Leader.","Mục tiêu":"Target","Mục tiêu FY":"FY target","Mục tiêu MMH":"MMH target","Mục tiêu MMH (Budget Mani)":"MMH target (Budget Mani)","Mục tiêu chiến lược":"Strategic goal","Mục tiêu tháng / quý / năm và mức đạt thực tế":"Monthly / quarterly / yearly target and actual achievement","Mục đích":"Purpose","NPP Việt Nam":"Vietnam distributor","NPP đã khai + NPP khác":"Declared distributor + other distributors","Nam Dũng":"Nam Dũng","Next action (cột T)":"Next action (column T)","Next action — bắt buộc":"Next action — required","Nguồn":"Source","Nguồn Event":"Event source","Ngày":"Date","Ngày bắt đầu":"Start date","Ngày bắt đầu là thứ Hai, kết thúc là Chủ nhật, kể cả khi bạn tạo giữa tuần.":"The start date is Monday and the end date is Sunday, even if you create it mid-week.","Ngày kể từ lần gặp":"Days since last meeting","Ngày mở account":"Account opening date","Ngày thêm":"Date added","Ngày đặt":"Order date","Người báo cáo":"Reporter","Người dự":"Attendee","Người gặp:":"Person met:","Người gặp: BS. …":"Person met: Dr. …","Người khác":"Other person","Người liên hệ":"Contact","Người liên hệ (CBC)":"Contact (CBC)","Người liên lạc":"Contact person","Người liên lạc đầu tiên (CBC)":"First contact person (CBC)","Người mua":"Buyer","Người mua từ account này":"Buyer from this account","Người nhận không thấy chữ TBD. Dòng này hiện là":"Recipients won't see the word TBD. This line currently reads","Người đi cùng":"Person accompanying","Nhiều lần làm việc nhất":"Most interactions","Nhà phân phối":"Distributor","Nhãn khoa · Ngoại khoa":"Ophthalmology · Surgical","Nhóm":"Group","Nhóm Dental, Surgical và Eyeless dùng ba file Google Sheet tách biệt. Tài khoản của bạn tự vào đúng nhóm.":"The Dental, Surgical and Eyeless groups use three separate Google Sheet files. Your account is automatically placed in the right group.","Nhóm công việc":"Task group","Nhóm khác":"Other group","Nhóm khách hàng dự kiến tiếp cận":"Target customer group","Nhóm sản phẩm":"Product group","Nhóm sản phẩm trao đổi":"Product group discussed","Nhóm đang xem":"Current group","Nhập lại mật khẩu":"Re-enter password","Nhập mật khẩu để vào hệ thống":"Enter password to sign in","Nhập nội dung…":"Enter content…","Nhập tên Key Task":"Enter Key Task name","Nhập tên người gặp trước đã":"Enter the person met's name first","Nhập tên việc":"Enter task name","Nhập tên đầu việc":"Enter task item name","Những lỗi hay gặp và cách xử lý trong một phút":"Common errors and fixes in one minute","Nút tròn góc dưới bên phải — lối tắt thêm việc đi địa bàn hoặc công việc khác từ bất kỳ màn hình nào.":"Round button in the bottom-right corner — a shortcut to add a field visit or other task from any screen.","Nút ⟳ nạp lại":"⟳ Reload button","Nút ＋":"＋ button","Nút 🦷 / 👁 / 🪡 trên thanh trên cùng. Mỗi nhóm là một file Google Sheet riêng, đổi nhóm sẽ nạp lại toàn bộ dữ liệu.":"🦷 / 👁 / 🪡 button on the top bar. Each group is its own Google Sheet file; switching groups reloads all data.","Năm tài chính":"Fiscal year","Nằm ngay cạnh tên việc, dạng thanh kéo. Kéo hoặc bấm −/＋ là lưu ngay, không cần bấm nút nào khác.":"Located right next to the task name, as a slider. Drag it or tap −/＋ to save instantly — no other button needed.","Nếu":"If","Nếu chỉ cần file để nộp riêng, chọn":"If you only need a file to submit separately, choose","Nếu email nhận được vẫn thiếu mục này, file":"If the email you received is still missing this section, the file","Nếu email thiếu mục ③ Other tasks, cần cập nhật Code.gs (xem hướng dẫn trong trang Gửi báo cáo).":"If the email is missing section ③ Other tasks, Code.gs needs to be updated (see the instructions on the Send report page).","Nếu tuần sau chưa có dòng đi địa bàn nào, app sẽ hỏi trước khi cho gửi. Quay lại thêm kế hoạch, hoặc chọn TBD.":"If next week has no field visit line yet, the app will ask before letting you send. Go back to add a plan, or choose TBD.","Nếu tuần sau chưa có dòng đi địa bàn nào, lúc bấm gửi báo cáo tuần app sẽ hỏi. Chọn":"If next week has no field visit line yet, the app will ask when you tap send weekly report. Choose","Nội dung bạn nhập vẫn còn nguyên — bấm":"What you entered is still saved — tap","PDF báo cáo (A4)":"Report PDF (A4)","PHẦN A — Tổng mục tiêu MMH":"PART A — MMH overall target","PHẦN B — CHỈ TIÊU PHÂN BỔ THEO SALE":"PART B — TARGETS ALLOCATED BY SALES REP","PIC \\\\ Tháng":"PIC \\\\ Month","PIC khác":"Other PIC","PIC này":"This PIC","PIC phụ trách":"PIC in charge","PLAN — kế hoạch":"PLAN — plan","Phân bổ danh mục khách hàng":"Customer portfolio allocation","Phân loại":"Category","Phân nhóm ABCD":"ABCD grouping","Phí hội thảo":"Conference fee","Phòng khám":"Clinic","Phạm vi FY":"FY scope","Phải có dòng":"Must have a line","Phải điền gì":"What to fill in","Phản hồi khách hàng":"Customer feedback","Phản hồi khách hàng:":"Customer feedback:","Phần A — mục tiêu chung":"Part A — overall target","Phần B1–B6 — chia theo PIC":"Part B1–B6 — split by PIC","Phễu Sales Process":"Sales Process funnel","Plan chưa có dòng “Người gặp:”":"Plan has no “Person met:” line yet","Plan — dự định làm gì (không bắt buộc)":"Plan — what you intend to do (optional)","Product group đã trao đổi":"Product group discussed","Purpose (Mục đích)":"Purpose (Objective)","QUÁ HẠN":"OVERDUE","Quay lại thêm kế hoạch":"Go back to add a plan","Quá hạn":"Overdue","Quá thời gian chờ":"Timed out","Quá thời gian chờ khi đọc file Turnover":"Timed out while reading the Turnover file","Quá thời gian chờ — mở file Event rồi chạy menu MMH Event ▸ ② Đồng bộ ngay":"Timed out — open the Event file and run menu MMH Event ▸ ② Sync now","Quý":"Quarter","Quản lý":"Management","RESULT — kết quả (có thể để trống, cập nhật sau)":"RESULT — result (can be left blank, update later)","Report Hub (file Sales & Marketing) chưa có tính năng này (cần bản ReportHub_Trip_Mail v12.7 trở lên) — trong Apps Script của Report Hub cần có file ReportHub_Trip_Mail và Deploy ▸ Manage deployments ▸ Edit ▸ New version.":"Report Hub (Sales & Marketing file) doesn't have this feature yet (requires ReportHub_Trip_Mail v12.7 or later) — the Report Hub's Apps Script needs the ReportHub_Trip_Mail file, then Deploy ▸ Manage deployments ▸ Edit ▸ New version.","Report Hub không trả lời":"Report Hub is not responding","Report Hub phản hồi chậm — đề xuất có thể đã được gửi. Bấm ⟳ trên lịch sau 1 phút để kiểm tra trước khi gửi lại.":"Report Hub is responding slowly — the request may already have been sent. Tap ⟳ on the calendar after 1 minute to check before resending.","Report Hub phản hồi quá lâu (hơn":"Report Hub took too long to respond (more than","Report Hub trả về dữ liệu không hợp lệ":"Report Hub returned invalid data","Review theo quý":"Quarterly review","Sales có ảnh":"Sales reps with photos","Sales không sửa được ô mục tiêu — chỉ Management đặt. Thấy target sai thì báo lại, đừng sửa trên Google Sheet.":"Sales reps can't edit the target cell — only Management sets it. If a target looks wrong, report it, don't edit it in Google Sheet.","Schedule (Lịch trình)":"Schedule (Timeline)","So giữa các PIC":"Compare across PICs","So giữa các tháng":"Compare across months","So sánh công việc tháng":"Compare monthly tasks","Soát lại rồi gửi email kèm file PDF":"Review it, then send the email with the PDF attached","SĐT":"Phone number","Sản phẩm":"Product","Sản phẩm trong đơn":"Products in the order","Sắp theo doanh số":"Sorted by sales","Sẽ gửi kèm":"Will be sent with","Sẽ tạo":"Will create","SỐ BUỔI THEO PIC":"NUMBER OF SESSIONS BY PIC","Số ADP":"ADP count","Số CBC":"CBC count","Số account mới ghi nhận trong kỳ":"New accounts recorded in the period","Số buổi":"Number of sessions","Số buổi & người tham dự theo tháng":"Sessions & attendees by month","Số của đơn đang sửa":"Number of the order being edited","Số key account mỗi nhóm":"Key accounts per group","Số khách":"Number of customers","Số khách hàng":"Number of customers","Số khách khác nhau":"Number of distinct customers","Số liệu Actual từ đâu":"Where the Actual figures come from","Số liệu bằng 0 bất thường":"Abnormal zero figures","Số lượng nhân đơn giá ra thành tiền, không gõ tay. Nhập đơn thiếu thì cả KPI lẫn ADP đều trông như chưa đạt.":"Quantity multiplied by unit price gives the total amount — don't type it manually. If an order is entered incompletely, both KPI and ADP will look unmet.","Số lượt mỗi tháng":"Number of visits per month","Số lượt nhắc tới trong task":"Number of mentions in tasks","Số lượt theo Account type":"Number of visits by Account type","Số ngày":"Number of days","Số ngày có ảnh":"Days with photos","Số người liên hệ đang quản lý":"Number of contacts managed","Số task chưa Completed mà đã qua ngày kết thúc. Bấm vào để nhảy sang danh sách.":"Number of tasks not yet Completed but past their end date. Tap to jump to the list.","Số thứ tự kế tiếp của địa bàn":"Next sequence number for the location","Số trên Dashboard lấy từ dữ liệu bạn nhập ở mục Cập nhật và Đơn hàng. Nhập thiếu thì Dashboard sai.":"The numbers on the Dashboard come from the data you enter under Updates and Sales orders. If entries are missing, the Dashboard will be wrong.","Số đơn hàng":"Number of sales orders","Số đơn hàng theo tháng":"Sales orders by month","Số ảnh":"Number of photos","Số ảnh theo PIC × tháng":"Photos by PIC × month","Sửa":"Edit","Sửa ADP":"Edit ADP","Sửa CBC":"Edit CBC","Sửa Google Sheet mà app chưa thấy":"Edited Google Sheet but the app hasn't picked it up","Sửa account":"Edit account","Sửa buổi thuyết trình":"Edit presentation","Sửa chi tiết":"Edit details","Sửa hồ sơ account":"Edit account profile","Sửa lại sau khi lưu":"Edit again after saving","Sửa thông tin":"Edit information","Sửa trực tiếp dòng":"Edit the line directly","Sửa đơn hàng":"Edit sales order","Sự kiện":"Event","T09 → T08 năm sau":"Sep → Aug next year","TBD là kế hoạch tạm, không phải chỗ để trốn việc. Chốt được địa bàn nào thì tạo dòng đi địa bàn thật — dòng TBD sẽ tự đếm vào.":"TBD is a temporary placeholder, not a way to dodge work. Once you've settled on a location, create a real field visit line — the TBD line will be counted automatically.","TBD — khi chưa xác định được địa bàn":"TBD — when the location hasn't been determined yet","TG/tháng":"Time/month","THỐNG KÊ ẢNH ĐI ĐỊA BÀN —":"FIELD VISIT PHOTO STATISTICS —","TIẾN ĐỘ":"PROGRESS","TOÀN NHÓM (":"ENTIRE GROUP (","TRẠNG THÁI":"STATUS","Tab Khách hàng Event":"Event Customers tab","Tab Thông tin có nút":"The Info tab has a button","Tab thứ hai của màn hình":"The second tab of the screen","Tab Đơn hàng trong hồ sơ":"Sales orders tab in the profile","Target nhập tại đây ghi thẳng vào tab \"9. MỤC TIÊU & KPI\" · Actual tính tự động từ dữ liệu thực":"Target entered here writes directly into tab \"9. TARGET & KPI\" · Actual is calculated automatically from real data","Target/tháng":"Target/month","Task Result để hệ thống tự tổng hợp":"Task Result for the system to auto-summarize","Task Result — bắt buộc":"Task Result — required","Task Result — kết quả thực tế":"Task Result — actual result","Task chưa có vị trí dòng trên Sheet":"Task has no row position on the Sheet yet","Task này đã có ảnh đi địa bàn.":"This task already has a field visit photo.","Task đã lưu nhưng ảnh chưa lên được:":"Task saved but the photo failed to upload:","Tay khoan chậm khuỷu":"Contra-angle low-speed handpiece","Tay rung rửa sóng âm":"Ultrasonic irrigation handpiece","Thanh tiến độ & màu":"Progress bar & color","Theo doanh số":"By sales","Theo hình thức tiếp xúc":"By contact method","Theo loại công việc":"By task type","Theo loại khách hàng":"By customer type","Theo nhóm sản phẩm":"By product group","Theo quý":"By quarter","Theo tháng":"By month","Theo từng tháng trong kỳ":"By each month in the period","Theo đúng thang chung của app: đỏ → cam → vàng → xanh nhạt → xanh đậm; vượt 100% có huy hiệu ⭐.":"Following the app's standard scale: red → orange → yellow → light green → dark green; exceeding 100% earns a ⭐ badge.","Thiết bị":"Device","Thoát toàn màn hình (Esc)":"Exit full screen (Esc)","Thu gọn":"Collapse","Thu gọn ▴":"Collapse ▴","Thuyết trình":"Presentation","Thuyết trình sản phẩm":"Product presentation","Thuộc Key Task":"Belongs to Key Task","Thuộc các key task trên":"Belongs to the key tasks above","Thám trâm":"Pathfinder file","Thám trâm 2 đầu khác nhau":"Pathfinder file with two different tips","Tháng":"Month","Tháng này":"This month","Tháng này đã có đủ hạng mục của tháng trước":"This month already includes all of last month's line items.","Thêm":"Add","Thêm ADP key account":"Add ADP key account","Thêm account mới":"Add new account","Thêm buổi thuyết trình":"Add presentation","Thêm công việc mới":"Add new task","Thêm mới":"Add new","Thêm người liên hệ (CBC)":"Add contact (CBC)","Thêm task đi địa bàn":"Add field visit task","Thêm đơn hàng":"Add sales order","Thêm địa bàn mới":"Add new location","Thông tin":"Info","Thông tin account":"Account info","Thông tin địa bàn":"Updates","Thường gặp khi file Sales & Marketing đang chạy đồng bộ nền, hoặc sheet WEEKYLY new đã quá nhiều dòng.":"Common when the Sales & Marketing file is running a background sync, or the WEEKYLY new sheet has too many rows.","Thẻ Đã tiếp xúc":"Contacted badge","Thời gian up ảnh":"Photo upload time","Thứ":"Day","Thứ 2":"Mon","Thứ 3":"Tue","Thứ 4":"Wed","Thứ 5":"Thu","Thứ 6":"Fri","Thứ 7":"Sat","Thử bỏ bộ lọc sự kiện hoặc xoá từ khoá tìm kiếm.":"Try removing the event filter or clearing the search keyword.","Thử lại":"Try again","Tiến độ":"Progress","Tiến độ PLAN → RESULT":"PLAN → RESULT progress","Tiến độ các đầu việc đã ghi nhận":"Progress of recorded tasks","Tiếp khách":"Client entertainment","Tiếp tục chăm - Duy trì":"Keep nurturing - Maintain","Tiếp tục chăm - Tăng tốc":"Keep nurturing - Accelerate","Tiếp tục →":"Continue →","Top 10 khách hàng theo doanh số":"Top 10 customers by sales","Top 10 theo số người liên hệ":"Top 10 by number of contacts","Top khách hàng & nhóm sản phẩm":"Top customers & product groups","Toàn bộ file":"Entire file","Toàn bộ lịch sử mua hàng":"Entire purchase history","Toàn nhóm":"Entire group","Toạ độ GPS":"GPS coordinates","Trong phạm vi đang xem":"Within the current view","Trong đó có ghi chú “Khách hàng từ Event”:":"Of which noted “Customer from Event”:","Trung bình":"Average","Trên":"Above","Trên email báo cáo":"On the report email","Trên điện thoại":"On the phone","Trình duyệt không hỗ trợ nhập bằng giọng nói":"Browser doesn't support voice input","Trường đại học":"University","Trạng thái":"Status","Trạng thái công việc":"Task status","Trạng thái tự chạy":"Auto-run status","Tuần":"Week","Tuần này":"This week","Tuần này đã có kế hoạch TBD rồi":"This week already has a TBD plan","Tuần này đã có sẵn kế hoạch đi địa bàn — dùng luôn dòng đó.":"This week already has a field visit plan — just use that line.","Tuần trước":"Last week","Type action = Visiting thì bắt buộc đúng 1 ảnh, và phải vừa chụp. App chỉ mở camera, ảnh trong thư viện bị từ chối.":"When Type action = Visiting, exactly 1 photo is required, and it must be freshly taken. The app only opens the camera — photos from the gallery are rejected.","Type task này chưa có khung mẫu — chọn Type task trước":"This Type task has no template yet — choose Type task first","TÌM HIỂU":"IDENTIFY","Tài khoản đang đăng nhập:":"Currently signed in as:","Tên Key Task":"Key Task name","Tên người liên hệ":"Contact name","Tên việc":"Task name","Tên đầu việc":"Task item name","Tên địa bàn / Account name":"Location name / Account name","Tìm kiếm thông minh":"Smart search","Tìm nhanh":"Quick search","Tăng thị phần trên khách đang mua":"Increase share of wallet with current customers","Tạo":"Create","Tạo kế hoạch & gửi báo cáo":"Create plan & send report","Tạo kế hoạch TBD cho tuần mới":"Create a TBD plan for the new week","Tải PDF":"Download PDF","Tải lại dữ liệu":"Reload data","Tải ảnh về":"Download photo","Tất cả":"All","Tất cả FY":"All FY","Tất cả PIC":"All PICs","Tất cả buổi đi địa bàn":"All field visits","Tất cả tiến độ":"All progress","Tần suất / khách":"Frequency / customer","Tần suất gặp khách theo thời gian":"Customer visit frequency over time","Tỉ lệ":"Rate","Tỉnh":"Province","Tỉnh / Area":"Province / Area","Tỉnh / Khu vực":"Province / Region","Tỉnh thành":"Province/city","Tỉnh/thành dự kiến":"Expected province/city","Tỉnh/thành dự kiến:":"Expected province/city:","Tối đa 3 PIC một lần":"Up to 3 PICs at a time","Tối đa 3 tháng một lần":"Up to 3 months at a time","TỔNG":"TOTAL","TỔNG HỢP THEO PIC":"SUMMARY BY PIC","TỔNG NHÓM":"GROUP TOTAL","Tổng":"Total","Tổng CBC":"Total CBC","Tổng account":"Total accounts","Tổng dự trù:":"Total estimated:","Tổng hoạt động":"Total activities","Tổng quan":"Overview","Tổng quan đi địa bàn":"Field visit overview","Tổng số lần làm việc với địa bàn đó trong FY, tách rõ 📍 viếng thăm · 📞 gọi điện · 💬 nhắn tin · ✉️ email, kèm khoảng cách từ lần gần nhất.":"Total interactions with that location in this FY, broken down into 📍 visits · 📞 calls · 💬 messages · ✉️ emails, with time since the most recent one.","Tổng:":"Total:","Từ":"From","Từ ngày":"From date","Từ ngày (thứ Hai)":"From date (Monday)","Tự sinh sau khi lưu":"Auto-generated after saving","Tự sinh theo địa bàn":"Auto-generated based on location","Tự đếm tiếp số lớn nhất trong sheet":"Auto-continues from the highest number in the sheet","Tỷ lệ địa bàn đã được ghé thăm ít nhất một lần trong FY trên tổng số địa bàn bạn phụ trách. Đây là chỉ số chăm sóc, không phải doanh số.":"The share of locations visited at least once this FY out of all locations you're responsible for. This is an engagement metric, not a sales metric.","Viếng thăm":"Visit","Viếng thăm & đơn hàng":"Visits & sales orders","Viếng thăm khách hàng, gặp bác sĩ, demo sản phẩm — có ảnh chụp tại chỗ và GPS":"Visit customers, meet doctors, demo products — with on-site photo and GPS","Viếng thăm khách hàng, gặp bác sĩ, demo — ghi vào tab 6. WEEKLY REPORT":"Visit customers, meet doctors, demo — recorded in tab 6. WEEKLY REPORT","Việc này do hệ thống tự tạo (đồng bộ từ đơn hàng / file khác) nên không sửa trực tiếp ở đây.":"This task is auto-created by the system (synced from sales orders / other files), so it can't be edited directly here.","Việc quan trọng nhất mỗi ngày — ghi lại buổi làm việc với khách":"The most important task each day — log your session with the customer","Việc quá hạn":"Overdue task","Việc quá hạn không rải trên lịch để lịch gọn hơn.":"Overdue tasks aren't spread across the calendar, to keep it tidy.","Việc đi gặp khách hàng nằm ở tab":"Customer visit tasks are on the tab","Việc đi địa bàn không hiện ở đây":"Field visit tasks don't show here","Việt Thái":"Viet Thai","Vui lòng điền đủ Key Activities, Key Findings và Follow Up Actions":"Please fill in Key Activities, Key Findings and Follow Up Actions completely","Vui lòng điền:":"Please fill in:","Vào":"Go to","Vào file":"Go to the file","Vé máy bay":"Flight ticket","Vé tàu / xe":"Train / bus ticket","Vẫn chưa lấy được vị trí. Kiểm tra: đã BẬT Vị trí (Location) của điện thoại, và cho phép trang này truy cập vị trí.":"Still couldn't get your location. Check that Location is turned ON on your phone, and that this page is allowed to access location.","Vị trí":"Location","Vị trí chụp:":"Photo location:","Vị trí khách hàng trong quy trình":"Customer stage in the sales process","Web App đang chạy bản Code.gs cũ (chưa có \"account360\").":"The Web App is running an old version of Code.gs (missing \"account360\").","Xem nhanh trước khi gửi":"Quick preview before sending","Xem thêm":"See more","Xem thêm (":"See more (","Xem toàn bộ dữ liệu · cần mã nội bộ":"View all data · internal code required","Xem tất cả":"View all","Xem ảnh đi địa bàn":"View field visit photos","Xem ảnh, lọc theo PIC, đặt KPI, gửi thay":"View photos, filter by PIC, set KPI, send on behalf","Xoá":"Delete","Xoá chuyến đi":"Delete trip","Xoá dòng":"Delete row","Xoá dòng này khỏi Google Sheet? Thao tác không hoàn tác được.":"Delete this row from Google Sheet? This action cannot be undone.","Xoá đơn hàng này khỏi sheet Sale Order? Thao tác không hoàn tác được.":"Delete this order from the Sale Order sheet? This action cannot be undone.","Xoá ảnh này khỏi Drive và khỏi sheet?":"Delete this photo from Drive and from the sheet?","Xếp hạng theo doanh số. Dùng để biết nên dồn thời gian vào đâu.":"Ranked by sales. Use it to see where to focus your time.","Xếp hạng trong kỳ":"Ranking for the period","Xếp hạng ·":"Ranking ·","_pq\" autocomplete=\"off\" placeholder=\"Gõ tên tỉnh/thành…\"":"_pq\" autocomplete=\"off\" placeholder=\"Type province/city name…\"","account khác nhau":"distinct accounts","account trong danh mục":"accounts in the portfolio","account đã tiếp xúc":"accounts contacted","buổi":"sessions","buổi có ảnh":"sessions with photos","buổi có ảnh.":"sessions with photos.","buổi ·":"sessions ·","buổi đi địa bàn":"field visit sessions","buổi đi địa bàn ⇒":"field visit sessions ⇒","bản ADP":"ADP record","bấm vào ô để lọc":"tap the cell to filter","bắt buộc có ảnh":"photo required","cho phép đọc chính tả.":"allow dictation.","cho tuần":"for the week","chính là căn cứ để hệ thống đếm số lần chăm sóc từng CBC. Ghi sai tên là mất số liệu.":"is exactly what the system uses to count visits to each CBC. Get the name wrong and the data is lost.","chưa chăm sóc":"not yet engaged","chưa có CBC nào trong danh mục.":"no CBC in the portfolio yet.","chưa có budget":"no budget yet","chưa có dòng nào mang ghi chú event. Bấm":"no line has an event note yet. Tap","chưa có dòng nào thuộc":"no line belongs to","chưa có hoạt động":"no activity yet","chưa có hạng mục nào":"no items yet","chưa gán account":"no account assigned","chưa gặp":"not met yet","chưa gặp trong FY":"not met this FY","chưa gặp trong kỳ":"not met in this period","chưa xác định":"undetermined","chưa xác định account của":"account not yet determined for","chưa đánh giá":"not yet evaluated","chưa được gán nhà phân phối nào. Bấm “Toàn nhóm” để xem toàn bộ NPP của nhóm.":"no distributor assigned yet. Tap “Entire group” to see all distributors in the group.","chưa đặt mục tiêu":"no target set","chỉ":"only","chỉ hiện với tài khoản Management. Xem toàn bộ ảnh hiện trường theo ngày, theo PIC, kèm toạ độ GPS và địa chỉ nơi chụp.":"Visible to Management accounts only. View all field photos by date and by PIC, with GPS coordinates and the address where taken.","chọn nhanh người trong danh bạ, hoặc":"quickly pick a person from the contacts, or","chọn được nhiều tỉnh":"select multiple provinces","còn":"remaining","có kết quả":"has result","có ảnh":"has photo","cần bổ sung":"needs completing","cần cập nhật trước khi gửi":"needs updating before sending","cập nhật":"update","của":"of","danh mục khách hàng":"customer list","doanh số":"sales","dòng":"row","dòng sang sheet nhưng app chưa nhận ra khách event —":"rows to the sheet, but the app didn't recognize the event customer —","dòng sản phẩm cho đơn":"product lines for the order","dòng sản phẩm)…":"product lines)…","dòng)":"rows)","giây) nên app tạm dừng chờ.":"seconds), so the app paused to wait.","giờ trước":"hours ago","gửi cho toàn bộ":"send to all","gửi cho toàn bộ team":"send to the whole team","gửi chính thức tới team":"send officially to the team","gửi lại email xin duyệt":"resend the approval request email","gửi thay cho":"send on behalf of","gửi thay cho một PIC":"send on behalf of a PIC","gửi thử cho chính bạn":"send a test to yourself","hoàn thành":"completed","hoạt động":"activity","hoạt động ·":"activity ·","hoạt động địa bàn":"field activity","hoặc":"or","hoặc mở file Event chạy menu":"or open the Event file and run the menu","hôm nay":"today","hạng mục":"item","hạng mục cho":"item for","hạng mục cho kỳ":"item for the period","hạng mục có sẵn khung":"item that already has a template","hạng mục ·":"item ·","hạng mục — không tạo trùng":"item — do not create duplicates","khi mới lên kế hoạch ·":"when just planned ·","khi đang làm dở ·":"when in progress ·","khi đã xong. Điền đủ CBC, ảnh và Next action thì app tự chuyển sang Completed.":"when done. Fill in CBC, photo, and Next action, and the app automatically switches it to Completed.","khu vực":"area","khách":"customer","khách gặp từ 2 lần trở lên":"customers met 2 or more times","không bắt buộc — ghi vào tab 2. CBC":"optional — enter in the 2. CBC tab","không nhận được dữ liệu.":"no data received.","không rõ":"unknown","không được duyệt":"not approved","khớp bộ lọc":"match the filter","kiểm tra cột Ghi chú (R) của tab 2. CBC có đúng dạng “Khách hàng từ Event: …” không.":"check whether the Note column (R) in the 2. CBC tab has the correct “Customer from Event: …” format.","kế hoạch":"plan","kế hoạch tháng sau":"next month's plan","kết quả":"result","loại KH":"customer type","là hình thức: Visiting, Telephone, Message, Document…":"is the format: Visiting, Telephone, Message, Document…","là loại công việc theo khách hàng (Sale-Hospital, Sale-Clinics…).":"is the task type by customer (Sale-Hospital, Sale-Clinics…).","lượt":"contacts","lượt tiếp xúc trung bình mỗi khách":"average contacts per customer","lượt · ✓":"contacts · ✓","lượt/ngày":"contacts/day","lấy từ danh sách CBC của địa bàn đó. Đây là căn cứ duy nhất để dựng biểu đồ “ai mua từ địa bàn này”, bỏ trống là mất số liệu.":"taken from the CBC list of that territory. This is the only basis for building the “who buys from this territory” chart — leaving it blank means losing the data.","lỗi nằm ở đường truyền hoặc tài khoản Google trên máy. Hiện trang đăng nhập hoặc báo lỗi quyền":"the error is with the connection or the Google account on this device. Shows the login page or a permission error","lớn hơn Target":"greater than Target","mã":"code","mã chung một mức giá":"codes share the same price","mã nữa":"more codes","mã đã chọn":"selected codes","mã — nhớ kiểm tra đơn giá và quy cách đóng gói phải giống nhau":"codes — remember to check that unit price and packaging spec must match","mã.":"codes.","mã. Chọn Product type trước để hệ thống mở sẵn đúng nhóm.":"codes. Select Product type first so the system opens the right group automatically.","mọi NPP trong segment":"all distributors in the segment","mỗi dòng 1 khoản — mô tả + số tiền":"one item per row — description + amount","mới sửa được":"before it can be edited","mới sửa được.":"before it can be edited.","mới xoá được":"before it can be deleted","mở file Business Trip ↗":"open the Business Trip file ↗","mở sau khi quản lý chọn":"opens after the manager selects","mục Công việc khác nhưng Code.gs chưa xác nhận.":"Other tasks section, but Code.gs hasn't confirmed it.","mục Công việc khác). Kiểm tra hộp thư trong ~1 phút.":"Other tasks section). Check your inbox within ~1 minute.","mục kế hoạch tuần sau,":"next week's plan items,","mục…":"items…","nghìn":"thousand","ngàn":"thousand","ngày":"day","ngày có hoạt động · TB":"days with activity · avg","ngày trước":"days ago","ngày · 👤":"days · 👤","ngày đi / về":"departure / return date","ngày đi công tác":"business trip days","người":"person","người duyệt":"approver","người liên hệ":"contact person","người liên hệ (CBC)":"contact person (CBC)","người mua":"buyer","người tham dự":"attendees","người)":"people)","nhiều tài khoản Google cùng lúc — Google chuyển sang trang chọn tài khoản nên app":"multiple Google accounts at once — Google switches to the account picker page, so the app","nhân 12 ra mục tiêu cả năm, nhân 3 ra mục tiêu quý.":"multiply by 12 for the annual target, by 3 for the quarterly target.","nhóm":"group","nhóm ADP":"ADP group","nhóm khác)":"other group)","nhóm sản phẩm (":"product group (","này":"this","nằm ở mục":"is located in section","phút trước":"minutes ago","phút, giữ màn hình mở trong lúc tạo file.":"minutes, keep the screen open while the file is being created.","phụ trách (":"in charge (","placeholder=\"🔍 Tìm theo tên người, account, số điện thoại, chức vụ…\" value=\"":"placeholder=\"🔍 Search by name, account, phone number, position…\" value=\"","placeholder=\"🔍 Tìm theo tên, mã, tỉnh, PIC… (gõ nhiều từ đều được, không cần dấu)\"":"placeholder=\"🔍 Search by name, code, province, PIC… (type multiple words, no accents needed)\"","placeholder=\"🔍 Tìm trong key task, đầu việc, kết quả…\" value=\"":"placeholder=\"🔍 Search within key task, sub task, result…\" value=\"","quá hạn":"overdue","quá nhiều — kiểm tra lại đơn vị trong sheet":"too high — recheck the unit in the sheet","rồi dán nội dung file PRODUCT_CODE vào (tiêu đề ở hàng 1).":"then paste the PRODUCT_CODE file content in (header on row 1).","rồi điền kế hoạch, app tạo dòng giúp bạn và gửi báo cáo luôn.":"then fill in the plan, the app creates the row for you and sends the report right away.","sau khi gửi, chuyến đi hiện ngay trên":"once sent, the trip appears immediately on","sau khi đi":"after the visit","slide (+ trang bìa, tổng hợp, danh sách theo PIC).":"slides (+ cover page, summary, list by PIC).","slide đi địa bàn)":"field visit slides)","sẽ bị":"will be","số người dự kiến":"expected number of people","số người thực tế":"actual number of people","số tiền cho mọi khoản chi phí":"amount for every expense item","số từ tab SALE ORDER · đơn vị":"figures from the SALE ORDER tab · unit","sự kiện":"event","sự kiện ·":"event ·","tab 2. CBC chưa có cột ngày tạo":"the 2. CBC tab doesn't have a created-date column","task trong kỳ":"tasks in the period","task · còn":"tasks · remaining","thiếu CBC":"missing CBC","thiếu action":"missing action","thiếu lý do dừng":"missing stop reason","thiếu ảnh":"missing photo","thuyết trình":"presentation","tháng":"month","thì mới là do Deploy.":"only then is it due to Deploy.","thì mới lưu được. Bấm":"before it can be saved. Click","thì phải ghi lý do.":"you must state a reason.","triệu":"million","trong folder chuyến đi, ghi vào cột":"in the trip folder, enter it in the column","trong khoảng đã chọn":"within the selected range","trong thẻ đó để thêm các bước nhỏ. Tiến độ Key Task tự tính từ trung bình các đầu việc con.":"in that card to add small steps. Key Task progress is auto-calculated from the average of its sub tasks.","trên Google Sheet như bình thường;":"on Google Sheet as usual;","trên file":"on the file","trên file Business Trip.":"on the Business Trip file.","trên file Business Trip; chuyến đi trên lịch tự chuyển":"on the Business Trip file; the trip on the calendar automatically switches","trên thanh trên cùng quyết định TOÀN BỘ số liệu bạn nhìn thấy. Thấy số 0 bất thường thì kiểm tra ô này trước tiên.":"on the top bar determines ALL the figures you see. If you see an unusual 0, check this field first.","trễ":"late","tạo đầu mục lớn, rồi":"create the main item, then","tải PDF":"download PDF","tất cả FY":"all FY","tất cả PIC":"all PIC","tỉnh / thành":"province / city","tổng":"total","tới":"to","từ event ·":"from event ·","tỷ":"billion","viếng thăm":"visit","việc":"task","việc khác":"other task","việc quá hạn ›":"overdue tasks ›","việc tuần này ·":"tasks this week ·","việc tuần sau":"tasks next week","việc · ✓":"tasks · ✓","và":"and","và chuyến đi biến mất khỏi lịch. Không hoàn tác được.":"and the trip disappears from the calendar. This cannot be undone.","và hiện dạng":"and displays as","vào CBC":"into CBC","vượt":"exceeds","với Visiting · 1 ảnh · kèm GPS":"with Visiting · 1 photo · with GPS","với “":"with “","vừa xong":"just now","xoá trắng":"clear","·   🕒 Up ảnh":"· 🕒 Upload photo","· HÔM NAY":"· TODAY","· Hôm nay":"· Today","· bấm chọn hoặc gõ để lọc":"· click to select or type to filter","· chọn":"· select","· chọn một hoặc nhiều người":"· select one or more people","· cột xanh = lượt tiếp xúc, cột vàng = số khách khác nhau":"· blue bar = contacts, yellow bar = distinct customers","· của":"· of","· gõ để tìm, chọn được nhiều":"· type to search, multiple selection allowed","· gửi báo cáo tuần →":"· send weekly report →","· hoạt động tính trong":"· activity counted within","· hôm nay":"· today","· khớp từ khoá":"· matches keyword","· kỳ tính trọn tuần":"· period counted in full weeks","· lọc theo":"· filter by","· mọi product type":"· all product types","· phạm vi":"· scope","· phải có dòng “Người gặp:”":"· must include a “Person met:” line","· toàn nhóm":"· whole group","· trạng thái hiện tại:":"· current status:","· tạo trong":"· created within","· từ thứ Năm →":"· from Thursday →","· đang nạp dữ liệu":"· loading data","· đã xoá":"· deleted","· đã đi từ 1 buổi →":"· visited from 1 session →","Ô":"Field","Ô Task Result do hệ thống tự viết:":"Task Result field is auto-written by the system:","Ô kết quả đã có sẵn khung 4 mục":"Result field already has a 4-item template","Ô này đã có khung rồi":"This field already has a template","ít nhất 2 PIC":"at least 2 PICs","ít nhất 2 tháng":"at least 2 months","ô đang sửa — chưa lưu":"field being edited — not saved yet","ĐB":"Terr.","Đang chuyển sang":"Switching to","Đang chuẩn bị dữ liệu…":"Preparing data…","Đang chuẩn bị…":"Preparing…","Đang chốt kết quả đi địa bàn…":"Finalizing field visit results…","Đang cập nhật dữ liệu mới…":"Updating new data…","Đang dựng file Excel…":"Building Excel file…","Đang dựng slide…":"Building slides…","Đang ghi kế hoạch TBD vào Google Sheet…":"Writing TBD plan to Google Sheet…","Đang ghi task và tải ảnh (":"Writing task and uploading photos (","Đang ghi vào Google Sheet…":"Writing to Google Sheet…","Đang gửi email + tạo PDF đính kèm…":"Sending email + creating PDF attachment…","Đang gửi… (khoảng 10 giây)":"Sending… (about 10 seconds)","Đang hiện bản đã lưu trên máy.":"Showing the version saved on this device.","Đang kiểm tra kế hoạch tuần mới…":"Checking the new weekly plan…","Đang kết nối Google Sheet…":"Connecting to Google Sheet…","Đang lưu ADP…":"Saving ADP…","Đang lưu CBC…":"Saving CBC…","Đang lưu mục tiêu…":"Saving target…","Đang lưu vào Google Sheet…":"Saving to Google Sheet…","Đang lưu đơn hàng (":"Saving sales order (","Đang lưu…":"Saving…","Đang lưu… (~10–20 giây)":"Saving… (~10–20 seconds)","Đang lấy giờ up ảnh…":"Getting photo upload time…","Đang lấy vị trí GPS…":"Getting GPS location…","Đang lọc theo:":"Filtering by:","Đang mở dòng đã có để bạn sửa.":"Opening the existing row for you to edit.","Đang mở dữ liệu nhóm":"Opening group data","Đang mở sẵn nhóm hợp với Product type":"Pre-opening the group matching the Product type","Đang mở task…":"Opening task…","Đang nén ảnh…":"Compressing photo…","Đang nạp":"Loading","Đang nạp Công việc khác…":"Loading Other tasks…","Đang nạp danh bạ CBC…":"Loading CBC contacts…","Đang nạp danh mục…":"Loading list…","Đang nạp dữ liệu, thử lại sau vài giây":"Loading data, try again in a few seconds","Đang nạp dữ liệu…":"Loading data…","Đang nạp lại danh bạ CBC…":"Reloading CBC contacts…","Đang nạp lại danh bạ…":"Reloading contacts…","Đang nạp ảnh":"Loading photo","Đang theo dõi trong":"Tracking within","Đang thêm địa bàn vào Google Sheet…":"Adding territory to Google Sheet…","Đang tạo":"Creating","Đang tạo PDF…":"Creating PDF…","Đang tạo hạng mục…":"Creating item…","Đang tạo khung":"Creating template","Đang tạo khung 0/":"Creating template 0/","Đang tạo kế hoạch TBD…":"Creating TBD plan…","Đang tải danh mục điểm đến, người đi cùng, thiết bị từ file Business Trip…":"Loading destinations, companions, and equipment from the Business Trip file…","Đang tải danh mục…":"Loading list…","Đang tải danh sách…":"Loading list…","Đang tải hồ sơ…":"Loading profile…","Đang tải lại dữ liệu mới nhất…":"Reloading latest data…","Đang tải lại dữ liệu…":"Reloading data…","Đang tải thông tin chuyến đi từ file Business Trip…":"Loading trip info from the Business Trip file…","Đang tải ảnh lên Drive (":"Uploading photo to Drive (","Đang tải ảnh lên Drive…":"Uploading photo to Drive…","Đang tải ảnh từ Drive…":"Loading photo from Drive…","Đang tổng hợp KPI…":"Aggregating KPI…","Đang xem":"Viewing","Đang xoá task và ảnh trên Drive…":"Deleting task and photos on Drive…","Đang xoá task…":"Deleting task…","Đang xoá đơn hàng…":"Deleting sales order…","Đang xoá ảnh…":"Deleting photo…","Đang xoá…":"Deleting…","Đang xuất file PowerPoint…":"Exporting PowerPoint file…","Đang xử lý…":"Processing…","Đang điền bù Area / PIC…":"Auto-filling Area / PIC…","Đang đọc doanh số NPP từ file MMH Turnover…":"Reading distributor sales from the MMH Turnover file…","Đang đọc file khách Event và ghi sang tab 2. CBC…":"Reading the Event customer file and writing to the 2. CBC tab…","Đang đọc lại Công việc khác…":"Rereading Other tasks…","Đang đọc lại lịch…":"Rereading the calendar…","Đi theo Account":"By Account","Đi địa bàn":"Field visit","Đi địa bàn (chưa chốt account)":"Field visit (account not finalized)","Điện thoại":"Phone","Đã bỏ thay đổi":"Changes discarded","Đã chèn người gặp vào kết quả":"Person met inserted into the result","Đã chăm sóc":"Followed up","Đã chăm sóc lại":"Followed up again","Đã chọn":"Selected","Đã chọn hết danh sách":"Selected the entire list","Đã có khách từ event nhưng chưa dòng nào ghi PIC là":"There are customers from the event, but no row has PIC recorded as","Đã có kết quả":"Already has a result","Đã cập nhật chuyến công tác":"Business trip updated","Đã ghi":"Recorded","Đã gán account hết":"All accounts assigned","Đã gặp":"Met","Đã gửi báo cáo":"Report sent","Đã gửi lên máy chủ — dữ liệu sẽ hiện sau khi tải lại":"Sent to the server — data will appear after reloading","Đã gửi yêu cầu tới máy chủ (kèm":"Request sent to the server (with","Đã gửi đề xuất công tác — chờ phê duyệt trên file Business Trip":"Business trip request sent — awaiting approval on the Business Trip file","Đã hoàn thành":"Completed","Đã làm việc":"Worked","Đã lưu":"Saved","Đã lưu báo cáo công tác":"Business trip report saved","Đã lưu hồ sơ account":"Account profile saved","Đã lưu mục tiêu":"Target saved","Đã nộp":"Submitted","Đã qua hạn, chưa xong":"Overdue, not yet done","Đã thêm":"Added","Đã thêm địa bàn":"Territory added","Đã thêm địa bàn — điền tiếp thông tin CBC":"Territory added — continue filling in CBC info","Đã thêm địa bàn — điền tiếp thông tin buổi":"Territory added — continue filling in session info","Đã thêm địa bàn — điền tiếp đơn hàng":"Territory added — continue filling in the sales order","Đã tiếp cận":"Reached","Đã tiếp xúc":"Contacted","Đã tiếp xúc hết":"All contacted","Đã tiếp xúc hết trong kỳ":"All contacted within the period","Đã tạo PDF":"PDF created","Đã xoá":"Deleted","Đã xoá chuyến công tác":"Business trip deleted","Đã xoá task":"Task deleted","Đã xoá đơn hàng":"Sales order deleted","Đã xoá ảnh":"Photo deleted","Đèn quang trùng hợp":"Curing light","Đèn thực hành":"Practice light","Đính kèm":"Attachment","Đóng":"Close","Đóng dialog và bỏ nội dung đang nhập?":"Close the dialog and discard the entered content?","Đúng thiết kế. Cần sửa thì nhờ chính người đó, hoặc báo Management.":"This is by design. To change it, ask that person directly, or report it to Management.","Đăng nhập":"Log in","Đăng nhập, chọn năm tài chính, tìm đúng mục cần làm":"Log in, select the fiscal year, find the right item to work on","Đăng xuất khỏi tài khoản":"Log out of the account","Đơn":"Order","Đơn hàng":"Sales order","Đơn hàng · Thuyết trình · Công việc tháng · ADP":"Sales order · Presentation · Monthly task · ADP","Đơn hàng — chọn người mua":"Sales order — select the buyer","Đơn hàng — một đơn nhiều mặt hàng":"Sales order — one order, multiple items","Đơn hàng — thành tiền":"Sales order — line total","Đơn vị VND ·":"Unit: VND ·","Đại lý":"Dealer","Đạt":"Achieved","Đầu việc con":"Sub task","Đặt mục tiêu KPI":"Set KPI target","Đặt target xong nên báo lại cho sales — app không tự gửi thông báo khi mục tiêu thay đổi.":"After setting the target, let sales know — the app doesn't send a notification automatically when the target changes.","Đặt tên cho link (bỏ trống thì dùng chính link):":"Name the link (leave blank to use the link itself):","Đếm số lần bạn ghi nhận gặp người đó trong FY, tách theo 📍 · 📞 · 💬. Căn cứ là dòng":"Counts how many times you recorded meeting that person during the FY, split by 📍 · 📞 · 💬. Based on the row","Đếm số đơn phát sinh":"Counts the number of orders generated","Đến ngày":"To date","Đến ngày (Chủ nhật)":"To date (Sunday)","Đề xuất công tác":"Business trip request","Đề xuất được ghi thẳng vào file":"The request is written directly into the file","Để trống nếu chưa biết — thêm sau ở tab Key stakeholder cũng được.":"Leave blank if unknown — you can also add it later in the Key stakeholder tab.","Để trống nếu mới lên kế hoạch — ghi kết quả sau khi đi":"Leave blank if just planned — record the result after the visit","Địa bàn":"Territory","Địa bàn (Account)":"Territory (Account)","Địa bàn chưa từng có hoạt động nào sẽ nằm cuối danh sách khi sắp theo Activities — đây là danh sách cần ưu tiên đi.":"Sites with no activity yet will appear at the bottom of the list when sorted by Activities — this is the list to prioritize visiting.","Địa bàn có ADP thì hiện % đạt so với mục tiêu; địa bàn thường hiện doanh số trong FY đang chọn.":"Sites with an ADP show % achieved vs. target; regular sites show sales for the selected FY.","Địa bàn mới sẽ được ghi vào tab":"New site will be recorded in the tab","Địa bàn đã chụp":"Site photographed","Địa bàn đã lưu, nhưng chưa thêm được người liên lạc:":"Site saved, but no contact person added yet:","Địa bàn “":"Site “","Địa chỉ":"Address","Địa chỉ nơi chụp":"Photo location address","Địa chỉ up ảnh":"Photo upload address","Đọc từ T9 đến T8 năm sau. Ô nào trống nghĩa là tháng đó chưa ghi nhận gì.":"Reads from Sep to Aug of the next year. An empty cell means nothing was recorded for that month.","Đồng bộ từ file Event":"Sync from Event file","Đồng gửi (Cc)":"Copy (Cc)","Đồng hồ máy đang lệch giờ — chỉnh lại rồi chụp lại":"Device clock is off — fix it and retake the photo","Đổi nhóm sẽ tải lại app.":"Switching groups will reload the app.","Đổi tài khoản":"Switch account","Độ phủ account":"Account coverage","Độ phủ danh mục":"Catalog coverage","Độ phủ địa bàn":"Site coverage","Đừng gộp nhiều mặt hàng vào một dòng, vì biểu đồ cơ cấu nhóm sản phẩm sẽ sai.":"Don't combine multiple items into one row, or the product mix chart will be wrong.","đ":"VND","đang chạy bản cũ hơn":"running an older version","đang chọn nhiều mã — cần điền Unit price và SL dùng chung cho cả dòng":"multiple codes selected — enter a shared Unit price and Qty for all rows","đang chờ phê duyệt":"pending approval","đang dùng":"in use","đang làm":"in progress","điền sẵn account cho bạn.":"pre-fills the account for you.","đã có ADP trong":"already has an ADP in","đã có báo cáo":"already has a report","đã có kế hoạch":"already has a plan","đã có kết quả":"already has a result","đã có một dòng kế hoạch đi địa bàn":"already has a field visit plan row","đã có đủ":"already has enough","đã gặp":"met","đã tiếp xúc trong kỳ":"contacted during the period","đã xong ·":"done ·","đơn hàng":"sales orders","đơn ·":"orders ·","đơn · Tổng":"orders · Total","đạt":"achieved","đầu việc":"task","đầu việc con.":"sub-task.","đầu việc xong":"tasks completed","đến":"to","để có sẵn Actions Taken / Current Situation / Customer Feedback / Opportunities. Nút":"to have Actions Taken / Current Situation / Customer Feedback / Opportunities ready. The button","để kéo khách mới sang. Chạy lại nhiều lần không bị nhân đôi.":"to pull new customers over. Running it multiple times won't create duplicates.","để mở.":"to open.","để nhập tay.":"to enter manually.","để sao chép nhanh. Điền PLAN đầu tháng, RESULT cuối tháng.":"to copy quickly. Fill in PLAN at the start of the month, RESULT at the end.","để sinh sẵn toàn bộ hạng mục theo Type task, hoặc":"to pre-generate all items by Type task, or","để thử lần nữa.":"to try again.","để trống = No":"leave blank = No","để đặt cạnh nhau":"to place side by side","Ước theo ngày mở account ·":"Estimated by account open date ·","Ảnh":"Photo","Ảnh bị từ chối":"Photo rejected","Ảnh chỉ được chấp nhận nếu chụp trong vòng 10 phút và mở trực tiếp bằng camera. Tên file theo mẫu PIC_Ngày_Khách hàng_STT nên đối chiếu rất nhanh.":"Photos are only accepted if taken within the last 10 minutes and opened directly from the camera. File names follow the PIC_Date_Customer_No. pattern, so they're quick to cross-check.","Ảnh cũng được gửi tự động khi bấm":"Photos are also sent automatically when you tap","Ảnh hiện trường":"On-site photo","Ảnh hướng dẫn — chạm để xem cỡ lớn":"Guide photo — tap to view full size","Ảnh mới sẽ ĐÈ LÊN ảnh cũ (ảnh cũ bị xoá khỏi Drive). Tiếp tục?":"The new photo will OVERWRITE the old one (the old photo will be deleted from Drive). Continue?","Ảnh này chụp lúc":"This photo was taken at","Ảnh phải vừa chụp trong vòng 10 phút và mở bằng camera. Ảnh trong thư viện hoặc ảnh chụp màn hình đều không được.":"The photo must have been taken within the last 10 minutes and opened from the camera. Photos from the gallery or screenshots are not allowed.","Ảnh trong kỳ":"Photos this period","Ảnh đi địa bàn":"Field visit photo","Ảnh đi địa bàn của dòng này cũng bị xoá khỏi folder Drive.":"This row's field visit photo will also be deleted from the Drive folder.","Ảnh địa bàn":"Site photo","ảnh":"photo","ảnh chụp tại địa bàn":"photo taken on-site","ảnh khỏi Drive":"photo from Drive","ảnh ·":"photos ·","ảnh · Xuất lúc":"photos · Exported at","ảnh đi địa bàn (bắt buộc với Visiting đã hoàn thành)":"field visit photo (required for completed Visiting)","ảnh đi địa bàn sẽ được xuất.":"field visit photos will be exported.","ảnh)":"photos)","Ẩn menu bên, thanh trên — xem lịch toàn màn hình":"Hide side menu and top bar — view the calendar full screen","Ẩn việc đã xong":"Hide completed tasks","Ở mục Gửi báo cáo có thêm lựa chọn":"In the Send report section, there's an extra option","ở Phần B1–B6 cho từng PIC, hoặc ô Target ở Phần A cho chỉ tiêu chung. Bấm lưu là ghi thẳng vào tab 9 của Google Sheet. Sales không sửa được các ô này.":"in Section B1–B6 for each PIC, or the Target cell in Section A for the overall target. Tapping save writes directly to tab 9 of the Google Sheet. Sales reps cannot edit these cells.","ở trên để bắt đầu so sánh":"above to start comparing","— Chưa phân loại —":"— Uncategorized —","— Nội dung cũ —":"— Old content —","— app lần lượt dựng báo cáo của từng người.":"— the app builds each person's report one by one.","— chúng tự đồng bộ sang đây nên mặc định được ẩn.":"— they sync here automatically, so they're hidden by default.","— chưa có dữ liệu —":"— no data yet —","— chưa có nội dung —":"— no content yet —","— chưa nhập —":"— not entered —","— chưa phân loại —":"— uncategorized —","— chọn người liên lạc —":"— select a contact person —","— chọn nhóm sản phẩm —":"— select a product group —","— chọn —":"— select —","— cần dán bản vá Code.gs (sendWeeklyReport phải đọc tham số":"— need to paste the Code.gs patch (sendWeeklyReport must read the parameter","— cập nhật Code.gs của file đó (bản v5.3)":"— update that file's Code.gs (v5.3)","— gõ để tìm, chọn được nhiều tỉnh.":"— type to search, multiple provinces can be selected.","— không phải ảnh vừa chụp. Quy định: chụp ngay tại địa bàn, không dùng ảnh cũ.":"— not a just-taken photo. Rule: take the photo on-site, don't use an old photo.","— kỳ":"— period","— lưu thay đổi sẽ đưa trạng thái về":"— saving changes will set the status back to","— lịch đi địa bàn":"— field visit schedule","— mở bản hiện có để sửa":"— open the existing one to edit","— mở bản đó ra sửa thay vì tạo thêm":"— open that one to edit instead of creating another","— nhớ bổ sung":"— remember to add","— nội dung báo cáo trên file sẽ mất (file Google Doc trong folder vẫn giữ).":"— the report content on the file will be lost (the Google Doc file in the folder is kept).","— sửa & lưu để cập nhật":"— edit & save to update","— vẫn cần ghi rõ dự tính tiếp cận nhóm khách hàng nào.":"— still need to specify which customer group you plan to approach.","— xử lý trước khi gửi.":"— handle before sending.","— đang thêm CBC cho đúng account này":"— adding a CBC for this exact account","— đổi FY ở góc trên để xem lịch đi địa bàn của năm đó.":"— change the FY at the top to view that year's field visit schedule.","“Đã tiếp cận 3 phòng khám, 2 bệnh viện”":"“Reached 3 clinics, 2 hospitals”","” tới":"” to","” đã có trong danh mục (mã":"” already exists in the catalog (code","• Khác":"• Other","… và":"… and","‹ Trang trước":"‹ Previous page","ℹ️ Khoảng đang xem nằm ngoài":"ℹ️ The range you're viewing is outside","ℹ️ Ô trong sheet có lẫn chữ, app đọc là":"ℹ️ The sheet cell contains text, the app reads it as","← Chọn tài khoản khác":"← Choose another account","← Quay lại":"← Back","↻ Gửi lại":"↻ Resend","↻ Lưu lại":"↻ Save again","↻ Thử lại":"↻ Retry","↻ Thử xoá lại":"↻ Retry delete","↻ Đọc lại danh bạ":"↻ Reload contacts","⇒ việc hiện ở ngày hôm nay ·":"⇒ task now shows on today's date ·","⇒ việc quay lại lịch ở ngày hạn mới.":"⇒ task returns to the calendar on the new due date.","⊘ Huỷ":"⊘ Cancel","⊞ Bảng ABCD":"⊞ ABCD board","⏰ Đến hạn hôm nay":"⏰ Due today","⏳ Chuyến đi":"⏳ Trip","⏳ Còn":"⏳ Remaining","⏳ Nhiều ảnh — tải ảnh mất khoảng":"⏳ Many photos — upload takes about","⏳ Đang nạp dữ liệu đi địa bàn":"⏳ Loading field visit data","⏳ Đang đọc Công việc khác / lịch công tác từ Report Hub…":"⏳ Reading Other tasks / business trip schedule from Report Hub…","⏳ Đang đọc Report Hub…":"⏳ Reading Report Hub…","⏳ Ảnh chờ gửi ·":"⏳ Photos waiting to send ·","⏺ Đang nghe…":"⏺ Listening…","① Kết quả tháng":"① Monthly result","① Máy đang đăng nhập nhiều tài khoản Google cùng lúc — Google chuyển sang trang chọn tài khoản.":"① This device is signed into multiple Google accounts at once — Google switches to the account picker page.","① Đi địa bàn —":"① Field visit —","② Kế hoạch tháng":"② Monthly plan","② Other task — Key task & đầu việc con":"② Other task — Key task & sub-tasks","② Web App của file Sales & Marketing chưa Deploy với quyền “Anyone”.":"② The Sales & Marketing file's Web App hasn't been deployed with “Anyone” access.","▤ Bảng":"▤ Table","▦ Thẻ":"▦ Card","▴ Thu gọn":"▴ Collapse","▾ Kết quả":"▾ Result","▾ Xem đầy đủ":"▾ View full","◐ Đang làm":"◐ In progress","☰ Danh sách lớn":"☰ Full list","☰ Hiện bộ lọc":"☰ Show filters","☰ Ẩn bộ lọc":"☰ Hide filters","⚖️ So sánh":"⚖️ Compare","⚙ Lọc":"⚙ Filter","⚠ Chưa lấy được vị trí — bật Location rồi bấm lấy lại":"⚠ Couldn't get location — turn on Location, then tap to retry","⚠ không lấy được GPS":"⚠ couldn't get GPS","⚠️ Bấm lần nữa để XÁC NHẬN xoá":"⚠️ Tap again to CONFIRM delete","⚠️ Bấm lần nữa — xoá cả ẢNH trên Drive":"⚠️ Tap again — also deletes the PHOTO on Drive","⚠️ Bắt buộc chọn:":"⚠️ Required selection:","⚠️ Bắt buộc có dòng “Người gặp:” — bấm nút CBC ở trên":"⚠️ A “Person met:” line is required — tap the CBC button above","⚠️ Chuyến đi":"⚠️ Trip","⚠️ Chuyến đi đã được":"⚠️ The trip has been","⚠️ Chưa chèn được — copy dòng này dán vào Task Result:":"⚠️ Couldn't insert — copy this line and paste it into Task Result:","⚠️ Chưa chọn PIC nào.":"⚠️ No PIC selected yet.","⚠️ Chưa có buổi gặp nào trong":"⚠️ No meetings yet in","⚠️ Chưa đọc được Công việc khác từ Report Hub — lịch đang chỉ hiện đi địa bàn.":"⚠️ Couldn't read Other tasks from Report Hub — the calendar is only showing field visits.","⚠️ Chọn TBD thì bắt buộc chọn:":"⚠️ Selecting TBD requires you to also select:","⚠️ Cần bổ sung:":"⚠️ Needs to be added:","⚠️ Key Task này còn":"⚠️ This Key Task still has","⚠️ Lưu thất bại:":"⚠️ Save failed:","⚠️ Task đã xoá nhưng ảnh trên Drive có thể chưa xoá được — kiểm tra lại folder ảnh.":"⚠️ Task deleted, but the photo on Drive may not have been deleted — check the photo folder.","⚠️ Đang xem hồ sơ dựng từ dữ liệu đã tải.":"⚠️ Viewing a profile built from previously loaded data.","⚠️ Đã có nội dung thì bắt buộc dòng “Người gặp:” — bấm nút CBC ở trên":"⚠️ If there's content, a “Person met:” line is required — tap the CBC button above","⚠️ Đã gửi kèm":"⚠️ Already sent with","⚡ Cập nhật nhanh":"⚡ Quick update","⛔ Ảnh đi địa bàn phải chụp trực tiếp bằng camera — không dán từ clipboard":"⛔ Field visit photos must be taken directly with the camera — not pasted from clipboard","⛶ Toàn màn hình":"⛶ Full screen","✅ RESULT — kết quả":"✅ RESULT — outcome","✅ Task Result — kết quả thực tế":"✅ Task Result — actual outcome","✈️ Chuyến công tác":"✈️ Business trip","✈️ CÔNG TÁC":"✈️ BUSINESS TRIP","✈️ Công tác":"✈️ Business trip","✈️ Đề xuất công tác":"✈️ Propose a business trip","✉ Gửi ngay":"✉ Send now","✉️ Gửi thử cho tôi":"✉️ Send a test to me","✎ Mở hạng mục":"✎ Open item","✎ Sửa ADP":"✎ Edit ADP","✎ Sửa Key Task":"✎ Edit Key Task","✎ Sửa danh sách ·":"✎ Edit list ·","✎ Sửa hồ sơ":"✎ Edit profile","✎ Sửa thông tin":"✎ Edit info","✎ Sửa đầu việc":"✎ Edit task","✏️ Sửa":"✏️ Edit","✏️ Sửa chuyến công tác":"✏️ Edit business trip","✓ Dữ liệu đang là bản mới nhất":"✓ Data is up to date","✓ Gửi ảnh ngay":"✓ Send photo now","✓ Hoàn thành":"✓ Completed","✓ Lần đồng bộ gần nhất:":"✓ Last synced:","✓ Đã chèn khung":"✓ Frame inserted","✓ Đã chèn khung 4 mục":"✓ 4-item frame inserted","✓ Đã chèn khung Event review":"✓ Event review frame inserted","✓ Đã chèn link":"✓ Link inserted","✓ Đã chèn:":"✓ Inserted:","✓ Đã cập nhật Công việc khác":"✓ Other tasks updated","✓ Đã cập nhật dữ liệu mới":"✓ New data updated","✓ Đã cập nhật lịch":"✓ Schedule updated","✓ Đã cập nhật task vào Sheet":"✓ Task updated to Sheet","✓ Đã ghi CBC (người gặp)":"✓ CBC (person met) recorded","✓ Đã ghi CBC (người gặp) — có thể lưu":"✓ CBC (person met) recorded — ready to save","✓ Đã hoàn thành “":"✓ Completed “","✓ Đã lưu":"✓ Saved","✓ Đã lưu kế hoạch cho":"✓ Plan saved for","✓ Đã lấy được vị trí":"✓ Location retrieved","✓ Đã nạp":"✓ Loaded","✓ Đã thêm task cho":"✓ Task added for","✓ Đã tạo":"✓ Created","✓ Đã tạo file PowerPoint (":"✓ PowerPoint file created (","✓ Đã tạo kế hoạch đi địa bàn (chưa xác định account) cho tuần":"✓ Field visit plan created (account not yet set) for week","✓ Đã tạo kế hoạch đi địa bàn tuần":"✓ Field visit plan created for week","✓ Đã tải file Excel (":"✓ Excel file downloaded (","✓ Đã tải ảnh lên Drive":"✓ Photo uploaded to Drive","✓ Đã đủ CBC · ảnh · next action — tự chuyển Completed":"✓ CBC · photo · next action all complete — auto-moves to Completed","✕ Bỏ lọc":"✕ Clear filter","✕ Bỏ toàn bộ bộ lọc":"✕ Clear all filters","✕ Chuyến đi":"✕ Trip","✕ Thu nhỏ":"✕ Minimize","✕ Xoá từ khoá":"✕ Clear keyword","⟳ Làm mới":"⟳ Refresh","⟳ Thử lại":"⟳ Retry","⟳ Đọc lại":"⟳ Reload","⟳ Đọc lại danh bạ":"⟳ Reload contacts","⟳ Đồng bộ từ file Event":"⟳ Sync from Event file","⟳ Đồng bộ với Sheet":"⟳ Sync with Sheet","⤓ Tải PDF":"⤓ Download PDF","⤵ Lấy từ Plan":"⤵ Pull from Plan","⧉ Lấy kế hoạch tháng trước":"⧉ Copy last month's plan","⬇️ Tải Excel thống kê":"⬇️ Download statistics Excel","⬇️ Tải Excel thống kê ảnh":"⬇️ Download photo statistics Excel","⬇️ Tải PDF":"⬇️ Download PDF","⬇️ Tải file Excel":"⬇️ Download Excel file","⭐ Chỉ account có ADP":"⭐ Only accounts with ADP","⭐ Thêm ADP":"⭐ Add ADP","⭐ Ưu tiên":"⭐ Priority","＋ Account mới":"＋ New account","＋ CBC mới":"＋ New CBC","＋ Chọn mã sản phẩm":"＋ Select product code","＋ Thêm":"＋ Add","＋ Thêm ADP":"＋ Add ADP","＋ Thêm ADP cho account này":"＋ Add ADP for this account","＋ Thêm CBC":"＋ Add CBC","＋ Thêm Key Task":"＋ Add Key Task","＋ Thêm Key stakeholder":"＋ Add Key stakeholder","＋ Thêm Key stakeholder cho địa bàn này":"＋ Add Key stakeholder for this site","＋ Thêm buổi":"＋ Add session","＋ Thêm hạng mục":"＋ Add item","＋ Thêm hạng mục tháng":"＋ Add monthly item","＋ Thêm khoản chi phí":"＋ Add expense","＋ Thêm kết quả":"＋ Add result","＋ Thêm người liên hệ":"＋ Add contact person","＋ Thêm sản phẩm":"＋ Add product","＋ Thêm task":"＋ Add task","＋ Thêm task đầu tiên":"＋ Add first task","＋ Thêm việc":"＋ Add task","＋ Thêm việc ngày này":"＋ Add task for this day","＋ Thêm việc ·":"＋ Add task ·","＋ Thêm đơn hàng":"＋ Add sales order","＋ Thêm đầu việc":"＋ Add task","＋ Thêm đầu việc con":"＋ Add sub-task","＋ Thêm địa bàn mới":"＋ Add new site","＋ Thêm “":"＋ Add “","＋ Tạo Key Task mới":"＋ Create new Key Task","＋ việc":"＋ task","＋ Đơn hàng mới":"＋ New sales order","＋ Địa bàn mới":"＋ New site","🎉 Không còn việc quá hạn.":"🎉 No more overdue tasks.","🎤 Nói":"🎤 Speak","🎪 Khách hàng Event":"🎪 Event customer","🎪 Đồng bộ từ file Event":"🎪 Sync from Event file","🏥 Khách hàng":"🏥 Customer","👁 Mở bảng xem nhanh":"👁 Open quick view","👁️ Chi tiết công việc":"👁️ Task details","👤 CBC — người gặp":"👤 CBC — person met","👤 Người gặp dự kiến":"👤 Expected person to meet","👤 Thêm CBC":"👤 Add CBC","👥 Cả đội":"👥 Whole team","👥 Hồ sơ 360°":"👥 360° profile","👥 Tất cả":"👥 All","💬 Ý kiến quản lý:":"💬 Manager's comment:","💾 Cập nhật vào Sheet":"💾 Update to Sheet","💾 Lưu mục tiêu vào Sheet":"💾 Save target to Sheet","💾 Lưu thay đổi":"💾 Save changes","💾 Lưu vào Sheet":"💾 Save to Sheet","📁 Folder ảnh Drive":"📁 Drive photo folder","📁 Mở folder chuyến đi":"📁 Open trip folder","📄 Lưu báo cáo":"📄 Save report","📅 Báo cáo tuần":"📅 Weekly report","📅 Chọn ngày":"📅 Select date","📅 Gia hạn":"📅 Extend","📅 Lịch công việc":"📅 Work calendar","📅 Tuần này —":"📅 This week —","📅 Đã gia hạn “":"📅 Extended “","📈 Doanh số":"📈 Sales","📊 Biểu đồ":"📊 Chart","📊 Tạo PowerPoint":"📊 Create PowerPoint","📊 Tạo PowerPoint đi địa bàn":"📊 Create field visit PowerPoint","📊 Tạo file PowerPoint":"📊 Create PowerPoint file","📊 Tổng quan":"📊 Overview","📋 Báo cáo công tác":"📋 Business trip report","📋 Chèn khung":"📋 Insert frame","📋 Chèn khung 4 mục":"📋 Insert 4-item frame","📌 Đang thực hiện":"📌 In progress","📍 Ghi hoạt động":"📍 Log activity","📍 Không có toạ độ GPS":"📍 No GPS coordinates","📍 KẾ HOẠCH TUẦN":"📍 WEEKLY PLAN","📍 Lấy lại vị trí GPS":"📍 Retry GPS location","📍 Thông tin địa bàn":"📍 Updates","📍 ĐI ĐỊA BÀN":"📍 FIELD VISIT","📍 Đi địa bàn":"📍 Field visit","📑 Thầu":"📑 Tender","📘 Kế hoạch tháng":"📘 Monthly plan","📘 Kế hoạch tuần sau (":"📘 Next week's plan (","📘 Kế hoạch tuần sau —":"📘 Next week's plan —","📘 PLAN — kế hoạch":"📘 PLAN — plan","📘 Plan — dự định làm gì":"📘 Plan — what you intend to do","📧 Gửi báo cáo":"📧 Send report","📧 Gửi chính thức tới team":"📧 Send officially to the team","📨 Gửi đề xuất":"📨 Send proposal","📷 Xem tất cả ảnh":"📷 View all photos","📷 Ảnh đi địa bàn":"📷 Field visit photo","🔄 Tự đồng bộ":"🔄 Auto-sync","🔒 Chỉ":"🔒 Only","🔔 Bảng tin hoạt động":"🔔 Activity feed","🔔 Sắp đến hạn ·":"🔔 Due soon ·","🔗 Chèn link":"🔗 Insert link","🔗 Chèn link tham chiếu":"🔗 Insert reference link","🔧 Điền bù Area / PIC":"🔧 Fill in missing Area / PIC","🔴 Quá hạn":"🔴 Overdue","🔴 Việc quá hạn (":"🔴 Overdue tasks (","🕑 Gặp gần nhất":"🕑 Last met","🖼️ Xem ảnh đi địa bàn":"🖼️ View field visit photo","🗂 Dữ liệu account":"🗂 Account data","🗑 Xoá":"🗑 Delete","🗑 Xoá chuyến công tác":"🗑 Delete business trip","🗑 Xoá chuyến đi":"🗑 Delete trip","🗑 Xoá task":"🗑 Delete task","🗑 Xoá đơn":"🗑 Delete order","🗓 Báo cáo tháng":"🗓 Monthly report","🗓 Công việc trong tháng":"🗓 Monthly tasks","🛑 Lý do dừng chăm sóc":"🛑 Reason for stopping engagement","🤝 Người liên hệ / khách Event":"🤝 Contact / Event guest","🤝 Tất cả CBC":"🤝 All CBC","🧩 Công việc khác":"🧩 Other tasks","🧩 Công việc khác ·":"🧩 Other tasks ·","🧩 Tạo đủ khung tháng này":"🧩 Generate all frames for this month","🧩 VIỆC KHÁC":"🧩 OTHER TASKS","🧩 Việc khác":"🧩 Other tasks","Viếng thăm theo tháng":"Visits by month","Tên account · objective · key action":"Account name · objective · key action","VD: Triển khai mũi khoan 1559L khu vực miền Bắc":"E.g.: Launch MANI knives at Bangkok university hospitals","Đã làm gì, kết quả ra sao…":"What was done, what was the result…","🔍 Tìm theo tên người, account, số điện thoại, chức vụ…":"🔍 Search by name, account, phone, job title…","🔍 Tìm theo tên, mã, tỉnh, PIC… (gõ nhiều từ đều được, không cần dấu)":"🔍 Search by name, code, province, PIC… (several words OK)","🔍 Tìm trong key task, đầu việc, kết quả…":"🔍 Search key tasks, sub tasks, results…","Chỉ xem việc đang thực hiện":"Show only tasks in progress","Gọi điện":"Phone call","Hình thức khác":"Other channel","Khách thu tại hội thảo là người liên hệ (CBC), không phải account":"Guests collected at events are contacts (CBC), not accounts","Nhắn tin / Zalo / Email":"Message / Email","Nhắn tin / Zalo":"Message","Nạp lại danh bạ CBC từ Google Sheet":"Reload CBC contacts from Google Sheet","PIC cố định theo tài khoản đăng nhập":"PIC fixed to the signed-in account","Task thiếu dữ liệu":"Task missing data","Trước":"Previous","Sau":"Next","Việc đi gặp khách hàng tự đồng bộ từ tab Thông tin địa bàn — bật để xem cùng ở đây":"Customer visits synced automatically from Customer Visiting — turn on to show them here","Xem cả ngày":"View whole day","Đọc lại dữ liệu + đồng bộ lịch công tác":"Reload data","Ẩn / hiện bộ lọc và thống kê":"Show / hide filters and stats","khách hàng":"customers","mục kế hoạch tuần sau, nằm ở mục":"next-week plan items, in section","Nhập mật khẩu để vào hệ thống · Enter password":"Enter password","Mật khẩu · Password":"Password","✓ Đã có người gặp + next action — tự chuyển Completed":"✓ Person met + next action filled — status set to Completed","Mới lên kế hoạch — để To Do; ghi người gặp + next action sẽ tự chuyển Completed":"Just planned — keep To Do; fill in person met + next action and it switches to Completed","trong email.":"in the email.","trong email":"in the email","BS. Nguyễn Văn A - Trưởng khoa":"Dr. Somchai - Head of Department","Gõ tên tỉnh/thành…":"Type a province name…","Mục tiêu buổi làm việc… (không bắt buộc)":"Objective of the visit… (optional)","Mục tiêu cụ thể, đầu mối liên hệ… (không bắt buộc)":"Specific objective, contact person… (optional)","Số nhà, đường, phường/xã":"House no., street, sub-district","Theo Type action":"By Type action"};
+/* các mẫu câu có số / tên chen giữa — dịch bằng biểu thức chính quy (hàm thay thế được phép) */
+var WD_EN={"T2":"Mon","T3":"Tue","T4":"Wed","T5":"Thu","T6":"Fri","T7":"Sat","CN":"Sun","Thứ 2":"Monday","Thứ 3":"Tuesday","Thứ 4":"Wednesday","Thứ 5":"Thursday","Thứ 6":"Friday","Thứ 7":"Saturday","Chủ nhật":"Sunday"};
+var MON_EN=["","Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+function dEN(s){ var t=DICT_EN[String(s).trim()]; return t==null?s:t; }
+var RULES_EN=[
+  [/^⚠️ Cần bổ sung: (.+)$/, function(m,a){ return "⚠️ Please fill in: "+a.split(", ").map(dEN).join(", "); }],
+  [/^Xoá (Key Task|đầu việc) ([\d.]+)\?$/, function(m,a,b){ return "Delete "+(a==="Key Task"?"Key Task":"sub task")+" "+b+"?"; }],
+  [/^⚠️ Key Task này còn (\d+) đầu việc con\.$/, "⚠️ This Key Task still has $1 sub task(s)."],
+  [/^Đăng xuất khỏi tài khoản (.+)\?$/, "Sign out of account $1?"],
+  [/^Tạo (\d+) hạng mục cho (.+) — kỳ (\d+\/\d+)\?$/, "Create $1 items for $2 — period $3?"],
+  [/^Đang tạo khung (\d+)\/(\d+)(.*)$/, "Creating templates $1/$2$3"],
+  [/^Kỳ (\d+\/\d+) của (.+) đã có đủ (\d+) hạng mục — không tạo trùng$/, "Period $1 of $2 already has all $3 items — nothing duplicated"],
+  [/^✓ Đã tạo (\d+) hạng mục có sẵn khung$/, "✓ Created $1 items with templates"],
+  [/^✓ Đã thêm task cho (.+)$/, "✓ Task added for $1"],
+  [/^(\d+) hạng mục · (\d+) kế hoạch tháng sau$/, "$1 items · $2 next-month plans"],
+  [/^Tháng (\d{1,2}), (\d{4})$/, function(m,a,b){ return ["","January","February","March","April","May","June","July","August","September","October","November","December"][+a]+" "+b; }],
+  [/^Area cố định theo PIC (.+)$/, "Area fixed by PIC $1"],
+  [/^(-?\d+) ngày trước$/, "$1 days ago"],
+  [/^Gặp gần nhất (-?\d+) ngày trước$/, "Last met $1 days ago"],
+  [/^Quá hạn (\d+) ngày$/, "Overdue $1 days"],
+  [/^Chưa có doanh số trong (FY\d+)$/, "No sales in $1"],
+  [/^doanh số (FY\d+)$/, "sales $1"],
+  [/^Xem thêm \((.+) account\)$/, "Show more ($1 accounts)"],
+  [/^Việc quá hạn \((\d+)\)$/, "Overdue tasks ($1)"],
+  [/^\/(\d+) account đã tiếp xúc$/, "/$1 accounts contacted"],
+  [/^(\d+)% hoàn thành$/, "$1% completed"],
+  [/^(\d+) hạng mục · (\d+) có kết quả$/, "$1 items · $2 with results"],
+  [/^· (\d+) hạng mục · (\d+) đã có kết quả$/, "· $1 items · $2 with results"],
+  [/^(\d+) hoạt động · (\d+) ảnh · (\d+) other task · (\d+) việc tuần sau$/, "$1 activities · $3 other tasks · $4 next-week items"],
+  [/^Chưa gặp trong (FY\d+)$/, "Not met in $1"],
+  [/^Có ít nhất 1 lần làm việc trong (FY\d+)$/, "At least 1 interaction in $1"],
+  [/^Cả năm tài chính (FY\d+)$/, "Whole fiscal year $1"],
+  [/^KPI & Mục tiêu (FY\d+)$/, "KPI & Targets $1"],
+  [/^Không tìm thấy dòng (\d+)$/, "Row $1 not found"],
+  [/^PHẦN ([A-Z]\d*) — Tổng mục tiêu (.+)$/, "PART $1 — Overall targets of $2"],
+  [/^(T[2-7]|CN|Thứ \d|Chủ nhật) · Hôm nay$/, function(m,a){ return WD_EN[a]+" · Today"; }],
+  [/^(T[2-7]|CN)$/, function(m,a){ return WD_EN[a]; }],
+  [/^[Tt]háng (\d{1,2})\/(\d{4})$/, function(m,a,b){ return MON_EN[+a]+" "+b; }],
+  [/^Trong (FY\d+) · của (.+)$/, "In $1 · of $2"],
+  [/^Trên (\d+) account$/, "Out of $1 accounts"],
+  [/^Tuần (\d.*) – (.*\d)$/, "Week $1 – $2"],
+  [/^TỔNG (.+)$/, "TOTAL $1"],
+  [/^Tổng quan (FY\d+)$/, "Overview $1"],
+  [/^còn (\d+)$/, "$1 left"],
+  [/^lượt · ✓ (\d+) hoàn thành$/, "visits · ✓ $1 completed"],
+  [/^người liên hệ · hoạt động tính trong (FY\d+)$/, "contacts · activities counted in $1"],
+  [/^việc · ✓ (\d+) xong · ◐ (\d+) đang làm$/, "tasks · ✓ $1 done · ◐ $2 in progress"],
+  [/^· (\d+) hoạt động · (\d+) account · (\d+) CBC$/, "· $1 activities · $2 accounts · $3 CBC"],
+  [/^• Khác (\d+)$/, "• Other $1"],
+  [/^① Đi địa bàn — (.+) đến (.+)$/, "① Field visits — $1 to $2"],
+  [/^📘 Kế hoạch tuần sau \((.+)\)$/, "📘 Next week plan ($1)"],
+  [/^🔴 (\d+) việc quá hạn ›$/, "🔴 $1 overdue tasks ›"],
+  [/^＋ Thêm việc · (Thứ \d|Chủ nhật) (.+)$/, function(m,a,b){ return "＋ Add task · "+WD_EN[a]+" "+b; }],
+  [/^(Thứ \d|Chủ nhật),? (\d.*)$/, function(m,a,b){ return WD_EN[a]+" "+b; }],
+  /* chung: "Nhãn (12)" / "Nhãn: 12" — dịch phần nhãn bằng từ điển */
+  [/^(.+?) \((\d+)\)$/, function(m,a,b){ var t=dEN(a); return t===a?m:t+" ("+b+")"; }],
+  [/^(.+?): (\d[\d.,%]*)$/, function(m,a,b){ var t=dEN(a); return t===a?m:t+": "+b; }]
+];
+
+</script>
+<script>
+/* ═══════════════════════════════════════════════════════════════════════════════
+   ⭐ v18 — GIAO DIỆN TIẾNG ANH CHO NHÓM THAILAND SURGICAL
+   App vẫn dựng giao diện bằng tiếng Việt như cũ; khi đang dùng nhóm Thái (hoặc thiết bị
+   chỉ đăng nhập bằng mật khẩu Thái), bộ dịch quét DOM — chữ, placeholder, title, cả
+   hộp thoại confirm/alert/prompt — và thay bằng tiếng Anh. MutationObserver bảo đảm mọi
+   lần vẽ lại (đổi tab, mở form, toast…) đều được dịch ngay. Dữ liệu trên sheet không đổi.
+   Các nhóm Việt Nam (Dental / Surgical / Eyeless) KHÔNG bị ảnh hưởng.
+   ═══════════════════════════════════════════════════════════════════════════════ */
+var I18N={ on:false, obs:null, busy:false, pend:[], t:null };
+function i18nOn(){
+  try{
+    if(S && S.user) return isTH();
+    if(thOnly()) return true;
+    var saved=localStorage.getItem("mmh_dental_pic");
+    if(saved && ROLES[saved] && ROLES[saved].team==="thai") return true;
+    return false;
+  }catch(e){ return false; }
+}
+var LEAD_ICON_EN=/^([←-⇿⌀-➿⬀-⯿①-⓿■-◿\uD800-\uDFFF️‍©®＋•·\s✓✕✎＋⚠️·•→←↻⟳⤓⬇️]+)/;
+var LEAD_TAIL_EN=/([\s:：.…·,;!?»›▾▸▴→)]+)$/;
+function trEN(str){
+  var raw=String(str), key=raw.trim();
+  if(!key) return null;
+  function look(k){
+    if(Object.prototype.hasOwnProperty.call(DICT_EN,k)) return DICT_EN[k];
+    for(var i=0;i<RULES_EN.length;i++){
+      var r=RULES_EN[i]; r[0].lastIndex=0;
+      if(r[0].test(k)){ r[0].lastIndex=0; var o=k.replace(r[0], r[1]); if(o!==k) return o; }
+    }
+    return null;
+  }
+  var out=look(key);
+  if(out!==null) return raw.replace(key,out);
+  var m=LEAD_ICON_EN.exec(key);
+  if(m && m[1] && m[1].trim()!==""){
+    var rest=key.slice(m[1].length), o2=look(rest);
+    if(o2!==null) return raw.replace(key, m[1]+o2);
+    var m2=LEAD_TAIL_EN.exec(rest);
+    if(m2){ var core=rest.slice(0,rest.length-m2[1].length), o3=look(core); if(o3!==null) return raw.replace(key, m[1]+o3+m2[1]); }
+  }
+  var t=LEAD_TAIL_EN.exec(key);
+  if(t){ var c2=key.slice(0,key.length-t[1].length), o4=look(c2); if(o4!==null) return raw.replace(key, o4+t[1]); }
+  return null;
+}
+/* chuỗi nhiều dòng (confirm / alert / toast dài): dịch cả khối, không được thì dịch từng dòng */
+function trBlock(str){
+  if(str==null) return str;
+  var s=String(str), o=trEN(s); if(o!==null) return o;
+  if(s.indexOf("\n")<0) return s;
+  return s.split("\n").map(function(l){ var x=trEN(l); return x===null?l:x; }).join("\n");
+}
+var I18N_SKIP={SCRIPT:1,STYLE:1,TEXTAREA:1,NOSCRIPT:1};
+var I18N_ATTR=["placeholder","title","aria-label"];
+function i18nNode(root){
+  if(!I18N.on || !root) return;
+  I18N.busy=true;
+  try{
+    if(root.nodeType===3){
+      var p0=root.parentNode;
+      if(p0 && !I18N_SKIP[p0.nodeName] && !(p0.closest&&p0.closest("[data-noi18n]"))){
+        var o0=trEN(root.nodeValue); if(o0!==null && o0!==root.nodeValue) root.nodeValue=o0;
+      }
+    } else if(root.nodeType===1 || root.nodeType===9 || root.nodeType===11){
+      var w=document.createTreeWalker(root, NodeFilter.SHOW_TEXT, { acceptNode:function(n){
+        if(!n.nodeValue || !n.nodeValue.trim()) return NodeFilter.FILTER_REJECT;
+        if(!/[^\x00-\x7F]|[a-z]/i.test(n.nodeValue)) return NodeFilter.FILTER_REJECT;
+        var p=n.parentNode; if(!p || I18N_SKIP[p.nodeName]) return NodeFilter.FILTER_REJECT;
+        if(p.closest && p.closest("[data-noi18n]")) return NodeFilter.FILTER_REJECT;
+        return NodeFilter.FILTER_ACCEPT; } });
+      var list=[], n; while((n=w.nextNode())) list.push(n);
+      list.forEach(function(node){ var o=trEN(node.nodeValue); if(o!==null && o!==node.nodeValue) node.nodeValue=o; });
+      var els=root.querySelectorAll ? root.querySelectorAll("[placeholder],[title],[aria-label]") : [];
+      var fix=function(el){ I18N_ATTR.forEach(function(a){ var v=el.getAttribute&&el.getAttribute(a); if(!v) return;
+        var o=trBlock(v); if(o!==null && o!==v) el.setAttribute(a,o); }); };
+      if(root.getAttribute) fix(root);
+      [].forEach.call(els, fix);
+    }
+  }catch(e){ try{ console.error("i18n",e); }catch(x){} }
+  I18N.busy=false;
+}
+function i18nFlush(){
+  I18N.t=null;
+  var list=I18N.pend; I18N.pend=[];
+  if(list.length>80){ i18nNode(document.body); return; }
+  list.forEach(function(n){ if(n.isConnected!==false) i18nNode(n); });
+}
+function i18nStart(){
+  if(I18N.obs || !window.MutationObserver) return;
+  I18N.obs=new MutationObserver(function(ms){
+    if(!I18N.on || I18N.busy) return;
+    ms.forEach(function(m){
+      if(m.type==="childList") [].forEach.call(m.addedNodes, function(n){ I18N.pend.push(n); });
+      else if(m.type==="characterData") I18N.pend.push(m.target);
+      else if(m.type==="attributes") I18N.pend.push(m.target);
+    });
+    if(!I18N.t) I18N.t=setTimeout(i18nFlush, 0);
+  });
+  I18N.obs.observe(document.body,{childList:true,subtree:true,characterData:true,attributes:true,attributeFilter:I18N_ATTR});
+}
+function i18nApply(){
+  var want=i18nOn();
+  if(want===I18N.on && (!want || I18N.obs)) { if(want) i18nNode(document.body); return; }
+  I18N.on=want;
+  document.documentElement.lang=want?"en":"vi";
+  if(want){ i18nNode(document.body); i18nStart(); try{ document.title=trBlock(document.title); }catch(e){} }
+}
+/* hộp thoại gốc của trình duyệt */
+(function(){
+  var c=window.confirm, a=window.alert, p=window.prompt;
+  window.confirm=function(m){ return c.call(window, I18N.on?trBlock(m):m); };
+  window.alert=function(m){ return a.call(window, I18N.on?trBlock(m):m); };
+  window.prompt=function(m,d){ return p.call(window, I18N.on?trBlock(m):m, d); };
+})();
+document.addEventListener("DOMContentLoaded",function(){ try{ i18nApply(); }catch(e){} });
+</script>
 </head>
 <body>
 
@@ -1282,7 +1465,7 @@ tr.rp-late td{background:var(--dang-bg)}
 
 <script>
 /* ═══════════════════════════════════════════════════════════════════
-   MMH CRM — Frontend v17
+   MMH CRM — Frontend v18  (v18: + Thailand Surgical — English UI, no orders / photos, other tasks in sheet ALL TASK)
    Backend: Google Apps Script (Code.gs v8.3)  ·  Deploy: GitHub Pages
    ───────────────────────────────────────────────────────────────────
    ⭐ v16 — LỊCH CÔNG VIỆC + CÔNG TÁC · ĐƠN GÕ TAY TRÊN SHEET HIỆN TRÊN APP
@@ -1340,8 +1523,29 @@ var TEAMS = {
     key:"eyeless", label:"Eyeless", short:"Kim liền chỉ (Eyeless needle)", ic:"🪡",
     url:"https://script.google.com/macros/s/AKfycbxsoTRbRWZRaf-z7-xRy_oIkM-Yv1HoCOjVRO-K6oRRh3Dr7MMg4v53K0qqpMfZ_K5IAg/exec",
     eventSrc:"eyeless", taskType:"Sales-Eyeless", crmFile:"MMH_Eyeless_CRM"
+  },
+  /* ⭐ v18 — nhóm Thailand Surgical: file CRM riêng, giao diện TIẾNG ANH, KHÔNG có Sales order,
+     KHÔNG chụp ảnh; "Công việc khác" nằm ngay trong file Thái (sheet ALL TASK) thay vì Report Hub */
+  thai: {
+    key:"thai", label:"Thailand Surgical", short:"Ophthalmic · Surgical (Thailand)", ic:"🇹🇭",
+    url:"https://script.google.com/macros/s/AKfycbwYwzWomkuxkEEMS4AKpGsibx2uLwgEu7jlrtemMzeR2Sv2NNW-lOLhaxPF3Lgb2O1j9g/exec",
+    eventSrc:"", taskType:"Sales-Thailand Surgical", crmFile:"FY68_Thailand_Surgical_CRM",
+    lang:"en", noOrder:true, noPhoto:true, ownTasks:true, noTrip:true, noTurnover:true
   }
 };
+/* ⭐ v18 — cờ theo nhóm đang dùng */
+function isTH(){ try{ return curTeamKey()==="thai"; }catch(e){ return false; } }
+function noOrder(){ try{ return !!curTeam().noOrder; }catch(e){ return false; } }
+function noPhoto(){ try{ return !!curTeam().noPhoto; }catch(e){ return false; } }
+function ownTasks(){ try{ return !!curTeam().ownTasks; }catch(e){ return false; } }
+function noTrip(){ try{ return !!curTeam().noTrip; }catch(e){ return false; } }
+function hubUrl(){ try{ return curTeam().ownTasks ? curTeam().url : REPORTHUB_URL; }catch(e){ return REPORTHUB_URL; } }
+/* chuỗi GHI VÀO SHEET: nhóm Thái ghi tiếng Anh */
+function TX(vi,en){ return isTH()?en:vi; }
+var TH_MON={T1:"Jan",T2:"Feb",T3:"Mar",T4:"Apr",T5:"May",T6:"Jun",T7:"Jul",T8:"Aug",T9:"Sep",T10:"Oct",T11:"Nov",T12:"Dec"};
+function monLbl(t){ return isTH()?(TH_MON[t]||t):t; }
+function meetLbl(){ return isTH()?"Person met: ":"Người gặp: "; }
+function isStopNA(v){ return /^(dừng lại|stop)$/i.test(String(v||"").trim()); }
 function teamTaskType(){ return curTeam().taskType || ("Sales-"+curTeam().label); }
 var LS_TEAM="mmh_team";
 function curTeamKey(){
@@ -1410,7 +1614,7 @@ var S = {
 
 /* ⭐ v5 — KHUNG BÁO CÁO TUẦN (guide chữ mờ, gõ vào là mất) */
 var RESULT_GUIDE = ["1. Actions Taken:","2. Current Situation:","3. Customer Feedback:","4. Opportunities / Next Steps:"];
-var RESULT_PH_TXT = "Người gặp: BS. …\n" + RESULT_GUIDE.join("\n");
+var RESULT_PH_TXT = (isTH()?"Person met: Dr. …\n":"Người gặp: BS. …\n") + RESULT_GUIDE.join("\n");
 function phAttr(t){ return esc(t).replace(/\n/g,"&#10;"); }
 /* chèn sẵn khung 4 mục vào ô kết quả, giữ nguyên dòng "Người gặp:" và nội dung đã gõ */
 function insertResultTpl(id){
@@ -1493,8 +1697,8 @@ function messyNum(v){
 function fmtN(v){ return n(v).toLocaleString("vi-VN"); }
 function fmtVND(v){
   var x=n(v);
-  if(Math.abs(x)>=1e9) return (x/1e9).toFixed(x>=1e10?1:2).replace(/\.?0+$/,"")+" tỷ";
-  if(Math.abs(x)>=1e6) return (x/1e6).toFixed(x>=1e8?0:1).replace(/\.0$/,"")+" tr";
+  if(Math.abs(x)>=1e9) return (x/1e9).toFixed(x>=1e10?1:2).replace(/\.?0+$/,"")+(isTH()?"B":" tỷ");
+  if(Math.abs(x)>=1e6) return (x/1e6).toFixed(x>=1e8?0:1).replace(/\.0$/,"")+(isTH()?"M":" tr");
   return fmtN(x);
 }
 function fmtVN(iso){ if(!iso) return ""; var m=/^(\d{4})-(\d{2})-(\d{2})/.exec(String(iso)); return m?(m[3]+"/"+m[2]+"/"+m[1]):String(iso); }
@@ -1891,6 +2095,8 @@ function boot(){
 function canAuto(saved){
   if(!saved || !ROLES[saved]) return false;
   if(!authOk()) return false;
+  if(ROLES[saved].team==="thai" && !thOk()) return false;          /* ⭐ v18 */
+  if(thOnly() && ROLES[saved].team!=="thai") return false;
   if(ROLES[saved].grp==="Management" && !mgmtOk()) return false;
   return true;
 }
@@ -2071,14 +2277,23 @@ var ROLES = {
   "Khang":     { grp:"Surgical Sales", title:"Surgical Sales PIC — South",   email:"mmh.saigon2@manimedicalhanoi.com", ini:"KH", team:"surgical" },
   "Viet Ha":   { grp:"Surgical Sales", title:"Surgical Sales PIC — North",   email:"mmh.hanoi2@manimedicalhanoi.com",  ini:"VH", team:"surgical" },
   /* ⭐ v7.2 — Eyeless Sales */
-  "Trang":     { grp:"Eyeless Sales",  title:"Eyeless Sales PIC",            email:"marketing.mmh2@manimedicalhanoi.com", ini:"TR", team:"eyeless" }
+  "Trang":     { grp:"Eyeless Sales",  title:"Eyeless Sales PIC",            email:"marketing.mmh2@manimedicalhanoi.com", ini:"TR", team:"eyeless" },
+  /* ⭐ v18 — Thailand Surgical Sales */
+  "Dao":       { grp:"Thailand Surgical Sales", title:"Thailand Surgical Sales PIC", email:"manithailand@manimedicalhanoi.com",  ini:"DA", team:"thai" },
+  "Miew":      { grp:"Thailand Surgical Sales", title:"Thailand Surgical Sales PIC", email:"manithailand4@manimedicalhanoi.com", ini:"MI", team:"thai" }
 };
 var ROLE_GROUPS = [
   { k:"Management",     ic:"🏛", sub:"Xem toàn bộ dữ liệu · cần mã nội bộ" },
   { k:"Dental Sales",   ic:"🦷", sub:"File dữ liệu Dental · chỉ xem việc của mình" },
   { k:"Surgical Sales", ic:"🔬", sub:"File dữ liệu Surgical · chỉ xem việc của mình" },
-  { k:"Eyeless Sales",  ic:"🪡", sub:"File dữ liệu Eyeless · chỉ xem việc của mình" }
+  { k:"Eyeless Sales",  ic:"🪡", sub:"File dữ liệu Eyeless · chỉ xem việc của mình" },
+  { k:"Thailand Surgical Sales", ic:"🇹🇭", sub:"Thailand Surgical data file · own tasks only" }
 ];
+/* ⭐ v18 — mật khẩu riêng của nhóm Thái (nhập 1 lần / thiết bị). Nhập "1234" ở màn hình đầu
+   ⇒ chỉ thấy nhóm Thailand. Người đã có mật khẩu chung muốn vào tài khoản Thái cũng phải nhập "1234" một lần. */
+var TH_PW = "1234", LS_TH = "mmh_th_auth";
+function thOk(){ try{ return localStorage.getItem(LS_TH)==="1"; }catch(e){ return false; } }
+function thOnly(){ try{ return localStorage.getItem("mmh_dental_auth")==="th"; }catch(e){ return false; } }
 function isMgmt(){ return !!(S.user && S.user.grp === "Management"); }
 /* ⭐ v13 — DANH SÁCH PIC THEO NHÓM
    Dental: Viet · Vinh · Phuong  ·  Surgical: Viet Ha · Khang  ·  Eyeless: Trang
@@ -2113,21 +2328,22 @@ function picFld(id,cur,label,extra){
 function setPicSel(id,v){ var el=$(id); if(v && el && el.tagName==="SELECT") el.value=v; }
 function afterUserKnown(){ try{ paintTeamBtn(); }catch(e){} }
 function canSeeGallery(){ return isMgmt(); }
-function authOk(){ try{ return localStorage.getItem(LS_AUTH)==="1"; }catch(e){ return false; } }
+function authOk(){ try{ var v=localStorage.getItem(LS_AUTH); return v==="1"||v==="th"; }catch(e){ return false; } }
 function mgmtOk(){ try{ return localStorage.getItem(LS_MGMT)==="1"; }catch(e){ return false; } }
 function lgLab(t){ var e=document.querySelector("#login .lglab"); if(e) e.textContent=t; }
 
 function showLogin(){
   $("login").classList.add("on");
+  try{ i18nApply(); }catch(e){}
   if(!authOk()) return stepPw();
   stepPic();
 }
 /* ── bước 1: mật khẩu ── */
 function stepPw(){
-  lgLab("Nhập mật khẩu để vào hệ thống");
+  lgLab("Nhập mật khẩu để vào hệ thống · Enter password");
   $("picGrid").className="lgcenter";
   $("picGrid").innerHTML='<div class="lgbox">'+
-    '<input class="inp lgin" type="password" id="lg_pw" placeholder="Mật khẩu" autocomplete="current-password" inputmode="text">'+
+    '<input class="inp lgin" type="password" id="lg_pw" placeholder="Mật khẩu · Password" autocomplete="current-password" inputmode="text">'+
     '<div class="lgerr" id="lg_err"></div>'+
     '<button class="btn pri lgbtn" onclick="checkPw()">Tiếp tục →</button>'+
     '<div class="lghint">Chỉ cần nhập một lần — lần sau mở app sẽ tự nhớ trên thiết bị này.</div></div>';
@@ -2137,6 +2353,11 @@ function stepPw(){
 }
 function checkPw(){
   var v=String(($("lg_pw")||{}).value||"").trim().toLowerCase();
+  if(v===TH_PW){                              /* ⭐ v18 — mật khẩu nhóm Thái */
+    try{ localStorage.setItem(LS_AUTH,"th"); localStorage.setItem(LS_TH,"1"); }catch(e){}
+    try{ i18nApply(); }catch(e){}
+    return stepPic();
+  }
   if(v!==APP_PW){
     $("lg_err").textContent="Mật khẩu chưa đúng. Thử lại nhé.";
     $("lg_pw").value=""; $("lg_pw").focus(); return;
@@ -2148,7 +2369,7 @@ function checkPw(){
 function stepPic(){
   lgLab("Bạn là ai?");
   $("picGrid").className="";
-  $("picGrid").innerHTML=ROLE_GROUPS.map(function(g){
+  $("picGrid").innerHTML=ROLE_GROUPS.filter(function(g){ return !thOnly() || g.k==="Thailand Surgical Sales"; }).map(function(g){
     var names=Object.keys(ROLES).filter(function(nm){ return ROLES[nm].grp===g.k; });
     return '<div class="lggrp"><div class="lggh"><span>'+g.ic+'</span><b>'+esc(g.k)+'</b><i>'+esc(g.sub)+'</i></div>'+
       '<div class="picgrid2">'+names.map(function(nm){
@@ -2182,9 +2403,32 @@ function ensureTeamFor(pic){
 }
 function pickPic(pic){
   var r=ROLES[pic];
+  if(r && r.team==="thai" && !thOk()) return stepThai(pic);       /* ⭐ v18 */
   if(r && r.grp==="Management" && !mgmtOk()) return stepCode(pic);
   if(ensureTeamFor(pic)) return;
   startApp(pic);
+}
+/* ⭐ v18 — người dùng mật khẩu chung chọn tài khoản Thái: nhập mật khẩu Thái một lần */
+function stepThai(pic){
+  lgLab("Password for the Thailand team");
+  $("picGrid").className="lgcenter";
+  $("picGrid").innerHTML='<div class="lgbox">'+
+    '<div class="lgwho"><div class="av" style="background:'+avColor(pic)+'">'+esc((ROLES[pic]||{}).ini||initials(pic))+'</div>'+
+      '<div><b>'+esc(pic)+'</b><span>'+esc((ROLES[pic]||{}).title||"")+'</span></div></div>'+
+    '<input class="inp lgin" type="password" id="lg_th" placeholder="Password" inputmode="numeric" maxlength="8">'+
+    '<div class="lgerr" id="lg_err3"></div>'+
+    '<button class="btn pri lgbtn" onclick="checkThai(\''+esc(pic).replace(/'/g,"\\'")+'\')">Sign in →</button>'+
+    '<div class="lghint">Only once on this device.</div>'+
+    '<button class="linkbtn" style="margin-top:12px" onclick="stepPic()">← Choose another account</button></div>';
+  var e=$("lg_th");
+  e.onkeydown=function(ev){ if(ev.key==="Enter") checkThai(pic); };
+  setTimeout(function(){ try{ e.focus(); }catch(x){} },150);
+}
+function checkThai(pic){
+  var v=String(($("lg_th")||{}).value||"").trim();
+  if(v!==TH_PW){ $("lg_err3").textContent="Wrong password."; $("lg_th").value=""; $("lg_th").focus(); return; }
+  try{ localStorage.setItem(LS_TH,"1"); }catch(e){}
+  pickPic(pic);
 }
 /* ── bước 3: mã nội bộ cho Management ── */
 function stepCode(pic){
@@ -2218,6 +2462,7 @@ function startApp(pic){
   /* chặn cả đường tự đăng nhập lại: thiết bị nhớ PIC Surgical nhưng nhóm đang là
      Dental (bản cũ để lại) thì đổi nhóm rồi nạp lại, không vào app bằng file sai */
   if(ensureTeamFor(pic)) return;
+  if(r.team==="thai" && !thOk()){ $("login").classList.add("on"); return stepThai(pic); }   /* ⭐ v18 */
   try{ localStorage.setItem(LS_PIC,pic); }catch(e){}
   var p=(S.picList||[]).filter(function(x){return x.pic===pic;})[0]||{};
   S.user={ pic:pic, grp:r.grp,
@@ -2227,6 +2472,7 @@ function startApp(pic){
   if(!isMgmt()) S.filt.pic=S.user.pic;      /* sales: khoá cứng theo PIC của mình */
   else S.filt.pic="";
   afterUserKnown();                          /* ⭐ v13 — hiện nút đổi nhóm cho Management (bản cũ quên gọi ⇒ kẹt ở Dental) */
+  try{ document.body.classList.toggle("th-mode", isTH()); i18nApply(); }catch(e){}   /* ⭐ v18 */
   $("login").classList.remove("on");
   $("app").classList.add("on");
   $("uInit").textContent=r.ini||initials(pic);
@@ -2276,7 +2522,7 @@ function paintTeamBtn(){
     var bt=document.querySelector(".brand .bt");
     if(bt) bt.textContent=t.label+" CRM";
     var sub=document.querySelector(".brand .bs")||document.querySelector(".brand .sub")||document.querySelector("#brandSub");
-    if(sub) sub.textContent="MANI Medical Hanoi · "+t.label+" Sales";
+    if(sub) sub.textContent=(t.key==="thai"?"MANI Medical Thailand · ":"MANI Medical Hanoi · ")+t.label+" Sales";
     document.title="MMH CRM system · "+t.label;
   }catch(e){}
 }
@@ -2291,6 +2537,8 @@ paintTeamBtn();
    hai nơi cùng ghi vào một dòng. */
 var REPORTHUB_URL = "https://script.google.com/macros/s/AKfycbzn-5chMgO7lQPKmot8P7UkP9C40MdCPtiTTa4H1gcKepVsnr1IYfcB7sSdK1_jrZYY/exec";
 var OTHER_TYPE_RE = /sale/i;          /* chỉ lấy đầu việc của khối Sales */
+/* ⭐ v18 — nhóm có sheet ALL TASK riêng: mọi Type task đều là việc của nhóm */
+function otherTypeOk(t){ return ownTasks() || OTHER_TYPE_RE.test(String(t||"")); }
 /* ⭐ v5.8 — Key task "…Customer visiting" do Visiting_Sync tự sinh từ tab 6. WEEKLY REPORT.
    Sales sửa chúng ở "Thông tin địa bàn", không sửa ở đây ⇒ mặc định ẩn khỏi Công việc khác
    để tránh trùng lặp và tránh sửa nhầm chỗ. Bật lại bằng nút trong bộ lọc. */
@@ -2323,7 +2571,7 @@ function hubJsonp(params,timeoutMs){
     window[cb]=function(d){ if(settled) return; settled=true; done(); res(d); };
     params=params||{}; params.callback=cb;
     var qs=Object.keys(params).map(function(k){ return encodeURIComponent(k)+"="+encodeURIComponent(params[k]==null?"":params[k]); }).join("&");
-    var url=REPORTHUB_URL+"?"+qs;
+    var url=hubUrl()+"?"+qs;                          /* ⭐ v18 — Thailand: backend của chính file Thái */
     el.src=url;
     el.onerror=function(){
       if(settled) return; settled=true; done();
@@ -2357,7 +2605,7 @@ function hubErrText(e){
 }
 (function(){ try{ var v=localStorage.getItem("mmh_otview"); if(v) S.otherView=v; }catch(e){} })();
 /* ⭐ v13 — Công việc khác: hiện ngay bản đã lưu, đọc lại Report Hub ở nền khi quá 2 phút */
-var OTHER_KEY="k:*:other";
+var OTHER_KEY=ownTasks()?("k:"+curTeamKey()+":other"):"k:*:other";   /* ⭐ v18 — Thái lưu riêng */
 function otherHydrate(){
   if(S.other) return;
   var c=kvGet(OTHER_KEY);
@@ -2398,7 +2646,7 @@ function loadOther(force){
 }
 /* Management xem Công việc khác của ĐÚNG nhóm đang chọn (Dental / Surgical / Eyeless) */
 function otherTeamOk(k){
-  if(!isMgmt()) return true;
+  if(!isMgmt() || ownTasks()) return true;          /* ⭐ v18 */
   var me=curTeamKey(), t=picKey_(k.type||""), hit="";
   if(/eyeless/.test(t)) hit="eyeless"; else if(/surgical|ophthal/.test(t)) hit="surgical"; else if(/dental/.test(t)) hit="dental";
   if(hit) return hit===me;
@@ -2413,12 +2661,12 @@ function pickTaskKind(){
   var h='<div class="pick2">'+
     '<button class="pick2-c terr" onclick="closeModal();formWeekly(null)">'+
       '<div class="ic">📍</div><div class="ti">Đi địa bàn</div>'+
-      '<div class="ds">Viếng thăm khách hàng, gặp bác sĩ, demo sản phẩm — có ảnh chụp tại chỗ và GPS</div>'+
-      '<div class="sh">Ghi vào <b>'+esc(curTeam().crmFile)+'</b> · tab 6. WEEKLY REPORT</div></button>'+
+      '<div class="ds">'+(noPhoto()?'Viếng thăm khách hàng, gặp bác sĩ, demo sản phẩm':'Viếng thăm khách hàng, gặp bác sĩ, demo sản phẩm — có ảnh chụp tại chỗ và GPS')+'</div>'+
+      '<div class="sh">Ghi vào <b>'+esc(curTeam().crmFile)+'</b> · '+(isTH()?'sheet 6. CUSTOMER VISITING':'tab 6. WEEKLY REPORT')+'</div></button>'+
     '<button class="pick2-c other" onclick="closeModal();S.wkTab=\'other\';pgWeekly();setTimeout(function(){formOtherKey(\'\');},260)">'+
       '<div class="ic">🧩</div><div class="ti">Công việc khác</div>'+
       '<div class="ds">Họp, hỗ trợ NPP, hồ sơ thầu, sự kiện, việc nội bộ — không phải đi gặp khách</div>'+
-      '<div class="sh">Ghi vào <b>Sales &amp; Marketing</b> · tab WEEKYLY new</div></button>'+
+      (ownTasks()?'<div class="sh">Ghi vào <b>'+esc(curTeam().crmFile)+'</b> · sheet ALL TASK</div></button>':'<div class="sh">Ghi vào <b>Sales &amp; Marketing</b> · tab WEEKYLY new</div></button>')+
   '</div>';
   openModal("Thêm công việc mới",h,'<button class="btn" onclick="closeModal()">Huỷ</button>');
 }
@@ -2439,6 +2687,7 @@ function hubPost(body){
   var flat={}; Object.keys(body||{}).forEach(function(k){
     var v=body[k]; flat[k]=(v!==null&&typeof v==="object")?JSON.stringify(v):v; });
   flat.pic=flat.pic||S.user.pic;          /* backend xác định người dùng qua tham số pic */
+  if(ownTasks()) flat.actor=flat.actor||S.user.pic;   /* ⭐ v18 — backend Thái kiểm tra người sửa */
   return hubJsonp(flat,60000).then(function(j){
     if(!j||j.ok===false) throw new Error((j&&j.error)||"Lỗi khi ghi vào Report Hub");
     return j;
@@ -2450,6 +2699,7 @@ function hubPost(body){
    rồi nạp lại phần Công việc khác để màn hình hiện đúng số liệu mới.
    Gọi tối đa 1 lần / 45 giây; lỗi mạng thì im lặng bỏ qua — trigger vẫn chạy như cũ. */
 function syncOrderTasks(){
+  if(noOrder()) return Promise.resolve(false);       /* ⭐ v18 */
   var now=Date.now();
   if(S._osAt && now-S._osAt<45000) return Promise.resolve(false);
   S._osAt=now;
@@ -2482,6 +2732,11 @@ function otherFindKey(no){
   return f;
 }
 function otherTypes(){
+  if(ownTasks()){                                    /* ⭐ v18 — Type task theo MASTER LIST của file Thái */
+    var o={}; (S.master.typeTask||[]).forEach(function(x){ if(x) o[x]=1; });
+    ((S.other&&S.other.keys)||[]).forEach(function(k){ if(k.type) o[k.type]=1; });
+    o[teamTaskType()]=1; return Object.keys(o).sort();
+  }
   var t={};
   ((S.other&&S.other.keys)||[]).forEach(function(k){ if(k.type) t[k.type]=1; });
   ["Sales-Dental","Sales-Surgical","Sales-Eyeless"].forEach(function(x){ t[x]=1; });   /* ⭐ v7.2 */
@@ -2512,7 +2767,7 @@ function otherKeys(){
   var out=[];
   ((S.other&&S.other.keys)||[]).forEach(function(k){
     if(String(k.fy||"") && String(k.fy)!==S.fy) return;
-    if(!OTHER_TYPE_RE.test(String(k.type||""))) return;
+    if(!otherTypeOk(k.type)) return;
     if(!otherTeamOk(k)) return;                          /* ⭐ v13 */
     if(!S.otherShowVisit && isVisitingKey(k)) return;   /* việc đi địa bàn: xem ở tab bên cạnh */
     if(S.otherType && String(k.type||"")!==S.otherType) return;   /* ⭐ v8 — lọc theo Loại việc */
@@ -2798,7 +3053,7 @@ function renderOther(){
       '<p style="max-width:620px;margin:0 auto;text-align:left;line-height:1.65">'+nl2br(S.otherErr)+'</p>'+
       '<div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:13px">'+
         '<button class="btn pri sm" onclick="refreshOther()">⟳ Thử lại</button>'+
-        '<a class="btn sm" href="'+esc(REPORTHUB_URL)+'?action=weekly" target="_blank" rel="noopener">Mở Report Hub để kiểm tra</a>'+
+        '<a class="btn sm" href="'+esc(hubUrl())+'?action=weekly" target="_blank" rel="noopener">Mở Report Hub để kiểm tra</a>'+
       '</div>'+
       '<div style="font-size:11.5px;color:var(--mute);margin-top:10px;max-width:620px">'+
         'Bấm “Mở Report Hub để kiểm tra”: hiện ra một trang đầy chữ JSON là Web App vẫn chạy tốt — '+
@@ -3451,6 +3706,7 @@ function pgStake(){
   renderStake();
 }
 function stakeTabBar(){
+  if(!curTeam().eventSrc){ S.stTab="all"; return ""; }     /* ⭐ v18 */
   var t=S.stTab||"all";
   var nEv=stakeRows().filter(function(r){ return r.event && (!S.stFy||r.evFy===S.stFy); }).length;
   return '<div class="shtabs">'+
@@ -3497,7 +3753,7 @@ function renderStake(){
       '<div class="chipbar" style="margin-bottom:0">'+
         '<div class="chip'+(S.stSort==="none"?" on":"")+'" onclick="setStFilter(\'stSort\',\''+(S.stSort==="none"?"":"none")+'\')">Chưa chăm sóc</div>'+
         '<div class="chip'+(S.stSort==="act"?" on":"")+'" onclick="setStFilter(\'stSort\',\''+(S.stSort==="act"?"":"act")+'\')">Nhiều lần làm việc nhất</div>'+
-        '<div class="chip'+(S.stSort==="sales"?" on":"")+'" onclick="setStFilter(\'stSort\',\''+(S.stSort==="sales"?"":"sales")+'\')">Doanh số cao nhất</div>'+
+        (noOrder()?"":'<div class="chip'+(S.stSort==="sales"?" on":"")+'" onclick="setStFilter(\'stSort\',\''+(S.stSort==="sales"?"":"sales")+'\')">Doanh số cao nhất</div>')+
       '</div></div>'+
     '<div id="stakeList"></div>'+
   '</div>';
@@ -3647,7 +3903,10 @@ var TABS=[
 ];
 /* thứ tự nút ở thanh dưới trên điện thoại */
 var MOB_ORDER=["weekly","cust","stake","order","present","report","monthly","adp","dash","kpi","photos"];
-function navTabs(){ return TABS.filter(function(t){ return t.gate!=="gallery" || canSeeGallery(); }); }
+function navTabs(){ return TABS.filter(function(t){
+  if(t.id==="order" && noOrder()) return false;            /* ⭐ v18 */
+  if(t.id==="photos" && noPhoto()) return false;
+  return t.gate!=="gallery" || canSeeGallery(); }); }
 function buildNav(){
   var h="",lastGrp="";
   if(isMgmt()){
@@ -3662,7 +3921,7 @@ function buildNav(){
     if(t.grp!==lastGrp){ h+='<div class="grp">'+t.grp+'</div>'; lastGrp=t.grp; }
     h+='<button class="nvi" data-t="'+t.id+'" onclick="go(\''+t.id+'\')"><span class="ic">'+t.ic+'</span><span class="lb">'+t.lb+'</span></button>';
   });
-  h+='<div style="flex:1"></div><div style="padding:10px;font-size:10.5px;color:var(--mute);line-height:1.5">MMH CRM v13<br>'+
+  h+='<div style="flex:1"></div><div style="padding:10px;font-size:10.5px;color:var(--mute);line-height:1.5">MMH CRM v18<br>'+
      (isMgmt()?'<a href="'+DRIVE_FOLDER+'" target="_blank">📁 Folder ảnh Drive</a>':"")+'</div>';
   $("side").innerHTML=h;
   /* ⭐ v4.5 — thanh dưới trượt ngang, đủ mọi mục, bỏ nút "Thêm" */
@@ -3681,6 +3940,7 @@ function moreMenu(){
   openModal("Chức năng khác",h,'<button class="btn" onclick="closeModal()">Đóng</button>');
 }
 function go(tab){
+  if((tab==="order"&&noOrder())||(tab==="photos"&&noPhoto())) tab="weekly";   /* ⭐ v18 */
   S.tab=tab;
   document.querySelectorAll("[data-t]").forEach(function(el){ el.classList.toggle("on", el.getAttribute("data-t")===tab); });
   $("fab").classList.toggle("on", tab==="weekly"||tab==="dash");
@@ -3757,7 +4017,7 @@ function dashSrc(){
 function dashMissing(){
   var m=[];
   if(!S.cache.weekly) m.push("hoạt động địa bàn");
-  if(!tGet("order")) m.push("đơn hàng");
+  if(!noOrder() && !tGet("order")) m.push("đơn hàng");
   if(!tGet("present")) m.push("thuyết trình");
   if(!(S.custIndex&&S.custIndex.length)) m.push("danh mục khách hàng");
   if(!S.cbcRows) m.push("người liên hệ (CBC)");
@@ -3765,8 +4025,9 @@ function dashMissing(){
   return m;
 }
 /* nhóm thông tin trên Dashboard */
-var DASH_GROUPS=[["all","📊 Tổng quan"],["cust","🏥 Khách hàng"],["field","📍 Đi địa bàn"],
+var DASH_GROUPS0=[["all","📊 Tổng quan"],["cust","🏥 Khách hàng"],["field","📍 Đi địa bàn"],
                  ["biz","🧾 Kinh doanh"],["adp","⭐ ADP Key account"]];
+var DASH_GROUPS=DASH_GROUPS0.filter(function(g){ return !(g[0]==="biz" && noOrder()); });   /* ⭐ v18 */
 function setDashG(g){ S.dashG=g; renderDash(); }
 /* ── tính toàn bộ số liệu dashboard trong trình duyệt ── */
 function dashBuild(){
@@ -3923,7 +4184,7 @@ function dashBuild(){
     });
 
   return { months:months, rangeLabel:R.label, rangeSub:R.sub,
-    monthLabels: months.map(function(m){ return "T"+parseInt(String(m).slice(4,6),10); }),
+    monthLabels: months.map(function(m){ return monLbl("T"+parseInt(String(m).slice(4,6),10)); }),
     amtByMonth:amtByMonth, ordByMonth:ordByMonth, visByMonth:visByMonth, newAcc:newAcc,
     presByMonth:presByMonth, attByMonth:attByMonth,
     amtByPic:top(amtByPic,12), topCustomers:top(custAmt,10), prodAmt:top(prodAmt,10),
@@ -4025,11 +4286,17 @@ function renderDash(){
   }
 
   /* — KHỐI: tổng quan chỉ tiêu — */
+  var totalPres=d.presByMonth.reduce(function(s,v){return s+v;},0);
   var blkKpi='<div class="grid g4" style="margin-bottom:14px">'+
-      kpiCard("Doanh số",totalAmt,"amount","vnd")+
-      kpiCard("Số đơn hàng",totalOrd,"orders")+
-      kpiCard("Lượt viếng thăm",totalVis,"visiting")+
-      kpiCard("Account mở mới",totalNew,"newacct")+
+      (noOrder()                                         /* ⭐ v18 — Thailand: không có đơn hàng */
+        ? kpiCard("Lượt viếng thăm",totalVis,"visiting")+
+          kpiCard("Buổi thuyết trình",totalPres,"present")+
+          kpiCard("Account mở mới",totalNew,"newacct")+
+          stat("Người liên hệ (CBC)",fmtN(d.cbcTotal),"Trên "+fmtN(d.totalAcc)+" account")
+        : kpiCard("Doanh số",totalAmt,"amount","vnd")+
+          kpiCard("Số đơn hàng",totalOrd,"orders")+
+          kpiCard("Lượt viếng thăm",totalVis,"visiting")+
+          kpiCard("Account mở mới",totalNew,"newacct"))+
     '</div>';
 
   /* — KHỐI: khách hàng — */
@@ -4055,7 +4322,7 @@ function renderDash(){
             '<span>còn '+fmtN(d.evTotal-d.evTouched)+'</span></div></div>'+
           stat("Chưa gán account",fmtN(d.evNoAcc),
                d.evNoAcc?"Cần gán để theo dõi được":"Đã gán account hết",d.evNoAcc?"#E08A00":"#1E9E5A")+
-          stat("Doanh số account liên quan",fmtVND(d.evOrder),"Cộng đơn hàng của các account này")+
+          (noOrder()?"":stat("Doanh số account liên quan",fmtVND(d.evOrder),"Cộng đơn hàng của các account này"))+
         '</div>'+
         '<div class="tbwrap" style="max-height:300px"><table class="tb"><thead><tr>'+
           '<th>Sự kiện</th><th class="num" style="width:96px">Số khách</th>'+
@@ -4089,14 +4356,18 @@ function renderDash(){
   var blkFieldStat='<div class="grid g4" style="margin-bottom:14px">'+
       stat("Tổng hoạt động",fmtN(d.totalActivity),"Trong "+esc(d.rangeLabel))+
       stat("Lượt viếng thăm",fmtN(totalVis),"Type action = Visiting")+
+      (noPhoto()?stat("Account đã tiếp xúc",fmtN(d.coveredAcc),"Trên "+fmtN(d.totalAcc)+" account"):
       stat("Hoạt động có ảnh",fmtN(d.withPhoto),
-           (d.totalActivity?Math.round(d.withPhoto/d.totalActivity*100):0)+'% số dòng đã đính ảnh')+
+           (d.totalActivity?Math.round(d.withPhoto/d.totalActivity*100):0)+'% số dòng đã đính ảnh'))+
       stat("Việc quá hạn",fmtN(d.overdue),d.overdue?"Cần cập nhật kết quả":"Không có việc quá hạn",
            d.overdue?"#D9433F":"#1E9E5A")+
     '</div>';
   var blkField='<div class="cwrap" style="margin-bottom:14px">'+
-      card("Viếng thăm &amp; đơn hàng","Số lượt mỗi tháng",
-        svgSeries(d.monthLabels,[{name:"Viếng thăm",data:d.visByMonth,color:"#5B8DD9"},{name:"Đơn hàng",data:d.ordByMonth,color:"#E8A302"}],"num","bar"))+
+      (noOrder()
+        ? card("Viếng thăm theo tháng","Số lượt mỗi tháng",
+            svgSeries(d.monthLabels,[{name:"Viếng thăm",data:d.visByMonth,color:"#5B8DD9"}],"num","bar"))
+        : card("Viếng thăm &amp; đơn hàng","Số lượt mỗi tháng",
+            svgSeries(d.monthLabels,[{name:"Viếng thăm",data:d.visByMonth,color:"#5B8DD9"},{name:"Đơn hàng",data:d.ordByMonth,color:"#E8A302"}],"num","bar")))+
       card("Hình thức tiếp xúc","Theo Type action",
         svgDonut(toEntries(d.actByType),fmtN(d.totalActivity),"hoạt động"))+
       card("Loại khách hàng viếng thăm","Số lượt theo Account type",
@@ -4108,7 +4379,7 @@ function renderDash(){
       card("Trạng thái công việc","Tiến độ các đầu việc đã ghi nhận",
         svgHBars(toEntries(d.byStatus),"num",function(k2){ return /complet/i.test(k2)?"#1E9E5A":/cancel/i.test(k2)?"#8A97B5":/75/.test(k2)?"#3FA64B":/50/.test(k2)?"#3A5CAA":/25/.test(k2)?"#E08A00":"#8A97B5"; }))+
       card("Phản hồi khách hàng","Cảm nhận sau tiếp xúc",
-        svgHBars(toEntries(d.byFeedback),"num",function(k2){ return /tích/i.test(k2)?"#1E9E5A":/tiêu/i.test(k2)?"#D9433F":/trung/i.test(k2)?"#E8A302":"#8A97B5"; }))+
+        svgHBars(toEntries(d.byFeedback),"num",function(k2){ return /tích|positive/i.test(k2)?"#1E9E5A":/tiêu|negative|reject/i.test(k2)?"#D9433F":/trung|neutral/i.test(k2)?"#E8A302":"#8A97B5"; }))+
     '</div>'+
     '<div class="cwrap" style="margin-bottom:14px">'+
       card("Lượt đi địa bàn theo PIC","Xếp hạng trong kỳ",
@@ -4201,7 +4472,7 @@ function renderDash(){
   var bodyHtml =
       G==="cust"  ? (blkCustStat+blkCust)
     : G==="field" ? (blkFieldStat+blkField+blkRecent)
-    : G==="biz"   ? (blkKpi+blkBiz)
+    : (G==="biz"&&!noOrder()) ? (blkKpi+blkBiz)
     : G==="adp"   ? blkAdp
     : (blkKpi+
        '<div class="grid g4" style="margin-bottom:14px">'+
@@ -4216,7 +4487,20 @@ function renderDash(){
          stat("Việc quá hạn",fmtN(d.overdue),d.overdue?"Cần cập nhật kết quả":"Không có việc quá hạn",
               d.overdue?"#D9433F":"#1E9E5A")+
        '</div>'+
-       '<div class="cwrap" style="margin-bottom:14px">'+
+       (noOrder()                                         /* ⭐ v18 — Thailand: biểu đồ theo hoạt động */
+       ? '<div class="cwrap" style="margin-bottom:14px">'+
+           card("Viếng thăm theo tháng","Số lượt mỗi tháng",
+             svgSeries(d.monthLabels,[{name:"Viếng thăm",data:d.visByMonth,color:"#5B8DD9"}],"num","bar"))+
+           card("Hình thức tiếp xúc","Theo Type action",
+             svgDonut(toEntries(d.actByType),fmtN(d.totalActivity),"hoạt động"))+
+         '</div>'+
+         '<div class="cwrap" style="margin-bottom:14px">'+
+           card("Account &amp; CBC mở mới","Theo từng tháng trong kỳ",
+             svgSeries(d.monthLabels,[{name:"Account mới",data:d.newAcc,color:"#1E9E5A"},{name:"CBC mới",data:d.newCbc,color:"#B44FA6"}],"num","bar"))+
+           card("Nhóm sản phẩm trao đổi","Số lượt nhắc tới trong task",
+             svgHBars(toEntries(d.byProduct),"num",function(k2,i){ return PAL[i%PAL.length]; }))+
+         '</div>'
+       : '<div class="cwrap" style="margin-bottom:14px">'+
          card("Doanh số theo tháng","Đơn vị VND · "+esc(d.rangeLabel),
            svgSeries(d.monthLabels,[{name:"Doanh số",data:d.amtByMonth,color:"#3A5CAA"}],"vnd",d.months.length>2?"line":"bar"))+
          card("Viếng thăm &amp; đơn hàng","Số lượt mỗi tháng",
@@ -4227,7 +4511,7 @@ function renderDash(){
            svgSeries(d.monthLabels,[{name:"Account mới",data:d.newAcc,color:"#1E9E5A"},{name:"CBC mới",data:d.newCbc,color:"#B44FA6"}],"num","bar"))+
          card("Cơ cấu nhóm sản phẩm","Theo doanh số",
            svgDonut(toEntries(d.prodAmt),fmtVND(totalAmt),"tổng","vnd"))+
-       '</div>'+
+       '</div>')+
        blkRecent);
 
   $("main").innerHTML='<div class="pg">'+
@@ -4259,7 +4543,7 @@ var KPI_DELTA = { amount:1, present:1, newacct:1 };  /* chỉ tiêu hiện cột
 
 function kpiDirty(){ return Object.keys(S.targetDraft||{}).length>0; }
 function pgKPI(){
-  if(!S.turnover && !S._toLoading && !S.turnoverErr)
+  if(!curTeam().noTurnover && !S.turnover && !S._toLoading && !S.turnoverErr)
     loadTurnover().then(function(){ if(S.tab==="kpi") renderKPI(); })
                   .catch(function(){ if(S.tab==="kpi") renderKPI(); });
   if(S.kpi&&S.kpi._fy===S.fy) return renderKPI();
@@ -4468,6 +4752,7 @@ function fmtQty(v){ return n(v).toLocaleString("vi-VN"); }
 
 /* tổng Actual/Forecast của đúng 4 NPP — dùng cho dòng "doanh số Dental" ở PHẦN A */
 function turnoverDentalActual(picOnly){
+  if(curTeam().noTurnover) return null;             /* ⭐ v18 */
   var g=turnoverByDistributor((S.toRange==="FY")?fyMonths(S.fy):null, picOnly||"");
   return g?g.actual:null;
 }
@@ -4485,6 +4770,7 @@ function refreshTurnover(){
 function setToRange(v){ S.toRange=v; renderKPI(); }
 /* khối hiển thị trong tab KPI */
 function turnoverBlock(picSel){
+  if(curTeam().noTurnover) return "";                /* ⭐ v18 */
   var months = (S.toRange==="FY") ? fyMonths(S.fy) : null;   /* null = lấy toàn bộ tháng có trong file */
   var stamp = S.turnover ? ('cập nhật '+new Date(S.turnover.at).toLocaleTimeString("vi-VN",{hour:"2-digit",minute:"2-digit"})) : "";
   var head='<div class="ct"><span class="dot"></span>Doanh số nhà phân phối'+
@@ -4585,13 +4871,13 @@ function renderKPI(){
   var k=S.kpi, mgr=S.user.role==="manager";
   var qsel=S.kpiQ||"FY";
   var picSel=mgr?(S.kpiPic||""):S.user.pic;   /* sales chỉ xem chỉ tiêu của mình */
-  turnoverAutoOn();
+  if(!curTeam().noTurnover) turnoverAutoOn();
 
   /* ── PHẦN A ── */
   var partA='<div class="tbwrap"><table class="tb"><thead><tr>'+
     '<th style="width:32px">#</th><th>Mục tiêu chiến lược</th><th>Chỉ số</th><th class="num">Mục tiêu FY</th>'+
     '<th class="num">'+esc(k.prevFY)+'</th><th class="num">Chênh lệch</th><th class="num">Actual</th><th style="width:160px">% đạt</th></tr></thead><tbody>'+
-    k.partA.map(function(a){
+    k.partA.filter(function(a){ return !(noOrder() && /^(amount|orders)$/.test(String(a.blockId||""))); }).map(function(a){
       var dv=S.targetDraft["A"+a.row];
       var v=dv!==undefined?dv.value:(a.target?fmtN(a.target):"");
       var inp=mgr?'<input class="inp num" style="height:32px;text-align:right" value="'+esc(v)+'" data-scope="A" data-row="'+a.row+'" oninput="tgIn(this)">':('<b>'+(a.target?fmtN(a.target):"—")+'</b>');
@@ -4622,7 +4908,7 @@ function renderKPI(){
   (k.blocks||[]).forEach(function(b){ (b.rows||[]).forEach(function(r){ if(picList.indexOf(r.pic)<0) picList.push(r.pic); }); });
   distributorList().forEach(function(d){ if(d.pic&&picList.indexOf(d.pic)<0) picList.push(d.pic); });
 
-  var blocks=(k.blocks||[]).filter(function(b){ return !KPI_HIDE[b.id]; }).map(function(b){
+  var blocks=(k.blocks||[]).filter(function(b){ return !KPI_HIDE[b.id] && !(noOrder() && /^(amount|orders)$/.test(String(b.id||""))); }).map(function(b){
     var showD=!!KPI_DELTA[b.id];
     var rows0=(b.rows||[]).filter(function(r){ return !picSel||r.pic===picSel; });
     var qHead=k.quarters.map(function(q){ return '<th class="num">'+q.name+'</th>'; }).join("");
@@ -4860,7 +5146,7 @@ function renderCustList(){
     '<th style="width:112px">Tỉnh</th><th style="width:80px">PIC</th>'+
     '<th style="width:230px">Target → Achieve '+esc(S.fy)+'</th>'+
     '<th style="width:186px">Activities</th><th class="num" style="width:52px">CBC</th>'+
-    '<th class="num" style="width:56px">Đơn</th></tr></thead><tbody>'+
+    (noOrder()?'':'<th class="num" style="width:56px">Đơn</th>')+'</tr></thead><tbody>'+
     shown.map(function(c){
       var mx=custMetricOf(c.name);
       var g=ABC[mx.abcd];
@@ -4892,7 +5178,7 @@ function renderCustList(){
         '<td>'+skHl(c.province,toks)+'</td><td>'+skHl(c.pic,toks)+'</td>'+
         '<td>'+bar+'</td>'+
         '<td>'+custActCell(mx)+'</td>'+
-        '<td class="num">'+(c.nCbc||0)+'</td><td class="num">'+(c.nOrder||0)+'</td></tr>'; }).join("")+
+        '<td class="num">'+(c.nCbc||0)+'</td>'+(noOrder()?'':'<td class="num">'+(c.nOrder||0)+'</td>')+'</tr>'; }).join("")+
     '</tbody></table></div>'+
     (rows.length>S.custLimit?'<div style="text-align:center;margin-top:12px">'+
       '<button class="btn" onclick="S.custLimit+=100;renderCustList()">Xem thêm ('+fmtN(rows.length-S.custLimit)+' account)</button></div>':"");
@@ -4963,7 +5249,7 @@ function renderCust(){
       '<div class="chipbar" id="custChips" style="margin-bottom:0">'+
         '<div class="chip'+(f.visit==="none"?" on":"")+'" data-k="visit" data-v="none" onclick="custToggle(\'visit\',\'none\')">Chưa gặp trong '+esc(S.fy)+'</div>'+
         '<div class="chip'+(f.visit==="has"?" on":"")+'" data-k="visit" data-v="has" onclick="custToggle(\'visit\',\'has\')">Đã gặp</div>'+
-        '<div class="chip'+(f.sort==="sales"?" on":"")+'" data-k="sort" data-v="sales" onclick="custToggle(\'sort\',\'sales\')">Sắp theo doanh số</div>'+
+        (noOrder()?'':'<div class="chip'+(f.sort==="sales"?" on":"")+'" data-k="sort" data-v="sales" onclick="custToggle(\'sort\',\'sales\')">Sắp theo doanh số</div>')+
       '</div>'+
       (isMgmt()?'<div class="chipbar" id="custPicBar"><div class="chip'+(f.pic?"":" on")+'" onclick="custPic(\'\')">Tất cả PIC</div>'+
         picChips.map(function(p){ return '<div class="chip'+(f.pic===p?" on":"")+'" onclick="custPic(\''+esc(p)+'\')">'+esc(p)+'</div>'; }).join("")+'</div>':"")+
@@ -5131,6 +5417,12 @@ function formCustomer(c){
 }
 function autoArea(){
   var pv=$("f_province").value;
+  if(isTH()){                                        /* ⭐ v18 — Thailand: lấy vùng từ account cùng tỉnh */
+    var cnt={}; (S.custIndex||[]).forEach(function(c){ if(c.province===pv && c.area) cnt[c.area]=(cnt[c.area]||0)+1; });
+    var best="", mx=0; Object.keys(cnt).forEach(function(k){ if(cnt[k]>mx){ mx=cnt[k]; best=k; } });
+    if(best && $("f_area")) $("f_area").value=best;
+    return;
+  }
   var NORTH=["Hanoi","Ha Giang","Cao Bang","Bac Kan","Tuyen Quang","Lao Cai","Dien Bien","Lai Chau","Son La","Yen Bai","Hoa Binh","Thai Nguyen","Lang Son","Quang Ninh","Bac Giang","Phu Tho","Vinh Phuc","Bac Ninh","Hai Duong","Hai Phong","Hung Yen","Thai Binh","Ha Nam","Nam Dinh","Ninh Binh","Thanh Hoa","Nghe An","Ha Tinh","Ha Noi"];
   var CENTRAL=["Quang Binh","Quang Tri","Thua Thien-Hue","Da Nang","Quang Nam","Quang Ngai","Binh Dinh","Phu Yen","Khanh Hoa","Ninh Thuan","Binh Thuan","Kon Tum","Gia Lai","Dak Lak","Dak Nong","Lam Dong"];
   var a=NORTH.indexOf(pv)>=0?"North":CENTRAL.indexOf(pv)>=0?"Central":pv?"South":"";
@@ -5257,7 +5549,7 @@ function formCBC(row,code){
     '<div class="row">'+
       '<div class="fld"><label>Role</label><select class="inp" id="b_role">'+opts(S.master.role,b.role,"— chọn —")+'</select></div>'+
       '<div class="fld"><label>Influence</label><select class="inp" id="b_influence">'+opts(S.master.influence,b.influence,"— chọn —")+'</select></div>'+
-      '<div class="fld"><label>Trust</label><select class="inp" id="b_trust">'+opts(S.master.influence,b.trust,"— chọn —")+'</select></div>'+
+      '<div class="fld"><label>Trust</label><select class="inp" id="b_trust">'+opts(S.master.trust||S.master.influence,b.trust,"— chọn —")+'</select></div>'+
     '</div>'+
     '<div class="fld"><label>Ghi chú</label><textarea class="inp" id="b_note">'+esc(b.note||"")+'</textarea></div>';
   S.editing={ tab:"cbc", row:b._row||0, ctx:{ code:lock, c:(lock&&lock===String(c.code||""))?c:((S.custIndex||[]).filter(function(x){return String(x.code)===lock;})[0]||{}) } };
@@ -5334,7 +5626,9 @@ function accountPickerOld(inputId,hiddenId,onPick){
    · Task Result bắt buộc có CBC (người gặp); thiếu CBC ⇒ thêm Key stakeholder ngay
    ═══════════════════════════════════════════════════════════════════════════════ */
 
-var NEXT_ACTIONS = ["Tiếp tục chăm - Tăng tốc","Tiếp tục chăm - Duy trì","Chờ - Thử lại sau 30 ngày","Dừng lại"];
+var NEXT_ACTIONS = isTH()
+  ? ["Keep nurturing - Accelerate","Keep nurturing - Maintain","Wait - Retry after 30 days","Stop"]
+  : ["Tiếp tục chăm - Tăng tốc","Tiếp tục chăm - Duy trì","Chờ - Thử lại sau 30 ngày","Dừng lại"];
 
 /* ═══════════ ⭐ v10 — ACCOUNT "TBD" (chưa xác định) ═══════════
    Dùng khi sales biết tuần tới có đi địa bàn nhưng chưa chốt được account.
@@ -5347,7 +5641,8 @@ var FIELD_ACC_TYPES=["Hospital","Clinic","Dealer","University","Distributor"];
 /* nhóm khách hàng dự kiến tiếp cận — khớp với cột "Account type (auto)" */
 var TBD_GROUPS=[["Hospital","Bệnh viện"],["Clinic","Phòng khám"],["University","Trường đại học"],
                 ["Dealer","Đại lý"],["Distributor","Nhà phân phối"]];
-function tbdGroupVn(k){ var f=TBD_GROUPS.filter(function(x){return x[0]===k;})[0]; return f?f[1]:k; }
+function tbdGroupVn(k){ if(isTH()) return ({Hospital:"hospital(s)",Clinic:"clinic(s)",University:"university(ies)",Dealer:"dealer(s)",Distributor:"distributor(s)"})[k]||k;
+  var f=TBD_GROUPS.filter(function(x){return x[0]===k;})[0]; return f?f[1]:k; }
 /* Plan của dòng TBD không phải ô tự do — chọn nhóm khách hàng và tỉnh thành (nhiều được) */
 /* ⭐ v14 — BỎ ô "Nhóm khách hàng dự kiến tiếp cận".
    Dòng TBD nghĩa là CHƯA xác định đi đâu, gặp ai — bắt chọn trước nhóm khách hàng chỉ
@@ -5404,7 +5699,7 @@ function tbdSel(pfx,kind){
 }
 function tbdPlanText(pfx){
   var p=tbdSel(pfx,"p"), note=String(($(pfx+"_note")||{}).value||"").trim(), L=[];
-  if(p.length) L.push("Tỉnh/thành dự kiến: "+p.join(", "));
+  if(p.length) L.push(TX("Tỉnh/thành dự kiến: ","Planned provinces: ")+p.join(", "));
   if(note) L.push(note);
   return L.join("\n");
 }
@@ -5421,7 +5716,7 @@ function tbdPrev(pfx){
    lọc được theo Task Status (chỉ tính buổi đã Completed).
    Thứ tự hiển thị: phòng khám → bệnh viện → trường đại học → đại lý → NPP. */
 var TBD_ORDER=["Clinic","Hospital","University","Dealer","Distributor"];
-var TBD_EMPTY="Chưa ghi nhận hoạt động đi địa bàn nào hoàn thành trong tuần";
+var TBD_EMPTY=TX("Chưa ghi nhận hoạt động đi địa bàn nào hoàn thành trong tuần","No completed field visit recorded this week");
 function tbdIsDone(st){ return /complet/i.test(String(st||"")); }
 /* ⭐ v13 — đếm một lần cho mọi (PIC, tuần) thay vì quét toàn bộ dòng cho từng dòng TBD */
 function tbdIndex(rows){
@@ -5458,7 +5753,7 @@ function tbdResultText(rows,pic,startIso,idx){
   var x=tbdCounts(rows,pic,startIso,idx);
   var parts=TBD_ORDER.filter(function(k){ return x.c[k]; })
     .map(function(k){ return x.c[k]+" "+tbdGroupVn(k).toLowerCase(); });
-  return parts.length ? ("Đã tiếp cận "+parts.join(", ")) : TBD_EMPTY;
+  return parts.length ? (TX("Đã tiếp cận ","Visited ")+parts.join(", ")) : TBD_EMPTY;
 }
 /* ⭐ v12 — Task Status của dòng TBD do hệ thống giữ, sales không phải tự đổi:
      chưa đi buổi nào            → Not Started
@@ -5565,7 +5860,7 @@ function pickOpt(list,re,dflt){
   var a=(list||[]).filter(function(x){ return re.test(String(x)); });
   return a.length?a[0]:dflt;
 }
-function tbdProcess(){ return pickOpt(S.master.process,/t[ìi]m\s*hi[ểe]u/i,"TÌM HIỂU"); }
+function tbdProcess(){ return pickOpt(S.master.process,/t[ìi]m\s*hi[ểe]u|identify/i,isTH()?"IDENTIFY":"TÌM HIỂU"); }
 function tbdAction(){ return pickOpt(S.master.typeAction,/visiting/i,"Visiting"); }
 function tbdTypeTask(cur){ return cur||pickOpt(S.master.typeTask,/^sale/i,(S.master.typeTask||[])[0]||""); }
 /* dựng dữ liệu 1 dòng TBD trọn tuần — dùng chung cho form thủ công và hộp thoại gửi báo cáo */
@@ -5578,7 +5873,7 @@ function tbdRow(startIso,plan,prov,pic){
     product:"", plan:String(plan||""), result:"",
     status:stTodo(), feedback:"", nextAction:"", stopReason:"" };
 }
-var MEET_RE = /^Người gặp:[^\n]*/m;
+var MEET_RE = /^(Người gặp|Person met):[^\n]*/m;
 var WD = ["Chủ nhật","Thứ 2","Thứ 3","Thứ 4","Thứ 5","Thứ 6","Thứ 7"];
 
 function weekRange(){
@@ -5593,9 +5888,9 @@ function tkFlag(w){ /* task thiếu dữ liệu bắt buộc */
   var miss=[];
   /* ⭐ v12 — dòng TBD không cần ảnh lẫn CBC; kết quả do hệ thống tự tổng hợp */
   if(isTbdAcc(w.account)) return miss;
-  if(isVisiting(w)&&!hasPhoto(w)) miss.push("thiếu ảnh");
+  if(!noPhoto()&&isVisiting(w)&&!hasPhoto(w)) miss.push("thiếu ảnh");
   if(!hasMeet(w)&&!/^MMH/i.test(parseAcc(w.account).name||"")) miss.push("thiếu CBC");
-  if(String(w.nextAction||"")==="Dừng lại"&&!String(w.stopReason||"").trim()) miss.push("thiếu lý do dừng");
+  if(isStopNA(w.nextAction)&&!String(w.stopReason||"").trim()) miss.push("thiếu lý do dừng");
   return miss;
 }
 
@@ -5873,7 +6168,7 @@ function renderTerritory(){
     '<div class="strip">'+
       '<div><b>'+rows.length+'</b><span>task trong kỳ</span></div>'+
       '<div><b>'+nVisit+'</b><span>viếng thăm</span></div>'+
-      '<div><b>'+nPhoto+'</b><span>có ảnh</span></div>'+
+      (noPhoto()?'<div><b>'+Object.keys(accSet).length+'</b><span>khách hàng</span></div>':'<div><b>'+nPhoto+'</b><span>có ảnh</span></div>')+
       '<div class="'+(nFlag?"bad":"")+'"><b>'+nFlag+'</b><span>cần bổ sung</span></div>'+
     '</div>'+
 
@@ -5961,7 +6256,7 @@ function taskCard(w){
       (w.typeTask?'<span class="ttag" style="background:var(--line2);color:var(--sub)">'+esc(w.typeTask)+'</span>':"")+
       (w.process?'<span class="ttag" style="background:#F3EDFB;color:#6B4A9E">'+esc(w.process)+'</span>':"")+
       (w.product?'<span class="ttag" style="background:#FFF6E4;color:#8A5A00">'+esc(w.product)+'</span>':"")+
-      (w.nextAction?'<span class="ttag" style="background:'+(w.nextAction==="Dừng lại"?"var(--dang-bg);color:#A82F2C":"var(--ok-bg);color:#15803D")+'">'+esc(w.nextAction)+'</span>':"")+
+      (w.nextAction?'<span class="ttag" style="background:'+(isStopNA(w.nextAction)?"var(--dang-bg);color:#A82F2C":"var(--ok-bg);color:#15803D")+'">'+esc(w.nextAction)+'</span>':"")+
     '</div>'+
     (w.plan?'<div class="tk-pl"><b>KẾ HOẠCH</b>'+esc(String(w.plan).slice(0,220))+'</div>':"")+
     (w.result?'<div class="tk-rs"><b>'+(tbd?"KẾT QUẢ TỰ TỔNG HỢP":"KẾT QUẢ")+'</b>'+esc(String(w.result).slice(0,320))+'</div>'
@@ -6024,7 +6319,7 @@ function tkReqSync(){
   var s=$("tk-status");
   if(s && !S.tkStatusManual && !isDone){
     var w=S.task||{}, ta=curV("tk-ta","typeAction");
-    var photoOk=(ta!=="Visiting")||!!S.pending||((w.photos||[]).length>0);
+    var photoOk=noPhoto()||(ta!=="Visiting")||!!S.pending||((w.photos||[]).length>0);
     if(hasCbc && photoOk && String(curV("tk-next","nextAction")).trim()){
       var want=stDone();
       if(want && stHas(want)){ s.value=want; S.dirty.status=want;
@@ -6055,7 +6350,7 @@ function taskEditorHTML(w){
       +selT("tk-status","status","Task Status",S.master.status,w.status,1)
       +selT("tk-next","nextAction","Next action (cột T)",NEXT_ACTIONS,w.nextAction,MEET_RE.test(String(w.result||""))?1:0)
     +'</div></div>'
-    +'<div class="te-sec" id="tk-stop-sec" style="'+(String(w.nextAction||"")==="Dừng lại"||w.stopReason?"":"display:none")+'">'
+    +'<div class="te-sec" id="tk-stop-sec" style="'+(isStopNA(w.nextAction)||w.stopReason?"":"display:none")+'">'
       +'<div class="te-st">🛑 Lý do dừng chăm sóc <span class="te-req">*</span></div>'
       +'<textarea id="tk-stop" style="min-height:70px" oninput="markDirty(\'stopReason\',this.value)" placeholder="Vì sao dừng theo đuổi account này…">'+esc(w.stopReason||"")+'</textarea></div>'
 
@@ -6101,8 +6396,8 @@ function markDirty(field,val){
   var el=$({status:"tk-status",nextAction:"tk-next",typeTask:"tk-tt",typeAction:"tk-ta",result:"tk-result",stopReason:"tk-stop"}[field]||"");
   if(el&&String(val||"").trim()) el.classList.remove("bad");
   if(field==="nextAction"){
-    var sec=$("tk-stop-sec"); if(sec) sec.style.display=(val==="Dừng lại")?"":"none";
-    if(val==="Dừng lại"&&$("tk-stop")) $("tk-stop").focus();
+    var sec=$("tk-stop-sec"); if(sec) sec.style.display=isStopNA(val)?"":"none";
+    if(isStopNA(val)&&$("tk-stop")) $("tk-stop").focus();
   }
   if(field==="result"){
     var f=$("tk-meetflag"); if(f){
@@ -6166,12 +6461,12 @@ function openMeetPicker(targetId,accStr){
 }
 function pickMeet(i){
   var s=(S._stakeList||[])[i]; if(!s) return;
-  insertMeetLine("Người gặp: "+[s.contact,s.jobTitle,s.specialize].filter(Boolean).join(" - "));
+  insertMeetLine(meetLbl()+[s.contact,s.jobTitle,s.specialize].filter(Boolean).join(" - "));
 }
 function pickMeetManual(){
   var el=$("mp_manual"), v=el?String(el.value||"").trim():"";
   if(!v) return toast("Nhập tên người gặp trước đã","warn");
-  insertMeetLine("Người gặp: "+v.replace(/^Người gặp:\s*/i,""));
+  insertMeetLine(meetLbl()+v.replace(/^(Người gặp|Person met):\s*/i,""));
 }
 /* ⭐ v4.7 — chèn dòng "Người gặp:" vào đúng ô đang soạn.
    Picker nằm ở lớp 2 nên form nhập vẫn còn nguyên trong DOM ⇒ ghi thẳng vào
@@ -6226,7 +6521,7 @@ function openStakeAdd(targetId,accStr){
     +'<div class="row">'
       +'<div class="fld"><label>Role</label><select class="inp" id="ks_role">'+opts(S.master.role,"","— chọn —")+'</select></div>'
       +'<div class="fld"><label>Influence</label><select class="inp" id="ks_inf">'+opts(S.master.influence,"","— chọn —")+'</select></div>'
-      +'<div class="fld"><label>Trust</label><select class="inp" id="ks_tru">'+opts(S.master.influence,"","— chọn —")+'</select></div>'
+      +'<div class="fld"><label>Trust</label><select class="inp" id="ks_tru">'+opts(S.master.trust||S.master.influence,"","— chọn —")+'</select></div>'
     +'</div>'
     +'<div class="fld"><label>Ghi chú</label><textarea class="inp" id="ks_note"></textarea></div>';
   S._ksCtx={ code:c.code||"", name:a.name||"", type:a.type||c.type||"", address:c.address||"",
@@ -6248,7 +6543,7 @@ function saveStakeAdd(){
     busy(false); toast("Đã thêm "+name+" vào CBC","ok",3800);
     d._row=r.row||0; S.cbcRows=(S.cbcRows||[]).concat([d]);
     afterWrite("cbc", r.row||0, d);
-    insertMeetLine("Người gặp: "+[d.contact,d.jobTitle,d.specialize].filter(Boolean).join(" - "));
+    insertMeetLine(meetLbl()+[d.contact,d.jobTitle,d.specialize].filter(Boolean).join(" - "));
   }).catch(function(e){ busy(false); toast(e.message,"err",5000); });
 }
 
@@ -6598,8 +6893,8 @@ function saveTask(){
   mark("tk-fb",hasCbc?!!String(curV("tk-fb","feedback")).trim():true,"Customer feedback");
   mark("tk-result",isDone?!!String(result).trim():true,"Task Result");
   if(String(result).trim() && !hasCbc) bad.push("CBC (dòng “Người gặp:” trong Task Result)");
-  if(next==="Dừng lại" && !String(curV("tk-stop","stopReason")).trim()){ mark("tk-stop",false,"Lý do dừng chăm sóc"); }
-  if(isDone && typeAction==="Visiting" && !S.pending && !(w.photos||[]).length) bad.push("ảnh đi địa bàn (bắt buộc với Visiting đã hoàn thành)");
+  if(isStopNA(next) && !String(curV("tk-stop","stopReason")).trim()){ mark("tk-stop",false,"Lý do dừng chăm sóc"); }
+  if(!noPhoto() && isDone && typeAction==="Visiting" && !S.pending && !(w.photos||[]).length) bad.push("ảnh đi địa bàn (bắt buộc với Visiting đã hoàn thành)");
   if(bad.length){ toast("⚠️ Cần bổ sung: "+bad.join(", "),"warn",6000); return; }
 
   var hasData=Object.keys(S.dirty).length>0, hasPh=!!S.pending;
@@ -6614,7 +6909,7 @@ function saveTask(){
       if(f in S.dirty) d[f]=S.dirty[f];
     });
     if(d.start) d.finish=d.start;
-    if(("nextAction" in d)&&d.nextAction!=="Dừng lại") d.stopReason="";
+    if(("nextAction" in d)&&!isStopNA(d.nextAction)) d.stopReason="";
     /* ⭐ v15 — sửa nội dung và ảnh đi chung một lượt gọi, không còn chờ hai lần */
     var pay={action:"saveWeekly",data:d};
     if(hasPh){
@@ -6678,7 +6973,7 @@ function toggleVoice(id,btn){
   var SR=window.SpeechRecognition||window.webkitSpeechRecognition;
   if(!SR) return toast("Trình duyệt không hỗ trợ nhập bằng giọng nói","warn");
   if(_rec) return stopVoice();
-  _rec=new SR(); _rec.lang="vi-VN"; _rec.continuous=true; _rec.interimResults=true;
+  _rec=new SR(); _rec.lang=isTH()?"en-US":"vi-VN"; _rec.continuous=true; _rec.interimResults=true;
   _recT=$(id); _recB=btn; if(!_recT) return;
   var base=_recT.value?(_recT.value+" "):"";
   btn.classList.add("listening"); btn.innerHTML="⏺ Đang nghe…";
@@ -6732,7 +7027,7 @@ function formWeekly(w,presetAcc){
       '<div id="nt_meetflag" style="font-size:11.5px;font-weight:700;margin-top:6px;color:var(--dang)">⚠️ Bắt buộc có dòng “Người gặp:” — bấm nút CBC ở trên</div></div>'+
     '<div class="row">'+
       '<div class="fld"><label>Task Status <span class="rq">*</span></label><select class="inp" id="nt_status" onchange="S.ntStatusManual=1">'+opts(S.master.status,stTodo(),"— chọn —")+'</select>'+
-        '<div class="hint" id="nt_stHint">Mới lên kế hoạch — để To Do; điền đủ CBC · ảnh · next action sẽ tự chuyển Completed</div></div>'+
+        '<div class="hint" id="nt_stHint">'+(noPhoto()?'Mới lên kế hoạch — để To Do; ghi người gặp + next action sẽ tự chuyển Completed':'Mới lên kế hoạch — để To Do; điền đủ CBC · ảnh · next action sẽ tự chuyển Completed')+'</div></div>'+
       '<div class="fld"><label>Customer feedback</label><select class="inp" id="nt_feedback">'+opts(S.master.feedback,"","— chọn —")+'</select></div>'+
     '</div>'+
     '<div class="row">'+
@@ -6838,7 +7133,7 @@ function stHas(v){ return (S.master.status||[]).indexOf(v)>=0; }
 function ntReady(){
   var res=$("nt_result")?$("nt_result").value:"";
   if(!MEET_RE.test(res||"")) return false;
-  if(($("nt_typeAction")||{}).value==="Visiting" && !S.ntPhoto) return false;
+  if(!noPhoto() && ($("nt_typeAction")||{}).value==="Visiting" && !S.ntPhoto) return false;
   return !!String((($("nt_next")||{}).value)||"").trim();
 }
 function ntAutoStatus(){
@@ -6846,15 +7141,17 @@ function ntAutoStatus(){
   var ready=ntReady(), want=ready?stDone():stTodo();
   if(want && stHas(want) && s.value!==want) s.value=want;
   var h=$("nt_stHint");
-  if(h) h.textContent=ready
+  if(h) h.textContent=noPhoto()
+    ? (ready?"✓ Đã có người gặp + next action — tự chuyển Completed":"Mới lên kế hoạch — để To Do; ghi người gặp + next action sẽ tự chuyển Completed")
+    : (ready
     ? "✓ Đã đủ CBC · ảnh · next action — tự chuyển Completed"
-    : "Mới lên kế hoạch — để To Do; điền đủ CBC · ảnh · next action sẽ tự chuyển Completed";
+    : "Mới lên kế hoạch — để To Do; điền đủ CBC · ảnh · next action sẽ tự chuyển Completed");
 }
 function ntPhotoHint(){
   var v=$("nt_typeAction")?$("nt_typeAction").value:"";
   var h=$("nt_phHint"); if(h) h.innerHTML=(v==="Visiting")?'<b style="color:#A82F2C">Bắt buộc</b> với Visiting · 1 ảnh · kèm GPS':'Không bắt buộc với hình thức này';
 }
-function ntStopToggle(){ var w=$("nt_stopWrap"); if(w) w.style.display=($("nt_next").value==="Dừng lại")?"":"none"; }
+function ntStopToggle(){ var w=$("nt_stopWrap"); if(w) w.style.display=isStopNA($("nt_next").value)?"":"none"; }
 function ntFiles(files){
   if(!files||!files.length) return;
   if(!photoGate(files[0])){ try{$("nt_file").value="";}catch(e){} return; }
@@ -6936,7 +7233,7 @@ function submitNewTask(){
     result:(String($("nt_result").value||"").trim() ? $("nt_result").value : (S.ntDraft||"")),
     status:$("nt_status").value,
     feedback:$("nt_feedback").value, nextAction:$("nt_next").value,
-    stopReason:($("nt_next").value==="Dừng lại")?$("nt_stop").value:"" };
+    stopReason:isStopNA($("nt_next").value)?$("nt_stop").value:"" };
   var bad=[];
   if(!accName) bad.push("Account");
   if(!d.start) bad.push("Ngày");
@@ -6956,12 +7253,12 @@ function submitNewTask(){
      Ảnh Visiting cũng không bắt buộc lúc tạo — bổ sung sau khi đi thực địa. */
   if(String(d.result).trim() && !MEET_RE.test(d.result))
     bad.push("CBC — dòng “Người gặp:” trong Task Result");
-  if(d.nextAction==="Dừng lại"&&!String(d.stopReason).trim()) bad.push("Lý do dừng");
+  if(isStopNA(d.nextAction)&&!String(d.stopReason).trim()) bad.push("Lý do dừng");
   if(bad.length) return toast("⚠️ Cần bổ sung: "+bad.join(", "),"warn",6000);
 
   var later=[];
   if(!String(d.result).trim()) later.push("kết quả");
-  if(d.typeAction==="Visiting"&&!S.ntPhoto) later.push("ảnh chụp tại địa bàn");
+  if(!noPhoto()&&d.typeAction==="Visiting"&&!S.ntPhoto) later.push("ảnh chụp tại địa bàn");
 
   /* ⭐ v15 — GỬI TASK VÀ ẢNH TRONG MỘT LƯỢT.
      Bản cũ gọi saveWeekly rồi uploadPhoto nối tiếp: hai lần khởi động Apps Script,
@@ -6991,7 +7288,7 @@ function submitNewTask(){
 /* xoá dòng chung cho các tab khác */
 function delRow(tab,row){
   if(!confirm("Xoá dòng này khỏi Google Sheet? Thao tác không hoàn tác được."+
-              (tab==="weekly"?"\n\nẢnh đi địa bàn của dòng này cũng bị xoá khỏi folder Drive.":""))) return;
+              (tab==="weekly"&&!noPhoto()?"\n\nẢnh đi địa bàn của dòng này cũng bị xoá khỏi folder Drive.":""))) return;
   busy(true,"Đang xoá…");
   apiPost({action:"deleteRow",tab:tab,row:row}).then(function(r){
     busy(false); closeModal(); toast(r.message||"Đã xoá","ok");
@@ -7903,7 +8200,7 @@ function saveMonthlyDrw(){
 }
 /* ── thêm mới ── */
 /* ⭐ v4.5 — Area cố định theo PIC (sửa bảng này nếu phân vùng thay đổi) */
-var PIC_AREA={ "Viet":"North", "Phuong":"South", "Vinh":"Central", "Viet Ha":"North", "Khang":"South" };
+var PIC_AREA={ "Viet":"North", "Phuong":"South", "Vinh":"Central", "Viet Ha":"North", "Khang":"South", "Dao":"Thailand", "Miew":"Thailand" };
 /* ⭐ v16 — FY suy THẲNG từ tháng (T9 → T8 năm sau). Bản cũ dò trong danh sách FY của
    MASTER LIST: danh sách chưa có FY68 thì đơn tháng 9/2026 bị gán FY67. */
 function fyOfMonth(ym){
@@ -8759,8 +9056,8 @@ function renderReport(){
           (S.otherErr?' <b style="color:var(--dang)">'+esc(S.otherErr)+'</b>':"")+'</div>'
         : '<div class="hint">Sẽ gửi kèm <b>'+_nc+'</b> Key task / đầu việc con của tuần này và <b>'+_nn+'</b> mục kế hoạch tuần sau, '+
           'nằm ở mục <b>③ Other tasks</b> trong email.</div>')+
-      '<div class="hint" style="margin-top:6px;color:var(--mute)">Nếu email nhận được vẫn thiếu mục này, file <b>Code.gs</b> của '+esc(curTeam().crmFile)+' '+
-      'đang chạy bản cũ hơn <b>v6.8</b> — cần dán bản vá Code.gs (sendWeeklyReport phải đọc tham số <code>other</code>).</div></div>';
+      (isTH()?'':'<div class="hint" style="margin-top:6px;color:var(--mute)">Nếu email nhận được vẫn thiếu mục này, file <b>Code.gs</b> của '+esc(curTeam().crmFile)+' '+
+      'đang chạy bản cũ hơn <b>v6.8</b> — cần dán bản vá Code.gs (sendWeeklyReport phải đọc tham số <code>other</code>).</div>')+'</div>';
   }
   var body = loading
     ? skRows(5,true)
@@ -8798,7 +9095,7 @@ function rpPreviewRows(from,to){
   /* nguồn 2 — công việc khác (bỏ key Customer visiting vì đã đếm ở nguồn 1) */
   ((S.other&&S.other.keys)||[]).forEach(function(k){
     if(String(k.fy||"") && String(k.fy)!==S.fy) return;
-    if(!OTHER_TYPE_RE.test(String(k.type||""))) return;
+    if(!otherTypeOk(k.type)) return;
     if(isVisitingKey(k)) return;
     var subs=(k.subs||[]);
     function push(x,isKey){
@@ -8885,7 +9182,7 @@ function rpOtherFor(pic,from,to){
   var out=[];
   ((S.other&&S.other.keys)||[]).forEach(function(k){
     if(String(k.fy||"") && String(k.fy)!==S.fy) return;
-    if(!OTHER_TYPE_RE.test(String(k.type||""))) return;
+    if(!otherTypeOk(k.type)) return;
     if(isVisitingKey(k)) return;
     var subs=(k.subs||[]);
     var mine=subs.filter(function(x){ return (!pic||picEq(x.pic,pic)) && rpFit(x,from,to); });
@@ -9513,8 +9810,8 @@ function adpMonthStrip(a){
   if(!vals.some(function(v){return v;})) return '<span style="color:var(--mute)">Chưa có số theo tháng</span>';
   return '<div class="adpms">'+ADP_MONTH_FIELDS.map(function(x,i){
     var v=vals[i], h=v?Math.max(6,Math.round(v/mx*44)):2;
-    return '<div class="adpms-i" title="'+esc(x[1])+': '+fmtVND(v)+'">'+
-      '<i style="height:'+h+'px;background:'+(v?"var(--blue)":"var(--line2)")+'"></i><span>'+x[1]+'</span></div>';
+    return '<div class="adpms-i" title="'+esc(monLbl(x[1]))+': '+fmtVND(v)+'">'+
+      '<i style="height:'+h+'px;background:'+(v?"var(--blue)":"var(--line2)")+'"></i><span>'+monLbl(x[1])+'</span></div>';
   }).join("")+'</div>';
 }
 /* ⭐ v5 — sửa hồ sơ account ngay trong màn hình chi tiết */
@@ -9595,11 +9892,12 @@ function renderAcc(){
   var tabs=[["tl","Dòng thời gian",j.timeline.length],["ph","Ảnh",j.photos.length],
             ["cbc","Người liên hệ",j.cbc.length],["od","Đơn hàng",j.orders.length],
             ["info","Thông tin",null],["adp","ADP",j.adp.length]]
+    .filter(function(x){ return !((x[0]==="ph"&&noPhoto())||(x[0]==="od"&&noOrder())); })   /* ⭐ v18 */
     .map(function(x){ return '<button class="'+(tab===x[0]?"on":"")+'" onclick="accTab(\''+x[0]+'\')">'+x[1]+(x[2]!=null?' ('+x[2]+')':"")+'</button>'; }).join("");
 
   var stats='<div class="mstrip">'
-    +'<div class="mstat hi"><div class="v">'+fmtVND(st.totalAmount)+'</div><div class="l">Doanh số</div></div>'
-    +'<div class="mstat"><div class="v">'+fmtN(st.orderCount)+'</div><div class="l">Đơn hàng</div></div>'
+    +(noOrder()?'':'<div class="mstat hi"><div class="v">'+fmtVND(st.totalAmount)+'</div><div class="l">Doanh số</div></div>'
+    +'<div class="mstat"><div class="v">'+fmtN(st.orderCount)+'</div><div class="l">Đơn hàng</div></div>')
     +'<div class="mstat"><div class="v">'+fmtN(st.visitCount)+'</div><div class="l">Lượt gặp</div></div>'
     +'<div class="mstat"><div class="v">'+fmtN(st.presentCount)+'</div><div class="l">Thuyết trình</div></div>'
     +'<div class="mstat '+(since<0?"dang":(since>90?"warn":"ok"))+'"><div class="v">'+(since<0?"—":since)+'</div><div class="l">Ngày kể từ lần gặp</div></div>'
@@ -10468,7 +10766,8 @@ var MAIL_TUYEN="tt.tuyen@manimedicalhanoi.com", MAIL_HA="nt.ha@manimedicalhanoi.
 var MAIL_RULE={
   dental  : { team:"Dental Sales Team",   toTeam:true,  fixed:[MAIL_TUYEN,MAIL_HA,MAIL_HR] },
   surgical: { team:"Surgical Sales Team", toTeam:false, fixed:[MAIL_TUYEN,MAIL_HA,MAIL_PROD,MAIL_HR] },
-  eyeless : { team:"Eyeless Sales Team",  toTeam:false, fixed:[MAIL_TUYEN,MAIL_HA,MAIL_PROD,MAIL_HR] }
+  eyeless : { team:"Eyeless Sales Team",  toTeam:false, fixed:[MAIL_TUYEN,MAIL_HA,MAIL_PROD,MAIL_HR] },
+  thai    : { team:"Thailand Surgical Sales Team", toTeam:false, fixed:[MAIL_HA,MAIL_HR] }
 };
 function mailRule(){ return MAIL_RULE[curTeamKey()]||MAIL_RULE.dental; }
 function teamMails(){
@@ -10480,6 +10779,11 @@ function teamMails(){
   return out;
 }
 function mailTargets(){
+  if(isTH()){                                        /* ⭐ v18 — Thailand: Dao → Ha (cc Hoa) · Miew → Dao (cc Ha, Hoa) */
+    var who=(S.rpPic||(S.user&&S.user.pic)||"");
+    if(picEq(who,"Miew")) return { to:["manithailand@manimedicalhanoi.com"], cc:[MAIL_HA,MAIL_HR] };
+    return { to:[MAIL_HA], cc:[MAIL_HR] };
+  }
   var r=mailRule(), tm=teamMails();
   var to=(r.toTeam?tm:r.fixed).slice().filter(Boolean);
   var cc=(r.toTeam?r.fixed:tm).slice().filter(function(e){ return e && to.indexOf(e)<0; });
@@ -10791,7 +11095,7 @@ function calItems(){
   ((S.other&&S.other.keys)||[]).forEach(function(k){
     var trip=calIsTrip(k)||(k.subs||[]).some(calIsTrip);
     if(!trip){
-      if(!OTHER_TYPE_RE.test(String(k.type||""))) return;
+      if(!otherTypeOk(k.type)) return;
       if(isVisitingKey(k)) return;                       /* đi địa bàn đã lấy thẳng từ file CRM */
       if(!otherTeamOk(k)) return;
     }
@@ -10919,7 +11223,7 @@ function calSummary(items){
   var h='';
   if(CAL.show.v && !CAL.onlyIP) h+=box("📍 Đi địa bàn",v,"lượt · ✓ "+vd+" hoàn thành", v?Math.round(vd*100/v):0, "% = số lượt đã Completed / tổng lượt đi địa bàn trong khoảng đang xem");
   if(CAL.show.o) h+=box("🧩 Việc khác",o,"việc · ✓ "+od+" xong · ◐ "+op+" đang làm", o?Math.round(osum/o):0, "% = trung bình tiến độ các việc trong khoảng đang xem (To Do = 0%, bỏ việc đã huỷ)");
-  if(CAL.show.t && !CAL.onlyIP) h+=box("✈️ Công tác",tdays,"ngày đi công tác", null);
+  if(CAL.show.t && !CAL.onlyIP && !noTrip()) h+=box("✈️ Công tác",tdays,"ngày đi công tác", null);
   return {html:(h?'<div class="cal-sum">'+h+'</div>':''), overdue:overdue, ip:ip};
 }
 function calPeopleNames(){
@@ -11017,7 +11321,7 @@ function renderCal(){
   /* bộ lọc nguồn + nhân sự */
   var chip=function(k,lb,col){ return '<button class="cal-chip'+(CAL.show[k]?"":" off")+'" onclick="calToggle(\''+k+'\')"><i style="background:'+col+'"></i>'+lb+'</button>'; };
   var bar='<div class="cal-bar">'
-    +chip("v","📍 Đi địa bàn",CAL_COL.v)+chip("o","🧩 Việc khác","#3A5CAA")+chip("t","✈️ Công tác",CAL_COL.t)
+    +chip("v","📍 Đi địa bàn",CAL_COL.v)+chip("o","🧩 Việc khác","#3A5CAA")+(noTrip()?"":chip("t","✈️ Công tác",CAL_COL.t))
     +'<button class="cal-chip'+(CAL.hideDone?" on":"")+'" onclick="calHide()">'+(CAL.hideDone?"✓ ":"")+'Ẩn việc đã xong</button>'
     +'<button class="cal-chip'+(CAL.onlyIP?" on":"")+'" onclick="CAL.onlyIP=!CAL.onlyIP;renderCal()" title="Chỉ xem việc đang thực hiện">📌 Đang thực hiện <b>'+sum.ip+'</b>'+(CAL.onlyIP?' ✕':'')+'</button>'
     +(sum.overdue?'<button class="cal-od" onclick="calOverdue()">🔴 '+sum.overdue+' việc quá hạn ›</button>':'');
@@ -11047,13 +11351,13 @@ function renderCal(){
     +'<button class="btn sm" onclick="refreshCal(this)" title="Đọc lại dữ liệu + đồng bộ lịch công tác">⟳</button>'
     +'<button class="btn sm'+(CAL.compact?' cal-fullbtn on':'')+'" onclick="calCompact()" title="Ẩn / hiện bộ lọc và thống kê">'+(CAL.compact?'☰ Hiện bộ lọc':'☰ Ẩn bộ lọc')+'</button>'
     +'<button class="btn sm cal-fullbtn'+(CAL.full?' on':'')+'" onclick="calFull()" title="'+(CAL.full?'Thoát toàn màn hình (Esc)':'Ẩn menu bên, thanh trên — xem lịch toàn màn hình')+'">'+(CAL.full?'✕ Thu nhỏ':'⛶ Toàn màn hình')+'</button>'
-    +'<button class="btn sm hide-m" onclick="tripProposeOpen()">✈️ Đề xuất công tác</button>'
+    +(noTrip()?'':'<button class="btn sm hide-m" onclick="tripProposeOpen()">✈️ Đề xuất công tác</button>')
     +'<button class="btn pri sm" onclick="calAdd(todayISO())">＋ Thêm việc</button>'
     +'</div>'
     +(CAL.compact?(sum.overdue?'<div class="cal-bar"><button class="cal-od" onclick="calOverdue()">🔴 '+sum.overdue+' việc quá hạn ›</button></div>':''):(bar+sum.html))
     +(notes.length?'<div class="cal-note">'+notes.join("<br>")+'</div>':'')
     +body
-    +(mob?'<div style="display:flex;gap:8px;margin-top:12px"><button class="btn" style="flex:1" onclick="tripProposeOpen()">✈️ Đề xuất công tác</button></div>':'')
+    +(mob&&!noTrip()?'<div style="display:flex;gap:8px;margin-top:12px"><button class="btn" style="flex:1" onclick="tripProposeOpen()">✈️ Đề xuất công tác</button></div>':'')
     +'<div style="height:70px"></div></div>';
 }
 function calNav(n){
@@ -11084,7 +11388,7 @@ function refreshCal(btn){
   toast("Đang đọc lại lịch…");
   var done=function(){ if(btn) btn.disabled=false; if(S.tab==="weekly"&&S.wkTab==="cal") renderCal(); };
   /* đồng bộ lịch công tác bên Report Hub trước, rồi đọc lại cả hai nguồn */
-  var trip=hubJsonp({action:"tripSync", pic:S.user.pic, actor:S.user.pic, _ts:Date.now()},70000).catch(function(){ return null; });
+  var trip=noTrip()?Promise.resolve(null):hubJsonp({action:"tripSync", pic:S.user.pic, actor:S.user.pic, _ts:Date.now()},70000).catch(function(){ return null; });
   Promise.all([
     trip.then(function(){ return loadOther(true); }).catch(function(e){ toast(hubErrText(e).split("\n")[0],"err",6000); }),
     loadTerritoryAll(true)
@@ -11245,9 +11549,9 @@ function calAdd(iso){
   var d=calDate(iso);
   openModal("＋ Thêm việc · "+CAL_WDF[d.getDay()]+" "+fmtVN(iso),
     '<div class="cal-pick">'
-    +'<button onclick="calAddVisit(\''+iso+'\')"><span class="ic">📍</span><span class="ti">Đi địa bàn</span><span class="ds">Viếng thăm khách hàng, gặp bác sĩ, demo — ghi vào tab 6. WEEKLY REPORT</span></button>'
-    +'<button onclick="calAddOther(\''+iso+'\')"><span class="ic">🧩</span><span class="ti">Công việc khác</span><span class="ds">Họp, hỗ trợ NPP, hồ sơ thầu, sự kiện… — ghi vào Report Hub</span></button>'
-    +'<button onclick="closeModal();tripProposeOpen(\''+iso+'\')"><span class="ic">✈️</span><span class="ti">Đề xuất công tác</span><span class="ds">Ghi vào file Business Trip và gửi email xin duyệt ngay</span></button>'
+    +'<button onclick="calAddVisit(\''+iso+'\')"><span class="ic">📍</span><span class="ti">Đi địa bàn</span><span class="ds">'+(isTH()?'Customer visit, meeting doctors, demo — saved to sheet 6. CUSTOMER VISITING':'Viếng thăm khách hàng, gặp bác sĩ, demo — ghi vào tab 6. WEEKLY REPORT')+'</span></button>'
+    +'<button onclick="calAddOther(\''+iso+'\')"><span class="ic">🧩</span><span class="ti">Công việc khác</span><span class="ds">'+(ownTasks()?'Meetings, distributor support, tenders, events… — saved to sheet ALL TASK':'Họp, hỗ trợ NPP, hồ sơ thầu, sự kiện… — ghi vào Report Hub')+'</span></button>'
+    +(noTrip()?'':'<button onclick="closeModal();tripProposeOpen(\''+iso+'\')"><span class="ic">✈️</span><span class="ti">Đề xuất công tác</span><span class="ds">Ghi vào file Business Trip và gửi email xin duyệt ngay</span></button>')
     +'</div>',
     '<button class="btn" onclick="closeModal()">Huỷ</button>');
 }
@@ -11259,7 +11563,7 @@ function calAddVisit(iso){
 /* Công việc khác: chọn Key Task để thêm đầu việc, hoặc tạo Key Task mới */
 function calAddOther(iso){
   var mine=((S.other&&S.other.keys)||[]).filter(function(k){
-    if(!OTHER_TYPE_RE.test(String(k.type||""))||isVisitingKey(k)||calIsTrip(k)||k.vSrc) return false;
+    if(!otherTypeOk(k.type)||isVisitingKey(k)||calIsTrip(k)||k.vSrc) return false;
     if(!otherTeamOk(k)) return false;
     if(!canEditOther(k.pic)) return false;
     var sk=calStatusKey(k.status); if(sk==="done"||sk==="cancel") return false;
