@@ -4306,11 +4306,18 @@ var DISTRIBUTORS_BY_TEAM = {
     { label:"Việt Thái", pic:"Phuong", match:["vietthai"],     abbr:["vtm","vt"] },
     { label:"SPI",       pic:"Vinh",   match:[],               abbr:["spi"] }
   ],
-  /* ⚠️ Nhóm Surgical: anh Nguyen xác nhận lại danh sách NPP và PIC phụ trách,
-     sửa ngay tại đây là toàn app đổi theo. */
+  /* ⭐ v18.2 — ĐỦ 5 NPP VIỆT NAM segment Surgical trong SUM TURNOVER FY68.
+     PIC theo tab "MMH KPI FY68" của file Turnover:
+       · Hung Vi + MHI   → Viet Ha (miền Bắc)
+       · Icare + An Tam  → Khang   (miền Nam)
+     Bảo Linh: có trong SUM TURNOVER nhưng FY68 chưa có budget và chưa gán PIC (pic:"")
+     ⇒ vẫn hiện ở báo cáo cấp team, không tính vào NPP của PIC nào. Gán PIC thì điền vào đây. */
   surgical: [
     { label:"Hùng Vĩ",   pic:"Viet Ha", match:["hungvi"],      abbr:["hv"] },
-    { label:"I-CARE",    pic:"Khang",   match:["icare"],       abbr:[] }
+    { label:"MHI",       pic:"Viet Ha", match:["mhipharma"],   abbr:["mhi"] },
+    { label:"I-CARE",    pic:"Khang",   match:["icare"],       abbr:[] },
+    { label:"An Tâm",    pic:"Khang",   match:["antam"],       abbr:[] },
+    { label:"Bảo Linh",  pic:"",        match:["baolinh"],     abbr:[] }
   ],
   /* ⭐ v7.2 — Nhóm Eyeless: CHƯA có danh sách NPP chính thức ⇒ tạm nhận MỌI nhà phân phối
      thuộc segment "Eyeless" trong file Turnover, gán PIC Trang (dòng any:true).
@@ -12279,6 +12286,12 @@ function galPptBuild(PptxGenJS, sel, photos){
 .mt .mt-bar1{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:12px}
 .mt .mt-stamp{font-size:11.5px;color:var(--mute);font-weight:600}
 .mt .mt-kpis{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-bottom:12px}
+/* ⭐ v18.2 — forecast nhiều NPP */
+.mt .mt-nppnm{font-size:14px;font-weight:800;color:var(--navy);margin:2px 0 8px}
+.mt .mt-nppnm span{font-size:12px;font-weight:600;color:var(--mute)}
+.mt .mt-lk{cursor:pointer;color:var(--navy);border-bottom:1px dashed #9DB7E0}
+.mt .mt-lk:hover{color:#3A5CAA}
+.mt #mt-s1{border-top:3px solid #FFE100}
 .mt .mt-kpi{border:1px solid var(--line);border-radius:13px;padding:12px 14px;background:var(--card)}
 .mt .mt-kpi .l{font-size:12px;font-weight:800;color:var(--sub);display:flex;align-items:center;gap:6px;flex-wrap:wrap}
 .mt .mt-kpi .v{font-size:23px;font-weight:800;color:var(--navy);margin-top:4px;line-height:1.15}
@@ -12387,11 +12400,13 @@ function galPptBuild(PptxGenJS, sel, photos){
 <script>
 /* ═══════════════════════════════════════════════════════════════════
    ⭐ v18 — HỌP TUẦN SURGICAL
-   ① Hoạt động đi địa bàn  : tự đọc task tuần này + kế hoạch tuần sau của từng PIC
+   ⭐ v18.2 — Forecast NPP lên ĐẦU · đủ 5 NPP VN (Hùng Vĩ, MHI, I-CARE, An Tâm, Bảo Linh)
+             · mặc định xem "Tất cả NPP của PIC" + bảng từng NPP · lưu vào backend CRM v8.4
+   ① Forecast NPP          : đọc SUM TURNOVER qua Web App file Turnover (?action=getNppDetail),
+                             hiện ngay bản lưu trong máy, tự làm mới mỗi 60 giây.
+   ② Hoạt động đi địa bàn  : tự đọc task tuần này + kế hoạch tuần sau của từng PIC
                              (dữ liệu đã có trong app, không gọi thêm máy chủ).
                              Chưa có kế hoạch ⇒ thêm ngay task / dòng TBD tại đây.
-   ② Forecast NPP          : đọc SUM TURNOVER qua Web App file Turnover (?action=getNppDetail),
-                             hiện ngay bản lưu trong máy, tự làm mới mỗi 60 giây.
    ③ Tình hình thầu        : sheet 14. TENDER TRACK — tính DS ước tính còn lại trong FY.
    ④ Thông tin khác        : ghi tự do.
    Lưu ⇒ sheet 13. WEEKLY MEETING (1 dòng / tuần / PIC, lưu lại là ghi đè).
@@ -12424,11 +12439,23 @@ function mtPct(a,b){ return b>0?(a/b):null; }
 function mtPctTx(p){ return p==null?"—":(Math.round(p*100)+"%"); }
 function mtUsd(x){ return fmtN(Math.round(n(x))); }
 function mtCopy(o){ try{ return JSON.parse(JSON.stringify(o||{})); }catch(e){ return {}; } }
-function mtNppOfPic(pic){ var d=(DISTRIBUTORS_BY_TEAM.surgical||[]).filter(function(x){ return !x.any && mtPicEq(x.pic,pic); })[0]; return d?d.label:(((DISTRIBUTORS_BY_TEAM.surgical||[])[0]||{}).label||""); }
 function mtNppList(){ return (DISTRIBUTORS_BY_TEAM.surgical||[]).filter(function(x){ return !x.any; }); }
+/* ⭐ v18.2 — một PIC có thể phụ trách nhiều NPP (Viet Ha: Hùng Vĩ + MHI · Khang: I-CARE + An Tâm) */
+function mtNppsOfPic(pic){ return mtNppList().filter(function(x){ return x.pic && mtPicEq(x.pic,pic); }).map(function(x){ return x.label; }); }
+function mtNppOfPic(pic){ return mtNppsOfPic(pic)[0]||((mtNppList()[0]||{}).label||""); }
+var MT_ALL="@all";
+/* d.npp = "@all" (mặc định: tất cả NPP của PIC) hoặc tên 1 NPP ⇒ { labels, name, all } */
+function mtNppSel(sel,pic){
+  sel=String(sel||MT_ALL);
+  if(sel===MT_ALL){
+    var L=mtNppsOfPic(pic); if(!L.length) L=mtNppList().map(function(x){ return x.label; });
+    return { labels:L, name:(L.length>1?"Tổng "+L.join(" + "):(L[0]||"")), all:true };
+  }
+  return { labels:[sel], name:sel, all:false };
+}
 function mtDefaults(pic,week){
   var ym=ymOf(addDays(week,3)), ms=fyMonths(S.fy);
-  return { visitNote:"", npp:mtNppOfPic(pic), nppMonth:(ms.indexOf(ym)>=0?ym:ms[0]),
+  return { visitNote:"", npp:MT_ALL, nppMonth:(ms.indexOf(ym)>=0?ym:ms[0]),
            fcStatus:"", risk:"", pos:"", neg:"", act:"", tenderNote:"", other:"" };
 }
 
@@ -12469,7 +12496,7 @@ function mtLoadList(){
     MT.list=j.list||[]; MT.listErr=""; kvSet(ckey("mtlist"),{list:MT.list,at:Date.now()});
     if(S.tab==="meet"){ mtEnsureRec(); mtPaintTabs(); mtPaintSv(); if(MT.mode==="cmp"){ mtPrevEnsure(); mtPaintCmp(); } }
     return MT.list;
-  }).catch(function(e){ MT.listErr=e.message; if(S.tab==="meet") mtPaintSv(); });
+  }).catch(function(e){ MT.listErr=mtErrTx(e); if(S.tab==="meet") mtPaintSv(); });
 }
 function mtGetRec(id,force){
   if(MT.rec[id] && !force) return Promise.resolve(MT.rec[id]);
@@ -12526,7 +12553,7 @@ function mtTdLoad(){
   return apiGet("mtTenders",{_ts:Date.now()}).then(function(j){
     MT.tenders=j.list||[]; MT.tErr=""; kvSet(ckey("mttd"),{list:MT.tenders,at:Date.now()});
     if(S.tab==="meet") mtPaintTd();
-  }).catch(function(e){ MT.tErr=e.message; if(S.tab==="meet") mtPaintTd(); });
+  }).catch(function(e){ MT.tErr=mtErrTx(e); if(S.tab==="meet") mtPaintTd(); });
 }
 function mtAutoOn(){
   if(MT.timer) return;
@@ -12656,20 +12683,21 @@ function mtTbdGo(){
 }
 
 /* ───────── ② FORECAST NPP ───────── */
-function mtNppAgg(label,ym){
-  var N=MT.npp; if(!N||!label) return null;
+function mtNppAgg(sel,ym){   /* sel = mtNppSel(...) ⇒ gộp 1 hoặc nhiều NPP */
+  var N=MT.npp; if(!N||!sel||!sel.labels||!sel.labels.length) return null;
   var ms=(N.months&&N.months.length===12)?N.months.map(String):fyMonths(S.fy);
   ym=String(ym||""); var idx=ms.indexOf(ym); if(idx<0){ idx=0; ym=ms[0]; }
   var z=function(){ return {bm:0,bd:0,fc:0,ac:0,v:0}; };
   var add=function(o,r){ o.bm+=r.bm; o.bd+=r.bd; o.fc+=r.fc; o.ac+=r.ac; o.v+=r.v; };
-  var byM={}, byP={}, hit=0;
-  ms.forEach(function(m){ byM[m]=z(); });
+  var mk=function(){ var o={}; ms.forEach(function(m){ o[m]=z(); }); return o; };
+  var want={}, byD={}, hitD={}; sel.labels.forEach(function(l){ want[l]=1; byD[l]=mk(); hitD[l]=0; });
+  var byM=mk(), byP={}, hit=0;
   N.rows.forEach(function(r){
     if(!(r.m in byM)) return;
-    var d=distributorOf(r.d); if(!d||d.label!==label) return;
-    var p=String(r.p||"Khác"); hit++;
-    if(!byP[p]){ byP[p]={}; ms.forEach(function(m){ byP[p][m]=z(); }); }
-    add(byP[p][r.m],r); add(byM[r.m],r);
+    var d=distributorOf(r.d); if(!d||!want[d.label]) return;
+    var p=String(r.p||"Khác"); hit++; hitD[d.label]++;
+    if(!byP[p]) byP[p]=mk();
+    add(byP[p][r.m],r); add(byM[r.m],r); add(byD[d.label][r.m],r);
   });
   var sum=function(src,list){ var o=z(); list.forEach(function(m){ add(o,src[m]); }); return o; };
   var qs=Math.floor(idx/3)*3, qMs=ms.slice(qs,qs+3), qTD=ms.slice(qs,idx+1), ytd=ms.slice(0,idx+1);
@@ -12677,11 +12705,14 @@ function mtNppAgg(label,ym){
     var ia=MT_PROD_ORDER.indexOf(noAcc(a)), ib=MT_PROD_ORDER.indexOf(noAcc(b));
     return (ia<0?99:ia)-(ib<0?99:ib)||a.localeCompare(b); });
   var pr=prods.map(function(p){ return { p:p, m:byP[p][ym], ytd:sum(byP[p],ytd), fy:sum(byP[p],ms) }; });
-  return { label:label, ym:ym, idx:idx, ms:ms, qi:qs/3+1, qMs:qMs, hit:hit, mode:N.mode,
+  var dl=sel.labels.map(function(l){ var src=byD[l];
+    return { label:l, hit:hitD[l], m:src[ym], qtd:sum(src,qTD), q:sum(src,qMs), ytd:sum(src,ytd), fy:sum(src,ms) }; });
+  return { label:sel.name, all:!!sel.all, labels:sel.labels.slice(), byD:dl, ym:ym, idx:idx, ms:ms, qi:qs/3+1, qMs:qMs, hit:hit, mode:N.mode,
            closed:!!(N.closed&&N.closed[ym]), byM:byM, prods:pr,
            m:byM[ym], qtd:sum(byM,qTD), q:sum(byM,qMs), ytd:sum(byM,ytd), fy:sum(byM,ms),
            elQ:(idx-qs+1)/3, elY:(idx+1)/12 };
 }
+function mtNppAggCur(d){ d=d||mtDraft(); return MT.npp?mtNppAgg(mtNppSel(d.npp,MT.pic),d.nppMonth):null; }
 function mtBar(p,mark){
   var w=Math.max(0,Math.min(100,Math.round((p||0)*100)));
   return '<div class="mt-pbar"><i style="width:'+w+'%;background:'+pctColor(p||0)+'"></i>'+
@@ -12718,12 +12749,38 @@ function mtPaintStamp(){
   el.textContent="Cập nhật "+new Date(MT.npp.at).toLocaleTimeString("vi-VN",{hour:"2-digit",minute:"2-digit"})+
     " · nguồn SUM TURNOVER"+(MT.npp.mode==="basic"?" (bản rút gọn)":"");
 }
+function mtNppChipsHtml(d){
+  var mine=mtNppsOfPic(MT.pic), cur=String(d.npp||MT_ALL);
+  var chip=function(v,txt,sub,on,dim){ return '<div class="chip'+(on?" on":"")+'"'+(dim?' style="opacity:.78"':"")+' onclick="mtIn(\'npp\',\''+esc(v)+'\');mtPaintNpp()">'+txt+(sub?' <span style="opacity:.7;font-weight:600">· '+esc(sub)+'</span>':"")+'</div>'; };
+  var h=chip(MT_ALL,"📊 Tất cả NPP của "+esc(MT.pic),mine.length?(mine.length+" NPP"):"",cur===MT_ALL,0);
+  h+=mtNppList().filter(function(x){ return mine.indexOf(x.label)>=0; }).map(function(x){ return chip(x.label,"🏢 "+esc(x.label),"",cur===x.label,0); }).join("");
+  h+=mtNppList().filter(function(x){ return mine.indexOf(x.label)<0; }).map(function(x){ return chip(x.label,"🏢 "+esc(x.label),x.pic||"chưa gán PIC",cur===x.label,1); }).join("");
+  return h;
+}
+/* bảng từng NPP — chỉ khi xem "Tất cả NPP của PIC" */
+function mtNppByDHtml(A){
+  if(!A.all||!A.byD||A.byD.length<2) return "";
+  var P=function(a,b){ return mtPct(a,b); };
+  var pc=function(p){ return '<td style="color:'+(p==null?"var(--mute)":pctColor(p))+';font-weight:800">'+mtPctTx(p)+'</td>'; };
+  var row=function(x,tot){
+    if(!tot && !x.hit) return '<tr><td class="l"><b class="mt-lk" onclick="mtIn(\'npp\',\''+esc(x.label)+'\');mtPaintNpp()">'+esc(x.label)+'</b></td>'+
+      '<td colspan="9" style="text-align:left;color:var(--mute)">Chưa có budget / forecast '+esc(S.fy)+' trong SUM TURNOVER</td></tr>';
+    return '<tr'+(tot?' class="tot"':"")+'><td class="l">'+(tot?esc(x.label):'<b class="mt-lk" title="Xem chi tiết NPP này" onclick="mtIn(\'npp\',\''+esc(x.label)+'\');mtPaintNpp()">'+esc(x.label)+' ›</b>')+'</td>'+
+      '<td>'+mtUsd(x.m.bm)+'</td><td><b>'+mtUsd(x.m.v)+'</b></td>'+pc(P(x.m.v,x.m.bm))+
+      '<td class="g">'+mtUsd(x.qtd.v)+'</td>'+pc(P(x.qtd.v,x.q.bm)).replace("<td ",'<td class="g" ')+
+      '<td>'+mtUsd(x.ytd.v)+'</td>'+pc(P(x.ytd.v,x.fy.bm))+
+      '<td class="g">'+mtUsd(x.fy.v)+'</td>'+pc(P(x.fy.v,x.fy.bm)).replace("<td ",'<td class="g" ')+'</tr>';
+  };
+  return '<div class="mt-cst" style="margin-top:0">🏢 Từng NPP của '+esc(MT.pic)+' · tháng '+esc(mtYmLb(A.ym))+(A.closed?" (đã chốt Actual)":" (chưa chốt — Forecast)")+'</div>'+
+    '<div class="mt-tw"><table class="mt-tb" style="min-width:820px"><thead><tr><th>NPP</th><th>Budget tháng</th><th>A/F tháng</th><th>% tháng</th>'+
+    '<th class="g">Q'+A.qi+' lũy kế</th><th class="g">% budget Q'+A.qi+'</th><th>'+esc(S.fy)+' lũy kế</th><th>% budget FY</th><th class="g">Dự báo cả FY</th><th class="g">% FY</th></tr></thead><tbody>'+
+    A.byD.map(function(x){ return row(x,0); }).join("")+row({ label:"Tổng "+MT.pic, hit:A.hit, m:A.m, qtd:A.qtd, q:A.q, ytd:A.ytd, fy:A.fy },1)+
+    '</tbody></table></div>';
+}
 function mtPaintNpp(){
   var box=$("mtNpp"); if(!box) return;
-  var d=mtDraft(), ms=fyMonths(S.fy);
-  var h='<div class="mt-bar1"><div class="chips">'+mtNppList().map(function(x){
-      return '<div class="chip'+(x.label===d.npp?" on":"")+'" onclick="mtIn(\'npp\',\''+esc(x.label)+'\');mtPaintNpp()">🏢 '+esc(x.label)+' <span style="opacity:.7;font-weight:600">· '+esc(x.pic)+'</span></div>';
-    }).join("")+'</div>'+
+  var d=mtDraft(), ms=fyMonths(S.fy), sel=mtNppSel(d.npp,MT.pic);
+  var h='<div class="mt-bar1"><div class="chips">'+mtNppChipsHtml(d)+'</div>'+
     '<select class="inp" style="width:auto;height:34px" onchange="mtIn(\'nppMonth\',this.value);mtPaintNpp()">'+
       ms.map(function(m){ return '<option value="'+m+'"'+(m===d.nppMonth?" selected":"")+'>Tháng '+mtYmLb(m)+'</option>'; }).join("")+'</select>'+
     '<span class="mt-sp" style="flex:1"></span><span class="mt-stamp" id="mtNppStamp"></span>'+
@@ -12734,17 +12791,19 @@ function mtPaintNpp(){
       : '<div class="mt-empty"><div class="spin" style="margin:6px auto 10px"></div><p>Đang đọc SUM TURNOVER…</p></div>');
     return;
   }
-  var A=mtNppAgg(d.npp,d.nppMonth);
-  if(!A||!A.hit){ box.innerHTML=h+'<div class="mt-empty"><div class="e">🔎</div><p>Không có dòng nào của NPP '+esc(d.npp)+' (segment Surgical) trong '+esc(S.fy)+'.</p></div>'; mtPaintStamp(); return; }
+  var A=mtNppAgg(sel,d.nppMonth);
+  if(!A||!A.hit){ box.innerHTML=h+(A?mtNppByDHtml(A):"")+'<div class="mt-empty"><div class="e">🔎</div><p>Không có dòng nào của '+esc(sel.name||"NPP")+' (segment Surgical) trong '+esc(S.fy)+' — NPP chưa có budget / forecast trong SUM TURNOVER.</p></div>'; mtPaintStamp(); return; }
   var basic=A.mode==="basic", m=A.m;
   var mTag=A.closed?' <span class="tag t-g">đã chốt Actual</span>':' <span class="tag t-y">chưa chốt · đang dùng Forecast</span>';
   var subM=basic?"":("Forecast "+mtUsd(m.fc)+" · Actual "+mtUsd(m.ac)+" USD"+(m.bd>0?("<br>So với Target NPP ("+mtUsd(m.bd)+"): <b>"+mtPctTx(mtPct(m.v,m.bd))+"</b>"):""));
   var subQ="Dự báo cả quý: <b>"+mtUsd(A.q.v)+"</b> USD ("+mtPctTx(mtPct(A.q.v,A.q.bm))+" budget quý)";
   var subY="So với budget lũy kế đến T"+(+A.ym.slice(4))+": <b>"+mtPctTx(mtPct(A.ytd.v,A.ytd.bm))+"</b><br>Dự báo cả FY: <b>"+mtUsd(A.fy.v)+"</b> USD ("+mtPctTx(mtPct(A.fy.v,A.fy.bm))+")";
+  h+='<div class="mt-nppnm">'+(A.all?"📊 ":"🏢 ")+esc(A.label)+(A.all&&A.labels.length>1?' <span>· cộng '+A.labels.length+' NPP '+esc(MT.pic)+' phụ trách</span>':"")+'</div>';
   h+='<div class="mt-kpis">'+
     mtKpi("📦 Tháng "+mtYmLb(A.ym),mTag,m.v,m.bm,mtPct(m.v,m.bm),null,subM)+
     mtKpi("🧭 Quý Q"+A.qi+" · lũy kế","",A.qtd.v,A.q.bm,mtPct(A.qtd.v,A.q.bm),A.elQ,subQ)+
     mtKpi("🏁 "+esc(S.fy)+" · lũy kế","",A.ytd.v,A.fy.bm,mtPct(A.ytd.v,A.fy.bm),A.elY,subY)+'</div>';
+  h+=mtNppByDHtml(A);
   var th=basic
     ? '<tr><th>Sản phẩm</th><th>Budget MMH</th><th>A/F</th><th>% budget</th><th class="g">Lũy kế budget</th><th class="g">Lũy kế A/F</th><th class="g">% lũy kế</th></tr>'
     : '<tr><th>Sản phẩm</th><th>Budget MMH</th><th>Target NPP</th><th>Forecast</th><th>Actual</th><th>A/F</th><th>% budget</th><th class="g">Lũy kế budget</th><th class="g">Lũy kế A/F</th><th class="g">% lũy kế</th></tr>';
@@ -12755,8 +12814,9 @@ function mtPaintNpp(){
       '<td><b>'+mtUsd(o.v)+'</b></td><td style="color:'+(p==null?"var(--mute)":pctColor(p))+';font-weight:800">'+mtPctTx(p)+'</td>'+
       '<td class="g">'+mtUsd(y.bm)+'</td><td class="g"><b>'+mtUsd(y.v)+'</b></td><td class="g" style="color:'+(py==null?"var(--mute)":pctColor(py))+';font-weight:800">'+mtPctTx(py)+'</td></tr>';
   };
+  h+='<div class="mt-cst" style="margin-top:4px">📦 Theo sản phẩm · tháng '+esc(mtYmLb(A.ym))+'</div>';
   h+='<div class="mt-tw"><table class="mt-tb"><thead>'+th+'</thead><tbody>'+
-     A.prods.map(function(x){ return row(x.p,x.m,x.ytd); }).join("")+row("Tổng "+A.label,A.m,A.ytd,"tot")+
+     A.prods.map(function(x){ return row(x.p,x.m,x.ytd); }).join("")+row(A.all?A.label:("Tổng "+A.label),A.m,A.ytd,"tot")+
      '</tbody></table></div>';
   h+=mtChart(A);
   if(basic) h+='<div class="hint" style="margin:-4px 0 10px">⚠️ Web App file Turnover chưa có <b>getNppDetail</b> ⇒ tạm thiếu cột Target NPP / Forecast / Actual. Cập nhật Code.gs Turnover theo hướng dẫn để hiện đủ.</div>';
@@ -13087,7 +13147,7 @@ function mtPaintC2(){
   var el=$("mtC2"); if(!el) return;
   var st=mtPrevState();
   if(!st.prev){ el.innerHTML=st.none?"":'<div class="mt-cmp"><div class="mt-cmpnone">'+(st.err?"⚠️ "+esc(st.err):"Đang mở biên bản họp trước…")+'</div></div>'; return; }
-  var prev=st.prev, pd=prev.data||{}, P=(prev.snap||{}).npp, d=mtDraft(), A=MT.npp?mtNppAgg(d.npp,d.nppMonth):null;
+  var prev=st.prev, pd=prev.data||{}, P=(prev.snap||{}).npp, d=mtDraft(), A=mtNppAggCur(d);
   var h='<div class="mt-cmp"><div class="hd">⇆ So với họp trước <span class="mt-cmpsub">'+mtPrevHead(prev)+'</span></div>';
   if(P && A && A.hit && P.name===A.label){
     var C={ ym:A.ym, qi:A.qi, m:A.m, qtd:A.qtd, q:A.q, ytd:A.ytd, fy:A.fy };
@@ -13193,7 +13253,7 @@ function mtPaintSv(){
   var id=mtCurId(), it=mtListItem(id);
   if(MT.dirty[id]){ el.className="mt-sv dirty"; el.textContent="● Chưa lưu lên sheet"; }
   else if(it){ el.className="mt-sv ok"; el.textContent="✓ Đã lưu "+String(it.updatedAt||"").slice(5).replace(/^(\d\d)-(\d\d)/,"$2/$1")+(it.updatedBy?" · "+it.updatedBy:""); }
-  else { el.className="mt-sv new"; el.textContent=MT.listErr?"⚠️ Chưa đọc được log":"Chưa có biên bản tuần này"; }
+  else { el.className="mt-sv new"; el.textContent=MT.listErr?"⚠️ Chưa đọc được log":"Chưa có biên bản tuần này"; el.title=MT.listErr||""; }
   mtPaintTabsDot();
 }
 function mtPaintTabsDot(){ /* cập nhật dấu ● / ✓ mà không vẽ lại cả thanh tab */
@@ -13228,18 +13288,13 @@ function renderMeet(){
       '<button class="btn sm pri" onclick="mtSave()">💾 <span class="t">Lưu biên bản</span></button></div>'+
     (P.length>1?'<div class="shtabs" id="mtTabs"></div>':'<div id="mtTabs" style="display:none"></div>')+
     '<div id="mtBan"></div>'+
-    '<div class="mt-steps"><button onclick="mtJump(1)"><b>1</b>Đi địa bàn</button><button onclick="mtJump(2)"><b>2</b>Forecast NPP</button>'+
+    '<div class="mt-steps"><button onclick="mtJump(1)"><b>1</b>Forecast NPP</button><button onclick="mtJump(2)"><b>2</b>Đi địa bàn</button>'+
       '<button onclick="mtJump(3)"><b>3</b>Tình hình thầu</button><button onclick="mtJump(4)"><b>4</b>Thông tin khác</button>'+
       '<div class="seg mt-md"><button class="'+(cmp?"":"on")+'" onclick="mtSetMode(\'cur\')">📄 Chỉ tuần này</button>'+
         '<button class="'+(cmp?"on":"")+'" onclick="mtSetMode(\'cmp\')">⇆ So sánh tuần trước</button></div></div>'+
     (cmp?'<div class="mt-cmpbar" id="mtCmpBar"></div>':"")+
-    '<section class="card pad mt-sec" id="mt-s1"><div class="mt-sh"><div class="no">1</div><div><h3>Hoạt động đi địa bàn</h3>'+
-      '<small>Xem kết quả tuần này trước · sau đó '+esc(MT.pic)+' trình bày kế hoạch tuần sau</small></div></div>'+
-      c1("mtC1")+'<div id="mtVis"></div>'+
-      '<div class="mt-note"><label>📝 Ghi chú họp — nhận xét, chỉ đạo về hoạt động địa bàn</label>'+
-        mtTa("visitNote","Điểm tốt / cần cải thiện, account cần ưu tiên tuần sau, hỗ trợ cần thiết…",d)+'</div></section>'+
-    '<section class="card pad mt-sec" id="mt-s2"><div class="mt-sh"><div class="no">2</div><div><h3>Forecast nhà phân phối</h3>'+
-      '<small>Số liệu tự đọc từ SUM TURNOVER (MMH Turnover FY67–68) · sales chỉ cần điền phần giải thích</small></div></div>'+
+    '<section class="card pad mt-sec" id="mt-s1"><div class="mt-sh"><div class="no">1</div><div><h3>Forecast nhà phân phối</h3>'+
+      '<small>Mở đầu buổi họp · số liệu tự đọc từ SUM TURNOVER (MMH Turnover) · mặc định cộng tất cả NPP '+esc(MT.pic)+' phụ trách · sales chỉ cần điền phần giải thích</small></div></div>'+
       '<div id="mtNpp"></div>'+c1("mtC2")+
       '<div class="mt-chips"><span class="k">NPP có đang theo forecast?</span>'+mtChipsHtml("fcStatus",MT_FC,d.fcStatus)+'</div>'+
       '<div class="mt-chips"><span class="k">Mức rủi ro</span>'+mtChipsHtml("risk",MT_RISK,d.risk)+'</div>'+
@@ -13248,6 +13303,11 @@ function renderMeet(){
         '<div class="bx n"><b>❌ Negative factors</b>'+c1("mtP_neg")+mtTa("neg","Vì sao giảm / lệch forecast? Tồn kho NPP, dời đơn, đối thủ… Rủi ro là gì?",d)+'</div>'+
         '<div class="bx a"><b>➡️ Follow up Action</b>'+c1("mtP_act")+mtTa("act","Việc cần làm, ai làm, khi nào xong…",d)+'</div>'+
       '</div></section>'+
+    '<section class="card pad mt-sec" id="mt-s2"><div class="mt-sh"><div class="no">2</div><div><h3>Hoạt động đi địa bàn</h3>'+
+      '<small>Xem kết quả tuần này trước · sau đó '+esc(MT.pic)+' trình bày kế hoạch tuần sau</small></div></div>'+
+      c1("mtC1")+'<div id="mtVis"></div>'+
+      '<div class="mt-note"><label>📝 Ghi chú họp — nhận xét, chỉ đạo về hoạt động địa bàn</label>'+
+        mtTa("visitNote","Điểm tốt / cần cải thiện, account cần ưu tiên tuần sau, hỗ trợ cần thiết…",d)+'</div></section>'+
     '<section class="card pad mt-sec" id="mt-s3"><div class="mt-sh"><div class="no">3</div><div><h3>Tình hình thầu</h3>'+
       '<small>Gói thầu đang theo dõi của '+esc(MT.pic)+' · thống kê số lượng & DS ước tính còn lại trong '+esc(S.fy)+'</small></div></div>'+
       c1("mtC3")+'<div id="mtTd"></div>'+
@@ -13279,9 +13339,11 @@ function mtVSnap(w){
 function mtBuild(){
   var pic=MT.pic, wk=MT.week, d=mtDraft(), nx=addDays(wk,7);
   var cur=mtVisits(pic,wk,addDays(wk,6)), nxt=mtVisits(pic,nx,addDays(nx,6));
-  var A=MT.npp?mtNppAgg(d.npp,d.nppMonth):null, tds=mtTdOf(pic), ts=mtTdSum(tds);
-  var npp=A?{ name:A.label, ym:A.ym, qi:A.qi, closed:A.closed, mode:A.mode, m:A.m, qtd:A.qtd, q:A.q, ytd:A.ytd, fy:A.fy, elQ:A.elQ, elY:A.elY,
-              prods:A.prods.map(function(x){ return { p:x.p, m:x.m, ytd:x.ytd }; }) }:null;
+  var A=mtNppAggCur(d), tds=mtTdOf(pic), ts=mtTdSum(tds);
+  var npp=A?{ name:A.label, all:A.all, labels:A.labels, ym:A.ym, qi:A.qi, closed:A.closed, mode:A.mode, m:A.m, qtd:A.qtd, q:A.q, ytd:A.ytd, fy:A.fy, elQ:A.elQ, elY:A.elY,
+              prods:A.prods.map(function(x){ return { p:x.p, m:x.m, ytd:x.ytd }; }),
+              byD:(A.byD||[]).map(function(x){ return { label:x.label, hit:x.hit, m:x.m, qtd:x.qtd, q:x.q, ytd:x.ytd, fy:x.fy }; }) }:null;
+  var nppTx=A?(A.byD||[]).map(function(x){ return x.label+": "+(x.hit?(mtUsd(x.m.v)+"/"+mtUsd(x.m.bm)+" USD ("+mtPctTx(mtPct(x.m.v,x.m.bm))+") · FY "+mtPctTx(mtPct(x.ytd.v,x.fy.bm))):"chưa có số liệu"); }).join("\n"):"";
   var snap={ v:1, at:Date.now(), fy:S.fy,
     visits:{ cur:cur.list.map(mtVSnap), nxt:nxt.list.map(mtVSnap), tbdCur:cur.tbd?mtVSnap(cur.tbd):null, tbdNxt:nxt.tbd?mtVSnap(nxt.tbd):null },
     npp:npp,
@@ -13293,7 +13355,7 @@ function mtBuild(){
   var row={ "Week start":wk, "Tuần":mtWeekLabel(wk), "FY":S.fy, "Sales PIC":pic,
     "Số lượt tuần này":cur.list.length, "Đã hoàn thành":cur.list.filter(function(w){ return /complet/i.test(String(w.status||"")); }).length,
     "Số lượt tuần sau":nxt.list.length+(nxt.tbd?1:0), "Ghi chú địa bàn":d.visitNote||"",
-    "NPP":d.npp||"", "Tháng NPP":d.nppMonth||"",
+    "NPP":A?A.label:(d.npp===MT_ALL?"":(d.npp||"")), "Tháng NPP":d.nppMonth||"", "Tóm tắt NPP":nppTx,
     "A/F tháng (USD)":A?Math.round(A.m.v):"", "Budget tháng (USD)":A?Math.round(A.m.bm):"",
     "% tháng":A?mtPctTx(mtPct(A.m.v,A.m.bm)):"", "% FY lũy kế":A?mtPctTx(mtPct(A.ytd.v,A.fy.bm)):"",
     "Theo forecast":fcL, "Rủi ro":rkL, "✅ Positive factors":d.pos||"", "❌ Negative factors":d.neg||"", "➡️ Follow up action":d.act||"",
@@ -13309,7 +13371,7 @@ function mtSave(then){
     var now=(r&&r.updatedAt)||(todayISO()+" "+new Date().toTimeString().slice(0,5));
     MT.rec[id]={ id:id, week:MT.week, wlabel:mtWeekLabel(MT.week), fy:S.fy, pic:MT.pic, data:d, snap:b.snap, updatedAt:now, updatedBy:S.user.pic };
     var it=mtListItem(id), meta={ id:id, week:MT.week, wlabel:mtWeekLabel(MT.week), fy:S.fy, pic:MT.pic,
-      nCur:b.row["Số lượt tuần này"], nDone:b.row["Đã hoàn thành"], nNxt:b.row["Số lượt tuần sau"], npp:d.npp, pm:b.row["% tháng"], pf:b.row["% FY lũy kế"],
+      nCur:b.row["Số lượt tuần này"], nDone:b.row["Đã hoàn thành"], nNxt:b.row["Số lượt tuần sau"], npp:b.row["NPP"], pm:b.row["% tháng"], pf:b.row["% FY lũy kế"],
       nTender:b.row["Số gói thầu"], tRemain:b.row["DS thầu còn lại FY (VND)"], updatedAt:now, updatedBy:S.user.pic,
       emailedAt:it?it.emailedAt:"", emailedTo:it?it.emailedTo:"" };
     MT.list=(MT.list||[]).filter(function(x){ return x.id!==id; }); MT.list.unshift(meta);
@@ -13318,7 +13380,14 @@ function mtSave(then){
     toast(r&&r.opaque?"Đã gửi biên bản lên máy chủ — đang xác nhận…":"Đã lưu biên bản họp "+MT.pic+" · "+mtWeekLabel(MT.week),"ok",4500);
     if(r&&(r.opaque||r.softTimeout)) setTimeout(mtLoadList,2500);
     if(typeof then==="function") then();
-  }).catch(function(e){ busy(false); toast("Lưu chưa được: "+e.message+" — bản nháp vẫn còn trong máy","err",8000); });
+  }).catch(function(e){ busy(false); toast("Lưu chưa được: "+mtErrTx(e)+" — bản nháp vẫn còn trong máy","err",9000); });
+}
+/* ⭐ v18.2 — backend CRM chưa có module Họp tuần ⇒ nói rõ cách xử lý thay vì "Unknown action" */
+function mtErrTx(e){
+  var m=String((e&&e.message)||e||"");
+  return /unknown action:\s*mt/i.test(m)
+    ? "Backend CRM chưa có chức năng Họp tuần — dán Code.gs CRM v8.4, chạy mtSetup() rồi Deploy › New version"
+    : m;
 }
 
 /* ───────── BIÊN BẢN (HTML dùng chung cho xem lại + email) ───────── */
@@ -13338,8 +13407,35 @@ function mtRecHtml(rec,no,prev){   /* prev: biên bản họp trước (không b
   var wk=rec.week, nwk=addDays(wk,7), title=(ROLES[rec.pic]||{}).title||"";
   var h='<div style="'+MTS.f+'"><div style="'+MTS.h2+'">'+(no?no+". ":"")+esc(rec.pic)+(title?' <span style="font-weight:600;color:#666666;font-size:13px">— '+esc(title)+'</span>':"")+'</div>';
   /* ① */
+  h+='<div style="'+MTS.h3+'">① Forecast NPP'+(N?(" "+esc(N.name)+" · tháng "+esc(mtYmLb(N.ym))):"")+'</div>';
+  if(N){
+    var P=function(a,b){ return mtPctTx(mtPct(a,b)); };
+    h+='<table style="'+MTS.tb+'"><tr><th style="'+MTS.th+'">Kỳ</th><th style="'+MTS.th+'text-align:right">A/F (USD)</th><th style="'+MTS.th+'text-align:right">Budget MMH</th><th style="'+MTS.th+'text-align:right">% hoàn thành</th><th style="'+MTS.th+'">Ghi chú</th></tr>'+
+      '<tr><td style="'+MTS.td+'">Tháng '+esc(mtYmLb(N.ym))+'</td><td style="'+MTS.tdr+'"><b>'+mtUsd(N.m.v)+'</b></td><td style="'+MTS.tdr+'">'+mtUsd(N.m.bm)+'</td><td style="'+MTS.tdr+'"><b>'+P(N.m.v,N.m.bm)+'</b></td>'+
+        '<td style="'+MTS.td+'">'+(N.closed?"Đã chốt Actual":"Chưa chốt — đang dùng Forecast")+(N.mode!=="basic"&&N.m.bd>0?(" · vs Target NPP "+P(N.m.v,N.m.bd)):"")+'</td></tr>'+
+      '<tr><td style="'+MTS.td+'">Quý Q'+N.qi+' (lũy kế)</td><td style="'+MTS.tdr+'"><b>'+mtUsd(N.qtd.v)+'</b></td><td style="'+MTS.tdr+'">'+mtUsd(N.q.bm)+'</td><td style="'+MTS.tdr+'"><b>'+P(N.qtd.v,N.q.bm)+'</b></td>'+
+        '<td style="'+MTS.td+'">Dự báo cả quý '+mtUsd(N.q.v)+' ('+P(N.q.v,N.q.bm)+') · thời gian '+Math.round((N.elQ||0)*100)+'%</td></tr>'+
+      '<tr><td style="'+MTS.td+'">'+esc((rec.fy||s.fy||""))+' (lũy kế)</td><td style="'+MTS.tdr+'"><b>'+mtUsd(N.ytd.v)+'</b></td><td style="'+MTS.tdr+'">'+mtUsd(N.fy.bm)+'</td><td style="'+MTS.tdr+'"><b>'+P(N.ytd.v,N.fy.bm)+'</b></td>'+
+        '<td style="'+MTS.td+'">vs budget lũy kế '+P(N.ytd.v,N.ytd.bm)+' · dự báo cả FY '+mtUsd(N.fy.v)+' ('+P(N.fy.v,N.fy.bm)+')</td></tr></table>';
+    if((N.byD||[]).length>1) h+='<table style="'+MTS.tb+'"><tr><th style="'+MTS.th+'">NPP</th><th style="'+MTS.th+'text-align:right">Budget tháng</th><th style="'+MTS.th+'text-align:right">A/F tháng</th><th style="'+MTS.th+'text-align:right">% tháng</th><th style="'+MTS.th+'text-align:right">Q'+N.qi+' lũy kế</th><th style="'+MTS.th+'text-align:right">% quý</th><th style="'+MTS.th+'text-align:right">FY lũy kế</th><th style="'+MTS.th+'text-align:right">% budget FY</th></tr>'+
+      N.byD.map(function(x){ return x.hit?('<tr><td style="'+MTS.td+'"><b>'+esc(x.label)+'</b></td><td style="'+MTS.tdr+'">'+mtUsd(x.m.bm)+'</td><td style="'+MTS.tdr+'"><b>'+mtUsd(x.m.v)+'</b></td><td style="'+MTS.tdr+'"><b>'+P(x.m.v,x.m.bm)+'</b></td>'+
+        '<td style="'+MTS.tdr+'">'+mtUsd(x.qtd.v)+'</td><td style="'+MTS.tdr+'">'+P(x.qtd.v,x.q.bm)+'</td><td style="'+MTS.tdr+'">'+mtUsd(x.ytd.v)+'</td><td style="'+MTS.tdr+'">'+P(x.ytd.v,x.fy.bm)+'</td></tr>')
+        :('<tr><td style="'+MTS.td+'"><b>'+esc(x.label)+'</b></td><td style="'+MTS.td+'" colspan="7"><span style="'+MTS.mute+'">Chưa có budget / forecast trong SUM TURNOVER</span></td></tr>'); }).join("")+'</table>';
+    if((N.prods||[]).length) h+='<table style="'+MTS.tb+'"><tr><th style="'+MTS.th+'">Sản phẩm</th><th style="'+MTS.th+'text-align:right">Budget tháng</th>'+
+      (N.mode!=="basic"?'<th style="'+MTS.th+'text-align:right">Forecast</th><th style="'+MTS.th+'text-align:right">Actual</th>':"")+
+      '<th style="'+MTS.th+'text-align:right">A/F tháng</th><th style="'+MTS.th+'text-align:right">%</th><th style="'+MTS.th+'text-align:right">A/F lũy kế</th><th style="'+MTS.th+'text-align:right">% lũy kế</th></tr>'+
+      N.prods.map(function(x){ return '<tr><td style="'+MTS.td+'">'+esc(x.p)+'</td><td style="'+MTS.tdr+'">'+mtUsd(x.m.bm)+'</td>'+
+        (N.mode!=="basic"?'<td style="'+MTS.tdr+'">'+mtUsd(x.m.fc)+'</td><td style="'+MTS.tdr+'">'+mtUsd(x.m.ac)+'</td>':"")+
+        '<td style="'+MTS.tdr+'"><b>'+mtUsd(x.m.v)+'</b></td><td style="'+MTS.tdr+'">'+P(x.m.v,x.m.bm)+'</td><td style="'+MTS.tdr+'">'+mtUsd(x.ytd.v)+'</td><td style="'+MTS.tdr+'">'+P(x.ytd.v,x.ytd.bm)+'</td></tr>'; }).join("")+'</table>';
+  } else h+='<div style="'+MTS.mute+'">Không có số liệu NPP.</div>';
+  if(prev) h+=mtRecCmpNpp(rec,prev);
+  var fcL=(MT_FC.filter(function(x){ return x[0]===d.fcStatus; })[0]||[,""])[1], rkL=(MT_RISK.filter(function(x){ return x[0]===d.risk; })[0]||[,""])[1];
+  if(fcL||rkL) h+='<div style="font-size:13px;margin:4px 0 6px"><b>Theo forecast:</b> '+esc(fcL||"—")+' &nbsp;·&nbsp; <b>Rủi ro:</b> '+esc(rkL||"—")+'</div>';
+  [["pos","✅ Positive factors","#1E9E5A"],["neg","❌ Negative factors","#D9433F"],["act","➡️ Follow up Action","#3A5CAA"]].forEach(function(x){
+    if(String(d[x[0]]||"").trim()) h+='<div style="'+MTS.note+'border-left-color:'+x[2]+'"><b>'+x[1]+'</b><br>'+mtE(d[x[0]])+'</div>'; });
+  /* ② */
   var done=cur.filter(function(v){ return /complet/i.test(v.st); }).length, pos=cur.filter(function(v){ return /tích\s*cực/i.test(v.fb); }).length;
-  h+='<div style="'+MTS.h3+'">① Hoạt động đi địa bàn · '+esc(mtRange(wk))+'</div>'+
+  h+='<div style="'+MTS.h3+'">② Hoạt động đi địa bàn · '+esc(mtRange(wk))+'</div>'+
      '<div style="'+MTS.mute+'">'+cur.length+' lượt · '+done+' hoàn thành · '+pos+' feedback tích cực'+(V.tbdCur?(" · TBD: "+esc(V.tbdCur.rs||"")):"")+'</div>';
   if(cur.length) h+='<table style="'+MTS.tb+'"><tr><th style="'+MTS.th+'width:62px">Ngày</th><th style="'+MTS.th+'">Địa bàn</th><th style="'+MTS.th+'">SP · Process</th><th style="'+MTS.th+'">Kết quả</th><th style="'+MTS.th+'">Feedback · Next</th></tr>'+
     cur.map(function(v){ return '<tr><td style="'+MTS.td+'">'+esc(fmtVN(v.d).slice(0,5))+'</td><td style="'+MTS.td+'"><b>'+esc(v.a)+'</b>'+(v.pv?'<br><span style="'+MTS.mute+'">'+esc(v.pv)+'</span>':"")+'</td>'+
@@ -13353,29 +13449,6 @@ function mtRecHtml(rec,no,prev){   /* prev: biên bản họp trước (không b
     nx.map(function(v){ return '<tr><td style="'+MTS.td+'">'+esc(fmtVN(v.d).slice(0,5))+'</td><td style="'+MTS.td+'"><b>'+esc(v.a)+'</b></td><td style="'+MTS.td+'">'+esc(v.pr||"—")+'<br><span style="'+MTS.mute+'">'+esc(v.ps||"")+'</span></td><td style="'+MTS.td+'">'+mtE(v.pl||"—")+'</td></tr>'; }).join("")+'</table>';
   else h+='<div style="'+MTS.mute+'">Chưa có kế hoạch.</div>';
   if(d.visitNote) h+='<div style="'+MTS.note+'"><b>Ghi chú họp:</b> '+mtE(d.visitNote)+'</div>';
-  /* ② */
-  h+='<div style="'+MTS.h3+'">② Forecast NPP'+(N?(" "+esc(N.name)+" · tháng "+esc(mtYmLb(N.ym))):"")+'</div>';
-  if(N){
-    var P=function(a,b){ return mtPctTx(mtPct(a,b)); };
-    h+='<table style="'+MTS.tb+'"><tr><th style="'+MTS.th+'">Kỳ</th><th style="'+MTS.th+'text-align:right">A/F (USD)</th><th style="'+MTS.th+'text-align:right">Budget MMH</th><th style="'+MTS.th+'text-align:right">% hoàn thành</th><th style="'+MTS.th+'">Ghi chú</th></tr>'+
-      '<tr><td style="'+MTS.td+'">Tháng '+esc(mtYmLb(N.ym))+'</td><td style="'+MTS.tdr+'"><b>'+mtUsd(N.m.v)+'</b></td><td style="'+MTS.tdr+'">'+mtUsd(N.m.bm)+'</td><td style="'+MTS.tdr+'"><b>'+P(N.m.v,N.m.bm)+'</b></td>'+
-        '<td style="'+MTS.td+'">'+(N.closed?"Đã chốt Actual":"Chưa chốt — đang dùng Forecast")+(N.mode!=="basic"&&N.m.bd>0?(" · vs Target NPP "+P(N.m.v,N.m.bd)):"")+'</td></tr>'+
-      '<tr><td style="'+MTS.td+'">Quý Q'+N.qi+' (lũy kế)</td><td style="'+MTS.tdr+'"><b>'+mtUsd(N.qtd.v)+'</b></td><td style="'+MTS.tdr+'">'+mtUsd(N.q.bm)+'</td><td style="'+MTS.tdr+'"><b>'+P(N.qtd.v,N.q.bm)+'</b></td>'+
-        '<td style="'+MTS.td+'">Dự báo cả quý '+mtUsd(N.q.v)+' ('+P(N.q.v,N.q.bm)+') · thời gian '+Math.round((N.elQ||0)*100)+'%</td></tr>'+
-      '<tr><td style="'+MTS.td+'">'+esc((rec.fy||s.fy||""))+' (lũy kế)</td><td style="'+MTS.tdr+'"><b>'+mtUsd(N.ytd.v)+'</b></td><td style="'+MTS.tdr+'">'+mtUsd(N.fy.bm)+'</td><td style="'+MTS.tdr+'"><b>'+P(N.ytd.v,N.fy.bm)+'</b></td>'+
-        '<td style="'+MTS.td+'">vs budget lũy kế '+P(N.ytd.v,N.ytd.bm)+' · dự báo cả FY '+mtUsd(N.fy.v)+' ('+P(N.fy.v,N.fy.bm)+')</td></tr></table>';
-    if((N.prods||[]).length) h+='<table style="'+MTS.tb+'"><tr><th style="'+MTS.th+'">Sản phẩm</th><th style="'+MTS.th+'text-align:right">Budget tháng</th>'+
-      (N.mode!=="basic"?'<th style="'+MTS.th+'text-align:right">Forecast</th><th style="'+MTS.th+'text-align:right">Actual</th>':"")+
-      '<th style="'+MTS.th+'text-align:right">A/F tháng</th><th style="'+MTS.th+'text-align:right">%</th><th style="'+MTS.th+'text-align:right">A/F lũy kế</th><th style="'+MTS.th+'text-align:right">% lũy kế</th></tr>'+
-      N.prods.map(function(x){ return '<tr><td style="'+MTS.td+'">'+esc(x.p)+'</td><td style="'+MTS.tdr+'">'+mtUsd(x.m.bm)+'</td>'+
-        (N.mode!=="basic"?'<td style="'+MTS.tdr+'">'+mtUsd(x.m.fc)+'</td><td style="'+MTS.tdr+'">'+mtUsd(x.m.ac)+'</td>':"")+
-        '<td style="'+MTS.tdr+'"><b>'+mtUsd(x.m.v)+'</b></td><td style="'+MTS.tdr+'">'+P(x.m.v,x.m.bm)+'</td><td style="'+MTS.tdr+'">'+mtUsd(x.ytd.v)+'</td><td style="'+MTS.tdr+'">'+P(x.ytd.v,x.ytd.bm)+'</td></tr>'; }).join("")+'</table>';
-  } else h+='<div style="'+MTS.mute+'">Không có số liệu NPP.</div>';
-  if(prev) h+=mtRecCmpNpp(rec,prev);
-  var fcL=(MT_FC.filter(function(x){ return x[0]===d.fcStatus; })[0]||[,""])[1], rkL=(MT_RISK.filter(function(x){ return x[0]===d.risk; })[0]||[,""])[1];
-  if(fcL||rkL) h+='<div style="font-size:13px;margin:4px 0 6px"><b>Theo forecast:</b> '+esc(fcL||"—")+' &nbsp;·&nbsp; <b>Rủi ro:</b> '+esc(rkL||"—")+'</div>';
-  [["pos","✅ Positive factors","#1E9E5A"],["neg","❌ Negative factors","#D9433F"],["act","➡️ Follow up Action","#3A5CAA"]].forEach(function(x){
-    if(String(d[x[0]]||"").trim()) h+='<div style="'+MTS.note+'border-left-color:'+x[2]+'"><b>'+x[1]+'</b><br>'+mtE(d[x[0]])+'</div>'; });
   /* ③ */
   var sm=T.sum||{}, it=T.items||[], A0=sm.all||{n:0,qty:0,total:0,remain:0};
   h+='<div style="'+MTS.h3+'">③ Tình hình thầu</div><div style="'+MTS.mute+'">'+A0.n+' gói · giá trị '+fmtVND(A0.total)+' · DS ước tính còn lại '+esc(rec.fy||s.fy||"")+': <b style="color:#003047">'+fmtVND(A0.remain)+'</b>'+
@@ -13475,7 +13548,7 @@ function mtMailOpen(){
 }
 function mtMailIntro(wk){
   return "Kính gửi Anh/Chị,\n\nEm xin gửi cập nhật hoạt động của Surgical Sales Team "+mtWeekLabel(wk)+" ("+fmtVN(wk)+" – "+fmtVN(addDays(wk,6))+
-    "), tổng hợp từ buổi họp tuần với từng PIC, gồm: ① hoạt động đi địa bàn & kế hoạch tuần sau, ② forecast nhà phân phối, ③ tình hình thầu, ④ các thông tin khác.";
+    "), tổng hợp từ buổi họp tuần với từng PIC, gồm: ① forecast nhà phân phối, ② hoạt động đi địa bàn & kế hoạch tuần sau, ③ tình hình thầu, ④ các thông tin khác.";
 }
 function mtMailPick(){
   var g=function(k){ return [].slice.call($("mBody").querySelectorAll('input[data-g="'+k+'"]:checked')).map(function(x){ return x.value; }); };
@@ -13487,12 +13560,14 @@ function mtMailPick(){
 }
 function mtMailHtml(p){
   var wk=S._mtMail.wk, me=S.user.pic, meT=(ROLES[me]||{}).title||"";
-  var ov='<table style="'+MTS.tb+'"><tr><th style="'+MTS.th+'">PIC</th><th style="'+MTS.th+'text-align:right">Địa bàn tuần này</th><th style="'+MTS.th+'text-align:right">KH tuần sau</th>'+(p.cmp?'<th style="'+MTS.th+'text-align:right">Thực hiện KH đã chốt</th>':"")+'<th style="'+MTS.th+'">NPP · tháng</th><th style="'+MTS.th+'text-align:right">% tháng</th><th style="'+MTS.th+'text-align:right">% FY lũy kế</th><th style="'+MTS.th+'text-align:right">Thầu còn lại FY</th></tr>'+
+  var ov='<table style="'+MTS.tb+'"><tr><th style="'+MTS.th+'">PIC</th><th style="'+MTS.th+'">NPP · tháng</th><th style="'+MTS.th+'text-align:right">A/F tháng (USD)</th><th style="'+MTS.th+'text-align:right">% tháng</th><th style="'+MTS.th+'text-align:right">% FY lũy kế</th><th style="'+MTS.th+'text-align:right">Địa bàn tuần này</th><th style="'+MTS.th+'text-align:right">KH tuần sau</th>'+(p.cmp?'<th style="'+MTS.th+'text-align:right">Thực hiện KH đã chốt</th>':"")+'<th style="'+MTS.th+'text-align:right">Thầu còn lại FY</th></tr>'+
     p.recs.map(function(r){ var s=r.snap||{}, V=s.visits||{}, N=s.npp, T=((s.tender||{}).sum||{}).all||{};
       var cur=V.cur||[], dn=cur.filter(function(v){ return /complet/i.test(v.st); }).length;
-      return '<tr><td style="'+MTS.td+'"><b>'+esc(r.pic)+'</b></td><td style="'+MTS.tdr+'">'+dn+'/'+cur.length+'</td><td style="'+MTS.tdr+'">'+((V.nxt||[]).length+(V.tbdNxt?1:0))+'</td>'+(p.cmp?'<td style="'+MTS.tdr+'">'+mtPlanTx(r,(S._mtMail.prev||{})[r.id])+'</td>':"")+
-        '<td style="'+MTS.td+'">'+(N?esc(N.name)+' · '+esc(mtYmLb(N.ym)):"—")+'</td><td style="'+MTS.tdr+'"><b>'+(N?mtPctTx(mtPct(N.m.v,N.m.bm)):"—")+'</b></td>'+
-        '<td style="'+MTS.tdr+'"><b>'+(N?mtPctTx(mtPct(N.ytd.v,N.fy.bm)):"—")+'</b></td><td style="'+MTS.tdr+'">'+fmtVND(T.remain||0)+' <span style="'+MTS.mute+'">('+(T.n||0)+' gói)</span></td></tr>'; }).join("")+'</table>';
+      return '<tr><td style="'+MTS.td+'"><b>'+esc(r.pic)+'</b></td>'+
+        '<td style="'+MTS.td+'">'+(N?esc(N.name)+' · '+esc(mtYmLb(N.ym)):"—")+'</td><td style="'+MTS.tdr+'">'+(N?mtUsd(N.m.v)+' / '+mtUsd(N.m.bm):"—")+'</td><td style="'+MTS.tdr+'"><b>'+(N?mtPctTx(mtPct(N.m.v,N.m.bm)):"—")+'</b></td>'+
+        '<td style="'+MTS.tdr+'"><b>'+(N?mtPctTx(mtPct(N.ytd.v,N.fy.bm)):"—")+'</b></td>'+
+        '<td style="'+MTS.tdr+'">'+dn+'/'+cur.length+'</td><td style="'+MTS.tdr+'">'+((V.nxt||[]).length+(V.tbdNxt?1:0))+'</td>'+(p.cmp?'<td style="'+MTS.tdr+'">'+mtPlanTx(r,(S._mtMail.prev||{})[r.id])+'</td>':"")+
+        '<td style="'+MTS.tdr+'">'+fmtVND(T.remain||0)+' <span style="'+MTS.mute+'">('+(T.n||0)+' gói)</span></td></tr>'; }).join("")+'</table>';
   return '<div style="'+MTS.f+'color:#1A1A1A;font-size:14px;line-height:1.55;max-width:880px">'+
     '<div style="border-left:6px solid #FFE100;background:#F0F7FF;padding:14px 18px;border-radius:0 10px 10px 0;margin-bottom:16px">'+
       '<div style="font-size:12px;font-weight:700;color:#3A5CAA;letter-spacing:.5px">MANI MEDICAL HANOI · SURGICAL SALES TEAM</div>'+
