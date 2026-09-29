@@ -3970,7 +3970,7 @@ function buildNav(){
     if(t.grp!==lastGrp){ h+='<div class="grp">'+t.grp+'</div>'; lastGrp=t.grp; }
     h+='<button class="nvi" data-t="'+t.id+'" onclick="go(\''+t.id+'\')"><span class="ic">'+t.ic+'</span><span class="lb">'+t.lb+'</span></button>';
   });
-  h+='<div style="flex:1"></div><div style="padding:10px;font-size:10.5px;color:var(--mute);line-height:1.5">MMH CRM v21<br>'+
+  h+='<div style="flex:1"></div><div style="padding:10px;font-size:10.5px;color:var(--mute);line-height:1.5">MMH CRM v21.2<br>'+
      (isMgmt()?'<a href="'+DRIVE_FOLDER+'" target="_blank">📁 Folder ảnh Drive</a>':"")+'</div>';
   $("side").innerHTML=h;
   /* ⭐ v4.5 — thanh dưới trượt ngang, đủ mọi mục, bỏ nút "Thêm" */
@@ -14802,6 +14802,13 @@ function thHtml(h){
   .ev-g4 .kpi{padding:10px 11px}
   .ev-g4 .kpi .vl{font-size:20px}
 }
+/* HDSD PDF */
+.hdsd-tabs{margin-bottom:10px}
+.hdsd-wrap{position:relative;border-radius:12px;overflow:hidden;background:#F2F5FA;border:1px solid var(--line)}
+.hdsd-load{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:var(--mute);font-size:13px;font-weight:700;z-index:0}
+.hdsd-frame{position:relative;z-index:1;display:block;width:100%;height:calc(100vh - 250px);min-height:420px;border:0;background:transparent}
+.hdsd-hint{font-size:12px;color:var(--mute);margin-top:8px}
+@media(max-width:720px){ .hdsd-frame{height:calc(100vh - 260px);min-height:360px} }
 </style>
 <script>
 /* ═══════════════════════════════════════════════════════════════════════════════════════
@@ -15439,6 +15446,47 @@ function renderEvCust(){
       (rows.length>lim?'<div style="text-align:center;margin-top:12px"><button class="btn" onclick="S.ecLimit=(S.ecLimit||100)+200;renderEvCust()">Show more ('+fmtN(rows.length-lim)+')</button></div>':'')+'</div>'
      :'<div class="card pad"><div class="empty"><div class="e">🎪</div><p>'+(EVS.cust?'No customer matches.':'Loading…')+'</p></div></div>')+
   '</div>';
+}
+
+/* ═════════════ ⭐ v21.2 — HƯỚNG DẪN SỬ DỤNG = FILE PDF TRÊN DRIVE (mỗi nhóm một file) ═════════════
+   Sales: chỉ thấy HDSD của nhóm mình · Management: thêm HDSD Management và HDSD của mọi nhóm. */
+var HDSD_PDF={
+  dental:  { id:"12bngE0U8y2v5I7yJk861V8nacvHRekwv", ic:"🦷", lb:"Dental" },
+  surgical:{ id:"184iN99S_d8Egxi8MRW3tLz9WivMz8PGX", ic:"👁", lb:"Surgical" },
+  eyeless: { id:"1vsEq2RZVR25RDB5chL-XGrNqjjIqe0i-", ic:"🪡", lb:"Eyeless" },
+  thai:    { id:"1_Oak7xSG8qQnJ7wRoLbEVpHJ0xp6ARgF", ic:"🇹🇭", lb:"Thailand Surgical" },
+  mgmt:    { id:"1gjsFwVBJhvvWcghCTjpUHLjiX6VgDES9", ic:"🛡", lb:"Management" }
+};
+function hdsdList(){
+  var cur=curTeamKey(), L=[];
+  if(isMgmt()) L.push("mgmt");
+  if(HDSD_PDF[cur]) L.push(cur);
+  if(isMgmt()) ["dental","surgical","eyeless","thai"].forEach(function(k){ if(L.indexOf(k)<0) L.push(k); });
+  return L;
+}
+function hdsdView(id){ return "https://drive.google.com/file/d/"+id+"/view"; }
+function hdsdDl(id){ return "https://drive.google.com/uc?export=download&id="+id; }
+openHelp=function(){
+  var L=hdsdList(); if(!L.length) return;
+  if(L.indexOf(S.hdsdK)<0) S.hdsdK=L[0];
+  openModal(TX("📘 Hướng dẫn sử dụng","📘 User guide"),
+    (L.length>1?'<div class="hp-tabs hdsd-tabs">'+L.map(function(k){ var d=HDSD_PDF[k];
+      return '<button class="hp-tab" data-k="'+k+'" onclick="hdsdGo(\''+k+'\')"><span>'+d.ic+'</span>'+esc(d.lb)+'</button>'; }).join("")+'</div>':'')+
+    '<div class="hdsd-wrap"><div class="hdsd-load">'+TX("Đang mở file PDF…","Opening the PDF…")+'</div>'+
+      '<iframe id="hdsdFrame" class="hdsd-frame" loading="lazy" title="HDSD"></iframe></div>'+
+    '<div class="hdsd-hint">'+TX("Không hiện file? Bấm <b>↗ Mở toàn màn hình</b> để xem trên Google Drive.",
+                                   "PDF not showing? Tap <b>↗ Open full screen</b> to view it on Google Drive.")+'</div>',
+    '<a class="btn" id="hdsdOpen" target="_blank" rel="noopener">↗ '+TX("Mở toàn màn hình","Open full screen")+'</a>'+
+    '<a class="btn" id="hdsdDl" target="_blank" rel="noopener">⬇ '+TX("Tải PDF","Download PDF")+'</a>'+
+    '<div style="flex:1"></div><button class="btn pri" onclick="closeModal()">'+TX("Đóng","Close")+'</button>', true);
+  hdsdGo(S.hdsdK);
+};
+function hdsdGo(k){
+  var d=HDSD_PDF[k]; if(!d) return; S.hdsdK=k;
+  var f=$("hdsdFrame"); if(f && f.getAttribute("data-k")!==k){ f.setAttribute("data-k",k); f.src="https://drive.google.com/file/d/"+d.id+"/preview"; }
+  var o=$("hdsdOpen"); if(o) o.href=hdsdView(d.id);
+  var w=$("hdsdDl"); if(w) w.href=hdsdDl(d.id);
+  Array.prototype.forEach.call(document.querySelectorAll(".hdsd-tabs .hp-tab"),function(b){ b.classList.toggle("on", b.getAttribute("data-k")===k); });
 }
 
 </script>
