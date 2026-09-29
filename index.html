@@ -4935,8 +4935,10 @@ function k68Bar(p,sub){
 function k68Quarter(r,q){
   var last=k68IsLast(r), t=null, a=null, i;
   if(last){
-    for(i=0;i<=q*3+2;i++) if(r.a[i]!=null) a=r.a[i];
-    t=r.t[q*3+2];
+    /* Rule 13: doanh số lũy kế ⇒ quý = cuối quý − cuối quý trước */
+    var a0=null; for(i=0;i<=q*3+2;i++){ if(r.a[i]!=null){ a=r.a[i]; if(i<q*3) a0=r.a[i]; } }
+    if(a!=null&&q>0) a=a-(a0||0);
+    t=r.t[q*3+2]; if(t!=null&&q>0) t=t-n(r.t[q*3-1]);
   } else {
     for(i=q*3;i<q*3+3;i++){ if(r.t[i]!=null) t=(t||0)+r.t[i]; if(r.a[i]!=null) a=(a||0)+r.a[i]; }
   }
@@ -4961,7 +4963,8 @@ function renderKPI(){
       TX("Theo đúng mã KPI của file MMH KPI FY68 · Target lấy từ file KPI · Actual tự tính bằng công thức ở tab ",
          "Per the KPI codes of the MMH KPI FY68 file · targets from the KPI file · actuals calculated by the formulas of sheet ")+
       esc(isTH()?"9. TARGET & KPI":"9. MỤC TIÊU & KPI")+
-      (st.sync?'<br><span style="font-size:11.5px;color:var(--mute)">'+TX("Đồng bộ file KPI lần cuối: ","Last sync with the KPI file: ")+esc(st.sync)+'</span>':"")+'</p></div><div class="sp"></div>'+
+      (st.sync||st.checked?'<br><span style="font-size:11.5px;color:var(--mute)">'+TX("Đồng bộ 2 chiều với file KPI tổng (5 phút/lần)","Two-way sync with the master KPI file (every 5 min)")+
+        (st.checked?' · '+TX("kiểm tra lần cuối ","last check ")+esc(st.checked):"")+(st.sync?'<br>'+TX("Lần có thay đổi gần nhất: ","Last change: ")+esc(st.sync):"")+'</span>':"")+'</p></div><div class="sp"></div>'+
     (mgr&&k.v68&&!k.notBuilt?'<button class="btn sm" style="margin-right:8px" onclick="kpiSync()" title="'+
       (st.hasLink?TX("Kéo target + doanh số NPP từ file KPI FY68 về, đẩy actual CRM sang file KPI","Pull targets + turnover from the KPI FY68 file, push CRM actuals to it"):
                   TX("Chưa có link file KPI FY68 ở ô D9 của tab KPI","No KPI FY68 file link in cell D9 of the KPI sheet"))+'">⟳ '+TX("Đồng bộ file KPI FY68","Sync KPI FY68 file")+'</button>':"")+
@@ -5043,8 +5046,8 @@ function renderKPI(){
     '<div style="display:flex;align-items:flex-end;gap:12px;flex-wrap:wrap;margin:16px 4px 10px">'+
       '<div><div style="font-size:12.5px;font-weight:800;color:var(--navy);letter-spacing:.3px">'+TX("PHẦN B — KPI TỪNG SALES","PART B — KPI OF EACH PIC")+'</div>'+
       '<div style="font-size:11.5px;color:var(--mute);margin-top:2px">'+
-        (qsel==="FY"?TX("Mỗi ô quý = actual / target · Cộng dồn = tổng 3 tháng · Lũy kế (doanh số NPP) = số cuối quý",
-                        "Each quarter cell = actual / target · Sum = 3 months · Cumulative (turnover) = end of quarter")
+        (qsel==="FY"?TX("Mỗi ô quý = actual / target · Cộng dồn = tổng 3 tháng · Lũy kế (doanh số NPP) = cuối quý − cuối quý trước",
+                        "Each quarter cell = actual / target · Sum = 3 months · Cumulative (turnover) = quarter-end − previous quarter-end")
                     :TX("Mỗi ô tháng = actual, dòng nhỏ = target tháng","Each month cell = actual, small line = monthly target"))+
         ' · '+TX("% tối đa 130% (doanh số mã F không giới hạn)","capped at 130% (turnover F codes not capped)")+'</div></div></div>'+
     picBar+cards+'</div>';
