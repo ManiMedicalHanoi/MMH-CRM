@@ -1501,7 +1501,11 @@ document.addEventListener("DOMContentLoaded",function(){ try{ i18nApply(); }catc
 
 <script>
 /* ═══════════════════════════════════════════════════════════════════
-   MMH CRM — Frontend v20  (v20: trang KPI theo file MMH KPI FY68 — mã KPI, target 12 tháng, % theo quý / lũy kế,
+   MMH CRM — Frontend v21  (v21: Thailand Surgical có tab Event (file Marketing Offline, sheet REPORT_EVENT) — thêm / sửa / xoá,
+                              event tự lên Lịch công việc, Dashboard + Key stakeholder có số liệu event · bỏ ADP của nhóm Thái ·
+                              đăng nhập là mở Lịch công việc tuần này · điện thoại gọn hơn · task thuộc kỳ theo NGÀY BẮT ĐẦU
+                              · cần backend VN v9.0 / Thai v1.3 / Event_Backend v1.0)
+                              (v20: v20: trang KPI theo file MMH KPI FY68 — mã KPI, target 12 tháng, % theo quý / lũy kế,
                               nút đồng bộ file KPI · cần backend VN v8.9 / Thai v1.2)
                               (v19: báo cáo tuần chỉ lấy task có ngày bắt đầu / kết thúc trong tuần · tìm nhanh Key Task khi thêm
                               Công việc khác · Họp tuần cho Thailand Surgical · v18: + Thailand Surgical)
@@ -2519,7 +2523,8 @@ function startApp(pic){
   $("fySel").innerHTML=opts(S.fyList,S.fy);
   buildNav();
   startSync();                               /* ⭐ v13 — hỏi version trước: dữ liệu không đổi thì KHÔNG tải lại */
-  go("weekly");                              /* mở app là vào ngay màn hình địa bàn */
+  if(typeof v21Landing==="function") v21Landing();   /* ⭐ v21 — mở app là vào Lịch công việc, tuần này */
+  go("weekly");
   if(!S.custIndex.length) loadCustomerIndex();
   if(S.activity&&S.activity.length) $("actDot").style.display="";
   warmGps();
@@ -3933,6 +3938,7 @@ var TABS=[
   {id:"cust",   ic:"👥", lb:"Khách hàng",  mlb:"Khách hàng", grp:"Dữ liệu", mob:1},
   {id:"stake",  ic:"🤝", lb:"Key stakeholder", mlb:"CBC",    grp:"Dữ liệu"},
   {id:"weekly", ic:"📍", lb:"Cập nhật", mlb:"Cập nhật", grp:"Dữ liệu", mob:1},
+  {id:"event",  ic:"🎪", lb:"Event", mlb:"Event", grp:"Dữ liệu", mob:1, gate:"event"},   /* ⭐ v21 — Thailand Surgical */
   {id:"order",  ic:"🧾", lb:"Đơn hàng",    mlb:"Đơn hàng",  grp:"Dữ liệu"},
   {id:"present",ic:"🎤", lb:"Thuyết trình",mlb:"Thuyết trình", grp:"Dữ liệu"},
   {id:"monthly",ic:"🗓", lb:"Công việc trong tháng",mlb:"CV tháng", grp:"Dữ liệu"},
@@ -3942,10 +3948,12 @@ var TABS=[
   {id:"report", ic:"📧", lb:"Gửi báo cáo", mlb:"Mail",      grp:"Công cụ", mob:1}
 ];
 /* thứ tự nút ở thanh dưới trên điện thoại */
-var MOB_ORDER=["weekly","meet","cust","stake","order","present","report","monthly","adp","dash","kpi","photos"];
+var MOB_ORDER=["weekly","event","meet","cust","stake","order","present","report","monthly","adp","dash","kpi","photos"];
 function navTabs(){ return TABS.filter(function(t){
   if(t.id==="order" && noOrder()) return false;            /* ⭐ v19 — Thailand */
   if(t.id==="photos" && noPhoto()) return false;
+  if(t.id==="adp" && isTH()) return false;                 /* ⭐ v21 — Thailand: bỏ ADP */
+  if(t.gate==="event") return typeof hasEvents==="function" && hasEvents();
   if(t.gate==="meet") return typeof canSeeMeet==="function" && canSeeMeet();   /* ⭐ v18 */
   return t.gate!=="gallery" || canSeeGallery(); }); }
 function buildNav(){
@@ -3962,7 +3970,7 @@ function buildNav(){
     if(t.grp!==lastGrp){ h+='<div class="grp">'+t.grp+'</div>'; lastGrp=t.grp; }
     h+='<button class="nvi" data-t="'+t.id+'" onclick="go(\''+t.id+'\')"><span class="ic">'+t.ic+'</span><span class="lb">'+t.lb+'</span></button>';
   });
-  h+='<div style="flex:1"></div><div style="padding:10px;font-size:10.5px;color:var(--mute);line-height:1.5">MMH CRM v20<br>'+
+  h+='<div style="flex:1"></div><div style="padding:10px;font-size:10.5px;color:var(--mute);line-height:1.5">MMH CRM v21<br>'+
      (isMgmt()?'<a href="'+DRIVE_FOLDER+'" target="_blank">📁 Folder ảnh Drive</a>':"")+'</div>';
   $("side").innerHTML=h;
   /* ⭐ v4.5 — thanh dưới trượt ngang, đủ mọi mục, bỏ nút "Thêm" */
@@ -4515,12 +4523,13 @@ function renderDash(){
     : G==="field" ? (blkFieldStat+blkField+blkRecent)
     : (G==="biz"&&!noOrder()) ? (blkKpi+blkBiz)
     : G==="adp"   ? blkAdp
+    : (G==="event"&&typeof hasEvents==="function"&&hasEvents()) ? evDashHtml(true)
     : (blkKpi+
        '<div class="grid g4" style="margin-bottom:14px">'+
          '<div class="kpi"><div class="lb">Độ phủ account</div><div class="vl">'+Math.round(cov*100)+'%</div>'+
            '<div class="sb"><b>'+fmtN(d.coveredAcc)+'</b>/'+fmtN(d.totalAcc)+' account đã tiếp xúc</div>'+pb(cov)+'</div>'+
          stat("Người liên hệ (CBC)",fmtN(d.cbcTotal),"Trên "+fmtN(d.totalAcc)+" account")+
-         (d.evTotal
+         ((typeof hasEvents==="function"&&hasEvents())?evDashStat():d.evTotal
            ? '<div class="kpi"><div class="lb">Khách từ Event</div><div class="vl">'+fmtN(d.evTotal)+'</div>'+
              '<div class="sb">Đã chăm sóc lại <b>'+fmtN(d.evTouched)+'</b></div>'+pb(d.evTotal?d.evTouched/d.evTotal:0)+'</div>'
            : stat("Key account (ADP)",fmtN(d.adpCount),
@@ -5311,7 +5320,7 @@ function renderCust(){
           'value="'+esc(f.q)+'" oninput="S.filt.q=this.value;S.custLimit=60;debCust()"></div>'+
         '<div><select class="inp" onchange="custSetFilter(\'type\',this.value)">'+opts(S.master.accountType,f.type,"Mọi loại KH")+'</select></div>'+
         '<div><select class="inp" onchange="custSetFilter(\'area\',this.value)">'+opts(S.master.area,f.area,"Mọi khu vực")+'</select></div>'+
-        '<div><select class="inp" onchange="custSetFilter(\'abcd\',this.value)">'+
+        (isTH()?'<div hidden>':'<div>')+'<select class="inp" onchange="custSetFilter(\'abcd\',this.value)">'+
           '<option value=""'+(f.abcd?"":" selected")+'>Mọi nhóm ADP</option>'+
           '<option value="ADP"'+(f.abcd==="ADP"?" selected":"")+'>⭐ Chỉ account có ADP</option>'+
           ABCD_GROUPS.map(function(g){ return '<option value="'+g.k+'"'+(f.abcd===g.k?" selected":"")+'>'+esc(g.lb)+'</option>'; }).join("")+
@@ -6096,7 +6105,11 @@ function photoObjsOf(cellVal){
   });
 }
 
-/* ⭐ v19 — MỘT TASK THUỘC KỲ ĐANG XEM KHI NGÀY BẮT ĐẦU HOẶC NGÀY KẾT THÚC NẰM TRONG KỲ.
+/* ⭐ v21 — MỘT TASK THUỘC KỲ ĐANG XEM KHI NGÀY BẮT ĐẦU NẰM TRONG KỲ.
+   Task bắt đầu trước kỳ chỉ được tính khi vẫn còn chạy trong kỳ VÀ kéo dài tối đa 14 ngày.
+   Task có ngày kết thúc lệch (> 14 ngày, thường do gõ nhầm ngày/tháng) chỉ tính theo ngày bắt đầu —
+   bản v19 còn tính theo ngày kết thúc nên task 10/04 có ngày kết thúc trong tuần này vẫn hiện ở tuần này.
+   (bản v19: tính khi ngày bắt đầu HOẶC ngày kết thúc nằm trong kỳ.)
    Task bắt đầu trước và kết thúc sau kỳ chỉ được tính khi kéo dài tối đa 14 ngày (đi công tác nhiều ngày thật).
    Trước đây chỉ cần "giao nhau" ⇒ task gõ nhầm ngày/tháng (vd Start 12/01/2026 · Finish 01/12/2026 = kéo dài
    gần 11 tháng) hiện trong MỌI tuần của báo cáo tuần, lịch, họp tuần. */
@@ -6104,9 +6117,9 @@ function spanHit(a,b,from,to){
   a=String(a||"").slice(0,10); b=String(b||"").slice(0,10)||a;
   if(!a) a=b; if(!b) b=a; if(!a) return false;
   if(b<a) b=a;
-  if(a>=from && a<=to) return true;
-  if(b>=from && b<=to) return true;
-  return a<from && b>to && dayDiff(a,b)<=14;
+  if(a>=from && a<=to) return true;          /* bắt đầu trong kỳ */
+  if(dayDiff(a,b)>14) return false;           /* ngày kết thúc lệch ⇒ chỉ tính theo ngày bắt đầu */
+  return a<from && b>=from;                   /* bắt đầu trước kỳ, vẫn đang chạy trong kỳ */
 }
 function dayDiff(a,b){ var x=new Date(String(a).slice(0,10)+"T00:00:00"), y=new Date(String(b).slice(0,10)+"T00:00:00"); return Math.round((y-x)/86400000); }
 /* ngày kết thúc cách ngày bắt đầu > 45 ngày ⇒ gần như chắc gõ nhầm ngày/tháng */
@@ -9975,7 +9988,7 @@ function renderAcc(){
   var tabs=[["tl","Dòng thời gian",j.timeline.length],["ph","Ảnh",j.photos.length],
             ["cbc","Người liên hệ",j.cbc.length],["od","Đơn hàng",j.orders.length],
             ["info","Thông tin",null],["adp","ADP",j.adp.length]]
-    .filter(function(x){ return !((x[0]==="ph"&&noPhoto())||(x[0]==="od"&&noOrder())); })   /* ⭐ v18 */
+    .filter(function(x){ return !((x[0]==="ph"&&noPhoto())||(x[0]==="od"&&noOrder())||(x[0]==="adp"&&isTH())); })   /* ⭐ v18 */
     .map(function(x){ return '<button class="'+(tab===x[0]?"on":"")+'" onclick="accTab(\''+x[0]+'\')">'+x[1]+(x[2]!=null?' ('+x[2]+')':"")+'</button>'; }).join("");
 
   var stats='<div class="mstrip">'
@@ -11224,7 +11237,7 @@ function calByDay(items){
   var by={}, today=todayISO();
   items.forEach(function(it){
     if(it.od) return;
-    if(it.kind==="t" && it.st && it.en && it.en>it.st){
+    if((it.kind==="t"||it.kind==="e") && it.st && it.en && it.en>it.st){
       var d=calDate(it.st), n=0;
       while(calISO(d)<=it.en && n<45){ (by[calISO(d)]=by[calISO(d)]||[]).push(it); d.setDate(d.getDate()+1); n++; }
       return;
@@ -11232,7 +11245,7 @@ function calByDay(items){
     if(!it.d) return;
     (by[it.d]=by[it.d]||[]).push(it);
   });
-  var rank={t:0,v:1,o:2};
+  var rank={e:0,t:1,v:2,o:3};
   Object.keys(by).forEach(function(d){ by[d].sort(function(a,b){
     if(a.done!==b.done) return a.done?1:-1;
     if(rank[a.kind]!==rank[b.kind]) return rank[a.kind]-rank[b.kind];
@@ -11256,9 +11269,9 @@ function calCard(it, multi){
     +'<span class="tg">'+calTag(it)+'</span>'
     +'<b>'+esc(it.title||"—")+'</b>'
     +(it.sub?'<div class="k">'+(it.kind==="o"&&!it.key?"📂 ":"")+esc(it.sub)+'</div>':'')
-    +'<div class="m">'+(multi?calAv(it.pic):'')+calStTag(it)
+    +'<div class="m">'+(multi&&it.pic?calAv(it.pic):'')+calStTag(it)
       +(it.kind==="o"?'<span class="pc" style="color:'+pctColor(it.pct/100)+'">'+it.pct+'%</span>':'')
-      +(it.kind==="t"&&it.st&&it.en&&it.en>it.st?'<span class="pc" style="color:'+CAL_COL.t+'">'+calDM(it.st)+'→'+calDM(it.en)+'</span>':'')
+      +((it.kind==="t"||it.kind==="e")&&it.st&&it.en&&it.en>it.st?'<span class="pc" style="color:'+it.color+'">'+calDM(it.st)+'→'+calDM(it.en)+'</span>':'')
     +'</div>'+calDueTag(it)+'</button>';
 }
 /* việc đang thực hiện: đếm ngày còn lại tới hạn (giống Report Hub) */
@@ -11288,12 +11301,13 @@ function calGhostBlock(gh, multi){
 function calChipEv(it){
   var c=it.kind==="v"?CAL_COL.v:it.color;
   return '<button type="button" class="cal-ev'+(it.done?" done":"")+'" style="--c:'+c+'" onclick="event.stopPropagation();calOpen(\''+calQ(it.id)+'\')" title="'+esc(it.title+" · "+(it.pic||"")+" · "+(it.status||""))+'">'
-    +'<span>'+(it.kind==="v"?"📍":it.kind==="t"?"✈️":"🧩")+'</span><span class="t">'+esc(it.title||"—")+'</span></button>';
+    +'<span>'+calIc(it.kind)+'</span><span class="t">'+esc(it.title||"—")+'</span></button>';
 }
 function calSummary(items){
   var rg=calRange(), v=0, vd=0, o=0, od=0, op=0, osum=0, tdays=0, overdue=0, ip=0;
   items.forEach(function(it){
     if(it.od){ overdue++; return; }
+    if(it.kind==="e") return;                      /* ⭐ v21 — event đếm riêng */
     if(it.kind==="o" && calStatusKey(it.status)==="prog") ip++;
     if(it.kind==="t"){ if(it.st<=rg.to && it.en>=rg.from){ var a=it.st<rg.from?rg.from:it.st, b=it.en>rg.to?rg.to:it.en; tdays+=Math.round((calDate(b)-calDate(a))/86400000)+1; } return; }
     if(!it.d || it.d<rg.from || it.d>rg.to) return;
@@ -11308,6 +11322,8 @@ function calSummary(items){
   if(CAL.show.v && !CAL.onlyIP) h+=box("📍 Đi địa bàn",v,"lượt · ✓ "+vd+" hoàn thành", v?Math.round(vd*100/v):0, "% = số lượt đã Completed / tổng lượt đi địa bàn trong khoảng đang xem");
   if(CAL.show.o) h+=box("🧩 Việc khác",o,"việc · ✓ "+od+" xong · ◐ "+op+" đang làm", o?Math.round(osum/o):0, "% = trung bình tiến độ các việc trong khoảng đang xem (To Do = 0%, bỏ việc đã huỷ)");
   if(CAL.show.t && !CAL.onlyIP && !noTrip()) h+=box("✈️ Công tác",tdays,"ngày đi công tác", null);
+  var nEv=(typeof calEvCount==="function"&&!CAL.onlyIP)?calEvCount(rg):null;
+  if(nEv!==null) h+=box("🎪 Event",nEv,"events in this period",null);
   return {html:(h?'<div class="cal-sum">'+h+'</div>':''), overdue:overdue, ip:ip};
 }
 function calPeopleNames(){
@@ -11356,7 +11372,7 @@ function renderCal(){
     body='<div class="cal-week">'+days.map(function(d){
       var iso=calISO(d), ev=by[iso]||[], open=!!CAL.exp[iso], shown=open?ev:ev.slice(0,LIM), we=(d.getDay()===0||d.getDay()===6);
       if(mob && !ev.length && iso!==today && we) return '';   /* điện thoại: bỏ T7/CN trống cho gọn */
-      return '<div class="cal-wc'+(iso===today?" today":"")+(we?" we":"")+'">'
+      return '<div class="cal-wc'+(iso===today?" today":"")+(we?" we":"")+((ev.length||(iso===today&&ghosts.length))?"":" cal-free")+'">'
         +'<div class="cal-wh" onclick="calDay(\''+iso+'\')" title="Xem cả ngày"><span>'+(mob?CAL_WDF[d.getDay()]:CAL_WD[d.getDay()])+(iso===today?' · Hôm nay':'')+'</span><b>'+d.getDate()+'/'+(d.getMonth()+1)+'</b></div>'
         +'<div class="cal-wb" onclick="calEmpty(event,\''+iso+'\')">'
         +(iso===today?calGhostBlock(ghosts,multi):'')
@@ -11376,8 +11392,8 @@ function renderCal(){
         +by[d].map(function(it){
           var c=it.kind==="v"?CAL_COL.v:it.color;
           return '<button type="button" class="cal-lr" style="--c:'+c+'" onclick="calOpen(\''+calQ(it.id)+'\')">'
-            +'<span class="ic">'+(it.kind==="v"?"📍":it.kind==="t"?"✈️":"🧩")+'</span>'
-            +'<div class="mn"><b>'+esc(it.title||"—")+'</b><div class="k">'+(multi?esc(it.pic||"")+' · ':'')+esc(it.sub||"")+'</div></div>'
+            +'<span class="ic">'+calIc(it.kind)+'</span>'
+            +'<div class="mn"><b>'+esc(it.title||"—")+'</b><div class="k">'+(multi&&it.pic?esc(it.pic)+' · ':'')+esc(it.sub||"")+'</div></div>'
             +calStTag(it)+(it.kind==="o"?'<b style="color:'+pctColor(it.pct/100)+';font-size:13px;min-width:38px;text-align:right">'+it.pct+'%</b>':'')+'</button>';
         }).join("");
     }).join(""):'<div class="card pad"><div class="empty"><div class="e">📅</div><p>Không có công việc trong tháng này.</p>'
@@ -11406,6 +11422,7 @@ function renderCal(){
   var chip=function(k,lb,col){ return '<button class="cal-chip'+(CAL.show[k]?"":" off")+'" onclick="calToggle(\''+k+'\')"><i style="background:'+col+'"></i>'+lb+'</button>'; };
   var bar='<div class="cal-bar">'
     +chip("v","📍 Đi địa bàn",CAL_COL.v)+chip("o","🧩 Việc khác","#3A5CAA")+(noTrip()?"":chip("t","✈️ Công tác",CAL_COL.t))
+    +((typeof hasEvents==="function"&&hasEvents())?chip("e","🎪 Event",CAL_COL.e):"")
     +'<button class="cal-chip'+(CAL.hideDone?" on":"")+'" onclick="calHide()">'+(CAL.hideDone?"✓ ":"")+'Ẩn việc đã xong</button>'
     +'<button class="cal-chip'+(CAL.onlyIP?" on":"")+'" onclick="CAL.onlyIP=!CAL.onlyIP;renderCal()" title="Chỉ xem việc đang thực hiện">📌 Đang thực hiện <b>'+sum.ip+'</b>'+(CAL.onlyIP?' ✕':'')+'</button>'
     +(sum.overdue?'<button class="cal-od" onclick="calOverdue()">🔴 '+sum.overdue+' việc quá hạn ›</button>':'');
@@ -11426,7 +11443,7 @@ function renderCal(){
   if(CAL.show.v && (rg.to<fr.from || rg.from>fr.to)) notes.push("ℹ️ Khoảng đang xem nằm ngoài "+esc(S.fy)+" — đổi FY ở góc trên để xem lịch đi địa bàn của năm đó.");
 
   $("main").innerHTML='<div class="pg">'+wkTabBar()
-    +'<div class="cal-head"><h2>'+title+'</h2>'
+    +(mob?calMobHead(title,view,sum,bar):('<div class="cal-head"><h2>'+title+'</h2>'
     +'<button class="cal-ib" onclick="calNav(-1)" title="Trước">‹</button>'
     +'<button class="cal-ib" onclick="calNav(1)" title="Sau">›</button>'
     +'<button class="btn sm" onclick="calNav(0)">Hôm nay</button>'
@@ -11438,7 +11455,7 @@ function renderCal(){
     +(noTrip()?'':'<button class="btn sm hide-m" onclick="tripProposeOpen()">✈️ Đề xuất công tác</button>')
     +'<button class="btn pri sm" onclick="calAdd(todayISO())">＋ Thêm việc</button>'
     +'</div>'
-    +(CAL.compact?(sum.overdue?'<div class="cal-bar"><button class="cal-od" onclick="calOverdue()">🔴 '+sum.overdue+' việc quá hạn ›</button></div>':''):(bar+sum.html))
+    +(CAL.compact?(sum.overdue?'<div class="cal-bar"><button class="cal-od" onclick="calOverdue()">🔴 '+sum.overdue+' việc quá hạn ›</button></div>':''):(bar+sum.html))))
     +(notes.length?'<div class="cal-note">'+notes.join("<br>")+'</div>':'')
     +body
     +(mob&&!noTrip()?'<div style="display:flex;gap:8px;margin-top:12px"><button class="btn" style="flex:1" onclick="tripProposeOpen()">✈️ Đề xuất công tác</button></div>':'')
@@ -11591,7 +11608,7 @@ function calOverdue(){
   var tmr=addDays(todayISO(),1), multi=(calPics().length!==1);
   var rows=list.map(function(it){
     var n=Math.round((calDate(todayISO())-calDate(it.en))/86400000);
-    return '<div class="od-row"><div class="mn"><b>'+esc(it.title)+'</b><span>'+(multi?esc(it.pic||"")+' · ':'')+(it.key?'Key task':'📂 '+esc(it.sub))+' · '+esc(it.status)+' '+it.pct+'%</span></div>'
+    return '<div class="od-row"><div class="mn"><b>'+esc(it.title)+'</b><span>'+(multi&&it.pic?esc(it.pic)+' · ':'')+(it.key?'Key task':'📂 '+esc(it.sub))+' · '+esc(it.status)+' '+it.pct+'%</span></div>'
       +'<span class="n">🔴 Quá hạn '+n+' ngày</span>'
       +(it.ro?'<div class="a"><button class="mini" onclick="calOpen(\''+calQ(it.id)+'\')">Xem</button></div>'
         :'<div class="a"><button class="mini" onclick="calOdDone(\''+calQ(it.id)+'\')">✓ Hoàn thành</button>'
@@ -14679,6 +14696,699 @@ function thHtml(h){
   mtPdfHtml=function(p){ return thHtml(_ph(p)); };
   mtPdfName=function(){ var n=_pn2(); return isTH()?n.replace("_HopTuan_","_WeeklyMeeting_"):n; };
 })();
+</script>
+<style>
+/* ⭐ v21 — tab Event · đầu lịch gọn trên điện thoại · thanh tab Cập nhật gọn */
+.shtabs button .sm{display:none}
+.ev-head{display:flex;align-items:flex-start;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+.ev-head h2{font-size:20px;font-weight:800;color:var(--navy);letter-spacing:-.2px}
+.ev-head p{font-size:12.5px;color:var(--sub);margin-top:2px}
+.ev-head>div:first-child{flex:1 1 260px;min-width:0}
+.ev-acts{display:flex;gap:7px;flex-wrap:wrap;align-items:center}
+.ev-strip{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-bottom:10px}
+.ev-strip>div{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:9px 12px;box-shadow:var(--sh-1);min-width:0}
+.ev-strip b{display:block;font-size:20px;color:var(--navy);line-height:1.15}
+.ev-strip b small{font-size:13px;color:var(--mute);font-weight:700}
+.ev-strip span{font-size:11px;font-weight:800;color:var(--mute);text-transform:uppercase;letter-spacing:.3px}
+.ev-bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
+.ev-seg button .c{background:var(--line2);border-radius:10px;padding:0 6px;font-size:11px;margin-left:3px}
+.ev-seg button.on .c{background:rgba(255,255,255,.25)}
+.ev-q{flex:1 1 200px;min-width:0;height:36px}
+.ev-ty{width:auto;min-width:150px;height:36px}
+.ev-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:10px}
+.ev-card{display:flex;gap:11px;text-align:left;background:var(--card);border:1px solid var(--line);border-left:4px solid #D9477E;border-radius:14px;padding:11px 12px;box-shadow:var(--sh-1);cursor:pointer;font-family:inherit;color:inherit;width:100%;min-width:0}
+.ev-card:hover{box-shadow:var(--sh-2,0 4px 14px rgba(20,40,90,.12))}
+.ev-card.s-done{border-left-color:#1E9E5A}
+.ev-card.s-cancel{border-left-color:#9AA3B5;opacity:.72}
+.ev-card.s-cancel .ev-tp{text-decoration:line-through}
+.ev-card.s-live{border-left-color:#3A5CAA}
+.ev-d{flex:none;width:52px;text-align:center;background:#FCEAF1;border-radius:11px;padding:6px 2px;align-self:flex-start}
+.ev-card.s-done .ev-d{background:#E6F6EC}.ev-card.s-cancel .ev-d{background:#F0F2F6}.ev-card.s-live .ev-d{background:#EAF0FB}
+.ev-d b{display:block;font-size:20px;color:var(--navy);line-height:1.1}
+.ev-d b i{font-style:normal;font-size:13px}
+.ev-d span{display:block;font-size:11px;font-weight:800;color:var(--sub);text-transform:uppercase}
+.ev-d span.x{font-size:9.5px;color:var(--mute)}
+.ev-m{flex:1;min-width:0}
+.ev-t{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:4px}
+.evty{font-size:11px;font-weight:800;color:#B0305F;background:#FCEAF1;border-radius:8px;padding:2px 7px}
+.evst{font-size:11px;font-weight:800;border-radius:8px;padding:2px 7px}
+.ev-tp{display:block;font-size:14px;color:var(--navy);line-height:1.35;margin-bottom:4px;word-break:break-word}
+.ev-k{display:flex;flex-wrap:wrap;gap:3px 10px;font-size:12px;color:var(--sub)}
+.ev-p{display:flex;flex-wrap:wrap;gap:4px;margin-top:5px}
+.ev-p span{font-size:10.5px;font-weight:700;background:var(--paler);border:1px solid var(--line);border-radius:7px;padding:1px 6px;color:var(--sub)}
+.ev-n{font-size:12px;color:var(--sub);margin-top:6px;display:flex;align-items:center;gap:6px}
+.ev-n .pc{font-weight:800;margin-left:auto}
+.evchk{display:flex;flex-wrap:wrap;gap:6px}
+.evchk label{display:flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:10px;padding:6px 10px;font-size:13px;cursor:pointer;background:var(--card)}
+.evchk label:has(input:checked){border-color:#D9477E;background:#FCEAF1;color:#8E2350;font-weight:700}
+.evchk input{accent-color:#D9477E}
+.ev-cl{display:flex;flex-direction:column;gap:5px;max-height:240px;overflow:auto}
+.ev-cl>div{font-size:12.5px;border-bottom:1px dashed var(--line);padding-bottom:4px}
+.ev-cl span{color:var(--sub);margin-left:6px}
+.ev-cl em{display:block;font-style:normal;color:#8E2350;font-size:12px}
+.ev-bars>div{display:grid;grid-template-columns:110px 1fr 34px;align-items:center;gap:8px;font-size:12.5px;margin-bottom:6px}
+.ev-bars i{display:block;height:12px;border-radius:6px;background:#D9477E}
+.ev-bars b{text-align:right;color:var(--navy)}
+.pick2-c.ev .ic{background:#FCEAF1}
+.ev-past{font-size:11.5px;font-weight:800;color:var(--mute);text-transform:uppercase;letter-spacing:.5px;margin:18px 2px 8px;border-top:2px dashed var(--line);padding-top:10px}
+/* lịch — điện thoại */
+.cal-mh{display:flex;align-items:center;gap:6px;margin-bottom:8px}
+.cal-mt{flex:1 1 auto;min-width:60px;border:0;background:none;font-family:inherit;text-align:left;padding:0 2px;cursor:pointer;display:flex;flex-direction:column;line-height:1.15}
+.cal-mt b{font-size:16px;color:var(--navy);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cal-mt small{font-size:11px;color:var(--blue);font-weight:700}
+.cal-mh select.cal-vs{width:auto!important;max-width:100px;height:34px;padding:0 22px 0 9px;font-size:13px;flex:none}
+.cal-odm{flex:none;height:34px;border:1px solid #F3C2C0;background:#FEECEC;color:#B3261E;border-radius:10px;font-weight:800;font-size:12.5px;padding:0 8px;font-family:inherit}
+.cal-ib.on{background:var(--navy);color:#fff;border-color:var(--navy)}
+.cal-mtools{background:var(--paler);border:1px solid var(--line);border-radius:14px;padding:9px;margin-bottom:10px}
+.cal-mbtns{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px}
+.cal-mtools .cal-bar{margin-bottom:8px}
+.cal-mtools .cal-sum{margin-bottom:0}
+@media(max-width:720px){
+  .wk-tabs{gap:5px;margin-bottom:8px;border-bottom:0;padding-bottom:1px}
+  .wk-tabs button{height:32px;padding:0 11px;gap:4px;font-size:12.5px;border-radius:17px;border:1px solid var(--line);background:var(--card);box-shadow:none}
+  .wk-tabs button.on{background:var(--navy);color:#fff;border-color:var(--navy);box-shadow:none;border-bottom:1px solid var(--navy)}
+  .wk-tabs button .lg{display:none}
+  .wk-tabs button .sm{display:inline}
+  .wk-tabs .cnt{padding:0 6px}
+  .cal-wc .cal-add{display:none}
+  .cal-wc.cal-free .cal-wb{display:none}
+  .cal-wc.cal-free .cal-wh{border-bottom:0;padding:7px 10px}
+  .cal-wc.cal-free .cal-wh b{font-size:13px;color:var(--mute)}
+  .cal-wc.cal-free .cal-wh span{color:var(--mute)}
+  .cal-wh{padding:7px 10px}
+  .cal-wh b:after{content:" ＋";font-size:12px;color:var(--mute);font-weight:700}
+  .cal-week{gap:6px}
+  .ev-strip{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .ev-grid{grid-template-columns:1fr}
+  .ev-q{flex-basis:100%}
+  .ev-ty{flex:1}
+  .ev-seg{width:100%;display:flex}
+  .ev-seg button{flex:1;padding:0 4px}
+  .ev-head .hide-m{display:none}
+  .ev-bars>div{grid-template-columns:90px 1fr 30px}
+  .grid.g4.ev-g4{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+  .ev-g4 .kpi{padding:10px 11px}
+  .ev-g4 .kpi .vl{font-size:20px}
+}
+</style>
+<script>
+/* ═══════════════════════════════════════════════════════════════════════════════════════
+   ⭐ v21 — (1) THAILAND SURGICAL: tab EVENT (file Marketing Offline · sheet REPORT_EVENT)
+              · thêm / sửa / xoá event như thêm task · event tự lên Lịch công việc
+              · Dashboard có nhóm 🎪 Event · Key stakeholder có tab Khách hàng Event (sheet CUSTOMER LIST)
+              · bỏ mục ADP của nhóm Thái
+            (2) MỌI NHÓM: đăng nhập là mở Lịch công việc tuần này · màn hình điện thoại gọn hơn
+            (3) Rule hiển thị task: task thuộc kỳ khi NGÀY BẮT ĐẦU nằm trong kỳ (xem spanHit)
+   ═══════════════════════════════════════════════════════════════════════════════════════ */
+var EV_URL="https://script.google.com/macros/s/AKfycbykuiMSXhyVeujpffSi0l8hU8yok1QTnsrT6ZnCOxdMFaq8e4g4TMB7PyY9QiCIY3qF/exec";
+var EV_SHEET="https://docs.google.com/spreadsheets/d/1s6ny0CSsF0WECR_8Zu41eU2kCFrmYHYbEa3GIWSbO1M/edit";
+var EV_GID={ event:"2090468147", cust:"2139397591" };
+try{ TEAMS.thai.evUrl=EV_URL; }catch(e){}
+function hasEvents(){ try{ return !!curTeam().evUrl; }catch(e){ return false; } }
+var EV_COL="#D9477E";
+try{ CAL_COL.e=EV_COL; if(CAL.show.e===undefined) CAL.show.e=1; }catch(e){}
+var EVS={ rows:null, lists:null, editors:[], tpl:"", at:0, err:"", loading:null, cust:null, custAt:0, custErr:"", custLoading:null, _team:"" };
+var EV_MON=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+
+/* ── gọi backend Event (JSONP, dự phòng bằng fetch) ── */
+function evJsonp(params, ms){
+  return new Promise(function(res, rej){
+    var cb="__mmhev21_"+Date.now()+"_"+Math.floor(Math.random()*1e6);
+    var el=document.createElement("script"), done=false;
+    var t=setTimeout(function(){ if(done) return; done=true; clean(); rej(new Error("__EV_TIMEOUT__")); }, ms||45000);
+    function clean(){ clearTimeout(t); try{ delete window[cb]; }catch(e){ window[cb]=undefined; } if(el.parentNode) el.parentNode.removeChild(el); }
+    window[cb]=function(d){ if(done) return; done=true; clean(); res(d); };
+    params=params||{}; params.callback=cb; params._ts=Date.now();
+    var url=curTeam().evUrl+"?"+Object.keys(params).map(function(k){ return encodeURIComponent(k)+"="+encodeURIComponent(params[k]==null?"":params[k]); }).join("&");
+    el.src=url;
+    el.onerror=function(){
+      if(done) return; done=true; clean();
+      fetch(url.replace(/([?&])callback=[^&]*/,"$1_j=1"),{method:"GET",credentials:"omit"})
+        .then(function(r){ return r.text(); })
+        .then(function(txt){ var m=String(txt||"").replace(/^[^{[]*/,"").replace(/\);?\s*$/,""); try{ res(JSON.parse(m)); }catch(e){ rej(new Error("__EV_BLOCKED__")); } })
+        .catch(function(){ rej(new Error("__EV_BLOCKED__")); });
+    };
+    document.body.appendChild(el);
+  });
+}
+function evErrText(e){
+  var m=String((e&&e.message)||e||"");
+  if(m==="__EV_TIMEOUT__") return "The Marketing Offline file did not answer in time. Check that its Apps Script (Event backend) is deployed as a Web app with access “Anyone”, then press ⟳.";
+  if(m==="__EV_BLOCKED__") return "Cannot reach the Marketing Offline file. If this phone is signed in to several Google accounts, open the app in a private window, or check the Web app access is “Anyone”.";
+  return m||"Unknown error";
+}
+function evRid(){ return "e"+Date.now().toString(36)+Math.random().toString(36).slice(2,8); }
+/* ghi: request ngắn đi JSONP; dài (review nhiều dòng) đi POST. Mỗi lệnh có rid ⇒ gửi lại không bị ghi trùng */
+function evWrite(body){
+  body.pic=S.user.pic; body.rid=body.rid||evRid();
+  var flat={}; Object.keys(body).forEach(function(k){ var v=body[k]; flat[k]=(v!==null&&typeof v==="object")?JSON.stringify(v):v; });
+  var qs=Object.keys(flat).map(function(k){ return encodeURIComponent(k)+"="+encodeURIComponent(flat[k]==null?"":flat[k]); }).join("&");
+  var chk=function(j){ if(!j||j.ok===false){ var er=new Error((j&&j.error)||"Error"); er.stale=!!(j&&j.stale); throw er; } return j; };
+  if((curTeam().evUrl+"?"+qs).length<6500){
+    return evJsonp(flat,60000).then(chk).catch(function(e){
+      if(e&&e.message==="__EV_TIMEOUT__") return evJsonp(flat,60000).then(chk);   /* cùng rid ⇒ an toàn */
+      throw e;
+    });
+  }
+  return fetch(curTeam().evUrl,{ method:"POST", headers:{"Content-Type":"text/plain;charset=utf-8"}, body:JSON.stringify(body), redirect:"follow" })
+    .then(function(r){ return r.json(); }).then(chk)
+    .catch(function(e){
+      if(e && e.message && !/fetch|json|network|Unexpected/i.test(e.message)) throw e;
+      return fetch(curTeam().evUrl,{ method:"POST", mode:"no-cors", headers:{"Content-Type":"text/plain;charset=utf-8"}, body:JSON.stringify(body) })
+        .then(function(){ return { ok:true, opaque:true }; });
+    });
+}
+function evLsKey(n){ return "k:"+curTeamKey()+":ev_"+n; }
+function evRestore(){
+  if(EVS._team===curTeamKey()) return;
+  EVS._team=curTeamKey(); EVS.rows=null; EVS.cust=null; EVS.at=0; EVS.custAt=0;
+  var a=lsGet(evLsKey("list")); if(a&&a.rows){ EVS.rows=a.rows; EVS.lists=a.lists||{}; EVS.editors=a.editors||[]; EVS.tpl=a.tpl||""; EVS.at=1; }
+  var c=lsGet(evLsKey("cust")); if(c&&c.rows){ EVS.cust=c.rows; EVS.custAt=1; }
+}
+function loadEvents(force){
+  if(!hasEvents()) return Promise.resolve(null);
+  evRestore();
+  if(EVS.loading) return EVS.loading;
+  if(!force && EVS.rows && Date.now()-EVS.at<120000) return Promise.resolve(EVS);
+  EVS.loading=evJsonp({action:"list"},45000).then(function(j){
+    EVS.loading=null;
+    if(!j||!j.ok) throw new Error((j&&j.error)||"Error");
+    EVS.rows=j.rows||[]; EVS.lists=j.lists||{}; EVS.editors=j.editors||[]; EVS.tpl=j.reviewTemplate||""; EVS.at=Date.now(); EVS.err="";
+    lsSet(evLsKey("list"),{ rows:EVS.rows, lists:EVS.lists, editors:EVS.editors, tpl:EVS.tpl });
+    evRepaint(); return EVS;
+  }).catch(function(e){ EVS.loading=null; EVS.err=evErrText(e); evRepaint(); return null; });
+  return EVS.loading;
+}
+function loadEvCust(force){
+  if(!hasEvents()) return Promise.resolve(null);
+  evRestore();
+  if(EVS.custLoading) return EVS.custLoading;
+  if(!force && EVS.cust && Date.now()-EVS.custAt<180000) return Promise.resolve(EVS.cust);
+  EVS.custLoading=evJsonp({action:"customers"},45000).then(function(j){
+    EVS.custLoading=null;
+    if(!j||!j.ok) throw new Error((j&&j.error)||"Error");
+    EVS.cust=j.rows||[]; EVS.custAt=Date.now(); EVS.custErr="";
+    try{ lsSet(evLsKey("cust"),{ rows:EVS.cust }); }catch(e){}
+    evRepaint(); return EVS.cust;
+  }).catch(function(e){ EVS.custLoading=null; EVS.custErr=evErrText(e); evRepaint(); return null; });
+  return EVS.custLoading;
+}
+var _evRT=null;
+function evRepaint(){
+  clearTimeout(_evRT);
+  _evRT=setTimeout(function(){
+    if(!S.user) return;
+    try{
+      if(S.tab==="event") renderEvent();
+      else if(S.tab==="weekly" && S.wkTab==="cal") renderCal();
+      else if(S.tab==="dash") renderDash();
+      else if(S.tab==="stake" && S.stTab==="evc") renderEvCust();
+    }catch(e){ try{ console.error(e); }catch(x){} }
+  },80);
+}
+
+/* ── tiện ích event ── */
+function evRows(){ evRestore(); return EVS.rows||[]; }
+function evByRow(row){ return evRows().filter(function(e){ return String(e.row)===String(row); })[0]||null; }
+function evEnd(e){ return (e.end && e.end>=e.start) ? e.end : e.start; }
+function evState(e){
+  if(/cancel/i.test(e.action||"")) return "cancel";
+  var t=todayISO();
+  if(!e.start) return "plan";
+  if(evEnd(e)<t) return "done";
+  if(e.start<=t) return "live";
+  return "plan";
+}
+var EV_ST={ plan:["Upcoming","#E08A00"], live:["Ongoing","#3A5CAA"], done:["Done","#1E9E5A"], cancel:["Cancelled","#9AA3B5"] };
+function evStTag(e){ var s=EV_ST[evState(e)]; return '<span class="evst" style="background:'+s[1]+'1A;color:'+s[1]+'">'+s[0]+'</span>'; }
+function evDM(iso){ var d=calDate(iso); return d?(d.getDate()+" "+EV_MON[d.getMonth()]):""; }
+function evDates(e){
+  if(!e.start) return e.date||"—";
+  var en=evEnd(e);
+  if(en===e.start) return fmtVN(e.start);
+  return fmtVN(e.start).slice(0,5)+" – "+fmtVN(en);
+}
+function evCustOf(e){ return (EVS.cust||[]).filter(function(c){ return c.event && c.event===e.name; }); }
+function evActual(e){ var a=Number(e.actual); if(a>0) return a; return EVS.cust?evCustOf(e).length:(a||0); }
+function evCanEdit(){ if(isMgmt()) return true; var L=EVS.editors||[]; return !L.length || L.indexOf(S.user.pic)>=0; }
+function evFyRows(fy){ fy=fy||S.fy; return evRows().filter(function(e){ return e.fy===fy; }); }
+function evArea(e){ return e.area || (((EVS.lists||{}).areas||{})[e.place]) || ""; }
+function evMonthOf(e){ return String(e.month||"").slice(0,6) || (e.start?e.start.slice(0,4)+e.start.slice(5,7):""); }
+
+/* ═════════════ TAB EVENT ═════════════ */
+function pgEvent(){
+  evRestore();
+  renderEvent();
+  loadEvents(!EVS.at || Date.now()-EVS.at>60000);
+  loadEvCust(false);
+}
+function evSetF(k,v){ S[k]=v; renderEvent(); }
+var _evq; function evDebQ(){ clearTimeout(_evq); _evq=setTimeout(function(){ keepCaret("ev_q",renderEvent); },180); }
+function renderEvent(){
+  if(S.tab!=="event") return;
+  var all=evFyRows(), scope=S.evScope||"all", q=noAcc(S.evQ||""), ty=S.evType||"", today=todayISO();
+  var rows=all.filter(function(e){
+    if(ty && e.type!==ty) return false;
+    var st=evState(e);
+    if(scope==="up" && !(st==="plan"||st==="live")) return false;
+    if(scope==="past" && st!=="done") return false;
+    if(scope==="cancel" && st!=="cancel") return false;
+    if(q){ var hay=noAcc([e.topic,e.type,e.kol,e.place,e.area,e.partner,e.product,e.name].join(" ")); if(q.split(/\s+/).some(function(t){ return t && hay.indexOf(t)<0; })) return false; }
+    return true;
+  }).sort(function(a,b){ return String(a.start).localeCompare(String(b.start)) || (a.row-b.row); });
+  var n={ all:all.length, up:0, done:0, cancel:0, tg:0, ac:0 };
+  all.forEach(function(e){ var st=evState(e); if(st==="plan"||st==="live") n.up++; else if(st==="done") n.done++; else n.cancel++;
+    if(st!=="cancel"){ n.tg+=Number(e.target)||0; if(st==="done") n.ac+=evActual(e); } });
+  var types={}; all.forEach(function(e){ if(e.type) types[e.type]=(types[e.type]||0)+1; });
+  var byM={}, ms=[];
+  rows.forEach(function(e){ var m=evMonthOf(e)||"—"; if(!byM[m]){ byM[m]=[]; ms.push(m); } byM[m].push(e); });
+  var curM=today.slice(0,4)+today.slice(5,7);
+  ms=ms.filter(function(m){ return m>=curM; }).concat(ms.filter(function(m){ return m<curM; }).reverse());   /* tháng này + sắp tới trước, tháng đã qua sau */
+  var seg=function(k,lb,c){ return '<button class="'+(scope===k?"on":"")+'" onclick="evSetF(\'evScope\',\''+k+'\')">'+lb+(c!=null?' <span class="c">'+c+'</span>':'')+'</button>'; };
+  var note=EVS.err?'<div class="cal-note">⚠️ '+esc(EVS.err)+' <a href="javascript:void(0)" onclick="loadEvents(true)">Retry</a></div>'
+          :(!EVS.rows?'<div class="cal-note">⏳ Reading sheet REPORT_EVENT…</div>':'');
+  $("main").innerHTML='<div class="pg ev-pg">'+
+    '<div class="ev-head"><div><h2>🎪 Marketing events</h2><p>'+esc(S.fy)+' · sheet REPORT_EVENT · Marketing Offline file'+
+      (EVS.loading?' · <span class="stale"><span class="dot"></span>syncing…</span>':'')+'</p></div>'+
+      '<div class="ev-acts"><button class="btn sm" onclick="loadEvents(true);loadEvCust(true)" title="Read the sheet again">⟳</button>'+
+      '<a class="btn sm hide-m" href="'+EV_SHEET+'#gid='+EV_GID.event+'" target="_blank">📄 Open sheet</a>'+
+      (evCanEdit()?'<button class="btn pri sm" onclick="evForm(null)">＋ Add event</button>':'')+'</div></div>'+
+    note+
+    '<div class="ev-strip">'+
+      '<div><b>'+n.all+'</b><span>events '+esc(S.fy)+'</span></div>'+
+      '<div><b style="color:#E08A00">'+n.up+'</b><span>upcoming</span></div>'+
+      '<div><b style="color:#1E9E5A">'+n.done+'</b><span>done</span></div>'+
+      '<div><b>'+fmtN(n.ac)+'<small>/'+fmtN(n.tg)+'</small></b><span>participants</span></div>'+
+    '</div>'+
+    '<div class="ev-bar"><div class="seg ev-seg">'+seg("all","All",null)+seg("up","Upcoming",n.up)+seg("past","Done",n.done)+(n.cancel?seg("cancel","Cancelled",n.cancel):'')+'</div>'+
+      '<input class="inp ev-q" id="ev_q" placeholder="🔍 Topic, KOL, place…" value="'+esc(S.evQ||"")+'" oninput="S.evQ=this.value;evDebQ()">'+
+      '<select class="inp ev-ty" onchange="evSetF(\'evType\',this.value)"><option value="">All types</option>'+
+        Object.keys(types).sort().map(function(t){ return '<option value="'+esc(t)+'"'+(ty===t?" selected":"")+'>'+esc(t)+' ('+types[t]+')</option>'; }).join("")+'</select>'+
+    '</div>'+
+    (ms.length ? ms.map(function(m,i){
+      var y=m.slice(0,4), mo=parseInt(m.slice(4,6),10);
+      return (m<curM && (i===0||ms[i-1]>=curM)?'<div class="ev-past">Past months</div>':'')+'<div class="daysec" id="evm_'+m+'"><div class="dayhd'+(m===curM?" today":"")+'"><span class="dt">'+(mo?EV_MON[mo-1]+" "+y:"—")+'</span>'+
+        (m===curM?'<span class="wd">THIS MONTH</span>':'')+'<span class="tag t-b">'+byM[m].length+' event'+(byM[m].length>1?"s":"")+'</span><span class="ln"></span></div>'+
+        '<div class="ev-grid">'+byM[m].map(evCardHtml).join("")+'</div></div>';
+    }).join("")
+    : '<div class="card pad"><div class="empty"><div class="e">🎪</div><p>'+(EVS.rows?'No event matches.':'Loading events…')+'</p>'+
+      (evCanEdit()&&EVS.rows?'<button class="btn pri sm" style="margin-top:12px" onclick="evForm(null)">＋ Add event</button>':'')+'</div></div>')+
+    '<div style="height:70px"></div></div>';
+}
+function evCardHtml(e){
+  var d=calDate(e.start), en=evEnd(e), st=evState(e), multi=e.start&&en!==e.start;
+  var prods=String(e.product||"").split(/\s*,\s*/).filter(Boolean);
+  var ac=evActual(e), tg=Number(e.target)||0;
+  return '<button type="button" class="ev-card s-'+st+'" onclick="evForm('+e.row+')">'+
+    '<div class="ev-d"><b>'+(d?d.getDate():"?")+(multi?'<i>–'+calDate(en).getDate()+'</i>':'')+'</b><span>'+(d?EV_MON[d.getMonth()]:"")+'</span>'+
+      (multi&&calDate(en).getMonth()!==d.getMonth()?'<span class="x">→ '+EV_MON[calDate(en).getMonth()]+'</span>':'')+'</div>'+
+    '<div class="ev-m"><div class="ev-t"><span class="evty">'+esc(e.type||"—")+'</span>'+evStTag(e)+
+      (/not yet/i.test(e.plan||"")?'<span class="evst" style="background:#FFF4DB;color:#A86B00">Not fixed</span>':'')+
+      (/change/i.test(e.action||"")?'<span class="evst" style="background:#EEF3FB;color:#3A5CAA">Rescheduled</span>':'')+
+      (/additional/i.test(e.action||"")?'<span class="evst" style="background:#EEF3FB;color:#3A5CAA">Additional</span>':'')+
+      (e.dateWarn?'<span class="evst" style="background:#FEECEC;color:#B3261E" title="Date (col E) and Month (col D) do not match">⚠️ check date</span>':'')+'</div>'+
+      '<b class="ev-tp">'+esc(e.topic||"(no topic)")+'</b>'+
+      '<div class="ev-k">'+(e.kol?'<span>👤 '+esc(e.kol)+'</span>':'')+(e.place?'<span>📍 '+esc(e.place)+(evArea(e)?' · '+esc(evArea(e)):'')+'</span>':'')+(e.partner?'<span>🤝 '+esc(e.partner)+'</span>':'')+'</div>'+
+      (prods.length?'<div class="ev-p">'+prods.map(function(p){ return '<span>'+esc(p)+'</span>'; }).join("")+'</div>':'')+
+      '<div class="ev-n">👥 <b>'+fmtN(ac)+'</b>'+(tg?' / '+fmtN(tg)+' target':' participants')+
+        (tg&&st==="done"?'<span class="pc" style="color:'+pctColor(ac/tg)+'">'+Math.round(ac*100/tg)+'%</span>':'')+'</div>'+
+    '</div></button>';
+}
+
+/* ── form thêm / sửa event (giống form task) ── */
+var EVF=null;
+function evForm(row, iso){
+  evRestore();
+  if(!EVS.rows && !EVS.lists){ toast("Loading events… try again in a moment","warn"); loadEvents(true); return; }
+  var e=row?evByRow(row):null;
+  if(row && !e) return toast("Event not found — press ⟳ to reload","warn");
+  var L=EVS.lists||{}, can=evCanEdit(), ro=can?"":" disabled";
+  var isNew=!e;
+  e=e||{ start:iso||todayISO(), end:"", type:"", product:"", topic:"", kol:"MMH "+S.user.pic, partner:"", place:"", plan:"Not yet fixed", action:"As planned", link:"", review:EVS.tpl||"", target:"" };
+  EVF={ row:e.row||0, sig:e.sig||"" };
+  var prodList=(L.products||[]).slice(), chosen=String(e.product||"").split(/\s*,\s*/).filter(Boolean);
+  chosen.forEach(function(p){ if(prodList.indexOf(p)<0) prodList.push(p); });
+  var provs=(L.provinces||[]).slice(); if(e.place && provs.indexOf(e.place)<0) provs.unshift(e.place);
+  var types=(L.types||[]).slice(); if(e.type && types.indexOf(e.type)<0) types.unshift(e.type);
+  var plans=(L.plan||["Fixed","Not yet fixed"]).slice(), acts=(L.action||["As planned","Change schedule","Additional","Cancel"]).slice();
+  var cust=isNew?[]:evCustOf(e);
+  var h=(isNew?'':'<div class="q16-meta"><span>#'+esc(e.no||"")+' · '+esc(e.fy||"")+'</span><span>Row '+e.row+'</span>'+evStTag(e)+'</div>')+
+    '<div class="row">'+
+      '<div class="fld"><label>Start date <span class="rq">*</span></label><input class="inp" type="date" id="ev_start" value="'+esc(e.start||"")+'"'+ro+' onchange="evfSync()"></div>'+
+      '<div class="fld"><label>End date <span style="font-weight:600;color:var(--mute)">(multi-day)</span></label><input class="inp" type="date" id="ev_end" value="'+esc(evEnd(e)!==e.start?evEnd(e):"")+'"'+ro+' onchange="evfSync()"></div>'+
+    '</div>'+
+    '<div class="row">'+
+      '<div class="fld"><label>Type of event <span class="rq">*</span></label><select class="inp" id="ev_type"'+ro+'>'+opts(types,e.type,"— select —")+'</select></div>'+
+      '<div class="fld"><label>Target participants</label><input class="inp" type="number" min="0" id="ev_target" value="'+esc(e.target===""||e.target==null?"":e.target)+'"'+ro+'></div>'+
+    '</div>'+
+    '<div class="fld"><label>Topic <span class="rq">*</span></label><textarea class="inp" id="ev_topic" style="min-height:54px"'+ro+'>'+esc(e.topic||"")+'</textarea></div>'+
+    '<div class="fld"><label>Target product</label><div class="evchk">'+prodList.map(function(p,i){
+      return '<label><input type="checkbox" value="'+esc(p)+'" id="ev_p'+i+'"'+(chosen.indexOf(p)>=0?" checked":"")+ro+'><span>'+esc(p)+'</span></label>'; }).join("")+'</div></div>'+
+    '<div class="row">'+
+      '<div class="fld"><label>KOL / PIC</label><input class="inp" id="ev_kol" list="ev_kols" value="'+esc(e.kol||"")+'"'+ro+' placeholder="Dr. … or MMH '+esc(S.user.pic)+'">'+
+        '<datalist id="ev_kols">'+(L.kols||[]).map(function(k){ return '<option value="'+esc(k)+'">'; }).join("")+'</datalist></div>'+
+      '<div class="fld"><label>Partner</label><input class="inp" id="ev_partner" list="ev_partners" value="'+esc(e.partner||"")+'"'+ro+'>'+
+        '<datalist id="ev_partners">'+(L.partners||[]).map(function(k){ return '<option value="'+esc(k)+'">'; }).join("")+'</datalist></div>'+
+    '</div>'+
+    '<div class="row">'+
+      '<div class="fld"><label>Place</label><select class="inp" id="ev_place"'+ro+' onchange="evfSync()">'+opts(provs,e.place,"— select —")+'</select><div class="hint" id="ev_area"></div></div>'+
+      '<div class="fld"><label>Detail event folder link</label><input class="inp" id="ev_link" value="'+esc(e.link||"")+'"'+ro+' placeholder="https://drive.google.com/…"></div>'+
+    '</div>'+
+    '<div class="row">'+
+      '<div class="fld"><label>Plan status</label><select class="inp" id="ev_plan"'+ro+'>'+opts(plans,e.plan||"","— select —")+'</select></div>'+
+      '<div class="fld"><label>Action status</label><select class="inp" id="ev_action"'+ro+'>'+opts(acts,e.action||"","— select —")+'</select></div>'+
+    '</div>'+
+    '<div class="fld"><label>Event review</label><textarea class="inp" id="ev_review" style="min-height:170px"'+ro+'>'+esc(e.review||"")+'</textarea>'+
+      (can?'<div style="display:flex;gap:7px;margin-top:7px;flex-wrap:wrap"><button class="mini" onclick="toggleVoice(\'ev_review\',this)">🎤 Speak</button>'+
+        '<button class="mini" onclick="addLinkTo(\'ev_review\')">🔗 Insert link</button>'+
+        (EVS.tpl?'<button class="mini" onclick="evfTpl()">📋 Review template</button>':'')+'</div>':'')+'</div>'+
+    '<div class="hint" id="ev_name">'+(isNew?'':'Event name (col C, auto): <b>'+esc(e.name||"")+'</b>')+'</div>'+
+    (isNew?'':'<div class="sect" style="margin-top:10px"><div class="ct" style="margin-bottom:6px"><span class="dot"></span>Customers from this event<span class="sp"></span><small>'+
+      (EVS.cust?cust.length+' in CUSTOMER LIST':'loading…')+'</small></div>'+
+      (cust.length?'<div class="ev-cl">'+cust.slice(0,30).map(function(c){ return '<div><b>'+esc(c.name)+'</b><span>'+esc([c.workplace,c.province].filter(Boolean).join(" · "))+'</span>'+(c.feedback?'<em>'+esc(c.feedback)+'</em>':'')+'</div>'; }).join("")+
+        (cust.length>30?'<div class="hint">+ '+(cust.length-30)+' more — see Key stakeholder ▸ Event customers</div>':'')+'</div>'
+       :'<div class="hint">No customer linked yet. Customers are added to sheet CUSTOMER LIST (column K = this event name).</div>')+'</div>')+
+    (can?'':'<div class="hint">🔒 View only — account '+esc(S.user.pic)+' cannot edit events.</div>');
+  openModal((isNew?"🎪 Add event":"🎪 Event")+(iso&&isNew?" · "+fmtVN(iso):""), h,
+    (!isNew&&can?'<button class="btn" style="color:var(--dang)" onclick="evDelete()">🗑 Delete</button>':'')+
+    '<button class="btn" onclick="closeModal()">'+(can?"Cancel":"Close")+'</button><div style="flex:1"></div>'+
+    (can?'<button class="btn pri" id="ev_save" onclick="evSave()">Save to Google Sheet</button>':''), true);
+  evfSync();
+}
+function evfSync(){
+  var p=$("ev_place"), a=$("ev_area"), L=EVS.lists||{};
+  if(p&&a){ var ar=(L.areas||{})[p.value]; a.textContent=p.value?("Area: "+(ar||"—")):""; }
+  var s=$("ev_start"), en=$("ev_end");
+  if(s&&en){ en.min=s.value||""; if(en.value && s.value && en.value<s.value) en.value=""; }
+}
+function evfTpl(){ var t=$("ev_review"); if(!t) return; if(t.value.trim() && !confirm("Replace the review text with the template?")) return; t.value=EVS.tpl||""; }
+function evfVal(){
+  var prods=[]; Array.prototype.forEach.call(document.querySelectorAll(".evchk input:checked"),function(x){ prods.push(x.value); });
+  var start=$("ev_start").value, end=$("ev_end").value;
+  return { row:EVF.row||"", sig:EVF.sig||"", start:start, end:(end&&end>start)?end:"", type:$("ev_type").value,
+    product:prods.join(", "), topic:$("ev_topic").value.trim(), kol:$("ev_kol").value.trim(), partner:$("ev_partner").value.trim(),
+    place:$("ev_place").value, plan:$("ev_plan").value, action:$("ev_action").value, link:$("ev_link").value.trim(),
+    review:$("ev_review").value, target:$("ev_target").value };
+}
+function evSave(){
+  var v=evfVal();
+  if(!v.start) return toast("Start date is required","warn");
+  if(!v.type) return toast("Select the type of event","warn");
+  if(!v.topic) return toast("Topic is required","warn");
+  var b=$("ev_save"); if(b) b.disabled=true;
+  busy(true,"Saving to REPORT_EVENT…");
+  evWrite({ action:"save", ev:v }).then(function(j){
+    busy(false);
+    if(j.event){ var i=-1; (EVS.rows||[]).forEach(function(x,k){ if(x.row===j.event.row) i=k; });
+      EVS.rows=EVS.rows||[]; if(i>=0) EVS.rows[i]=j.event; else EVS.rows.push(j.event); }
+    S.dash=null; closeModal(); evRepaint();
+    toast((j.message||"Saved")+(j.opaque?" — refreshing…":""),"ok",5000);
+    setTimeout(function(){ loadEvents(true); if(j.relinked) loadEvCust(true); }, j.opaque?2500:600);
+  }).catch(function(e){
+    busy(false); if(b) b.disabled=false;
+    toast("Not saved: "+(e.stale?e.message:evErrText(e)),"err",8000);
+    if(e.stale) loadEvents(true);
+  });
+}
+function evDelete(){
+  var e=evByRow(EVF&&EVF.row); if(!e) return;
+  var nc=evCustOf(e).length;
+  if(!confirm("Delete this event from sheet REPORT_EVENT?\n\n"+evDates(e)+" · "+(e.type||"")+"\n"+(e.topic||"")+
+      (nc?"\n\n"+nc+" customer(s) in CUSTOMER LIST are linked to this event. They stay in the sheet, but their event name will no longer match.":""))) return;
+  busy(true,"Deleting…");
+  evWrite({ action:"delete", row:e.row, sig:e.sig }).then(function(){
+    busy(false);
+    EVS.rows=(EVS.rows||[]).filter(function(x){ return x.row!==e.row; }).map(function(x){ if(x.row>e.row){ x=Object.assign({},x); x.row--; } return x; });
+    closeModal(); evRepaint(); toast("Event deleted","ok");
+    setTimeout(function(){ loadEvents(true); },600);
+  }).catch(function(er){ busy(false); toast("Not deleted: "+(er.stale?er.message:evErrText(er)),"err",8000); if(er.stale) loadEvents(true); });
+}
+
+/* ═════════════ EVENT TRÊN LỊCH CÔNG VIỆC ═════════════ */
+function calIc(k){ return k==="v"?"📍":k==="t"?"✈️":k==="e"?"🎪":"🧩"; }
+(function(){
+  var ci=calItems;
+  calItems=function(){
+    var out=ci.apply(this,arguments);
+    if(!hasEvents()) return out;
+    if(CAL.show.e===undefined) CAL.show.e=1;
+    if(!CAL.show.e || CAL.onlyIP) return out;
+    evRows().forEach(function(ev){
+      if(!ev.start) return;
+      var st=evState(ev), done=(st==="done"), cancel=(st==="cancel");
+      if(CAL.hideDone && (done||cancel)) return;
+      var en=evEnd(ev); if(dayDiff(ev.start,en)>31) en=ev.start;          /* ngày kết thúc lệch ⇒ chỉ ngày đầu */
+      var it={ id:"e"+ev.row, kind:"e", st:ev.start, en:en, d:ev.start, pic:"", title:ev.topic||ev.type||"Event",
+        sub:[ev.type, ev.place].filter(Boolean).join(" · "), status:EV_ST[st][0], pct:0, done:done, cancel:cancel, od:false, ro:false,
+        color:cancel?"#9AA3B5":EV_COL, ev:ev };
+      CAL.map[it.id]=it; out.push(it);
+    });
+    return out;
+  };
+  var ct=calTag; calTag=function(it){ return it.kind==="e"?"🎪 EVENT":ct.apply(this,arguments); };
+  var co=calOpen; calOpen=function(id){
+    var it=CAL.map[id]; if(!it){ calItems(); it=CAL.map[id]; }
+    if(it && it.kind==="e"){ if($("ov").classList.contains("on") && /^📅/.test($("mTitle").textContent||"")) closeModal(); return evForm(it.ev.row); }
+    return co.apply(this,arguments);
+  };
+  var we=wkEnsureData_; wkEnsureData_=function(){ var r=we.apply(this,arguments); if(hasEvents()) loadEvents(false); return r; };
+  var rc=refreshCal; refreshCal=function(btn){ if(hasEvents()) loadEvents(true); return rc.apply(this,arguments); };
+  var ca=calAdd; calAdd=function(iso){
+    ca.apply(this,arguments);
+    if(!hasEvents()) return;
+    var p=document.querySelector("#mBody .cal-pick"); if(!p) return;
+    iso=iso||todayISO();
+    p.insertAdjacentHTML("beforeend",'<button onclick="closeModal();evForm(null,\''+iso+'\')"><span class="ic">🎪</span><span class="ti">Event</span>'+
+      '<span class="ds">Seminar, workshop, wetlab, booth… — saved to sheet REPORT_EVENT (Marketing Offline file)</span></button>');
+  };
+  var pk=pickTaskKind; pickTaskKind=function(){
+    pk.apply(this,arguments);
+    if(!hasEvents()) return;
+    var p=document.querySelector("#mBody .pick2"); if(!p) return;
+    p.insertAdjacentHTML("beforeend",'<button class="pick2-c ev" onclick="closeModal();evForm(null)"><div class="ic">🎪</div><div class="ti">Event</div>'+
+      '<div class="ds">Seminar, workshop, wetlab, presentation, booth…</div><div class="sh">Saved to <b>Marketing Offline</b> · sheet REPORT_EVENT</div></button>');
+  };
+})();
+/* số event trong kỳ đang xem (ô thống kê trên lịch) */
+function calEvCount(rg){
+  if(!hasEvents() || !CAL.show.e) return null;
+  return evRows().filter(function(e){ return e.start && evState(e)!=="cancel" && e.start<=rg.to && evEnd(e)>=rg.from; }).length;
+}
+
+/* ═════════════ ĐIỆN THOẠI: ĐẦU LỊCH GỌN 1 DÒNG ═════════════ */
+function calMobHead(title, view, sum, bar){
+  var ref=CAL.ref||new Date(), t, rg=calRange(), today=todayISO();
+  if(view==="week"){ var mon=calDate(rg.from), sun=calDate(rg.to); t=calDM(rg.from)+" – "+calDM(rg.to)+(sun.getFullYear()!==new Date().getFullYear()?"/"+sun.getFullYear():""); }
+  else t=(isTH()?EV_MON[ref.getMonth()]+" ":"Th"+(ref.getMonth()+1)+"/")+ref.getFullYear();
+  var now=(today>=rg.from && today<=rg.to), open=!!CAL.mt;
+  return '<div class="cal-mh">'+
+    '<button class="cal-ib" onclick="calNav(-1)" aria-label="prev">‹</button>'+
+    '<button class="cal-mt" onclick="calNav(0)" title="'+TX("Về hôm nay","Back to today")+'"><b>'+esc(t)+'</b>'+(now?'':'<small>'+TX("↺ về hôm nay","↺ today")+'</small>')+'</button>'+
+    '<button class="cal-ib" onclick="calNav(1)" aria-label="next">›</button>'+
+    '<select class="inp cal-vs" onchange="calView(this.value)">'+[["week",TX("Tuần","Week")],["month",TX("Tháng","Month")],["list",TX("Danh sách","List")]].map(function(x){
+      return '<option value="'+x[0]+'"'+(view===x[0]?" selected":"")+'>'+x[1]+'</option>'; }).join("")+'</select>'+
+    (sum.overdue?'<button class="cal-odm" onclick="calOverdue()" title="'+TX("Việc quá hạn","Overdue")+'">🔴 '+sum.overdue+'</button>':'')+
+    '<button class="cal-ib cal-dots3'+(open?' on':'')+'" onclick="calMTools()" title="'+TX("Bộ lọc · thống kê","Filters · summary")+'">'+(open?'✕':'⋯')+'</button>'+
+  '</div>'+
+  (open?'<div class="cal-mtools">'+
+    '<div class="cal-mbtns"><button class="btn sm" onclick="refreshCal(this)">⟳ '+TX("Đọc lại","Reload")+'</button>'+
+      '<button class="btn sm" onclick="calFull()">'+(CAL.full?'✕ '+TX("Thu nhỏ","Exit full screen"):'⛶ '+TX("Toàn màn hình","Full screen"))+'</button>'+
+      '<button class="btn pri sm" onclick="calAdd(todayISO())">＋ '+TX("Thêm việc","Add")+'</button></div>'+
+    bar+sum.html+'</div>':'');
+}
+function calMTools(){ CAL.mt=!CAL.mt; renderCal(); }
+
+/* ═════════════ THANH TAB "CẬP NHẬT" GỌN (mọi nhóm) ═════════════ */
+wkTabBar=function(){
+  var t=S.wkTab||"terr";
+  var nOther=(S.other&&S.other.keys)?otherKeys().length:null;
+  var b=function(k,ic,lg,sm,extra){ return '<button class="'+(t===k?"on":"")+'" onclick="setWkTab(\''+k+'\')">'+ic+' <span class="lg">'+lg+'</span><span class="sm">'+sm+'</span>'+(extra||"")+'</button>'; };
+  return '<div class="shtabs wk-tabs">'+
+    b("cal","📅",TX("Lịch công việc","Work calendar"),TX("Lịch","Calendar"))+
+    b("terr","📍",TX("Thông tin địa bàn","Updates"),TX("Địa bàn","Visits"))+
+    b("other","🧩",TX("Công việc khác","Other tasks"),TX("Việc khác","Other"),nOther!=null?'<span class="cnt">'+nOther+'</span>':"")+
+  '</div>';
+};
+
+/* ═════════════ ĐIỀU HƯỚNG ═════════════ */
+(function(){
+  var g21=go;
+  go=function(tab){
+    if(tab==="adp" && isTH()) tab="weekly";
+    if(tab==="event" && !hasEvents()) tab="weekly";
+    /* sang ngày mới (app để mở qua đêm) ⇒ màn hình Cập nhật / lịch quay về tuần hiện tại */
+    if(tab==="weekly" && S._wkDay!==todayISO()){ S._wkDay=todayISO(); S.vMode="week"; S.vAnchor=todayISO(); S.wkFrom=mondayOf(todayISO()); S.wkTo=addDays(S.wkFrom,6); CAL.ref=new Date(); }
+    if(tab==="event"){
+      if(CAL.full) calFull(false);
+      S.tab="event";
+      document.querySelectorAll("[data-t]").forEach(function(el){ el.classList.toggle("on", el.getAttribute("data-t")==="event"); });
+      $("fab").classList.toggle("on", evCanEdit()); $("fab").title="Add event";
+      $("main").scrollTop=0; S._evScrolled=0;
+      pgEvent(); return;
+    }
+    return g21.apply(this,[tab]);
+  };
+  $("fab").onclick=function(){ if(S.tab==="event") evForm(null); else pickTaskKind(); };
+})();
+/* đăng nhập ⇒ Lịch công việc, tuần này (mọi nhóm) */
+function v21Landing(){
+  S.wkTab="cal"; try{ localStorage.setItem("mmh_wktab","cal"); }catch(e){}
+  CAL.view="week"; CAL.ref=new Date(); CAL.mt=false;
+  S.vMode="week"; S.vAnchor=todayISO(); S.wkFrom=mondayOf(todayISO()); S.wkTo=addDays(S.wkFrom,6); S._wkDay=todayISO();
+}
+
+/* ═════════════ DASHBOARD: NHÓM 🎪 EVENT ═════════════ */
+(function(){
+  var rd=renderDash;
+  renderDash=function(){
+    DASH_GROUPS=DASH_GROUPS0.filter(function(g){ return !(g[0]==="biz" && noOrder()) && !(g[0]==="adp" && isTH()); });
+    if(hasEvents()) DASH_GROUPS.push(["event","🎪 Event"]);
+    if(S.dashG==="adp" && isTH()) S.dashG="all";
+    if(hasEvents() && !EVS.rows && !EVS.loading) loadEvents(false);
+    if(hasEvents() && !EVS.cust && !EVS.custLoading) loadEvCust(false);
+    return rd.apply(this,arguments);
+  };
+  var dm=dashMissing;
+  dashMissing=function(){ var m=dm.apply(this,arguments); if(isTH()) m=m.filter(function(x){ return !/ADP/.test(x); }); return m; };
+})();
+function evDashRows(){
+  var R=dashRange(), set={}; R.months.forEach(function(m){ set[m]=1; });
+  return { R:R, rows:evRows().filter(function(e){ return set[evMonthOf(e)]; }) };
+}
+function evDashStat(){
+  var x=evDashRows(), n=0, done=0, ac=0, tg=0;
+  x.rows.forEach(function(e){ var st=evState(e); if(st==="cancel") return; n++; if(st==="done"){ done++; ac+=evActual(e); tg+=Number(e.target)||0; } });
+  return '<div class="kpi" style="cursor:pointer" onclick="setDashG(\'event\')"><div class="lb">🎪 Events</div><div class="vl">'+fmtN(n)+'</div>'+
+    '<div class="sb"><b>'+done+'</b> done · <b>'+fmtN(ac)+'</b> participants'+(tg?' / '+fmtN(tg):'')+'</div>'+(tg?pb(ac/tg):pb(n?done/n:0))+'</div>';
+}
+function evDashHtml(full){
+  if(!EVS.rows) return '<div class="card pad" style="margin-bottom:14px"><div class="ct"><span class="dot"></span>🎪 Marketing events</div><div class="hint">'+(EVS.err?esc(EVS.err):'Reading sheet REPORT_EVENT…')+'</div></div>';
+  var x=evDashRows(), rows=x.rows, R=x.R, today=todayISO();
+  var n={ all:0, done:0, up:0, cancel:0, chg:0, add:0, ac:0, tg:0, cu:0 };
+  var byType={}, byArea={}, byMonth=R.months.map(function(){ return 0; }), acM=R.months.map(function(){ return 0; }), mi={};
+  R.months.forEach(function(m,i){ mi[m]=i; });
+  var names={};
+  rows.forEach(function(e){
+    var st=evState(e); n.all++;
+    if(st==="cancel"){ n.cancel++; return; }
+    if(st==="done") n.done++; else n.up++;
+    if(/change/i.test(e.action||"")) n.chg++;
+    if(/additional/i.test(e.action||"")) n.add++;
+    var i=mi[evMonthOf(e)]; if(i!==undefined) byMonth[i]++;
+    if(e.type) byType[e.type]=(byType[e.type]||0)+1;
+    var ar=evArea(e)||"(no area)"; byArea[ar]=(byArea[ar]||0)+1;
+    if(st==="done"){ var a=evActual(e); n.ac+=a; n.tg+=Number(e.target)||0; if(i!==undefined) acM[i]+=a; }
+    names[e.name]=1;
+  });
+  (EVS.cust||[]).forEach(function(c){ if(names[c.event]) n.cu++; });
+  var labels=R.months.map(function(m){ return EV_MON[parseInt(m.slice(4,6),10)-1]; });
+  var stat=function(lb,val,sub,extra){ return '<div class="kpi"><div class="lb">'+lb+'</div><div class="vl">'+val+'</div>'+(sub?'<div class="sb">'+sub+'</div>':'')+(extra||'')+'</div>'; };
+  var ent=function(o){ return Object.keys(o).map(function(k){ return [k,o[k]]; }).sort(function(a,b){ return b[1]-a[1]; }); };
+  var up=evRows().filter(function(e){ var st=evState(e); return st==="plan"||st==="live"; }).sort(function(a,b){ return String(a.start).localeCompare(String(b.start)); }).slice(0,6);
+  var head='<div class="ct" style="margin:4px 0 10px"><span class="dot" style="background:'+EV_COL+'"></span>🎪 Marketing events · <span>'+esc(R.label)+'</span>'+
+    '<span class="sp"></span><button class="btn xs" onclick="go(\'event\')">Open Event tab ›</button></div>';
+  var stats='<div class="grid g4 ev-g4" style="margin-bottom:14px">'+
+    stat("Events",fmtN(n.all-n.cancel),'<b>'+n.done+'</b> done · <b>'+n.up+'</b> upcoming'+(n.cancel?' · '+n.cancel+' cancelled':''),pb(n.all-n.cancel?n.done/(n.all-n.cancel):0))+
+    stat("Participants",fmtN(n.ac),n.tg?'Target <b>'+fmtN(n.tg)+'</b> (done events)':'Done events',n.tg?pb(n.ac/n.tg)+'<div class="pbl"><span style="color:'+pctColor(n.ac/n.tg)+'">'+Math.round(n.ac*100/n.tg)+'%</span><span></span></div>':'')+
+    stat("Event customers",fmtN(n.cu),'In CUSTOMER LIST, from events in this period')+
+    stat("Schedule changes",fmtN(n.chg),'<b>'+n.add+'</b> additional · <b>'+n.cancel+'</b> cancelled')+
+  '</div>';
+  if(!full) return '<div class="ev-dash">'+head+stats+'</div>';
+  var card=function(t,sub,inner){ return '<div class="cbox"><h4>'+t+'</h4>'+(sub?'<div class="csub">'+sub+'</div>':"")+inner+'</div>'; };
+  var areaList=ent(byArea), maxA=areaList.length?areaList[0][1]:1;
+  return '<div class="ev-dash">'+head+stats+
+    '<div class="cwrap" style="margin-bottom:14px">'+
+      card("Events by month","Number of events (cancelled excluded)",svgSeries(labels,[{name:"Events",data:byMonth,color:EV_COL}],"num","bar"))+
+      card("Type of event",esc(R.label),svgDonut(ent(byType),fmtN(n.all-n.cancel),"events"))+
+    '</div>'+
+    '<div class="cwrap" style="margin-bottom:14px">'+
+      card("Participants by month","Actual participants of done events",svgSeries(labels,[{name:"Participants",data:acM,color:"#5B8DD9"}],"num","bar"))+
+      card("Events by area","Area of the place (sheet Master name)",areaList.length?'<div class="ev-bars">'+areaList.map(function(a){
+        return '<div><span>'+esc(a[0])+'</span><i style="width:'+Math.max(4,Math.round(a[1]*100/maxA))+'%"></i><b>'+a[1]+'</b></div>'; }).join("")+'</div>':'<div class="hint">No data</div>')+
+    '</div>'+
+    '<div class="card pad" style="margin-bottom:14px"><div class="ct"><span class="dot"></span>Next events</div>'+
+      (up.length?'<div class="ev-grid">'+up.map(evCardHtml).join("")+'</div>':'<div class="hint">No upcoming event.</div>')+'</div>'+
+  '</div>';
+}
+
+/* ═════════════ KEY STAKEHOLDER: KHÁCH HÀNG TỪ EVENT (sheet CUSTOMER LIST) ═════════════ */
+(function(){
+  var stb=stakeTabBar;
+  stakeTabBar=function(){
+    if(!hasEvents()) return stb.apply(this,arguments);
+    var t=S.stTab==="evc"?"evc":"all", n=(EVS.cust||[]).length;
+    return '<div class="shtabs">'+
+      '<button class="'+(t==="all"?"on":"")+'" onclick="setStTab(\'all\')">🤝 All CBC</button>'+
+      '<button class="'+(t==="evc"?"on":"")+'" onclick="setStTab(\'evc\')">🎪 Event customers'+(n?'<span class="cnt">'+n+'</span>':'')+'</button>'+
+    '</div>';
+  };
+  var rs=renderStake;
+  renderStake=function(){
+    if(hasEvents() && S.stTab==="evc") return renderEvCust();
+    if(hasEvents() && S.stTab!=="all") S.stTab="all";
+    return rs.apply(this,arguments);
+  };
+  var ps=pgStake;
+  pgStake=function(){ if(hasEvents()){ loadEvCust(false); loadEvents(false); } return ps.apply(this,arguments); };
+})();
+function ecSet(k,v){ S[k]=v; S.ecLimit=100; renderEvCust(); }
+var _ecq; function ecDebQ(){ clearTimeout(_ecq); _ecq=setTimeout(function(){ keepCaret("ec_q",renderEvCust); },180); }
+function evOfCust(c){ var L=evRows(); for(var i=0;i<L.length;i++) if(L[i].name===c.event) return L[i]; return null; }
+function renderEvCust(){
+  if(S.tab!=="stake") return;
+  var all=EVS.cust||[], q=noAcc(S.ecQ||""), fev=S.ecEv||"", fy=S.ecFy===undefined?"":S.ecFy, reg=S.ecReg||"";
+  var fys={}, evs={}, regs={};
+  all.forEach(function(c){ var e=evOfCust(c), f=(e&&e.fy)||c.eventFy||""; c._fy=f; c._ev=e;
+    if(f) fys[f]=(fys[f]||0)+1; if(c.region) regs[c.region]=(regs[c.region]||0)+1; });
+  var rows=all.filter(function(c){
+    if(fy && c._fy!==fy) return false;
+    if(reg && c.region!==reg) return false;
+    if(fev && c.event!==fev) return false;
+    if(q){ var hay=noAcc([c.name,c.workplace,c.province,c.region,c.event,c.feedback,c.pic,c.tel,c.email].join(" ")); if(q.split(/\s+/).some(function(t){ return t && hay.indexOf(t)<0; })) return false; }
+    return true;
+  });
+  all.forEach(function(c){ if(fy && c._fy!==fy) return; if(c.event) evs[c.event]=(evs[c.event]||0)+1; });
+  var nEv={}, nWp={}, nFb=0; rows.forEach(function(c){ if(c.event) nEv[c.event]=1; if(c.workplace) nWp[c.workplace.toLowerCase()]=1; if(c.feedback) nFb++; });
+  var lim=S.ecLimit||100, shown=rows.slice(0,lim);
+  var evLabel=function(name){ var e=null; evRows().some(function(x){ if(x.name===name){ e=x; return true; } return false; });
+    return e?(evDates(e)+" · "+(e.type||"")+" · "+(e.topic||"")):name; };
+  $("main").innerHTML='<div class="pg">'+stakeTabBar()+
+    '<div class="trhead compact"><div class="tt"><span class="sub"><b>'+fmtN(rows.length)+'</b> customers from events'+(fy?' · '+esc(fy):' · all FY')+'</span></div>'+
+      '<div class="acts"><button class="btn sm" onclick="loadEvCust(true);loadEvents(true)">⟳ Reload</button>'+
+      '<a class="btn sm hide-m" href="'+EV_SHEET+'#gid='+EV_GID.cust+'" target="_blank">📄 CUSTOMER LIST</a></div></div>'+
+    (EVS.custErr?'<div class="cal-note">⚠️ '+esc(EVS.custErr)+'</div>':(!EVS.cust?'<div class="cal-note">⏳ Reading sheet CUSTOMER LIST…</div>':''))+
+    '<div class="grid g4 ev-g4" style="margin-bottom:13px">'+
+      '<div class="kpi"><div class="lb">Event customers</div><div class="vl">'+fmtN(rows.length)+'</div><div class="sb">Sheet CUSTOMER LIST</div></div>'+
+      '<div class="kpi"><div class="lb">Events</div><div class="vl">'+fmtN(Object.keys(nEv).length)+'</div><div class="sb">with at least 1 customer</div></div>'+
+      '<div class="kpi"><div class="lb">Workplaces</div><div class="vl">'+fmtN(Object.keys(nWp).length)+'</div><div class="sb">hospitals / clinics</div></div>'+
+      '<div class="kpi"><div class="lb">With feedback</div><div class="vl">'+fmtN(nFb)+'</div><div class="sb">column M · Event feedback detail</div></div>'+
+    '</div>'+
+    '<div class="card pad" style="margin-bottom:12px">'+
+      '<div class="row" style="margin-bottom:9px">'+
+        '<div style="flex:2"><input class="inp" id="ec_q" autocomplete="off" placeholder="🔍 Name, workplace, province, feedback…" value="'+esc(S.ecQ||"")+'" oninput="S.ecQ=this.value;ecDebQ()"></div>'+
+        '<div><select class="inp" onchange="ecSet(\'ecEv\',this.value)"><option value="">All events</option>'+
+          Object.keys(evs).sort().reverse().map(function(k){ return '<option value="'+esc(k)+'"'+(fev===k?" selected":"")+'>'+esc(evLabel(k).slice(0,90))+' ('+evs[k]+')</option>'; }).join("")+'</select></div>'+
+        '<div><select class="inp" onchange="ecSet(\'ecReg\',this.value)"><option value="">All regions</option>'+
+          Object.keys(regs).sort().map(function(k){ return '<option value="'+esc(k)+'"'+(reg===k?" selected":"")+'>'+esc(k)+' ('+regs[k]+')</option>'; }).join("")+'</select></div>'+
+      '</div>'+
+      '<div class="chipbar" style="margin-bottom:0"><span class="fylb">FY</span>'+
+        '<div class="chip'+(fy?"":" on")+'" onclick="ecSet(\'ecFy\',\'\')">All FY</div>'+
+        Object.keys(fys).sort().reverse().map(function(f){ return '<div class="chip'+(fy===f?" on":"")+'" onclick="ecSet(\'ecFy\',\''+esc(f)+'\')">'+esc(f)+' ('+fys[f]+')</div>'; }).join("")+
+      '</div></div>'+
+    (shown.length?'<div class="card pad"><div class="tbwrap" style="max-height:none"><table class="tb st-tb"><thead><tr>'+
+      '<th>Customer</th><th>Workplace</th><th style="width:130px">Province · Region</th><th style="width:130px">Contact</th><th>Event</th><th style="width:60px">FY</th><th>Feedback</th><th style="width:80px">PIC</th></tr></thead><tbody>'+
+      shown.map(function(c){ var e=c._ev;
+        return '<tr><td><b>'+esc(c.name)+'</b></td><td>'+esc(c.workplace||c.address||"")+'</td><td>'+esc([c.province,c.region].filter(Boolean).join(" · "))+'</td>'+
+          '<td style="font-size:12px">'+esc([c.tel,c.email].filter(Boolean).join(" · "))+'</td>'+
+          '<td>'+(e?'<a href="javascript:void(0)" onclick="evForm('+e.row+')">'+esc(evDates(e))+' · '+esc(e.type||"")+'</a><div style="font-size:12px;color:var(--sub)">'+esc(e.topic||"")+'</div>'
+                  :'<span style="font-size:12px;color:var(--sub)">'+esc(c.event||"—")+'</span>')+'</td>'+
+          '<td>'+esc(c._fy||"")+'</td><td style="font-size:12px">'+esc(c.feedback||"")+'</td><td>'+esc(c.pic||"")+'</td></tr>'; }).join("")+
+      '</tbody></table></div>'+
+      (rows.length>lim?'<div style="text-align:center;margin-top:12px"><button class="btn" onclick="S.ecLimit=(S.ecLimit||100)+200;renderEvCust()">Show more ('+fmtN(rows.length-lim)+')</button></div>':'')+'</div>'
+     :'<div class="card pad"><div class="empty"><div class="e">🎪</div><p>'+(EVS.cust?'No customer matches.':'Loading…')+'</p></div></div>')+
+  '</div>';
+}
+
 </script>
 </body>
 </html>
