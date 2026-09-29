@@ -11411,7 +11411,7 @@ function renderCal(){
       cells+='<div class="dc'+(out?" out":"")+(we?" we":"")+(iso===today?" today":"")+'" onclick="calCell(event,\''+iso+'\')">'
         +'<div class="dn">'+dd.getDate()+'</div>'
         +ev.slice(0,maxShow).map(calChipEv).join("")
-        +(ev.length>maxShow?'<button class="cal-more" onclick="event.stopPropagation();calDay(\''+iso+'\')">+'+(ev.length-maxShow)+' việc</button>':'')
+        +(ev.length>maxShow?'<button class="cal-more" onclick="event.stopPropagation();calDay(\''+iso+'\')">+'+(ev.length-maxShow)+TX(' việc',' more')+'</button>':'')
         +'<div class="cal-dots">'+ev.slice(0,6).map(function(it){ return '<i style="--c:'+(it.kind==="v"?CAL_COL.v:it.color)+'"></i>'; }).join("")+'</div>'
         +'</div>';
     }
@@ -14710,6 +14710,12 @@ function thHtml(h){
 .ev-strip b{display:block;font-size:20px;color:var(--navy);line-height:1.15}
 .ev-strip b small{font-size:13px;color:var(--mute);font-weight:700}
 .ev-strip span{font-size:11px;font-weight:800;color:var(--mute);text-transform:uppercase;letter-spacing:.3px}
+.ev-per{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:10px}
+.ev-mnav{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.ev-mnav select{width:auto;min-width:150px;height:34px}
+.ev-mnav input[type=date]{width:auto;height:34px}
+.ev-mnav label{font-size:12.5px;font-weight:700;color:var(--sub)}
+.ev-mnav .cal-ib:disabled{opacity:.35;cursor:default}
 .ev-bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
 .ev-seg button .c{background:var(--line2);border-radius:10px;padding:0 6px;font-size:11px;margin-left:3px}
 .ev-seg button.on .c{background:rgba(255,255,255,.25)}
@@ -14783,6 +14789,11 @@ function thHtml(h){
   .ev-q{flex-basis:100%}
   .ev-ty{flex:1}
   .ev-seg{width:100%;display:flex}
+  .ev-per .seg{width:100%;display:flex}
+  .ev-per .seg button{flex:1}
+  .ev-mnav{width:100%}
+  .ev-mnav select{flex:1;min-width:0}
+  .ev-mnav input[type=date]{flex:1;min-width:0}
   .ev-seg button{flex:1;padding:0 4px}
   .ev-head .hide-m{display:none}
   .ev-bars>div{grid-template-columns:90px 1fr 30px}
@@ -14944,9 +14955,49 @@ function pgEvent(){
 }
 function evSetF(k,v){ S[k]=v; renderEvent(); }
 var _evq; function evDebQ(){ clearTimeout(_evq); _evq=setTimeout(function(){ keepCaret("ev_q",renderEvent); },180); }
+/* ⭐ v21.1 — kỳ xem của tab Event: theo tháng (mặc định = tháng hiện tại) · khoảng ngày · cả FY */
+function evYm(iso){ return iso.slice(0,4)+iso.slice(5,7); }
+function evMonLb(ym){ var mo=parseInt(String(ym).slice(4,6),10); return (mo?EV_MON[mo-1]:"")+" "+String(ym).slice(0,4); }
+function evPeriod(){
+  var per=S.evPer||"month", today=todayISO(), fms=fyMonths(S.fy);
+  if(per==="range"){
+    if(!S.evFrom) S.evFrom=mondayOf(today);
+    if(!S.evTo) S.evTo=addDays(S.evFrom,29);
+    if(S.evTo<S.evFrom){ var t=S.evFrom; S.evFrom=S.evTo; S.evTo=t; }
+    return { per:per, from:S.evFrom, to:S.evTo, label:fmtVN(S.evFrom)+" → "+fmtVN(S.evTo) };
+  }
+  if(per==="fy") return { per:per, from:"", to:"", label:"Whole "+S.fy };
+  if(!S.evMonth || fms.indexOf(S.evMonth)<0) S.evMonth = fms.indexOf(evYm(today))>=0 ? evYm(today) : fms[0];
+  var y=+S.evMonth.slice(0,4), m=+S.evMonth.slice(4,6), last=new Date(y,m,0).getDate();
+  return { per:per, from:y+"-"+("0"+m).slice(-2)+"-01", to:y+"-"+("0"+m).slice(-2)+"-"+("0"+last).slice(-2), label:evMonLb(S.evMonth) };
+}
+function evSetPer(p){ S.evPer=p; S.evScope="all"; renderEvent(); }
+function evMonthStep(k){ var fms=fyMonths(S.fy), i=fms.indexOf(S.evMonth)+k; if(i<0||i>=fms.length) return; S.evMonth=fms[i]; renderEvent(); }
+function evSetRange(which,v){ if(!v) return; if(which==="from") S.evFrom=v; else S.evTo=v; renderEvent(); }
+function evQuickRange(k){ var t=todayISO(); if(k>0){ S.evFrom=t; S.evTo=addDays(t,k-1); } else { S.evTo=t; S.evFrom=addDays(t,k+1); } S.evPer="range"; renderEvent(); }
+function evPeriodBar(rg, cnt){
+  var per=rg.per, fms=fyMonths(S.fy), i=fms.indexOf(S.evMonth);
+  var b=function(k,lb){ return '<button class="'+(per===k?"on":"")+'" onclick="evSetPer(\''+k+'\')">'+lb+'</button>'; };
+  var h='<div class="ev-per"><div class="seg">'+b("month","Month")+b("range","Date range")+b("fy","Whole FY")+'</div>';
+  if(per==="month"){
+    h+='<div class="ev-mnav"><button class="cal-ib" onclick="evMonthStep(-1)"'+(i<=0?" disabled":"")+'>‹</button>'+
+      '<select class="inp" onchange="S.evMonth=this.value;renderEvent()">'+fms.map(function(m){
+        return '<option value="'+m+'"'+(m===S.evMonth?" selected":"")+'>'+evMonLb(m)+(cnt[m]?' ('+cnt[m]+')':'')+'</option>'; }).join("")+'</select>'+
+      '<button class="cal-ib" onclick="evMonthStep(1)"'+(i>=fms.length-1?" disabled":"")+'>›</button>'+
+      (S.evMonth!==evYm(todayISO())&&fms.indexOf(evYm(todayISO()))>=0?'<button class="btn sm" onclick="S.evMonth=\''+evYm(todayISO())+'\';renderEvent()">This month</button>':'')+'</div>';
+  } else if(per==="range"){
+    h+='<div class="ev-mnav"><label>From</label><input class="inp" type="date" value="'+esc(rg.from)+'" onchange="evSetRange(\'from\',this.value)">'+
+      '<label>to</label><input class="inp" type="date" value="'+esc(rg.to)+'" onchange="evSetRange(\'to\',this.value)">'+
+      '<button class="btn sm" onclick="evQuickRange(30)">Next 30 days</button><button class="btn sm" onclick="evQuickRange(-30)">Last 30 days</button></div>';
+  }
+  return h+'</div>';
+}
 function renderEvent(){
   if(S.tab!=="event") return;
-  var all=evFyRows(), scope=S.evScope||"all", q=noAcc(S.evQ||""), ty=S.evType||"", today=todayISO();
+  var rg=evPeriod(), today=todayISO();
+  var mCnt={}; evFyRows().forEach(function(e){ if(!e.start) return; var a=evYm(e.start), b=evYm(evEnd(e)); fyMonths(S.fy).forEach(function(m){ if(m>=a&&m<=b) mCnt[m]=(mCnt[m]||0)+1; }); });
+  var all=(rg.per==="fy"?evFyRows():evRows().filter(function(e){ return e.start && e.start<=rg.to && evEnd(e)>=rg.from; }));
+  var scope=S.evScope||"all", q=noAcc(S.evQ||""), ty=S.evType||"";
   var rows=all.filter(function(e){
     if(ty && e.type!==ty) return false;
     var st=evState(e);
@@ -14963,19 +15014,19 @@ function renderEvent(){
   var byM={}, ms=[];
   rows.forEach(function(e){ var m=evMonthOf(e)||"—"; if(!byM[m]){ byM[m]=[]; ms.push(m); } byM[m].push(e); });
   var curM=today.slice(0,4)+today.slice(5,7);
-  ms=ms.filter(function(m){ return m>=curM; }).concat(ms.filter(function(m){ return m<curM; }).reverse());   /* tháng này + sắp tới trước, tháng đã qua sau */
+  if(rg.per==="fy") ms=ms.filter(function(m){ return m>=curM; }).concat(ms.filter(function(m){ return m<curM; }).reverse());   /* cả FY: tháng này + sắp tới trước, tháng đã qua sau */
   var seg=function(k,lb,c){ return '<button class="'+(scope===k?"on":"")+'" onclick="evSetF(\'evScope\',\''+k+'\')">'+lb+(c!=null?' <span class="c">'+c+'</span>':'')+'</button>'; };
   var note=EVS.err?'<div class="cal-note">⚠️ '+esc(EVS.err)+' <a href="javascript:void(0)" onclick="loadEvents(true)">Retry</a></div>'
           :(!EVS.rows?'<div class="cal-note">⏳ Reading sheet REPORT_EVENT…</div>':'');
   $("main").innerHTML='<div class="pg ev-pg">'+
-    '<div class="ev-head"><div><h2>🎪 Marketing events</h2><p>'+esc(S.fy)+' · sheet REPORT_EVENT · Marketing Offline file'+
+    '<div class="ev-head"><div><h2>🎪 Marketing events</h2><p>'+esc(rg.label)+' · sheet REPORT_EVENT · Marketing Offline file'+
       (EVS.loading?' · <span class="stale"><span class="dot"></span>syncing…</span>':'')+'</p></div>'+
       '<div class="ev-acts"><button class="btn sm" onclick="loadEvents(true);loadEvCust(true)" title="Read the sheet again">⟳</button>'+
       '<a class="btn sm hide-m" href="'+EV_SHEET+'#gid='+EV_GID.event+'" target="_blank">📄 Open sheet</a>'+
       (evCanEdit()?'<button class="btn pri sm" onclick="evForm(null)">＋ Add event</button>':'')+'</div></div>'+
-    note+
+    note+evPeriodBar(rg,mCnt)+
     '<div class="ev-strip">'+
-      '<div><b>'+n.all+'</b><span>events '+esc(S.fy)+'</span></div>'+
+      '<div><b>'+n.all+'</b><span>events · '+esc(rg.per==="fy"?S.fy:rg.label)+'</span></div>'+
       '<div><b style="color:#E08A00">'+n.up+'</b><span>upcoming</span></div>'+
       '<div><b style="color:#1E9E5A">'+n.done+'</b><span>done</span></div>'+
       '<div><b>'+fmtN(n.ac)+'<small>/'+fmtN(n.tg)+'</small></b><span>participants</span></div>'+
@@ -14987,11 +15038,11 @@ function renderEvent(){
     '</div>'+
     (ms.length ? ms.map(function(m,i){
       var y=m.slice(0,4), mo=parseInt(m.slice(4,6),10);
-      return (m<curM && (i===0||ms[i-1]>=curM)?'<div class="ev-past">Past months</div>':'')+'<div class="daysec" id="evm_'+m+'"><div class="dayhd'+(m===curM?" today":"")+'"><span class="dt">'+(mo?EV_MON[mo-1]+" "+y:"—")+'</span>'+
+      return (rg.per==="fy" && m<curM && (i===0||ms[i-1]>=curM)?'<div class="ev-past">Past months</div>':'')+'<div class="daysec" id="evm_'+m+'"><div class="dayhd'+(m===curM?" today":"")+'"><span class="dt">'+(mo?EV_MON[mo-1]+" "+y:"—")+'</span>'+
         (m===curM?'<span class="wd">THIS MONTH</span>':'')+'<span class="tag t-b">'+byM[m].length+' event'+(byM[m].length>1?"s":"")+'</span><span class="ln"></span></div>'+
         '<div class="ev-grid">'+byM[m].map(evCardHtml).join("")+'</div></div>';
     }).join("")
-    : '<div class="card pad"><div class="empty"><div class="e">🎪</div><p>'+(EVS.rows?'No event matches.':'Loading events…')+'</p>'+
+    : '<div class="card pad"><div class="empty"><div class="e">🎪</div><p>'+(EVS.rows?(all.length?'No event matches the filters.':'No event in '+esc(rg.label)+'.'):'Loading events…')+'</p>'+
       (evCanEdit()&&EVS.rows?'<button class="btn pri sm" style="margin-top:12px" onclick="evForm(null)">＋ Add event</button>':'')+'</div></div>')+
     '<div style="height:70px"></div></div>';
 }
