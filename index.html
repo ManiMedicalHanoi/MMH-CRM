@@ -1501,7 +1501,9 @@ document.addEventListener("DOMContentLoaded",function(){ try{ i18nApply(); }catc
 
 <script>
 /* ═══════════════════════════════════════════════════════════════════
-   MMH CRM — Frontend v21  (v21: Thailand Surgical có tab Event (file Marketing Offline, sheet REPORT_EVENT) — thêm / sửa / xoá,
+   MMH CRM — Frontend v22  (v22: Họp tuần bố cục mới: 4 mục họp, xem từng mục, số liệu tự động bên trái · ghi chú họp bên phải ·
+                              thầu nhiều mã SP + bảng giá thầu theo tỉnh / miền / toàn quốc (lưu log) · cần backend VN v9.1 / Thai v1.4)
+                              (v21: v21: Thailand Surgical có tab Event (file Marketing Offline, sheet REPORT_EVENT) — thêm / sửa / xoá,
                               event tự lên Lịch công việc, Dashboard + Key stakeholder có số liệu event · bỏ ADP của nhóm Thái ·
                               đăng nhập là mở Lịch công việc tuần này · điện thoại gọn hơn · task thuộc kỳ theo NGÀY BẮT ĐẦU
                               · cần backend VN v9.0 / Thai v1.3 / Event_Backend v1.0)
@@ -2363,7 +2365,7 @@ function normTeamPics(){
    · Management → chọn trong danh sách PIC của nhóm đang xem */
 function picFld(id,cur,label,extra){
   label=label||"MMH sales PIC";
-  if(!isMgmt()) return '<div class="fld"><label>'+esc(label)+'</label><input class="inp piclock" id="'+id+'" value="'+esc(S.user.pic)+'" readonly title="PIC cố định theo tài khoản đăng nhập"></div>';
+  if(!isMgrView()) return '<div class="fld"><label>'+esc(label)+'</label><input class="inp piclock" id="'+id+'" value="'+esc(S.user.pic)+'" readonly title="PIC cố định theo tài khoản đăng nhập"></div>';
   var list=(S.master.pic||[]).slice(); if(cur && list.indexOf(cur)<0) list.unshift(cur);
   return '<div class="fld"><label>'+esc(label)+'</label><select class="inp" id="'+id+'"'+(extra||"")+'>'+opts(list,cur||"","— chọn —")+'</select></div>';
 }
@@ -2511,8 +2513,10 @@ function startApp(pic){
   S.user={ pic:pic, grp:r.grp,
            role:(r.grp==="Management")?"manager":"pic",
            title:r.title||p.title||"", email:r.email||p.email||"",
-           team:p.team||r.grp, level:(r.grp==="Management")?"lead":"pic" };
-  if(!isMgmt()) S.filt.pic=S.user.pic;      /* sales: khoá cứng theo PIC của mình */
+           team:p.team||r.grp, level:(r.grp==="Management")?"lead":"pic",
+           lead:(r.team==="thai" && /leader/i.test(r.title||"")) };          /* ⭐ v22 — Dao: xem cả nhóm */
+  if(S.user.lead) S.user.role="manager";
+  if(!isMgrView()) S.filt.pic=S.user.pic;      /* sales: khoá cứng theo PIC của mình */
   else S.filt.pic="";
   afterUserKnown();                          /* ⭐ v13 — hiện nút đổi nhóm cho Management (bản cũ quên gọi ⇒ kẹt ở Dental) */
   try{ document.body.classList.toggle("th-mode", isTH()); i18nApply(); }catch(e){}   /* ⭐ v18 */
@@ -2806,7 +2810,7 @@ function otherInRange(x,r){
    Trả về BẢN SAO của key task với subs đã lọc — key gom nhiều PIC (VD
    "202606_Dental Customer visiting") sẽ chỉ còn đầu việc của đúng người đang xem. */
 function otherKeys(){
-  var pic = isMgmt() ? (S.otherPic||"") : S.user.pic;   /* sales chỉ thấy việc của mình */
+  var pic = isMgrView() ? (S.otherPic||"") : S.user.pic;   /* sales chỉ thấy việc của mình */
   var r = vRangeCalc();
   var out=[];
   ((S.other&&S.other.keys)||[]).forEach(function(k){
@@ -2911,13 +2915,13 @@ function otherSetStatus(no,val){
 function formOtherKey(no){
   var k=no?otherFindKey(no):null, isNew=!k;
   if(k&&!canEditOther(k.pic)) return toast("🔒 Chỉ "+(k.pic||"PIC phụ trách")+" mới sửa được","warn");
-  var picOpts=isMgmt()?(S.master.pic||[]):[S.user.pic];
+  var picOpts=isMgrView()?(S.master.pic||[]):[S.user.pic];
   var h='<div class="fld"><label>Loại công việc <span class="rq">*</span></label>'
       +'<select class="inp" id="ok_type">'+opts(otherTypes(),(k&&k.type)||teamTaskType(),"— chọn —")+'</select></div>'
     +'<div class="fld"><label>Tên Key Task <span class="rq">*</span></label>'
       +'<textarea class="inp" id="ok_name" style="min-height:74px" placeholder="VD: Triển khai mũi khoan 1559L khu vực miền Bắc">'+esc((k&&k.keyTask)||"")+'</textarea></div>'
     +'<div class="row">'
-      +'<div class="fld"><label>PIC phụ trách</label><select class="inp" id="ok_pic"'+(isMgmt()?"":" disabled")+'>'
+      +'<div class="fld"><label>PIC phụ trách</label><select class="inp" id="ok_pic"'+(isMgrView()?"":" disabled")+'>'
         +opts(picOpts,(k&&k.pic)||S.user.pic,"")+'</select></div>'
       +'<div class="fld"><label>Trạng thái</label><select class="inp" id="ok_status" onchange="okSyncProg()">'+opts(OTHER_STATUS,(k&&k.status)||"To Do","")+'</select></div>'
     +'</div>'
@@ -2973,12 +2977,12 @@ function formOtherSub(keyNo,no){
   var x=no?otherFindSub(no):null, isNew=!x;
   if(x&&!canEditOther(x.pic)) return toast("🔒 Chỉ "+(x.pic||"PIC phụ trách")+" mới sửa được","warn");
   var k=otherFindKey(keyNo)||{};
-  var picOpts=isMgmt()?(S.master.pic||[]):[S.user.pic];
+  var picOpts=isMgrView()?(S.master.pic||[]):[S.user.pic];
   var h='<p style="font-size:12.5px;color:var(--sub);margin-bottom:12px">Thuộc Key Task <b>'+esc(keyNo)+'</b> — '+esc(k.keyTask||"")+'</p>'
     +'<div class="fld"><label>Tên đầu việc <span class="rq">*</span></label>'
       +'<textarea class="inp" id="os_name" style="min-height:70px">'+esc((x&&x.subTask)||"")+'</textarea></div>'
     +'<div class="row">'
-      +'<div class="fld"><label>PIC phụ trách</label><select class="inp" id="os_pic"'+(isMgmt()?"":" disabled")+'>'
+      +'<div class="fld"><label>PIC phụ trách</label><select class="inp" id="os_pic"'+(isMgrView()?"":" disabled")+'>'
         +opts(picOpts,(x&&x.pic)||S.user.pic,"")+'</select></div>'
       +'<div class="fld"><label>Trạng thái</label><select class="inp" id="os_status" onchange="osSyncProg()">'+opts(OTHER_STATUS,(x&&x.status)||"To Do","")+'</select></div>'
     +'</div>'
@@ -3125,7 +3129,7 @@ function renderOther(){
   $("main").innerHTML='<div class="pg">'+head+
     '<div class="grid g4 ot-stats" style="margin-bottom:13px">'+
       '<div class="kpi"><div class="lb">Key task</div><div class="vl">'+fmtN(keys.length)+'</div><div class="sb">Trong '+esc(S.fy)+
-        (isMgmt()?"":" · của "+esc(S.user.pic))+'</div></div>'+
+        (isMgrView()?"":" · của "+esc(S.user.pic))+'</div></div>'+
       '<div class="kpi"><div class="lb">Đầu việc con</div><div class="vl">'+fmtN(nSub)+'</div><div class="sb">Thuộc các key task trên</div></div>'+
       '<div class="kpi"><div class="lb">Đã hoàn thành</div><div class="vl">'+fmtN(nDone)+'</div>'+
         (nSub?pb(nDone/nSub)+'<div class="pbl"><span style="color:'+pctColor(nDone/nSub)+'">'+Math.round(nDone/nSub*100)+'%</span><span>còn '+(nSub-nDone)+'</span></div>':"")+'</div>'+
@@ -3144,7 +3148,7 @@ function renderOther(){
           'title="Việc đi gặp khách hàng tự đồng bộ từ tab Thông tin địa bàn — bật để xem cùng ở đây">'+
           (S.otherShowVisit?"✓ ":"")+'Hiện cả việc đi địa bàn</div>'+
       '</div>'+
-      (isMgmt()&&picList.length>1?'<div class="chipbar" style="margin-bottom:0"><div class="chip'+(S.otherPic?"":" on")+'" onclick="setOtherPic(\'\')">Tất cả PIC</div>'+
+      (isMgrView()&&picList.length>1?'<div class="chipbar" style="margin-bottom:0"><div class="chip'+(S.otherPic?"":" on")+'" onclick="setOtherPic(\'\')">Tất cả PIC</div>'+
         picList.map(function(p){ return '<div class="chip'+(S.otherPic===p?" on":"")+'" onclick="setOtherPic(\''+esc(p)+'\')">'+esc(p)+'</div>'; }).join("")+'</div>':"")+
     '</div>'+
     (keys.length?((S.otherView||"table")==="table"?otherTable(keys):keys.map(otherKeyCard).join(""))
@@ -3667,7 +3671,7 @@ function stakeEvents(){
 }
 function stakeFiltered(){
   var rows=stakeRows(), toks=skTokens(S.stQ||"");
-  var mgr=isMgmt(), me=S.user.pic;
+  var mgr=isMgrView(), me=S.user.pic;
   var out=[];
   rows.forEach(function(r){
     if(!mgr && r.pic && !picEq(r.pic,me)) return;        /* sales chỉ xem CBC mình phụ trách */
@@ -3862,12 +3866,12 @@ function stakeDiag(){
   /* số dòng thực sự thuộc quyền xem của người đang đăng nhập */
   var mine=stakeRows().filter(function(r){
     if(!r.event) return false;
-    return isMgmt() || !r.pic || picEq(r.pic,S.user.pic);
+    return isMgrView() || !r.pic || picEq(r.pic,S.user.pic);
   }).length;
   var L=[];
   L.push('Danh bạ CBC app đang giữ: <b>'+fmtN(all)+'</b> dòng');
   L.push('Trong đó có ghi chú “Khách hàng từ Event”: <b>'+fmtN(withNote)+'</b>');
-  if(!isMgmt()) L.push('Bạn đang xem với quyền sales — chỉ thấy CBC do <b>'+esc(S.user.pic)+'</b> phụ trách ('+fmtN(mine)+' dòng)');
+  if(!isMgrView()) L.push('Bạn đang xem với quyền sales — chỉ thấy CBC do <b>'+esc(S.user.pic)+'</b> phụ trách ('+fmtN(mine)+' dòng)');
   var hint;
   if(!all)
     hint='App chưa tải được danh bạ. Bấm <b>⟳ Đọc lại</b>.';
@@ -3970,7 +3974,7 @@ function buildNav(){
     if(t.grp!==lastGrp){ h+='<div class="grp">'+t.grp+'</div>'; lastGrp=t.grp; }
     h+='<button class="nvi" data-t="'+t.id+'" onclick="go(\''+t.id+'\')"><span class="ic">'+t.ic+'</span><span class="lb">'+t.lb+'</span></button>';
   });
-  h+='<div style="flex:1"></div><div style="padding:10px;font-size:10.5px;color:var(--mute);line-height:1.5">MMH CRM v21.2<br>'+
+  h+='<div style="flex:1"></div><div style="padding:10px;font-size:10.5px;color:var(--mute);line-height:1.5">MMH CRM v22<br>'+
      (isMgmt()?'<a href="'+DRIVE_FOLDER+'" target="_blank">📁 Folder ảnh Drive</a>':"")+'</div>';
   $("side").innerHTML=h;
   /* ⭐ v4.5 — thanh dưới trượt ngang, đủ mọi mục, bỏ nút "Thêm" */
@@ -5306,7 +5310,7 @@ function custClearAll(){
 }
 function renderCust(){
   var f=S.filt;
-  var picChips=isMgmt()?(S.master.pic||[]):[];
+  var picChips=isMgrView()?(S.master.pic||[]):[];
 
   $("main").innerHTML='<div class="pg">'+
     '<div class="ph"><div><h2>Khách hàng</h2><p id="custCount">…</p></div>'+
@@ -5332,7 +5336,7 @@ function renderCust(){
         '<div class="chip'+(f.visit==="has"?" on":"")+'" data-k="visit" data-v="has" onclick="custToggle(\'visit\',\'has\')">Đã gặp</div>'+
         (noOrder()?'':'<div class="chip'+(f.sort==="sales"?" on":"")+'" data-k="sort" data-v="sales" onclick="custToggle(\'sort\',\'sales\')">Sắp theo doanh số</div>')+
       '</div>'+
-      (isMgmt()?'<div class="chipbar" id="custPicBar"><div class="chip'+(f.pic?"":" on")+'" onclick="custPic(\'\')">Tất cả PIC</div>'+
+      (isMgrView()?'<div class="chipbar" id="custPicBar"><div class="chip'+(f.pic?"":" on")+'" onclick="custPic(\'\')">Tất cả PIC</div>'+
         picChips.map(function(p){ return '<div class="chip'+(f.pic===p?" on":"")+'" onclick="custPic(\''+esc(p)+'\')">'+esc(p)+'</div>'; }).join("")+'</div>':"")+
     '</div>'+
     '<div id="custList"></div>'+
@@ -5649,7 +5653,7 @@ function saveCBC(){
   if(!code) return toast("Chọn địa bàn trước — hoặc bấm ＋ Địa bàn mới","warn");
   var d={ _row:S.editing.row, code:code, cbcCode:$("b_cbcCode").value.trim(), cbcNo:$("b_cbcNo").value,
     type:c.type||"", name:c.name||$("b_accName").value.trim(), address:c.address||"", province:c.province||"", area:c.area||"",
-    pic:(isMgmt()?(($("b_pic")&&$("b_pic").value)||c.pic||""):S.user.pic),
+    pic:(isMgrView()?(($("b_pic")&&$("b_pic").value)||c.pic||""):S.user.pic),
     contact:$("b_contact").value.trim(), phone:$("b_phone").value.trim(), jobTitle:$("b_jobTitle").value,
     specialize:$("b_specialize").value.trim(), role:$("b_role").value, influence:$("b_influence").value,
     trust:$("b_trust").value, note:$("b_note").value };
@@ -6081,7 +6085,7 @@ function terrRefresh(){
 /* ⭐ v11 — mở tab Đi địa bàn là chốt luôn kết quả các dòng TBD của tuần đang xem,
    để ô trên Google Sheet không bị bỏ rỗng nếu sales chưa lưu thêm gì. */
 function tbdAutoSync(){
-  var d=S.wkFrom||S.vAnchor||todayISO(), pic=isMgmt()?"":scopePic();
+  var d=S.wkFrom||S.vAnchor||todayISO(), pic=isMgrView()?"":scopePic();
   var k=mondayOf(d)+"|"+pic;
   S._tbdAuto=S._tbdAuto||{};
   if(S._tbdAuto[k]) return;
@@ -6222,7 +6226,7 @@ function renderTerritory(){
   var accSet={}; rows.forEach(function(w){ var a=parseAcc(w.account).name; if(a) accSet[a]=1; });
   var nToday=terrRows().filter(function(w){ return String(w.start).slice(0,10)===today; }).length;
 
-  var nAct=(S.filt.q?1:0)+(isMgmt()&&S.filt.pic?1:0)+(S.filt.act?1:0)+(S.filt.status?1:0)+(S.filt.flag?1:0);
+  var nAct=(S.filt.q?1:0)+(isMgrView()&&S.filt.pic?1:0)+(S.filt.act?1:0)+(S.filt.status?1:0)+(S.filt.flag?1:0);
 
   $("main").innerHTML='<div class="pg">'+
     wkTabBar()+
@@ -6252,12 +6256,12 @@ function renderTerritory(){
       '<div class="fwrap'+(S.fOpen?" on":"")+'">'+
         '<div class="fbar">'+
           '<div class="sbox"><input class="inp" id="wk_q" placeholder="Tìm account · kết quả · loại việc" value="'+esc(S.filt.q)+'" oninput="S.filt.q=this.value;debWk()"></div>'+
-          (isMgmt()?'<select class="inp" onchange="S.filt.pic=this.value;renderTerritory()">'+opts(S.master.pic,S.filt.pic,"Mọi PIC")+'</select>':"")+
+          (isMgrView()?'<select class="inp" onchange="S.filt.pic=this.value;renderTerritory()">'+opts(S.master.pic,S.filt.pic,"Mọi PIC")+'</select>':"")+
           '<select class="inp" onchange="S.filt.act=this.value;renderTerritory()">'+opts(S.master.typeAction,S.filt.act||"","Mọi hình thức")+'</select>'+
           '<select class="inp" onchange="S.filt.status=this.value;renderTerritory()">'+opts(S.master.status,S.filt.status||"","Mọi trạng thái")+'</select>'+
         '</div>'+
         '<div style="display:flex;gap:7px;margin-top:8px;flex-wrap:wrap">'+
-          (nAct?'<button class="ftog" onclick="S.filt.q=\'\';S.filt.pic=\''+(isMgmt()?"":esc(S.user.pic))+'\';S.filt.act=\'\';S.filt.status=\'\';S.filt.flag=false;renderTerritory()">✕ Bỏ lọc</button>':"")+
+          (nAct?'<button class="ftog" onclick="S.filt.q=\'\';S.filt.pic=\''+(isMgrView()?"":esc(S.user.pic))+'\';S.filt.act=\'\';S.filt.status=\'\';S.filt.flag=false;renderTerritory()">✕ Bỏ lọc</button>':"")+
           '<button class="ftog'+(S.vChart?" on":"")+'" onclick="S.vChart=!S.vChart;renderTerritory()">📊 Biểu đồ</button>'+
           (nPhoto?'<button class="ftog" onclick="openAllPhotos()">📷 Xem tất cả ảnh</button>':"")+
         '</div>'+
@@ -6746,7 +6750,7 @@ function ntNewAcc(){
     if(hint) hint.textContent=[c.type,c.province,c.area,"PIC "+(c.pic||"—")].filter(String).join(" · ");
     var tt=typeTaskForAcc(c.type);
     if(tt&&$("nt_typeTask")){ $("nt_typeTask").value=tt; if(hint) hint.textContent+=" · Type task: "+tt; }
-    if(isMgmt()&&c.pic&&$("nt_pic")&&$("nt_pic").tagName==="SELECT") $("nt_pic").value=c.pic;
+    if(isMgrView()&&c.pic&&$("nt_pic")&&$("nt_pic").tagName==="SELECT") $("nt_pic").value=c.pic;
     ntTbdSync();
   }});
 }
@@ -7100,7 +7104,7 @@ function formWeekly(w,presetAcc){
     '<div class="row">'+
       '<div class="fld"><label>Ngày <span class="rq">*</span></label><input class="inp" type="date" id="nt_start" value="'+todayISO()+'" onchange="ntTbdSync()"></div>'+
       '<div class="fld"><label>Sales PIC</label>'+
-        (isMgmt()
+        (isMgrView()
           ? '<select class="inp" id="nt_pic" onchange="ntTbdSync()">'+opts(S.master.pic,"","— chọn —")+'</select>'
           : '<input class="inp piclock" id="nt_pic" value="'+esc(S.user.pic)+'" readonly title="PIC cố định theo tài khoản đăng nhập">')+
       '</div>'+
@@ -7150,7 +7154,7 @@ function ntWire(){
     $("nt_accHint").textContent=[c.type,c.province,c.area,"PIC "+(c.pic||"—")].filter(String).join(" · ");
     var tt=typeTaskForAcc(c.type);
     if(tt&&$("nt_typeTask")){ $("nt_typeTask").value=tt; $("nt_accHint").textContent+=" · Type task: "+tt; }
-    if(isMgmt()&&c.pic&&$("nt_pic")&&$("nt_pic").tagName==="SELECT") $("nt_pic").value=c.pic;
+    if(isMgrView()&&c.pic&&$("nt_pic")&&$("nt_pic").tagName==="SELECT") $("nt_pic").value=c.pic;
     ntTbdSync();
   });
   var ai=$("nt_accName");
@@ -7193,7 +7197,7 @@ function ntTbdSync(){
 
   /* ⭐ v14 — cảnh báo NGAY nếu tuần đó đã có một dòng TBD của chính PIC này */
   var whoNt=($("nt_pic")&&$("nt_pic").value)||S.user.pic;
-  var dup=tbdExistingRow(from,isMgmt()?whoNt:S.user.pic,0);
+  var dup=tbdExistingRow(from,isMgrView()?whoNt:S.user.pic,0);
   if(note){ note.style.display="";
     note.innerHTML = dup
       ? ('<div class="card pad" style="margin-bottom:12px;background:#FFFBF1;border-color:#F3D69B">'+
@@ -7423,7 +7427,7 @@ function renderOrder(){
     '<div class="card pad" style="margin-bottom:12px">'+
       '<div class="row" style="margin-bottom:10px">'+
         '<div style="flex:2"><input class="inp" id="ord_q" autocomplete="off" placeholder="🔍 Tìm theo account, mã, sản phẩm…" value="'+esc(S.filt.q)+'" oninput="S.filt.q=this.value;debOrd()"></div>'+
-        (isMgmt()?'<div><select class="inp" onchange="S.filt.pic=this.value;renderOrder()">'+opts(S.master.pic,S.filt.pic,"Mọi PIC")+'</select></div>':"")+
+        (isMgrView()?'<div><select class="inp" onchange="S.filt.pic=this.value;renderOrder()">'+opts(S.master.pic,S.filt.pic,"Mọi PIC")+'</select></div>':"")+
       '</div>'+
       '<div class="chipbar"><div class="chip'+(S.filt.month?"":" on")+'" onclick="S.filt.month=\'\';renderOrder()">Cả FY</div>'+
         months.map(function(m){ return '<div class="chip'+(S.filt.month===m?" on":"")+'" onclick="S.filt.month=\''+m+'\';renderOrder()">T'+parseInt(m.slice(4),10)+'</div>'; }).join("")+'</div>'+
@@ -8208,7 +8212,7 @@ function mnCard(r){
    Sales chỉ việc mở từng hạng mục lên điền, không phải tự nhớ có bao nhiêu mục. */
 function mnScaffold(){
   var mn=S.mnMonth||ymOf(todayISO());
-  var pic=(isMgmt()? (S.mnPic||S.user.pic) : S.user.pic);
+  var pic=(isMgrView()? (S.mnPic||S.user.pic) : S.user.pic);
   if(!pic) return toast("Chọn PIC trước khi tạo khung","warn");
   var have={}; mnRows().forEach(function(r){
     if(mnPer(r)===String(mn) && picMatch(r.pic,pic)) have[String(r.typeTask||"").toLowerCase()]=1; });
@@ -8254,7 +8258,7 @@ function openMonthly(row){
       +selM("mn-pe","period","Kỳ báo cáo",months,r.period)
     +'</div></div>'
     +'<div class="te-sec"><div class="te-g2">'
-      +(isMgmt()?selM("mn-pic","pic","PIC",S.master.pic,r.pic)
+      +(isMgrView()?selM("mn-pic","pic","PIC",S.master.pic,r.pic)
                :'<div><span class="te-lb">PIC</span><input class="inp piclock" id="mn-pic" value="'+esc(S.user.pic)+'" readonly></div>')
       +selM("mn-ar","area","Area",S.master.area,r.area)
     +'</div></div>'
@@ -8331,7 +8335,7 @@ function formMonthly(r){
     '</div>'+
     '<div class="row">'+
       '<div class="fld"><label>PIC</label>'+
-        (isMgmt()?'<select class="inp" id="m_pic" onchange="mnSyncArea()">'+opts(S.master.pic,"","— chọn —")+'</select>'
+        (isMgrView()?'<select class="inp" id="m_pic" onchange="mnSyncArea()">'+opts(S.master.pic,"","— chọn —")+'</select>'
                  :'<input class="inp piclock" id="m_pic" value="'+esc(S.user.pic)+'" readonly>')+'</div>'+
       '<div class="fld"><label>Area</label><div id="m_areaBox"></div></div>'+
       '<div class="fld"><label>FY (tự theo kỳ)</label><input class="inp piclock" id="m_fy" value="'+esc(fyOfMonth(mn))+'" readonly></div>'+
@@ -8697,7 +8701,7 @@ function renderADP(){
       '<button class="btn pri sm" onclick="formADP(null)">＋ Thêm ADP</button></div>'+
 
     '<div class="card pad" style="margin-bottom:12px">'+
-      (isMgmt()?'<div class="chipbar" style="margin-bottom:10px"><div class="chip'+(f.pic?"":" on")+'" onclick="setAdpF(\'pic\',\'\')">Tất cả PIC</div>'+
+      (isMgrView()?'<div class="chipbar" style="margin-bottom:10px"><div class="chip'+(f.pic?"":" on")+'" onclick="setAdpF(\'pic\',\'\')">Tất cả PIC</div>'+
         picList.map(function(p){
           var c=all.filter(function(r){return r.pic===p;}).length;
           return '<div class="chip'+(f.pic===p?" on":"")+'" onclick="setAdpF(\'pic\',\''+esc(p)+'\')">'+esc(p)+' <span style="opacity:.65">'+c+'</span></div>'; }).join("")+'</div>':"")+
@@ -9469,10 +9473,10 @@ function tbdPlanCount(rows,who){
 function tbdGate(option,who){
   busy(true,"Đang kiểm tra kế hoạch tuần mới…");
   /* chốt kết quả các dòng TBD của TUẦN NÀY trước, để email gửi đi không lệch */
-  tbdSyncWeek(S.rpFrom, isMgmt()?"":who).then(function(){ return fetchTab("weekly"); })
+  tbdSyncWeek(S.rpFrom, isMgrView()?"":who).then(function(){ return fetchTab("weekly"); })
   .then(function(rows){
     busy(false);
-    if(tbdPlanCount(rows,isMgmt()?"":who)>0){ S._tbdOk=S.rpFrom+"|"+who; return sendReport(option,true); }
+    if(tbdPlanCount(rows,isMgrView()?"":who)>0){ S._tbdOk=S.rpFrom+"|"+who; return sendReport(option,true); }
     tbdGateDialog(option,who);
   }).catch(function(){ busy(false); S._tbdOk=S.rpFrom+"|"+who; sendReport(option,true); });
 }
@@ -9544,7 +9548,7 @@ function sendReport(option,confirmed){
   if(kind==="week" && option!=="download" && S._tbdFin!==(S.rpFrom+"|"+who)){
     S._tbdFin=S.rpFrom+"|"+who;
     busy(true,"Đang chốt kết quả đi địa bàn…");
-    return tbdSyncWeek(S.rpFrom, isMgmt()?"":who, true)
+    return tbdSyncWeek(S.rpFrom, isMgrView()?"":who, true)
       .then(function(){ busy(false); sendReport(option,true); })
       .catch(function(){ busy(false); sendReport(option,true); });
   }
@@ -11148,7 +11152,7 @@ function calDM(iso){ var d=calDate(iso); return d?(d.getDate()+"/"+(d.getMonth()
 function calCanTeam(){ return isMgmt() || !!(S.user && S.user.role==="manager"); }
 function calPics(){
   if(!calCanTeam()) return [S.user.pic];
-  if(CAL.pics===null) CAL.pics = isMgmt() ? [] : [S.user.pic];
+  if(CAL.pics===null) CAL.pics = isMgrView() ? [] : [S.user.pic];
   return CAL.pics;
 }
 function calPicOk(p){
@@ -12840,7 +12844,7 @@ function mtTeamLb(){ return (curTeam()||{}).label||"Sales"; }                   
 function mtTeamName(){ return mtTeamLb()+" Sales Team"; }
 function mtSegLb(){ return turnoverSegments().join(" + "); }
 function mtIsLead(){ return /leader/i.test(((ROLES[S.user.pic]||{}).title)||""); }
-function mtPics(){ var L=teamPicNames(); return (isMgmt()||mtIsLead())?L:[S.user.pic]; }
+function mtPics(){ var L=teamPicNames(); return (isMgrView()||mtIsLead())?L:[S.user.pic]; }
 function mtPicKey(p){ return noAcc(p||"").replace(/[^a-z0-9]/g,"").toUpperCase()||"X"; }
 function mtPicEq(a,b){ return mtPicKey(a)===mtPicKey(b); }
 function mtId(week,pic){ return "MT-"+String(week).replace(/-/g,"")+"-"+mtPicKey(pic); }
@@ -14240,7 +14244,7 @@ function mtRecHtml(rec,no,prev){   /* prev: biên bản họp trước (không b
 
 /* ───────── LỊCH SỬ ───────── */
 function mtHistory(pf){
-  var L=(MT.list||[]).filter(function(x){ return isMgmt()||mtPicEq(x.pic,S.user.pic); });
+  var L=(MT.list||[]).filter(function(x){ return isMgrView()||mtPicEq(x.pic,S.user.pic); });
   if(pf) L=L.filter(function(x){ return mtPicEq(x.pic,pf); });
   var P=mtPics();
   var h=(P.length>1?'<div class="chips" style="margin-bottom:12px"><div class="chip'+(pf?"":" on")+'" onclick="closeModal();mtHistory()">Tất cả</div>'+
@@ -15488,6 +15492,867 @@ function hdsdGo(k){
   var w=$("hdsdDl"); if(w) w.href=hdsdDl(d.id);
   Array.prototype.forEach.call(document.querySelectorAll(".hdsd-tabs .hp-tab"),function(b){ b.classList.toggle("on", b.getAttribute("data-k")===k); });
 }
+
+</script>
+<style>
+/* ⭐ v22 — Họp tuần */
+.mt2 .mt-top{gap:10px}
+.mt2 .mt-tl h2{font-size:19px}
+.mt2-wk{display:flex;align-items:center;gap:4px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:3px}
+.mt2-wk>button{border:0;background:none;width:30px;height:32px;border-radius:9px;font-size:17px;font-weight:800;color:var(--navy);cursor:pointer;font-family:inherit}
+.mt2-wk>button:hover{background:var(--pale)}
+.mt2-wk>button.now{width:auto;padding:0 10px;font-size:12px;background:var(--pale);color:var(--blue-d)}
+.mt2-wk .w{display:flex;flex-direction:column;line-height:1.15;padding:0 6px;min-width:0}
+.mt2-wk .w b{font-size:13.5px;color:var(--navy);white-space:nowrap}
+.mt2-wk .w b i{font-style:normal;font-size:10.5px;color:#fff;background:var(--blue);border-radius:7px;padding:1px 6px;margin-left:5px;vertical-align:1px}
+.mt2-wk .w span{font-size:11.5px;color:var(--sub);font-weight:700;white-space:nowrap}
+.mt2-pics{display:flex;align-items:center;gap:8px;margin:0 0 10px}
+.mt2-pics .k{font-size:11px;font-weight:800;color:var(--mute);text-transform:uppercase}
+.mt2-pics .shtabs{margin:0;border:0;flex:1;min-width:0}
+/* chương trình họp */
+.mt2-steps{display:grid;grid-template-columns:repeat(4,minmax(0,1fr)) auto;gap:8px;margin-bottom:8px}
+.mt2-st{display:flex;align-items:center;gap:10px;text-align:left;border:1.5px solid var(--line);background:var(--card);border-radius:14px;padding:9px 11px;cursor:pointer;font-family:inherit;min-width:0;box-shadow:var(--sh-1);transition:.15s}
+.mt2-st:hover{border-color:var(--blue-l,#9DB7E0)}
+.mt2-st .n{flex:none;width:28px;height:28px;border-radius:50%;display:grid;place-items:center;font-size:13px;font-weight:800;background:var(--line2);color:var(--sub)}
+.mt2-st .t{display:flex;flex-direction:column;min-width:0;line-height:1.25}
+.mt2-st .t b{font-size:13px;color:var(--navy);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mt2-st .t small{font-size:11.5px;color:var(--mute);font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mt2-st.on{border-color:var(--blue);background:#F2F6FE;box-shadow:0 0 0 3px rgba(58,92,170,.12)}
+.mt2-st.on .n{background:var(--blue);color:#fff}
+.mt2-st.done .n{background:#1E9E5A;color:#fff}
+.mt2-st.part .n{background:#FFE9C2;color:#8A5A00}
+.mt2-prog{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:0 6px;min-width:108px}
+.mt2-prog b{font-size:18px;color:var(--navy);line-height:1}
+.mt2-prog>span{font-size:10.5px;font-weight:800;color:var(--mute);text-transform:uppercase}
+.mt2-all-b{border:0;background:none;font-family:inherit;font-size:11.5px;font-weight:700;color:var(--blue-d);text-decoration:underline;cursor:pointer;margin-top:3px}
+.mt2-mode{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+.mt2-mode .mt-md{margin:0}
+.mt2-mode .mt-cmpbar{margin:0}
+/* mục */
+.mt2 .mt2-sec{display:none}
+.mt2 .mt2-sec.on{display:block}
+.mt2 .mt-sec{border-top:4px solid var(--blue)}
+.mt2 #mt-s1{border-top-color:#E8A302}.mt2 #mt-s3{border-top-color:#1E9E5A}.mt2 #mt-s4{border-top-color:#8A6BC4}
+.mt2-lbl{font-size:11px;font-weight:800;color:var(--mute);text-transform:uppercase;letter-spacing:.4px;margin:4px 0 8px;display:flex;align-items:center;gap:6px}
+.mt2-lbl:after{content:"";flex:1;height:1px;background:var(--line)}
+.mt2-lbl.n{color:#8A5A00;margin-top:16px}
+.mt2-rate{display:flex;gap:6px 22px;flex-wrap:wrap}
+.mt2-cols{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:16px;align-items:start}
+.mt2-notes{align-self:stretch}
+.mt2-stk{position:sticky;top:78px;background:#FFFBF1;border:1px solid #F3DDAA;border-radius:14px;padding:10px 12px 12px}
+.mt2-stk .mt2-lbl.n{margin-top:0}
+.mt2-stk .mt2-lbl.n:after{background:#F3DDAA}
+.mt2-hint{font-size:12px;color:#7A5A20;line-height:1.45;margin:0 0 8px}
+.mt2-stk textarea.mt-ta{background:#fff;border-color:#EBD7A6}
+.mt2-nav{display:flex;justify-content:space-between;gap:10px;margin-top:16px;padding-top:12px;border-top:1px dashed var(--line)}
+.mt2-all .mt2-nav{display:none}
+/* đi địa bàn gọn */
+.mt2 .mt-vl{gap:0;border:1px solid var(--line);border-radius:13px;overflow:hidden;background:var(--card)}
+.mt2 .mt-vl>.mt-vi{border:0;border-radius:0;border-bottom:1px solid var(--line2)}
+.mt2-vi{display:flex;gap:12px;padding:10px 13px;border-bottom:1px solid var(--line2)}
+.mt2-vi:last-child{border-bottom:0}
+.mt2-vi.nores{background:#FFF8F7}
+.mt2-vi .d{flex:none;width:46px;text-align:center;background:#EAF0FB;border-radius:10px;padding:5px 2px;align-self:flex-start}
+.mt2-vi .d b{display:block;font-size:13.5px;color:var(--navy)}
+.mt2-vi .d span{display:block;font-size:10.5px;font-weight:800;color:var(--sub)}
+.mt2-vi .b{flex:1;min-width:0}
+.mt2-vi .l1{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.mt2-vi .an{font-size:13.5px;font-weight:800;color:var(--ink,var(--navy));cursor:pointer}
+.mt2-vi .an:hover{text-decoration:underline}
+.mt2-vi .pv{font-size:11.5px;color:var(--mute);font-weight:700}
+.mt2-vi .sp{flex:1}
+.mt2-vi .ed{border:1px solid var(--line);background:var(--card);border-radius:8px;width:28px;height:26px;cursor:pointer;color:var(--blue-d);font-size:13px}
+.mt2-vi .ed:hover{background:var(--pale)}
+.mt2-vi .tg{display:flex;gap:5px;flex-wrap:wrap;margin-top:5px}
+.mt2-vi .pl{font-size:12px;color:var(--sub);margin-top:6px;line-height:1.45}
+.mt2-vi .pl span{font-size:10.5px;font-weight:800;color:var(--blue-d);text-transform:uppercase;margin-right:6px}
+.mt2-vi .rs{font-size:12.5px;color:var(--text,#2A3950);line-height:1.5;margin-top:6px;white-space:pre-wrap;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;cursor:pointer}
+.mt2-vi .rs.open{display:block}
+.mt2-vi .rs.miss{color:var(--dang);font-weight:700;cursor:default}
+.mt2-vi .fb{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+.mt2-mbar{display:none}
+@media(max-width:1180px){ .mt2-cols{grid-template-columns:minmax(0,1fr) 290px} .mt2-steps{grid-template-columns:repeat(2,minmax(0,1fr))} .mt2-prog{grid-column:1/-1;flex-direction:row;gap:8px} }
+@media(max-width:900px){ .mt2-cols{grid-template-columns:1fr} .mt2-stk{position:static} }
+@media(max-width:720px){
+  .mt2 .mt-top{gap:6px}
+  .mt2 .mt-tl{flex-basis:100%}
+  .mt2 .mt-tl h2{font-size:16px}
+  .mt2-wk{flex:1}
+  .mt2-wk .w{flex:1;align-items:center}
+  .mt2 .mt-top .btn .t{display:none}
+  .mt2 .mt-top .btn.pri,.mt2 .mt-top .mt-sv{display:none}
+  .mt2-steps{display:flex;overflow-x:auto;gap:6px;margin:0 -12px 8px;padding:2px 12px 4px;scrollbar-width:none}
+  .mt2-steps::-webkit-scrollbar{display:none}
+  .mt2-st{flex:0 0 auto;padding:7px 10px;gap:7px;border-radius:12px}
+  .mt2-st .n{width:24px;height:24px;font-size:12px}
+  .mt2-st .t b{font-size:12.5px}
+  .mt2-st .t small{font-size:10.5px}
+  .mt2-prog{flex:0 0 auto;min-width:0;flex-direction:row}
+  .mt2-mode .mt-md{width:100%;display:flex}.mt2-mode .mt-md button{flex:1;padding:7px 4px}
+  .mt2 .mt-sec{padding:12px}
+  .mt2-vi{gap:9px;padding:9px 10px}
+  .mt2-vi .d{width:40px}
+  .mt2-vi .ed{display:none}
+  .mt2-vi .d span{font-size:9.5px;white-space:nowrap}
+  .mt2-nav .btn{flex:1;justify-content:center;font-size:12.5px;padding:0 8px}
+  .mt2-mbar{display:flex;align-items:center;gap:8px;position:sticky;bottom:8px;z-index:30;background:rgba(255,255,255,.96);backdrop-filter:blur(8px);border:1px solid var(--line);border-radius:14px;padding:7px 7px 7px 10px;box-shadow:0 4px 18px rgba(21,34,56,.14);margin-top:10px}
+  .mt2-mbar .mt2-mst{flex:1;min-width:0;font-size:11.5px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;background:none!important;padding:0!important}
+  .mt2-mbar .btn{height:40px;flex:none}
+  .mt2-vi .l1 .ttag{font-size:10.5px}
+}
+
+/* ⭐ v22 · thầu nhiều mã SP + bảng giá thầu */
+.mt .mt3-tabs{margin-bottom:12px}
+.mt .mt3-tabs b{font-weight:800;color:var(--mute);margin-left:2px}
+.mt .mt3-q{flex:1 1 220px;min-width:0;height:36px}
+.mt .mt3-a{width:auto;min-width:150px;height:36px}
+.mt .mt-tsum{grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}
+.mt3-list{display:flex;flex-direction:column;gap:9px;margin-bottom:8px}
+.mt3-td{border:1px solid var(--line);border-radius:13px;padding:10px 13px;background:var(--card)}
+.mt3-td .l1{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.mt3-td .l1>b{font-size:13.5px;color:var(--navy)}
+.mt3-td .pv{font-size:11.5px;font-weight:700;color:var(--sub)}
+.mt3-td .sp{flex:1}
+.mt3-td .meta{font-size:12px;color:var(--sub);margin-top:4px}
+.mt3-it{width:100%;border-collapse:collapse;margin-top:8px;font-size:12.5px}
+.mt3-it td{padding:5px 8px;border-top:1px dashed var(--line);white-space:nowrap}
+.mt3-it td.c{white-space:normal;font-weight:700;color:var(--navy);width:50%}
+.mt3-it td.c small{display:block;font-weight:600;color:var(--mute);font-size:11px}
+.mt3-it td.v{text-align:right;font-weight:700}
+.mt3-td .tot{display:flex;gap:10px;flex-wrap:wrap;justify-content:space-between;margin-top:8px;padding-top:8px;border-top:1px solid var(--line2);font-size:12.5px;color:var(--sub)}
+.mt3-td .tot b{color:var(--navy)}
+.mt3-td .tot small{color:var(--mute)}
+.mt3-pt .mute,.mt3-hh .mute{font-size:11px;color:var(--mute)}
+.mt3-pt .up{font-size:11px;font-weight:800;color:#B3261E}
+.mt3-pt .dn{font-size:11px;font-weight:800;color:#15803D}
+.mt3-pt{min-width:640px}
+.mt3-hh{font-size:14px;color:var(--navy);margin-bottom:10px}
+tr.cur td{background:#F2FAF5}
+.mt3-lh,.mt3-ln{display:grid;grid-template-columns:minmax(0,2.2fr) 80px 80px minmax(0,1.3fr) 34px;gap:6px;align-items:center}
+.mt3-lh{font-size:11px;font-weight:800;color:var(--mute);text-transform:uppercase;margin-bottom:4px}
+.mt3-ln{margin-bottom:8px;padding-bottom:8px;border-bottom:1px dashed var(--line)}
+.mt3-ln .inp{height:36px;min-width:0}
+.mt3-ln .inf{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:4px 12px;font-size:11.5px}
+.mt3-ln .inf .ok{color:#15803D;font-weight:700}
+.mt3-ln .inf .dif{color:#A86A00;font-weight:700}
+.mt3-ln .inf .no{color:var(--mute)}
+.mt3-ln .inf .sv{display:flex;align-items:center;gap:5px;color:var(--navy);font-weight:700;cursor:pointer}
+@media(max-width:720px){
+  .mt3-lh{display:none}
+  .mt3-ln{grid-template-columns:1fr 1fr 34px}
+  .mt3-ln input[id^=tl_c]{grid-column:1/3}
+  .mt3-ln input[id^=tl_q]{grid-column:1/2}
+  .mt3-ln input[id^=tl_u]{grid-column:2/3}
+  .mt3-ln input[id^=tl_p]{grid-column:1/3}
+  .mt3-ln button{grid-row:1;grid-column:3}
+}
+</style>
+<script>
+/* ═══════════════════════════════════════════════════════════════════
+   ⭐ v22 · THẦU: NHẬP GIÁ THEO MÃ SẢN PHẨM TỪNG ĐỊA BÀN (LƯU LOG)
+   · Bảng giá thầu (sheet "15. TENDER PRICE LOG"): mỗi lần nhập giá = 1 dòng mới,
+     không ghi đè ⇒ giữ đủ lịch sử. Giá hiện hành = dòng mới nhất theo Ngày áp dụng.
+   · Phạm vi giá: Tỉnh · Miền (North / Central / South) · Toàn quốc.
+     Tìm giá cho 1 mã ở 1 bệnh viện: đúng tỉnh ⇒ đúng miền ⇒ toàn quốc.
+   · Gói thầu nhiều dòng mã SP: mỗi dòng Mã SP · SL · Đơn vị · Đơn giá.
+     Đơn giá tự điền từ bảng giá theo tỉnh của bệnh viện, sửa được; giá mới được
+     ghi thêm vào log (có ô chọn) ngay khi lưu gói thầu.
+   · Giá trị gói = Σ SL × Đơn giá ⇒ DS ước tính còn lại trong FY như cũ.
+   ═══════════════════════════════════════════════════════════════════ */
+var MT_PSRC=[["KQTT","KQTT","Tender result"],["Báo giá NPP","Báo giá NPP","Distributor quotation"],["Giá kê khai","Giá kê khai","Declared price"],["Khác","Khác","Other"]];
+var MT_PSCOPE=[["prov","Tỉnh","Province"],["area","Miền","Region"],["all","Toàn quốc","Nationwide"]];
+function mtCurr(){ return isTH()?"THB":"VND"; }
+function mtPsLb(k){ var x=MT_PSCOPE.filter(function(s){ return s[0]===k; })[0]; return x?TX(x[1],x[2]):k; }
+function mtSrcLb(k){ var x=MT_PSRC.filter(function(s){ return s[0]===k; })[0]; return x?TX(x[1],x[2]):(k||""); }
+function mtPrKey(s){ return noAcc(String(s||"")).replace(/[^a-z0-9]+/g,"").toUpperCase(); }
+function mtProvArea(prov){
+  var k=noAcc(prov||"").trim(), hit="";
+  (S.custIndex||[]).some(function(c){ if(c.province && noAcc(c.province).trim()===k && c.area){ hit=c.area; return true; } return false; });
+  return hit;
+}
+/* ── nạp bảng giá ── */
+function mtPrLoad(){
+  if(!MT.prices){ var c=kvGet(ckey("mtpr")); if(c&&c.list) MT.prices=c.list; }
+  return apiGet("mtPrices",{_ts:Date.now()}).then(function(j){
+    MT.prices=j.list||[]; MT.pErr=""; kvSet(ckey("mtpr"),{list:MT.prices,at:Date.now()});
+    if(S.tab==="meet") mtPaintTd();
+  }).catch(function(e){ MT.pErr=mtErrTx(e); if(!MT.prices) MT.prices=null; if(S.tab==="meet") mtPaintTd(); });
+}
+(function(){ var _l=mtTdLoad; mtTdLoad=function(){ mtPrLoad(); return _l.apply(this,arguments); }; })();
+function mtPrSort(a,b){ return String(b.date||"").localeCompare(String(a.date||"")) || String(b.createdAt||"").localeCompare(String(a.createdAt||"")); }
+/* giá hiện hành cho 1 mã tại 1 địa bàn */
+function mtPriceFind(code,prov,area){
+  var key=mtPrKey(code); if(!key||!MT.prices) return null;
+  var pk=noAcc(prov||"").trim(), ak=noAcc(area||"").trim(), best=null, bs=0;
+  MT.prices.forEach(function(p){
+    if(mtPrKey(p.code)!==key && mtPrKey(p.detail)!==key) return;
+    var s=0, pa=noAcc(p.area||"").trim();
+    if(p.scope==="prov" && pk && pa===pk) s=3;
+    else if(p.scope==="area" && ak && pa===ak) s=2;
+    else if(p.scope==="all") s=1;
+    if(!s) return;
+    if(s>bs || (s===bs && mtPrSort(p,best)<0)){ best=p; bs=s; }
+  });
+  return best;
+}
+/* nhóm theo mã + phạm vi + địa bàn ⇒ giá hiện hành + số lần cập nhật */
+function mtPriceGroups(){
+  var g={}, out=[];
+  (MT.prices||[]).forEach(function(p){
+    var k=mtPrKey(p.code||p.detail)+"|"+p.scope+"|"+noAcc(p.area||"").trim();
+    if(!g[k]){ g[k]={ key:k, list:[] }; out.push(g[k]); }
+    g[k].list.push(p);
+  });
+  out.forEach(function(x){ x.list.sort(mtPrSort); x.cur=x.list[0]; x.prev=x.list[1]||null; });
+  out.sort(function(a,b){ return String(a.cur.code||a.cur.detail).localeCompare(String(b.cur.code||b.cur.detail)) || String(a.cur.area||"").localeCompare(String(b.cur.area||"")); });
+  return out;
+}
+/* ── dòng mã SP của gói thầu ── */
+function mtTdItems(t){
+  if(t && t.items && t.items.length) return t.items;
+  if(!t || !(n(t.qty)>0)) return [];
+  return [{ code:t.detail||t.prod||"", name:"", qty:n(t.qty), unit:t.unit||"", price:n(t.price) }];
+}
+mtTdCalc=(function(){ var _c=mtTdCalc; return function(t,fy){
+  var L=mtTdItems(t), q=0, tot=0;
+  L.forEach(function(x){ q+=n(x.qty); tot+=n(x.qty)*n(x.price); });
+  var r=_c({ qty:tot, price:1, valid:t.valid, status:t.status, won:t.won, kqtt:t.kqtt },fy);
+  r.qty=q; r.lines=L.length; return r;
+}; })();
+
+/* ── mục 3: tab Gói thầu | Bảng giá thầu ── */
+function mtPaintTd(){
+  var box=$("mtTd"); if(!box) return;
+  var tab=MT.tdTab||"td";
+  var nPr=MT.prices?mtPriceGroups().length:null;
+  var h='<div class="seg mt3-tabs"><button class="'+(tab==="td"?"on":"")+'" onclick="MT.tdTab=\'td\';mtPaintTd()">📑 '+TX("Gói thầu","Tender packages")+(MT.tenders?' <b>('+mtTdOf(MT.pic).length+')</b>':"")+'</button>'+
+    '<button class="'+(tab==="pr"?"on":"")+'" onclick="MT.tdTab=\'pr\';mtPaintTd()">💲 '+TX("Bảng giá thầu (log)","Tender price log")+(nPr!=null?' <b>('+nPr+')</b>':"")+'</button></div>';
+  box.innerHTML=h+(tab==="pr"?mtPrHtml():mtTdHtml());
+  if(MT.mode==="cmp") setTimeout(mtPaintC3,0);
+}
+function mtTdHtml(){
+  if(!MT.tenders) return MT.tErr?'<div class="mt-empty"><div class="e">⚠️</div><p>'+esc(MT.tErr)+'</p><button class="btn sm" onclick="mtTdLoad()">'+TX("Thử lại","Retry")+'</button></div>'
+    :'<div class="mt-empty"><div class="spin" style="margin:6px auto 10px"></div><p>'+TX("Đang nạp danh sách thầu…","Loading tenders…")+'</p></div>';
+  var all=mtTdOf(MT.pic), sm=mtTdSum(all), f=MT.tFilt||"all";
+  var list=all.filter(function(t){ return f==="all"||t.status===f; });
+  var h='<div class="mt-bar1"><div class="chips">'+
+    [["all",TX("Tất cả","All"),sm.all.n]].concat(MT_STATUS.map(function(s){ return [s,s,sm[s].n]; })).map(function(x){
+      return '<div class="chip'+(f===x[0]?" on":"")+'" onclick="MT.tFilt=\''+x[0]+'\';mtPaintTd()">'+esc(x[1])+' · '+x[2]+'</div>'; }).join("")+
+    '</div><span style="flex:1"></span><button class="btn sm pri" onclick="mtTdForm()">＋ '+TX("Thêm gói thầu","Add tender")+'</button></div>';
+  var card=function(title,o,col,extra){
+    return '<div class="mt-ts" style="border-left-color:'+col+'"><div class="h">'+title+'</div><div class="v">'+fmtVND(o.remain)+'</div>'+
+      '<div class="s">'+o.n+TX(" gói · giá trị "," pkg · value ")+fmtVND(o.total)+(extra||"")+'</div></div>'; };
+  h+='<div class="mt-tsum">'+card("📋 Listing",sm["Listing"],"#3A5CAA")+card("⚖️ "+TX("Đang chấm","Under evaluation"),sm["Đang chấm"],"#E8A302")+
+     card("🏆 "+TX("Đã có KQ · trúng","Result · won"),sm.won,"#1E9E5A",sm.lost.n?(" · "+sm.lost.n+TX(" không trúng"," lost")):"")+
+     card("Σ "+TX("DS ước tính còn lại ","Estimated remaining sales ")+esc(S.fy),sm.all,"#003047")+'</div>';
+  if(!list.length) return h+'<div class="mt-empty"><div class="e">📑</div><p>'+(all.length?TX("Không có gói thầu nào ở trạng thái này","No tender with this status")
+      :TX("Chưa có gói thầu nào đang theo dõi cho ","No tender followed yet for ")+esc(MT.pic))+'</p>'+
+     '<div class="mt-cta"><button class="btn sm pri" onclick="mtTdForm()">＋ '+TX("Thêm gói thầu","Add tender")+'</button></div></div>';
+  h+='<div class="mt3-list">'+list.map(function(t){
+    var c=mtTdCalc(t), stc=(t.status==="Đã có kết quả"&&c.lost)?"st-x":(MT_STCLS[t.status]||"st-l"), L=mtTdItems(t);
+    return '<div class="mt3-td">'+
+      '<div class="l1"><b>'+esc(t.hosp)+'</b>'+(t.prov?'<span class="pv">📍 '+esc(t.prov)+'</span>':"")+
+        '<span class="tag '+stc+'">'+esc(t.status||"—")+(t.status==="Đã có kết quả"&&t.won?(" · "+esc(t.won)):"")+'</span>'+
+        '<span class="sp"></span><button class="btn xs gho" onclick="mtTdForm(\''+esc(t.id)+'\')">✎</button>'+
+        '<button class="btn xs" title="'+TX("Xoá","Delete")+'" onclick="mtTdDel(\''+esc(t.id)+'\')">🗑</button></div>'+
+      '<div class="meta">'+esc(t.prod||"")+(t.npp?' · '+TX("NPP ","Distributor ")+esc(t.npp):"")+
+        (c.noDate?' · <span style="color:var(--mute)">'+TX("chưa đủ tháng KQTT / hiệu lực","result month / validity missing")+'</span>'
+          :' · '+TX("KQTT ","Result ")+esc(mtYmLb(String(t.kqtt).replace(/\D/g,"").slice(0,6)))+' → '+esc(mtYmLb(c.end))+' ('+t.valid+TX(" th"," mo")+')')+'</div>'+
+      (L.length?'<table class="mt3-it"><tbody>'+L.map(function(x){
+        return '<tr><td class="c">'+esc(x.code||"—")+(x.name?'<small>'+esc(x.name)+'</small>':"")+'</td><td>'+fmtN(x.qty)+' '+esc(x.unit||"")+'</td>'+
+          '<td>× '+fmtN(x.price)+'</td><td class="v">'+fmtN(n(x.qty)*n(x.price))+'</td></tr>'; }).join("")+'</tbody></table>':"")+
+      '<div class="tot"><span>'+TX("Giá trị gói","Package value")+' <b>'+fmtN(c.total)+' '+mtCurr()+'</b></span>'+
+        '<span class="r">'+TX("Còn lại ","Remaining ")+esc(S.fy)+' <b>'+(c.noDate?"—":fmtVND(c.remain))+'</b>'+
+        (c.noDate||c.lost?"":' <small>'+c.leftM+TX(" tháng × "," mo × ")+fmtVND(c.monthly)+'</small>')+'</span></div>'+
+    '</div>';
+  }).join("")+'</div>';
+  h+='<div class="hint" style="margin:6px 0 4px">'+TX("Giá trị gói = Σ SL × Đơn giá từng mã. DS ước tính còn lại = Giá trị gói ÷ số tháng hiệu lực × số tháng hiệu lực còn lại trong ","Package value = Σ qty × unit price of each code. Estimated remaining sales = package value ÷ validity months × validity months left in ")+esc(S.fy)+TX(". Gói không trúng = 0.",". Lost packages = 0.")+'</div>';
+  return h;
+}
+/* ── bảng giá thầu ── */
+function mtPrHtml(){
+  if(!MT.prices) return MT.pErr?'<div class="mt-empty"><div class="e">⚠️</div><p>'+esc(MT.pErr)+'</p><button class="btn sm" onclick="mtPrLoad()">'+TX("Thử lại","Retry")+'</button></div>'
+    :'<div class="mt-empty"><div class="spin" style="margin:6px auto 10px"></div><p>'+TX("Đang nạp bảng giá thầu…","Loading tender prices…")+'</p></div>';
+  var G=mtPriceGroups(), q=noAcc(MT.prQ||""), fa=MT.prArea||"";
+  var areas=[]; G.forEach(function(x){ var a=x.cur.area||mtPsLb(x.cur.scope); if(areas.indexOf(a)<0) areas.push(a); }); areas.sort();
+  var L=G.filter(function(x){
+    var c=x.cur, a=c.area||mtPsLb(c.scope);
+    if(fa && a!==fa) return false;
+    if(q && noAcc([c.code,c.detail,c.prod,c.area].join(" ")).indexOf(q)<0) return false;
+    return true;
+  });
+  var h='<div class="mt-bar1"><input class="inp mt3-q" placeholder="'+TX("Tìm mã / tên hàng / địa bàn…","Search code / item / area…")+'" value="'+esc(MT.prQ||"")+'" oninput="MT.prQ=this.value;clearTimeout(MT._pq);MT._pq=setTimeout(mtPaintTd,250)">'+
+    '<select class="inp mt3-a" onchange="MT.prArea=this.value;mtPaintTd()"><option value="">'+TX("Mọi địa bàn","All areas")+'</option>'+
+      areas.map(function(a){ return '<option'+(a===fa?" selected":"")+'>'+esc(a)+'</option>'; }).join("")+'</select>'+
+    '<span style="flex:1"></span><button class="btn sm pri" onclick="mtPrForm()">＋ '+TX("Nhập giá","Add price")+'</button></div>';
+  if(!G.length) return h+'<div class="mt-empty"><div class="e">💲</div><p>'+TX("Chưa có giá thầu nào. Nhập giá theo mã sản phẩm và địa bàn (tỉnh, miền hoặc toàn quốc) để app tự điền đơn giá khi thêm gói thầu.","No tender price yet. Add prices by product code and area (province, region or nationwide) so the app fills the unit price when adding a tender.")+'</p>'+
+    '<div class="mt-cta"><button class="btn sm pri" onclick="mtPrForm()">＋ '+TX("Nhập giá","Add price")+'</button></div></div>';
+  if(!L.length) return h+'<div class="mt-empty"><p>'+TX("Không có giá nào khớp bộ lọc","No price matches the filter")+'</p></div>';
+  h+='<div class="mt-tw"><table class="mt-tb mt3-pt"><thead><tr><th>'+TX("Mã SP","Code")+'</th><th>'+TX("Địa bàn","Area")+'</th><th>'+TX("Đơn giá hiện hành","Current price")+' ('+mtCurr()+')</th>'+
+    '<th>'+TX("Áp dụng từ","Effective")+'</th><th>'+TX("Nguồn","Source")+'</th><th>'+TX("Lịch sử","History")+'</th><th></th></tr></thead><tbody>'+
+    L.map(function(x){
+      var c=x.cur, p=x.prev, d=p?(n(c.price)-n(p.price)):0;
+      return '<tr><td class="l"><b>'+esc(c.code||c.detail)+'</b>'+(c.code&&c.detail?'<div class="mute">'+esc(c.detail)+'</div>':"")+(c.prod?'<div class="mute">'+esc(c.prod)+'</div>':"")+'</td>'+
+        '<td class="l">'+esc(c.area||"")+'<div class="mute">'+esc(mtPsLb(c.scope))+'</div></td>'+
+        '<td><b>'+fmtN(c.price)+'</b>'+(c.unit?' <span class="mute">/ '+esc(c.unit)+'</span>':"")+
+          (p?'<div class="'+(d>0?"up":d<0?"dn":"mute")+'">'+(d>0?"▲ ":d<0?"▼ ":"= ")+fmtN(Math.abs(d))+'</div>':"")+'</td>'+
+        '<td>'+esc(fmtVN(c.date))+'</td><td class="l">'+esc(mtSrcLb(c.src))+(c.ref?'<div class="mute">'+esc(c.ref)+'</div>':"")+'</td>'+
+        '<td><button class="btn xs gho" onclick="mtPrHist(\''+esc(x.key)+'\')">'+x.list.length+TX(" lần",x.list.length>1?" entries":" entry")+' ›</button></td>'+
+        '<td style="white-space:nowrap"><button class="btn xs" title="'+TX("Nhập giá mới cho mã này","Add a new price for this code")+'" onclick="mtPrForm(\''+esc(x.key)+'\')">＋</button></td></tr>';
+    }).join("")+'</tbody></table></div>'+
+    '<div class="hint" style="margin:6px 0 4px">'+TX("Mỗi lần nhập là 1 dòng mới trong sheet 15. TENDER PRICE LOG (không ghi đè). Giá hiện hành = lần nhập có ngày áp dụng mới nhất. Khi thêm gói thầu, đơn giá tự lấy theo thứ tự: đúng tỉnh, đúng miền, toàn quốc.","Each entry is a new row in sheet 22. TENDER PRICE LOG (never overwritten). Current price = entry with the latest effective date. When adding a tender the unit price is taken in this order: same province, same region, nationwide.")+'</div>';
+  return h;
+}
+function mtPrHist(key){
+  var x=mtPriceGroups().filter(function(g){ return g.key===key; })[0]; if(!x) return;
+  var c=x.cur;
+  var h='<div class="mt3-hh"><b>'+esc(c.code||c.detail)+'</b> · '+esc(c.area||"")+' ('+esc(mtPsLb(c.scope))+')</div>'+
+    '<div class="mt-tw"><table class="mt-tb"><thead><tr><th>'+TX("Áp dụng từ","Effective")+'</th><th>'+TX("Đơn giá","Unit price")+' ('+mtCurr()+')</th><th>'+TX("Nguồn","Source")+'</th><th>'+TX("Ghi chú","Note")+'</th><th>'+TX("Người nhập","Entered by")+'</th><th></th></tr></thead><tbody>'+
+    x.list.map(function(p,i){
+      return '<tr'+(i===0?' class="cur"':'')+'><td>'+esc(fmtVN(p.date))+(i===0?' <span class="tag t-g">'+TX("hiện hành","current")+'</span>':"")+'</td><td><b>'+fmtN(p.price)+'</b>'+(p.unit?' / '+esc(p.unit):"")+'</td>'+
+        '<td class="l">'+esc(mtSrcLb(p.src))+(p.ref?'<div class="mute">'+esc(p.ref)+'</div>':"")+'</td><td class="l">'+esc(p.note||"")+'</td>'+
+        '<td class="l">'+esc(p.createdBy||"")+'<div class="mute">'+esc(p.createdAt||"")+'</div></td>'+
+        '<td><button class="btn xs" title="'+TX("Xoá dòng nhập nhầm","Delete a wrong entry")+'" onclick="mtPrDel(\''+esc(p.id)+'\')">🗑</button></td></tr>'; }).join("")+
+    '</tbody></table></div>';
+  openModal("💲 "+TX("Lịch sử giá","Price history"),h,'<button class="btn" onclick="closeModal()">'+TX("Đóng","Close")+'</button><div style="flex:1"></div><button class="btn pri" onclick="closeModal();mtPrForm(\''+esc(key)+'\')">＋ '+TX("Nhập giá mới","Add new price")+'</button>',true);
+}
+function mtPcOpts(){
+  var out=[], seen={};
+  ((S.pcode&&S.pcode.items)||[]).forEach(function(it){ var k=it[0]; if(!k||seen[k]) return; seen[k]=1; out.push('<option value="'+esc(it[0])+'">'+esc(it[1]||"")+'</option>'); });
+  (MT.prices||[]).forEach(function(p){ var k=p.code||p.detail; if(!k||seen[k]) return; seen[k]=1; out.push('<option value="'+esc(k)+'">'+esc(p.detail||"")+'</option>'); });
+  return out.join("");
+}
+function mtPcName(code){
+  var it=((S.pcode&&S.pcode.items)||[]).filter(function(x){ return x[0]===code || x[1]===code; })[0];
+  return it?(it[0]===code?(it[1]||""):it[0]):"";
+}
+function mtPrForm(key){
+  var base=key?(mtPriceGroups().filter(function(g){ return g.key===key; })[0]||{}).cur:null;
+  var p=base?mtCopy(base):{ scope:"prov", unit:"", src:"KQTT", date:todayISO() };
+  p.date=todayISO(); p.price=""; p.ref=""; p.note="";
+  if(typeof loadProductCodes==="function") loadProductCodes().then(function(){ var d=$("pr_codes"); if(d) d.innerHTML=mtPcOpts(); });
+  var provs=S.master.province||[], areas=S.master.area||["North","Central","South"];
+  var h='<datalist id="pr_codes">'+mtPcOpts()+'</datalist>'+
+    '<div class="row"><div class="fld"><label>'+TX("Mã sản phẩm","Product code")+' <span class="rq">*</span></label><input class="inp" id="pr_code" list="pr_codes" value="'+esc(p.code||"")+'" oninput="var n=mtPcName(this.value);if(n&&!$(\'pr_detail\').value)$(\'pr_detail\').value=n"></div>'+
+      '<div class="fld"><label>'+TX("Tên hàng / quy cách","Item / specification")+'</label><input class="inp" id="pr_detail" value="'+esc(p.detail||"")+'"></div></div>'+
+    '<div class="row"><div class="fld"><label>'+TX("Nhóm sản phẩm","Product group")+'</label><select class="inp" id="pr_prod">'+opts(S.master.product||[],p.prod||"",TX("— chọn —","— select —"))+'</select></div>'+
+      '<div class="fld"><label>'+TX("Đơn vị","Unit")+'</label><input class="inp" id="pr_unit" list="td_units" value="'+esc(p.unit||"")+'"></div></div>'+
+    '<div class="fld"><label>'+TX("Phạm vi áp dụng","Price scope")+' <span class="rq">*</span></label><div class="chips" id="pr_scope">'+
+      MT_PSCOPE.map(function(s){ return '<div class="chip'+(p.scope===s[0]?" on":"")+'" data-v="'+s[0]+'" onclick="mtPrScope(this)">'+esc(TX(s[1],s[2]))+'</div>'; }).join("")+'</div></div>'+
+    '<div class="fld" id="pr_provW" style="'+(p.scope==="prov"?"":"display:none")+'"><label>'+TX("Tỉnh","Province")+' <span class="rq">*</span></label><select class="inp" id="pr_prov">'+opts(provs,p.scope==="prov"?p.area:"",TX("— chọn —","— select —"))+'</select></div>'+
+    '<div class="fld" id="pr_areaW" style="'+(p.scope==="area"?"":"display:none")+'"><label>'+TX("Miền","Region")+' <span class="rq">*</span></label><select class="inp" id="pr_area">'+opts(areas,p.scope==="area"?p.area:"",TX("— chọn —","— select —"))+'</select></div>'+
+    '<div class="row"><div class="fld"><label>'+TX("Đơn giá","Unit price")+' ('+mtCurr()+') <span class="rq">*</span></label><input class="inp" id="pr_price" inputmode="numeric" oninput="numOnly(this)"></div>'+
+      '<div class="fld"><label>'+TX("Áp dụng từ ngày","Effective from")+' <span class="rq">*</span></label><input class="inp" type="date" id="pr_date" value="'+esc(p.date)+'"></div></div>'+
+    '<div class="row"><div class="fld"><label>'+TX("Nguồn giá","Price source")+'</label><select class="inp" id="pr_src">'+MT_PSRC.map(function(s){ return '<option value="'+esc(s[0])+'"'+(p.src===s[0]?" selected":"")+'>'+esc(TX(s[1],s[2]))+'</option>'; }).join("")+'</select></div>'+
+      '<div class="fld"><label>'+TX("Tham chiếu (số QĐ, bệnh viện…)","Reference (decision no., hospital…)")+'</label><input class="inp" id="pr_ref"></div></div>'+
+    '<div class="fld"><label>'+TX("Ghi chú","Note")+'</label><input class="inp" id="pr_note"></div>'+
+    '<div class="hint">'+TX("Lưu là thêm 1 dòng mới vào log, giá cũ vẫn được giữ để xem lịch sử.","Saving adds a new row to the log; older prices are kept as history.")+'</div>';
+  openModal("💲 "+TX("Nhập giá thầu","Add tender price"),h,'<button class="btn" onclick="closeModal()">'+TX("Huỷ","Cancel")+'</button><button class="btn pri" onclick="mtPrSave()">💾 '+TX("Lưu giá","Save price")+'</button>');
+}
+function mtPrScope(el){
+  var v=el.getAttribute("data-v");
+  Array.prototype.forEach.call($("pr_scope").querySelectorAll(".chip"),function(c){ c.classList.toggle("on",c===el); });
+  $("pr_provW").style.display=v==="prov"?"":"none"; $("pr_areaW").style.display=v==="area"?"":"none";
+}
+function mtPrSend(list){
+  return apiPost({action:"mtPriceSave",by:S.user.pic,prices:JSON.stringify(list)}).then(function(r){
+    var saved=(r&&r.list)||list.map(function(p){ return Object.assign({createdBy:S.user.pic,createdAt:mtNowStr()},p); });
+    MT.prices=(MT.prices||[]).concat(saved); kvSet(ckey("mtpr"),{list:MT.prices,at:Date.now()});
+    return r;
+  });
+}
+function mtNowStr(){ var d=new Date(); return todayISO()+" "+("0"+d.getHours()).slice(-2)+":"+("0"+d.getMinutes()).slice(-2); }
+function mtPrId(){ return "PR-"+Date.now().toString(36)+"-"+Math.random().toString(36).slice(2,6); }
+function mtPrSave(){
+  var on=$("pr_scope").querySelector(".chip.on"), scope=on?on.getAttribute("data-v"):"";
+  var p={ id:mtPrId(), code:$("pr_code").value.trim(), detail:$("pr_detail").value.trim(), prod:$("pr_prod").value, unit:$("pr_unit").value.trim(),
+    scope:scope, area:scope==="prov"?$("pr_prov").value:scope==="area"?$("pr_area").value:TX("Toàn quốc","Nationwide"),
+    price:n($("pr_price").value), date:$("pr_date").value, src:$("pr_src").value, ref:$("pr_ref").value.trim(), note:$("pr_note").value.trim() };
+  var bad=[];
+  if(!p.code) bad.push(TX("Mã sản phẩm","Product code")); if(!scope) bad.push(TX("Phạm vi","Scope"));
+  if(scope!=="all" && !p.area) bad.push(scope==="prov"?TX("Tỉnh","Province"):TX("Miền","Region"));
+  if(!(p.price>0)) bad.push(TX("Đơn giá","Unit price")); if(!p.date) bad.push(TX("Ngày áp dụng","Effective date"));
+  if(bad.length) return toast("⚠️ "+TX("Cần bổ sung: ","Please fill in: ")+bad.join(", "),"warn",6000);
+  busy(true,TX("Đang lưu giá…","Saving price…"));
+  mtPrSend([p]).then(function(){ busy(false); closeModal(); MT.tdTab="pr"; mtPaintTd(); toast(TX("Đã lưu giá ","Price saved: ")+p.code+" · "+p.area,"ok"); })
+    .catch(function(e){ busy(false); toast(e.message,"err",6000); });
+}
+function mtPrDel(id){
+  if(!confirm(TX("Xoá dòng giá này? (dòng trên sheet được đánh dấu Deleted)","Delete this price entry? (the sheet row is marked Deleted)"))) return;
+  busy(true,TX("Đang xoá…","Deleting…"));
+  apiPost({action:"mtPriceDelete",by:S.user.pic,id:id}).then(function(){
+    busy(false); MT.prices=(MT.prices||[]).filter(function(p){ return p.id!==id; }); kvSet(ckey("mtpr"),{list:MT.prices,at:Date.now()});
+    closeModal(); MT.tdTab="pr"; mtPaintTd(); toast(TX("Đã xoá","Deleted"),"ok");
+  }).catch(function(e){ busy(false); toast(e.message,"err",6000); });
+}
+
+/* ── form gói thầu nhiều dòng mã SP ── */
+function mtTdForm(id){
+  var t=id?(MT.tenders||[]).filter(function(x){ return x.id===id; })[0]:null;
+  t=t?mtCopy(t):{ id:"", pic:MT.pic, status:"Listing", won:"", valid:12, npp:mtNppOfPic(MT.pic), kqtt:"", prov:"", area:"" };
+  t.items=mtTdItems(t).map(function(x){ return mtCopy(x); });
+  if(!t.items.length) t.items=[{ code:"", name:"", qty:"", unit:TX("Cái","Pcs"), price:"" }];
+  S._mtTd=t;
+  if(typeof loadProductCodes==="function") loadProductCodes().then(function(){ var d=$("td_codes"); if(d) d.innerHTML=mtPcOpts(); });
+  var stOpts=MT_STATUS.map(function(s){ return '<div class="chip'+(t.status===s?" on":"")+'" data-v="'+esc(s)+'" onclick="mtTdSt(this)">'+esc(s)+'</div>'; }).join("");
+  var kq=String(t.kqtt||"").replace(/\D/g,""), kqv=kq.length>=6?(kq.slice(0,4)+"-"+kq.slice(4,6)):"";
+  var h='<datalist id="td_codes">'+mtPcOpts()+'</datalist><datalist id="td_units">'+(isTH()?["Pcs","Pack","Box"]:MT_UNITS).map(function(u){ return '<option value="'+u+'">'; }).join("")+'</datalist>'+
+    '<div class="fld sbox"><label>'+TX("Bệnh viện","Hospital")+' <span class="rq">*</span></label>'+
+      '<input class="inp" id="td_hosp" value="'+esc(t.hosp||"")+'" autocomplete="off"><input type="hidden" id="td_acc" value="'+esc(t.account||"")+'">'+
+      '<div class="hint">'+TX("Chọn từ danh mục khách hàng hoặc gõ tên bệnh viện","Pick from the customer list or type the hospital name")+'</div></div>'+
+    '<div class="row"><div class="fld"><label>'+TX("Tỉnh (địa bàn tính giá)","Province (pricing area)")+' <span class="rq">*</span></label><select class="inp" id="td_prov" onchange="mtTdProv()">'+opts(S.master.province||[],t.prov||"",TX("— chọn —","— select —"))+'</select></div>'+
+      '<div class="fld"><label>'+TX("Miền","Region")+'</label><input class="inp" id="td_area" value="'+esc(t.area||"")+'" readonly></div></div>'+
+    '<div class="row">'+picFld("td_pic",t.pic||MT.pic,"Sales PIC")+
+      '<div class="fld"><label>'+TX("NPP tham gia","Distributor")+'</label><select class="inp" id="td_npp">'+opts(mtNppList().map(function(x){ return x.label; }).concat([TX("Khác","Other")]),t.npp||"",TX("— chọn —","— select —"))+'</select></div>'+
+      '<div class="fld"><label>'+TX("Nhóm sản phẩm","Product group")+' <span class="rq">*</span></label><select class="inp" id="td_prod">'+opts(S.master.product||[],t.prod||"",TX("— chọn —","— select —"))+'</select></div></div>'+
+    '<div class="fld"><label>'+TX("Mã sản phẩm dự thầu","Tendered product codes")+' <span class="rq">*</span></label><div id="td_lines"></div>'+
+      '<button class="btn sm" style="margin-top:6px" onclick="mtTdLineAdd()">＋ '+TX("Thêm mã","Add code")+'</button></div>'+
+    '<div class="fld"><label>'+TX("Trạng thái trong thầu","Tender status")+' <span class="rq">*</span></label><div class="chips" id="td_st">'+stOpts+'</div></div>'+
+    '<div class="fld" id="td_wonW" style="'+(t.status==="Đã có kết quả"?"":"display:none")+'"><label>'+TX("Kết quả","Result")+' <span class="rq">*</span></label><select class="inp" id="td_won" onchange="mtTdCalcUi()">'+opts(["Trúng","Không trúng"],t.won||"",TX("— chọn —","— select —"))+'</select></div>'+
+    '<div class="row"><div class="fld"><label id="td_kqL">'+(t.status==="Đã có kết quả"?TX("Tháng có KQTT","Result month"):TX("Tháng dự kiến có KQTT","Expected result month"))+'</label><input class="inp" type="month" id="td_kqtt" value="'+esc(kqv)+'" onchange="mtTdCalcUi()"></div>'+
+      '<div class="fld"><label>'+TX("Hiệu lực hợp đồng (tháng)","Contract validity (months)")+'</label><input class="inp" id="td_valid" inputmode="numeric" value="'+esc(t.valid||"")+'" oninput="numOnly(this);mtTdCalcUi()">'+
+        '<div class="chips" style="margin-top:6px">'+[12,18,24,36].map(function(k){ return '<div class="chip" onclick="$(\'td_valid\').value='+k+';mtTdCalcUi()">'+k+TX(" th"," mo")+'</div>'; }).join("")+'</div></div></div>'+
+    '<div class="fld"><label>'+TX("Ghi chú","Note")+'</label><textarea class="inp" id="td_note" style="min-height:60px">'+esc(t.note||"")+'</textarea></div>'+
+    '<div class="mt-calc" id="td_calc"></div>';
+  openModal(id?"✎ "+TX("Sửa gói thầu","Edit tender"):"＋ "+TX("Thêm gói thầu","Add tender"),h,
+    '<button class="btn" onclick="closeModal()">'+TX("Huỷ","Cancel")+'</button><button class="btn pri" onclick="mtTdSave()">💾 '+TX("Lưu gói thầu","Save tender")+'</button>',true);
+  accountCombo("td_hosp","td_acc",function(c){
+    if(c.pic){ var p=$("td_pic"); if(p&&p.tagName==="SELECT") p.value=c.pic; }
+    if(c.province){ $("td_prov").value=c.province; } mtTdProv();
+  });
+  if(!t.area && t.prov) $("td_area").value=mtProvArea(t.prov);
+  mtTdLinesPaint(); mtTdCalcUi();
+}
+function mtTdProv(){ var a=mtProvArea($("td_prov").value); $("td_area").value=a; mtTdLinesSync(); mtTdLinesPaint(true); mtTdCalcUi(); }
+function mtTdLinesSync(){
+  var t=S._mtTd; if(!t) return;
+  t.items.forEach(function(x,i){
+    var g=function(k){ var el=$("tl_"+k+i); return el?el.value:""; };
+    if(!$("tl_c"+i)) return;
+    x.code=g("c").trim(); x.qty=n(g("q")); x.unit=g("u").trim(); x.price=n(g("p"));
+    var cb=$("tl_s"+i); if(cb) x.save=cb.checked;
+  });
+}
+/* refill = điền lại đơn giá trống từ bảng giá sau khi đổi tỉnh */
+function mtTdLinesPaint(refill){
+  var box=$("td_lines"), t=S._mtTd; if(!box||!t) return;
+  var prov=$("td_prov")?$("td_prov").value:"", area=$("td_area")?$("td_area").value:"";
+  box.innerHTML='<div class="mt3-lh"><span>'+TX("Mã SP","Code")+'</span><span>'+TX("SL","Qty")+'</span><span>'+TX("Đơn vị","Unit")+'</span><span>'+TX("Đơn giá","Unit price")+' ('+mtCurr()+')</span><span></span></div>'+
+    t.items.map(function(x,i){
+      var f=x.code?mtPriceFind(x.code,prov,area):null;
+      if(f && (refill||!x.price) && !x._typed){ x.price=n(f.price); if(!x.unit&&f.unit) x.unit=f.unit; }
+      var diff=f && n(x.price)>0 && n(x.price)!==n(f.price);
+      var info=!x.code?"":f?('<span class="'+(diff?"dif":"ok")+'">'+TX("Bảng giá: ","Price log: ")+fmtN(f.price)+' · '+esc(f.area||"")+' ('+esc(mtPsLb(f.scope))+') · '+esc(fmtVN(f.date))+'</span>')
+        :'<span class="no">'+TX("Chưa có giá của mã này cho ","No logged price for this code in ")+esc(prov||TX("địa bàn này","this area"))+'</span>';
+      var askSave=n(x.price)>0 && x.code && (!f || diff);
+      return '<div class="mt3-ln">'+
+        '<input class="inp" id="tl_c'+i+'" list="td_codes" value="'+esc(x.code||"")+'" placeholder="'+TX("Mã / tên hàng","Code / item")+'" onchange="mtTdLine('+i+')">'+
+        '<input class="inp" id="tl_q'+i+'" inputmode="numeric" value="'+esc(x.qty||"")+'" oninput="numOnly(this);mtTdLinesSync();mtTdCalcUi()">'+
+        '<input class="inp" id="tl_u'+i+'" list="td_units" value="'+esc(x.unit||"")+'" oninput="mtTdLinesSync()">'+
+        '<input class="inp" id="tl_p'+i+'" inputmode="numeric" value="'+esc(x.price||"")+'" oninput="numOnly(this);S._mtTd.items['+i+']._typed=1;mtTdLinesSync();mtTdCalcUi()" onchange="mtTdLine('+i+')">'+
+        '<button class="btn xs" title="'+TX("Bỏ dòng","Remove line")+'" onclick="mtTdLineDel('+i+')">✕</button>'+
+        '<div class="inf">'+info+(askSave?'<label class="sv"><input type="checkbox" id="tl_s'+i+'"'+(x.save!==false?" checked":"")+'> '+
+          TX("Lưu giá này vào bảng giá cho ","Save this price to the log for ")+esc(prov||TX("tỉnh này","this province"))+'</label>':"")+'</div>'+
+      '</div>';
+    }).join("");
+}
+function mtTdLine(i){ mtTdLinesSync(); var x=S._mtTd.items[i]; if(x && !x.name) x.name=mtPcName(x.code); mtTdLinesPaint(); mtTdCalcUi(); }
+function mtTdLineAdd(){ mtTdLinesSync(); S._mtTd.items.push({ code:"", name:"", qty:"", unit:TX("Cái","Pcs"), price:"" }); mtTdLinesPaint(); }
+function mtTdLineDel(i){ mtTdLinesSync(); S._mtTd.items.splice(i,1); if(!S._mtTd.items.length) S._mtTd.items.push({ code:"", qty:"", unit:"", price:"" }); mtTdLinesPaint(); mtTdCalcUi(); }
+function mtTdVal(){
+  mtTdLinesSync();
+  var on=$("td_st").querySelector(".chip.on"), t=mtCopy(S._mtTd||{});
+  t.hosp=$("td_hosp").value.trim(); t.account=$("td_acc").value||"";
+  if(t.account && parseAcc(t.account).name!==t.hosp) t.account="";
+  t.prov=$("td_prov").value; t.area=$("td_area").value;
+  t.pic=$("td_pic").value||MT.pic; t.npp=$("td_npp").value; t.prod=$("td_prod").value;
+  t.items=(S._mtTd.items||[]).filter(function(x){ return x.code||n(x.qty)>0||n(x.price)>0; })
+    .map(function(x){ return { code:x.code, name:x.name||mtPcName(x.code), qty:n(x.qty), unit:x.unit, price:n(x.price), save:x.save }; });
+  var q=0, tot=0; t.items.forEach(function(x){ q+=x.qty; tot+=x.qty*x.price; });
+  t.qty=q; t.price=t.items.length===1?t.items[0].price:""; t.unit=t.items.length===1?t.items[0].unit:"";
+  t.detail=t.items.map(function(x){ return x.code; }).filter(Boolean).join("; "); t.value=tot;
+  t.status=on?on.getAttribute("data-v"):""; t.won=(t.status==="Đã có kết quả")?$("td_won").value:"";
+  t.kqtt=$("td_kqtt").value||""; t.valid=parseInt($("td_valid").value,10)||""; t.note=$("td_note").value.trim();
+  return t;
+}
+function mtTdCalcUi(){
+  var b=$("td_calc"); if(!b||!$("td_st")) return;
+  var t=mtTdVal(), c=mtTdCalc(t);
+  b.innerHTML=TX("Giá trị gói (Σ SL × đơn giá): ","Package value (Σ qty × price): ")+'<b>'+fmtN(c.total)+' '+mtCurr()+'</b> ('+fmtVND(c.total)+')<br>'+
+    (c.noDate?'<span style="color:var(--mute)">'+TX("Nhập tháng KQTT và số tháng hiệu lực để tính DS ước tính.","Enter the result month and validity to estimate sales.")+'</span>'
+      :(TX("Mỗi tháng ≈ ","Per month ≈ ")+'<b>'+fmtVND(c.monthly)+'</b> · '+TX("hiệu lực ","valid ")+mtYmLb(String(t.kqtt).replace(/\D/g,""))+' → '+mtYmLb(c.end)+'<br>'+
+        TX("Trong ","In ")+esc(S.fy)+': '+c.inFyM+TX(" tháng · "," months · ")+'<b>'+TX("còn lại ","remaining ")+c.leftM+TX(" tháng ≈ "," months ≈ ")+fmtVND(c.remain)+'</b>'+(c.lost?' <span class="tag t-r">'+TX("không trúng ⇒ 0","lost ⇒ 0")+'</span>':"")));
+}
+function mtTdSave(){
+  var t=mtTdVal(), bad=[];
+  if(!t.hosp) bad.push(TX("Bệnh viện","Hospital")); if(!t.prov) bad.push(TX("Tỉnh","Province")); if(!t.prod) bad.push(TX("Nhóm sản phẩm","Product group"));
+  if(!t.items.length) bad.push(TX("Mã sản phẩm","Product code"));
+  t.items.forEach(function(x,i){ if(!x.code||!(x.qty>0)||!(x.price>0)) bad.push(TX("dòng ","line ")+(i+1)+TX(" (mã, SL, đơn giá)"," (code, qty, price)")); });
+  if(!t.status) bad.push(TX("Trạng thái","Status"));
+  if(t.status==="Đã có kết quả"){ if(!t.won) bad.push(TX("Kết quả","Result")); if(!t.kqtt) bad.push(TX("Tháng có KQTT","Result month")); }
+  if(bad.length) return toast("⚠️ "+TX("Cần bổ sung: ","Please fill in: ")+bad.join(", "),"warn",7000);
+  if(!t.id) t.id="TD-"+Date.now().toString(36)+"-"+Math.random().toString(36).slice(2,6);
+  /* giá mới cần ghi vào log */
+  var logs=[];
+  t.items.forEach(function(x,i){
+    var cb=$("tl_s"+i); if(!cb||!cb.checked) return;
+    logs.push({ id:mtPrId(), code:x.code, detail:x.name||"", prod:t.prod, unit:x.unit, scope:"prov", area:t.prov, price:x.price,
+      date:todayISO(), src:t.status==="Đã có kết quả"?"KQTT":"Khác", ref:t.hosp, note:TX("Nhập từ gói thầu ","From tender ")+t.id });
+  });
+  t.items=t.items.map(function(x){ return { code:x.code, name:x.name, qty:x.qty, unit:x.unit, price:x.price }; });
+  busy(true,TX("Đang lưu gói thầu…","Saving tender…"));
+  apiPost({action:"mtTenderSave",by:S.user.pic,tender:t,prices:JSON.stringify(logs)}).then(function(r){
+    busy(false); closeModal();
+    var sv=(r&&r.tender)||Object.assign(t,{updatedBy:S.user.pic});
+    if(!sv.items||!sv.items.length) sv.items=t.items;
+    MT.tenders=(MT.tenders||[]).filter(function(x){ return x.id!==sv.id; }); MT.tenders.unshift(sv);
+    kvSet(ckey("mttd"),{list:MT.tenders,at:Date.now()});
+    if(logs.length){ var added=(r&&r.prices)||logs.map(function(p){ return Object.assign({createdBy:S.user.pic,createdAt:mtNowStr()},p); });
+      MT.prices=(MT.prices||[]).concat(added); kvSet(ckey("mtpr"),{list:MT.prices,at:Date.now()}); }
+    mtPaintTd(); mtPaintSteps();
+    toast(TX("Đã lưu gói thầu ","Tender saved: ")+sv.hosp+(logs.length?TX(" · thêm "," · ")+logs.length+TX(" giá vào bảng giá"," price(s) added to the log"):""),"ok",4500);
+    if(r&&(r.opaque||r.softTimeout)) setTimeout(mtTdLoad,2500);
+  }).catch(function(e){ busy(false); toast(e.message,"err",6000); });
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   ⭐ v22 · HỌP TUẦN BỐ CỤC MỚI (mọi nhóm)
+   · Thanh trên cùng gọn: tuần ‹ › · PIC · trạng thái lưu · Lịch sử · Email · Lưu
+   · Thanh chương trình họp 4 mục, mỗi mục có số liệu + dấu đã ghi / chưa ghi
+   · Mỗi lần xem 1 mục (có nút "Xem cả 4 mục"), cuối mục có nút sang mục kế tiếp
+   · Mục 2, 3: bên trái SỐ LIỆU TỰ ĐỘNG, bên phải GHI CHÚ HỌP (luôn nhìn thấy khi cuộn)
+   · Danh sách đi địa bàn gọn: 1 dòng tiêu đề + kết quả 3 dòng, bấm để xem đủ
+   Giữ nguyên toàn bộ id vùng vẽ (mtNpp, mtCrmTabs, mtCrmBody, mtTd, mtC1..4, mtP_*)
+   nên các hàm mtPaint* và phần lưu / email / PDF không đổi.
+   ═══════════════════════════════════════════════════════════════════ */
+var MT_STEPS=[
+  { no:1, ic:"📈", vi:"Forecast NPP",               en:"Distributor forecast" },
+  { no:2, ic:"🤝", vi:"Quan hệ KH & PT thị trường", en:"Customers & market" },
+  { no:3, ic:"📑", vi:"Tình hình thầu",             en:"Tenders" },
+  { no:4, ic:"💬", vi:"Thông tin khác",             en:"Other information" }
+];
+function mtStep(){ if(MT.step==null){ var v=lsGet(ckey("mtstep")); MT.step=(v===0||v==="0")?0:1; } return MT.step; }
+function mtGoStep(k){
+  MT.step=k; lsSet(ckey("mtstep"),k===0?0:1);
+  var root=$("mtRoot"); if(!root) return renderMeet();
+  root.classList.toggle("mt2-all",k===0);
+  [1,2,3,4].forEach(function(i){ var s=$("mt-s"+i); if(s) s.classList.toggle("on",k===0||k===i); });
+  mtPaintSteps();
+  var m=$("main"); if(m) m.scrollTop=0;
+}
+function mtJump(i){ if(mtStep()!==0) return mtGoStep(i); var el=$("mt-s"+i); if(el&&el.scrollIntoView) el.scrollIntoView({behavior:"smooth",block:"start"}); }
+/* trạng thái từng mục: có số liệu gì, đã ghi chú chưa */
+function mtStepInfo(i){
+  var d=mtDraft(), has=function(f){ return !!String(d[f]||"").trim(); };
+  if(i===1){ var w=["pos","neg","act"].filter(has).length+(d.fcStatus?1:0)+(d.risk?1:0);
+    return { done:w>=3, part:w>0, sub:(d.fcStatus?esc(d.fcStatus):TX("Chưa chọn đánh giá","Not rated yet")) }; }
+  if(i===2){ var nv=mtVisits(MT.pic,MT.week,addDays(MT.week,6)).list.length;
+    return { done:has("visitNote"), part:false, sub:nv+TX(" lượt địa bàn"," visits") }; }
+  if(i===3){ var nt=(MT.tenders?mtTdOf(MT.pic).length:null);
+    return { done:has("tenderNote"), part:false, sub:(nt==null?TX("Đang nạp gói thầu…","Loading tenders…"):nt+TX(" gói thầu đang theo dõi"," tenders followed")) }; }
+  return { done:has("other"), part:false, sub:has("other")?TX("Đã ghi","Written"):TX("Ghi tự do","Free notes") };
+}
+function mtPaintSteps(){
+  var box=$("mtSteps2"); if(!box) return;
+  var cur=mtStep(), nDone=0;
+  var h=MT_STEPS.map(function(s){
+    var I=mtStepInfo(s.no); if(I.done) nDone++;
+    return '<button class="mt2-st'+(cur===s.no?" on":"")+(I.done?" done":I.part?" part":"")+'" onclick="mtJump('+s.no+')">'+
+      '<span class="n">'+(I.done?"✓":s.no)+'</span><span class="t"><b>'+s.ic+' '+esc(TX(s.vi,s.en))+'</b><small>'+I.sub+'</small></span></button>';
+  }).join("");
+  box.innerHTML=h+'<div class="mt2-prog"><b>'+nDone+'/4</b><span>'+TX("mục đã ghi","sections written")+'</span>'+
+    '<button class="mt2-all-b'+(cur===0?" on":"")+'" onclick="mtGoStep('+(cur===0?1:0)+')">'+(cur===0?TX("Xem từng mục","One at a time"):TX("Xem cả 4 mục","Show all 4"))+'</button></div>';
+}
+/* gõ ghi chú ⇒ cập nhật dấu ✓ trên thanh chương trình (không vẽ lại cả trang) */
+(function(){
+  var _in=mtIn, _cs=mtChipSet;
+  mtIn=function(f,v){ _in(f,v); clearTimeout(MT._stT); MT._stT=setTimeout(mtPaintSteps,350); };
+  mtChipSet=function(f,v,el){ _cs(f,v,el); setTimeout(mtPaintSteps,0); };
+})();
+function mtNavHtml(i){
+  var p=MT_STEPS[i-2], nx=MT_STEPS[i];
+  return '<div class="mt2-nav">'+
+    (p?'<button class="btn" onclick="mtGoStep('+p.no+')">‹ '+p.no+'. '+esc(TX(p.vi,p.en))+'</button>':'<span></span>')+
+    (nx?'<button class="btn pri" onclick="mtGoStep('+nx.no+')">'+nx.no+'. '+esc(TX(nx.vi,nx.en))+' ›</button>'
+       :'<button class="btn pri" onclick="mtSave()">💾 '+TX("Lưu biên bản họp","Save meeting minutes")+'</button>')+
+  '</div>';
+}
+function mtSecHead(i,title,sub){
+  return '<div class="mt-sh"><div class="no">'+i+'</div><div><h3>'+title+'</h3><small>'+sub+'</small></div></div>';
+}
+function renderMeet(){
+  if(S.tab!=="meet") return;
+  var d=mtDraft(), wk=MT.week, P=mtPics(), cmp=(MT.mode==="cmp"), st=mtStep(), mob=window.innerWidth<=720;
+  var c1=function(id){ return cmp?'<div id="'+id+'"></div>':""; };
+  var on=function(i){ return (st===0||st===i)?" on":""; };
+  var isNow=wk===mondayOf(todayISO());
+  var lbData='<div class="mt2-lbl">📊 '+TX("Số liệu tự động","Auto data")+'</div>';
+  var lbNote=function(t){ return '<div class="mt2-lbl n">📝 '+(t||TX("Ghi chú họp","Meeting notes"))+'</div>'; };
+
+  var h='<div class="pg mt mt2'+(st===0?" mt2-all":"")+'" id="mtRoot">'+
+    /* ── thanh trên ── */
+    '<div class="mt-top">'+
+      '<div class="mt-tl"><h2>🗂️ '+TX("Họp tuần ","Weekly meeting · ")+esc(mtTeamLb())+'</h2></div>'+
+      '<div class="mt2-wk"><button onclick="mtGoWeek(-1)" title="'+TX("Tuần trước","Previous week")+'">‹</button>'+
+        '<div class="w"><b>'+esc(mtWeekLabel(wk))+(isNow?' <i>'+TX("tuần này","this week")+'</i>':"")+'</b><span>'+esc(fmtVN(wk))+' - '+esc(fmtVN(addDays(wk,6)))+'</span></div>'+
+        '<button onclick="mtGoWeek(1)" title="'+TX("Tuần sau","Next week")+'">›</button>'+
+        (isNow?"":'<button class="now" onclick="mtGoWeek(0)">'+TX("Tuần này","This week")+'</button>')+'</div>'+
+      '<span class="mt-sp"></span><span class="mt-sv" id="mtSv"></span>'+
+      '<button class="btn sm" onclick="mtHistory()" title="'+TX("Lịch sử họp","Meeting history")+'">📚<span class="t"> '+TX("Lịch sử","History")+'</span></button>'+
+      '<button class="btn sm" onclick="mtMailOpen()" title="'+TX("Email tuần","Weekly email")+'">✉<span class="t"> '+TX("Email tuần","Weekly email")+'</span></button>'+
+      '<button class="btn sm pri" onclick="mtSave()">💾<span class="t"> '+TX("Lưu biên bản","Save minutes")+'</span></button>'+
+    '</div>'+
+    (P.length>1?'<div class="mt2-pics"><span class="k">PIC</span><div class="shtabs" id="mtTabs"></div></div>':'<div id="mtTabs" style="display:none"></div>')+
+    '<div id="mtBan"></div>'+
+    /* ── chương trình họp ── */
+    '<div class="mt2-steps" id="mtSteps2"></div>'+
+    '<div class="mt2-mode"><div class="seg mt-md"><button class="'+(cmp?"":"on")+'" onclick="mtSetMode(\'cur\')">📄 '+TX("Chỉ tuần này","This week only")+'</button>'+
+      '<button class="'+(cmp?"on":"")+'" onclick="mtSetMode(\'cmp\')">⇆ '+TX("So sánh tuần trước","Compare with last week")+'</button></div>'+
+      (cmp?'<div class="mt-cmpbar" id="mtCmpBar"></div>':"")+'</div>'+
+
+    /* ── 1. Forecast NPP ── */
+    '<section class="card pad mt-sec mt2-sec'+on(1)+'" id="mt-s1">'+
+      mtSecHead(1,TX("Forecast nhà phân phối","Distributor forecast"),
+        noTurnover()?'Opens the meeting · Thailand distributors are not in SUM TURNOVER, write the forecast situation of Innotech / Mahachak below'
+                    :TX('Mở đầu buổi họp · số liệu đọc từ SUM TURNOVER · mặc định cộng tất cả NPP '+esc(MT.pic)+' phụ trách','Opens the meeting · figures from SUM TURNOVER'))+
+      lbData+'<div id="mtNpp"></div>'+c1("mtC2")+
+      lbNote(TX("Ghi chú họp · đánh giá forecast","Meeting notes · forecast review"))+
+      '<div class="mt2-rate">'+
+        '<div class="mt-chips"><span class="k">'+TX("NPP có đang theo forecast?","Is the distributor on forecast?")+'</span>'+mtChipsHtml("fcStatus",MT_FC,d.fcStatus)+'</div>'+
+        '<div class="mt-chips"><span class="k">'+TX("Mức rủi ro","Risk level")+'</span>'+mtChipsHtml("risk",MT_RISK,d.risk)+'</div></div>'+
+      '<div class="mt-cm">'+
+        '<div class="bx p"><b>✅ Positive factors</b>'+c1("mtP_pos")+mtTa("pos",TX("Vì sao tăng / đạt? Đơn lớn, account mới, trúng thầu…","Why up / on target? Big orders, new accounts, tenders won…"),d)+'</div>'+
+        '<div class="bx n"><b>❌ Negative factors</b>'+c1("mtP_neg")+mtTa("neg",TX("Vì sao giảm / lệch forecast? Tồn kho NPP, dời đơn, đối thủ… Rủi ro là gì?","Why down / off forecast? Stock, delayed orders, competitors… What is the risk?"),d)+'</div>'+
+        '<div class="bx a"><b>➡️ Follow up Action</b>'+c1("mtP_act")+mtTa("act",TX("Việc cần làm, ai làm, khi nào xong…","What to do, who, by when…"),d)+'</div>'+
+      '</div>'+mtNavHtml(1)+'</section>'+
+
+    /* ── 2. Quan hệ KH & PT thị trường ── */
+    '<section class="card pad mt-sec mt2-sec'+on(2)+'" id="mt-s2">'+
+      mtSecHead(2,TX("Quan hệ khách hàng &amp; Phát triển thị trường","Customer relations &amp; Market development"),
+        TX('Tự tổng hợp theo tuần của '+esc(MT.pic)+': đi địa bàn'+(mtHasOrd()?', đơn hàng':'')+', địa bàn mở mới / New SKU, giới thiệu sản phẩm, khách hàng mới, công tác',
+           'Auto summary for '+esc(MT.pic)+': visits, new SKU, product presentations, new customers, trips'))+
+      '<div class="mt2-cols"><div class="mt2-data">'+lbData+'<div class="mt-ctabs" id="mtCrmTabs"></div><div id="mtCrmBody"></div></div>'+
+        '<div class="mt2-notes"><div class="mt2-stk">'+lbNote()+
+          '<p class="mt2-hint">'+TX("Điểm tốt / cần cải thiện, account &amp; SKU cần ưu tiên tuần sau, khách hàng mới cần chăm sóc, hỗ trợ cần thiết","Good points / to improve, accounts &amp; SKUs to prioritise next week, new customers, support needed")+'</p>'+
+          mtTa("visitNote",TX("Nhập ghi chú họp…","Type meeting notes…"),d,mob?120:260)+'</div></div></div>'+
+      mtNavHtml(2)+'</section>'+
+
+    /* ── 3. Thầu ── */
+    '<section class="card pad mt-sec mt2-sec'+on(3)+'" id="mt-s3">'+
+      mtSecHead(3,TX("Tình hình thầu","Tender status"),
+        TX('Gói thầu đang theo dõi của '+esc(MT.pic)+' · số lượng &amp; DS ước tính còn lại trong '+esc(S.fy),'Tenders followed by '+esc(MT.pic)+' · count &amp; estimated remaining sales in '+esc(S.fy)))+
+      '<div class="mt2-cols"><div class="mt2-data">'+lbData+c1("mtC3")+'<div id="mtTd"></div></div>'+
+        '<div class="mt2-notes"><div class="mt2-stk">'+lbNote()+
+          '<p class="mt2-hint">'+TX("Gói nào cần ưu tiên, TSKT, hồ sơ, phối hợp NPP","Priority tenders, specs, documents, distributor coordination")+'</p>'+
+          mtTa("tenderNote",TX("Nhập ghi chú họp…","Type meeting notes…"),d,mob?110:200)+'</div></div></div>'+
+      mtNavHtml(3)+'</section>'+
+
+    /* ── 4. Thông tin khác ── */
+    '<section class="card pad mt-sec mt2-sec'+on(4)+'" id="mt-s4">'+
+      mtSecHead(4,TX("Các thông tin khác","Other information"),TX("Ghi tự do: sự kiện, đối thủ, đề xuất, hỗ trợ cần thiết","Free notes: events, competitors, proposals, support needed"))+
+      c1("mtC4")+lbNote()+mtTa("other",TX("Nội dung khác trao đổi trong buổi họp…","Other topics discussed in the meeting…"),d,160)+
+      mtNavHtml(4)+'</section>'+
+
+    '<div class="mt-foot"><span class="mt-stamp">'+TX("Bản nháp tự lưu trong máy khi gõ · bấm Lưu để ghi vào sheet 13. WEEKLY MEETING","Drafts are kept on this device while typing · press Save to write to sheet 20. WEEKLY MEETING")+'</span></div>'+
+    (mob?'<div class="mt2-mbar"><span class="mt2-mst" id="mtSvM"></span><button class="btn pri" onclick="mtSave()">💾 '+TX("Lưu biên bản","Save minutes")+'</button></div>':"")+
+  '</div>';
+  $("main").innerHTML=h;
+  mtPaintSteps(); mtPaintTabs(); mtPaintSv(); mtPaintBanner(); mtPaintCrm(); mtPaintNpp(); mtPaintTd();
+  if(cmp){ mtPrevEnsure(); mtPaintCmp(); }
+}
+/* trạng thái lưu cũng hiện ở thanh dưới (điện thoại) */
+(function(){ var _sv=mtPaintSv; mtPaintSv=function(){ _sv(); var a=$("mtSv"), b=$("mtSvM"); if(a&&b){ b.className="mt2-mst "+a.className; b.textContent=a.textContent; } }; })();
+/* tab PIC: số lượt địa bàn + dấu đã có biên bản */
+/* ── đi địa bàn: dòng gọn ── */
+function mtVisitHtml(w,future){
+  var a=parseAcc(w.account), d=String(w.start||"").slice(0,10), res=String(w.result||"").trim(), pl=String(w.plan||"").trim();
+  var tags=(w.product?'<span class="ttag" style="background:#FFF6E4;color:#8A5A00">'+esc(w.product)+'</span>':"")+
+           (w.process?'<span class="ttag" style="background:#F3EDFB;color:#6B4A9E">'+esc(w.process)+'</span>':"")+
+           (w.typeAction&&w.typeAction!=="Visiting"?'<span class="ttag" style="background:#EFF2F7;color:var(--sub)">'+esc(w.typeAction)+'</span>':"");
+  var main=future?(pl||res):res;
+  return '<div class="mt2-vi'+(!future&&!res?" nores":"")+'">'+
+    '<div class="d"><b>'+esc(fmtVN(d).slice(0,5))+'</b><span>'+esc(wdOf(d))+'</span></div>'+
+    '<div class="b">'+
+      '<div class="l1"><span class="an"'+(w._row?' onclick="openTask('+w._row+')"':'')+'>'+esc(a.name||w.accName||"-")+'</span>'+(a.province?'<span class="pv">'+esc(a.province)+'</span>':"")+tags+
+        '<span class="sp"></span>'+(future?"":statusTag(w.status))+
+        (w._row?'<button class="ed" title="'+TX("Mở task để cập nhật","Open the task to update")+'" onclick="openTask('+w._row+')">✎</button>':"")+'</div>'+
+      (!future&&pl?'<div class="pl"><span>'+TX("Kế hoạch","Plan")+'</span>'+esc(pl.length>160?pl.slice(0,160)+"…":pl)+'</div>':"")+
+      (main?'<p class="rs" onclick="this.classList.toggle(\'open\')">'+esc(main)+'</p>'
+           :(future?'':'<p class="rs miss">'+TX("Chưa ghi kết quả","No result yet")+'</p>'))+
+      (future||(!w.feedback&&!w.nextAction)?"":'<div class="fb">'+(mtFbTag(w.feedback)||"")+(mtNxTag(w.nextAction)||"")+'</div>')+
+    '</div></div>';
+}
+/* số trên thanh chương trình họp cập nhật khi dữ liệu nạp xong */
+(function(){ var _td=mtPaintTd, _cr=mtPaintCrm;
+  mtPaintTd=function(){ var r=_td.apply(this,arguments); mtPaintSteps(); return r; };
+  mtPaintCrm=function(){ var r=_cr.apply(this,arguments); mtPaintSteps(); return r; };
+})();
+
+/* ═══════════════════════════════════════════════════════════════════
+   ⭐ v22 · THAILAND SURGICAL
+   (1) Dao (Team Leader) xem được việc của cả nhóm như quản lý (Dao + Miew)
+   (2) Người nhận báo cáo: Dao → To nt.ha · Cc vtt.hoa  ·  Miew → To nt.ha · Cc Dao, vtt.hoa
+   (3) Doanh số NPP: sửa ánh xạ SUM TURNOVER (segment "Surgical", đủ NPP Thái)
+   (4) Đề xuất công tác + chuyến công tác trên lịch (dùng chung backend Report Hub với các nhóm VN)
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ── (1) trưởng nhóm Thái ── */
+function isLead(){ return !!(S.user && S.user.lead); }
+function isMgrView(){ return isMgmt() || isLead(); }
+canEditOther=function(pic){ if(isMgrView()) return true; return picEq(pic, S.user.pic) || !String(pic||"").trim(); };
+
+/* ── (2) người nhận báo cáo tuần / tháng ── */
+mailTargets=(function(){ var _m=mailTargets; return function(){
+  if(!isTH()) return _m.apply(this,arguments);
+  var who=(S.rpPic||(S.user&&S.user.pic)||"");
+  var dao=(ROLES.Dao||{}).email||"manithailand@manimedicalhanoi.com";
+  if(picEq(who,"Miew")) return { to:[MAIL_HA], cc:[dao,MAIL_HR] };
+  return { to:[MAIL_HA], cc:[MAIL_HR] };
+}; })();
+
+/* ── (3) doanh số NPP Thái trong file MMH Turnover ──
+   Tab SUM TURNOVER: cột "Segment Report" = Surgical · cột "Country" = Thailand / Myanmar.
+   Bản trước đặt segment = "Thailand" (không có segment nào tên như vậy) và tắt hẳn phần doanh số ⇒ không lên số. */
+try{
+  TEAMS.thai.noTurnover=false; TEAMS.thai.noTrip=false;
+  TURNOVER_SEG_BY_TEAM.thai=["Surgical"];
+  DISTRIBUTORS_BY_TEAM.thai=[
+    { label:"Innotech", pic:"Dao",  match:["innotech"], abbr:[] },      /* AFTA-INNOTECH · knife, forceps, hook */
+    { label:"Mahachak", pic:"Dao",  match:["mahachak"], abbr:[] },      /* MAHACHAK · Manipler */
+    { label:"Novatec",  pic:"Miew", match:["novatec"],  abbr:[] },      /* NOVATEC · Manipler (KPI F1-01 của Miew) */
+    { label:"AV (Myanmar)", pic:"Dao", match:[],        abbr:["av"] }   /* AV · Myanmar · knife */
+  ];
+  PRODUCT_CARDS.thai=[
+    { label:"Manipler",          src:"rows", prod:"Manipler",          unit:"usd" },
+    { label:"Ophthalmic knife",  src:"rows", prod:"Ophthalmic knife",  unit:"usd" }
+  ];
+}catch(e){}
+/* đọc đúng FY đang xem (bản trước để file Turnover tự chọn FY hiện tại) */
+loadTurnover=function(force){
+  if(S.turnover && !force && S.turnover.fy===S.fy) return Promise.resolve(S.turnover);
+  if(S._toLoading) return S._toLoading;
+  S._toLoading = turnoverJsonp({action:"getTurnoverData", fy:S.fy, _ts:Date.now()}).then(function(j){
+    S._toLoading=null; S.turnoverErr="";
+    if(!j || !j.ok) throw new Error((j&&j.error)||TX("File Turnover trả về dữ liệu không hợp lệ","The Turnover file returned invalid data"));
+    S.turnover={ rows:j.rows||[], jizai:j.rowsJizai||[], composite:j.rowsComposite||[], at:Date.now(), fy:S.fy,
+                 status:j.monthStatus||null, fyInfo:j.fyInfo||null };
+    return S.turnover;
+  }).catch(function(e){ S._toLoading=null; S.turnoverErr=e.message; throw e; });
+  return S._toLoading;
+};
+
+/* ── (4) công tác: luôn gọi backend Report Hub (file Sales & Marketing), kể cả nhóm Thái ── */
+function hubJsonpAt(url,params,ms){ S._hubAt=url; try{ return hubJsonp(params,ms); } finally { S._hubAt=null; } }
+hubUrl=(function(){ var _h=hubUrl; return function(){ return (S&&S._hubAt)||_h(); }; })();
+tripHub=function(body, ms){
+  var flat={}; Object.keys(body||{}).forEach(function(k){ var v=body[k]; flat[k]=(v!==null&&typeof v==="object")?JSON.stringify(v):v; });
+  flat.pic=flat.pic||S.user.pic; flat.actor=flat.actor||S.user.pic;
+  var qs=Object.keys(flat).map(function(k){ return encodeURIComponent(k)+"="+encodeURIComponent(flat[k]==null?"":flat[k]); }).join("&");
+  if(qs.length>6800){
+    return fetch(REPORTHUB_URL,{ method:"POST", mode:"no-cors", headers:{"Content-Type":"text/plain;charset=utf-8"}, body:JSON.stringify(flat) })
+      .then(function(){ return { ok:true, posted:true }; });
+  }
+  return hubJsonpAt(REPORTHUB_URL, flat, ms||60000).then(function(j){
+    if(!j || j.ok===false) throw new Error((j&&j.error)||TX("Report Hub không trả lời","Report Hub did not answer"));
+    if(ownTasks() && /tripPropose|tripUpdate|tripDelete|tripReport/.test(String(body.action||""))) setTimeout(function(){ thTripLoad(true); },1500);
+    return j;
+  });
+};
+/* chuyến công tác của nhóm Thái nằm ở Report Hub, không nằm trong sheet ALL TASK của file Thái
+   ⇒ đọc riêng, chỉ để hiện trên lịch + mục Công tác của Họp tuần (không sửa được ở màn Công việc khác) */
+function thTripLoad(force){
+  if(!ownTasks() || noTrip()) return Promise.resolve(null);
+  if(S._thTripLd) return S._thTripLd;
+  if(!force && S.thTrips && Date.now()-(S.thTripsAt||0)<600000) return Promise.resolve(S.thTrips);
+  var team=teamPicNames();
+  S._thTripLd=hubJsonpAt(REPORTHUB_URL,{action:"tripSync", pic:S.user.pic, actor:S.user.pic, _ts:Date.now()},70000).catch(function(){ return null; })
+    .then(function(){ return hubJsonpAt(REPORTHUB_URL,{action:"weekly", pic:S.user.pic, _ts:Date.now()},70000); })
+    .then(function(j){
+      S._thTripLd=null;
+      var keys=(j&&j.keyTasks)||[];
+      S.thTrips=keys.filter(function(k){
+        var trip=calIsTrip(k)||(k.subs||[]).some(calIsTrip); if(!trip) return false;
+        var pics=[k.pic].concat((k.subs||[]).map(function(s){ return s.pic; }));
+        return pics.some(function(p){ return team.some(function(t){ return picEq(p,t); }); });
+      }).map(function(k){ var c=JSON.parse(JSON.stringify(k)); c._hub=1; return c; });
+      S.thTripsAt=Date.now();
+      if(S.tab==="weekly" && S.wkTab==="cal") renderCal();
+      if(S.tab==="meet" && typeof mtPaintCrm==="function") mtPaintCrm();
+      return S.thTrips;
+    }).catch(function(){ S._thTripLd=null; return null; });
+  return S._thTripLd;
+}
+function withThTrips(fn){
+  return function(){
+    if(!ownTasks() || !S.thTrips || !S.thTrips.length) return fn.apply(this,arguments);
+    var o=S.other; S.other=Object.assign({},o||{},{ keys:((o&&o.keys)||[]).concat(S.thTrips) });
+    try{ return fn.apply(this,arguments); } finally { S.other=o; }
+  };
+}
+calItems=withThTrips(calItems);
+mtTripData=withThTrips(mtTripData);
+refreshCal=(function(){ var _r=refreshCal; return function(btn){ if(ownTasks()) thTripLoad(true); return _r.apply(this,arguments); }; })();
+renderCal=(function(){ var _r=renderCal; return function(){ if(ownTasks() && !noTrip() && !S.thTrips && !S._thTripLd) thTripLoad(false); return _r.apply(this,arguments); }; })();
+
+/* ═══════════════════════════════════════════════════════════════════
+   ⭐ v22 · TIẾNG ANH CHO THAILAND SURGICAL: dịch nốt các chữ còn sót
+   (màn đăng nhập, doanh số NPP, Họp tuần mục 1, bảng tin, nút gửi cho cả nhóm…)
+   ═══════════════════════════════════════════════════════════════════ */
+/* thiết bị đã chọn nhóm Thái ⇒ màn đăng nhập cũng hiện tiếng Anh */
+i18nOn=(function(){ var _o=i18nOn; return function(){
+  try{ if(!(S&&S.user) && localStorage.getItem("mmh_team")==="thai") return true; }catch(e){}
+  return _o();
+}; })();
+nppScopeLabel=(function(){ var _n=nppScopeLabel; return function(){
+  if(!isTH()) return _n();
+  var L=distributorList(), k=L.filter(function(d){ return !d.any; }).length;
+  return k+" distributors (Thailand / Myanmar)";
+}; })();
+(function(){
+  var D={
+    "Chỉ cần nhập một lần — lần sau mở app sẽ tự nhớ trên thiết bị này.":"Enter it only once — the app remembers it on this device.",
+    "MANI Medical Hanoi · Theo dõi khách hàng & KPI":"MANI Medical · Customer & KPI tracking",
+    "Nhập mật khẩu để vào hệ thống · Enter password":"Enter password",
+    "Mật khẩu · Password":"Password",
+    "Tiếp tục →":"Continue →", "Tiếp tục":"Continue",
+    "Mọi hành động":"All actions", "Thêm mới":"Added", "Xoá":"Delete", "Cập nhật":"Update", "Báo cáo":"Report", "Ảnh":"Photos",
+    "Bảng tin hoạt động":"Activity feed", "Làm mới":"Refresh", "Đóng":"Close", "Đọc lại ngay":"Reload now",
+    "Toàn bộ file":"Whole file", "Thử lại":"Retry", "Đang đọc SUM TURNOVER…":"Reading SUM TURNOVER…",
+    "đã chốt Actual":"finalized · Actual", "chưa chốt · đang dùng Forecast":"not finalized · using Forecast",
+    "Lũy kế budget":"Cumulative budget", "Lũy kế A/F":"Cumulative A/F", "% lũy kế":"% cumulative", "Budget MMH":"MMH budget",
+    "Target NPP":"Distributor target", "NPP":"Distributor", "FY (theo Month)":"FY (by Month)", "Target theo Product type":"Target by Product type", "Dự báo cả quý:":"Full-quarter forecast:", "Dự báo cả FY:":"Full-FY forecast:"
+  };
+  Object.keys(D).forEach(function(k){ DICT_EN[k]=D[k]; });
+  var chot=function(s){ return String(s).replace("chưa chốt — Forecast","not finalized — Forecast").replace("đã chốt — Actual","finalized — Actual"); };
+  RULES_EN.push(
+    [/^Cập nhật (\d\d:\d\d) · nguồn (.+)$/, "Updated $1 · source $2"],
+    [/^(.*) · cập nhật (\d\d:\d\d)$/, "$1 · updated $2"],
+    [/^(FY\d+|Q\d) lũy kế$/, "$1 cumulative"],
+    [/^(FY\d+) · lũy kế$/, "$1 · cumulative"],
+    [/^Quý (Q\d) · lũy kế$/, "Quarter $1 · cumulative"],
+    [/^Gửi cho toàn bộ (.+) team$/, "Send for the whole $1 team"],
+    [/^So với Target NPP \((.+)\):$/, "Vs. distributor target ($1):"],
+    [/^So với budget lũy kế đến T(\d+):$/, "Vs. cumulative budget up to month $1:"],
+    [/^Toàn bộ file · (.+)$/, "Whole file · $1"],
+    [/^Theo (FY\d+)$/, "By $1"],
+    [/^Toàn nhóm (.+) · (\d+) hoạt động · (\d+) account · (\d+) CBC$/, "Whole team $1 · $2 activities · $3 accounts · $4 CBC"],
+    [/^USD \((\d+)% budget quý\)$/, "USD ($1% of the quarter budget)"],
+    [/^Tiến độ thời gian (\d+)%$/, "Time elapsed $1%"],
+    [/^thời gian (\d+)%$/, "time $1%"],
+    [/^Tuần (.+) chưa có biên bản nào được lưu — lưu biên bản trước khi gửi email$/, "Week $1 has no saved minutes yet — save the minutes before sending the email"],
+    [/^còn (.+)$/, "$1 left"],
+    [/^· cộng (\d+) NPP (.+) phụ trách$/, "· sum of the $1 distributors handled by $2"],
+    [/^Từng NPP của (.+) · tháng (\d+\/\d+) \((.+)\)$/, function(m,a,b,c){ return "Each distributor of "+a+" · month "+b+" ("+chot(c)+")"; }],
+    [/^Tất cả NPP của (.+)$/, "All distributors of $1"],
+    [/^· (\d+) NPP$/, "· $1 distributors"],
+    [/^Theo sản phẩm · tháng (\d+\/\d+)$/, "By product · month $1"],
+    [/^Tháng (\d+\/\d+)$/, "Month $1"],
+    [/^Tổng (.+)$/, "Total $1"],
+    [/^(.+) \(tôi\)$/, "$1 (me)"],
+    [/^Không có dòng nào của (.+) \(segment (.+)\) trong (FY\d+) — NPP chưa có budget \/ forecast trong SUM TURNOVER\.$/,
+      "No row of $1 (segment $2) in $3 — the distributor has no budget / forecast in SUM TURNOVER yet."]
+  );
+})();
 
 </script>
 </body>
