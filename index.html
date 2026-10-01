@@ -9522,7 +9522,7 @@ function tbdFormGo(option,who){
     toast("Tuần này đã có sẵn kế hoạch đi địa bàn — dùng luôn dòng đó.","ok",4200);
     return sendReport(option,true);
   }
-  busy(true,"Đang tạo kế hoạch TBD…");
+  busy(true,"Đang tạo kế hoạch…");
   apiPost({action:"saveWeekly",data:t}).then(function(r){
     busy(false); closeModal();
     afterWrite("weekly", r.row||0, t);
@@ -9545,7 +9545,7 @@ function sendReport(option,confirmed){
       .catch(function(e){ busy(false); toast("Không nạp được Other task: "+e.message,"err",6500); });
   }
   /* ⭐ v10 — chưa có kế hoạch đi địa bàn tuần sau thì hỏi trước khi gửi */
-  if(kind==="week" && option!=="download" && S._tbdOk!==(S.rpFrom+"|"+who))
+  if(kind==="week" && option!=="download" && curTeamKey()!=="eyeless" && S._tbdOk!==(S.rpFrom+"|"+who))   /* ⭐ v25 — Eyeless không bắt buộc kế hoạch / TBD tuần sau */
     return tbdGate(option,who);
   /* ⭐ v12 — người dùng đã xác nhận gửi: chốt lần cuối số account đã đi và
      chuyển dòng TBD của tuần này sang Completed TRƯỚC khi Code.gs đọc sheet. */
@@ -13045,11 +13045,13 @@ function mtVisitHtml(w,future){
     '</div></div>';
 }
 function mtTbdHtml(w,future){
-  var prog=future?"":'<div style="font-size:12.5px;margin-top:6px;color:#6B4A00"><b>Kết quả tự tổng hợp:</b> '+esc(w.result||"—")+'</div>';
-  return '<div class="mt-vi tbd"><div class="mt-vd"><b>TBD</b><span>cả tuần</span></div><div style="min-width:0">'+
-    '<div class="mt-vh"><div style="flex:1"><span class="mt-an">Chưa xác định account</span></div>'+
-    (w._row?'<button class="btn xs gho" onclick="openTask('+w._row+')">✎ Sửa</button>':"")+'</div>'+
-    '<p style="font-size:13.5px;line-height:1.55;white-space:pre-wrap;margin-top:6px">'+esc(w.plan||"—")+'</p>'+prog+'</div></div>';
+  /* ⭐ v25 — không hiện "TBD / Chưa xác định account" trong họp tuần; chỉ ghi một dòng tổng hợp */
+  var txt=future?String(w.plan||"").trim():String(w.result||"").trim();
+  var lb=future?"Kế hoạch đi địa bàn chung":"Tổng hợp tình hình đi địa bàn";
+  return '<div class="mt-sum" style="display:flex;align-items:flex-start;gap:10px;padding:10px 12px;margin-bottom:8px;'+
+    'background:#FFFCF0;border:1px solid #F1E2A8;border-radius:10px;font-size:13.5px;line-height:1.55">'+
+    '<div style="flex:1;min-width:0;white-space:pre-wrap"><b style="color:#7A5A00">'+lb+':</b> '+esc(txt||"—")+'</div>'+
+    (w._row?'<button class="btn xs gho" onclick="openTask('+w._row+')">✎ Sửa</button>':"")+'</div>';
 }
 function mtPaintVis(){
   var box=$("mtVis"); if(!box) return;
@@ -13058,7 +13060,7 @@ function mtPaintVis(){
   var loadingV=!(S.cache.weekly&&S.cache.weekly.rows);
   var h='<div class="seg" style="margin-bottom:4px">'+
     '<button class="'+(MT.vis==="cur"?"on":"")+'" onclick="MT.vis=\'cur\';mtPaintVis()">📍 Tuần này<span class="t"> · '+esc(mtRange(wk))+'</span> <b>('+cur.list.length+')</b></button>'+
-    '<button class="'+(MT.vis==="nxt"?"on":"")+'" onclick="MT.vis=\'nxt\';mtPaintVis()">🗓 Kế hoạch tuần sau<span class="t"> · '+esc(mtRange(nx))+'</span> <b>('+(nxt.list.length+(nxt.tbd?1:0))+')</b></button></div>';
+    '<button class="'+(MT.vis==="nxt"?"on":"")+'" onclick="MT.vis=\'nxt\';mtPaintVis()">🗓 Kế hoạch tuần sau<span class="t"> · '+esc(mtRange(nx))+'</span> <b>('+nxt.list.length+')</b></button></div>';
   if(loadingV){ box.innerHTML=h+'<div class="mt-empty"><div class="spin" style="margin:6px auto 10px"></div><p>Đang nạp dữ liệu đi địa bàn…</p></div>'; return; }
   if(MT.vis==="cur"){
     var L=cur.list, done=L.filter(function(w){ return /complet/i.test(String(w.status||"")); }).length,
@@ -13073,13 +13075,13 @@ function mtPaintVis(){
     var N=nxt.list;
     h+='<div class="mt-stat"><span><b>'+N.length+'</b>lượt dự kiến</span><span><b>'+
        Object.keys(N.reduce(function(o,w){ o[parseAcc(w.account).name]=1; return o; },{})).length+'</b>account</span>'+
-       (nxt.tbd?'<span style="background:#FFF6E4;color:#8A5A00">có dòng TBD</span>':"")+'</div>';
+       (nxt.tbd?'<span style="background:#FFF6D9;color:#7A5A00">có kế hoạch chung</span>':"")+'</div>';
     var cta='<div class="mt-cta"><button class="btn sm pri" onclick="mtAddPlan()">＋ Thêm kế hoạch</button>'+
-            (nxt.tbd?"":'<button class="btn sm acc" onclick="mtTbdForm()">＋ TBD — chưa xác định account</button>')+'</div>';
+            (nxt.tbd?"":'<button class="btn sm acc" onclick="mtTbdForm()">＋ Kế hoạch chung — chưa chốt account</button>')+'</div>';
     h+=(N.length||nxt.tbd)
       ? '<div class="mt-vl">'+(nxt.tbd?mtTbdHtml(nxt.tbd,true):"")+N.map(function(w){ return mtVisitHtml(w,true); }).join("")+'</div><div style="margin-top:10px">'+cta+'</div>'
       : '<div class="mt-empty"><div class="e">🗓</div><p>'+esc(MT.pic)+' chưa có kế hoạch đi địa bàn tuần '+esc(mtRange(nx))+
-        '.<br>Thêm từng account, hoặc chọn <b>TBD</b> nếu chưa xác định và ghi rõ dự định.</p>'+cta+'</div>';
+        '.<br>Thêm từng account, hoặc tạo <b>kế hoạch chung</b> nếu chưa chốt account và ghi rõ dự định.</p>'+cta+'</div>';
   }
   box.innerHTML=h;
 }
@@ -13096,10 +13098,10 @@ function mtTbdForm(){
   var nx=addDays(MT.week,7);
   var h='<div class="card pad" style="margin-bottom:12px;background:var(--pale);border-color:var(--lb1)">'+
     '<div style="font-size:13.5px;font-weight:800;color:var(--navy);margin-bottom:4px">'+esc(MT.pic)+' · tuần '+esc(fmtVN(nx))+' – '+esc(fmtVN(addDays(nx,6)))+'</div>'+
-    '<div style="font-size:12.5px;color:var(--sub);line-height:1.6">Tạo một dòng Account <b>TBD</b> cho cả tuần. Cuối tuần, ô kết quả tự tổng hợp các account thực sự đã đi.</div></div>'+
+    '<div style="font-size:12.5px;color:var(--sub);line-height:1.6">Tạo một kế hoạch đi địa bàn chung cho cả tuần. Cuối tuần, hệ thống tự tổng hợp tình hình các account thực sự đã đi.</div></div>'+
     tbdPickHTML("mtb");
-  openModal("Kế hoạch TBD — chưa xác định account",h,
-    '<button class="btn" onclick="closeModal()">Huỷ</button><button class="btn pri" onclick="mtTbdGo()">Tạo kế hoạch TBD</button>',true);
+  openModal("Kế hoạch đi địa bàn chung — chưa chốt account",h,
+    '<button class="btn" onclick="closeModal()">Huỷ</button><button class="btn pri" onclick="mtTbdGo()">Tạo kế hoạch</button>',true);
   tbdProvInit("mtb");
 }
 function mtTbdGo(){
@@ -13108,12 +13110,12 @@ function mtTbdGo(){
   var t=tbdRow(nx,tbdPlanText("mtb"),tbdSel("mtb","p")[0]||"",pic);
   var dup=tbdExistingRow(t.start,t.pic,0);
   if(dup){ closeModal(); toast(tbdDupMsg(dup),"warn",6000); return openTask(dup._row); }
-  busy(true,"Đang tạo kế hoạch TBD…");
+  busy(true,"Đang tạo kế hoạch…");
   apiPost({action:"saveWeekly",data:t}).then(function(r){
     busy(false); closeModal();
     afterWrite("weekly",r.row||0,t); tbdSyncWeek(t.start,t.pic);
     MT.vis="nxt"; mtPaintVis();
-    toast("Đã tạo kế hoạch TBD tuần "+fmtVN(t.start)+" – "+fmtVN(t.finish),"ok",4500);
+    toast("Đã tạo kế hoạch đi địa bàn chung tuần "+fmtVN(t.start)+" – "+fmtVN(t.finish),"ok",4500);
   }).catch(function(e){ busy(false); toast(e.message,"err",6000); });
 }
 
@@ -13540,7 +13542,7 @@ function mtC1Html(liveCur,livePrev,st,wk){
           return '<span class="'+(r.hit.length?"ok":"no")+'" title="'+phAttr(tip)+'">'+(r.hit.length?"✓ ":"✗ ")+esc(r.p.a)+
             '<small>'+(v?esc(fmtVN(v.d).slice(0,5)):"KH "+esc(fmtVN(r.p.d).slice(0,5)))+'</small></span>'; }).join("")+
         pc.extra.map(function(v){ return '<span class="ex" title="Không có trong kế hoạch họp trước">＋ '+esc(v.a)+'<small>'+esc(fmtVN(v.d).slice(0,5))+'</small></span>'; }).join("")+'</div>';
-      if(pc.tbd) h+='<div class="mt-prev" style="margin-top:8px"><span class="pl">TBD đã đăng ký</span>'+esc(pc.tbd.pl||"—")+'</div>';
+      if(pc.tbd) h+='<div class="mt-prev" style="margin-top:8px"><span class="pl">Kế hoạch đi địa bàn chung</span>'+esc(pc.tbd.pl||"—")+'</div>';
     }
   }
   /* 2 cột: tuần trước | tuần này */
@@ -14218,7 +14220,7 @@ function mtRecHtml(rec,no,prev){   /* prev: biên bản họp trước (không b
   h+='<div style="'+MTS.h3+'">② Quan hệ khách hàng &amp; Phát triển thị trường</div>'+
      (s.crm?'<div style="'+MTS.mute+'margin-bottom:4px">'+esc(mtCrmSum(s.crm)||"Không có phát sinh mới ngoài đi địa bàn")+'</div>':"")+
      '<div style="font-size:13px;font-weight:700;color:#003047;margin:8px 0 4px">📍 Đi địa bàn · '+esc(mtRange(wk))+'</div>'+
-     '<div style="'+MTS.mute+'">'+cur.length+' lượt · '+done+' hoàn thành · '+pos+' feedback tích cực'+(V.tbdCur?(" · TBD: "+esc(V.tbdCur.rs||"")):"")+'</div>';
+     '<div style="'+MTS.mute+'">'+cur.length+' lượt · '+done+' hoàn thành · '+pos+' feedback tích cực'+(V.tbdCur&&V.tbdCur.rs?("<br>Tổng hợp tình hình đi địa bàn: "+esc(V.tbdCur.rs)):"")+'</div>';
   if(cur.length) h+='<table style="'+MTS.tb+'"><tr><th style="'+MTS.th+'width:62px">Ngày</th><th style="'+MTS.th+'">Địa bàn</th><th style="'+MTS.th+'">SP · Process</th><th style="'+MTS.th+'">Kết quả</th><th style="'+MTS.th+'">Feedback · Next</th></tr>'+
     cur.map(function(v){ return '<tr><td style="'+MTS.td+'">'+esc(fmtVN(v.d).slice(0,5))+'</td><td style="'+MTS.td+'"><b>'+esc(v.a)+'</b>'+(v.pv?'<br><span style="'+MTS.mute+'">'+esc(v.pv)+'</span>':"")+'</td>'+
       '<td style="'+MTS.td+'">'+esc(v.pr||"—")+'<br><span style="'+MTS.mute+'">'+esc(v.ps||"")+'</span></td>'+
@@ -14227,7 +14229,7 @@ function mtRecHtml(rec,no,prev){   /* prev: biên bản họp trước (không b
   if(prev) h+=mtRecCmpVis(rec,prev);
   h+='<div style="font-size:13px;font-weight:700;color:#003047;margin:10px 0 4px">Kế hoạch tuần sau · '+esc(mtRange(nwk))+' ('+(nx.length+(V.tbdNxt?1:0))+')</div>';
   if(nx.length||V.tbdNxt) h+='<table style="'+MTS.tb+'"><tr><th style="'+MTS.th+'width:62px">Ngày</th><th style="'+MTS.th+'">Địa bàn</th><th style="'+MTS.th+'">SP · Process</th><th style="'+MTS.th+'">Kế hoạch</th></tr>'+
-    (V.tbdNxt?'<tr><td style="'+MTS.td+'">TBD</td><td style="'+MTS.td+'"><i>Chưa xác định account</i></td><td style="'+MTS.td+'">—</td><td style="'+MTS.td+'">'+mtE(V.tbdNxt.pl)+'</td></tr>':"")+
+    (V.tbdNxt?'<tr><td style="'+MTS.td+'">Cả tuần</td><td style="'+MTS.td+'" colspan="2"><i>Kế hoạch đi địa bàn chung</i></td><td style="'+MTS.td+'">'+mtE(V.tbdNxt.pl)+'</td></tr>':"")+
     nx.map(function(v){ return '<tr><td style="'+MTS.td+'">'+esc(fmtVN(v.d).slice(0,5))+'</td><td style="'+MTS.td+'"><b>'+esc(v.a)+'</b></td><td style="'+MTS.td+'">'+esc(v.pr||"—")+'<br><span style="'+MTS.mute+'">'+esc(v.ps||"")+'</span></td><td style="'+MTS.td+'">'+mtE(v.pl||"—")+'</td></tr>'; }).join("")+'</table>';
   else h+='<div style="'+MTS.mute+'">Chưa có kế hoạch.</div>';
   if(s.crm) h+=mtCrmRecHtml(s.crm);
