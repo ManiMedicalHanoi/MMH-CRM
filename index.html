@@ -17120,5 +17120,479 @@ function q16Del(){
   }).catch(function(e){ busy(false); toast(e.message,"err",6000); });
 }
 </script>
+<style>
+/* ═══════════ ⭐ v26 — KPI CÁ NHÂN (file KPI FY68 · KPI Hub) + BÁO CÁO KPI ═══════════ */
+.km{padding:0;overflow:hidden;margin-bottom:16px}
+.km-h{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:16px 18px 12px;border-bottom:1px solid var(--line2)}
+.km-h h3{margin:0;font-size:16px;color:var(--navy);display:flex;align-items:center;gap:8px}
+.km-live{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;color:var(--mute);font-weight:600}
+.km-live i{width:8px;height:8px;border-radius:50%;background:#3E8E6B;box-shadow:0 0 0 0 rgba(62,142,107,.5);animation:kmPulse 2s infinite}
+@keyframes kmPulse{0%{box-shadow:0 0 0 0 rgba(62,142,107,.45)}70%{box-shadow:0 0 0 7px rgba(62,142,107,0)}100%{box-shadow:0 0 0 0 rgba(62,142,107,0)}}
+.km-sel{height:32px;border:1px solid var(--line);border-radius:9px;padding:0 10px;background:var(--card);color:var(--ink);font:inherit;font-size:13px;font-weight:600;max-width:260px}
+.km-seg{display:inline-flex;background:var(--pale);border:1px solid var(--line);border-radius:10px;padding:3px;gap:2px}
+.km-seg b{padding:5px 11px;border-radius:7px;font-size:12px;color:var(--sub);cursor:pointer;font-weight:650}
+.km-seg b.on{background:var(--card);color:var(--navy);box-shadow:0 1px 3px rgba(36,54,74,.12)}
+.km-tl{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:5px;padding:12px 18px 4px}
+.km-m{border:1px solid var(--line);border-radius:10px;padding:6px 4px 7px;text-align:center;cursor:pointer;background:var(--card);transition:.12s;position:relative}
+.km-m:hover{border-color:var(--blue-l)}
+.km-m.on{outline:2px solid var(--blue);outline-offset:-1px}
+.km-m small{display:block;font-size:10.5px;color:var(--mute);font-weight:650}
+.km-m b{display:block;font-size:13.5px;margin-top:1px}
+.km-m.cl::after{content:"";position:absolute;top:5px;right:5px;width:6px;height:6px;border-radius:50%;background:#FFE100;box-shadow:0 0 0 1px rgba(0,0,0,.18)}
+.km-qbar{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;padding:0 18px 10px}
+.km-qbar div{font-size:10.5px;color:var(--mute);text-align:center;border-top:2px solid var(--line);padding-top:3px;font-weight:650}
+.km-body{display:grid;grid-template-columns:250px 1fr;gap:0;border-top:1px solid var(--line2)}
+.km-side{padding:16px 18px;border-right:1px solid var(--line2);background:linear-gradient(180deg,var(--pale),transparent 70%)}
+.km-who{display:flex;gap:11px;align-items:center;margin-bottom:12px}
+.km-av{width:42px;height:42px;border-radius:12px;background:var(--card);border:1px solid var(--line);display:grid;place-items:center;font-weight:800;color:var(--navy);flex:none}
+.km-who b{display:block;font-size:14.5px;color:var(--ink)}
+.km-who small{display:block;font-size:11.5px;color:var(--mute);line-height:1.35}
+.km-ring{display:flex;justify-content:center;margin:6px 0 4px}
+.km-ring svg{width:150px;height:150px}
+.km-cap{text-align:center;font-size:11.5px;color:var(--mute);margin-bottom:12px}
+.km-mini{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.km-mini div{border-radius:10px;padding:8px 10px;border:1px solid var(--line)}
+.km-mini small{display:block;font-size:10.5px;color:var(--sub);font-weight:650}
+.km-mini b{font-size:16px}
+.km-cov{margin-top:12px;font-size:11.5px;color:var(--sub)}
+.km-cov .bar{height:6px;background:var(--line2);border-radius:4px;overflow:hidden;margin-top:5px}
+.km-cov .bar i{display:block;height:100%;background:var(--blue)}
+.km-main{padding:6px 0 10px;min-width:0}
+.km-tb{width:100%;border-collapse:collapse}
+.km-tb th{font-size:11.5px;color:var(--mute);font-weight:650;text-align:left;padding:9px 12px;border-bottom:1px solid var(--line);white-space:nowrap;position:sticky;top:0;background:var(--card)}
+.km-tb td{padding:9px 12px;border-bottom:1px solid var(--line2);font-size:13px;vertical-align:middle}
+.km-tb td.n{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
+.km-tb tr.g td{font-size:11.5px;font-weight:800;color:var(--blue);background:var(--pale);padding:6px 12px;letter-spacing:.2px}
+.km-code{font-weight:800;color:var(--navy);white-space:nowrap}
+.km-nm{max-width:420px}
+.km-nm small{display:block;color:var(--mute);font-size:11px}
+.km-pill{display:inline-block;min-width:56px;text-align:center;padding:2px 8px;border-radius:999px;font-weight:800;font-size:12px}
+.km-pbar{height:6px;border-radius:4px;background:var(--line2);overflow:hidden;margin-top:4px;min-width:90px}
+.km-pbar i{display:block;height:100%}
+.km-na{color:var(--mute);font-size:12px}
+.km-leg{display:flex;flex-wrap:wrap;gap:12px;padding:8px 18px 14px;font-size:11.5px;color:var(--sub)}
+.km-leg span{display:inline-flex;align-items:center;gap:5px}
+.km-leg i{width:11px;height:11px;border-radius:3px;display:inline-block}
+.km-empty{padding:30px 18px;text-align:center;color:var(--mute);font-size:13px;line-height:1.7}
+.km-err{padding:16px 18px;color:#8A3633;background:#FBEDEC;font-size:13px;line-height:1.6}
+/* composer */
+.kr-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:16px;align-items:start}
+.kr-form .fld{margin-bottom:12px}
+.kr-form label{display:block;font-size:12px;font-weight:700;color:var(--sub);margin-bottom:5px}
+.kr-chips{display:flex;flex-wrap:wrap;gap:6px;align-items:center;min-height:40px;border:1px solid var(--line);border-radius:10px;padding:5px 7px;background:var(--card);cursor:text}
+.kr-chips:focus-within{border-color:var(--blue);box-shadow:0 0 0 3px rgba(78,124,175,.15)}
+.kr-chip{display:inline-flex;align-items:center;gap:6px;background:var(--pale);border:1px solid var(--line);border-radius:8px;padding:3px 4px 3px 9px;font-size:12.5px;font-weight:600;color:var(--ink)}
+.kr-chip.bad{background:#FBEDEC;border-color:#F0B9B7;color:#8A3633}
+.kr-chip button{border:0;background:none;cursor:pointer;color:var(--mute);font-size:14px;line-height:1;padding:0 3px}
+.kr-chips input{flex:1;min-width:150px;border:0;outline:0;font:inherit;font-size:13px;padding:4px 2px;background:transparent;color:var(--ink)}
+.kr-form textarea{width:100%;min-height:110px;resize:vertical;border:1px solid var(--line);border-radius:10px;padding:9px 11px;font:inherit;font-size:13px;color:var(--ink);background:var(--card)}
+.kr-form .inp{width:100%}
+.kr-sug{display:flex;flex-wrap:wrap;gap:5px;margin-top:6px}
+.kr-sug b{font-size:11.5px;font-weight:650;color:var(--blue);background:var(--pale);border:1px dashed var(--blue-l);border-radius:7px;padding:2px 8px;cursor:pointer}
+.kr-prev{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#F4F6F9}
+.kr-prev .bar{display:flex;align-items:center;gap:8px;padding:9px 12px;border-bottom:1px solid var(--line);background:var(--card);font-size:12px;color:var(--sub)}
+.kr-prev .bar b{color:var(--ink)}
+.kr-prev iframe{width:100%;height:640px;border:0;display:block;background:#F4F6F9}
+.kr-meta{font-size:12px;color:var(--sub);line-height:1.7;padding:9px 12px;background:var(--card);border-bottom:1px solid var(--line)}
+.kr-meta b{color:var(--ink)}
+.kr-act{display:flex;gap:9px;flex-wrap:wrap;margin-top:6px}
+.kr-steps{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 12px}
+.kr-steps span{display:inline-flex;align-items:center;gap:7px;font-size:12px;font-weight:700;color:var(--sub);background:var(--pale);border:1px solid var(--line);border-radius:999px;padding:4px 12px 4px 5px}
+.kr-steps span i{width:20px;height:20px;border-radius:50%;background:var(--blue);color:#fff;display:grid;place-items:center;font-style:normal;font-size:11px}
+@media (max-width:980px){ .km-body{grid-template-columns:1fr} .km-side{border-right:0;border-bottom:1px solid var(--line2)} .kr-grid{grid-template-columns:1fr} .km-tl{grid-template-columns:repeat(6,1fr)} .km-qbar{display:none} }
+@media (max-width:560px){ .km-tl{grid-template-columns:repeat(4,1fr)} .km-tb .hide-s{display:none} }
+</style>
+<script>
+/* ═══════════════════════════════════════════════════════════════════════════════════════════
+   ⭐ v26 — KPI CÁ NHÂN ĐỌC TRỰC TIẾP TỪ FILE KPI FY68 (KPI Hub) + GỬI BÁO CÁO KPI
+   Nguồn: sheet "5. Member KPI Monthly" (từng mã KPI) và "6. Member KPI Summarize" (điểm tổng),
+   đọc qua Web App của KPI Hub (module KPI_Report_API.gs, các action kpiApi…).
+   Số trên app = số trên sheet; app tự đọc lại mỗi 60 giây khi đang mở tab KPI / Gửi báo cáo.
+   ═══════════════════════════════════════════════════════════════════════════════════════════ */
+var KPI_HUB_URL = "https://script.google.com/macros/s/AKfycbx58htPcvaOk5R4lC91hWcT3GHWTTAWSq7UZSoRUKkanez6noyX1vHatHNCndQPrFV2/exec";
+var KM_BANDS = [
+  { max:0.9, bg:"#E4E7EB", fg:"#5F6B78", vi:"Dưới 90%", en:"Below 90%" },
+  { max:1,   bg:"#D6EAF8", fg:"#2E5C8A", vi:"90% – dưới 100%", en:"90% – below 100%" },
+  { max:1.2, bg:"#FFF2B3", fg:"#7A5C00", vi:"100% – 120%", en:"100% – 120%" },
+  { max:null,bg:"#D5F0D8", fg:"#1E6B34", vi:"Trên 120%", en:"Above 120%" }
+];
+function kmBand(p){ if(p==null||isNaN(p)) return null; if(p<0.9) return KM_BANDS[0]; if(p<1) return KM_BANDS[1]; if(p<=1.2) return KM_BANDS[2]; return KM_BANDS[3]; }
+function kmPct(p){ return (p==null||isNaN(p))?"—":(Math.round(p*1000)/10)+"%"; }
+function kmNum(v,unit){
+  if(v==null||isNaN(v)) return "—";
+  if(unit==="%") return (Math.round(v*10000)/100)+"%";
+  var a=Math.abs(v), dp=a>=100?0:(a>=10?1:2);
+  return Number(v).toLocaleString("en-US",{maximumFractionDigits:dp});
+}
+function kmYm(ym){ ym=String(ym); return ym.slice(4,6)+"/"+ym.slice(2,4); }
+function kmKey(s){ return String(s||"").toLowerCase().replace(/\s+/g," ").trim(); }
+
+function kraJsonp(params,timeoutMs){
+  return new Promise(function(res,rej){
+    var cb="__mmhkra_"+Date.now()+"_"+(++_seq);
+    var el=document.createElement("script");
+    var t=setTimeout(function(){ done(); rej(new Error(TX("KPI Hub phản hồi chậm — thử lại sau ít giây.","The KPI Hub is slow to answer — try again in a moment."))); }, timeoutMs||45000);
+    function done(){ clearTimeout(t); try{ delete window[cb]; }catch(e){ window[cb]=undefined; } if(el.parentNode) el.parentNode.removeChild(el); }
+    window[cb]=function(d){ done(); res(d); };
+    params=params||{}; params.callback=cb;
+    var qs=Object.keys(params).map(function(k){ return encodeURIComponent(k)+"="+encodeURIComponent(params[k]==null?"":params[k]); }).join("&");
+    el.src=KPI_HUB_URL+"?"+qs;
+    el.onerror=function(){ done(); rej(new Error(TX("Không đọc được KPI Hub — kiểm tra Web App của file KPI đã Deploy với quyền “Anyone” và đã cài module KPI_Report_API.gs.",
+                                                     "Cannot reach the KPI Hub — check that the KPI file Web App is deployed for “Anyone” and the KPI_Report_API.gs module is installed."))); };
+    document.body.appendChild(el);
+  });
+}
+function kraCall(params,timeoutMs){
+  return kraJsonp(params,timeoutMs).then(function(j){
+    if(!j||typeof j!=="object") throw new Error(TX("KPI Hub trả về dữ liệu không hợp lệ.","Invalid answer from the KPI Hub."));
+    if(j.ok===false) throw new Error(j.error||"KPI Hub error");
+    if(!j.kpiApi && /^kpiApi(Members|Member)$/.test(params.action)) throw new Error(TX("KPI Hub chưa cài module KPI_Report_API.gs (hoặc chưa Deploy bản mới).","The KPI Hub has no KPI_Report_API.gs module yet (or the new version is not deployed)."));
+    return j;
+  });
+}
+
+S.km=S.km||{ list:null, by:{}, err:"", at:0, loading:null };
+function kmLoadList(force){
+  if(S.km.list && !force && Date.now()-S.km.at<60000) return Promise.resolve(S.km.list);
+  if(S.km.loadingList) return S.km.loadingList;
+  S.km.loadingList=kraCall({ action:"kpiApiMembers", fresh:force?1:"", _ts:Date.now() }).then(function(j){
+    S.km.loadingList=null; S.km.err=""; S.km.list=j; S.km.at=Date.now(); return j;
+  }).catch(function(e){ S.km.loadingList=null; S.km.err=e.message; throw e; });
+  return S.km.loadingList;
+}
+function kmLoadMember(key,force){
+  var k=kmKey(key), hit=S.km.by[k];
+  if(hit && !force && Date.now()-hit._at<60000) return Promise.resolve(hit);
+  if(S.km["ld_"+k]) return S.km["ld_"+k];
+  S.km["ld_"+k]=kraCall({ action:"kpiApiMember", member:key, fresh:force?1:"", _ts:Date.now() }).then(function(j){
+    S.km["ld_"+k]=null; j._at=Date.now(); S.km.by[k]=j; S.km.err=""; return j;
+  }).catch(function(e){ S.km["ld_"+k]=null; S.km.err=e.message; throw e; });
+  return S.km["ld_"+k];
+}
+
+/* Ai được xem KPI của ai: quản lý ⇒ mọi người · Team Leader / HOD ⇒ người cùng team / phòng ban · còn lại ⇒ chính mình */
+function kmMembersAll(){ return (S.km.list&&S.km.list.members)||[]; }
+function kmMe(){ var me=kmKey(S.user.pic); return kmMembersAll().filter(function(m){ return kmKey(m.key)===me; })[0]||null; }
+function kmVisible(){
+  var all=kmMembersAll(), me=kmMe();
+  if(S.user.role==="manager" && !S.user.lead) return all;
+  if(isTH() && S.user.lead) return all.filter(function(m){ return (/thailand/i.test(m.dept) && /surgical/i.test(m.dept)) || kmKey(m.key)===kmKey(S.user.pic); });
+  if(me && /team leader/i.test(me.role) && me.team) return all.filter(function(m){ return kmKey(m.team)===kmKey(me.team); });
+  if(me && /^hod$/i.test(me.role)) return all.filter(function(m){ return kmKey(m.dept)===kmKey(me.dept); });
+  return me?[me]:[];
+}
+/* người mặc định: chính mình (nếu có KPI), không thì người đầu tiên của nhóm CRM đang mở */
+function kmDefaultPic(){
+  var vis=kmVisible(); if(!vis.length) return "";
+  var me=kmKey(S.user.pic), hit=vis.filter(function(m){ return kmKey(m.key)===me; })[0];
+  if(hit) return hit.key;
+  var team=(S.picList||[]).filter(function(p){ return p.team===curTeam().team||p.team===(curTeam().label+" Sales Team"); }).map(function(p){ return kmKey(p.pic); });
+  var t=vis.filter(function(m){ return team.indexOf(kmKey(m.key))>=0; })[0];
+  return (t||vis[0]).key;
+}
+/* tháng mặc định: tháng gần nhất đã có điểm, không thì tháng trước tháng hiện tại */
+function kmDefaultMonth(d){
+  var months=(d&&d.months)||[], sum=(d&&d.sum&&d.sum.m)||[], closed=(d&&d.closed)||[], last=-1, lastC=-1;
+  var cur=ymOf(todayISO());
+  for(var i=0;i<months.length;i++) if(sum[i]!=null && months[i]<=cur){ last=i; if(closed.indexOf(months[i])>=0) lastC=i; }
+  if(lastC>=0) return months[lastC];          /* ưu tiên tháng gần nhất ĐÃ CHỐT SỐ */
+  if(last>=0) return months[last];
+  var prev=ymOf(addDays(cur.slice(0,4)+"-"+cur.slice(4,6)+"-01",-1));
+  return months.indexOf(prev)>=0?prev:(months[0]||"");
+}
+function kmLang(m){ return (isTH()||/thailand/i.test((m&&m.dept)||""))?"en":"vi"; }
+
+/* ── khối hiển thị KPI 1 người (dùng chung cho tab KPI và Gửi báo cáo KPI) ── */
+function kmPeriodData(d,view,mi){
+  var qi=Math.floor(mi/3);
+  return {
+    label: view==="FY"?(d.fy||"FY"):view==="Q"?("Q"+(qi+1)+" · "+kmYm(d.months[qi*3])+"–"+kmYm(d.months[qi*3+2])):TX("Tháng ","Month ")+kmYm(d.months[mi]),
+    score: view==="FY"?(d.sum&&d.sum.fy):view==="Q"?(d.sum&&d.sum.q&&d.sum.q[qi]):(d.sum&&d.sum.m&&d.sum.m[mi]),
+    cell: function(r){ return (view==="FY"?r.fy:view==="Q"?(r.q&&r.q[qi]):(r.m&&r.m[mi]))||{}; }
+  };
+}
+function kmRing(p){
+  var b=kmBand(p)||{bg:"#EEF1F5",fg:"#8595A6"}, r=58, c=2*Math.PI*r, f=p==null?0:Math.max(0,Math.min(1.3,p))/1.3;
+  return '<svg viewBox="0 0 150 150" role="img" aria-label="'+kmPct(p)+'"><circle cx="75" cy="75" r="'+r+'" fill="none" stroke="var(--line2)" stroke-width="12"/>'+
+    '<circle cx="75" cy="75" r="'+r+'" fill="none" stroke="'+b.fg+'" stroke-width="12" stroke-linecap="round" stroke-dasharray="'+(c*f)+' '+c+'" transform="rotate(-90 75 75)"/>'+
+    '<circle cx="75" cy="75" r="44" fill="'+b.bg+'"/>'+
+    '<text x="75" y="80" text-anchor="middle" font-size="22" font-weight="800" fill="'+b.fg+'">'+kmPct(p)+'</text>'+
+    '<text x="75" y="99" text-anchor="middle" font-size="10" fill="#5C6F84">'+TX("điểm KPI","KPI score")+'</text></svg>';
+}
+function kmBlock(d,opt){
+  opt=opt||{};
+  var view=opt.view||"M", mi=Math.max(0,d.months.indexOf(opt.month)), P=kmPeriodData(d,view,mi), m=d.member||{};
+  var closed=d.closed||[];
+  /* dải 12 tháng */
+  var tl='<div class="km-tl">'+d.months.map(function(ym,i){
+    var v=d.sum&&d.sum.m?d.sum.m[i]:null, b=kmBand(v);
+    return '<div class="km-m'+(i===mi&&view!=="FY"?" on":"")+(closed.indexOf(ym)>=0?" cl":"")+'" onclick="'+opt.onMonth+'(\''+ym+'\')" title="'+
+      (closed.indexOf(ym)>=0?TX("Đã chốt số","Closed"):TX("Chưa chốt số","Not closed yet"))+'" style="'+(b?"background:"+b.bg:"")+'">'+
+      '<small>'+kmYm(ym)+'</small><b style="color:'+(b?b.fg:"var(--mute)")+'">'+(v==null?"·":kmPct(v))+'</b></div>';
+  }).join("")+'</div>'+
+  '<div class="km-qbar">'+[0,1,2,3].map(function(q){ var v=d.sum&&d.sum.q?d.sum.q[q]:null, b=kmBand(v);
+    return '<div style="border-color:'+(b?b.fg:"var(--line)")+'">Q'+(q+1)+' · <b style="color:'+(b?b.fg:"var(--mute)")+'">'+kmPct(v)+'</b></div>'; }).join("")+'</div>';
+  /* bảng */
+  var groups=[], gi={};
+  (d.rows||[]).forEach(function(r){ var g=r.group||"—"; if(gi[g]==null){ gi[g]=groups.length; groups.push({g:g,rows:[]}); } groups[gi[g]].rows.push(r); });
+  var wT=0, wD=0;
+  (d.rows||[]).forEach(function(r){ var x=P.cell(r); if(x.w){ wT+=x.w; if(x.a!=null) wD+=x.w; } });
+  var body=groups.map(function(G){
+    return '<tr class="g"><td colspan="7">'+esc(G.g)+'</td></tr>'+G.rows.map(function(r){
+      var x=P.cell(r), b=kmBand(x.p);
+      var pc=x.p==null?'<span class="km-na">'+(x.a==null?TX("chưa có số","no data"):"—")+'</span>'
+        :'<span class="km-pill" style="background:'+b.bg+';color:'+b.fg+'">'+kmPct(x.p)+'</span><div class="km-pbar"><i style="width:'+Math.min(100,x.p/1.3*100)+'%;background:'+b.fg+'"></i></div>';
+      return '<tr><td class="km-code">'+esc(r.code)+'</td>'+
+        '<td class="km-nm">'+esc(r.name)+'<small>'+esc(r.unit||"")+(r.agg==="LAST"?TX(" · lũy kế"," · cumulative"):r.agg==="AVG"?TX(" · trung bình"," · average"):"")+'</small></td>'+
+        '<td class="n hide-s">'+kmNum(x.t,r.unit)+'</td><td class="n"><b>'+kmNum(x.a,r.unit)+'</b></td>'+
+        '<td>'+pc+'</td><td class="n hide-s" style="color:var(--sub)">'+(x.w==null?"—":Math.round(x.w*1000)/10+"%")+'</td>'+
+        '<td class="n"><b>'+(x.s==null?"—":Math.round(x.s*1000)/10+"%")+'</b></td></tr>';
+    }).join("");
+  }).join("");
+  var qi=Math.floor(mi/3), sum=d.sum||{};
+  var side='<div class="km-side"><div class="km-who"><div class="km-av">'+esc(initials(m.key))+'</div><div><b>'+esc(m.key)+'</b>'+
+      '<small>'+esc(m.full||"")+'</small><small>'+esc([m.title,m.team].filter(String).join(" · "))+'</small></div></div>'+
+    '<div class="km-ring">'+kmRing(P.score)+'</div><div class="km-cap">'+esc(P.label)+'</div>'+
+    '<div class="km-mini">'+
+      [[TX("Tháng ","Month ")+kmYm(d.months[mi]),sum.m&&sum.m[mi]],["Q"+(qi+1),sum.q&&sum.q[qi]],[d.fy||"FY",sum.fy],[TX("Số KPI","KPIs"),null,(d.rows||[]).length]].map(function(x){
+        var b=kmBand(x[1]); return '<div style="'+(b?"background:"+b.bg+";border-color:"+b.bg:"")+'"><small>'+esc(x[0])+'</small><b style="color:'+(b?b.fg:"var(--ink)")+'">'+(x.length>2?x[2]:kmPct(x[1]))+'</b></div>';
+      }).join("")+'</div>'+
+    (wT?'<div class="km-cov">'+TX("Đã có số liệu: ","Data available: ")+'<b>'+Math.round(wD/wT*100)+'%</b>'+TX(" tổng trọng số"," of total weight")+'<div class="bar"><i style="width:'+Math.round(wD/wT*100)+'%"></i></div></div>':"")+
+    '</div>';
+  var tb=(d.rows&&d.rows.length)
+    ? '<div class="tbwrap" style="max-height:'+(opt.maxH||560)+'px"><table class="km-tb"><thead><tr><th>'+TX("Mã","Code")+'</th><th>KPI</th><th class="hide-s" style="text-align:right">Target</th>'+
+      '<th style="text-align:right">Actual</th><th>'+TX("% đạt","Achieved")+'</th><th class="hide-s" style="text-align:right">'+TX("Trọng số","Weight")+'</th><th style="text-align:right">'+TX("Điểm","Score")+'</th></tr></thead><tbody>'+body+'</tbody></table></div>'
+    : '<div class="km-empty">'+TX("Chưa có mã KPI nào cho ","No KPI rows for ")+esc(m.key)+'</div>';
+  var leg='<div class="km-leg">'+KM_BANDS.map(function(b){ return '<span><i style="background:'+b.bg+';border:1px solid '+b.fg+'"></i>'+TX(b.vi,b.en)+'</span>'; }).join("")+
+    '<span style="margin-left:auto">'+TX("Điểm = Σ (% đạt × trọng số) · chấm vàng = tháng đã chốt","Score = Σ (achievement × weight) · yellow dot = closed month")+'</span></div>';
+  return tl+'<div class="km-body">'+side+'<div class="km-main">'+tb+leg+'</div></div>';
+}
+function kmPickerHtml(sel,onchange){
+  var vis=kmVisible();
+  if(vis.length<=1) return "";
+  var depts=[];
+  vis.forEach(function(m){ var dp=m.dept||"—"; if(depts.indexOf(dp)<0) depts.push(dp); });
+  return '<select class="km-sel" onchange="'+onchange+'(this.value)">'+depts.map(function(dp){
+    return '<optgroup label="'+esc(dp)+'">'+vis.filter(function(m){ return (m.dept||"—")===dp; }).map(function(m){
+      return '<option value="'+esc(m.key)+'"'+(kmKey(m.key)===kmKey(sel)?" selected":"")+'>'+esc(m.key)+(m.title?" — "+esc(m.title):"")+'</option>'; }).join("")+'</optgroup>';
+  }).join("")+'</select>';
+}
+
+/* ═══════════ TAB KPI: khối "KPI cá nhân" đặt trên cùng ═══════════ */
+function kmSectionHtml(){
+  var head='<div class="km-h"><h3>📊 '+TX("KPI cá nhân · file KPI FY68","Personal KPI · KPI FY68 file")+'</h3>'+
+    '<span class="km-live"><i></i>'+TX("Realtime từ KPI Hub","Live from the KPI Hub")+(S.km.list&&S.km.list.readAt?" · "+esc(S.km.list.readAt.slice(-8,-3)):"")+'</span>'+
+    '<div class="sp" style="flex:1"></div>'+
+    (S.km.list?kmPickerHtml(S.kmPic,"kmSetPic"):"")+
+    '<div class="km-seg">'+[["M",TX("Tháng","Month")],["Q",TX("Quý","Quarter")],["FY","FY"]].map(function(x){
+      return '<b class="'+((S.kmView||"M")===x[0]?"on":"")+'" onclick="S.kmView=\''+x[0]+'\';kmPaint()">'+x[1]+'</b>'; }).join("")+'</div>'+
+    '<button class="btn sm" onclick="kmRefresh()" title="'+TX("Đọc lại ngay từ file KPI","Read the KPI file again now")+'">⟳</button></div>';
+  if(S.km.err && !S.km.list) return '<section class="card km">'+head+'<div class="km-err"><b>'+TX("Chưa đọc được KPI Hub: ","Cannot read the KPI Hub: ")+'</b>'+esc(S.km.err)+'</div></section>';
+  var d=S.kmPic?S.km.by[kmKey(S.kmPic)]:null;
+  if(!S.km.list || (S.kmPic && !d)) return '<section class="card km">'+head+'<div style="padding:14px 18px">'+skRows(4,true)+'</div></section>';
+  if(!S.kmPic) return '<section class="card km">'+head+'<div class="km-empty">'+TX("Tài khoản ","Account ")+esc(S.user.pic)+TX(" chưa có KPI trong sheet 5. Member KPI Monthly."," has no KPI in sheet 5. Member KPI Monthly.")+'</div></section>';
+  if(!S.kmMonth||d.months.indexOf(S.kmMonth)<0) S.kmMonth=kmDefaultMonth(d);
+  return '<section class="card km">'+head+kmBlock(d,{ view:S.kmView||"M", month:S.kmMonth, onMonth:"kmSetMonth" })+'</section>';
+}
+function kmPaint(){
+  var box=$("kmSec"); if(!box) return;
+  box.innerHTML=kmSectionHtml();
+}
+function kmMount(){
+  var pg=document.querySelector("#main .pg"); if(!pg) return;
+  var ph=pg.querySelector(".ph");
+  var box=document.createElement("div"); box.id="kmSec";
+  if(ph&&ph.nextSibling) pg.insertBefore(box,ph.nextSibling); else pg.insertBefore(box,pg.firstChild);
+  kmPaint();
+  kmEnsure(false).then(function(){ if(S.tab==="kpi") kmPaint(); }).catch(function(){ if(S.tab==="kpi") kmPaint(); });
+}
+function kmEnsure(force){
+  return kmLoadList(force).then(function(){
+    if(!S.kmPic || !kmVisible().some(function(m){ return kmKey(m.key)===kmKey(S.kmPic); })) S.kmPic=kmDefaultPic();
+    if(!S.kmPic) return null;
+    return kmLoadMember(S.kmPic,force);
+  });
+}
+function kmSetPic(v){ S.kmPic=v; S.kmMonth=""; kmPaint(); kmLoadMember(v).then(function(){ kmPaint(); if(S.tab==="report"&&S.rpKind==="kpi") renderReport(); }).catch(function(){ kmPaint(); }); }
+function kmSetMonth(ym){ S.kmMonth=ym; if((S.kmView||"M")==="FY") S.kmView="M"; kmPaint(); }
+function kmRefresh(){
+  toast(TX("Đang đọc lại file KPI…","Reading the KPI file again…"),"",1600);
+  kmEnsure(true).then(function(){ kmPaint(); if(S.tab==="report"&&S.rpKind==="kpi"){ if(S.kr.dirty) rpKpiPaintTable(); else renderReport(); } toast(TX("✓ Đã cập nhật số liệu KPI mới nhất","✓ Latest KPI figures loaded"),"ok",2200); })
+    .catch(function(e){ kmPaint(); toast(e.message,"err",5000); });
+}
+/* tự đọc lại mỗi 60 giây khi đang mở tab KPI hoặc Báo cáo KPI */
+setInterval(function(){
+  if(document.hidden) return;
+  var onKpi=S.tab==="kpi", onRp=S.tab==="report"&&S.rpKind==="kpi";
+  if(!onKpi&&!onRp) return;
+  if(!S.km.list||Date.now()-S.km.at<60000) return;
+  kmEnsure(true).then(function(){ if(S.tab==="kpi") kmPaint(); else if(S.tab==="report"&&S.rpKind==="kpi") rpKpiPaintTable(); }).catch(function(){});
+},15000);
+
+/* gắn khối KPI cá nhân vào trang KPI (giữ nguyên toàn bộ bảng KPI theo CRM bên dưới) */
+var _renderKPI_crm=renderKPI;
+renderKPI=function(){ _renderKPI_crm.apply(this,arguments); try{ kmMount(); }catch(e){} };
+
+/* ═══════════ GỬI BÁO CÁO: lựa chọn thứ 3 "Báo cáo KPI" ═══════════ */
+S.kr=S.kr||{ to:null, cc:null, subject:"", note:"", prevHtml:"", prevKey:"", dirty:false };
+var _renderReport_v25=renderReport;
+renderReport=function(){
+  if(S.rpKind==="kpi") return renderReportKpi();
+  _renderReport_v25.apply(this,arguments);
+  var chips=document.querySelector("#main .pg .ph .chips");
+  if(chips && !chips.querySelector("[data-kpi]")) chips.insertAdjacentHTML("beforeend",'<div class="chip" data-kpi="1" onclick="S.rpKind=\'kpi\';renderReport()">📊 '+TX("Báo cáo KPI","KPI report")+'</div>');
+};
+function rpKpiHead(){
+  return '<div class="ph"><div><h2>'+TX("Gửi báo cáo","Send report")+'</h2><p>'+TX("Báo cáo KPI tháng: xem bảng KPI · soạn email · xem trước đúng bản sẽ gửi","Monthly KPI report: review the KPI table · compose · preview the exact email")+'</p></div>'+
+    '<div class="sp"></div><div class="chips">'+
+      '<div class="chip" onclick="S.rpKind=\'week\';renderReport()">📅 '+TX("Báo cáo tuần","Weekly report")+'</div>'+
+      '<div class="chip" onclick="S.rpKind=\'month\';renderReport()">🗓 '+TX("Báo cáo tháng","Monthly report")+'</div>'+
+      '<div class="chip on" data-kpi="1">📊 '+TX("Báo cáo KPI","KPI report")+'</div>'+
+    '</div></div>';
+}
+function renderReportKpi(){
+  var head=rpKpiHead();
+  if(S.km.err && !S.km.list){
+    $("main").innerHTML='<div class="pg">'+head+'<div class="card"><div class="km-err"><b>'+TX("Chưa đọc được KPI Hub: ","Cannot read the KPI Hub: ")+'</b>'+esc(S.km.err)+
+      '<div style="margin-top:8px"><button class="btn sm" onclick="S.km.err=\'\';renderReport()">⟳ '+TX("Thử lại","Retry")+'</button></div></div></div></div>'; return;
+  }
+  var d=S.kmPic?S.km.by[kmKey(S.kmPic)]:null;
+  if(!S.km.list || (S.kmPic&&!d)){
+    $("main").innerHTML='<div class="pg">'+head+'<div class="card pad">'+skRows(5,true)+'</div></div>';
+    kmEnsure(false).then(function(){ if(S.tab==="report"&&S.rpKind==="kpi") renderReport(); })
+      .catch(function(){ if(S.tab==="report"&&S.rpKind==="kpi") renderReport(); });
+    return;
+  }
+  if(!S.kmPic){ $("main").innerHTML='<div class="pg">'+head+'<div class="card"><div class="km-empty">'+TX("Tài khoản của bạn chưa có KPI trong file KPI FY68.","Your account has no KPI in the KPI FY68 file.")+'</div></div></div>'; return; }
+  if(!S.kmMonth||d.months.indexOf(S.kmMonth)<0) S.kmMonth=kmDefaultMonth(d);
+  var key=S.kmPic+"|"+S.kmMonth;
+  if(S.kr.forKey!==S.kmPic){            /* đổi người ⇒ nạp lại người nhận mặc định */
+    S.kr.forKey=S.kmPic; S.kr.to=(d.to||[]).slice(); S.kr.cc=(d.cc||[]).slice();
+    var myMail=String(S.user.email||"").toLowerCase();
+    if(myMail && S.kr.to.indexOf(myMail)<0 && S.kr.cc.indexOf(myMail)<0) S.kr.cc.push(myMail);
+    S.kr.subject=""; S.kr.prevHtml=""; S.kr.prevKey="";
+  }
+  var m=d.member||{}, closed=(d.closed||[]).indexOf(S.kmMonth)>=0;
+  var cfg='<div class="card pad" style="margin-bottom:12px"><div class="ct"><span class="dot"></span>'+TX("Kỳ báo cáo KPI","KPI report period")+
+      '<span class="sp"></span>'+kmPickerHtml(S.kmPic,"rpKpiPic")+'</div>'+
+    '<div class="chipbar">'+d.months.map(function(ym,i){
+      var v=d.sum&&d.sum.m?d.sum.m[i]:null;
+      return '<div class="chip'+(S.kmMonth===ym?" on":"")+'" onclick="rpKpiMonth(\''+ym+'\')">'+kmYm(ym)+((d.closed||[]).indexOf(ym)>=0?" ✓":"")+(v!=null?' <span style="opacity:.75;font-weight:600">'+kmPct(v)+'</span>':"")+'</div>'; }).join("")+'</div>'+
+    '<div class="hint" style="margin-top:8px">'+(closed?TX("Tháng ","Month ")+kmYm(S.kmMonth)+TX(" đã chốt số."," is closed."):
+      '<b style="color:#B7791F">'+TX("Tháng ","Month ")+kmYm(S.kmMonth)+TX(" chưa chốt số (chốt sau 16:00 ngày 2 tháng sau) — số còn có thể thay đổi."," is not closed yet (closes 16:00 on day 2 of the next month) — figures may still change.")+'</b>')+'</div></div>';
+  var steps='<div class="kr-steps"><span><i>1</i>'+TX("Xem bảng KPI tháng","Review the monthly KPI")+'</span><span><i>2</i>'+TX("Soạn email","Compose")+'</span><span><i>3</i>'+TX("Xem trước & gửi","Preview & send")+'</span></div>';
+  var table='<section class="card km" id="krTable"><div class="km-h"><h3>① '+TX("Bảng KPI tháng ","KPI table ")+kmYm(S.kmMonth)+' · '+esc(m.key)+'</h3>'+
+    '<span class="km-live"><i></i>'+TX("đọc lúc ","read at ")+esc(String(d.readAt||"").slice(-8,-3))+'</span><div class="sp" style="flex:1"></div>'+
+    '<button class="btn sm" onclick="kmRefresh()">⟳ '+TX("Đọc lại","Reload")+'</button></div>'+
+    kmBlock(d,{ view:"M", month:S.kmMonth, onMonth:"rpKpiMonth", maxH:520 })+'</section>';
+  var dirMails=kmMembersAll().filter(function(x){ return x.email; }).map(function(x){ return x.email; });
+  var defSub="[MMH KPI] "+TX("Báo cáo KPI tháng ","KPI report ")+kmYm(S.kmMonth).replace(/(\d\d)\/(\d\d)/,"$1/20$2")+" — "+m.key;
+  var composer='<section class="card pad" style="margin-bottom:14px"><div class="ct" style="margin-bottom:12px"><span class="dot"></span>② '+TX("Soạn email báo cáo KPI","Compose the KPI email")+'</div>'+
+    '<div class="kr-grid"><div class="kr-form">'+
+      '<div class="fld"><label>'+TX("Gửi tới (To)","To")+'</label><div class="kr-chips" id="krTo" onclick="this.querySelector(\'input\').focus()">'+krChips("to")+
+        '<input list="krDir" placeholder="'+TX("gõ email rồi Enter","type an email, press Enter")+'" onkeydown="krKey(event,\'to\')" onblur="krAdd(\'to\',this)"></div></div>'+
+      '<div class="fld"><label>CC</label><div class="kr-chips" id="krCc" onclick="this.querySelector(\'input\').focus()">'+krChips("cc")+
+        '<input list="krDir" placeholder="'+TX("thêm người nhận CC","add a CC recipient")+'" onkeydown="krKey(event,\'cc\')" onblur="krAdd(\'cc\',this)"></div>'+
+        '<div class="kr-sug">'+(d.cc||[]).concat(d.to||[]).filter(function(e,i,a){ return a.indexOf(e)===i && S.kr.to.indexOf(e)<0 && S.kr.cc.indexOf(e)<0; }).map(function(e){
+          return '<b onclick="krPush(\'cc\',\''+esc(e)+'\')">+ '+esc(e)+'</b>'; }).join("")+'</div></div>'+
+      '<datalist id="krDir">'+dirMails.map(function(e){ return '<option value="'+esc(e)+'">'; }).join("")+'</datalist>'+
+      '<div class="fld"><label>'+TX("Tiêu đề","Subject")+'</label><input class="inp" id="krSub" maxlength="200" value="'+esc(S.kr.subject||defSub)+'" oninput="S.kr.subject=this.value;krDirty()"></div>'+
+      '<div class="fld"><label>'+TX("Lời nhắn (hiện trong khung vàng phía trên bảng KPI)","Message (shown in the yellow box above the KPI table)")+'</label>'+
+        '<textarea id="krNote" maxlength="1200" placeholder="'+TX("VD: Tháng này em cần đẩy mạnh viếng thăm Dealer để bù chỉ tiêu C3-01…","E.g. This month please focus on dealer visits to close the C3-01 gap…")+'" oninput="S.kr.note=this.value;krDirty()">'+esc(S.kr.note||"")+'</textarea>'+
+        '<div class="hint" style="margin-top:4px">'+TX("Tối đa 1.200 ký tự. Người gửi: ","Up to 1,200 characters. Sender: ")+'<b>'+esc(S.user.pic)+'</b>'+(S.user.email?' · reply-to '+esc(S.user.email):"")+'</div></div>'+
+      '<div class="kr-act">'+
+        '<button class="btn" onclick="krPreview(true)">👁 '+TX("Xem trước email","Preview email")+'</button>'+
+        (S.user.email?'<button class="btn" onclick="krSend(true)">✉️ '+TX("Gửi thử cho tôi","Send a test to me")+'</button>':"")+
+        '<button class="btn pri" onclick="krSend(false)">📧 '+TX("Gửi báo cáo KPI","Send KPI report")+'</button></div>'+
+    '</div><div>'+
+      '<div class="kr-prev"><div class="bar">③ <b>'+TX("Xem trước","Preview")+'</b><span class="sp" style="flex:1"></span><span id="krPrevSt">'+(S.kr.prevKey===key&&S.kr.prevHtml?TX("đúng bản sẽ gửi","exactly what will be sent"):TX("bấm “Xem trước email”","press “Preview email”"))+'</span></div>'+
+        '<div class="kr-meta" id="krMeta"></div>'+
+        '<iframe id="krFrame" title="Email preview" sandbox=""></iframe></div>'+
+    '</div></div></section>';
+  $("main").innerHTML='<div class="pg">'+head+cfg+steps+table+composer+'</div>';
+  krMeta();
+  if(S.kr.prevKey===key && S.kr.prevHtml) krShow(S.kr.prevHtml); else krPreview(false);
+}
+function rpKpiPaintTable(){
+  if(!(S.tab==="report"&&S.rpKind==="kpi")) return;
+  var sec=$("krTable"), d=S.km.by[kmKey(S.kmPic)];
+  if(!sec||!d) return;
+  var keep=sec.querySelector(".km-h"); var h=keep?keep.outerHTML:"";
+  sec.innerHTML=h+kmBlock(d,{ view:"M", month:S.kmMonth, onMonth:"rpKpiMonth", maxH:520 });
+}
+function rpKpiPic(v){ S.kmPic=v; S.kmMonth=""; S.kr.forKey=""; renderReport(); }
+function rpKpiMonth(ym){ S.kmMonth=ym; S.kr.subject=""; renderReport(); }
+function krChips(which){
+  return (S.kr[which]||[]).map(function(e,i){
+    var ok=/^[^@\s]+@(manimedicalhanoi\.com|mani\.inc)$/i.test(e);
+    return '<span class="kr-chip'+(ok?"":" bad")+'" title="'+(ok?"":TX("Chỉ nhận email @manimedicalhanoi.com hoặc @mani.inc","Only @manimedicalhanoi.com or @mani.inc addresses"))+'">'+esc(e)+
+      '<button type="button" onclick="event.stopPropagation();krDel(\''+which+'\','+i+')" aria-label="remove">×</button></span>'; }).join("");
+}
+function krRefreshChips(which){
+  var box=$(which==="to"?"krTo":"krCc"); if(!box) return;
+  var inp=box.querySelector("input"), keep=inp?inp.outerHTML:"";
+  box.innerHTML=krChips(which)+keep;
+  krMeta(); krDirty();
+}
+function krPush(which,e){
+  e=String(e||"").trim().toLowerCase().replace(/[;,]+$/,""); if(!e) return;
+  var other=which==="to"?"cc":"to";
+  if(S.kr[which].indexOf(e)<0) S.kr[which].push(e);
+  var j=S.kr[other].indexOf(e); if(j>=0){ S.kr[other].splice(j,1); krRefreshChips(other); }
+  krRefreshChips(which);
+}
+function krAdd(which,inp){ var v=String(inp.value||""); if(!v.trim()) return; v.split(/[,;\s]+/).forEach(function(x){ if(x) krPush(which,x); }); inp.value=""; }
+function krKey(ev,which){
+  if(ev.key==="Enter"||ev.key===","||ev.key===";"){ ev.preventDefault(); krAdd(which,ev.target); var b=$(which==="to"?"krTo":"krCc"); if(b) b.querySelector("input").focus(); }
+  else if(ev.key==="Backspace" && !ev.target.value && S.kr[which].length){ S.kr[which].pop(); krRefreshChips(which); var b2=$(which==="to"?"krTo":"krCc"); if(b2) b2.querySelector("input").focus(); }
+}
+function krDel(which,i){ S.kr[which].splice(i,1); krRefreshChips(which); }
+function krMeta(){
+  var el=$("krMeta"); if(!el) return;
+  el.innerHTML='<div><b>To:</b> '+(S.kr.to.length?esc(S.kr.to.join(", ")):'<span style="color:#A82F2C">'+TX("chưa có người nhận","no recipient yet")+'</span>')+'</div>'+
+    (S.kr.cc.length?'<div><b>CC:</b> '+esc(S.kr.cc.join(", "))+'</div>':"")+
+    '<div><b>'+TX("Tiêu đề","Subject")+':</b> '+esc(($("krSub")&&$("krSub").value)||"")+'</div>';
+}
+var _krT=null;
+function krDirty(){ S.kr.dirty=true; krMeta(); var st=$("krPrevSt"); if(st) st.textContent=TX("nội dung đã đổi — bấm “Xem trước email” để cập nhật","content changed — press “Preview email” to refresh"); }
+function krParams(){
+  var d=S.km.by[kmKey(S.kmPic)]||{};
+  return { member:S.kmPic, month:S.kmMonth, note:String(S.kr.note||"").slice(0,1200),
+           subject:String(($("krSub")&&$("krSub").value)||S.kr.subject||"").slice(0,200),
+           sender:S.user.pic, senderEmail:S.user.email||"", lang:kmLang(d.member) };
+}
+function krShow(html){
+  var f=$("krFrame"); if(!f) return;
+  f.srcdoc='<!doctype html><html><head><meta charset="utf-8"><style>body{margin:0}</style></head><body>'+html+'</body></html>';
+}
+function krPreview(manual){
+  var p=krParams(), key=S.kmPic+"|"+S.kmMonth, st=$("krPrevSt");
+  if(st) st.textContent=TX("đang dựng bản xem trước…","building the preview…");
+  p.action="kpiApiPreview"; p._ts=Date.now();
+  kraCall(p).then(function(j){
+    S.kr.prevHtml=j.html; S.kr.prevKey=key; S.kr.dirty=false;
+    if(!S.kr.subject && $("krSub") && !$("krSub").value) $("krSub").value=j.subject;
+    krShow(j.html); krMeta();
+    var s2=$("krPrevSt"); if(s2) s2.textContent=TX("đúng bản sẽ gửi · ","exactly what will be sent · ")+String(j.readAt||"").slice(-8,-3);
+  }).catch(function(e){ var s3=$("krPrevSt"); if(s3) s3.textContent="⚠️ "+e.message; if(manual) toast(e.message,"err",5000); });
+}
+function krSend(test){
+  ["to","cc"].forEach(function(w){ var b=$(w==="to"?"krTo":"krCc"); if(b){ var i=b.querySelector("input"); if(i&&i.value) krAdd(w,i); } });
+  var p=krParams();
+  var bad=S.kr.to.concat(S.kr.cc).filter(function(e){ return !/^[^@\s]+@(manimedicalhanoi\.com|mani\.inc)$/i.test(e); });
+  if(!test && bad.length) return toast(TX("Email không hợp lệ: ","Invalid email: ")+bad.join(", "),"err",5000);
+  var to=test?[String(S.user.email||"").toLowerCase()]:S.kr.to.slice(), cc=test?[]:S.kr.cc.slice();
+  if(!to.length||!to[0]) return toast(TX("Chưa có người nhận (To).","No recipient (To) yet."),"err",4000);
+  var msg=(test?TX("Gửi bản thử tới ","Send a test copy to "):TX("Gửi báo cáo KPI tháng ","Send the KPI report ")+kmYm(S.kmMonth)+TX(" của "," of ")+S.kmPic+TX(" tới ",": to "))+to.join(", ")+(cc.length?"\nCC: "+cc.join(", "):"")+" ?";
+  if(!confirm(msg)) return;
+  p.action="kpiApiSend"; p.to=to.join(","); p.cc=cc.join(","); p._ts=Date.now();
+  if(test) p.subject="[TEST] "+p.subject;
+  busy(true,TX("Đang gửi email KPI…","Sending the KPI email…"));
+  kraCall(p,90000).then(function(j){
+    busy(false); toast("✓ "+(j.message||TX("Đã gửi","Sent")),"ok",5200);
+  }).catch(function(e){ busy(false); toast(e.message,"err",6000); });
+}
+</script>
+
 </body>
 </html>
