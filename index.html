@@ -3979,7 +3979,7 @@ function buildNav(){
     if(t.grp!==lastGrp){ h+='<div class="grp">'+t.grp+'</div>'; lastGrp=t.grp; }
     h+='<button class="nvi" data-t="'+t.id+'" onclick="go(\''+t.id+'\')"><span class="ic">'+t.ic+'</span><span class="lb">'+t.lb+'</span></button>';
   });
-  h+='<div style="flex:1"></div><div style="padding:10px;font-size:10.5px;color:var(--mute);line-height:1.5">MMH CRM v27<br>'+
+  h+='<div style="flex:1"></div><div style="padding:10px;font-size:10.5px;color:var(--mute);line-height:1.5">MMH CRM v27.1<br>'+
      (isMgmt()?'<a href="'+DRIVE_FOLDER+'" target="_blank">📁 Folder ảnh Drive</a>':"")+'</div>';
   $("side").innerHTML=h;
   /* ⭐ v4.5 — thanh dưới trượt ngang, đủ mọi mục, bỏ nút "Thêm" */
@@ -17688,6 +17688,41 @@ function krSend(test){
 .na-cm li{margin:5px 0}
 .na-cm label{display:flex;gap:9px;align-items:flex-start;font-size:12.5px;line-height:1.5;cursor:pointer}
 .na-cm input{margin-top:3px;width:16px;height:16px;flex:none}
+.na-ord{border:1px solid var(--line);border-radius:12px;padding:10px 12px;background:var(--pale)}
+.na-ord-h{display:flex;align-items:center;gap:8px;margin-bottom:7px;font-size:13px;color:var(--ink)}
+.na-ord-l{display:flex;flex-direction:column;gap:6px;max-height:300px;overflow:auto}
+.na-ord-i{display:flex;gap:10px;align-items:flex-start;background:var(--card);border:1.5px solid var(--line);border-radius:10px;padding:9px 11px;cursor:pointer;font-size:13px}
+.na-ord-i:hover{border-color:var(--blue-l)}
+.na-ord-i.on{border-color:var(--blue);background:#EEF4FB}
+.na-ord-i .rd{width:16px;height:16px;border-radius:50%;border:2px solid var(--line);flex:none;margin-top:2px;box-sizing:border-box}
+.na-ord-i.on .rd{border:5px solid var(--blue)}
+.na-ord-i .mu{color:var(--sub);font-weight:500}
+.na-sku-pick{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.na-skus{display:flex;flex-wrap:wrap;gap:6px;min-height:34px;align-items:center;border:1px solid var(--line);border-radius:10px;padding:5px 7px;background:var(--card)}
+.na-skc{display:inline-flex;align-items:center;gap:5px;font-size:12.5px;font-weight:650;padding:4px 10px;border-radius:8px;border:1.5px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer}
+.na-skc i{font-style:normal;font-weight:600;color:var(--mute);font-size:11px}
+.na-skc.on{border-color:var(--blue);background:#EEF4FB;color:var(--navy)}
+.na-reqs{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:10px}
+.na-rq{font-size:12.5px;font-weight:750;padding:5px 11px;border-radius:999px}
+.na-rq.y{background:#D5F0D8;color:#1E6B34}.na-rq.n{background:#FBEDEC;color:#A4413E}.na-rq.o{background:var(--pale);color:var(--sub)}
+.na-kinds{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-bottom:9px}
+.na-kinds .lb{font-size:12.5px;font-weight:700;color:var(--sub);margin-right:3px}
+.na-kinds b{font-size:13px;font-weight:700;padding:6px 13px;border-radius:9px;border:1.5px solid var(--line);background:var(--card);color:var(--sub);cursor:pointer}
+.na-kinds b.on{border-color:var(--blue);background:var(--blue);color:#fff}
+.na-dz{display:block;border:2.5px dashed var(--blue-l);border-radius:16px;padding:26px 16px;text-align:center;cursor:pointer;background:#F6F9FD;transition:.15s}
+.na-dz:hover,.na-dz.hov{border-color:var(--blue);background:#E9F1FB}
+.na-dz input{display:none}
+.na-dz .ic{font-size:38px;line-height:1}
+.na-dz .t1{font-size:16px;font-weight:800;color:var(--navy);margin-top:6px}
+.na-dz .t2{font-size:13px;color:var(--ink);margin-top:5px;line-height:1.5}
+.na-dz .t3{font-size:12px;color:var(--mute);margin-top:4px}
+.na-fgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px;margin-top:12px}
+.na-ft{font-size:12px}
+.na-ft .na-th{aspect-ratio:4/3;font-size:26px}
+.na-ft .na-th .sp{position:absolute;inset:0;display:grid;place-items:center;background:rgba(255,255,255,.55);font-size:24px}
+.na-ft small{display:block;color:var(--sub);word-break:break-all;line-height:1.35;margin-top:4px}
+.na-ft .st{color:var(--blue);font-weight:700}.na-ft .st.er{color:#A4413E}
+.na-ft .rm{font-size:11.5px;color:#A4413E;font-weight:700;text-decoration:none}
 @media (max-width:900px){ .na-det{grid-template-columns:1fr} .na-kpis{grid-template-columns:repeat(2,1fr)} .na-types{grid-template-columns:1fr} }
 </style>
 <script>
@@ -17926,7 +17961,8 @@ function naDelFile(fid){
   var c=S.na.cur; if(!c||!confirm(TX("Xoá chứng từ này khỏi case và Drive?","Remove this file from the case and Drive?"))) return;
   apiPost({ action:"naDelFile", id:c.id, fileId:fid }).then(function(j){
     if(j.rec){ S.na.cur=j.rec; naMerge(j.rec); } else if(S.na.cur){ S.na.cur.files=(S.na.cur.files||[]).filter(function(f){ return f.id!==fid; }); }
-    if($("naWz")) naWzFiles(); else naDetail();
+    if(S.na.wz) S.na.wz.files=(S.na.wz.files||[]).filter(function(f){ return f.id!==fid; });
+    if($("naWz")){ naWzFiles(); naWzCheck(); } else naDetail();
   }).catch(function(e){ toast(e.message,"err",5000); });
 }
 
@@ -17938,7 +17974,7 @@ function naMissing(c){
   if(c.type==="new_sku"&&!c.sku) m.push(TX("mã SKU","SKU code"));
   if(!c.orderNo&&!(Number(c.qty)>0)) m.push(TX("số đơn hoặc số lượng của đơn đầu tiên","first order No. or quantity"));
   if(!(c.weekly&&c.weekly.n>0)) m.push(TX("lịch sử chăm sóc trên báo cáo tuần trước ngày đơn đầu tiên","follow-up history in the weekly report before the first order"));
-  NA_EV.forEach(function(e){ if(e.req&&!(c.files||[]).some(function(f){ return f.kind===e.k; })) m.push(TX("chứng từ: ","evidence: ")+TX(e.vi,e.en)); });
+  NA_EV.forEach(function(e){ if(e.req&&!(c.files||[]).some(function(f){ return f.kind===e.k&&f.id; })) m.push(TX("chứng từ: ","evidence: ")+TX(e.vi,e.en)); });
   NA_CK.forEach(function(x){ if(!(c.checklist&&c.checklist[x.k])) m.push(TX("tick cam kết: ","confirmation: ")+TX(x.vi,x.en)); });
   return m;
 }
@@ -17957,71 +17993,200 @@ function naLocalWeekly(pic,acc,until){
   return out.sort(function(a,b){ return a.d<b.d?1:-1; });
 }
 
-/* ── form tạo / sửa case ── */
-function naForm(id){
-  var c=id?JSON.parse(JSON.stringify(S.na.cur||{})):{ type:"new_account", pic:S.user.pic, checklist:{}, files:[], status:"Draft" };
+/* ── form tạo / sửa case (v27.1) ── */
+function naForm(id,keep){
+  var c;
+  if(keep && S.na.wz) c=S.na.wz;
+  else c=id?JSON.parse(JSON.stringify(S.na.cur||{})):{ type:"new_account", pic:S.user.pic, checklist:{}, files:[], status:"Draft" };
+  if(!c.skuSel) c.skuSel=String(c.sku||"").split(/\s*;\s*|\n/).filter(Boolean);
+  if(c.ptype==null) c.ptype=c.detail||"";
   S.na.wz=c;
+  if(!noOrder() && !tGet("order")) ensureTab("order",{},function(r,ready){ if(ready&&$("naWz")) naOrdDraw(); });
+  loadProductCodes();
   var nppList=NA_NPP[curTeamKey()]||[];
-  var custs=(S.custIndex||[]).filter(function(x){ return !c.pic||!x.pic||naNorm(x.pic)===naNorm(c.pic)||S.na.seeAll; }).slice(0,3000);
-  var pcs=(S.pcode&&S.pcode.items)||[];
+  var custs=(S.custIndex||[]).filter(function(x){ return S.na.seeAll||!x.pic||naNorm(x.pic)===naNorm(c.pic); }).slice(0,3000);
   var tip=function(vi,en){ return '<div class="tip">'+TX(vi,en)+'</div>'; };
   var body='<div class="na-wz" id="naWz">'+
     '<div class="sec"><div class="sh"><i>1</i>'+TX("Loại case","Case type")+'</div>'+
-      tip("Chọn đúng loại theo quy định: <b>Đại lý mới</b> = đại lý đặt đơn MANI đầu tiên qua NPP trong FY68, do bạn mở. <b>SKU mới</b> = đại lý đã có, nay đặt một mã SKU MANI lần đầu. Mỗi đại lý / mỗi cặp đại lý + SKU chỉ tính 1 lần.",
-          "Pick the right type: <b>New account</b> = the account's first MANI order through the distributor in FY68, opened by you. <b>New SKU</b> = an existing account ordering a MANI SKU for the first time. Each account / account + SKU counts once.")+
+      tip("<b>Đại lý mới</b> = đại lý đặt đơn MANI đầu tiên qua NPP trong FY68, do bạn mở. <b>SKU mới</b> = đại lý đã có, nay đặt một mã SKU MANI lần đầu. Mỗi đại lý / mỗi cặp đại lý + SKU chỉ tính 1 lần.",
+          "<b>New account</b> = the account's first MANI order through the distributor in FY68, opened by you. <b>New SKU</b> = an existing account ordering a MANI SKU for the first time. Each account / account + SKU counts once.")+
       '<div class="na-types">'+[["new_account",TX("🏪 Đại lý / khách hàng mới","🏪 New account"),TX("Đơn MANI đầu tiên của đại lý qua NPP trong FY","The account's first MANI order through the distributor in the FY")],
         ["new_sku",TX("📦 SKU mới","📦 New SKU"),TX("Đại lý đặt một mã SKU MANI lần đầu","The account orders a MANI SKU for the first time")]].map(function(t){
         return '<label class="'+(c.type===t[0]?"on":"")+'" onclick="naWzType(\''+t[0]+'\',this)"><input type="radio" name="naType" value="'+t[0]+'"'+(c.type===t[0]?" checked":"")+'><b>'+t[1]+'</b>'+t[2]+'</label>'; }).join("")+'</div></div>'+
     '<div class="sec"><div class="sh"><i>2</i>'+TX("Đại lý &amp; nhà phân phối","Account &amp; distributor")+'</div>'+
-      tip("Gõ tên đại lý đúng như trên CRM để app đối chiếu lịch sử chăm sóc ở báo cáo tuần. Case <b>không gửi được</b> nếu đại lý chưa có lượt chăm sóc nào trước ngày đơn đầu tiên.",
-          "Type the account name exactly as in the CRM so the app can match the follow-up history in the weekly report. A case <b>cannot be sent</b> without any follow-up before the first order.")+
+      tip("Chọn đại lý trong danh sách CRM để app đối chiếu lịch sử chăm sóc ở báo cáo tuần và tìm các đơn hàng đã có. Case <b>không gửi được</b> nếu chưa có lượt chăm sóc nào trước ngày đơn đầu tiên.",
+          "Pick the account from the CRM list so the app can match the follow-up history and the existing orders. A case <b>cannot be sent</b> without any follow-up before the first order.")+
       '<div class="na-row">'+
-        (S.na.seeAll?'<div><label class="l">PIC</label><select class="inp" id="naPic" onchange="S.na.wz.pic=this.value;naWzCheck()">'+(function(){ var l=[]; (S.master.pic||[]).concat([c.pic]).forEach(function(p){ if(p&&l.indexOf(p)<0&&!/sale admin|team$/i.test(p)) l.push(p); }); return l.map(function(p){ return '<option'+(p===c.pic?" selected":"")+'>'+esc(p)+'</option>'; }).join(""); })()+'</select></div>':"")+
-        '<div style="grid-column:span 2"><label class="l">'+TX("Tên đại lý / khách hàng *","Account name *")+'</label><input class="inp" id="naAcc" list="naAccL" value="'+esc(c.account||"")+'" oninput="naWzAcc(this.value)"></div>'+
-        '<div><label class="l">'+TX("Nhà phân phối *","Distributor *")+'</label><input class="inp" id="naNpp" list="naNppL" value="'+esc(c.npp||"")+'"></div></div>'+
+        (S.na.seeAll?'<div><label class="l">PIC</label><select class="inp" id="naPic" onchange="S.na.wz.pic=this.value;naWzCheck();naOrdDraw()">'+(function(){ var l=[]; (S.master.pic||[]).concat([c.pic]).forEach(function(p){ if(p&&l.indexOf(p)<0&&!/sale admin|team$/i.test(p)) l.push(p); }); return l.map(function(p){ return '<option'+(p===c.pic?" selected":"")+'>'+esc(p)+'</option>'; }).join(""); })()+'</select></div>':"")+
+        '<div style="grid-column:span 2"><label class="l">'+TX("Tên đại lý / khách hàng *","Account name *")+'</label><input class="inp" id="naAcc" list="naAccL" autocomplete="off" value="'+esc(c.account||"")+'" oninput="naWzAcc(this.value)" onchange="naWzAcc(this.value)"></div>'+
+        '<div><label class="l">'+TX("Nhà phân phối *","Distributor *")+'</label><input class="inp" id="naNpp" list="naNppL" value="'+esc(c.npp||"")+'" oninput="naWzCheck()"></div></div>'+
       '<div class="na-row" style="margin-top:9px"><div><label class="l">'+TX("Loại khách hàng","Account type")+'</label><input class="inp" id="naAT" value="'+esc(c.accType||"")+'"></div>'+
         '<div><label class="l">'+TX("Tỉnh / thành","Province")+'</label><input class="inp" id="naPv" value="'+esc(c.province||"")+'"></div>'+
         '<div><label class="l">Customer code</label><input class="inp" id="naCode" value="'+esc(c.code||"")+'"></div></div>'+
       '<datalist id="naAccL">'+custs.map(function(x){ return '<option value="'+esc(x.name)+'">'; }).join("")+'</datalist>'+
       '<datalist id="naNppL">'+nppList.map(function(x){ return '<option value="'+esc(x)+'">'; }).join("")+'</datalist>'+
       '<div id="naWk"></div></div>'+
-    '<div class="sec"><div class="sh"><i>3</i>'+TX("Đơn hàng đầu tiên qua NPP","First order through the distributor")+'</div>'+
-      tip("Case được tính vào <b>tháng của ngày đơn đầu tiên</b>. Ghi đúng mã SKU MANI và số đơn / số lượng như trên chứng từ.",
-          "The case counts in the <b>month of the first order</b>. Use the exact MANI SKU code and the order No. / quantity shown on the documents.")+
-      '<div class="na-row"><div><label class="l">'+TX("Ngày đơn đầu tiên *","First order date *")+'</label><input class="inp" type="date" id="naOD" value="'+esc(c.orderDate||"")+'" onchange="naWzCheck()"></div>'+
-        '<div><label class="l">'+TX("Số đơn hàng","Order No.")+'</label><input class="inp" id="naON" value="'+esc(c.orderNo||"")+'"></div>'+
-        '<div><label class="l">'+TX("Số lượng","Quantity")+'</label><input class="inp" type="number" min="0" id="naQty" value="'+esc(c.qty||"")+'"></div>'+
+    '<div class="sec"><div class="sh"><i>3</i>'+TX("Đơn hàng đầu tiên &amp; SKU","First order &amp; SKU")+'</div>'+
+      (noOrder()
+        ? tip("Case được tính vào <b>tháng của ngày đơn đầu tiên</b>. Ghi đúng mã SKU MANI và số đơn / số lượng như trên chứng từ.","The case counts in the <b>month of the first order</b>. Use the exact MANI SKU and the order No. / quantity shown on the documents.")
+        : tip("Chọn đơn trong <b>Sale Order</b> của đại lý này (các ô ngày, số đơn, số lượng tự điền), rồi tick mã SKU cần ghi nhận — không cần chọn hết. Chưa có đơn thì bấm <b>＋ Tạo đơn hàng mới</b>: đơn được lưu vào Sale Order rồi quay lại đây.",
+              "Pick the account's order from the <b>Sale Order</b> sheet (date, order No. and quantity fill in), then tick the SKU(s) to record. No order yet? Press <b>＋ New order</b>: it is saved to Sale Order and you come back here."))+
+      (noOrder()?'':'<div id="naOrdBox"></div>')+
+      '<div class="na-row" style="margin-top:9px"><div><label class="l">'+TX("Ngày đơn đầu tiên *","First order date *")+'</label><input class="inp" type="date" id="naOD" value="'+esc(c.orderDate||"")+'" onchange="naWzCheck()"></div>'+
+        '<div><label class="l">'+TX("Số đơn hàng","Order No.")+'</label><input class="inp" id="naON" value="'+esc(c.orderNo||"")+'" oninput="naWzCheck()"></div>'+
+        '<div><label class="l">'+TX("Số lượng","Quantity")+'</label><input class="inp" type="number" min="0" id="naQty" value="'+esc(c.qty||"")+'" oninput="naWzCheck()"></div>'+
         '<div><label class="l">'+TX("Giá trị (tuỳ chọn)","Amount (optional)")+'</label><input class="inp" type="number" min="0" id="naAmt" value="'+esc(c.amount||"")+'"></div></div>'+
-      '<div class="na-row" style="margin-top:9px"><div><label class="l">'+TX("Mã SKU","SKU code")+'<span id="naSkuReq">'+(c.type==="new_sku"?" *":"")+'</span></label><input class="inp" id="naSku" list="naSkuL" value="'+esc(c.sku||"")+'" oninput="naWzSku(this.value)"></div>'+
-        '<div style="grid-column:span 2"><label class="l">'+TX("Tên sản phẩm","Product")+'</label><input class="inp" id="naDet" value="'+esc(c.detail||"")+'"></div></div>'+
-      '<datalist id="naSkuL">'+pcs.slice(0,4000).map(function(x){ return '<option value="'+esc(x[1]||x[0])+'">'+esc(x[0])+'</option>'; }).join("")+'</datalist>'+
+      '<div class="na-row" style="margin-top:9px"><div><label class="l">Product type</label><select class="inp" id="naPT" onchange="S.na.wz.ptype=this.value">'+opts(S.master.product||[],c.ptype,TX("— chọn —","— pick —"))+'</select></div>'+
+        '<div style="grid-column:span 3"><label class="l">'+TX("Mã SKU / Detail","SKU / Detail")+'<span id="naSkuReq">'+(c.type==="new_sku"?" *":"")+'</span></label><div id="naSkuBox"></div></div></div>'+
       '<div style="margin-top:9px"><label class="l">'+TX("Ghi chú","Note")+'</label><input class="inp" id="naNote" value="'+esc(c.note||"")+'" maxlength="500"></div></div>'+
-    '<div class="sec"><div class="sh"><i>4</i>'+TX("Chứng từ — kéo thả hoặc bấm chọn tệp","Evidence — drag &amp; drop or pick files")+'</div>'+
-      tip("Ảnh chụp màn hình email, ảnh chụp chứng từ, PDF đều được. Tệp tải lên Drive ngay và tự đặt tên <b>PIC_ngày_Đại lý_SKU</b>. Ảnh được nén nhẹ nhưng vẫn đọc rõ chữ.",
-          "Email screenshots, photos of documents and PDFs are all fine. Files go to Drive immediately, named <b>PIC_date_Account_SKU</b>. Photos are lightly compressed but stay readable.")+
-      '<div id="naFiles"></div></div>'+
+    '<div class="sec"><div class="sh"><i>4</i>'+TX("Chứng từ","Evidence")+'</div><div id="naFiles"></div></div>'+
     '<div class="sec"><div class="sh"><i>5</i>'+TX("Cam kết &amp; gửi","Confirm &amp; send")+'</div>'+
       '<ul class="na-cm">'+NA_CK.map(function(x){ return '<li><label><input type="checkbox" id="naCk_'+x.k+'"'+(c.checklist&&c.checklist[x.k]?" checked":"")+' onchange="naWzCheck()"><span>'+esc(TX(x.vi,x.en))+'</span></label></li>'; }).join("")+'</ul>'+
       '<div id="naMiss" style="margin-top:10px"></div></div></div>';
   var foot='<button class="btn" onclick="closeModal()">'+TX("Huỷ","Cancel")+'</button>'+
     '<button class="btn" onclick="naWzSave(false)">💾 '+TX("Lưu nháp","Save draft")+'</button>'+
     '<button class="btn pri" onclick="naWzSave(true)">📧 '+TX("Lưu &amp; gửi email xin xác nhận","Save &amp; send for approval")+'</button>';
-  openModal(id?TX("Sửa case ","Edit case ")+esc(c.id):TX("Thêm case mở mới","Add a new-account / SKU case"),body,foot,true);
-  naWzFiles(); naWzCheck();
+  openModal(c.id?TX("Sửa case ","Edit case ")+esc(c.id):TX("Thêm case mở mới","Add a new-account / SKU case"),body,foot,true);
+  S.modalRewire=naWzRewire;
+  naWzRewire();
 }
+/* vẽ lại các phần động (gọi cả khi quay lại từ form đơn hàng) */
+function naWzRewire(){ S.na.reopen=false; naOrdDraw(); naSkuDraw(); naWzFiles(); naWzCheck(); naDZArm(); }
 function naWzType(t,el){ S.na.wz.type=t; document.querySelectorAll(".na-types label").forEach(function(l){ l.classList.toggle("on",l===el); }); var r=$("naSkuReq"); if(r) r.textContent=t==="new_sku"?" *":""; naWzCheck(); }
 function naWzAcc(v){
   var c=(S.custIndex||[]).filter(function(x){ return naNorm(x.name)===naNorm(v); })[0];
-  if(c){ if($("naAT")&&!$("naAT").value) $("naAT").value=c.type||""; if($("naPv")&&!$("naPv").value) $("naPv").value=c.province||""; if($("naCode")&&!$("naCode").value) $("naCode").value=c.code||""; }
-  naWzCheck();
+  if(c){ if($("naAT")) $("naAT").value=c.type||$("naAT").value; if($("naPv")) $("naPv").value=c.province||$("naPv").value; if($("naCode")) $("naCode").value=c.code||$("naCode").value; }
+  naOrdDraw(); naWzCheck();
 }
-function naWzSku(v){ var it=((S.pcode&&S.pcode.items)||[]).filter(function(x){ return String(x[1]||x[0])===v; })[0]; if(it&&$("naDet")&&!$("naDet").value) $("naDet").value=it[0]; naWzCheck(); }
+
+/* ── đơn hàng của đại lý (sheet Sale Order) ── */
+function naOrders(){
+  var w=S.na.wz||{}, acc=naNorm(($("naAcc")||{}).value||w.account), code=String(($("naCode")||{}).value||w.code||"").trim();
+  if(!acc && !code) return [];
+  var pool=(((S.cache.order||{}).rows)||[]).concat(tGet("order")||[]), seen={}, by={}, out=[];
+  pool.forEach(function(o){
+    if(o._row&&seen[o._row]) return; if(o._row) seen[o._row]=1;
+    if(!((acc&&naNorm(o.name)===acc)||(code&&String(o.code||"")===code))) return;
+    var no=String(o.orderNo||"").trim()||("("+String(o.day||o.month||"")+")");
+    var g=by[no]; if(!g){ g=by[no]={ no:no, day:String(o.day||"").slice(0,10), pic:o.pic||"", lines:[], qty:0, amt:0 }; out.push(g); }
+    var ds=pcSplit(o.detail);
+    g.lines.push({ ptype:o.ptype||"", details:ds.length?ds:[o.ptype||"—"], qty:n(o.qty), amt:n(o.amount) });
+    g.qty+=n(o.qty); g.amt+=n(o.amount);
+    if(!g.day && o.day) g.day=String(o.day).slice(0,10);
+  });
+  return out.sort(function(a,b){ return a.day<b.day?-1:1; });
+}
+function naOrdDraw(){
+  var box=$("naOrdBox"); if(!box) return;
+  var w=S.na.wz||{}, list=naOrders(), loading=!tGet("order");
+  var sel=String(w.orderNo||"");
+  var h='<div class="na-ord"><div class="na-ord-h"><b>'+TX("Đơn hàng trong Sale Order","Orders in the Sale Order sheet")+'</b>'+
+      '<span class="sp" style="flex:1"></span><button class="btn sm" type="button" onclick="naNewOrder()">＋ '+TX("Tạo đơn hàng mới","New order")+'</button></div>';
+  if(!($("naAcc")||{}).value) h+='<div class="hint">'+TX("Chọn đại lý ở bước 2 để xem các đơn đã có.","Pick the account in step 2 to see its orders.")+'</div>';
+  else if(loading) h+='<div class="hint">'+TX("Đang nạp Sale Order…","Loading the Sale Order sheet…")+'</div>';
+  else if(!list.length) h+='<div class="hint">'+TX("Đại lý này chưa có đơn nào trong Sale Order — bấm “＋ Tạo đơn hàng mới”.","No order for this account yet — press “＋ New order”.")+'</div>';
+  else h+='<div class="na-ord-l">'+list.map(function(g){
+      var on=sel&&sel===g.no;
+      return '<div class="na-ord-i'+(on?" on":"")+'" onclick="naPickOrder(\''+esc(g.no).replace(/'/g,"\\'")+'\')">'+
+        '<span class="rd"></span><div style="min-width:0;flex:1"><b>'+esc(g.no)+'</b> <span class="mu">· '+(g.day?fmtVN(g.day):"—")+' · '+g.lines.length+TX(" dòng"," line(s)")+(g.amt?' · '+fmtVND(g.amt):"")+(g.pic?' · '+esc(g.pic):"")+'</span>'+
+        (on?'<div class="na-sku-pick">'+g.lines.map(function(l){
+          return l.details.map(function(d){ var k=(w.skuSel||[]).indexOf(d)>=0;
+            return '<span class="na-skc'+(k?" on":"")+'" onclick="event.stopPropagation();naTogSku(\''+esc(d).replace(/'/g,"\\'")+'\',\''+esc(l.ptype).replace(/'/g,"\\'")+'\')">'+(k?"✓ ":"")+esc(d)+(l.ptype?' <i>'+esc(l.ptype)+'</i>':"")+'</span>'; }).join("");
+        }).join("")+'<div class="hint" style="margin-top:4px">'+TX("Tick mã SKU cần ghi nhận (không cần chọn hết).","Tick the SKU(s) to record (no need to pick all).")+'</div></div>':"")+
+        '</div></div>';
+    }).join("")+'</div>';
+  box.innerHTML=h+'</div>';
+}
+function naPickOrder(no){
+  var g=naOrders().filter(function(x){ return x.no===no; })[0]; if(!g) return;
+  var w=S.na.wz; naWzRead();
+  w.orderNo=g.no.charAt(0)==="("?"":g.no; w.orderDate=g.day||w.orderDate; w.qty=g.qty||w.qty; w.amount=g.amt||w.amount;
+  if($("naON")) $("naON").value=w.orderNo; if($("naOD")&&g.day) $("naOD").value=g.day; if($("naQty")) $("naQty").value=w.qty||""; if($("naAmt")) $("naAmt").value=w.amount||"";
+  if(!w.ptype && g.lines.length===1 && g.lines[0].ptype){ w.ptype=g.lines[0].ptype; if($("naPT")) $("naPT").value=w.ptype; }
+  if(w.type==="new_account" && !(w.skuSel||[]).length){ w.skuSel=[]; g.lines.forEach(function(l){ l.details.forEach(function(d){ if(d!=="—"&&w.skuSel.indexOf(d)<0) w.skuSel.push(d); }); }); }
+  naOrdQty();
+  naOrdDraw(); naSkuDraw(); naWzCheck();
+}
+/* số lượng / giá trị = các dòng của đơn có chứa mã SKU đang chọn (chưa chọn mã nào ⇒ cả đơn) */
+function naOrdQty(){
+  var w=S.na.wz, g=naOrders().filter(function(x){ return x.no===w.orderNo; })[0]; if(!g) return;
+  var L=w.skuSel||[], q=0, a=0, any=false;
+  g.lines.forEach(function(l){ if(!L.length||l.details.some(function(d){ return L.indexOf(d)>=0; })){ q+=l.qty; a+=l.amt; any=true; } });
+  if(!any){ q=g.qty; a=g.amt; }
+  w.qty=q||""; w.amount=a||"";
+  if($("naQty")) $("naQty").value=w.qty; if($("naAmt")) $("naAmt").value=w.amount;
+}
+function naTogSku(d,pt){
+  var w=S.na.wz, L=w.skuSel||(w.skuSel=[]), i=L.indexOf(d);
+  if(i>=0) L.splice(i,1); else L.push(d);
+  naOrdQty();
+  if(pt && !w.ptype){ w.ptype=pt; if($("naPT")) $("naPT").value=pt; }
+  naOrdDraw(); naSkuDraw(); naWzCheck();
+}
+/* tạo đơn mới trong Sale Order rồi quay lại form case */
+function naNewOrder(){
+  naWzRead();
+  var w=S.na.wz, c=(S.custIndex||[]).filter(function(x){ return naNorm(x.name)===naNorm(w.account); })[0]||{};
+  if(!w.account) return toast(TX("Chọn đại lý trước khi tạo đơn.","Pick the account first."),"warn",4000);
+  S.na.reopen=true; S.na.lastOrder=null;
+  formOrder({ name:c.name||w.account, code:c.code||w.code||"", type:c.type||w.accType||"", province:c.province||w.province||"", area:c.area||"", address:c.address||"",
+              pic:w.pic||S.user.pic, day:w.orderDate||todayISO(), partner:w.npp||"" });
+}
+var _naAfterWrite=afterWrite;
+afterWrite=function(tab,row,d){
+  var r=_naAfterWrite.apply(this,arguments);
+  try{ if(tab==="order" && S.na && S.na.reopen && d){ S.na.lastOrder={ no:String(d.orderNo||""), day:String(d.day||"").slice(0,10) }; } }catch(e){}
+  return r;
+};
+var _naCloseAll=closeAllModals;
+closeAllModals=function(){
+  var back=S.na&&S.na.reopen&&S.na.lastOrder;
+  _naCloseAll.apply(this,arguments);
+  if(back){
+    S.na.reopen=false;
+    var lo=S.na.lastOrder; S.na.lastOrder=null;
+    setTimeout(function(){
+      naForm(S.na.wz&&S.na.wz.id,true);
+      setTimeout(function(){ if(lo.no) naPickOrder(lo.no); },120);
+      toast(TX("Đã thêm đơn ","Order ")+lo.no+TX(" vào Sale Order — chọn mã SKU cần ghi nhận"," added to Sale Order — tick the SKU(s) to record"),"ok",4500);
+    },80);
+  } else if(S.na) S.na.reopen=false;
+};
+
+/* ── mã SKU: chọn từ danh mục 12. PRODUCT CODE (dùng lại bộ chọn của form đơn hàng) ── */
+function naSkuDraw(){
+  var box=$("naSkuBox"); if(!box) return;
+  var w=S.na.wz||{}, L=w.skuSel||[], hasPc=!!(S.pcode&&S.pcode.items&&S.pcode.items.length);
+  box.innerHTML='<div class="na-skus">'+(L.length?L.map(function(d,k){ return '<span class="na-skc on" title="'+TX("Bỏ mã này","Remove")+'" onclick="naSkuDel('+k+')">'+esc(d)+' ✕</span>'; }).join("")
+      :'<span class="hint" style="margin:0">'+TX("Chưa chọn mã SKU","No SKU selected yet")+'</span>')+'</div>'+
+    '<div style="display:flex;gap:7px;margin-top:6px;flex-wrap:wrap">'+
+      (hasPc?'<button class="btn sm" type="button" onclick="naSkuPicker()">📦 '+TX("Chọn từ danh mục Product code","Pick from the product code list")+'</button>':"")+
+      '<input class="inp" id="naSkuTx" style="flex:1;min-width:180px;height:32px" placeholder="'+TX("hoặc gõ mã rồi Enter","or type a code and press Enter")+'" onkeydown="if(event.key===\'Enter\'){event.preventDefault();naSkuAdd(this)}" onblur="naSkuAdd(this)"></div>';
+}
+function naSkuAdd(inp){ var v=String(inp.value||"").trim(); if(!v) return; var w=S.na.wz; w.skuSel=w.skuSel||[]; v.split(/\s*;\s*/).forEach(function(x){ if(x&&w.skuSel.indexOf(x)<0) w.skuSel.push(x); }); inp.value=""; naSkuDraw(); naOrdDraw(); naWzCheck(); }
+function naSkuDel(k){ var w=S.na.wz; (w.skuSel||[]).splice(k,1); naSkuDraw(); naOrdDraw(); naWzCheck(); }
+function naSkuPicker(){
+  naWzRead();
+  S._naOrdBak=S.ordProds; S.ordProds=[{ ptype:S.na.wz.ptype||"", details:(S.na.wz.skuSel||[]).slice(), detail:"" }];
+  S.pcMode="na"; openDetailPicker(0);
+}
+var _naPcApply=pcApply;
+pcApply=function(){
+  if(S.pcMode!=="na") return _naPcApply.apply(this,arguments);
+  S.pcMode=""; S.na.wz.skuSel=Object.keys(S.pcPick||{});
+  S.ordProds=S._naOrdBak; S._naOrdBak=null;
+  closeModal2(); naSkuDraw(); naOrdDraw(); naWzCheck();
+};
+var _naClose2=closeModal2;
+closeModal2=function(){ if(S.pcMode==="na"){ S.pcMode=""; S.ordProds=S._naOrdBak; S._naOrdBak=null; } return _naClose2.apply(this,arguments); };
+
 function naWzRead(){
-  var c=S.na.wz, g=function(i){ var e=$(i); return e?String(e.value||"").trim():""; };
-  c.account=g("naAcc"); c.npp=g("naNpp"); c.accType=g("naAT"); c.province=g("naPv"); c.code=g("naCode");
-  c.orderDate=g("naOD"); c.orderNo=g("naON"); c.qty=g("naQty"); c.amount=g("naAmt"); c.sku=g("naSku"); c.detail=g("naDet"); c.note=g("naNote");
+  var c=S.na.wz, g=function(i){ var e=$(i); return e?String(e.value||"").trim():null; }, set=function(k,i){ var v=g(i); if(v!==null) c[k]=v; };
+  set("account","naAcc"); set("npp","naNpp"); set("accType","naAT"); set("province","naPv"); set("code","naCode");
+  set("orderDate","naOD"); set("orderNo","naON"); set("qty","naQty"); set("amount","naAmt"); set("note","naNote"); set("ptype","naPT");
   if($("naPic")) c.pic=$("naPic").value;
-  c.checklist={}; NA_CK.forEach(function(x){ var e=$("naCk_"+x.k); if(e&&e.checked) c.checklist[x.k]=1; });
+  c.sku=(c.skuSel||[]).join("; "); c.detail=c.ptype||"";
+  if($("naCk_first")){ c.checklist={}; NA_CK.forEach(function(x){ var e=$("naCk_"+x.k); if(e&&e.checked) c.checklist[x.k]=1; }); }
   return c;
 }
 function naWzCheck(){
@@ -18035,40 +18200,98 @@ function naWzCheck(){
   var miss=naMissing(tmp), box=$("naMiss");
   if(box) box.innerHTML=miss.length?'<div class="na-miss"><b>'+TX("Còn thiếu để gửi xin xác nhận:","Still missing before sending:")+'</b><br>• '+miss.map(esc).join("<br>• ")+'</div>'
     :'<div class="na-miss ok"><b>✓ '+TX("Đủ điều kiện","Ready")+'</b> — '+TX("bấm “Lưu &amp; gửi email xin xác nhận”. Email gửi tới ","press “Save &amp; send for approval”. The e-mail goes to ")+esc(((S.na.cur&&S.na.cur.mgrs)||[]).join(" / ")||TX("cấp trên","your manager"))+TX(", CC Giám đốc và vtt.hoa, kèm toàn bộ chứng từ.",", CC the Director and vtt.hoa, with all evidence attached.")+'</div>';
+  naReqDraw();
+}
+
+/* ── chứng từ: MỘT vùng kéo thả lớn, chọn loại chứng từ trước khi thả ── */
+function naNextKind(){
+  var fs=(S.na.wz&&S.na.wz.files)||[];
+  var miss=NA_EV.filter(function(e){ return e.req && !fs.some(function(f){ return f.kind===e.k&&(f.id||f._up); }); })[0];
+  return miss?miss.k:"other";
+}
+function naReqDraw(){
+  var el=$("naReq"); if(!el) return;
+  var fs=(S.na.wz&&S.na.wz.files)||[];
+  el.innerHTML=NA_EV.map(function(e){
+    var n0=fs.filter(function(f){ return f.kind===e.k&&f.id; }).length;
+    return '<span class="na-rq '+(n0?"y":e.req?"n":"o")+'">'+(n0?"✓":e.req?"!":"○")+' '+esc(TX(e.sv,e.se))+(n0?' · '+n0:"")+(e.req&&!n0?TX(" — bắt buộc"," — required"):"")+'</span>';
+  }).join("");
 }
 function naWzFiles(){
   var box=$("naFiles"); if(!box) return;
   var c=S.na.wz||{}, fs=c.files||[];
-  box.innerHTML=NA_EV.map(function(e){
-    var mine=fs.filter(function(f){ return f.kind===e.k; });
-    return '<div class="na-drop" data-k="'+e.k+'" ondragover="event.preventDefault();this.classList.add(\'hov\')" ondragleave="this.classList.remove(\'hov\')" ondrop="naDrop(event,\''+e.k+'\')">'+
-      '<div class="dh">'+(e.req?'<span class="req">'+TX("BẮT BUỘC","REQUIRED")+'</span>':'<span class="opt">'+TX("TUỲ CHỌN","OPTIONAL")+'</span>')+esc(TX(e.vi,e.en))+
-        '<label class="btn sm pick">📎 '+TX("Chọn tệp","Pick files")+'<input type="file" multiple accept="image/*,application/pdf,.doc,.docx,.xls,.xlsx,.eml,.msg" style="display:none" onchange="naPick(this,\''+e.k+'\')"></label></div>'+
-      '<div class="hint" style="margin-top:3px">'+esc(TX(e.hv,e.he))+'</div>'+
-      (mine.length?'<div class="fl">'+mine.map(function(f){
-        return '<div class="fi"><div class="na-th">'+(f._up?'⏳':naIsImg(f)?'<img src="'+(f._local||naThumb(f))+'" alt="">':'📄')+'</div><small>'+esc(String(f.orig||f.name).slice(0,40))+'</small>'+
-          (f.id&&!f._up?'<a href="#" style="font-size:10.5px;color:#A4413E" onclick="event.preventDefault();naDelFile(\''+esc(f.id)+'\')">'+TX("xoá","remove")+'</a>':"")+'</div>'; }).join("")+'</div>':"")+'</div>';
-  }).join("");
+  if(!S.na.dzKind || !NA_EV.some(function(e){ return e.k===S.na.dzKind; })) S.na.dzKind=naNextKind();
+  var cur=NA_EV.filter(function(e){ return e.k===S.na.dzKind; })[0];
+  box.innerHTML='<div class="na-reqs" id="naReq"></div>'+
+    '<div class="na-kinds"><span class="lb">'+TX("Tệp sắp tải lên là:","The next file is:")+'</span>'+NA_EV.map(function(e){
+      return '<b class="'+(e.k===S.na.dzKind?"on":"")+'" onclick="S.na.dzKind=\''+e.k+'\';naWzFiles()">'+esc(TX(e.sv,e.se))+(e.req?" *":"")+'</b>'; }).join("")+'</div>'+
+    '<label class="na-dz" id="naDZ"><input type="file" multiple accept="image/*,application/pdf,.doc,.docx,.xls,.xlsx,.eml,.msg" onchange="naPick(this)">'+
+      '<div class="ic">📥</div><div class="t1">'+TX("Kéo thả tệp vào đây hoặc bấm để chọn","Drag & drop files here or click to pick")+'</div>'+
+      '<div class="t2">'+TX("Đang tải lên cho: ","Uploading as: ")+'<b>'+esc(TX(cur.vi,cur.en))+'</b> — '+esc(TX(cur.hv,cur.he))+'</div>'+
+      '<div class="t3">'+TX("Ảnh chụp email, ảnh chứng từ, PDF · tự đặt tên PIC_ngày_Đại lý_SKU · tối đa 12 MB / tệp","Email screenshots, document photos, PDFs · auto-named PIC_date_Account_SKU · max 12 MB per file")+'</div></label>'+
+    (fs.length?'<div class="na-fgrid">'+fs.map(function(f){
+      return '<div class="na-ft'+(f._up?" up":"")+(f._err?" er":"")+'"><div class="na-th">'+((f._local||f._obj)?'<img src="'+(f._local||f._obj)+'" alt="">':(naIsImg(f)&&f.id?'<img src="'+naThumb(f)+'" alt="">':'📄'))+
+        (f._up?'<span class="sp">⏳</span>':"")+'<span class="k">'+esc(naEvS(f.kind))+'</span></div>'+
+        '<small title="'+esc(f.name||f.orig||"")+'">'+esc(String(f.orig||f.name||"").slice(0,34))+'</small>'+
+        (f._up?'<small class="st">'+TX("đang tải…","uploading…")+'</small>':f._err?'<small class="st er">'+esc(f._err)+'</small><a href="#" class="rm" onclick="event.preventDefault();naDropTmp(\''+esc(f.orig||"").replace(/'/g,"")+'\')">✕ '+TX("bỏ","dismiss")+'</a>':(f.id?'<a href="#" class="rm" onclick="event.preventDefault();naDelFile(\''+esc(f.id)+'\')">✕ '+TX("xoá","remove")+'</a>':""))+'</div>';
+    }).join("")+'</div>':"");
+  naReqDraw(); naDZArm();
 }
-function naDrop(ev,k){ ev.preventDefault(); var t=ev.currentTarget; t.classList.remove("hov"); naUploadFiles([].slice.call(ev.dataTransfer.files||[]),k); }
-function naPick(inp,k){ naUploadFiles([].slice.call(inp.files||[]),k); inp.value=""; }
-/* ảnh chứng từ: cạnh dài tối đa 2000px, JPEG 0.82 — vẫn đọc rõ chữ trên ảnh chụp email */
-function naShrink(file){
-  if(!/^image\/(jpeg|png|webp)$/i.test(file.type)||file.size<700*1024) return naReadB64(file);
-  return new Promise(function(res){
-    var img=new Image(), url=URL.createObjectURL(file);
-    img.onload=function(){ var mx=2000, w=img.width, h=img.height; if(w>mx||h>mx){ if(w>h){ h=Math.round(h*mx/w); w=mx; } else { w=Math.round(w*mx/h); h=mx; } }
-      var cv=document.createElement("canvas"); cv.width=w; cv.height=h; cv.getContext("2d").drawImage(img,0,0,w,h); URL.revokeObjectURL(url);
-      res({ b64:cv.toDataURL("image/jpeg",0.82), mime:"image/jpeg", name:file.name.replace(/\.\w+$/,"")+".jpg" }); };
-    img.onerror=function(){ URL.revokeObjectURL(url); naReadB64(file).then(res); };
-    img.src=url;
+function naDZArm(){
+  var dz=$("naDZ"); if(!dz||dz._armed) return; dz._armed=1;
+  ["dragenter","dragover"].forEach(function(t){ dz.addEventListener(t,function(e){ e.preventDefault(); e.stopPropagation(); try{ e.dataTransfer.dropEffect="copy"; }catch(x){} dz.classList.add("hov"); }); });
+  ["dragleave","dragend"].forEach(function(t){ dz.addEventListener(t,function(e){ e.preventDefault(); dz.classList.remove("hov"); }); });
+  dz.addEventListener("drop",function(e){ e.preventDefault(); e.stopPropagation(); dz.classList.remove("hov"); naUploadFiles([].slice.call((e.dataTransfer&&e.dataTransfer.files)||[]),S.na.dzKind); });
+}
+/* chặn trình duyệt tự mở tệp khi thả trượt ra ngoài vùng kéo thả trong lúc form đang mở */
+["dragover","drop"].forEach(function(t){ window.addEventListener(t,function(e){ if($("naWz")){ e.preventDefault(); } }); });
+function naDropTmp(o){ S.na.wz.files=(S.na.wz.files||[]).filter(function(f){ return !(f._err&&String(f.orig||"").replace(/'/g,"")===o); }); naWzFiles(); naWzCheck(); }
+function naPick(inp){ naUploadFiles([].slice.call(inp.files||[]),S.na.dzKind); inp.value=""; }
+function naUploadFiles(list,k){
+  if(!list.length) return;
+  k=k||naNextKind();
+  var big=list.filter(function(f){ return f.size>12*1048576; });
+  if(big.length) toast(TX("Bỏ qua tệp lớn hơn 12 MB: ","Skipped files over 12 MB: ")+big.map(function(f){ return f.name; }).join(", "),"err",6000);
+  list=list.filter(function(f){ return f.size<=12*1048576; });
+  if(!list.length) return;
+  /* hiện ngay ảnh xem trước (object URL), rồi mới lưu case + tải lên */
+  var tmps=list.map(function(file){ return { kind:k, orig:file.name, _up:1, mime:file.type, _obj:/^image\//.test(file.type)?URL.createObjectURL(file):"" }; });
+  S.na.wz.files=(S.na.wz.files||[]).concat(tmps);
+  naWzFiles();
+  naEnsureSaved().then(function(c){
+    var chain=Promise.resolve();
+    list.forEach(function(file,i){
+      var tmp=tmps[i];
+      chain=chain.then(function(){ return naShrink(file); }).then(function(x){
+        if(/^image\//.test(x.mime)) tmp._local=x.b64;
+        naWzFiles();
+        return apiPost({ action:"naUpload", id:c.id, b64:x.b64, mime:x.mime, name:x.name, kind:k });
+      }).then(function(j){
+        tmp._up=0;
+        if(j.file){ tmp.id=j.file.id; tmp.name=j.file.name; tmp.url=j.file.url; }
+        if(j.rec){ S.na.cur=j.rec; naMerge(j.rec); }
+        naWzFiles(); naWzCheck();
+      }).catch(function(e){ tmp._up=0; tmp._err=e.message; naWzFiles(); toast(file.name+": "+e.message,"err",6000); });
+    });
+    chain.then(function(){
+      if(S.na.dzKind===k) S.na.dzKind=naNextKind();
+      apiGet("naGet",{ id:c.id, _ts:Date.now() }).then(function(j){
+        if(!j.rec) return;
+        S.na.cur=j.rec; naMerge(j.rec);
+        var local=(S.na.wz.files||[]).filter(function(f){ return f._err; });
+        S.na.wz.files=(j.rec.files||[]).map(function(f){ var old=tmps.filter(function(t){ return t.id===f.id; })[0]; if(old){ f._local=old._local; f._obj=old._obj; } return f; }).concat(local);
+        S.na.wz.weekly=j.rec.weekly; naWzFiles(); naWzCheck();
+      }).catch(function(){ naWzFiles(); });
+    });
+  }).catch(function(e){
+    tmps.forEach(function(t){ t._up=0; t._err=TX("chưa lưu được case","case not saved"); });
+    naWzFiles();
   });
 }
-function naReadB64(file){ return new Promise(function(res,rej){ var r=new FileReader(); r.onload=function(){ res({ b64:r.result, mime:file.type||"application/octet-stream", name:file.name }); }; r.onerror=function(){ rej(new Error("read")); }; r.readAsDataURL(file); }); }
 function naEnsureSaved(){
   var c=naWzRead();
   if(c.id) return Promise.resolve(c);
-  if(!c.account){ toast(TX("Nhập tên đại lý trước khi tải chứng từ.","Enter the account name before uploading."),"err",4000); return Promise.reject(new Error("noacc")); }
+  if(!c.account){ toast(TX("Nhập tên đại lý ở bước 2 trước khi tải chứng từ — app cần lưu case nháp để có nơi lưu file.","Enter the account name in step 2 first — the app saves a draft case to hold the files."),"err",6000); return Promise.reject(new Error("noacc")); }
   return apiPost({ action:"naSave", data:naPayload(c) }).then(function(j){
     if(j.rec){ S.na.wz.id=j.rec.id; S.na.cur=j.rec; naMerge(j.rec); return S.na.wz; }
     return naLoad(true).then(function(rows){
@@ -18079,33 +18302,11 @@ function naEnsureSaved(){
   });
 }
 function naPayload(c){ return { id:c.id||"", pic:c.pic, type:c.type, account:c.account, code:c.code, accType:c.accType, province:c.province, npp:c.npp,
-  sku:c.sku, detail:c.detail, orderDate:c.orderDate, orderNo:c.orderNo, qty:c.qty, amount:c.amount, note:c.note, checklist:c.checklist }; }
-function naUploadFiles(list,k){
-  if(!list.length) return;
-  var big=list.filter(function(f){ return f.size>12*1048576; });
-  if(big.length) toast(TX("Bỏ qua tệp lớn hơn 12 MB: ","Skipped files over 12 MB: ")+big.map(function(f){ return f.name; }).join(", "),"err",6000);
-  list=list.filter(function(f){ return f.size<=12*1048576; });
-  naEnsureSaved().then(function(c){
-    var chain=Promise.resolve();
-    list.forEach(function(file){
-      var tmp={ kind:k, orig:file.name, _up:1, mime:file.type };
-      S.na.wz.files=(S.na.wz.files||[]).concat([tmp]); naWzFiles();
-      chain=chain.then(function(){ return naShrink(file); }).then(function(x){
-        tmp._local=/^image\//.test(x.mime)?x.b64:"";
-        return apiPost({ action:"naUpload", id:c.id, b64:x.b64, mime:x.mime, name:x.name, kind:k });
-      }).then(function(j){
-        if(j.file){ tmp.id=j.file.id; tmp.name=j.file.name; tmp.url=j.file.url; tmp._up=0; }
-        else tmp._up=0;
-        if(j.rec){ S.na.cur=j.rec; naMerge(j.rec); }
-        naWzFiles(); naWzCheck();
-      }).catch(function(e){ S.na.wz.files=S.na.wz.files.filter(function(f){ return f!==tmp; }); naWzFiles(); toast(file.name+": "+e.message,"err",6000); });
-    });
-    chain.then(function(){ apiGet("naGet",{ id:c.id, _ts:Date.now() }).then(function(j){ if(j.rec){ S.na.cur=j.rec; naMerge(j.rec); S.na.wz.files=j.rec.files||[]; S.na.wz.weekly=j.rec.weekly; naWzFiles(); naWzCheck(); } }).catch(function(){}); });
-  }).catch(function(){});
-}
+  sku:(c.skuSel||[]).join("; ")||c.sku||"", detail:c.ptype||c.detail||"", orderDate:c.orderDate, orderNo:c.orderNo, qty:c.qty, amount:c.amount, note:c.note, checklist:c.checklist }; }
 function naWzSave(send){
   var c=naWzRead();
   if(!c.account) return toast(TX("Nhập tên đại lý / khách hàng.","Enter the account name."),"err",4000);
+  if((c.files||[]).some(function(f){ return f._up; })) return toast(TX("Đợi tải xong chứng từ rồi lưu.","Wait for the uploads to finish."),"warn",4000);
   if(send){
     var tmp=JSON.parse(JSON.stringify(c)); tmp.weekly={ n:naLocalWeekly(c.pic||S.user.pic,c.account,c.orderDate||"").length };
     var miss=naMissing(tmp);
@@ -18121,6 +18322,20 @@ function naWzSave(send){
     return apiPost({ action:"naSubmit", id:id }).then(function(k){ busy(false); closeModal(); naAfter(k,k.message||TX("Đã gửi email xin xác nhận","Request sent")); });
   }).catch(function(e){ busy(false); toast(e.message,"err",8000); });
 }
+
+/* ảnh chứng từ: cạnh dài tối đa 2000px, JPEG 0.82 — vẫn đọc rõ chữ trên ảnh chụp email */
+function naShrink(file){
+  if(!/^image\/(jpeg|png|webp)$/i.test(file.type)||file.size<700*1024) return naReadB64(file);
+  return new Promise(function(res){
+    var img=new Image(), url=URL.createObjectURL(file);
+    img.onload=function(){ var mx=2000, w=img.width, h=img.height; if(w>mx||h>mx){ if(w>h){ h=Math.round(h*mx/w); w=mx; } else { w=Math.round(w*mx/h); h=mx; } }
+      var cv=document.createElement("canvas"); cv.width=w; cv.height=h; cv.getContext("2d").drawImage(img,0,0,w,h); URL.revokeObjectURL(url);
+      res({ b64:cv.toDataURL("image/jpeg",0.82), mime:"image/jpeg", name:file.name.replace(/\.\w+$/,"")+".jpg" }); };
+    img.onerror=function(){ URL.revokeObjectURL(url); naReadB64(file).then(res); };
+    img.src=url;
+  });
+}
+function naReadB64(file){ return new Promise(function(res,rej){ var r=new FileReader(); r.onload=function(){ res({ b64:r.result, mime:file.type||"application/octet-stream", name:file.name }); }; r.onerror=function(){ rej(new Error("read")); }; r.readAsDataURL(file); }); }
 
 /* ── biểu tượng ✉️ trên thanh đầu trang + mở thẳng case từ link email (#na=ID) ── */
 (function(){
