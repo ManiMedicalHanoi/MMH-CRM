@@ -3979,7 +3979,7 @@ function buildNav(){
     if(t.grp!==lastGrp){ h+='<div class="grp">'+t.grp+'</div>'; lastGrp=t.grp; }
     h+='<button class="nvi" data-t="'+t.id+'" onclick="go(\''+t.id+'\')"><span class="ic">'+t.ic+'</span><span class="lb">'+t.lb+'</span></button>';
   });
-  h+='<div style="flex:1"></div><div style="padding:10px;font-size:10.5px;color:var(--mute);line-height:1.5">MMH CRM v27.1<br>'+
+  h+='<div style="flex:1"></div><div style="padding:10px;font-size:10.5px;color:var(--mute);line-height:1.5">MMH CRM v27.2<br>'+
      (isMgmt()?'<a href="'+DRIVE_FOLDER+'" target="_blank">📁 Folder ảnh Drive</a>':"")+'</div>';
   $("side").innerHTML=h;
   /* ⭐ v4.5 — thanh dưới trượt ngang, đủ mọi mục, bỏ nút "Thêm" */
@@ -17723,6 +17723,28 @@ function krSend(test){
 .na-ft small{display:block;color:var(--sub);word-break:break-all;line-height:1.35;margin-top:4px}
 .na-ft .st{color:var(--blue);font-weight:700}.na-ft .st.er{color:#A4413E}
 .na-ft .rm{font-size:11.5px;color:#A4413E;font-weight:700;text-decoration:none}
+
+.hbtn.nab.on{animation:naPulse 1.6s infinite}
+@keyframes naPulse{0%{box-shadow:0 0 0 0 rgba(192,80,77,.55)}70%{box-shadow:0 0 0 9px rgba(192,80,77,0)}100%{box-shadow:0 0 0 0 rgba(192,80,77,0)}}
+#naAlert{position:fixed;right:22px;bottom:22px;z-index:60;display:none;align-items:center;gap:12px;background:#FFF2B3;color:#5C4500;border:1px solid #E8D27A;border-radius:14px;padding:10px 12px 10px 16px;box-shadow:0 10px 28px rgba(36,54,74,.18);font-size:13.5px;max-width:min(720px,94vw)}
+#naAlert.on{display:flex}
+@media (max-width:760px){ #naAlert{left:10px;right:10px;bottom:84px;max-width:none} }
+#naAlert b{font-weight:800}
+#naAlert .x{border:0;background:none;font-size:18px;color:#8A6D00;cursor:pointer;padding:0 4px}
+.na-th .ph{font-size:22px;opacity:.55}
+.na-gi .im{cursor:zoom-in}
+.na-vw{display:flex;flex-direction:column;gap:10px}
+.na-vw .stage{background:#1F2A36;border-radius:12px;min-height:46vh;display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative}
+.na-vw .stage img{max-width:100%;max-height:60vh;display:block}
+.na-vw .stage iframe{width:100%;height:60vh;border:0;background:#fff}
+.na-vw .stage .ld{color:#DDE3EA;font-size:14px}
+.na-vw .nav{position:absolute;top:50%;transform:translateY(-50%);width:42px;height:42px;border-radius:50%;border:0;background:rgba(255,255,255,.85);font-size:18px;cursor:pointer}
+.na-vw .nav.l{left:10px}.na-vw .nav.r{right:10px}
+.na-vw .meta{display:flex;gap:10px;align-items:center;flex-wrap:wrap;font-size:12.5px;color:var(--sub)}
+.na-vw .strip{display:flex;gap:6px;overflow:auto;padding-bottom:2px}
+.na-vw .strip div{width:64px;height:48px;flex:none;border-radius:7px;overflow:hidden;border:2px solid transparent;cursor:pointer;background:var(--line2);display:grid;place-items:center;font-size:18px}
+.na-vw .strip div.on{border-color:var(--blue)}
+.na-vw .strip img{width:100%;height:100%;object-fit:cover}
 @media (max-width:900px){ .na-det{grid-template-columns:1fr} .na-kpis{grid-template-columns:repeat(2,1fr)} .na-types{grid-template-columns:1fr} }
 </style>
 <script>
@@ -17751,7 +17773,43 @@ var NA_CK=[
 var NA_STL={ Draft:["Nháp","Draft"], Pending:["Chờ xác nhận","Waiting for approval"], Approved:["Đã xác nhận","Approved"], Rejected:["Bị từ chối","Rejected"] };
 function naStL(s){ var x=NA_STL[s]||[s,s]; return TX(x[0],x[1]); }
 function naTypeL(t){ return t==="new_sku"?TX("📦 SKU mới","📦 New SKU"):TX("🏪 Đại lý mới","🏪 New account"); }
-function naThumb(f,sz){ return "https://drive.google.com/thumbnail?id="+encodeURIComponent(f.id)+"&sz=w"+(sz||320); }
+S.na.th=S.na.th||{}; S.na.fd=S.na.fd||{};
+function naTh(f){
+  if(!f) return "";
+  if(f.id && S.na.th[f.id]) return S.na.th[f.id];
+  if(f.id && KV.ok){ var v=kvGet("k:*:nath:"+f.id); if(v){ S.na.th[f.id]=v; return v; } }
+  return f._local||f._obj||"";
+}
+/* ô ảnh: có ảnh thu nhỏ thì hiện, chưa có thì giữ chỗ (data-fid) rồi nạp theo lô */
+function naThImg(f){
+  var t=naTh(f);
+  if(t) return '<img loading="lazy" src="'+t+'" alt="">';
+  return '<span class="ph" data-fid="'+esc(f.id||"")+'">'+(naIsImg(f)?"🖼️":"📄")+'</span>';
+}
+var _naThQ={}, _naThT=null;
+function naThumbsLoad(ids){
+  (ids||[]).forEach(function(id){ if(id && !S.na.th[id] && !_naThQ[id]) _naThQ[id]=1; });
+  clearTimeout(_naThT);
+  _naThT=setTimeout(function(){
+    var list=Object.keys(_naThQ).filter(function(id){ return _naThQ[id]===1; }).slice(0,60);
+    if(!list.length) return;
+    list.forEach(function(id){ _naThQ[id]=2; });
+    apiGet("naThumbs",{ ids:list.join(","), _ts:Date.now() }).then(function(j){
+      var th=j.thumbs||{};
+      Object.keys(th).forEach(function(id){ S.na.th[id]=th[id]; if(KV.ok) kvSet("k:*:nath:"+id,th[id]); });
+      list.forEach(function(id){ if(!th[id]) _naThQ[id]=3; else delete _naThQ[id]; });
+      naThumbsPatch();
+      if(Object.keys(_naThQ).some(function(id){ return _naThQ[id]===1; })) naThumbsLoad([]);
+    }).catch(function(){ list.forEach(function(id){ _naThQ[id]=1; }); });
+  },60);
+}
+function naThumbsPatch(){
+  document.querySelectorAll("[data-fid]").forEach(function(el){
+    var id=el.getAttribute("data-fid"), t=S.na.th[id];
+    if(t) el.outerHTML='<img loading="lazy" src="'+t+'" alt="">';
+  });
+}
+function naThumbsFor(rows){ var ids=[]; (rows||[]).forEach(function(c){ (c.files||[]).forEach(function(f){ if(f.id&&!naTh(f)) ids.push(f.id); }); }); if(ids.length) naThumbsLoad(ids); }
 function naIsImg(f){ return /^image\//.test(f.mime||"")||/\.(png|jpe?g|webp|gif)$/i.test(f.name||""); }
 function naEvS(k){ var e=NA_EV.filter(function(x){ return x.k===k; })[0]; return e?TX(e.sv,e.se):k; }
 function naEvL(k){ var e=NA_EV.filter(function(x){ return x.k===k; })[0]; return e?TX(e.vi,e.en):k; }
@@ -17778,9 +17836,21 @@ function naLoad(force){
   });
   return S.na._ld;
 }
+function naGoPending(){ S.na.f={ month:"", pic:"", status:"", mine:S.na.pendingMine?1:0 }; naAlert(false,true); go("newacc"); }
+/* thông báo nổi cho người duyệt: hiện ở MỌI màn hình khi có case chờ xác nhận */
+function naAlert(show,dismiss){
+  var el=$("naAlert");
+  if(!el){ el=document.createElement("div"); el.id="naAlert"; document.body.appendChild(el); }
+  if(dismiss){ S.na.alertOff=Date.now(); el.classList.remove("on"); return; }
+  if(!show||!S.na.pendingMine||(S.na.alertOff&&Date.now()-S.na.alertOff<20*60000)){ el.classList.remove("on"); return; }
+  el.innerHTML='<span style="font-size:20px">📩</span><span>'+TX("Bạn có <b>"+S.na.pendingMine+" case mở mới / SKU mới</b> đang chờ xác nhận","You have <b>"+S.na.pendingMine+" new account / SKU case(s)</b> waiting for your approval")+'</span>'+
+    '<button class="btn sm pri" onclick="naGoPending()">'+TX("Xem &amp; xác nhận","Review")+'</button><button class="x" title="'+TX("Ẩn 20 phút","Hide for 20 min")+'" onclick="naAlert(false,true)">×</button>';
+  el.classList.add("on");
+}
 function naBadge(){
   var b=$("btnNa"); if(!b) return;
   b.classList.toggle("on",S.na.pendingMine>0);
+  naAlert(S.na.pendingMine>0 && !(S.tab==="newacc"&&S.na.f.mine));
   var c=b.querySelector(".cnt"); if(c) c.textContent=S.na.pendingMine>9?"9+":String(S.na.pendingMine||"");
   b.title=S.na.pendingMine?TX(S.na.pendingMine+" case mở mới đang chờ bạn xác nhận",S.na.pendingMine+" new-account case(s) waiting for your approval"):TX("Case mở mới — không có case chờ bạn xác nhận","New-account cases — nothing waiting for you");
 }
@@ -17795,9 +17865,9 @@ function pgNewAcc(){
 function naFiltered(){
   var f=S.na.f, me=String(S.user.pic||"").toLowerCase();
   return (S.na.rows||[]).filter(function(c){
+    if(f.mine) return c.canDecide;
     if(f.month && c.month!==f.month) return false;
     if(f.pic && String(c.pic).toLowerCase()!==String(f.pic).toLowerCase()) return false;
-    if(f.mine) return c.canDecide;
     if(f.status && c.status!==f.status) return false;
     return true;
   });
@@ -17830,12 +17900,13 @@ function naPaint(){
   var grid=rows.length?'<div class="na-grid">'+rows.map(naCardHtml).join("")+'</div>'
     :'<div class="card"><div class="km-empty">'+TX("Chưa có case nào khớp bộ lọc. Bấm “＋ Thêm case mở mới” để ghi nhận đại lý mới / SKU mới.","No case matches the filter. Press “＋ Add a case” to record a new account / new SKU.")+'</div></div>';
   $("main").innerHTML='<div class="pg">'+head+flt+kp+grid+'</div>';
+  naThumbsFor(rows);
 }
 function naCardHtml(c){
   var fs=c.files||[], ev;
   if(fs.length){
     ev=fs.slice(0,fs.length>4?3:4).map(function(x){
-      return '<div class="na-th">'+(naIsImg(x)?'<img loading="lazy" src="'+naThumb(x)+'" alt="">':'📄<br>'+esc(String(x.name).split(".").pop().toUpperCase()))+'<span class="k">'+esc(naEvS(x.kind))+'</span></div>';
+      return '<div class="na-th">'+naThImg(x)+'<span class="k">'+esc(naEvS(x.kind))+'</span></div>';
     }).join("")+(fs.length>4?'<div class="na-th more">+'+(fs.length-3)+'</div>':"");
   } else ev='<div class="na-th none">'+(c.status==="Rejected"?TX("Chứng từ đã gỡ khi từ chối","Evidence removed on rejection"):TX("Chưa có chứng từ","No evidence yet"))+'</div>';
   var wk=c.weekly||{n:0};
@@ -17877,8 +17948,9 @@ function naRules(){
 /* ── chi tiết case ── */
 function naOpen(id){
   var c=(S.na.rows||[]).filter(function(x){ return x.id===id; })[0];
+  S.na._detId="";
   if(c){ S.na.cur=c; naDetail(); }
-  apiGet("naGet",{ id:id, _ts:Date.now() }).then(function(j){ S.na.cur=j.rec; naMerge(j.rec); naDetail(); })
+  apiGet("naGet",{ id:id, _ts:Date.now() }).then(function(j){ S.na.cur=j.rec; naMerge(j.rec); if(!c||S.na._detId===id) naDetail(); })
     .catch(function(e){ if(!c) toast(e.message,"err",5000); });
 }
 function naMerge(rec){
@@ -17900,7 +17972,7 @@ function naDetail(){
     :'<div class="na-wk no">⚠️ '+TX("Chưa thấy lượt chăm sóc đại lý này trên báo cáo tuần trước ngày đơn đầu tiên — điều kiện bắt buộc.","No follow-up with this account in the weekly report before the first order — this is required.")+'</div>';
   var fs=c.files||[];
   var gal=fs.length?'<div class="na-gal">'+fs.map(function(x){
-    return '<div class="na-gi"><div class="im" onclick="window.open(\''+esc(x.url)+'\',\'_blank\')">'+(naIsImg(x)?'<img loading="lazy" src="'+naThumb(x,640)+'" alt="">':'📄')+'</div>'+
+    return '<div class="na-gi"><div class="im" onclick="naView(\''+esc(x.id)+'\')">'+naThImg(x)+'</div>'+
       '<div class="cap">'+(c.canEdit?'<button class="x" title="'+TX("Xoá","Remove")+'" onclick="naDelFile(\''+esc(x.id)+'\')">✕</button>':"")+'<b>'+esc(naEvL(x.kind))+'</b>'+esc(x.name)+'</div></div>'; }).join("")+'</div>'
     :'<div class="km-empty" style="padding:18px">'+(c.status==="Rejected"?TX("Chứng từ đã được gỡ khỏi Drive khi case bị từ chối.","The evidence was removed from Drive when the case was rejected."):TX("Chưa có chứng từ.","No evidence yet."))+'</div>';
   var banner='<div class="na-banner '+esc(c.status)+'"><b>'+naStL(c.status)+'</b> — '+naStatusLine(c)+(c.status==="Rejected"&&c.comment?'<div style="margin-top:4px;white-space:pre-wrap">'+TX("Lý do: ","Reason: ")+esc(c.comment)+'</div>':"")+'</div>';
@@ -17913,12 +17985,53 @@ function naDetail(){
     (c.canEdit?'<button class="btn" onclick="naForm(\''+esc(c.id)+'\')">✎ '+TX("Sửa / thêm chứng từ","Edit / add evidence")+'</button>':"")+
     ((c.status==="Draft")&&c.canEdit&&!c.canDecide?'<button class="btn pri" onclick="naSubmit()">📧 '+TX("Gửi email xin xác nhận","Send for approval")+'</button>':"")+
     (c.canDecide?'<button class="btn dg" onclick="naReject()">✕ '+TX("Từ chối","Reject")+'</button><button class="btn pri" onclick="naApprove()">✓ '+TX("Xác nhận","Approve")+'</button>':"");
-  openModal(naTypeL(c.type)+" · "+esc(c.account),body,foot,true);
+  /* đang mở đúng case này ⇒ thay nội dung tại chỗ, không chồng thêm một hộp thoại */
+  if($("ov").classList.contains("on") && S.na._detId===c.id && $("naDet")){
+    $("mBody").innerHTML='<div id="naDet">'+body+'</div>'; $("mFoot").innerHTML=foot;
+  } else {
+    openModal(naTypeL(c.type)+" · "+esc(c.account),'<div id="naDet">'+body+'</div>',foot,true);
+  }
+  S.na._detId=c.id;
+  naThumbsFor([c]);
 }
+/* ── xem chứng từ ngay trong app ── */
+function naView(fid){
+  var c=S.na.cur; if(!c) return;
+  var fs=(c.files||[]).filter(function(f){ return f.id; }), i=0;
+  fs.forEach(function(f,k){ if(f.id===fid) i=k; });
+  S.na.vw={ list:fs, i:i };
+  openModal2(TX("Chứng từ","Evidence"),'<div class="na-vw" id="naVw"></div>','<button class="btn" onclick="closeModal2()">'+TX("Đóng","Close")+'</button>');
+  try{ var m=$("modal2"); m.style.width="min(1100px,96vw)"; m.style.maxWidth="96vw"; }catch(e){}
+  naVwDraw();
+}
+function naVwGo(d){ var v=S.na.vw; if(!v) return; v.i=(v.i+d+v.list.length)%v.list.length; naVwDraw(); }
+function naVwDraw(){
+  var v=S.na.vw, box=$("naVw"); if(!v||!box) return;
+  var f=v.list[v.i]; if(!f) return;
+  var fd=S.na.fd[f.id];
+  var stage=fd&&fd.url
+    ? (/^image\//.test(fd.mime)?'<img src="'+fd.url+'" alt="">':/pdf/.test(fd.mime)?'<iframe src="'+fd.url+'"></iframe>':'<div class="ld">'+TX("Không xem trước được loại tệp này — ","No preview for this file type — ")+'<a style="color:#fff" href="'+fd.url+'" download="'+esc(f.name)+'">'+TX("tải về","download")+'</a></div>')
+    : fd&&fd.err ? '<div class="ld">'+esc(fd.err)+'</div>'
+    : '<div class="ld">'+(naTh(f)?'<img src="'+naTh(f)+'" style="opacity:.6;max-height:60vh" alt="">':TX("Đang mở tệp…","Opening the file…"))+'</div>';
+  box.innerHTML='<div class="stage">'+stage+(v.list.length>1?'<button class="nav l" onclick="naVwGo(-1)">◀</button><button class="nav r" onclick="naVwGo(1)">▶</button>':"")+'</div>'+
+    '<div class="meta"><b style="color:var(--ink)">'+esc(naEvL(f.kind))+'</b><span>'+esc(f.name)+'</span><span>·</span><span>'+(v.i+1)+'/'+v.list.length+'</span>'+
+      '<span class="sp" style="flex:1"></span><a class="btn sm" href="'+esc(f.url)+'" target="_blank" rel="noopener">Drive ↗</a></div>'+
+    (v.list.length>1?'<div class="strip">'+v.list.map(function(x,k){ return '<div class="'+(k===v.i?"on":"")+'" onclick="S.na.vw.i='+k+';naVwDraw()">'+naThImg(x)+'</div>'; }).join("")+'</div>':"");
+  if(!fd){
+    S.na.fd[f.id]={ loading:1 };
+    apiGet("naFileData",{ fileId:f.id, _ts:Date.now() }).then(function(j){
+      var bin=atob(j.data||""), u8=new Uint8Array(bin.length); for(var k=0;k<bin.length;k++) u8[k]=bin.charCodeAt(k);
+      S.na.fd[f.id]={ mime:j.mime||f.mime||"", url:URL.createObjectURL(new Blob([u8],{ type:j.mime||f.mime||"application/octet-stream" })) };
+      if(S.na.vw && S.na.vw.list[S.na.vw.i] && S.na.vw.list[S.na.vw.i].id===f.id) naVwDraw();
+    }).catch(function(e){ S.na.fd[f.id]={ err:e.message }; naVwDraw(); });
+  }
+  naThumbsFor([{ files:v.list }]);
+}
+document.addEventListener("keydown",function(e){ if(!S.na||!S.na.vw||!$("naVw")) return; if(e.key==="ArrowLeft") naVwGo(-1); else if(e.key==="ArrowRight") naVwGo(1); });
 function naAfter(j,msg){
   if(j&&j.rec){ S.na.cur=j.rec; naMerge(j.rec); }
   if(j&&(j.opaque||j.softTimeout)){ setTimeout(function(){ naLoad(true).then(function(){ naPaint(); if(S.na.cur) naOpen(S.na.cur.id); }); },2600); }
-  else naLoad(true).then(naPaint).catch(function(){});
+  else { naPaint(); setTimeout(function(){ naLoad(true).then(naPaint).catch(function(){}); },4000); }
   if(msg) toast(msg,"ok",5200);
 }
 function naSubmit(){
@@ -18003,6 +18116,7 @@ function naForm(id,keep){
   S.na.wz=c;
   if(!noOrder() && !tGet("order")) ensureTab("order",{},function(r,ready){ if(ready&&$("naWz")) naOrdDraw(); });
   loadProductCodes();
+  if(!noOrder() && typeof ensureCbc==="function") try{ ensureCbc(); }catch(e){}
   var nppList=NA_NPP[curTeamKey()]||[];
   var custs=(S.custIndex||[]).filter(function(x){ return S.na.seeAll||!x.pic||naNorm(x.pic)===naNorm(c.pic); }).slice(0,3000);
   var tip=function(vi,en){ return '<div class="tip">'+TX(vi,en)+'</div>'; };
@@ -18178,7 +18292,11 @@ pcApply=function(){
   closeModal2(); naSkuDraw(); naOrdDraw(); naWzCheck();
 };
 var _naClose2=closeModal2;
-closeModal2=function(){ if(S.pcMode==="na"){ S.pcMode=""; S.ordProds=S._naOrdBak; S._naOrdBak=null; } return _naClose2.apply(this,arguments); };
+closeModal2=function(){
+  if(S.pcMode==="na"){ S.pcMode=""; S.ordProds=S._naOrdBak; S._naOrdBak=null; }
+  if(S.na&&S.na.vw){ S.na.vw=null; try{ $("modal2").style.width=""; $("modal2").style.maxWidth=""; }catch(e){} }
+  return _naClose2.apply(this,arguments);
+};
 
 function naWzRead(){
   var c=S.na.wz, g=function(i){ var e=$(i); return e?String(e.value||"").trim():null; }, set=function(k,i){ var v=g(i); if(v!==null) c[k]=v; };
@@ -18230,12 +18348,13 @@ function naWzFiles(){
       '<div class="t2">'+TX("Đang tải lên cho: ","Uploading as: ")+'<b>'+esc(TX(cur.vi,cur.en))+'</b> — '+esc(TX(cur.hv,cur.he))+'</div>'+
       '<div class="t3">'+TX("Ảnh chụp email, ảnh chứng từ, PDF · tự đặt tên PIC_ngày_Đại lý_SKU · tối đa 12 MB / tệp","Email screenshots, document photos, PDFs · auto-named PIC_date_Account_SKU · max 12 MB per file")+'</div></label>'+
     (fs.length?'<div class="na-fgrid">'+fs.map(function(f){
-      return '<div class="na-ft'+(f._up?" up":"")+(f._err?" er":"")+'"><div class="na-th">'+((f._local||f._obj)?'<img src="'+(f._local||f._obj)+'" alt="">':(naIsImg(f)&&f.id?'<img src="'+naThumb(f)+'" alt="">':'📄'))+
+      return '<div class="na-ft'+(f._up?" up":"")+(f._err?" er":"")+'"><div class="na-th">'+((f._local||f._obj)?'<img src="'+(f._local||f._obj)+'" alt="">':naThImg(f))+
         (f._up?'<span class="sp">⏳</span>':"")+'<span class="k">'+esc(naEvS(f.kind))+'</span></div>'+
         '<small title="'+esc(f.name||f.orig||"")+'">'+esc(String(f.orig||f.name||"").slice(0,34))+'</small>'+
         (f._up?'<small class="st">'+TX("đang tải…","uploading…")+'</small>':f._err?'<small class="st er">'+esc(f._err)+'</small><a href="#" class="rm" onclick="event.preventDefault();naDropTmp(\''+esc(f.orig||"").replace(/'/g,"")+'\')">✕ '+TX("bỏ","dismiss")+'</a>':(f.id?'<a href="#" class="rm" onclick="event.preventDefault();naDelFile(\''+esc(f.id)+'\')">✕ '+TX("xoá","remove")+'</a>':""))+'</div>';
     }).join("")+'</div>':"");
   naReqDraw(); naDZArm();
+  naThumbsFor([{ files:fs }]);
 }
 function naDZArm(){
   var dz=$("naDZ"); if(!dz||dz._armed) return; dz._armed=1;
@@ -18247,6 +18366,17 @@ function naDZArm(){
 ["dragover","drop"].forEach(function(t){ window.addEventListener(t,function(e){ if($("naWz")){ e.preventDefault(); } }); });
 function naDropTmp(o){ S.na.wz.files=(S.na.wz.files||[]).filter(function(f){ return !(f._err&&String(f.orig||"").replace(/'/g,"")===o); }); naWzFiles(); naWzCheck(); }
 function naPick(inp){ naUploadFiles([].slice.call(inp.files||[]),S.na.dzKind); inp.value=""; }
+function naMakeThumb(dataUrl){
+  return new Promise(function(res){
+    if(!/^data:image\//.test(dataUrl||"")) return res("");
+    var img=new Image();
+    img.onload=function(){ var mx=360, w=img.width, h=img.height; if(w>mx||h>mx){ if(w>h){ h=Math.round(h*mx/w); w=mx; } else { w=Math.round(w*mx/h); h=mx; } }
+      var cv=document.createElement("canvas"); cv.width=w; cv.height=h; cv.getContext("2d").drawImage(img,0,0,w,h);
+      var q=.72, out=cv.toDataURL("image/jpeg",q); while(out.length>40000&&q>.3){ q-=.12; out=cv.toDataURL("image/jpeg",q); } res(out.length<46000?out:""); };
+    img.onerror=function(){ res(""); };
+    img.src=dataUrl;
+  });
+}
 function naUploadFiles(list,k){
   if(!list.length) return;
   k=k||naNextKind();
@@ -18259,20 +18389,28 @@ function naUploadFiles(list,k){
   S.na.wz.files=(S.na.wz.files||[]).concat(tmps);
   naWzFiles();
   naEnsureSaved().then(function(c){
-    var chain=Promise.resolve();
-    list.forEach(function(file,i){
-      var tmp=tmps[i];
-      chain=chain.then(function(){ return naShrink(file); }).then(function(x){
+    /* tải song song 2 tệp một lúc */
+    var q=list.map(function(file,i){ return { file:file, tmp:tmps[i] }; }), run=0, done;
+    var all=new Promise(function(r){ done=r; });
+    function next(){
+      if(!q.length){ if(!run) done(); return; }
+      var it=q.shift(), file=it.file, tmp=it.tmp; run++;
+      naShrink(file).then(function(x){
         if(/^image\//.test(x.mime)) tmp._local=x.b64;
         naWzFiles();
-        return apiPost({ action:"naUpload", id:c.id, b64:x.b64, mime:x.mime, name:x.name, kind:k });
-      }).then(function(j){
-        tmp._up=0;
-        if(j.file){ tmp.id=j.file.id; tmp.name=j.file.name; tmp.url=j.file.url; }
-        if(j.rec){ S.na.cur=j.rec; naMerge(j.rec); }
-        naWzFiles(); naWzCheck();
-      }).catch(function(e){ tmp._up=0; tmp._err=e.message; naWzFiles(); toast(file.name+": "+e.message,"err",6000); });
-    });
+        return naMakeThumb(/^image\//.test(x.mime)?x.b64:"").then(function(th){
+          return apiPost({ action:"naUpload", id:c.id, b64:x.b64, mime:x.mime, name:x.name, kind:k, thumb:th }).then(function(j){
+            tmp._up=0;
+            if(j.file){ tmp.id=j.file.id; tmp.name=j.file.name; tmp.url=j.file.url; if(th){ S.na.th[j.file.id]=th; if(KV.ok) kvSet("k:*:nath:"+j.file.id,th); } }
+            if(j.rec){ S.na.cur=j.rec; naMerge(j.rec); }
+            naWzFiles(); naWzCheck();
+          });
+        });
+      }).catch(function(e){ tmp._up=0; tmp._err=e.message; naWzFiles(); toast(file.name+": "+e.message,"err",6000); })
+        .then(function(){ run--; next(); });
+    }
+    next(); if(q.length) next();
+    var chain=all;
     chain.then(function(){
       if(S.na.dzKind===k) S.na.dzKind=naNextKind();
       apiGet("naGet",{ id:c.id, _ts:Date.now() }).then(function(j){
@@ -18301,8 +18439,11 @@ function naEnsureSaved(){
     });
   });
 }
-function naPayload(c){ return { id:c.id||"", pic:c.pic, type:c.type, account:c.account, code:c.code, accType:c.accType, province:c.province, npp:c.npp,
-  sku:(c.skuSel||[]).join("; ")||c.sku||"", detail:c.ptype||c.detail||"", orderDate:c.orderDate, orderNo:c.orderNo, qty:c.qty, amount:c.amount, note:c.note, checklist:c.checklist }; }
+function naPayload(c){
+  var wl=naLocalWeekly(c.pic||S.user.pic,c.account,c.orderDate||"");
+  return { weekly:{ n:wl.length, list:wl.slice(0,12).map(function(w){ return { d:w.d, a:w.a, s:w.s }; }) }, id:c.id||"", pic:c.pic, type:c.type, account:c.account, code:c.code, accType:c.accType, province:c.province, npp:c.npp,
+  sku:(c.skuSel||[]).join("; ")||c.sku||"", detail:c.ptype||c.detail||"", orderDate:c.orderDate, orderNo:c.orderNo, qty:c.qty, amount:c.amount, note:c.note, checklist:c.checklist };
+}
 function naWzSave(send){
   var c=naWzRead();
   if(!c.account) return toast(TX("Nhập tên đại lý / khách hàng.","Enter the account name."),"err",4000);
@@ -18342,7 +18483,7 @@ function naReadB64(file){ return new Promise(function(res,rej){ var r=new FileRe
   var hdr=document.querySelector("header"), act=$("btnAct");
   if(act && !$("btnNa")){
     var b=document.createElement("button"); b.className="hbtn nab"; b.id="btnNa"; b.innerHTML='✉️<span class="cnt"></span>';
-    b.onclick=function(){ S.na.f.mine=S.na.pendingMine?1:0; S.na.f.status=""; S.na.f.month=""; go("newacc"); };
+    b.onclick=function(){ naGoPending(); };
     act.parentNode.insertBefore(b,act);
   }
 })();
