@@ -3979,7 +3979,7 @@ function buildNav(){
     if(t.grp!==lastGrp){ h+='<div class="grp">'+t.grp+'</div>'; lastGrp=t.grp; }
     h+='<button class="nvi" data-t="'+t.id+'" onclick="go(\''+t.id+'\')"><span class="ic">'+t.ic+'</span><span class="lb">'+t.lb+'</span></button>';
   });
-  h+='<div style="flex:1"></div><div style="padding:10px;font-size:10.5px;color:var(--mute);line-height:1.5">MMH CRM v28.1<br>'+
+  h+='<div style="flex:1"></div><div style="padding:10px;font-size:10.5px;color:var(--mute);line-height:1.5">MMH CRM v28.2<br>'+
      (isMgmt()?'<a href="'+DRIVE_FOLDER+'" target="_blank">📁 Folder ảnh Drive</a>':"")+'</div>';
   $("side").innerHTML=h;
   /* ⭐ v4.5 — thanh dưới trượt ngang, đủ mọi mục, bỏ nút "Thêm" */
@@ -18970,6 +18970,38 @@ function kpi8Paint(){
     '<button class="btn sm" onclick="kr8Load(S.kr8.member,true).then(kpi8Paint).catch(function(e){toast(e.message,\'err\')})">⟳ '+TX("Đọc lại","Reload")+'</button>'+
     '<button class="btn sm pri" onclick="S.rpKind=\'kpi\';go(\'report\')">📧 '+TX("Gửi báo cáo KPI","Send KPI report")+'</button></div>'+mem8+mBar+hero+rows+'</div>';
 }
+</script>
+<script>
+/* ═══════════ ⭐ v28.2 — BẢNG KPI (tab 9) TRÊN APP: C5 / C6 / C7 / C1 hiện đúng số tính từ đơn hàng & case đã duyệt ═══════════ */
+function k8ApplyLive(k){
+  if(!k||!k.pics) return;
+  var ms=(k.months&&k.months.length===12?k.months:fyMonths(S.fy)).map(String), cur=ymOf(todayISO());
+  var cap=function(x){ return x==null?null:Math.min(x,1.3); };
+  k.pics.forEach(function(p){ (p.rows||[]).forEach(function(r){
+    var live=null;
+    if(/^supp_/.test(r.key) && (tGet("order")||(S.cache.order||{}).rows)) live=k8Live(p.pic,r.key);
+    else if(/^newacct_/.test(r.key) && S.na && S.na.rows) live=naApprovedSeries(p.pic,r.key);
+    if(!live) return;
+    r.a=ms.map(function(m,i){ return m<=cur ? Math.round(live[i]*100)/100 : null; });
+    var t=r.t||[], A=0, T=0, any=false;
+    r.a.forEach(function(v,i){ if(v!=null){ A+=v; any=true; } });
+    t.forEach(function(v){ T+=n(v); });
+    r.aFY=any?Math.round(A*100)/100:null; r.tFY=T||r.tFY;
+    r.pct=T?cap(A/T):null;
+    var tY=0, aY=0; ms.forEach(function(m,i){ if(m<=cur){ tY+=n(t[i]); aY+=n(r.a[i]); } });
+    r.ytd=tY?cap(aY/tY):null;
+    r.q=[0,1,2,3].map(function(q){ var tq=0, aq=0, st=false; for(var i=q*3;i<q*3+3;i++){ if(ms[i]<=cur){ st=true; tq+=n(t[i]); aq+=n(r.a[i]); } } return st&&tq?cap(aq/tq):null; });
+    r.score=r.pct!=null&&r.w!=null?r.pct*r.w:null; r._live=true;
+  }); });
+}
+var _renderKPI28=renderKPI;
+renderKPI=function(){ try{ k8ApplyLive(S.kpi); }catch(e){} return _renderKPI28.apply(this,arguments); };
+var _pgKPI28=pgKPI;
+pgKPI=function(){
+  _pgKPI28.apply(this,arguments);
+  if(!noOrder() && !tGet("order")) ensureTab("order",{},function(rows,ready){ if(ready && S.tab==="kpi" && S.kpi) renderKPI(); });
+  if(!S.na.rows && !S.na.err) naLoad(false).then(function(){ if(S.tab==="kpi" && S.kpi) renderKPI(); }).catch(function(){});
+};
 </script>
 
 </body>
