@@ -3979,7 +3979,7 @@ function buildNav(){
     if(t.grp!==lastGrp){ h+='<div class="grp">'+t.grp+'</div>'; lastGrp=t.grp; }
     h+='<button class="nvi" data-t="'+t.id+'" onclick="go(\''+t.id+'\')"><span class="ic">'+t.ic+'</span><span class="lb">'+t.lb+'</span></button>';
   });
-  h+='<div style="flex:1"></div><div style="padding:10px;font-size:10.5px;color:var(--mute);line-height:1.5">MMH CRM v28.4<br>'+
+  h+='<div style="flex:1"></div><div style="padding:10px;font-size:10.5px;color:var(--mute);line-height:1.5">MMH CRM v28.5<br>'+
      (isMgmt()?'<a href="'+DRIVE_FOLDER+'" target="_blank">📁 Folder ảnh Drive</a>':"")+'</div>';
   $("side").innerHTML=h;
   /* ⭐ v4.5 — thanh dưới trượt ngang, đủ mọi mục, bỏ nút "Thêm" */
@@ -18847,8 +18847,7 @@ renderReportKpi=function(){
       var v=(T[x]||{}).pw; return '<div class="chip'+(x===m?" on":"")+'" onclick="kr8Month(\''+x+'\')">'+monLbl("T"+parseInt(x.slice(4),10))+(d.closed.indexOf(x)>=0?" ✓":"")+(v!=null?' <b style="color:'+k8Col(v)+'">'+Math.round(v*100)+'%</b>':'')+'</div>'; }).join("")+'</div>';
   var cfg='<div class="card pad" style="margin-bottom:12px"><div class="ct" style="margin-bottom:8px"><span class="dot"></span>'+TX("Kỳ báo cáo KPI","KPI report period")+' · <b>'+esc(d.full||d.member)+'</b>'+(d.title?' <span style="color:var(--sub);font-weight:600">· '+esc(d.title)+'</span>':'')+
     '<span class="sp"></span><span class="k8-live"><i></i>'+TX("đọc lúc ","read at ")+esc(d.readAt)+'</span> <button class="btn sm" onclick="kr8Reload()">⟳</button></div>'+mem+mBar+
-    '<div class="hint" style="margin-top:8px">'+(d.closed.indexOf(m)>=0?TX("Tháng "+ml+" đã chốt số.","Month "+ml+" is closed."):'<b style="color:#B7791F">'+TX("Tháng "+ml+" chưa chốt (chốt 16:00 ngày 2 tháng sau) — số còn có thể đổi.","Month "+ml+" is not closed yet — figures may change.")+'</b>')+
-      ' · <a href="'+esc(d.src)+'" target="_blank">'+TX("Mở sheet 5. Member KPI Monthly ↗","Open sheet 5 ↗")+'</a></div></div>';
+    '<div class="hint" style="margin-top:8px">'+TX("Số realtime — cập nhật ngay khi dữ liệu CRM / file KPI thay đổi.","Real-time figures — updated as soon as the CRM / KPI file changes.")+' · <a href="'+esc(d.src)+'" target="_blank">'+TX("Mở sheet 5. Member KPI Monthly ↗","Open sheet 5 ↗")+'</a></div></div>';
   var hero='<div class="kr8-hero">'+[[TX("KPI THÁNG ","MONTH ")+ml,tm,TX("Σ % × trọng số của tháng","Σ % × weight of the month")],["KPI "+q+TX(" (đến T"," (to ")+parseInt(m.slice(4),10)+")",tq,TX("so với target cả quý (3 tháng)","vs. the full-quarter target")],["KPI "+fy+TX(" lũy kế"," to date"),tf,TX("so với target cả năm FY","vs. the full-year target")]].map(function(x){
       return '<div class="kr8-sc" title="'+esc(TX("Số đọc từ dòng TOTAL của sheet 5. Member KPI Monthly — ","From the TOTAL row of sheet 5. Member KPI Monthly — ")+(x[2]||""))+'">'+kr8Ring(x[1])+'<div><div class="lb">'+x[0]+'</div><div class="v" style="color:'+k8Col(x[1])+'">'+k8Pct(x[1])+'</div><div class="s">'+(x[2]||"")+'</div></div></div>'; }).join("")+'</div>';
   var table='<section class="card pad" style="margin-bottom:12px"><div class="ct" style="margin-bottom:10px"><span class="dot"></span>① '+TX("KPI tháng ","KPI ")+ml+' · '+TX("theo nhóm","by group")+'<span class="sp"></span><small>'+TX("Rê chuột vào từng KPI để xem tên đầy đủ","Hover a KPI to see its full name")+'</small></div>'+kr8Board(d,m)+'</section>';
@@ -19065,7 +19064,7 @@ kpiPushSoon=function(delay){
 function k8AfterPush(){
   var p=S.k8push||{};
   S.kpi=null; S.kr8.by={}; k8Badge();
-  if(p.lockedMonths && p.lockedMonths.length){
+  if(false && p.lockedMonths && p.lockedMonths.length){
     var ms=p.lockedMonths.map(function(m){ return String(m).slice(4)+"/"+String(m).slice(0,4); }).join(", ");
     toast(TX("⚠ Tháng "+ms+" đã chốt KPI — số mới đã có trên CRM nhưng chưa vào file KPI. Quản lý mở “🕒 Nhận số tháng đã chốt” ở tab KPI nếu cần.",
              "⚠ "+ms+" is closed — the new figures are in the CRM but not in the KPI file. A manager can open “🕒 Late entries” in the KPI tab."),"warn",8000);
@@ -19081,7 +19080,7 @@ function k8AfterPush(){
 k8Badge=function(){
   var el=$("k8live"); if(!el) return;
   var p=S.k8push||{}, nOb=OB.list().length;
-  var lockTxt=p.lockedMonths&&p.lockedMonths.length?TX(" · tháng "+p.lockedMonths.map(function(m){ return String(m).slice(4); }).join(", ")+" đã chốt"," · month "+p.lockedMonths.join(", ")+" closed"):"";
+  var lockTxt=false&&p.lockedMonths&&p.lockedMonths.length?TX(" · tháng "+p.lockedMonths.map(function(m){ return String(m).slice(4); }).join(", ")+" đã chốt"," · month "+p.lockedMonths.join(", ")+" closed"):"";
   el.className="k8-live"+(p.st==="run"||nOb?" wait":"");
   el.innerHTML='<i></i>'+(nOb?TX("Đang ghi "+nOb+" đơn vào sheet…","Saving…")
     :p.st==="run"?TX("Đang đẩy số lên file KPI…","Updating the KPI file…")
@@ -19097,7 +19096,8 @@ setInterval(function(){
 },120000);
 
 /* ── cửa sổ nhận số trễ cho tháng đã chốt (quản lý) ── */
-function kpiLateBtn(){ return k8CanRate()?'<button class="btn sm" style="margin-right:8px" onclick="kpiLateModal()">🕒 '+TX("Nhận số tháng đã chốt","Late entries")+'</button>':''; }
+function kpiLateBtn(){ return ''; /* bỏ rule chốt số tháng ⇒ không cần cửa sổ nhận số trễ */ }
+function kpiLateBtnOld(){ return k8CanRate()?'<button class="btn sm" style="margin-right:8px" onclick="kpiLateModal()">🕒 '+TX("Nhận số tháng đã chốt","Late entries")+'</button>':''; }
 function kpiLateModal(){
   busy(true,TX("Đang đọc trạng thái…","Loading…"));
   apiGet("kpiLate",{ _ts:Date.now() }).then(function(j){
