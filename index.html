@@ -3979,7 +3979,7 @@ function buildNav(){
     if(t.grp!==lastGrp){ h+='<div class="grp">'+t.grp+'</div>'; lastGrp=t.grp; }
     h+='<button class="nvi" data-t="'+t.id+'" onclick="go(\''+t.id+'\')"><span class="ic">'+t.ic+'</span><span class="lb">'+t.lb+'</span></button>';
   });
-  h+='<div style="flex:1"></div><div style="padding:10px;font-size:10.5px;color:var(--mute);line-height:1.5">MMH CRM v28.5<br>'+
+  h+='<div style="flex:1"></div><div style="padding:10px;font-size:10.5px;color:var(--mute);line-height:1.5">MMH CRM v28.6<br>'+
      (isMgmt()?'<a href="'+DRIVE_FOLDER+'" target="_blank">📁 Folder ảnh Drive</a>':"")+'</div>';
   $("side").innerHTML=h;
   /* ⭐ v4.5 — thanh dưới trượt ngang, đủ mọi mục, bỏ nút "Thêm" */
@@ -19137,6 +19137,24 @@ renderKPI=function(){
       k8Badge();
     }
   }catch(e){}
+  return r;
+};
+</script>
+<script>
+/* ⭐ v28.6 — phiên bản "kpi" đổi (lưu dữ liệu / gõ tay trên sheet / đẩy file KPI) ⇒ app đọc lại KPI + KPI cá nhân ngay */
+var _verApply286=verApply;
+verApply=function(vers,mine){
+  var prev=S.verMap||{}, kpiChg=vers && prev && prev.kpi!==vers.kpi && Object.keys(prev).length;
+  var r=_verApply286.apply(this,arguments);
+  if(kpiChg){
+    S.kr8.by={}; S.kpi=null;
+    k8Ensure(true).then(function(){
+      if(S.tab==="kpi") renderKPI();
+      else if(S.tab==="order") renderOrder();
+      else if(S.tab==="dash") dashRepaint();
+      else if(S.tab==="report" && S.rpKind==="kpi"){ kr8Load(S.kr8.member||S.user.pic,true).then(function(){ renderReport(); }).catch(function(){}); }
+    });
+  }
   return r;
 };
 </script>
