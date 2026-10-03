@@ -3979,7 +3979,7 @@ function buildNav(){
     if(t.grp!==lastGrp){ h+='<div class="grp">'+t.grp+'</div>'; lastGrp=t.grp; }
     h+='<button class="nvi" data-t="'+t.id+'" onclick="go(\''+t.id+'\')"><span class="ic">'+t.ic+'</span><span class="lb">'+t.lb+'</span></button>';
   });
-  h+='<div style="flex:1"></div><div style="padding:10px;font-size:10.5px;color:var(--mute);line-height:1.5">MMH CRM v27.2<br>'+
+  h+='<div style="flex:1"></div><div style="padding:10px;font-size:10.5px;color:var(--mute);line-height:1.5">MMH CRM v28<br>'+
      (isMgmt()?'<a href="'+DRIVE_FOLDER+'" target="_blank">📁 Folder ảnh Drive</a>':"")+'</div>';
   $("side").innerHTML=h;
   /* ⭐ v4.5 — thanh dưới trượt ngang, đủ mọi mục, bỏ nút "Thêm" */
@@ -17595,909 +17595,1278 @@ function krSend(test){
 }
 </script>
 
-<style>
-/* ═══════════ ⭐ v27 — MỞ MỚI ĐỊA BÀN & SKU MỚI ═══════════ */
-.hbtn.nab{position:relative}
-.hbtn.nab .cnt{position:absolute;top:-5px;right:-6px;min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:#C0504D;color:#fff;font-size:10.5px;font-weight:800;display:none;align-items:center;justify-content:center;border:2px solid var(--card)}
-.hbtn.nab.on .cnt{display:inline-flex}
-.na-rule{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:10px;margin-bottom:12px}
-.na-rule div{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:11px 13px;font-size:12.5px;line-height:1.55;color:var(--sub)}
-.na-rule b{display:block;color:var(--navy);font-size:13px;margin-bottom:3px}
-.na-flt{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
-.na-kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:12px 0}
-.na-kpi{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:11px 14px;cursor:pointer;transition:.12s}
-.na-kpi:hover{border-color:var(--blue-l)}
-.na-kpi.on{outline:2px solid var(--blue);outline-offset:-1px}
-.na-kpi small{display:block;font-size:11.5px;color:var(--sub);font-weight:650}
-.na-kpi b{font-size:24px;line-height:1.2}
-.na-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:12px}
-.na-card{background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden;cursor:pointer;display:flex;flex-direction:column;transition:.12s}
-.na-card:hover{border-color:var(--blue-l);box-shadow:0 6px 18px rgba(36,54,74,.08)}
-.na-top{display:flex;align-items:center;gap:7px;padding:11px 13px 0;flex-wrap:wrap}
-.na-type{font-size:11.5px;font-weight:800;padding:2px 9px;border-radius:999px;background:var(--pale);color:var(--navy)}
-.na-st{font-size:11.5px;font-weight:800;padding:2px 9px;border-radius:999px}
-.na-st.Draft{background:#EEF1F5;color:#5F6B78}
-.na-st.Pending{background:#FFF2B3;color:#7A5C00}
-.na-st.Approved{background:#D5F0D8;color:#1E6B34}
-.na-st.Rejected{background:#FBEDEC;color:#A4413E}
-.na-mon{margin-left:auto;font-size:11.5px;color:var(--mute);font-weight:700}
-.na-acc{padding:7px 13px 0;font-size:15px;font-weight:800;color:var(--ink);line-height:1.3}
-.na-meta{padding:2px 13px 0;font-size:12px;color:var(--sub);line-height:1.5}
-.na-ev{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;padding:10px 13px}
-.na-th{aspect-ratio:1;border-radius:9px;overflow:hidden;background:var(--line2);border:1px solid var(--line);position:relative;display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--sub);text-align:center}
-.na-th img{width:100%;height:100%;object-fit:cover;display:block}
-.na-th .k{position:absolute;left:4px;bottom:4px;font-size:9.5px;font-weight:800;background:rgba(255,255,255,.92);color:var(--navy);border-radius:5px;padding:1px 5px}
-.na-th.more{background:var(--pale);font-weight:800;font-size:14px;color:var(--blue)}
-.na-th.none{grid-column:1/-1;aspect-ratio:auto;height:54px;border-style:dashed;background:transparent}
-.na-foot{margin-top:auto;padding:9px 13px;border-top:1px solid var(--line2);font-size:11.5px;color:var(--sub);display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-.na-foot .wk{font-weight:700}
-.na-foot .wk.ok{color:#1E6B34}.na-foot .wk.no{color:#A4413E}
-/* detail */
-.na-det{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);gap:16px}
-.na-tb{width:100%;border-collapse:collapse;font-size:13px}
-.na-tb td{padding:6px 0;border-bottom:1px solid var(--line2);vertical-align:top}
-.na-tb td:first-child{color:var(--sub);width:38%}
-.na-tb td:last-child{font-weight:600;color:var(--ink)}
-.na-sec{font-size:12px;font-weight:800;color:var(--blue);letter-spacing:.2px;margin:14px 0 6px}
-.na-chk{list-style:none;margin:0;padding:0;font-size:12.5px}
-.na-chk li{padding:4px 0 4px 24px;position:relative;line-height:1.5}
-.na-chk li::before{content:"";position:absolute;left:0;top:5px;width:16px;height:16px;border-radius:5px;border:1.5px solid var(--line)}
-.na-chk li.y::before{content:"✓";color:#fff;background:#3E8E6B;border-color:#3E8E6B;font-size:11px;font-weight:800;display:grid;place-items:center}
-.na-gal{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:9px}
-.na-gi{border:1px solid var(--line);border-radius:11px;overflow:hidden;background:var(--card)}
-.na-gi .im{aspect-ratio:4/3;background:var(--line2);display:flex;align-items:center;justify-content:center;font-size:30px;cursor:zoom-in}
-.na-gi .im img{width:100%;height:100%;object-fit:cover}
-.na-gi .cap{padding:6px 8px;font-size:11px;line-height:1.4;color:var(--sub);word-break:break-all}
-.na-gi .cap b{display:block;color:var(--navy);font-size:11px}
-.na-gi .x{float:right;border:0;background:none;color:#A4413E;cursor:pointer;font-size:14px}
-.na-log{font-size:11.5px;color:var(--sub);white-space:pre-wrap;line-height:1.6;background:var(--pale);border-radius:10px;padding:9px 11px;max-height:160px;overflow:auto}
-.na-banner{border-radius:12px;padding:10px 13px;font-size:13px;line-height:1.55;margin-bottom:12px}
-.na-banner.Pending{background:#FFF8D9;color:#6B5200}
-.na-banner.Approved{background:#E6F5E8;color:#1E6B34}
-.na-banner.Rejected{background:#FBEDEC;color:#8A3633}
-.na-banner.Draft{background:#EEF1F5;color:#4A5868}
-/* wizard */
-.na-wz .sec{border:1px solid var(--line);border-radius:13px;padding:13px 14px;margin-bottom:12px;background:var(--card)}
-.na-wz .sh{display:flex;align-items:center;gap:9px;font-weight:800;color:var(--navy);font-size:14px;margin-bottom:8px}
-.na-wz .sh i{width:24px;height:24px;border-radius:50%;background:var(--blue);color:#fff;font-style:normal;font-size:12px;display:grid;place-items:center;flex:none}
-.na-wz .tip{font-size:12px;color:var(--sub);line-height:1.55;background:var(--pale);border-radius:9px;padding:8px 10px;margin-bottom:10px}
-.na-types{display:grid;grid-template-columns:1fr 1fr;gap:9px}
-.na-types label{border:1.5px solid var(--line);border-radius:12px;padding:10px 12px;cursor:pointer;font-size:12.5px;line-height:1.5;color:var(--sub)}
-.na-types label b{display:block;font-size:14px;color:var(--ink)}
-.na-types input{display:none}
-.na-types label.on{border-color:var(--blue);background:#EEF4FB}
-.na-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px}
-.na-wz label.l{display:block;font-size:12px;font-weight:700;color:var(--sub);margin-bottom:4px}
-.na-wz .inp{width:100%}
-.na-wk{font-size:12.5px;border-radius:9px;padding:8px 10px;margin-top:8px;line-height:1.55}
-.na-wk.ok{background:#E6F5E8;color:#1E6B34}.na-wk.no{background:#FBEDEC;color:#8A3633}
-.na-drop{border:2px dashed var(--line);border-radius:12px;padding:10px;margin-bottom:9px;transition:.12s;background:var(--card)}
-.na-drop.hov{border-color:var(--blue);background:#EEF4FB}
-.na-drop .dh{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;color:var(--ink)}
-.na-drop .dh small{font-weight:600;color:var(--mute)}
-.na-drop .req{font-size:10.5px;font-weight:800;color:#A4413E;background:#FBEDEC;border-radius:6px;padding:1px 6px}
-.na-drop .opt{font-size:10.5px;font-weight:800;color:var(--mute);background:var(--pale);border-radius:6px;padding:1px 6px}
-.na-drop .fl{display:flex;flex-wrap:wrap;gap:7px;margin-top:8px}
-.na-drop .fi{width:86px}
-.na-drop .fi .na-th{aspect-ratio:1}
-.na-drop .fi small{display:block;font-size:10px;color:var(--mute);word-break:break-all;line-height:1.3;margin-top:2px}
-.na-drop .pick{margin-left:auto}
-.na-miss{background:#FFF8D9;border-radius:11px;padding:9px 12px;font-size:12.5px;color:#6B5200;line-height:1.6}
-.na-miss.ok{background:#E6F5E8;color:#1E6B34}
-.na-cm{list-style:none;padding:0;margin:0}
-.na-cm li{margin:5px 0}
-.na-cm label{display:flex;gap:9px;align-items:flex-start;font-size:12.5px;line-height:1.5;cursor:pointer}
-.na-cm input{margin-top:3px;width:16px;height:16px;flex:none}
-.na-ord{border:1px solid var(--line);border-radius:12px;padding:10px 12px;background:var(--pale)}
-.na-ord-h{display:flex;align-items:center;gap:8px;margin-bottom:7px;font-size:13px;color:var(--ink)}
-.na-ord-l{display:flex;flex-direction:column;gap:6px;max-height:300px;overflow:auto}
-.na-ord-i{display:flex;gap:10px;align-items:flex-start;background:var(--card);border:1.5px solid var(--line);border-radius:10px;padding:9px 11px;cursor:pointer;font-size:13px}
-.na-ord-i:hover{border-color:var(--blue-l)}
-.na-ord-i.on{border-color:var(--blue);background:#EEF4FB}
-.na-ord-i .rd{width:16px;height:16px;border-radius:50%;border:2px solid var(--line);flex:none;margin-top:2px;box-sizing:border-box}
-.na-ord-i.on .rd{border:5px solid var(--blue)}
-.na-ord-i .mu{color:var(--sub);font-weight:500}
-.na-sku-pick{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
-.na-skus{display:flex;flex-wrap:wrap;gap:6px;min-height:34px;align-items:center;border:1px solid var(--line);border-radius:10px;padding:5px 7px;background:var(--card)}
-.na-skc{display:inline-flex;align-items:center;gap:5px;font-size:12.5px;font-weight:650;padding:4px 10px;border-radius:8px;border:1.5px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer}
-.na-skc i{font-style:normal;font-weight:600;color:var(--mute);font-size:11px}
-.na-skc.on{border-color:var(--blue);background:#EEF4FB;color:var(--navy)}
-.na-reqs{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:10px}
-.na-rq{font-size:12.5px;font-weight:750;padding:5px 11px;border-radius:999px}
-.na-rq.y{background:#D5F0D8;color:#1E6B34}.na-rq.n{background:#FBEDEC;color:#A4413E}.na-rq.o{background:var(--pale);color:var(--sub)}
-.na-kinds{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-bottom:9px}
-.na-kinds .lb{font-size:12.5px;font-weight:700;color:var(--sub);margin-right:3px}
-.na-kinds b{font-size:13px;font-weight:700;padding:6px 13px;border-radius:9px;border:1.5px solid var(--line);background:var(--card);color:var(--sub);cursor:pointer}
-.na-kinds b.on{border-color:var(--blue);background:var(--blue);color:#fff}
-.na-dz{display:block;border:2.5px dashed var(--blue-l);border-radius:16px;padding:26px 16px;text-align:center;cursor:pointer;background:#F6F9FD;transition:.15s}
-.na-dz:hover,.na-dz.hov{border-color:var(--blue);background:#E9F1FB}
-.na-dz input{display:none}
-.na-dz .ic{font-size:38px;line-height:1}
-.na-dz .t1{font-size:16px;font-weight:800;color:var(--navy);margin-top:6px}
-.na-dz .t2{font-size:13px;color:var(--ink);margin-top:5px;line-height:1.5}
-.na-dz .t3{font-size:12px;color:var(--mute);margin-top:4px}
-.na-fgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px;margin-top:12px}
-.na-ft{font-size:12px}
-.na-ft .na-th{aspect-ratio:4/3;font-size:26px}
-.na-ft .na-th .sp{position:absolute;inset:0;display:grid;place-items:center;background:rgba(255,255,255,.55);font-size:24px}
-.na-ft small{display:block;color:var(--sub);word-break:break-all;line-height:1.35;margin-top:4px}
-.na-ft .st{color:var(--blue);font-weight:700}.na-ft .st.er{color:#A4413E}
-.na-ft .rm{font-size:11.5px;color:#A4413E;font-weight:700;text-decoration:none}
 
-.hbtn.nab.on{animation:naPulse 1.6s infinite}
-@keyframes naPulse{0%{box-shadow:0 0 0 0 rgba(192,80,77,.55)}70%{box-shadow:0 0 0 9px rgba(192,80,77,0)}100%{box-shadow:0 0 0 0 rgba(192,80,77,0)}}
-#naAlert{position:fixed;right:22px;bottom:22px;z-index:60;display:none;align-items:center;gap:12px;background:#FFF2B3;color:#5C4500;border:1px solid #E8D27A;border-radius:14px;padding:10px 12px 10px 16px;box-shadow:0 10px 28px rgba(36,54,74,.18);font-size:13.5px;max-width:min(720px,94vw)}
-#naAlert.on{display:flex}
-@media (max-width:760px){ #naAlert{left:10px;right:10px;bottom:84px;max-width:none} }
-#naAlert b{font-weight:800}
-#naAlert .x{border:0;background:none;font-size:18px;color:#8A6D00;cursor:pointer;padding:0 4px}
-.na-th .ph{font-size:22px;opacity:.55}
-.na-gi .im{cursor:zoom-in}
-.na-vw{display:flex;flex-direction:column;gap:10px}
-.na-vw .stage{background:#1F2A36;border-radius:12px;min-height:46vh;display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative}
-.na-vw .stage img{max-width:100%;max-height:60vh;display:block}
-.na-vw .stage iframe{width:100%;height:60vh;border:0;background:#fff}
-.na-vw .stage .ld{color:#DDE3EA;font-size:14px}
-.na-vw .nav{position:absolute;top:50%;transform:translateY(-50%);width:42px;height:42px;border-radius:50%;border:0;background:rgba(255,255,255,.85);font-size:18px;cursor:pointer}
-.na-vw .nav.l{left:10px}.na-vw .nav.r{right:10px}
-.na-vw .meta{display:flex;gap:10px;align-items:center;flex-wrap:wrap;font-size:12.5px;color:var(--sub)}
-.na-vw .strip{display:flex;gap:6px;overflow:auto;padding-bottom:2px}
-.na-vw .strip div{width:64px;height:48px;flex:none;border-radius:7px;overflow:hidden;border:2px solid transparent;cursor:pointer;background:var(--line2);display:grid;place-items:center;font-size:18px}
-.na-vw .strip div.on{border-color:var(--blue)}
-.na-vw .strip img{width:100%;height:100%;object-fit:cover}
-@media (max-width:900px){ .na-det{grid-template-columns:1fr} .na-kpis{grid-template-columns:repeat(2,1fr)} .na-types{grid-template-columns:1fr} }
+<style>
+/* ═══════════ ⭐ v28 — ĐƠN HÀNG (KPI realtime) · MỞ MỚI & SKU MỚI · BÁO CÁO KPI ═══════════ */
+.k8-panel{background:var(--card);border:1px solid var(--line);border-radius:var(--r-lg);padding:14px 16px;margin-bottom:12px;box-shadow:var(--sh-1)}
+.k8-head{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+.k8-head h3{margin:0;font-size:16px;color:var(--navy);font-weight:800}
+.k8-head .sub{font-size:12.5px;color:var(--sub)}
+.k8-live{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--ok);font-weight:700;background:var(--ok-bg);border-radius:999px;padding:3px 10px}
+.k8-live i{width:7px;height:7px;border-radius:50%;background:var(--ok);display:inline-block;animation:k8p 1.6s infinite}
+.k8-live.wait{color:#7A5C00;background:#FFF6D9}.k8-live.wait i{background:#D9981F}
+@keyframes k8p{0%{opacity:1}50%{opacity:.25}100%{opacity:1}}
+.k8-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px}
+.k8-card{border:1px solid var(--line);border-radius:14px;padding:12px 14px;background:var(--paler)}
+.k8-card .tt{display:flex;align-items:flex-start;gap:8px}
+.k8-card .tt b{font-size:14.5px;color:var(--navy);line-height:1.3}
+.k8-card .tt .code{font-size:11px;font-weight:800;color:#fff;background:var(--blue);border-radius:6px;padding:2px 7px;flex:none;margin-top:1px}
+.k8-card .npp{display:inline-block;font-size:11.5px;font-weight:700;color:var(--blue-d);background:var(--lb2);border-radius:999px;padding:2px 9px;margin:6px 4px 0 0}
+.k8-big{display:flex;align-items:baseline;gap:8px;margin:8px 0 2px}
+.k8-big .v{font-size:28px;font-weight:800;color:var(--ink);line-height:1.1}
+.k8-big .u{font-size:13px;color:var(--sub);font-weight:600}
+.k8-big .p{margin-left:auto;font-size:22px;font-weight:800}
+.k8-bar{height:10px;background:#E8EEF6;border-radius:6px;overflow:hidden;position:relative}
+.k8-bar span{position:absolute;left:0;top:0;bottom:0;border-radius:6px}
+.k8-bar em{position:absolute;top:-2px;bottom:-2px;width:2px;background:var(--navy);opacity:.55}
+.k8-rows{margin-top:10px;display:grid;gap:7px}
+.k8-row{display:grid;grid-template-columns:78px 1fr 92px;gap:8px;align-items:center;font-size:12.5px}
+.k8-row .l{color:var(--sub);font-weight:700}
+.k8-row .r{text-align:right;font-weight:700;color:var(--ink)}
+.k8-row .r small{display:block;font-weight:600;color:var(--mute);font-size:11px}
+.k8-spark{display:flex;align-items:flex-end;gap:3px;height:46px;margin-top:10px;padding-top:4px;border-top:1px dashed var(--line)}
+.k8-spark div{flex:1;position:relative;height:100%;display:flex;align-items:flex-end;justify-content:center;cursor:default}
+.k8-spark .t{position:absolute;bottom:0;left:15%;right:15%;background:var(--lb3);border-radius:3px 3px 0 0}
+.k8-spark .a{position:relative;width:46%;border-radius:3px 3px 0 0}
+.k8-spark .m{position:absolute;bottom:-15px;font-size:9.5px;color:var(--mute);font-weight:700}
+.k8-spark .on .m{color:var(--blue-d)}
+.k8-sparkw{padding-bottom:14px}
+.k8-pics{display:grid;gap:6px;margin-top:10px}
+.k8-pic{display:grid;grid-template-columns:110px 1fr 70px;gap:8px;align-items:center;font-size:12.5px;cursor:pointer;border-radius:8px;padding:3px 4px}
+.k8-pic:hover{background:var(--pale)}
+.k8-pic b{color:var(--navy)}
+.k8-pic small{display:block;color:var(--sub);font-size:10.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.k8-note{font-size:11.5px;color:var(--sub);margin-top:8px;line-height:1.5}
+.k8-seg{display:inline-flex;background:var(--pale);border:1px solid var(--line);border-radius:10px;padding:3px;gap:2px}
+.k8-seg button{border:0;background:transparent;font:inherit;font-size:12.5px;font-weight:700;color:var(--sub);padding:5px 11px;border-radius:8px;cursor:pointer}
+.k8-seg button.on{background:#fff;color:var(--blue-d);box-shadow:var(--sh-1)}
+/* danh sách đơn dạng thẻ */
+.od-sum{display:flex;flex-wrap:wrap;gap:8px;margin:2px 0 12px}
+.od-sum .it{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:8px 12px;min-width:120px}
+.od-sum .it small{display:block;font-size:11.5px;color:var(--sub);font-weight:700}
+.od-sum .it b{font-size:17px;color:var(--ink)}
+.od-list{display:grid;gap:10px}
+.od-card{background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden;box-shadow:var(--sh-1)}
+.od-card.pend{border-color:#E9C46A;background:#FFFDF4}
+.od-card.err{border-color:#E5A3A1;background:#FFF7F7}
+.od-top{display:flex;align-items:center;gap:10px;padding:10px 14px;flex-wrap:wrap;border-bottom:1px solid var(--line2)}
+.od-top .dt{font-size:12px;font-weight:800;color:var(--blue-d);background:var(--lb2);border-radius:8px;padding:4px 8px;text-align:center;line-height:1.2;min-width:54px}
+.od-top .dt small{display:block;font-weight:700;color:var(--sub);font-size:10.5px}
+.od-top .acc{flex:1;min-width:180px}
+.od-top .acc b{font-size:15px;color:var(--navy)}
+.od-top .acc div{font-size:11.5px;color:var(--sub);margin-top:1px}
+.od-top .tot{text-align:right}
+.od-top .tot b{font-size:17px;color:var(--ink)}
+.od-top .tot small{display:block;font-size:11px;color:var(--sub)}
+.od-lines{padding:6px 10px 10px}
+.od-line{display:grid;grid-template-columns:110px 1fr 70px 110px;gap:8px;align-items:center;padding:7px 6px;border-radius:9px;cursor:pointer;font-size:13px}
+.od-line:hover{background:var(--pale)}
+.od-line .pt{font-size:11.5px;font-weight:800;border-radius:7px;padding:3px 8px;text-align:center;background:#EEF1F5;color:#4A5868}
+.od-line .pt.c{background:#E3F1FF;color:#2361A5}.od-line .pt.j{background:#EDE7FB;color:#5B3FA8}.od-line .pt.b{background:#FFF2D6;color:#8A5A00}
+.od-line .dtl{white-space:pre-wrap;color:var(--ink);line-height:1.4}
+.od-line .q{text-align:right;font-weight:700}
+.od-line .a{text-align:right;font-weight:800;color:var(--ink)}
+.od-badge{font-size:11.5px;font-weight:800;border-radius:999px;padding:3px 10px;display:inline-flex;align-items:center;gap:5px}
+.od-badge.pend{background:#FFF2C2;color:#7A5C00}.od-badge.err{background:#FDE2E1;color:#9B2C28}
+.od-tags span{display:inline-block;font-size:11px;font-weight:700;border-radius:6px;padding:2px 7px;margin-left:4px;background:var(--pale);color:var(--sub)}
+@media (max-width:720px){ .od-line{grid-template-columns:86px 1fr 70px} .od-line .q{display:none} .k8-row{grid-template-columns:64px 1fr 84px} }
+/* dashboard: khối doanh số theo KPI */
+.db8 .k8-card{background:#fff}
+.db8 .k8-big .v{font-size:24px}
+/* ═══════════ MỞ MỚI & SKU MỚI ═══════════ */
+.na8-fab{position:fixed;left:18px;bottom:calc(18px + var(--safe));z-index:60;display:none;align-items:center;gap:12px;background:#3A5CAA;color:#fff;border:0;border-radius:999px;
+  padding:10px 20px 10px 10px;box-shadow:0 10px 30px rgba(36,64,120,.35);cursor:pointer;font:inherit;animation:na8b 2.4s infinite}
+.na8-fab.on{display:inline-flex}
+.na8-fab .ic{width:54px;height:54px;border-radius:50%;background:#fff;color:#3A5CAA;display:grid;place-items:center;font-size:30px;position:relative}
+.na8-fab .ic b{position:absolute;top:-6px;right:-8px;min-width:26px;height:26px;border-radius:13px;background:#D93B36;color:#fff;font-size:14px;display:grid;place-items:center;padding:0 6px;border:3px solid #3A5CAA}
+.na8-fab .tx{text-align:left;line-height:1.25}.na8-fab .tx b{font-size:15px;display:block}.na8-fab .tx small{font-size:12px;opacity:.9}
+@keyframes na8b{0%,100%{box-shadow:0 10px 30px rgba(36,64,120,.35)}50%{box-shadow:0 10px 30px rgba(36,64,120,.35),0 0 0 10px rgba(58,92,170,.18)}}
+@media (min-width:721px){ .na8-fab{left:calc(var(--sb) + 22px)} }
+@media (max-width:720px){ .na8-fab{left:10px;bottom:calc(var(--nav) + 12px + var(--safe));padding:7px 14px 7px 7px} .na8-fab .ic{width:44px;height:44px;font-size:24px} .na8-fab .tx small{display:none} }
+.na8-top{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.na8-kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin:12px 0}
+.na8-kpi{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:11px 14px;cursor:pointer}
+.na8-kpi.on{outline:2px solid var(--blue);outline-offset:-1px}
+.na8-kpi small{display:block;font-size:12px;color:var(--sub);font-weight:700}
+.na8-kpi b{font-size:26px;color:var(--ink);line-height:1.2}
+.na8-kpi .k8-bar{margin-top:6px;height:7px}
+.na8-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:14px}
+.na8-card{background:var(--card);border:1px solid var(--line);border-radius:16px;overflow:hidden;cursor:pointer;display:flex;flex-direction:column;box-shadow:var(--sh-1);transition:.15s}
+.na8-card:hover{box-shadow:var(--sh-2);transform:translateY(-1px)}
+.na8-thumbs{display:grid;grid-template-columns:2fr 1fr;grid-template-rows:1fr 1fr;gap:3px;height:190px;background:#EEF2F7}
+.na8-thumbs.n1{grid-template-columns:1fr;grid-template-rows:1fr}
+.na8-thumbs.n2{grid-template-rows:1fr}
+.na8-thumbs .th{position:relative;overflow:hidden;background:#E3E9F1;display:grid;place-items:center}
+.na8-thumbs .th:first-child{grid-row:1 / span 2}
+.na8-thumbs.n2 .th:first-child{grid-row:auto}
+.na8-thumbs img{width:100%;height:100%;object-fit:cover;display:block}
+.na8-thumbs .th .k{position:absolute;left:6px;bottom:6px;font-size:10.5px;font-weight:800;background:rgba(255,255,255,.92);color:var(--navy);border-radius:6px;padding:2px 6px}
+.na8-thumbs .more{position:absolute;inset:0;background:rgba(0,48,71,.45);color:#fff;font-size:22px;font-weight:800;display:grid;place-items:center}
+.na8-noev{height:190px;display:grid;place-items:center;background:repeating-linear-gradient(45deg,#F4F7FB,#F4F7FB 10px,#EEF2F7 10px,#EEF2F7 20px);color:var(--sub);font-weight:700;font-size:13px;text-align:center;padding:10px}
+.na8-body{padding:12px 14px;display:flex;flex-direction:column;gap:6px;flex:1}
+.na8-tags{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.na8-type{font-size:11.5px;font-weight:800;padding:3px 9px;border-radius:999px;background:var(--lb2);color:var(--blue-d)}
+.na8-st{font-size:11.5px;font-weight:800;padding:3px 9px;border-radius:999px}
+.na8-st.Draft{background:#EEF1F5;color:#5F6B78}.na8-st.Pending{background:#FFF2B3;color:#7A5C00}
+.na8-st.Approved{background:#DDF3E3;color:#1E6B34}.na8-st.Rejected{background:#FCE3E2;color:#9B2C28}
+.na8-acc{font-size:16.5px;font-weight:800;color:var(--navy);line-height:1.3}
+.na8-meta{font-size:12.5px;color:var(--sub);line-height:1.55}
+.na8-meta b{color:var(--ink)}
+.na8-foot{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--sub);border-top:1px solid var(--line2);padding-top:8px;margin-top:auto}
+.na8-foot .pic{font-weight:800;color:var(--blue-d);background:var(--pale);border-radius:999px;padding:2px 9px}
+.na8-dec{margin-left:auto;font-weight:800;color:#fff;background:#3A5CAA;border-radius:999px;padding:4px 11px}
+/* chi tiết */
+.na8-det{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.25fr);gap:16px}
+.na8-info{width:100%;border-collapse:collapse}
+.na8-info td{padding:7px 8px;border-bottom:1px solid var(--line2);font-size:13px;vertical-align:top}
+.na8-info td:first-child{color:var(--sub);width:36%;font-weight:600}
+.na8-info td:last-child{color:var(--ink);font-weight:650}
+.na8-gal{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px}
+.na8-gi{border:1px solid var(--line);border-radius:12px;overflow:hidden;cursor:zoom-in;background:#fff}
+.na8-gi .im{height:240px;background:#EEF2F7;display:grid;place-items:center;overflow:hidden;position:relative}
+.na8-gi img{width:100%;height:100%;object-fit:cover}
+.na8-gi .cap{padding:6px 8px;font-size:11.5px;line-height:1.35}
+.na8-gi .cap b{display:block;color:var(--navy);font-size:12px}
+.na8-gi .cap small{color:var(--sub);word-break:break-all}
+.na8-pdf{font-size:42px}
+.na8-log{white-space:pre-wrap;font-size:11.5px;color:var(--sub);background:var(--pale);border-radius:10px;padding:8px 10px;max-height:150px;overflow:auto;margin-top:8px}
+.na8-decbox{border:2px solid #3A5CAA;background:#F2F6FF;border-radius:14px;padding:12px 14px;margin-top:12px}
+.na8-decbox h4{margin:0 0 6px;color:var(--navy);font-size:15px}
+.na8-decbtn{display:flex;gap:10px;margin-top:10px}
+.na8-decbtn button{flex:1;font:inherit;font-size:15px;font-weight:800;border:0;border-radius:12px;padding:13px 10px;cursor:pointer}
+.na8-decbtn .ok{background:#2E7D32;color:#fff}.na8-decbtn .no{background:#fff;color:#B3261E;border:2px solid #E5A3A1}
+.na8-res{border-radius:12px;padding:10px 12px;margin-top:10px;font-size:13px}
+.na8-res.Approved{background:#E6F5E8;color:#1E6B34}.na8-res.Rejected{background:#FCEDEC;color:#8A3633}
+/* lightbox */
+.na8-lb{position:fixed;inset:0;background:rgba(10,20,35,.92);z-index:400;display:none;flex-direction:column}
+.na8-lb.on{display:flex}
+.na8-lb .bar{display:flex;align-items:center;gap:10px;color:#fff;padding:10px 14px;font-size:13px}
+.na8-lb .bar b{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.na8-lb .bar a,.na8-lb .bar button{color:#fff;background:rgba(255,255,255,.14);border:0;border-radius:8px;padding:7px 12px;font:inherit;font-weight:700;text-decoration:none;cursor:pointer}
+.na8-lb .stage{flex:1;display:grid;place-items:center;overflow:auto;padding:0 10px 10px}
+.na8-lb .stage img{max-width:100%;max-height:100%;object-fit:contain;border-radius:6px;background:#fff}
+.na8-lb .stage iframe{width:min(1000px,100%);height:100%;border:0;border-radius:8px;background:#fff}
+.na8-lb .nav{position:absolute;top:50%;transform:translateY(-50%);width:46px;height:46px;border-radius:50%;border:0;background:rgba(255,255,255,.18);color:#fff;font-size:24px;cursor:pointer}
+/* form */
+.na8-step{border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin-bottom:12px;background:#fff}
+.na8-step>h4{margin:0 0 4px;font-size:14.5px;color:var(--navy);display:flex;align-items:center;gap:8px}
+.na8-step>h4 i{font-style:normal;width:24px;height:24px;border-radius:50%;background:#3A5CAA;color:#fff;display:grid;place-items:center;font-size:12.5px;flex:none}
+.na8-step>h4 .ok{margin-left:auto;font-size:11.5px;font-weight:800;color:#1E6B34;background:#E6F5E8;border-radius:999px;padding:2px 9px}
+.na8-step>h4 .need{margin-left:auto;font-size:11.5px;font-weight:800;color:#9B2C28;background:#FCE3E2;border-radius:999px;padding:2px 9px}
+.na8-guide{font-size:12.5px;color:var(--sub);line-height:1.55;margin:0 0 10px 32px}
+.na8-guide b{color:var(--ink)}
+.na8-types{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.na8-types button{border:2px solid var(--line);background:#fff;border-radius:14px;padding:12px;text-align:left;cursor:pointer;font:inherit}
+.na8-types button b{display:block;font-size:15px;color:var(--navy)}
+.na8-types button small{display:block;font-size:12px;color:var(--sub);margin-top:3px;line-height:1.45}
+.na8-types button.on{border-color:#3A5CAA;background:#F2F6FF}
+.na8-chk{font-size:12.5px;border-radius:10px;padding:8px 11px;margin-top:8px;line-height:1.55}
+.na8-chk.ok{background:#E6F5E8;color:#1E6B34}.na8-chk.warn{background:#FFF6D9;color:#6B5200}.na8-chk.bad{background:#FCEDEC;color:#8A3633}
+.na8-drop{border:2.5px dashed #B9C9E2;border-radius:16px;padding:20px 14px;text-align:center;background:#F7FAFF;cursor:pointer;transition:.12s}
+.na8-drop.hov{border-color:#3A5CAA;background:#EAF1FF}
+.na8-drop .big{font-size:36px;line-height:1}
+.na8-drop b{display:block;font-size:15px;color:var(--navy);margin-top:6px}
+.na8-drop small{display:block;color:var(--sub);font-size:12px;margin-top:4px;line-height:1.5}
+.na8-files{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;margin-top:12px}
+.na8-fi{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#fff;position:relative}
+.na8-fi .im{height:120px;background:#EEF2F7;display:grid;place-items:center;overflow:hidden;cursor:zoom-in}
+.na8-fi .im img{width:100%;height:100%;object-fit:cover}
+.na8-fi select{width:100%;border:0;border-top:1px solid var(--line);font:inherit;font-size:12px;font-weight:700;padding:6px;background:#fff;color:var(--navy)}
+.na8-fi .x{position:absolute;top:5px;right:5px;width:26px;height:26px;border-radius:50%;border:0;background:rgba(0,0,0,.55);color:#fff;cursor:pointer;font-size:14px}
+.na8-fi .st{position:absolute;left:6px;top:6px;font-size:11px;font-weight:800;border-radius:6px;padding:2px 7px;background:#fff}
+.na8-fi .st.up{color:#7A5C00;background:#FFF2C2}.na8-fi .st.ok{color:#1E6B34;background:#DDF3E3}.na8-fi .st.err{color:#9B2C28;background:#FCE3E2}
+.na8-fi .prog{position:absolute;left:0;right:0;bottom:0;height:4px;background:#FFE7A3}
+.na8-fi .prog i{display:block;height:100%;background:#D9981F;animation:na8u 1.2s linear infinite;width:40%}
+@keyframes na8u{0%{margin-left:-40%}100%{margin-left:100%}}
+.na8-lines .oprow{grid-template-columns:150px 1fr 110px 80px 110px 34px}
+.na8-miss{position:sticky;bottom:-16px;background:#FFF8E1;border:1px solid #F1D98A;border-radius:12px;padding:9px 12px;font-size:12.5px;color:#6B5200;line-height:1.6;margin-top:6px}
+.na8-miss.ok{background:#E6F5E8;border-color:#A8D8B4;color:#1E6B34}
+.na8-pick{display:grid;gap:8px;max-height:60vh;overflow:auto}
+.na8-po{border:1px solid var(--line);border-radius:12px;padding:9px 12px;cursor:pointer}
+.na8-po:hover{border-color:#3A5CAA;background:#F7FAFF}
+.na8-po b{color:var(--navy)}
+.na8-po div{font-size:12px;color:var(--sub);margin-top:2px;white-space:pre-wrap}
+@media (max-width:900px){ .na8-det{grid-template-columns:1fr} .na8-types{grid-template-columns:1fr} .na8-lines .oprow{grid-template-columns:1fr 1fr} }
+/* ═══════════ BÁO CÁO KPI ═══════════ */
+.kr8-hero{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-bottom:12px}
+.kr8-sc{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px;display:flex;gap:14px;align-items:center;box-shadow:var(--sh-1)}
+.kr8-sc .lb{font-size:12.5px;font-weight:800;color:var(--sub)}
+.kr8-sc .v{font-size:30px;font-weight:800;line-height:1.15}
+.kr8-sc .s{font-size:11.5px;color:var(--mute);font-weight:600}
+.kr8-ring{width:74px;height:74px;flex:none}
+.kr8-grp{font-size:12px;font-weight:800;color:#3A5CAA;letter-spacing:.05em;text-transform:uppercase;margin:12px 0 6px}
+.kr8-row{display:grid;grid-template-columns:minmax(0,1fr) 64px 110px 110px 74px;gap:10px;align-items:center;padding:9px 10px;border:1px solid var(--line2);border-radius:12px;margin-bottom:6px;background:#fff}
+.kr8-row .nm b{color:var(--navy);font-size:12.5px;margin-right:6px}
+.kr8-row .nm span{font-size:13px;color:var(--ink)}
+.kr8-row .nm .k8-bar{height:7px;margin-top:6px}
+.kr8-row .c{text-align:right;font-size:13px;font-weight:700;color:var(--ink)}
+.kr8-row .c small{display:block;font-size:10.5px;color:var(--mute);font-weight:700}
+.kr8-row .p{text-align:right;font-size:16px;font-weight:800}
+.kr8-cmp{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:14px}
+.kr8-cmp textarea{min-height:84px}
+.kr8-frame{width:100%;height:640px;border:1px solid var(--line);border-radius:12px;background:#F4F7FB}
+@media (max-width:980px){ .kr8-hero{grid-template-columns:1fr} .kr8-cmp{grid-template-columns:1fr} .kr8-row{grid-template-columns:minmax(0,1fr) 70px 64px} .kr8-row .hide-s{display:none} }
 </style>
 <script>
 /* ═══════════════════════════════════════════════════════════════════════════════════════════
-   ⭐ v27 — MỞ MỚI ĐỊA BÀN & SKU MỚI (NEW ACCOUNT & NEW SKU)
-   Backend: Code.gs VN v9.4 · Thailand v1.7 (actions naList · naGet · naSave · naUpload · naDelFile · naDelete · naSubmit · naDecide)
-   Sheet: 16. NEW ACCOUNT & SKU (VN) · 23. NEW ACCOUNT & SKU (Thailand) · chứng từ lưu folder Drive của từng nhóm.
+   ⭐ v28 (03/10/2026) — Backend: Code.gs VN v10.0 · Thailand v1.9
+   ① Mọi lần ghi gửi kèm mã yêu cầu (rid) ⇒ mạng chậm / gửi lại cũng KHÔNG ghi trùng.
+   ② push=0: backend trả lời ngay; app gom các lần lưu rồi gọi kpiPush ở nền (KPI tổng cập nhật sau vài giây).
+   ③ Đơn hàng: hiện NGAY trên app, ghi sheet ở nền (hàng chờ lưu trong máy, tự thử lại khi có mạng).
+      Sửa lỗi lọc tháng (cột Month là số) · lọc PIC · giao diện thẻ · khối tiến độ KPI C5 / C6 / C7 realtime.
+   ④ Dashboard: Account mở mới = case đã được quản lý XÁC NHẬN · khối Doanh số theo KPI (NPP, Composite, JIZAI…).
    ═══════════════════════════════════════════════════════════════════════════════════════════ */
-S.na=S.na||{ rows:null, err:"", at:0, pendingMine:0, seeAll:false, f:{ month:"", pic:"", status:"", mine:0 }, cur:null };
-var NA_NPP={ dental:["NAM DUNG","SPI","VIET THAI","MECI"], surgical:["HUNG VI","ICARE","MHI","AN TAM"], eyeless:[], thai:["NOVATEC","INNOTECH","MAHACHAK","AV"] };
-var NA_EV=[
-  { k:"dist",  vi:"Xác nhận của nhà phân phối", en:"Distributor confirmation", sv:"NPP xác nhận", se:"Dist. confirm", req:1,
-    hv:"Ảnh chụp email / văn bản NPP xác nhận đại lý (hoặc SKU) mới đặt đơn đầu tiên", he:"Screenshot of the distributor's email / letter confirming the new account (or SKU) and its first order" },
-  { k:"order", vi:"Đơn hàng đầu tiên", en:"First order", sv:"Đơn đầu tiên", se:"1st order", req:1,
-    hv:"Đơn hàng / hoá đơn / phiếu xuất kho của NPP cho đại lý — có ngày, mã SKU, số lượng", he:"The distributor's order / invoice / delivery note — with date, SKU code and quantity" },
-  { k:"info",  vi:"Thông tin đại lý mới / SKU mới", en:"New account / SKU information", sv:"Thông tin", se:"Info", req:0,
-    hv:"Phiếu thông tin đại lý / SKU theo format yêu cầu (nếu có)", he:"Account / SKU information sheet in the required format (if any)" },
-  { k:"other", vi:"Tài liệu khác", en:"Other document", sv:"Khác", se:"Other", req:0, hv:"Ảnh, file bổ sung khác", he:"Any other supporting file" }
-];
-var NA_CK=[
-  { k:"first",  vi:"Đây là đơn MANI ĐẦU TIÊN của đại lý (hoặc lần đầu đặt mã SKU này) qua nhà phân phối trong FY hiện tại", en:"This is the account's FIRST MANI order (or the first order of this SKU) through the distributor in the current FY" },
-  { k:"opened", vi:"Đại lý / SKU do chính tôi mở — có chăm sóc, làm việc trực tiếp", en:"I opened this account / SKU myself — with direct follow-up and work" },
-  { k:"month",  vi:"Case ghi vào ĐÚNG tháng phát sinh đơn hàng đầu tiên", en:"The case is recorded in the month of the first order" },
-  { k:"mail",   vi:"Đã thông báo / xin xác nhận nhà phân phối qua email", en:"The distributor was informed / asked to confirm by email" }
-];
-var NA_STL={ Draft:["Nháp","Draft"], Pending:["Chờ xác nhận","Waiting for approval"], Approved:["Đã xác nhận","Approved"], Rejected:["Bị từ chối","Rejected"] };
-function naStL(s){ var x=NA_STL[s]||[s,s]; return TX(x[0],x[1]); }
-function naTypeL(t){ return t==="new_sku"?TX("📦 SKU mới","📦 New SKU"):TX("🏪 Đại lý mới","🏪 New account"); }
-S.na.th=S.na.th||{}; S.na.fd=S.na.fd||{};
-function naTh(f){
-  if(!f) return "";
-  if(f.id && S.na.th[f.id]) return S.na.th[f.id];
-  if(f.id && KV.ok){ var v=kvGet("k:*:nath:"+f.id); if(v){ S.na.th[f.id]=v; return v; } }
-  return f._local||f._obj||"";
+function uid28(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,9); }
+var W28={ saveOrders:1, saveOrder:1, saveCustomer:1, saveCBC:1, saveCustomerCbc:1, saveWeekly:1, saveMonthly:1,
+          savePresentation:1, saveADP:1, deleteRow:1, deleteAccount:1, uploadPhoto:1 };
+var _apiPost27=apiPost;
+apiPost=function(body){
+  if(body && W28[body.action]){
+    if(!body.rid) body.rid=uid28();
+    if(body.push==null) body.push=0;
+    kpiPushSoon();
+  }
+  return _apiPost27(body);
+};
+/* đẩy KPI ở nền: gom các lần lưu trong 6 giây thành 1 lượt */
+var _kpT=null;
+function kpiPushSoon(delay){
+  clearTimeout(_kpT);
+  _kpT=setTimeout(function(){
+    if(OB.list().some(function(x){ return x.st!=="err"; })) return kpiPushSoon(6000);   /* còn đơn đang ghi ⇒ chờ */
+    S.k8push={ st:"run", at:Date.now() }; k8Badge();
+    _apiPost27({ action:"kpiPush" }).then(function(j){
+      var p=(j&&j.kpiPush)||{};
+      S.k8push={ st:p.ok===false?"err":"ok", at:Date.now(), msg:p.error||"" };
+      S.kpi=null; k8Badge();
+      if(S.tab==="order"||S.tab==="dash") k8Ensure(true).then(function(){ if(S.tab==="order") renderOrder(); else if(S.tab==="dash") dashRepaint(); });
+    }).catch(function(){ S.k8push={ st:"err", at:Date.now() }; k8Badge(); });
+  }, delay||6000);
 }
-/* ô ảnh: có ảnh thu nhỏ thì hiện, chưa có thì giữ chỗ (data-fid) rồi nạp theo lô */
-function naThImg(f){
-  var t=naTh(f);
-  if(t) return '<img loading="lazy" src="'+t+'" alt="">';
-  return '<span class="ph" data-fid="'+esc(f.id||"")+'">'+(naIsImg(f)?"🖼️":"📄")+'</span>';
-}
-var _naThQ={}, _naThT=null;
-function naThumbsLoad(ids){
-  (ids||[]).forEach(function(id){ if(id && !S.na.th[id] && !_naThQ[id]) _naThQ[id]=1; });
-  clearTimeout(_naThT);
-  _naThT=setTimeout(function(){
-    var list=Object.keys(_naThQ).filter(function(id){ return _naThQ[id]===1; }).slice(0,60);
-    if(!list.length) return;
-    list.forEach(function(id){ _naThQ[id]=2; });
-    apiGet("naThumbs",{ ids:list.join(","), _ts:Date.now() }).then(function(j){
-      var th=j.thumbs||{};
-      Object.keys(th).forEach(function(id){ S.na.th[id]=th[id]; if(KV.ok) kvSet("k:*:nath:"+id,th[id]); });
-      list.forEach(function(id){ if(!th[id]) _naThQ[id]=3; else delete _naThQ[id]; });
-      naThumbsPatch();
-      if(Object.keys(_naThQ).some(function(id){ return _naThQ[id]===1; })) naThumbsLoad([]);
-    }).catch(function(){ list.forEach(function(id){ _naThQ[id]=1; }); });
-  },60);
-}
-function naThumbsPatch(){
-  document.querySelectorAll("[data-fid]").forEach(function(el){
-    var id=el.getAttribute("data-fid"), t=S.na.th[id];
-    if(t) el.outerHTML='<img loading="lazy" src="'+t+'" alt="">';
-  });
-}
-function naThumbsFor(rows){ var ids=[]; (rows||[]).forEach(function(c){ (c.files||[]).forEach(function(f){ if(f.id&&!naTh(f)) ids.push(f.id); }); }); if(ids.length) naThumbsLoad(ids); }
-function naIsImg(f){ return /^image\//.test(f.mime||"")||/\.(png|jpe?g|webp|gif)$/i.test(f.name||""); }
-function naEvS(k){ var e=NA_EV.filter(function(x){ return x.k===k; })[0]; return e?TX(e.sv,e.se):k; }
-function naEvL(k){ var e=NA_EV.filter(function(x){ return x.k===k; })[0]; return e?TX(e.vi,e.en):k; }
-function naStatusLine(c){
-  if(c.status==="Draft") return TX("Cập nhật bởi ","Updated by ")+esc(c.pic)+TX(" — chưa gửi email xin xác nhận"," — confirmation request not sent yet");
-  if(c.status==="Pending") return TX("Chờ ","Waiting for ")+esc((c.mgrs||[]).join(" / ")||TX("quản lý","the manager"))+TX(" xác nhận · gửi "," · sent ")+esc(String(c.submittedAt||"").slice(5,16));
-  if(c.status==="Approved") return TX("Đã xác nhận bởi ","Approved by ")+esc(c.decidedBy)+" · "+esc(String(c.decidedAt||"").slice(5,16));
-  return TX("Từ chối bởi ","Rejected by ")+esc(c.decidedBy)+(c.comment?": "+esc(String(c.comment).slice(0,80)):"");
+function k8Badge(){
+  var el=$("k8live"); if(!el) return;
+  var p=S.k8push||{};
+  el.className="k8-live"+(p.st==="run"||OB.list().length?" wait":"");
+  el.innerHTML='<i></i>'+(OB.list().length?TX("Đang ghi "+OB.list().length+" đơn vào sheet…","Saving…")
+    :p.st==="run"?TX("Đang cập nhật file KPI tổng…","Updating the KPI file…")
+    :p.st==="ok"?TX("Đã cập nhật file KPI lúc ","KPI file updated at ")+new Date(p.at).toTimeString().slice(0,5)
+    :TX("Tính ngay từ đơn hàng trên app","Live from the orders"));
 }
 
-/* ── tải dữ liệu ── */
+/* ═══════════ SỐ KPI (tab 9) + TÍNH REALTIME C5 / C6 / C7 TỪ ĐƠN HÀNG ═══════════ */
+function k8Ensure(force){
+  if(!force && S.kpi && S.kpi._fy===S.fy) return Promise.resolve(S.kpi);
+  if(!force && S._k8failAt && Date.now()-S._k8failAt<60000) return new Promise(function(){});   /* lỗi vừa xảy ra ⇒ không gọi lại liên tục */
+  if(S._k8ld) return S._k8ld;
+  S._k8ld=apiGet("kpi",{ fy:S.fy, _ts:force?Date.now():"" }).then(function(j){ S._k8ld=null; if(j&&!j.unchanged){ S.kpi=j; S.kpi._fy=S.fy; } return S.kpi; })
+    .catch(function(e){ S._k8ld=null; S._k8failAt=Date.now(); return S.kpi; });
+  return S._k8ld;
+}
+function k8Months(){ return ((S.kpi&&S.kpi.months&&S.kpi.months.length===12)?S.kpi.months:fyMonths(S.fy)).map(String); }
+function k8Pics(){ return ((S.kpi&&S.kpi.pics)||[]).filter(function(p){ return p&&p.pic; }); }
+function k8RowsOf(pic,re){
+  var out=[]; k8Pics().forEach(function(p){ if(pic && p.pic!==pic) return; (p.rows||[]).forEach(function(r){ if(re.test(r.key)) out.push({pic:p.pic,r:r}); }); });
+  return out;
+}
+function k8HasSupp(){ return k8RowsOf("",/^supp_/).length>0; }
+function k8OrderRows(){
+  var base=(tGet("order")||((S.cache.order||{}).rows)||[]).slice();
+  OB.list().forEach(function(it){ (it.rows||[]).forEach(function(r){ if(!r._row) base.push(r); }); });
+  return base;
+}
+function k8Ym(o){ var m=String(o.month==null?"":o.month).replace(/\D/g,"").slice(0,6); return m||ymOf(o.day); }
+/* đúng rule công thức tab 9: PIC chứa tên · Month · từ khoá Composite / JIZAI trong Detail + Product type · Partner chứa từ khoá NPP */
+function k8Live(pic,key){
+  var ms=k8Months(), idx={}, out=ms.map(function(){ return 0; });
+  ms.forEach(function(m,i){ idx[m]=i; });
+  var st=(S.kpi&&S.kpi.settings)||{}, rate=n(st.rateVal)||26000;
+  var kw=(key==="supp_comp"?[st.comp1||"composite",st.comp2]:[st.jz1||"jizai",st.jz2]).filter(function(x){ return String(x||"").trim(); }).map(function(x){ return String(x).toLowerCase(); });
+  var npp=(((S.kpi&&S.kpi.npp)||{})[pic]||[]).map(function(x){ return String(x).toLowerCase(); });
+  var lp=String(pic).toLowerCase();
+  k8OrderRows().forEach(function(o){
+    if(String(o.pic||"").toLowerCase().indexOf(lp)<0) return;
+    var i=idx[k8Ym(o)]; if(i==null) return;
+    if(key==="supp_amt"){ out[i]+=n(o.amount)/rate; return; }
+    var txt=(String(o.detail||"")+" "+String(o.ptype||"")).toLowerCase();
+    if(!kw.some(function(k){ return txt.indexOf(k)>=0; })) return;
+    if(npp.length){ var pt=String(o.partner||"").toLowerCase(); if(!npp.some(function(k){ return pt.indexOf(k)>=0; })) return; }
+    out[i]+=n(o.qty);
+  });
+  return out;
+}
+/* tên NPP lấy từ tên mã KPI: "… · Nam Dung Distributor" ⇒ "Nam Dung" */
+function k8Npp(name){
+  var seg=String(name||"").split("·").pop().split(",").pop().trim();
+  var m=/(.+?)\s+Distributor/i.exec(seg); return m?m[1].replace(/\s*\(new\)\s*/i,"").trim():"";
+}
+function k8Label(r){
+  var nm=String(r.name||"");
+  if(/^supp_amt/.test(r.key)) return TX("Doanh số hỗ trợ (C5)","Supported sales (C5)");
+  if(/^supp_comp/.test(r.key)) return TX("SL Composite hỗ trợ (C6)","Composite qty supported (C6)");
+  if(/^supp_jizai/.test(r.key)) return TX("SL JIZAI hỗ trợ (C7)","JIZAI qty supported (C7)");
+  if(/^newacct/.test(r.key)) return TX("Account / SKU mở mới (C1)","New accounts / SKU");
+  if(/JIZAI/i.test(nm)) return TX("Doanh số JIZAI","JIZAI sales");
+  if(/Composite/i.test(nm)) return TX("Doanh số Composite","Composite sales");
+  if(/Manipler/i.test(nm)) return TX("Doanh số Manipler","Manipler sales");
+  if(/Hook|Forceps/i.test(nm)) return TX("Doanh số Hook + Micro Forceps","Hook + Micro Forceps sales");
+  if(/Knife|Suture/i.test(nm)) return TX("Doanh số Dao · Chỉ","Knife · Suture sales");
+  return TX("Doanh số NPP","Distributor sales");
+}
+function k8Unit(r){ var u=String(r.unit||""); return /usd/i.test(u)?"USD":/sheet/i.test(u)?TX("vỉ","sheets"):/pcs/i.test(u)?TX("cái","pcs"):u; }
+function k8Fmt(v,u){ if(v==null||isNaN(v)) return "—"; var a=Math.abs(v); var s=Number(v).toLocaleString("en-US",{maximumFractionDigits:a>=100?0:1}); return u==="USD"?("$"+s):s; }
+function k8Col(p){ return p==null?"#A7B3C0":p>=1.2?"#1E7B34":p>=1?"#2E8B57":p>=0.9?"#D9981F":p>=0.7?"#E07B39":"#C0504D"; }
+function k8Pct(p){ return p==null?"—":Math.round(p*100)+"%"; }
+function k8Bar(p,mark){ var w=Math.max(0,Math.min(100,Math.round((p||0)*100/1.3))); return '<div class="k8-bar"><span style="width:'+w+'%;background:'+k8Col(p)+'"></span>'+(mark?'<em style="left:'+Math.round(100/1.3)+'%"></em>':'')+'</div>'; }
+/* một chỉ tiêu (nhiều PIC cộng lại) ⇒ target / actual 12 tháng */
+function k8Series(list,useLive){
+  var t=[],a=[],has=[]; for(var i=0;i<12;i++){ t.push(0); a.push(0); has.push(false); }
+  list.forEach(function(x){
+    var live=useLive&&/^supp_/.test(x.r.key)?k8Live(x.pic,x.r.key):null;
+    var na=/^newacct/.test(x.r.key)?naApprovedSeries(x.pic,x.r.key):null;
+    for(var i=0;i<12;i++){
+      t[i]+=n((x.r.t||[])[i]);
+      var av=live?live[i]:na?na[i]:(x.r.a||[])[i];
+      if(av!=null&&av!==""){ a[i]+=n(av); has[i]=true; }
+    }
+  });
+  return { t:t, a:a, has:has };
+}
+function k8Sum(arr,idx){ return idx.reduce(function(s,i){ return s+n(arr[i]); },0); }
+function k8Idx(mode,m){
+  var ms=k8Months(), cur=ymOf(todayISO()), i=ms.indexOf(String(m)); if(i<0) i=Math.max(0,ms.indexOf(cur)); if(i<0) i=0;
+  if(mode==="M") return [i];
+  if(mode==="Q"){ var q=Math.floor(i/3)*3; return [q,q+1,q+2]; }
+  var o=[]; for(var k=0;k<12;k++) if(ms[k]<=cur||k<=i) o.push(k); return o.length?o:[0];
+}
+/* thẻ tiến độ dùng chung (đơn hàng + dashboard) */
+function k8Card(list,label,unit,code,focusM,opt){
+  opt=opt||{};
+  var s=k8Series(list,true), ms=k8Months(), fi=Math.max(0,ms.indexOf(String(focusM)));
+  var iM=[fi], iQ=k8Idx("Q",focusM), iY=k8Idx("FY",focusM);
+  function line(lb,ix){
+    if(!ix.length) return '<div class="k8-row"><span class="l">'+lb+'</span>'+k8Bar(null)+'<span class="r" style="color:var(--mute)">—<small>'+TX("chưa chốt số","not closed")+'</small></span></div>';
+    var t=k8Sum(s.t,ix), a=k8Sum(s.a,ix);
+    return '<div class="k8-row"><span class="l">'+lb+'</span>'+k8Bar(t?a/t:null,1)+'<span class="r" style="color:'+k8Col(t?a/t:null)+'">'+k8Fmt(a,unit)+
+      '<small>/ '+k8Fmt(t,unit)+' · '+k8Pct(t?a/t:null)+'</small></span></div>';
+  }
+  /* doanh số NPP (mã F) chỉ có Actual ở tháng đã chốt ⇒ quý / FY so với target của đúng các tháng đã có số */
+  var live=list.every(function(x){ return /^(supp_|newacct)/.test(x.r.key); });
+  var fix=function(ix){ if(live) return ix; var k=ix.filter(function(i){ return s.has[i]; }); return k; };
+  iQ=fix(iQ); iY=fix(iY); var iM2=fix(iM);
+  var main=opt.range||"M", ix=main==="FY"?iY:main==="Q"?iQ:iM2, T=k8Sum(s.t,ix), A=k8Sum(s.a,ix), P=T?A/T:null;
+  var npps={}; list.forEach(function(x){ var nn=k8Npp(x.r.name); if(nn) npps[nn]=1; });
+  var mx=Math.max.apply(null,s.t.concat(s.a).concat([1]));
+  var spark='<div class="k8-sparkw"><div class="k8-spark">'+ms.map(function(m,i){
+    var th=Math.round(s.t[i]/mx*100), ah=Math.round(s.a[i]/mx*100), pp=s.t[i]?s.a[i]/s.t[i]:null;
+    return '<div class="'+(i===fi?"on":"")+'" title="'+monLbl("T"+parseInt(m.slice(4),10))+': '+k8Fmt(s.a[i],unit)+' / '+k8Fmt(s.t[i],unit)+'"><span class="t" style="height:'+th+'%"></span>'+
+      (s.has[i]?'<span class="a" style="height:'+Math.max(2,ah)+'%;background:'+k8Col(pp)+'"></span>':'')+'<span class="m">'+parseInt(m.slice(4),10)+'</span></div>'; }).join("")+'</div></div>';
+  var picsHtml="";
+  if(opt.byPic && list.length>1){
+    var by={}; list.forEach(function(x){ (by[x.pic]=by[x.pic]||[]).push(x); });
+    picsHtml='<div class="k8-pics">'+Object.keys(by).map(function(pc){
+      var ss=k8Series(by[pc],true), t=k8Sum(ss.t,ix), a=k8Sum(ss.a,ix), pp=t?a/t:null, nn=by[pc].map(function(x){ return k8Npp(x.r.name); }).filter(String).join(" · ");
+      return '<div class="k8-pic" onclick="'+(opt.onPic||"")+'(\''+esc(pc)+'\')"><span><b>'+esc(pc)+'</b>'+(nn?'<small>'+esc(nn)+'</small>':'')+'</span>'+k8Bar(pp)+
+        '<span class="r" style="text-align:right;font-weight:800;color:'+k8Col(pp)+'">'+k8Pct(pp)+'<small style="display:block;color:var(--mute);font-size:10.5px">'+k8Fmt(a,unit)+'</small></span></div>';
+    }).join("")+'</div>';
+  }
+  return '<div class="k8-card"><div class="tt">'+(code?'<span class="code">'+esc(code)+'</span>':'')+'<b>'+esc(label)+'</b></div>'+
+    (Object.keys(npps).length?Object.keys(npps).map(function(x){ return '<span class="npp">🏢 '+esc(x)+'</span>'; }).join(""):"")+
+    '<div class="k8-big"><span class="v">'+(ix.length?k8Fmt(A,unit):'<span style="color:var(--mute)">'+TX("chưa chốt","not closed")+'</span>')+'</span><span class="u">/ '+k8Fmt(T,unit)+(unit&&unit!=="USD"?" "+esc(unit):"")+'</span><span class="p" style="color:'+k8Col(P)+'">'+k8Pct(P)+'</span></div>'+
+    k8Bar(P,1)+
+    '<div class="k8-rows">'+line(monLbl("T"+parseInt(ms[fi].slice(4),10)),iM2)+line("Q"+(Math.floor(fi/3)+1),iQ)+line(TX("FY lũy kế","FY to date"),iY)+'</div>'+
+    picsHtml+spark+'</div>';
+}
+
+/* ═══════════ HÀNG CHỜ GHI ĐƠN HÀNG (lưu trong máy, tự thử lại) ═══════════ */
+var OB={
+  key:function(){ return "mmh_outbox_"+curTeamKey(); },
+  list:function(){ try{ return JSON.parse(localStorage.getItem(OB.key())||"[]"); }catch(e){ return []; } },
+  save:function(l){ try{ localStorage.setItem(OB.key(),JSON.stringify(l)); }catch(e){} },
+  put:function(it){ var l=OB.list().filter(function(x){ return x.rid!==it.rid; }); l.push(it); OB.save(l); },
+  drop:function(rid){ OB.save(OB.list().filter(function(x){ return x.rid!==rid; })); },
+  busy:{}
+};
+function obAddOrders(rows,label){
+  var it={ rid:uid28(), kind:"orders", rows:rows.map(function(r){ return Object.assign({},r,{ _pend:1 }); }), at:Date.now(), tries:0, st:"pend", label:label||"" };
+  OB.put(it); k8Badge(); obSend(it.rid);
+  return it.rid;
+}
+function obSend(rid){
+  var it=OB.list().filter(function(x){ return x.rid===rid; })[0]; if(!it||OB.busy[rid]) return;
+  OB.busy[rid]=1; it.tries++; it.st="pend"; it.last=Date.now(); OB.put(it);
+  var rows=it.rows.map(function(r){ var o=Object.assign({},r); delete o._pend; delete o._err; delete o._rid; return o; });
+  _apiPost27({ action:"saveOrders", rows:rows, rid:it.rid, push:0 }).then(function(r){
+    delete OB.busy[rid];
+    if(r && (r.softTimeout||r.opaque)){ obRetryLater(rid,"Máy chủ chưa trả lời — sẽ kiểm tra lại"); return; }
+    var got=(r&&r.rows)||[];
+    OB.drop(rid);
+    rows.forEach(function(d,k){ if(d._row||got[k]) afterWrite("order", got[k]||d._row||0, d); });
+    toast(TX("✓ Đã ghi vào sheet: ","✓ Saved to the sheet: ")+(it.label||rows.length+" dòng")+(r&&r.dup?TX(" (đã có từ trước, không ghi trùng)",""):""),"ok",3200);
+    kpiPushSoon(4000); k8Badge();
+    if(S.tab==="order") renderOrder();
+    setTimeout(syncOrderTasks,800);
+  }).catch(function(e){ delete OB.busy[rid]; obRetryLater(rid,e.message); });
+}
+function obRetryLater(rid,msg){
+  var it=OB.list().filter(function(x){ return x.rid===rid; })[0]; if(!it) return;
+  it.st=it.tries>=3?"err":"pend"; it.err=msg||""; OB.put(it); k8Badge();
+  if(S.tab==="order") renderOrder();
+  var wait=[5000,15000,30000,60000,120000][Math.min(it.tries-1,4)];
+  setTimeout(function(){ obSend(rid); },wait);
+}
+function obFlush(){ OB.list().forEach(function(it){ if(!OB.busy[it.rid] && (!it.last||Date.now()-it.last>8000)) obSend(it.rid); }); }
+function obRetry(rid){ var it=OB.list().filter(function(x){ return x.rid===rid; })[0]; if(it){ it.tries=0; OB.put(it); obSend(rid); renderOrder(); } }
+function obDiscard(rid){ if(!confirm(TX("Bỏ đơn này (chưa ghi vào sheet)?","Discard this unsaved order?"))) return; OB.drop(rid); renderOrder(); k8Badge(); }
+window.addEventListener("online",function(){ setTimeout(obFlush,1500); });
+setInterval(function(){ if(S.user && OB.list().length) obFlush(); },20000);
+
+/* ── lưu đơn: hiện ngay, ghi sheet ở nền ── */
+saveOrder=function(){
+  ordSync();
+  var c=S.editing.ctx||{};
+  var accName=$("o_accName").value.trim();
+  if(!accName) return toast("Cần chọn Account","warn");
+  if(!$("o_day").value) return toast("Cần chọn ngày đặt","warn");
+  var list=ordProds().filter(function(p){ return String(p.ptype||"").trim()||String(p.detail||"").trim()||(p.details&&p.details.length)||n(p.qty)||n(p.price); });
+  if(!list.length) return toast("Cần nhập ít nhất một sản phẩm","warn");
+  var badLine=0;
+  list.forEach(function(p,k){ if((p.details||[]).length>1 && (!n(p.price)||!n(p.qty))) badLine=k+1; });
+  if(badLine) return toast("Dòng sản phẩm "+badLine+" đang chọn nhiều mã — cần điền Unit price và SL dùng chung cho cả dòng","warn",6000);
+  var base={ code:c.code||"", cbcCode:c.cbcCode||"", channel:$("o_channel").value,
+    fy:$("o_fy").value, month:$("o_month").value, day:$("o_day").value, orderNo:$("o_orderNo").value,
+    type:c.type||"", name:accName, address:c.address||"", province:c.province||"", area:c.area||"",
+    contact:($("o_contact")?$("o_contact").value:""), jobTitle:$("o_jobTitle").value, phone:$("o_phone").value,
+    pic:$("o_pic").value||S.user.pic, partner:$("o_partner").value, partnerType:$("o_partnerType").value,
+    source:$("o_source").value, note:$("o_note").value };
+  var first=S.editing.row||0;
+  var rows=list.map(function(p,k){
+    var amt=n(p.price)*n(p.qty);
+    return Object.assign({},base,{ _row:(k===0?first:0), ptype:p.ptype,
+      detail:(p.details&&p.details.length?p.details.join("\n"):p.detail||""),
+      qty:p.qty, price:p.price, amount:amt?String(amt):"" });
+  });
+  /* dòng đang sửa: cập nhật ngay trên app */
+  rows.forEach(function(d){ if(d._row) patchLocal("order", d._row, d); });
+  obAddOrders(rows, base.orderNo+" · "+accName);
+  closeAllModals();
+  toast(TX("✓ Đã thêm đơn ","✓ Order added ")+base.orderNo+TX(" — đang ghi vào sheet ở nền",""),"ok",2600);
+  if(S.tab==="order") renderOrder();
+};
+
+/* ═══════════ TRANG ĐƠN HÀNG ═══════════ */
+function ordPicScope(){ return isMgrView()?(S.filt.pic||""):S.user.pic; }
+function ordSetPic(p){ S.filt.pic=p; renderOrder(); }
+function ordSetRange(r){ S.ordRange=r; renderOrder(); }
+function ordView(v){ S.ordView=v; renderOrder(); }
+function ordPtCls(t){ t=String(t||"").toLowerCase(); return /composite|mmg|bond|bleach|nano|micro/.test(t)?"c":/jizai/.test(t)?"j":/bur/.test(t)?"b":""; }
+renderOrder=function(){
+  var data=S.cache.order||{rows:[]}, all=(data.rows||[]).slice(), pic=ordPicScope();
+  /* đơn đang chờ ghi vào sheet (hàng chờ trong máy) */
+  OB.list().forEach(function(it){ (it.rows||[]).forEach(function(r){ if(!r._row) all.unshift(Object.assign({},r,{ _pend:1, _rid:it.rid, _err:it.st==="err"?(it.err||"lỗi"):"" })); }); });
+  var rows=all.filter(function(o){
+    if(pic && String(o.pic||"").toLowerCase().indexOf(pic.toLowerCase())<0) return false;
+    if(S.filt.month && k8Ym(o)!==String(S.filt.month)) return false;
+    return true;
+  });
+  if(S.filt.q){ var q=noAcc(S.filt.q); rows=rows.filter(function(o){ return noAcc(o.name+" "+o.code+" "+o.detail+" "+o.orderNo+" "+o.partner+" "+o.ptype).indexOf(q)>=0; }); }
+  var tot=rows.reduce(function(s,o){ return s+n(o.amount); },0);
+  var months=fyMonths(S.fy), cnt={}; all.forEach(function(o){ if(pic && String(o.pic||"").toLowerCase().indexOf(pic.toLowerCase())<0) return; var m=k8Ym(o); cnt[m]=(cnt[m]||0)+1; });
+  /* gom theo đơn */
+  var groups=[], gi={};
+  rows.forEach(function(o){
+    var k=(o._rid||"")+"|"+String(o.orderNo||"")+"|"+noAcc(o.name)+"|"+String(o.day||k8Ym(o));
+    if(gi[k]==null){ gi[k]=groups.length; groups.push({ k:k, o:o, lines:[], amt:0 }); }
+    var g=groups[gi[k]]; g.lines.push(o); g.amt+=n(o.amount);
+  });
+  groups.sort(function(a,b){ return String(b.o.day||k8Ym(b.o)).localeCompare(String(a.o.day||k8Ym(a.o))) || (b.o._pend?1:0)-(a.o._pend?1:0); });
+  var byPt={}; rows.forEach(function(o){ var t=String(o.ptype||"—").split(/[,\n]/)[0].trim()||"—"; byPt[t]=(byPt[t]||0)+n(o.amount); });
+
+  var focusM=S.filt.month||((months.indexOf(ymOf(todayISO()))>=0)?ymOf(todayISO()):months[0]);
+  var kpiHtml="";
+  if(!S.kpi||S.kpi._fy!==S.fy){
+    kpiHtml='<div class="k8-panel"><div class="k8-head"><h3>📈 '+TX("Tiến độ KPI đơn hàng","Order KPI progress")+'</h3><span class="sub">'+TX("Đang nạp chỉ tiêu…","Loading targets…")+'</span></div>'+skRows(2,false)+'</div>';
+    k8Ensure().then(function(){ if(S.tab==="order") renderOrder(); });
+  } else if(k8HasSupp()){
+    var R=S.ordRange||"M";
+    var defs=[["supp_amt","C5"],["supp_comp","C6"],["supp_jizai","C7"]];
+    kpiHtml='<div class="k8-panel"><div class="k8-head"><h3>📈 '+TX("Tiến độ KPI từ đơn hàng","KPI progress from orders")+'</h3>'+
+      '<span class="sub">'+(pic?TX("Sales: ","PIC: ")+'<b>'+esc(pic)+'</b>':TX("Toàn nhóm","Whole team"))+' · '+TX("tháng ","month ")+esc(mLb(focusM))+'</span>'+
+      '<span class="k8-live" id="k8live"><i></i></span><span style="flex:1"></span>'+
+      '<div class="k8-seg">'+[["M",TX("Tháng","Month")],["Q",TX("Quý","Quarter")],["FY",TX("Cả FY","FY")]].map(function(x){ return '<button class="'+(R===x[0]?"on":"")+'" onclick="ordSetRange(\''+x[0]+'\')">'+x[1]+'</button>'; }).join("")+'</div></div>'+
+      '<div class="k8-grid">'+defs.map(function(d){
+        var list=k8RowsOf(pic,new RegExp("^"+d[0]+"$")); if(!list.length) return "";
+        return k8Card(list,k8Label(list[0].r),k8Unit(list[0].r),list.length===1?list[0].r.code:d[1],focusM,{ range:R, byPic:!pic, onPic:"ordSetPic" });
+      }).join("")+'</div>'+
+      '<div class="k8-note">'+TX("Số thực tế tính ngay trên app theo đúng rule tab 9: C5 = tổng giá trị mọi đơn của sales ÷ tỷ giá; C6 / C7 = số lượng Composite / JIZAI của đơn qua NPP phụ trách. Đơn vừa thêm được cộng ngay, file KPI tổng cập nhật sau vài giây.",
+        "Actuals are computed live with the same rule as tab 9.")+'</div></div>';
+  }
+
+  var picBar=isMgrView()?'<div class="chipbar" style="margin-bottom:10px"><div class="chip'+(pic?"":" on")+'" onclick="ordSetPic(\'\')">👥 '+TX("Toàn nhóm","Whole team")+'</div>'+
+    (S.master.pic||[]).map(function(p){ return '<div class="chip'+(pic===p?" on":"")+'" onclick="ordSetPic(\''+esc(p)+'\')">'+esc(p)+'</div>'; }).join("")+'</div>':"";
+  var pend=OB.list().length;
+  var head='<div class="ph"><div><h2>'+TX("Đơn hàng ","Orders ")+esc(S.fy)+'</h2><p><b>'+fmtN(groups.length)+'</b> '+TX("đơn","orders")+' · <b>'+fmtN(rows.length)+'</b> '+TX("dòng sản phẩm","lines")+' · '+TX("Tổng ","Total ")+'<b>'+fmtVND(tot)+'</b>'+
+      (pend?' · <span class="od-badge pend">⏳ '+pend+TX(" đơn đang ghi vào sheet"," saving")+'</span>':'')+'</p></div>'+
+    '<div class="sp"></div><div class="k8-seg" style="margin-right:8px"><button class="'+(S.ordView!=="table"?"on":"")+'" onclick="ordView(\'card\')">▦ '+TX("Thẻ","Cards")+'</button><button class="'+(S.ordView==="table"?"on":"")+'" onclick="ordView(\'table\')">▤ '+TX("Bảng","Table")+'</button></div>'+
+    '<button class="btn pri" onclick="formOrder(null)">＋ '+TX("Đơn hàng mới","New order")+'</button></div>';
+  var filt='<div class="card pad" style="margin-bottom:12px">'+picBar+
+      '<input class="inp" id="ord_q" autocomplete="off" style="margin-bottom:10px" placeholder="🔍 '+TX("Tìm theo account, mã, sản phẩm, NPP…","Search account, code, product…")+'" value="'+esc(S.filt.q||"")+'" oninput="S.filt.q=this.value;debOrd()">'+
+      '<div class="chipbar"><div class="chip'+(S.filt.month?"":" on")+'" onclick="S.filt.month=\'\';renderOrder()">'+TX("Cả FY","Whole FY")+'</div>'+
+        months.map(function(m){ return '<div class="chip'+(String(S.filt.month)===m?" on":"")+'" onclick="S.filt.month=\''+m+'\';renderOrder()">'+monLbl("T"+parseInt(m.slice(4),10))+(cnt[m]?' <span style="opacity:.7;font-weight:600">'+cnt[m]+'</span>':'')+'</div>'; }).join("")+'</div></div>';
+  var sum='<div class="od-sum">'+Object.keys(byPt).sort(function(a,b){ return byPt[b]-byPt[a]; }).slice(0,8).map(function(t){
+      return '<div class="it"><small>'+esc(t)+'</small><b>'+fmtVND(byPt[t])+'</b></div>'; }).join("")+'</div>';
+  var body;
+  if(!rows.length) body='<div class="card pad"><div class="empty"><div class="e">🧾</div><p>'+TX("Chưa có đơn hàng khớp bộ lọc","No order matches the filter")+'</p></div></div>';
+  else if(S.ordView==="table") body='<div class="tbwrap"><table class="tb"><thead><tr><th>Tháng</th><th>Order</th><th>Account</th><th>Partner</th><th>Sản phẩm</th><th>Nhóm</th><th class="num">SL</th><th class="num">Amount</th><th>PIC</th></tr></thead><tbody>'+
+      rows.map(function(o){ return '<tr '+(o._pend?'style="background:#FFFDF4"':'onclick="rOrder(\''+reg(o)+'\')" style="cursor:pointer"')+'><td class="mono">'+esc(k8Ym(o))+'</td><td>'+esc(o.orderNo)+(o._pend?' ⏳':'')+'</td><td><b>'+esc(o.name)+'</b><div style="font-size:11px;color:var(--mute)">'+esc(o.code||"")+' · '+esc(o.province||"")+'</div></td>'+
+        '<td style="font-size:12px">'+esc(String(o.partner||"").split("/")[0])+'</td><td style="max-width:240px;font-size:12px;white-space:pre-wrap">'+nl2br(String(o.detail||"").slice(0,140))+'</td><td><span class="tag t-n">'+esc(o.ptype)+'</span></td><td class="num">'+fmtN(o.qty)+'</td><td class="num"><b>'+fmtVND(o.amount)+'</b></td><td>'+esc(o.pic)+'</td></tr>'; }).join("")+'</tbody></table></div>';
+  else body='<div class="od-list">'+groups.slice(0,400).map(function(g){
+      var o=g.o, st=o._pend?(o._err?"err":"pend"):"", d=String(o.day||"");
+      return '<div class="od-card '+st+'"><div class="od-top"><div class="dt">'+(d?esc(d.slice(8,10)+"/"+d.slice(5,7)):esc(k8Ym(o).slice(4)))+'<small>'+esc(o.orderNo||"—")+'</small></div>'+
+        '<div class="acc"><b>'+esc(o.name)+'</b><div>'+esc([o.code,o.type,o.province].filter(String).join(" · "))+(o.contact?' · 👤 '+esc(o.contact):'')+'</div></div>'+
+        '<div class="od-tags">'+(o.partner?'<span>🏢 '+esc(String(o.partner).split("/")[0])+'</span>':'')+(o.channel?'<span>'+esc(o.channel)+'</span>':'')+'<span>'+esc(o.pic||"")+'</span></div>'+
+        (st==="pend"?'<span class="od-badge pend">⏳ '+TX("đang ghi vào sheet","saving")+'</span>':'')+
+        (st==="err"?'<span class="od-badge err">⚠ '+TX("chưa ghi được","not saved")+'</span><button class="btn sm" onclick="obRetry(\''+o._rid+'\')">↻ '+TX("Thử lại","Retry")+'</button><button class="btn sm" onclick="obDiscard(\''+o._rid+'\')">✕</button>':'')+
+        '<div class="tot"><b>'+fmtVND(g.amt)+'</b><small>'+g.lines.length+TX(" dòng"," lines")+'</small></div></div>'+
+        '<div class="od-lines">'+g.lines.map(function(x){
+          return '<div class="od-line" '+(x._pend?'':'onclick="rOrder(\''+reg(x)+'\')"')+'><span class="pt '+ordPtCls(x.ptype)+'">'+esc(x.ptype||"—")+'</span><span class="dtl">'+esc(String(x.detail||"").slice(0,200))+'</span><span class="q">× '+fmtN(x.qty)+'</span><span class="a">'+fmtVND(x.amount)+'</span></div>';
+        }).join("")+'</div></div>';
+    }).join("")+(groups.length>400?'<div class="hint">'+TX("Hiện 400 đơn gần nhất — chọn tháng để xem đủ.","Showing the latest 400 orders.")+'</div>':'')+'</div>';
+  $("main").innerHTML='<div class="pg">'+head+kpiHtml+filt+sum+body+'</div>';
+  k8Badge();
+};
+var _pgOrder27=pgOrder;
+pgOrder=function(){ k8Ensure(); obFlush(); _pgOrder27(); };
+
+/* ═══════════ DASHBOARD: Account mở mới = case đã duyệt · khối Doanh số theo KPI ═══════════ */
+function naApprovedSeries(pic,key){
+  var ms=k8Months(), idx={}, out=ms.map(function(){ return 0; }); ms.forEach(function(m,i){ idx[m]=i; });
+  var dl=((S.na&&S.na.cfg&&S.na.cfg.dealerOnly)||{})[pic];
+  ((S.na&&S.na.rows)||[]).forEach(function(c){
+    if(c.status!=="Approved"||c.pic!==pic) return;
+    if(dl && !/dealer/i.test(c.accType||"")) return;
+    var i=idx[String(c.month)]; if(i!=null) out[i]++;
+  });
+  return out;
+}
+var _dashBuild27=dashBuild;
+dashBuild=function(){
+  var d=_dashBuild27.apply(this,arguments);
+  try{
+    if(S.na && S.na.rows){
+      var R=dashRange(), mi={}, pic=S.filt.pic||""; R.months.forEach(function(m,i){ mi[m]=i; });
+      var arr=R.months.map(function(){ return 0; });
+      S.na.rows.forEach(function(c){
+        if(c.status!=="Approved") return;
+        if(pic && String(c.pic).toLowerCase().indexOf(pic.toLowerCase())<0) return;
+        var dl=((S.na.cfg||{}).dealerOnly||{})[c.pic]; if(dl && !/dealer/i.test(c.accType||"")) return;
+        var i=mi[String(c.month)]; if(i!=null) arr[i]++;
+      });
+      d.newAcc=arr; d.newAccFromNa=true;
+    }
+  }catch(e){}
+  return d;
+};
+var _renderDash27=renderDash;
+renderDash=function(){
+  _renderDash27.apply(this,arguments);
+  try{
+    if((!S.na || !S.na.rows) && !S.na.err && !S.na._ld) naLoad(false).then(dashRepaint).catch(function(){});
+    if(!S.kpi||S.kpi._fy!==S.fy){ k8Ensure().then(dashRepaint); return; }
+    /* đổi nhãn thẻ cũ cho đúng nghĩa */
+    Array.prototype.forEach.call(document.querySelectorAll("#main .kpi .lb"),function(el){
+      var t=el.textContent.trim();
+      if(t==="Doanh số") el.textContent=TX("Giá trị đơn hàng (CRM)","Order value (CRM)");
+      if(t==="Account mở mới") el.textContent=TX("Account / SKU mở mới · đã duyệt","New accounts / SKU · approved");
+    });
+    var tb=document.querySelector("#main .tbar"); if(!tb) return;
+    var card=tb.closest(".card"); if(!card||$("db8")) return;
+    var R=S.dashR||{mode:"FY"}, ms=k8Months(), cur=ymOf(todayISO());
+    var focus=R.mode==="M"?R.m:(R.mode==="Q"?ms[Math.min(11,(R.q-1)*3+2)]:(ms.indexOf(cur)>=0?cur:ms[11]));
+    if(R.mode==="Q" && ms.indexOf(cur)>=0 && Math.floor(ms.indexOf(cur)/3)===R.q-1) focus=cur;
+    var rng=R.mode==="M"?"M":R.mode==="Q"?"Q":"FY", pic=S.filt.pic||"";
+    var all=[]; k8Pics().forEach(function(p){ if(pic && p.pic!==pic) return; (p.rows||[]).forEach(function(r){ if(/^(turnover|supp_|newacct)/.test(r.key)) all.push({ pic:p.pic, r:r }); }); });
+    if(!all.length) return;
+    var rank=function(r){ return /^turnover/.test(r.key)?(/JIZAI|Composite/i.test(r.name)?1:0):/^supp_amt/.test(r.key)?2:/^supp_comp/.test(r.key)?3:/^supp_jizai/.test(r.key)?4:5; };
+    all.sort(function(x,y){ return rank(x.r)-rank(y.r); });
+    var groups=[], gi={};
+    all.forEach(function(x){ var lb=k8Label(x.r)+"|"+k8Unit(x.r); if(gi[lb]==null){ gi[lb]=groups.length; groups.push({ lb:k8Label(x.r), unit:k8Unit(x.r), list:[] }); } groups[gi[lb]].list.push(x); });
+    var html='<div class="k8-panel db8" id="db8"><div class="k8-head"><h3>💰 '+TX("Doanh số & chỉ tiêu theo KPI FY68","Sales & targets — KPI FY68")+'</h3>'+
+      '<span class="sub">'+(pic?'<b>'+esc(pic)+'</b>':TX("Toàn nhóm ","Whole team ")+esc(curTeam().label))+' · '+esc(dashRange().label)+'</span><span style="flex:1"></span>'+
+      '<button class="btn sm" onclick="k8Ensure(true).then(dashRepaint)">⟳ '+TX("Đọc lại KPI","Reload KPI")+'</button></div>'+
+      '<div class="k8-grid">'+groups.map(function(g){ return k8Card(g.list,g.lb,g.unit,g.list.length===1?g.list[0].r.code:"",focus,{ range:rng, byPic:!pic, onPic:"dashPic" }); }).join("")+'</div>'+
+      '<div class="k8-note">'+TX("Doanh số NPP / Composite / JIZAI (mã F) lấy từ file MMH KPI FY68 — chỉ tháng đã chốt số mới có Actual. C5 · C6 · C7 tính ngay từ đơn hàng; C1 = case mở mới / SKU mới đã được quản lý xác nhận. Bấm tên sales để xem riêng người đó.",
+        "Distributor sales (F codes) come from the MMH KPI FY68 file (closed months only). New accounts = approved cases. Click a name to see one PIC.")+'</div></div>';
+    card.insertAdjacentHTML("afterend",html);
+  }catch(e){ try{ console.warn(e); }catch(_e){} }
+};
+</script>
+<script>
+/* ═══════════════════════════════════════════════════════════════════════════════════════════
+   ⭐ v28 — MỞ MỚI ĐỊA BÀN & SKU MỚI (dựng lại hoàn toàn, thay bản v27)
+   Backend: actions naList · naPending · naSave · naUpload · naDelFile · naDelete · naSubmit · naDecide
+   Sheet: 16. NEW ACCOUNT & SKU (VN) · 23. NEW ACCOUNT & SKU (Thái) · chứng từ: folder Drive của nhóm / tháng
+   ═══════════════════════════════════════════════════════════════════════════════════════════ */
+var _afterWrite27=afterWrite;
+afterWrite=function(tab){ var k=S.kpi; _afterWrite27.apply(this,arguments); if(tab==="order"&&k) S.kpi=k; };
+
+S.na={ rows:null, cfg:{}, me:{}, pending:0, ver:"", f:{ month:"", pic:"", st:"" }, local:{}, err:"" };
+var NA_NPP_LIST={ dental:["Nam Dũng","SPI","Meci","Việt Thái"], surgical:["Hùng Vĩ","I-Care","MHI","An Tâm"], eyeless:["Hùng Vĩ","I-Care"], thai:["Novatech"] };
+var NA_NPP_DEF={ Viet:"Nam Dũng", Vinh:"SPI", Phuong:"Meci", "Viet Ha":"Hùng Vĩ", Khang:"I-Care", Miew:"Novatech" };
+var NA_ST_LB={ Draft:["Nháp · chưa gửi email","Draft · not sent"], Pending:["Chờ quản lý xác nhận","Waiting for approval"], Approved:["Đã xác nhận","Approved"], Rejected:["Bị từ chối","Rejected"] };
+var NA_KIND=[["dist","📧 Xác nhận NPP","📧 Distributor confirmation"],["order","🧾 Chứng từ đơn hàng","🧾 Order document"],["tender","🏛 Thông báo trúng thầu","🏛 Tender award"],["other","📎 Khác","📎 Other"]];
+function naStLb(s){ var x=NA_ST_LB[s]||[s,s]; return TX(x[0],x[1]); }
+function naKindLb(k){ var x=NA_KIND.filter(function(y){ return y[0]===k; })[0]||NA_KIND[3]; return TX(x[1],x[2]); }
+function naTypeLb(t){ return t==="new_sku"?TX("📦 SKU mới","📦 New SKU"):TX("🏪 Đại lý / KH mới","🏪 New account"); }
+function naThumb(f,w){ if(S.na.local[f.id]) return S.na.local[f.id]; return "https://drive.google.com/thumbnail?id="+encodeURIComponent(f.id)+"&sz=w"+(w||600); }
+function naIsPdf(f){ return /pdf/i.test(f.mime||"")||/\.pdf$/i.test(f.name||""); }
+
+/* ── nạp dữ liệu ── */
 function naLoad(force){
-  if(S.na.rows && !force && Date.now()-S.na.at<30000) return Promise.resolve(S.na.rows);
   if(S.na._ld) return S.na._ld;
-  S.na._ld=apiGet("naList",{ fy:S.fy, _ts:Date.now() }).then(function(j){
-    S.na._ld=null;
-    if(!j.na) throw new Error(TX("Backend của nhóm chưa có chức năng Mở mới (cần Code.gs VN v9.4 / Thailand v1.7).","The team backend has no New account module yet (needs Code.gs VN v9.4 / Thailand v1.7)."));
-    S.na.rows=j.rows||[]; S.na.at=Date.now(); S.na.err=""; S.na.pendingMine=j.pendingMine||0; S.na.seeAll=!!j.seeAll; S.na.folder=j.folder||"";
-    naBadge(); return S.na.rows;
+  var q={ fy:S.fy };
+  if(force) cvDrop("naList",q);
+  S.na._ld=apiGet("naList",q).then(function(j){
+    S.na._ld=null; S.na.err="";
+    if(j && j.unchanged && S.na.rows) return S.na;
+    if(!j || !j.na) throw new Error(TX("Backend chưa có chức năng Mở mới — dán Code.gs VN v10.0 / Thái v1.9, chạy naSetup rồi Deploy ▸ New version.","The backend has no New-account module — paste Code.gs VN v10.0 / Thailand v1.9, run naSetup, then Deploy ▸ New version."));
+    S.na.rows=j.rows||[]; S.na.cfg=j.cfg||{}; S.na.me=j.me||{}; S.na.pending=j.pending||0; S.na.ver=j.ver||"";
+    naFab();
+    return S.na;
   }).catch(function(e){
     S.na._ld=null;
-    S.na.err=/Unknown action/i.test(e.message)?TX("Backend của nhóm chưa có chức năng Mở mới — dán Code.gs VN v9.4 / Thailand v1.7 rồi Deploy ▸ New version.","The team backend has no New account module yet — paste Code.gs VN v9.4 / Thailand v1.7, then Deploy ▸ New version."):e.message;
+    S.na.err=/Unknown action/i.test(e.message)?TX("Backend của nhóm chưa có chức năng Mở mới — dán Code.gs VN v10.0 / Thái v1.9 rồi Deploy ▸ New version.","The team backend has no New-account module yet — paste Code.gs VN v10.0 / Thailand v1.9, then Deploy ▸ New version."):e.message;
+    if(!S.na.rows) S.na.rows=null;
     throw e;
   });
   return S.na._ld;
 }
-function naGoPending(){ S.na.f={ month:"", pic:"", status:"", mine:S.na.pendingMine?1:0 }; naAlert(false,true); go("newacc"); }
-/* thông báo nổi cho người duyệt: hiện ở MỌI màn hình khi có case chờ xác nhận */
-function naAlert(show,dismiss){
-  var el=$("naAlert");
-  if(!el){ el=document.createElement("div"); el.id="naAlert"; document.body.appendChild(el); }
-  if(dismiss){ S.na.alertOff=Date.now(); el.classList.remove("on"); return; }
-  if(!show||!S.na.pendingMine||(S.na.alertOff&&Date.now()-S.na.alertOff<20*60000)){ el.classList.remove("on"); return; }
-  el.innerHTML='<span style="font-size:20px">📩</span><span>'+TX("Bạn có <b>"+S.na.pendingMine+" case mở mới / SKU mới</b> đang chờ xác nhận","You have <b>"+S.na.pendingMine+" new account / SKU case(s)</b> waiting for your approval")+'</span>'+
-    '<button class="btn sm pri" onclick="naGoPending()">'+TX("Xem &amp; xác nhận","Review")+'</button><button class="x" title="'+TX("Ẩn 20 phút","Hide for 20 min")+'" onclick="naAlert(false,true)">×</button>';
-  el.classList.add("on");
+function naPoll(){
+  if(!S.user||!S.user.pic||document.hidden) return;
+  apiGet("naPending",{ _ts:Date.now() }).then(function(j){
+    if(!j||j.ok===false) return;
+    var changed=j.ver!==S.na.ver;
+    S.na.pending=j.n||0; naFab();
+    if(changed) naLoad(true).then(function(){ if(S.tab==="newacc"&&!naWzOpen()) naPaint(); if(S.tab==="dash") dashRepaint(); }).catch(function(){});
+  }).catch(function(){});
 }
-function naBadge(){
-  var b=$("btnNa"); if(!b) return;
-  b.classList.toggle("on",S.na.pendingMine>0);
-  naAlert(S.na.pendingMine>0 && !(S.tab==="newacc"&&S.na.f.mine));
-  var c=b.querySelector(".cnt"); if(c) c.textContent=S.na.pendingMine>9?"9+":String(S.na.pendingMine||"");
-  b.title=S.na.pendingMine?TX(S.na.pendingMine+" case mở mới đang chờ bạn xác nhận",S.na.pendingMine+" new-account case(s) waiting for your approval"):TX("Case mở mới — không có case chờ bạn xác nhận","New-account cases — nothing waiting for you");
+setInterval(naPoll,60000);
+
+/* ── nút ✉ to ở góc dưới cho người duyệt ── */
+function naFab(){
+  var b=$("na8fab");
+  if(!b){
+    b=document.createElement("button"); b.id="na8fab"; b.className="na8-fab"; b.type="button";
+    b.onclick=function(){ naApprovals(); };
+    document.body.appendChild(b);
+  }
+  var nP=S.na.pending||0;
+  b.classList.toggle("on",nP>0 && !!S.user);
+  b.innerHTML='<span class="ic">✉️<b>'+nP+'</b></span><span class="tx"><b>'+nP+TX(" case chờ bạn xác nhận"," case(s) to approve")+'</b><small>'+TX("Mở mới địa bàn / SKU mới · bấm để xem chứng từ","New account / SKU · tap to review")+'</small></span>';
+  var nb=document.querySelector('.nvi[data-t="newacc"] .lb');
+  if(nb){ var c=nb.querySelector(".na8c"); if(!c){ c=document.createElement("span"); c.className="na8c"; c.style.cssText="margin-left:6px;background:#D93B36;color:#fff;border-radius:9px;padding:0 6px;font-size:11px;font-weight:800"; nb.appendChild(c); } c.textContent=nP||""; c.style.display=nP?"inline-block":"none"; }
+}
+function naPendingList(){ return (S.na.rows||[]).filter(function(c){ return c.canDecide; }); }
+function naApprovals(){
+  var go1=function(){ var L=naPendingList(); if(!L.length) return toast(TX("Không còn case nào chờ bạn xác nhận","Nothing waiting for you"),"ok"); naView(L[0].id,true); };
+  if(S.na.rows) go1(); else { busy(true,TX("Đang mở danh sách chờ duyệt…","Loading…")); naLoad(true).then(function(){ busy(false); go1(); }).catch(function(e){ busy(false); toast(e.message,"err",6000); }); }
 }
 
-/* ── trang chính ── */
-function pgNewAcc(){
-  naPaint();
-  naLoad(false).then(function(){ if(S.tab==="newacc") naPaint(); }).catch(function(){ if(S.tab==="newacc") naPaint(); });
+/* ═════════ TRANG CHÍNH ═════════ */
+window.pgNewAcc=function(){
+  if(S.na.rows) naPaint();
+  else $("main").innerHTML='<div class="pg">'+naHead()+'<div class="card pad">'+skRows(5,true)+'</div></div>';
+  naLoad(false).then(function(){ if(S.tab==="newacc"&&!naWzOpen()) naPaint(); }).catch(function(){ if(S.tab==="newacc") naPaint(); });
   if(!S.custIndex.length) loadCustomerIndex();
-  if(!S.cache.weekly && typeof loadTerritoryAll==="function") loadTerritoryAll(true);
+  k8Ensure();
+};
+function naHead(){
+  return '<div class="ph"><div><h2>🆕 '+TX("Mở mới địa bàn &amp; SKU mới","New accounts &amp; new SKUs")+'</h2><p>'+
+    TX("Ghi nhận đại lý mới / SKU mới kèm chứng từ, gửi email xin quản lý xác nhận — case đã xác nhận mới được tính KPI C1","Record new accounts / new SKUs with evidence and ask your manager to approve — only approved cases count for KPI")+'</p></div>'+
+    '<div class="sp"></div><button class="btn" onclick="naRules()">📘 '+TX("Quy định &amp; hướng dẫn","Rules &amp; guide")+'</button>'+
+    '<button class="btn pri" style="font-size:14.5px;padding:0 18px;height:40px" onclick="naForm(null)">＋ '+TX("Thêm case mở mới","Add a case")+'</button></div>';
 }
-function naFiltered(){
-  var f=S.na.f, me=String(S.user.pic||"").toLowerCase();
-  return (S.na.rows||[]).filter(function(c){
-    if(f.mine) return c.canDecide;
-    if(f.month && c.month!==f.month) return false;
-    if(f.pic && String(c.pic).toLowerCase()!==String(f.pic).toLowerCase()) return false;
-    if(f.status && c.status!==f.status) return false;
-    return true;
-  });
-}
+function naSetF(k,v){ S.na.f[k]=v; naPaint(); }
 function naPaint(){
   if(S.tab!=="newacc") return;
-  var head='<div class="ph"><div><h2>🆕 '+TX("Mở mới địa bàn &amp; SKU mới","New accounts &amp; new SKUs")+'</h2><p>'+
-    TX("Ghi nhận đại lý mới / SKU mới kèm chứng từ, gửi email xin cấp trên xác nhận — số liệu cho KPI ","Record new accounts / new SKUs with evidence and ask your manager to approve — data for KPI ")+
-    esc(isTH()?"C2-03":"C1-01 → C1-05")+'</p></div><div class="sp"></div>'+
-    '<button class="btn" onclick="naRules()">📘 '+TX("Quy định &amp; hướng dẫn","Rules &amp; guide")+'</button>'+
-    (S.na.folder&&S.na.seeAll?'<a class="btn" href="'+esc(S.na.folder)+'" target="_blank" rel="noopener">📁 Drive</a>':"")+
-    '<button class="btn pri" onclick="naForm()">＋ '+TX("Thêm case mở mới","Add a case")+'</button></div>';
-  if(S.na.err && !S.na.rows){ $("main").innerHTML='<div class="pg">'+head+'<div class="card"><div class="km-err">'+esc(S.na.err)+'</div></div></div>'; return; }
-  if(!S.na.rows){ $("main").innerHTML='<div class="pg">'+head+skRows(6,true)+'</div>'; return; }
-  var f=S.na.f, months=fyMonths(S.fy), all=S.na.rows;
-  var pics=[]; all.forEach(function(c){ if(c.pic&&pics.indexOf(c.pic)<0) pics.push(c.pic); });
-  (S.master.pic||[]).forEach(function(p){ if(S.na.seeAll&&pics.indexOf(p)<0&&!/sale admin|team$/i.test(p)) pics.push(p); });
-  var flt='<div class="card pad" style="margin-bottom:4px"><div class="na-flt">'+
-    '<div class="chipbar" style="margin:0">'+['' ].concat(months).map(function(m){
-      return '<div class="chip'+(f.month===m?" on":"")+'" onclick="S.na.f.month=\''+m+'\';naPaint()">'+(m?m.slice(4)+"/"+m.slice(2,4):TX("Cả ","All ")+esc(S.fy))+'</div>'; }).join("")+'</div>'+
-    (S.na.seeAll?'<select class="km-sel" onchange="S.na.f.pic=this.value;naPaint()"><option value="">'+TX("Tất cả PIC","All PICs")+'</option>'+
-      pics.map(function(p){ return '<option'+(f.pic===p?" selected":"")+'>'+esc(p)+'</option>'; }).join("")+'</select>':"")+
-    (S.na.pendingMine||f.mine?'<div class="chip'+(f.mine?" on":"")+'" onclick="S.na.f.mine=S.na.f.mine?0:1;naPaint()">✉️ '+TX("Chờ tôi xác nhận","Waiting for me")+' ('+S.na.pendingMine+')</div>':"")+
-    '<button class="btn sm" style="margin-left:auto" onclick="naLoad(true).then(naPaint).catch(naPaint)">⟳</button></div></div>';
-  var base=all.filter(function(c){ return (!f.month||c.month===f.month)&&(!f.pic||String(c.pic).toLowerCase()===String(f.pic).toLowerCase()); });
-  var cnt=function(s){ return base.filter(function(c){ return c.status===s; }).length; };
-  var kp='<div class="na-kpis">'+[["Approved","#1E6B34"],["Pending","#7A5C00"],["Draft","#5F6B78"],["Rejected","#A4413E"]].map(function(x){
-    return '<div class="na-kpi'+(f.status===x[0]&&!f.mine?" on":"")+'" onclick="S.na.f.mine=0;S.na.f.status=S.na.f.status===\''+x[0]+'\'?\'\':\''+x[0]+'\';naPaint()"><small>'+naStL(x[0])+'</small><b style="color:'+x[1]+'">'+cnt(x[0])+'</b></div>'; }).join("")+'</div>';
-  var rows=naFiltered();
-  var grid=rows.length?'<div class="na-grid">'+rows.map(naCardHtml).join("")+'</div>'
-    :'<div class="card"><div class="km-empty">'+TX("Chưa có case nào khớp bộ lọc. Bấm “＋ Thêm case mở mới” để ghi nhận đại lý mới / SKU mới.","No case matches the filter. Press “＋ Add a case” to record a new account / new SKU.")+'</div></div>';
-  $("main").innerHTML='<div class="pg">'+head+flt+kp+grid+'</div>';
-  naThumbsFor(rows);
+  var head=naHead();
+  if(S.na.err && !S.na.rows){ $("main").innerHTML='<div class="pg">'+head+'<div class="card pad"><b style="color:#A82F2C">'+esc(S.na.err)+'</b><div style="margin-top:10px"><button class="btn sm" onclick="S.na.err=\'\';pgNewAcc()">⟳ '+TX("Thử lại","Retry")+'</button></div></div></div>'; return; }
+  var all=S.na.rows||[], f=S.na.f, me=S.na.me||{}, mgr=me.all||(me.approverOf||[]).length>0;
+  var ms=fyMonths(S.fy);
+  var base=all.filter(function(c){ return !f.pic || c.pic===f.pic; });
+  var inM=base.filter(function(c){ return !f.month || String(c.month)===String(f.month); });
+  var cnt={ all:inM.length }; inM.forEach(function(c){ cnt[c.status]=(cnt[c.status]||0)+1; });
+  var rows=inM.filter(function(c){ return !f.st || c.status===f.st; });
+  var mc={}; base.forEach(function(c){ mc[c.month]=(mc[c.month]||0)+1; });
+  /* thẻ tiến độ KPI C1 */
+  var kp="";
+  var pics=(S.na.cfg.pics||[]).filter(function(p){ return mgr ? (!f.pic||p===f.pic) && (me.all||(me.approverOf||[]).indexOf(p)>=0||p===S.user.pic) : p===S.user.pic; });
+  if(S.kpi && S.kpi._fy===S.fy){
+    kp=pics.map(function(p){
+      var L=k8RowsOf(p,/^newacct_/); if(!L.length) return "";
+      var s=k8Series(L,true), t=s.t.reduce(function(a,b){ return a+b; },0), a=s.a.reduce(function(x,y){ return x+y; },0), pp=t?a/t:null;
+      var pend=all.filter(function(c){ return c.pic===p && c.status==="Pending"; }).length;
+      return '<div class="na8-kpi'+(f.pic===p?" on":"")+'" onclick="naSetF(\'pic\',\''+(f.pic===p?"":esc(p))+'\')"><small>'+esc(p)+' · KPI '+esc(L[0].r.code)+' · FY</small><b>'+a+'</b> <span style="color:var(--sub);font-weight:700">/ '+t+'</span>'+
+        '<span style="float:right;font-weight:800;color:'+k8Col(pp)+'">'+k8Pct(pp)+'</span>'+k8Bar(pp,1)+(pend?'<small style="margin-top:5px;color:#7A5C00">⏳ '+pend+TX(" chờ duyệt"," pending")+'</small>':'')+'</div>';
+    }).join("");
+  } else k8Ensure().then(function(){ if(S.tab==="newacc"&&!naWzOpen()) naPaint(); });
+  var picBar=mgr?'<div class="chipbar" style="margin-bottom:8px"><div class="chip'+(f.pic?"":" on")+'" onclick="naSetF(\'pic\',\'\')">👥 '+TX("Cả nhóm","Whole team")+'</div>'+
+    (S.na.cfg.pics||[]).map(function(p){ return '<div class="chip'+(f.pic===p?" on":"")+'" onclick="naSetF(\'pic\',\''+esc(p)+'\')">'+esc(p)+'</div>'; }).join("")+'</div>':"";
+  var mBar='<div class="chipbar" style="margin-bottom:8px"><div class="chip'+(f.month?"":" on")+'" onclick="naSetF(\'month\',\'\')">'+TX("Cả FY","Whole FY")+'</div>'+
+    ms.map(function(m){ return '<div class="chip'+(String(f.month)===m?" on":"")+'" onclick="naSetF(\'month\',\''+m+'\')">'+monLbl("T"+parseInt(m.slice(4),10))+(mc[m]?' <span style="opacity:.7">'+mc[m]+'</span>':'')+'</div>'; }).join("")+'</div>';
+  var sBar='<div class="chipbar">'+[["",TX("Tất cả","All"),cnt.all],["Pending",TX("⏳ Chờ xác nhận","⏳ Pending"),cnt.Pending],["Draft",TX("✎ Nháp","✎ Draft"),cnt.Draft],["Approved",TX("✅ Đã xác nhận","✅ Approved"),cnt.Approved],["Rejected",TX("✕ Từ chối","✕ Rejected"),cnt.Rejected]]
+    .map(function(x){ return '<div class="chip'+(f.st===x[0]?" on":"")+'" onclick="naSetF(\'st\',\''+x[0]+'\')">'+x[1]+' <b>'+(x[2]||0)+'</b></div>'; }).join("")+'</div>';
+  var nPend=naPendingList().length;
+  var alert=nPend?'<div class="na8-decbox" style="margin:0 0 12px;display:flex;align-items:center;gap:12px;cursor:pointer" onclick="naApprovals()"><span style="font-size:30px">✉️</span><div style="flex:1"><b style="font-size:15px;color:var(--navy)">'+nPend+TX(" case đang chờ bạn xác nhận"," case(s) waiting for your approval")+'</b><div style="font-size:12.5px;color:var(--sub)">'+TX("Bấm để xem chứng từ và xác nhận / từ chối từng case","Tap to review the evidence and approve / reject")+'</div></div><button class="btn pri">'+TX("Xem ngay →","Review →")+'</button></div>':"";
+  var grid=rows.length?'<div class="na8-grid">'+rows.map(naCardHtml).join("")+'</div>'
+    :'<div class="card pad"><div class="empty"><div class="e">🆕</div><p>'+TX("Chưa có case nào khớp bộ lọc. Bấm “＋ Thêm case mở mới” để ghi nhận đại lý mới / SKU mới.","No case matches the filter. Press “＋ Add a case”.")+'</p></div></div>';
+  $("main").innerHTML='<div class="pg">'+head+alert+(kp?'<div class="na8-kpis">'+kp+'</div>':"")+'<div class="card pad" style="margin-bottom:12px">'+picBar+mBar+sBar+'</div>'+grid+'</div>';
 }
 function naCardHtml(c){
-  var fs=c.files||[], ev;
-  if(fs.length){
-    ev=fs.slice(0,fs.length>4?3:4).map(function(x){
-      return '<div class="na-th">'+naThImg(x)+'<span class="k">'+esc(naEvS(x.kind))+'</span></div>';
-    }).join("")+(fs.length>4?'<div class="na-th more">+'+(fs.length-3)+'</div>':"");
-  } else ev='<div class="na-th none">'+(c.status==="Rejected"?TX("Chứng từ đã gỡ khi từ chối","Evidence removed on rejection"):TX("Chưa có chứng từ","No evidence yet"))+'</div>';
-  var wk=c.weekly||{n:0};
-  return '<div class="na-card" onclick="naOpen(\''+esc(c.id)+'\')">'+
-    '<div class="na-top"><span class="na-type">'+naTypeL(c.type)+'</span><span class="na-st '+esc(c.status)+'">'+naStL(c.status)+'</span>'+
-      (c.kpi?'<span class="na-type" style="background:#EEF4FB;color:var(--blue)">'+esc(c.kpi)+'</span>':"")+'<span class="na-mon">'+esc(String(c.month).slice(4)+"/"+String(c.month).slice(0,4))+'</span></div>'+
-    '<div class="na-acc">'+esc(c.account)+'</div>'+
-    '<div class="na-meta">'+esc([c.npp?"NPP "+c.npp:"",c.sku,c.orderDate?TX("đơn đầu ","1st order ")+fmtVN(c.orderDate):""].filter(Boolean).join(" · "))+'<br>👤 '+esc(c.pic)+'</div>'+
-    '<div class="na-ev">'+ev+'</div>'+
-    '<div class="na-foot"><span class="wk '+(wk.n?"ok":"no")+'">'+(wk.n?"📍 "+wk.n+TX(" lượt chăm sóc"," follow-up visit(s)"):"⚠️ "+TX("chưa có lịch sử chăm sóc","no follow-up history"))+'</span><span>·</span><span>'+naStatusLine(c)+'</span></div></div>';
+  var fs=c.files||[], n3=fs.slice(0,3);
+  var th=fs.length?'<div class="na8-thumbs n'+Math.min(3,fs.length)+'">'+n3.map(function(f,i){
+      return '<div class="th"><span style="font-size:34px">'+(naIsPdf(f)?"📄":"🖼")+'</span><img loading="lazy" src="'+naThumb(f,i?300:600)+'" onerror="this.style.display=\'none\'" style="position:absolute;inset:0"><span class="k">'+esc(naKindLb(f.kind))+'</span>'+
+        (i===2&&fs.length>3?'<span class="more">+'+(fs.length-3)+'</span>':'')+'</div>'; }).join("")+'</div>'
+    :'<div class="na8-noev">'+(c.status==="Rejected"?TX("Chứng từ đã xoá khi từ chối","Evidence removed on rejection"):TX("⚠️ Chưa có chứng từ — mở case để kéo thả file","⚠️ No evidence yet — open the case and drop files"))+'</div>';
+  return '<div class="na8-card" onclick="naView(\''+esc(c.id)+'\')">'+th+'<div class="na8-body">'+
+    '<div class="na8-tags"><span class="na8-type">'+naTypeLb(c.type)+'</span><span class="na8-st '+esc(c.status)+'">'+esc(naStLb(c.status))+'</span>'+(c.kpi?'<span style="font-size:11px;color:var(--sub);font-weight:700">KPI '+esc(c.kpi)+'</span>':'')+'</div>'+
+    '<div class="na8-acc">'+esc(c.account)+'</div>'+
+    '<div class="na8-meta">🏢 <b>'+esc(c.npp||"—")+'</b>'+(c.sku?' · 📦 '+esc(String(c.sku).split(/\n/).slice(0,2).join(", ")):'')+'<br>🗓 '+TX("Đơn đầu tiên ","First order ")+'<b>'+esc(fmtVN(c.orderDate)||"—")+'</b>'+(c.orderNo?' · '+esc(c.orderNo):'')+
+      (c.weekly?'<br>📍 '+esc(c.weekly):'')+'</div>'+
+    '<div class="na8-foot"><span class="pic">'+esc(c.pic)+'</span><span>'+fs.length+TX(" chứng từ"," file(s)")+'</span>'+
+      (c.status==="Pending"?'<span>→ '+esc(c.subTo||"")+'</span>':'')+(c.decBy?'<span>· '+esc(c.decBy)+'</span>':'')+
+      (c.canDecide?'<span class="na8-dec">✉ '+TX("Xác nhận","Review")+'</span>':'')+'</div></div></div>';
 }
 
-/* ── quy định ── */
-function naRules(){
-  var body=isTH()
-    ? '<div class="na-rule"><div><b>New account</b>An account that places its FIRST MANI order through the distributor in FY68, opened by the sales rep.</div>'+
-      '<div><b>New SKU</b>An account ordering a MANI SKU for the first time.</div>'+
-      '<div><b>Counted when</b>Only in the month of the first order, with ALL of: follow-up history in the weekly report · distributor confirmation · account / SKU information in the required format · first order information through the distributor.</div>'+
-      '<div><b>Achievement</b>Maximum 130%. Each account / account + SKU counts once in the FY.</div></div>'+
-      '<div class="na-sec">How to send a case</div><ol style="margin:0;padding-left:20px;font-size:13px;line-height:1.75">'+
-      '<li>Make sure the account has visits in <b>6. CUSTOMER VISITING</b> before the first-order date (the app checks this automatically).</li>'+
-      '<li>Press <b>＋ Add a case</b>, choose New account or New SKU, fill in the account, distributor, SKU and first order.</li>'+
-      '<li>Drag & drop the evidence: <b>distributor confirmation</b> (email screenshot / letter) and <b>first order</b> (order, invoice or delivery note) are required.</li>'+
-      '<li>Tick the 4 confirmations, then press <b>Save & send for approval</b>. Your manager gets an e-mail (CC Director and vtt.hoa) with the files attached.</li>'+
-      '<li>The manager approves or rejects in the CRM (✉️ icon). A rejection comes with a comment and removes the evidence — fix the case and send again.</li></ol>'
-    : '<div class="na-rule"><div><b>Đại lý mới</b>Đại lý đặt đơn MANI ĐẦU TIÊN qua nhà phân phối trong FY68, do sale rep mở.</div>'+
-      '<div><b>SKU mới</b>Đại lý đặt một mã SKU MANI lần đầu.</div>'+
-      '<div><b>Điều kiện được tính</b>Chỉ ghi nhận vào tháng phát sinh đầu tiên, khi có ĐỦ: lịch sử chăm sóc trên báo cáo tuần · xác nhận của NPP · thông tin đại lý / SKU theo format · thông tin đơn hàng đầu tiên qua NPP.</div>'+
-      '<div><b>% đạt</b>Tối đa 130%. Mỗi đại lý / mỗi cặp đại lý + SKU chỉ tính 1 lần trong FY.</div></div>'+
-      '<div class="na-sec">Các bước gửi case</div><ol style="margin:0;padding-left:20px;font-size:13px;line-height:1.75">'+
-      '<li>Kiểm tra đại lý đã có lượt chăm sóc ở <b>tab 6. WEEKLY REPORT</b> trước ngày đơn đầu tiên (app tự kiểm tra).</li>'+
-      '<li>Bấm <b>＋ Thêm case mở mới</b>, chọn Đại lý mới hoặc SKU mới, điền đại lý, NPP, SKU, đơn hàng đầu tiên.</li>'+
-      '<li>Kéo thả chứng từ: <b>xác nhận của NPP</b> (ảnh chụp email / văn bản) và <b>đơn hàng đầu tiên</b> (đơn / hoá đơn / phiếu xuất kho) là bắt buộc.</li>'+
-      '<li>Tick đủ 4 cam kết rồi bấm <b>Lưu &amp; gửi email xin xác nhận</b>. Cấp trên nhận email (CC Giám đốc, vtt.hoa) kèm file.</li>'+
-      '<li>Cấp trên Xác nhận / Từ chối trên CRM (biểu tượng ✉️). Từ chối luôn kèm lý do và gỡ chứng từ — sửa case rồi gửi lại.</li></ol>';
-  openModal(TX("Quy định ghi nhận Đại lý mới / SKU mới","Rules for new accounts / new SKUs"),body,'<button class="btn" onclick="closeModal()">'+TX("Đóng","Close")+'</button>',true);
+/* ═════════ QUY ĐỊNH ═════════ */
+function naRulesHtml(){
+  var th=isTH();
+  return th
+  ? '<div class="na8-step"><h4><i>1</i>KPI explanation (Vietnam &amp; Thailand Surgical)</h4><div class="na8-guide" style="margin-left:0">'+
+      '• <b>New account</b> = an account placing its FIRST MANI order through the distributor in FY68, opened by the sales rep.<br>• <b>New SKU</b> = an account ordering a MANI SKU for the first time.</div></div>'+
+    '<div class="na8-step"><h4><i>2</i>Conditions</h4><div class="na8-guide" style="margin-left:0">• Counted only in the month of the FIRST order.<br>• Needed: care / work history with the account in the weekly report · distributor confirmation · new account / SKU information in the required format · first order through the distributor.<br>• Orders must be notified to the distributor by e-mail (LINE / chat only is not enough). Max. 130%.</div></div>'+
+    '<div class="na8-step"><h4><i>3</i>Steps in the CRM</h4><div class="na8-guide" style="margin-left:0">① Press <b>＋ Add a case</b> · ② choose New account or New SKU · ③ pick the account, distributor, first order · ④ drag &amp; drop the evidence (screenshot of the distributor e-mail, PO / invoice / delivery note…) and tag each file · ⑤ tick the 3 confirmations · ⑥ <b>Save &amp; send for approval</b>. The approver gets an e-mail with the files attached and approves / rejects in the CRM. Only approved cases count for KPI.</div></div>'
+  : '<div class="na8-step"><h4><i>1</i>Giải thích KPI (Việt Nam &amp; Thái Lan Surgical)</h4><div class="na8-guide" style="margin-left:0">'+
+      '• <b>Đại lý mới</b> = đại lý đặt đơn MANI ĐẦU TIÊN qua nhà phân phối trong FY68, do sale rep mở.<br>• <b>SKU mới</b> = đại lý đặt một mã SKU MANI lần đầu.<br>• Đơn hàng sale rep tạo ra nhờ tiếp xúc trực tiếp và hỗ trợ NPP: khách lẻ (phòng khám, bệnh viện, trường), đại lý mở mới / mở SKU mới (chỉ tính trong kỳ mở mới), đơn từ giá trị trúng thầu của NPP / đại lý nhờ sale rep hỗ trợ.</div></div>'+
+    '<div class="na8-step"><h4><i>2</i>Điều kiện được tính</h4><div class="na8-guide" style="margin-left:0">• Chỉ ghi nhận vào <b>tháng phát sinh đầu tiên</b>.<br>• Phải có đủ: lịch sử chăm sóc / làm việc với đại lý trên <b>Báo cáo tuần</b> · <b>xác nhận của nhà phân phối</b> · thông tin đại lý mới / SKU mới đúng format · thông tin <b>đơn hàng đầu tiên</b> bán qua NPP.<br>• Chứng từ hợp lệ (ít nhất một): phiếu xuất kho cho khách của NPP · xác nhận của NPP · thông báo trúng thầu.<br>• Đơn hàng phải được sale <b>thông báo cho NPP qua email</b> làm căn cứ — báo qua Zalo không bắt buộc, chỉ là trao đổi nhanh. % tối đa 130%.</div></div>'+
+    '<div class="na8-step"><h4><i>3</i>Các bước trên CRM</h4><div class="na8-guide" style="margin-left:0">① Bấm <b>＋ Thêm case mở mới</b> · ② chọn Đại lý mới hoặc SKU mới · ③ chọn Account, NPP, đơn hàng đầu tiên (chọn từ tab Đơn hàng hoặc nhập mới) · ④ kéo thả chứng từ (ảnh chụp email NPP xác nhận, phiếu xuất kho, hoá đơn, đơn đặt hàng, thông báo trúng thầu…) và gắn loại cho từng file · ⑤ tích 3 ô cam kết · ⑥ <b>Lưu &amp; gửi email xin xác nhận</b>. Quản lý nhận email kèm file, vào CRM bấm ✉ để xác nhận / từ chối. Chỉ case <b>đã xác nhận</b> mới được tính KPI C1.</div></div>';
 }
+function naRules(){ openModal(TX("Quy định ghi nhận Đại lý mới / SKU mới","Rules for new accounts / new SKUs"),naRulesHtml(),'<button class="btn pri" onclick="closeModal()">'+TX("Đã hiểu","OK")+'</button>',true); }
 
-/* ── chi tiết case ── */
-function naOpen(id){
-  var c=(S.na.rows||[]).filter(function(x){ return x.id===id; })[0];
-  S.na._detId="";
-  if(c){ S.na.cur=c; naDetail(); }
-  apiGet("naGet",{ id:id, _ts:Date.now() }).then(function(j){ S.na.cur=j.rec; naMerge(j.rec); if(!c||S.na._detId===id) naDetail(); })
-    .catch(function(e){ if(!c) toast(e.message,"err",5000); });
+/* ═════════ XEM CHI TIẾT / DUYỆT ═════════ */
+function naGet(id){ return (S.na.rows||[]).filter(function(c){ return c.id===id; })[0]||null; }
+function naView(id,fromFab){
+  var c=naGet(id);
+  if(!c){ naLoad(true).then(function(){ if(naGet(id)) naView(id,fromFab); else toast(TX("Không thấy case ","Case not found ")+id,"warn"); }).catch(function(e){ toast(e.message,"err"); }); return; }
+  var fs=c.files||[], pend=naPendingList(), pi=pend.map(function(x){ return x.id; }).indexOf(id);
+  var info='<table class="na8-info">'+
+    [[TX("Loại case","Case type"),naTypeLb(c.type)+(c.kpi?' · KPI '+esc(c.kpi):'')],
+     [TX("Trạng thái","Status"),'<span class="na8-st '+esc(c.status)+'">'+esc(naStLb(c.status))+'</span>'+(c.subAt?' <small style="color:var(--sub)">· '+TX("gửi ","sent ")+esc(c.subAt)+' → '+esc(c.subTo)+'</small>':'')],
+     ["PIC",esc(c.pic)],
+     ["Account",'<b>'+esc(c.account)+'</b>'+(c.code?' <small>('+esc(c.code)+')</small>':'')+'<br><small style="color:var(--sub)">'+esc([c.accType,c.province].filter(String).join(" · "))+'</small>'],
+     [TX("Nhà phân phối","Distributor"),esc(c.npp||"—")],
+     [TX("Đơn đầu tiên","First order"),esc(fmtVN(c.orderDate)||"—")+(c.orderNo?' · '+esc(c.orderNo):'')+' · '+TX("tháng KPI ","KPI month ")+'<b>'+esc(c.month||"—")+'</b>'],
+     [TX("Sản phẩm / SKU","Product / SKU"),esc(c.ptype||"")+(c.sku?'<div style="white-space:pre-wrap">'+esc(c.sku)+'</div>':'')],
+     [TX("Đơn hàng","Order lines"),(c.lines||[]).map(function(x){ return esc(x.ptype||"")+' · '+esc(String(x.detail||"").replace(/\n/g,", "))+' · SL '+esc(x.qty||"")+(x.price?' × '+fmtN(x.price):''); }).join("<br>")||(c.qty||c.amount?(TX("SL ","Qty ")+esc(c.qty||"—")+' · '+fmtVND(c.amount||0)):"—")],
+     [TX("Báo cáo tuần","Weekly report"),esc(c.weekly||"—")],
+     [TX("Ghi chú","Note"),'<div style="white-space:pre-wrap">'+esc(c.note||"—")+'</div>']]
+    .map(function(r){ return '<tr><td>'+r[0]+'</td><td>'+r[1]+'</td></tr>'; }).join("")+'</table>';
+  var ck=c.checklist||{};
+  info+='<div class="na8-chk '+(ck.first&&ck.month&&ck.mail?"ok":"warn")+'">'+[["first",TX("Đơn MANI đầu tiên / SKU lần đầu qua NPP","First MANI order / first SKU via the distributor")],["month",TX("Ghi nhận đúng tháng phát sinh đầu tiên","Counted in the month of the first order")],["mail",TX("Đã báo NPP qua email","Distributor informed by e-mail")]]
+    .map(function(x){ return (ck[x[0]]?"☑":"☐")+" "+x[1]; }).join("<br>")+'</div>';
+  if(c.status==="Approved"||c.status==="Rejected")
+    info+='<div class="na8-res '+c.status+'"><b>'+(c.status==="Approved"?TX("✅ Đã xác nhận bởi ","✅ Approved by "):TX("✕ Từ chối bởi ","✕ Rejected by "))+esc(c.decBy)+'</b> · '+esc(c.decAt)+(c.comment?'<div style="margin-top:4px">💬 '+esc(c.comment)+'</div>':'')+'</div>';
+  if(c.log) info+='<div class="na8-log">'+esc(c.log)+'</div>';
+  var gal=fs.length?'<div class="na8-gal">'+fs.map(function(f,i){
+      return '<div class="na8-gi" onclick="naLb(\''+esc(c.id)+'\','+i+')"><div class="im"><span class="na8-pdf">'+(naIsPdf(f)?"📄":"🖼")+'</span><img loading="lazy" src="'+naThumb(f,500)+'" onerror="this.style.display=\'none\'" style="position:absolute;inset:0"></div>'+
+        '<div class="cap"><b>'+esc(naKindLb(f.kind))+'</b><small>'+esc(f.name||"")+'</small></div></div>'; }).join("")+'</div>'
+    :'<div class="na8-noev" style="border-radius:12px">'+(c.status==="Rejected"?TX("Chứng từ đã xoá khi từ chối","Evidence removed on rejection"):TX("Chưa có chứng từ","No evidence yet"))+'</div>';
+  var dec="";
+  if(c.canDecide){
+    dec='<div class="na8-decbox" id="naDecBox"><h4>✉️ '+TX("Quản lý xác nhận case này","Approve this case")+'</h4>'+
+      '<div style="font-size:12.5px;color:var(--sub);line-height:1.55">'+TX("Kiểm tra: account đúng là mở mới / SKU lần đầu · đơn đầu tiên qua NPP · có xác nhận NPP · có lịch sử chăm sóc trên báo cáo tuần. Xác nhận ⇒ email gửi PIC, Director, kế toán trưởng và chính bạn; case được tính KPI. Từ chối ⇒ bắt buộc ghi lý do, chứng từ bị xoá khỏi Drive.",
+        "Check: really a new account / first SKU · first order via the distributor · distributor confirmation · care history in the weekly report. Approve ⇒ e-mail to the PIC, Director, chief accountant and you; the case counts for KPI. Reject ⇒ a reason is required and the evidence is deleted.")+'</div>'+
+      '<textarea class="inp" id="naCm" style="margin-top:8px;min-height:64px" placeholder="'+TX("Nhận xét (bắt buộc khi từ chối)…","Comment (required to reject)…")+'"></textarea>'+
+      '<div class="na8-decbtn"><button class="ok" onclick="naDecide(\''+esc(c.id)+'\',\'approve\')">✅ '+TX("Xác nhận","Approve")+'</button><button class="no" onclick="naDecide(\''+esc(c.id)+'\',\'reject\')">✕ '+TX("Từ chối","Reject")+'</button></div></div>';
+  }
+  var body='<div class="na8-det"><div>'+info+'</div><div><div class="ct" style="margin-bottom:8px"><span class="dot"></span>'+TX("Chứng từ","Evidence")+' ('+fs.length+')<span class="sp"></span>'+
+    (c.folder?'<a class="btn sm" href="'+esc(c.folder)+'" target="_blank">📁 Drive</a>':'')+'</div>'+gal+dec+'</div></div>';
+  var own=c.pic===S.user.pic||(S.na.me||{}).all;
+  var foot=(pi>=0&&pend.length>1?'<span style="margin-right:auto;font-size:12.5px;color:var(--sub)">'+(pi+1)+' / '+pend.length+' '+TX("case chờ duyệt","pending")+' '+
+      '<button class="btn sm" onclick="naView(\''+esc(pend[(pi+pend.length-1)%pend.length].id)+'\',1)">‹</button> <button class="btn sm" onclick="naView(\''+esc(pend[(pi+1)%pend.length].id)+'\',1)">›</button></span>':'')+
+    (own&&c.status!=="Approved"&&c.canEdit?'<button class="btn dg" onclick="naDel(\''+esc(c.id)+'\')">🗑 '+TX("Xoá","Delete")+'</button>':'')+
+    (c.canEdit?'<button class="btn" onclick="naForm(naGet(\''+esc(c.id)+'\'))">✎ '+TX(c.status==="Rejected"?"Mở lại & sửa":"Sửa","Edit")+'</button>':'')+
+    (own&&c.status==="Draft"?'<button class="btn pri" onclick="naSubmit(\''+esc(c.id)+'\')">📨 '+TX("Gửi email xin xác nhận","Send for approval")+'</button>':'')+
+    '<button class="btn" onclick="closeAllModals()">'+TX("Đóng","Close")+'</button>';
+  closeAllModals();
+  openModal(naTypeLb(c.type)+" · "+c.account,body,foot,true);
+}
+function naDecide(id,dec){
+  var cm=String(($("naCm")||{}).value||"").trim();
+  if(dec==="reject" && cm.length<5){ toast(TX("Từ chối cần ghi rõ lý do (ít nhất 5 ký tự)","A rejection needs a reason (5+ characters)"),"warn",5000); var el=$("naCm"); if(el){ el.focus(); el.style.borderColor="#C0504D"; } return; }
+  var c=naGet(id);
+  if(!confirm(dec==="approve"?TX("Xác nhận case mở mới của "+c.pic+" — "+c.account+"?","Approve the case of "+c.pic+" — "+c.account+"?")
+                             :TX("Từ chối case này? Toàn bộ chứng từ sẽ bị xoá khỏi Drive và email báo kết quả sẽ được gửi.","Reject this case? All evidence files will be deleted and the result e-mailed."))) return;
+  busy(true,TX("Đang ghi kết quả và gửi email…","Saving and e-mailing…"));
+  apiPost({ action:"naDecide", id:id, decision:dec, comment:cm, rid:uid28() }).then(function(j){
+    busy(false); naMerge(j.rec); toast(j.message||"OK","ok",5200);
+    S.na.pending=naPendingList().length; naFab(); S.kpi=null; kpiPushSoon(1000);
+    var next=naPendingList()[0];
+    if(next) naView(next.id,true); else { closeAllModals(); if(S.tab==="newacc") naPaint(); }
+  }).catch(function(e){ busy(false); toast(e.message,"err",7000); });
 }
 function naMerge(rec){
-  if(!rec||!S.na.rows) return;
-  var i=-1; S.na.rows.forEach(function(x,k){ if(x.id===rec.id) i=k; });
+  if(!rec) return; S.na.rows=S.na.rows||[];
+  var i=S.na.rows.map(function(x){ return x.id; }).indexOf(rec.id);
   if(i>=0) S.na.rows[i]=rec; else S.na.rows.unshift(rec);
 }
-function naDetail(){
-  var c=S.na.cur; if(!c) return;
-  var tb=function(l,v){ return '<tr><td>'+l+'</td><td>'+(v||"—")+'</td></tr>'; };
-  var info='<table class="na-tb">'+tb(TX("Mã case","Case ID"),esc(c.id))+tb(TX("Loại","Type"),naTypeL(c.type))+tb("PIC",esc(c.pic)+(c.kpi?" · KPI "+esc(c.kpi):""))+
-    tb(TX("Đại lý / khách hàng","Account"),esc(c.account)+(c.code?" · "+esc(c.code):"")+(c.accType||c.province?'<br><span style="font-weight:400;color:var(--sub)">'+esc([c.accType,c.province].filter(Boolean).join(" · "))+'</span>':""))+
-    tb(TX("Nhà phân phối","Distributor"),esc(c.npp))+tb("SKU",esc([c.sku,c.detail].filter(Boolean).join(" · ")))+
-    tb(TX("Đơn hàng đầu tiên","First order"),esc([c.orderDate?fmtVN(c.orderDate):"",c.orderNo?TX("số ","No. ")+c.orderNo:"",c.qty?TX("SL ","Qty ")+c.qty:"",c.amount?Number(c.amount).toLocaleString("en-US"):""].filter(Boolean).join(" · ")))+
-    tb(TX("Tháng ghi nhận","Counted in"),esc(String(c.month).slice(4)+"/"+String(c.month).slice(0,4)+" · "+c.fy))+(c.note?tb(TX("Ghi chú","Note"),esc(c.note)):"")+'</table>';
-  var ck='<ul class="na-chk">'+NA_CK.map(function(x){ return '<li class="'+(c.checklist&&c.checklist[x.k]?"y":"")+'">'+esc(TX(x.vi,x.en))+'</li>'; }).join("")+'</ul>';
-  var wk=c.weekly||{n:0,list:[]};
-  var wkh=wk.n?'<ul class="na-chk">'+(wk.list||[]).map(function(w){ return '<li class="y">'+fmtVN(w.d)+' · '+esc(w.a||"")+' · <span style="color:var(--sub)">'+esc(w.r||w.s||"")+'</span></li>'; }).join("")+'</ul>'
-    :'<div class="na-wk no">⚠️ '+TX("Chưa thấy lượt chăm sóc đại lý này trên báo cáo tuần trước ngày đơn đầu tiên — điều kiện bắt buộc.","No follow-up with this account in the weekly report before the first order — this is required.")+'</div>';
-  var fs=c.files||[];
-  var gal=fs.length?'<div class="na-gal">'+fs.map(function(x){
-    return '<div class="na-gi"><div class="im" onclick="naView(\''+esc(x.id)+'\')">'+naThImg(x)+'</div>'+
-      '<div class="cap">'+(c.canEdit?'<button class="x" title="'+TX("Xoá","Remove")+'" onclick="naDelFile(\''+esc(x.id)+'\')">✕</button>':"")+'<b>'+esc(naEvL(x.kind))+'</b>'+esc(x.name)+'</div></div>'; }).join("")+'</div>'
-    :'<div class="km-empty" style="padding:18px">'+(c.status==="Rejected"?TX("Chứng từ đã được gỡ khỏi Drive khi case bị từ chối.","The evidence was removed from Drive when the case was rejected."):TX("Chưa có chứng từ.","No evidence yet."))+'</div>';
-  var banner='<div class="na-banner '+esc(c.status)+'"><b>'+naStL(c.status)+'</b> — '+naStatusLine(c)+(c.status==="Rejected"&&c.comment?'<div style="margin-top:4px;white-space:pre-wrap">'+TX("Lý do: ","Reason: ")+esc(c.comment)+'</div>':"")+'</div>';
-  var body=banner+'<div class="na-det"><div>'+info+'<div class="na-sec">'+TX("CAM KẾT CỦA PIC","PIC CONFIRMATIONS")+'</div>'+ck+
-    '<div class="na-sec">'+TX("LỊCH SỬ CHĂM SÓC TRÊN BÁO CÁO TUẦN","FOLLOW-UP HISTORY IN THE WEEKLY REPORT")+' ('+(wk.n||0)+')</div>'+wkh+
-    (c.log?'<div class="na-sec">'+TX("NHẬT KÝ","LOG")+'</div><div class="na-log">'+esc(c.log)+'</div>':"")+'</div>'+
-    '<div><div class="na-sec" style="margin-top:0">'+TX("CHỨNG TỪ","EVIDENCE")+' ('+fs.length+')'+(c.folder?' · <a href="'+esc(c.folder)+'" target="_blank" rel="noopener">Drive ↗</a>':"")+'</div>'+gal+'</div></div>';
-  var foot='<button class="btn" onclick="closeModal()">'+TX("Đóng","Close")+'</button>'+
-    ((c.status==="Draft"||c.status==="Rejected")&&c.canEdit?'<button class="btn dg" onclick="naDel()">🗑 '+TX("Xoá case","Delete case")+'</button>':"")+
-    (c.canEdit?'<button class="btn" onclick="naForm(\''+esc(c.id)+'\')">✎ '+TX("Sửa / thêm chứng từ","Edit / add evidence")+'</button>':"")+
-    ((c.status==="Draft")&&c.canEdit&&!c.canDecide?'<button class="btn pri" onclick="naSubmit()">📧 '+TX("Gửi email xin xác nhận","Send for approval")+'</button>':"")+
-    (c.canDecide?'<button class="btn dg" onclick="naReject()">✕ '+TX("Từ chối","Reject")+'</button><button class="btn pri" onclick="naApprove()">✓ '+TX("Xác nhận","Approve")+'</button>':"");
-  /* đang mở đúng case này ⇒ thay nội dung tại chỗ, không chồng thêm một hộp thoại */
-  if($("ov").classList.contains("on") && S.na._detId===c.id && $("naDet")){
-    $("mBody").innerHTML='<div id="naDet">'+body+'</div>'; $("mFoot").innerHTML=foot;
-  } else {
-    openModal(naTypeL(c.type)+" · "+esc(c.account),'<div id="naDet">'+body+'</div>',foot,true);
-  }
-  S.na._detId=c.id;
-  naThumbsFor([c]);
-}
-/* ── xem chứng từ ngay trong app ── */
-function naView(fid){
-  var c=S.na.cur; if(!c) return;
-  var fs=(c.files||[]).filter(function(f){ return f.id; }), i=0;
-  fs.forEach(function(f,k){ if(f.id===fid) i=k; });
-  S.na.vw={ list:fs, i:i };
-  openModal2(TX("Chứng từ","Evidence"),'<div class="na-vw" id="naVw"></div>','<button class="btn" onclick="closeModal2()">'+TX("Đóng","Close")+'</button>');
-  try{ var m=$("modal2"); m.style.width="min(1100px,96vw)"; m.style.maxWidth="96vw"; }catch(e){}
-  naVwDraw();
-}
-function naVwGo(d){ var v=S.na.vw; if(!v) return; v.i=(v.i+d+v.list.length)%v.list.length; naVwDraw(); }
-function naVwDraw(){
-  var v=S.na.vw, box=$("naVw"); if(!v||!box) return;
-  var f=v.list[v.i]; if(!f) return;
-  var fd=S.na.fd[f.id];
-  var stage=fd&&fd.url
-    ? (/^image\//.test(fd.mime)?'<img src="'+fd.url+'" alt="">':/pdf/.test(fd.mime)?'<iframe src="'+fd.url+'"></iframe>':'<div class="ld">'+TX("Không xem trước được loại tệp này — ","No preview for this file type — ")+'<a style="color:#fff" href="'+fd.url+'" download="'+esc(f.name)+'">'+TX("tải về","download")+'</a></div>')
-    : fd&&fd.err ? '<div class="ld">'+esc(fd.err)+'</div>'
-    : '<div class="ld">'+(naTh(f)?'<img src="'+naTh(f)+'" style="opacity:.6;max-height:60vh" alt="">':TX("Đang mở tệp…","Opening the file…"))+'</div>';
-  box.innerHTML='<div class="stage">'+stage+(v.list.length>1?'<button class="nav l" onclick="naVwGo(-1)">◀</button><button class="nav r" onclick="naVwGo(1)">▶</button>':"")+'</div>'+
-    '<div class="meta"><b style="color:var(--ink)">'+esc(naEvL(f.kind))+'</b><span>'+esc(f.name)+'</span><span>·</span><span>'+(v.i+1)+'/'+v.list.length+'</span>'+
-      '<span class="sp" style="flex:1"></span><a class="btn sm" href="'+esc(f.url)+'" target="_blank" rel="noopener">Drive ↗</a></div>'+
-    (v.list.length>1?'<div class="strip">'+v.list.map(function(x,k){ return '<div class="'+(k===v.i?"on":"")+'" onclick="S.na.vw.i='+k+';naVwDraw()">'+naThImg(x)+'</div>'; }).join("")+'</div>':"");
-  if(!fd){
-    S.na.fd[f.id]={ loading:1 };
-    apiGet("naFileData",{ fileId:f.id, _ts:Date.now() }).then(function(j){
-      var bin=atob(j.data||""), u8=new Uint8Array(bin.length); for(var k=0;k<bin.length;k++) u8[k]=bin.charCodeAt(k);
-      S.na.fd[f.id]={ mime:j.mime||f.mime||"", url:URL.createObjectURL(new Blob([u8],{ type:j.mime||f.mime||"application/octet-stream" })) };
-      if(S.na.vw && S.na.vw.list[S.na.vw.i] && S.na.vw.list[S.na.vw.i].id===f.id) naVwDraw();
-    }).catch(function(e){ S.na.fd[f.id]={ err:e.message }; naVwDraw(); });
-  }
-  naThumbsFor([{ files:v.list }]);
-}
-document.addEventListener("keydown",function(e){ if(!S.na||!S.na.vw||!$("naVw")) return; if(e.key==="ArrowLeft") naVwGo(-1); else if(e.key==="ArrowRight") naVwGo(1); });
-function naAfter(j,msg){
-  if(j&&j.rec){ S.na.cur=j.rec; naMerge(j.rec); }
-  if(j&&(j.opaque||j.softTimeout)){ setTimeout(function(){ naLoad(true).then(function(){ naPaint(); if(S.na.cur) naOpen(S.na.cur.id); }); },2600); }
-  else { naPaint(); setTimeout(function(){ naLoad(true).then(naPaint).catch(function(){}); },4000); }
-  if(msg) toast(msg,"ok",5200);
-}
-function naSubmit(){
-  var c=S.na.cur; if(!c) return;
-  var miss=naMissing(c);
-  if(miss.length){ alert(TX("Chưa đủ điều kiện gửi:\n\n• ","Not ready to send:\n\n• ")+miss.join("\n• ")); return; }
-  if(!confirm(TX("Gửi email xin xác nhận case này tới ","Send this case for approval to ")+((c.mgrs||[]).join(" / ")||TX("cấp trên","your manager"))+TX(" (CC Giám đốc, vtt.hoa) kèm "," (CC Director, vtt.hoa) with ")+(c.files||[]).length+TX(" chứng từ?"," file(s)?"))) return;
-  busy(true,TX("Đang gửi email xin xác nhận…","Sending the request…"));
-  apiPost({ action:"naSubmit", id:c.id }).then(function(j){ busy(false); closeModal(); naAfter(j,j.message||TX("Đã gửi email xin xác nhận","Request sent")); })
-    .catch(function(e){ busy(false); toast(e.message,"err",8000); });
-}
-function naApprove(){
-  var c=S.na.cur; if(!c) return;
-  if(!confirm(TX("Xác nhận case mở mới “","Approve the case “")+c.account+TX("” của ","” of ")+c.pic+TX("?\nEmail xác nhận gửi tới PIC, Giám đốc, vtt.hoa và chính bạn.","?\nA confirmation e-mail goes to the PIC, the Director, vtt.hoa and you."))) return;
-  busy(true,TX("Đang xác nhận…","Approving…"));
-  apiPost({ action:"naDecide", id:c.id, decision:"approve" }).then(function(j){ busy(false); closeModal(); naAfter(j,j.message); })
-    .catch(function(e){ busy(false); toast(e.message,"err",7000); });
-}
-function naReject(){
-  var c=S.na.cur; if(!c) return;
-  openModal2(TX("Từ chối case — bắt buộc ghi lý do","Reject the case — a comment is required"),
-    '<div class="hint" style="margin-bottom:8px">'+TX("Lý do được gửi email tới PIC, Giám đốc, vtt.hoa. Toàn bộ chứng từ của case sẽ bị gỡ khỏi folder Drive.","The comment is e-mailed to the PIC, the Director and vtt.hoa. All evidence files of the case will be removed from the Drive folder.")+'</div>'+
-    '<textarea id="naRejTx" class="inp" style="width:100%;min-height:120px;padding:9px 11px" placeholder="'+TX("VD: Chưa có xác nhận của NPP; đơn đầu tiên thuộc tháng 08…","E.g. No distributor confirmation; the first order is in August…")+'"></textarea>',
-    '<button class="btn" onclick="closeModal2()">'+TX("Huỷ","Cancel")+'</button><button class="btn dg" onclick="naRejectGo()">✕ '+TX("Từ chối &amp; gửi email","Reject &amp; send e-mail")+'</button>');
-}
-function naRejectGo(){
-  var c=S.na.cur, tx=String(($("naRejTx")||{}).value||"").trim();
-  if(tx.length<5) return toast(TX("Ghi lý do từ chối (tối thiểu 5 ký tự).","Write a comment (at least 5 characters)."),"err",4000);
-  busy(true,TX("Đang từ chối case…","Rejecting…"));
-  apiPost({ action:"naDecide", id:c.id, decision:"reject", comment:tx }).then(function(j){ busy(false); closeModal2(); closeModal(); naAfter(j,j.message); })
-    .catch(function(e){ busy(false); toast(e.message,"err",7000); });
-}
-function naDel(){
-  var c=S.na.cur; if(!c||!confirm(TX("Xoá case ","Delete case ")+c.id+TX(" và toàn bộ chứng từ?"," and all its evidence?"))) return;
-  busy(true);
-  apiPost({ action:"naDelete", id:c.id }).then(function(j){ busy(false); closeModal(); S.na.rows=(S.na.rows||[]).filter(function(x){ return x.id!==c.id; }); naPaint(); toast(j.message||TX("Đã xoá","Deleted"),"ok"); naLoad(true).then(naPaint); })
+function naDel(id){
+  if(!confirm(TX("Xoá case này và toàn bộ chứng từ trên Drive?","Delete this case and all its files?"))) return;
+  busy(true,TX("Đang xoá…","Deleting…"));
+  apiPost({ action:"naDelete", id:id, rid:uid28() }).then(function(j){ busy(false); S.na.rows=(S.na.rows||[]).filter(function(x){ return x.id!==id; }); closeAllModals(); toast(j.message||"OK","ok"); naPaint(); })
     .catch(function(e){ busy(false); toast(e.message,"err",6000); });
 }
-function naDelFile(fid){
-  var c=S.na.cur; if(!c||!confirm(TX("Xoá chứng từ này khỏi case và Drive?","Remove this file from the case and Drive?"))) return;
-  apiPost({ action:"naDelFile", id:c.id, fileId:fid }).then(function(j){
-    if(j.rec){ S.na.cur=j.rec; naMerge(j.rec); } else if(S.na.cur){ S.na.cur.files=(S.na.cur.files||[]).filter(function(f){ return f.id!==fid; }); }
-    if(S.na.wz) S.na.wz.files=(S.na.wz.files||[]).filter(function(f){ return f.id!==fid; });
-    if($("naWz")){ naWzFiles(); naWzCheck(); } else naDetail();
-  }).catch(function(e){ toast(e.message,"err",5000); });
+function naSubmit(id){
+  busy(true,TX("Đang gửi email xin xác nhận (kèm chứng từ)…","Sending the request (with files)…"));
+  apiPost({ action:"naSubmit", id:id, rid:uid28() }).then(function(j){
+    busy(false); naMerge(j.rec); closeAllModals(); toast(j.message||"OK","ok",6000); naPaint();
+  }).catch(function(e){ busy(false); toast(e.message,"err",9000); });
 }
 
-/* ── điều kiện gửi (khớp kiểm tra của backend) ── */
-function naMissing(c){
-  var m=[];
-  if(!c.orderDate) m.push(TX("ngày đơn hàng đầu tiên","first order date"));
-  if(!c.npp) m.push(TX("nhà phân phối","distributor"));
-  if(c.type==="new_sku"&&!c.sku) m.push(TX("mã SKU","SKU code"));
-  if(!c.orderNo&&!(Number(c.qty)>0)) m.push(TX("số đơn hoặc số lượng của đơn đầu tiên","first order No. or quantity"));
-  if(!(c.weekly&&c.weekly.n>0)) m.push(TX("lịch sử chăm sóc trên báo cáo tuần trước ngày đơn đầu tiên","follow-up history in the weekly report before the first order"));
-  NA_EV.forEach(function(e){ if(e.req&&!(c.files||[]).some(function(f){ return f.kind===e.k&&f.id; })) m.push(TX("chứng từ: ","evidence: ")+TX(e.vi,e.en)); });
-  NA_CK.forEach(function(x){ if(!(c.checklist&&c.checklist[x.k])) m.push(TX("tick cam kết: ","confirmation: ")+TX(x.vi,x.en)); });
-  return m;
+/* ── xem ảnh / PDF cỡ lớn ── */
+function naLb(id,i,files){
+  var fs=files||((naGet(id)||{}).files)||[]; if(!fs.length) return;
+  i=(i+fs.length)%fs.length; var f=fs[i];
+  var lb=$("na8lb");
+  if(!lb){ lb=document.createElement("div"); lb.id="na8lb"; lb.className="na8-lb"; document.body.appendChild(lb);
+    document.addEventListener("keydown",function(e){ if(!$("na8lb").classList.contains("on")) return; if(e.key==="Escape") naLbClose(); if(e.key==="ArrowRight") naLbStep(1); if(e.key==="ArrowLeft") naLbStep(-1); }); }
+  S.na.lb={ id:id, i:i, files:fs };
+  var local=S.na.local[f.id];
+  var stage=naIsPdf(f)&&!local?'<iframe src="https://drive.google.com/file/d/'+encodeURIComponent(f.id)+'/preview" allow="autoplay"></iframe>'
+    :'<img src="'+(local||("https://drive.google.com/thumbnail?id="+encodeURIComponent(f.id)+"&sz=w2200"))+'" alt="">';
+  lb.innerHTML='<div class="bar"><b>'+esc(naKindLb(f.kind))+' · '+esc(f.name||"")+' ('+(i+1)+'/'+fs.length+')</b>'+
+    '<a href="https://drive.google.com/file/d/'+encodeURIComponent(f.id)+'/view" target="_blank">↗ Drive</a><button onclick="naLbClose()">✕ '+TX("Đóng","Close")+'</button></div>'+
+    '<div class="stage">'+stage+'</div>'+(fs.length>1?'<button class="nav" style="left:10px" onclick="naLbStep(-1)">‹</button><button class="nav" style="right:10px" onclick="naLbStep(1)">›</button>':'');
+  lb.classList.add("on");
 }
-/* lượt chăm sóc tại chỗ (để PIC thấy ngay khi gõ tên đại lý) */
-function naNorm(s){ return String(s||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/đ/g,"d").replace(/\s+/g," ").trim(); }
-function naLocalWeekly(pic,acc,until){
-  var k=naNorm(acc), p=naNorm(pic), out=[];
-  if(!k) return out;
-  terrRows().forEach(function(w){
-    if(naNorm(w.pic)!==p) return;
-    if(naNorm(parseAcc(w.account).name)!==k) return;
-    if(/^not started$|^cancel/i.test(String(w.status||""))) return;
-    var d=String(w.start||"").slice(0,10); if(!d||(until&&d>until)) return;
-    out.push({ d:d, a:w.typeAction||"", s:w.status||"" });
-  });
-  return out.sort(function(a,b){ return a.d<b.d?1:-1; });
-}
+function naLbStep(d){ var s=S.na.lb; if(s) naLb(s.id,s.i+d,s.files); }
+function naLbClose(){ var lb=$("na8lb"); if(lb){ lb.classList.remove("on"); lb.innerHTML=""; } }
 
-/* ── form tạo / sửa case (v27.1) ── */
-function naForm(id,keep){
-  var c;
-  if(keep && S.na.wz) c=S.na.wz;
-  else c=id?JSON.parse(JSON.stringify(S.na.cur||{})):{ type:"new_account", pic:S.user.pic, checklist:{}, files:[], status:"Draft" };
-  if(!c.skuSel) c.skuSel=String(c.sku||"").split(/\s*;\s*|\n/).filter(Boolean);
-  if(c.ptype==null) c.ptype=c.detail||"";
-  S.na.wz=c;
-  if(!noOrder() && !tGet("order")) ensureTab("order",{},function(r,ready){ if(ready&&$("naWz")) naOrdDraw(); });
-  loadProductCodes();
-  if(!noOrder() && typeof ensureCbc==="function") try{ ensureCbc(); }catch(e){}
-  var nppList=NA_NPP[curTeamKey()]||[];
-  var custs=(S.custIndex||[]).filter(function(x){ return S.na.seeAll||!x.pic||naNorm(x.pic)===naNorm(c.pic); }).slice(0,3000);
-  var tip=function(vi,en){ return '<div class="tip">'+TX(vi,en)+'</div>'; };
-  var body='<div class="na-wz" id="naWz">'+
-    '<div class="sec"><div class="sh"><i>1</i>'+TX("Loại case","Case type")+'</div>'+
-      tip("<b>Đại lý mới</b> = đại lý đặt đơn MANI đầu tiên qua NPP trong FY68, do bạn mở. <b>SKU mới</b> = đại lý đã có, nay đặt một mã SKU MANI lần đầu. Mỗi đại lý / mỗi cặp đại lý + SKU chỉ tính 1 lần.",
-          "<b>New account</b> = the account's first MANI order through the distributor in FY68, opened by you. <b>New SKU</b> = an existing account ordering a MANI SKU for the first time. Each account / account + SKU counts once.")+
-      '<div class="na-types">'+[["new_account",TX("🏪 Đại lý / khách hàng mới","🏪 New account"),TX("Đơn MANI đầu tiên của đại lý qua NPP trong FY","The account's first MANI order through the distributor in the FY")],
-        ["new_sku",TX("📦 SKU mới","📦 New SKU"),TX("Đại lý đặt một mã SKU MANI lần đầu","The account orders a MANI SKU for the first time")]].map(function(t){
-        return '<label class="'+(c.type===t[0]?"on":"")+'" onclick="naWzType(\''+t[0]+'\',this)"><input type="radio" name="naType" value="'+t[0]+'"'+(c.type===t[0]?" checked":"")+'><b>'+t[1]+'</b>'+t[2]+'</label>'; }).join("")+'</div></div>'+
-    '<div class="sec"><div class="sh"><i>2</i>'+TX("Đại lý &amp; nhà phân phối","Account &amp; distributor")+'</div>'+
-      tip("Chọn đại lý trong danh sách CRM để app đối chiếu lịch sử chăm sóc ở báo cáo tuần và tìm các đơn hàng đã có. Case <b>không gửi được</b> nếu chưa có lượt chăm sóc nào trước ngày đơn đầu tiên.",
-          "Pick the account from the CRM list so the app can match the follow-up history and the existing orders. A case <b>cannot be sent</b> without any follow-up before the first order.")+
-      '<div class="na-row">'+
-        (S.na.seeAll?'<div><label class="l">PIC</label><select class="inp" id="naPic" onchange="S.na.wz.pic=this.value;naWzCheck();naOrdDraw()">'+(function(){ var l=[]; (S.master.pic||[]).concat([c.pic]).forEach(function(p){ if(p&&l.indexOf(p)<0&&!/sale admin|team$/i.test(p)) l.push(p); }); return l.map(function(p){ return '<option'+(p===c.pic?" selected":"")+'>'+esc(p)+'</option>'; }).join(""); })()+'</select></div>':"")+
-        '<div style="grid-column:span 2"><label class="l">'+TX("Tên đại lý / khách hàng *","Account name *")+'</label><input class="inp" id="naAcc" list="naAccL" autocomplete="off" value="'+esc(c.account||"")+'" oninput="naWzAcc(this.value)" onchange="naWzAcc(this.value)"></div>'+
-        '<div><label class="l">'+TX("Nhà phân phối *","Distributor *")+'</label><input class="inp" id="naNpp" list="naNppL" value="'+esc(c.npp||"")+'" oninput="naWzCheck()"></div></div>'+
-      '<div class="na-row" style="margin-top:9px"><div><label class="l">'+TX("Loại khách hàng","Account type")+'</label><input class="inp" id="naAT" value="'+esc(c.accType||"")+'"></div>'+
-        '<div><label class="l">'+TX("Tỉnh / thành","Province")+'</label><input class="inp" id="naPv" value="'+esc(c.province||"")+'"></div>'+
-        '<div><label class="l">Customer code</label><input class="inp" id="naCode" value="'+esc(c.code||"")+'"></div></div>'+
-      '<datalist id="naAccL">'+custs.map(function(x){ return '<option value="'+esc(x.name)+'">'; }).join("")+'</datalist>'+
-      '<datalist id="naNppL">'+nppList.map(function(x){ return '<option value="'+esc(x)+'">'; }).join("")+'</datalist>'+
-      '<div id="naWk"></div></div>'+
-    '<div class="sec"><div class="sh"><i>3</i>'+TX("Đơn hàng đầu tiên &amp; SKU","First order &amp; SKU")+'</div>'+
-      (noOrder()
-        ? tip("Case được tính vào <b>tháng của ngày đơn đầu tiên</b>. Ghi đúng mã SKU MANI và số đơn / số lượng như trên chứng từ.","The case counts in the <b>month of the first order</b>. Use the exact MANI SKU and the order No. / quantity shown on the documents.")
-        : tip("Chọn đơn trong <b>Sale Order</b> của đại lý này (các ô ngày, số đơn, số lượng tự điền), rồi tick mã SKU cần ghi nhận — không cần chọn hết. Chưa có đơn thì bấm <b>＋ Tạo đơn hàng mới</b>: đơn được lưu vào Sale Order rồi quay lại đây.",
-              "Pick the account's order from the <b>Sale Order</b> sheet (date, order No. and quantity fill in), then tick the SKU(s) to record. No order yet? Press <b>＋ New order</b>: it is saved to Sale Order and you come back here."))+
-      (noOrder()?'':'<div id="naOrdBox"></div>')+
-      '<div class="na-row" style="margin-top:9px"><div><label class="l">'+TX("Ngày đơn đầu tiên *","First order date *")+'</label><input class="inp" type="date" id="naOD" value="'+esc(c.orderDate||"")+'" onchange="naWzCheck()"></div>'+
-        '<div><label class="l">'+TX("Số đơn hàng","Order No.")+'</label><input class="inp" id="naON" value="'+esc(c.orderNo||"")+'" oninput="naWzCheck()"></div>'+
-        '<div><label class="l">'+TX("Số lượng","Quantity")+'</label><input class="inp" type="number" min="0" id="naQty" value="'+esc(c.qty||"")+'" oninput="naWzCheck()"></div>'+
-        '<div><label class="l">'+TX("Giá trị (tuỳ chọn)","Amount (optional)")+'</label><input class="inp" type="number" min="0" id="naAmt" value="'+esc(c.amount||"")+'"></div></div>'+
-      '<div class="na-row" style="margin-top:9px"><div><label class="l">Product type</label><select class="inp" id="naPT" onchange="S.na.wz.ptype=this.value">'+opts(S.master.product||[],c.ptype,TX("— chọn —","— pick —"))+'</select></div>'+
-        '<div style="grid-column:span 3"><label class="l">'+TX("Mã SKU / Detail","SKU / Detail")+'<span id="naSkuReq">'+(c.type==="new_sku"?" *":"")+'</span></label><div id="naSkuBox"></div></div></div>'+
-      '<div style="margin-top:9px"><label class="l">'+TX("Ghi chú","Note")+'</label><input class="inp" id="naNote" value="'+esc(c.note||"")+'" maxlength="500"></div></div>'+
-    '<div class="sec"><div class="sh"><i>4</i>'+TX("Chứng từ","Evidence")+'</div><div id="naFiles"></div></div>'+
-    '<div class="sec"><div class="sh"><i>5</i>'+TX("Cam kết &amp; gửi","Confirm &amp; send")+'</div>'+
-      '<ul class="na-cm">'+NA_CK.map(function(x){ return '<li><label><input type="checkbox" id="naCk_'+x.k+'"'+(c.checklist&&c.checklist[x.k]?" checked":"")+' onchange="naWzCheck()"><span>'+esc(TX(x.vi,x.en))+'</span></label></li>'; }).join("")+'</ul>'+
-      '<div id="naMiss" style="margin-top:10px"></div></div></div>';
-  var foot='<button class="btn" onclick="closeModal()">'+TX("Huỷ","Cancel")+'</button>'+
-    '<button class="btn" onclick="naWzSave(false)">💾 '+TX("Lưu nháp","Save draft")+'</button>'+
-    '<button class="btn pri" onclick="naWzSave(true)">📧 '+TX("Lưu &amp; gửi email xin xác nhận","Save &amp; send for approval")+'</button>';
-  openModal(c.id?TX("Sửa case ","Edit case ")+esc(c.id):TX("Thêm case mở mới","Add a new-account / SKU case"),body,foot,true);
-  S.modalRewire=naWzRewire;
-  naWzRewire();
+/* ═════════ FORM THÊM / SỬA CASE ═════════ */
+function naWz(){ return S.na.wz; }
+function naWzOpen(){ return !!$("naWz") && $("ov").classList.contains("on"); }
+function naForm(rec){
+  rec=rec||null;
+  if(!S.custIndex.length) loadCustomerIndex();
+  ensureCbc && ensureCbc(); loadProductCodes();
+  var tp=(S.na.cfg&&S.na.cfg.pics)||[];
+  var owner=rec?rec.pic:(tp.indexOf(S.user.pic)>=0||!tp.length?S.user.pic:(S.na.f.pic||tp[0]));
+  S.na.wz={ id:rec?rec.id:("NA-"+curTeamKey().slice(0,2).toUpperCase()+"-"+uid28()), isNew:!rec, rec:rec, pic:owner,
+    type:rec?rec.type:"new_account", acc:rec?{ name:rec.account, code:rec.code, type:rec.accType, province:rec.province }:null,
+    files:(rec&&rec.files||[]).map(function(f){ return Object.assign({},f,{ st:"ok" }); }), uploaded:[],
+    lines:(rec&&rec.lines&&rec.lines.length?rec.lines:[]).map(function(x){ return { ptype:x.ptype||"", detail:x.detail||"", details:pcSplit(x.detail), price:x.price||"", qty:x.qty||"" }; }),
+    toSheet:false, srcOrder:"" };
+  var w=S.na.wz, t=function(v,e){ return TX(v,e); };
+  var hasOrd=!noOrder();
+  var h='<div id="naWz">'+
+  '<div class="na8-step"><h4><i>1</i>'+t("Loại case","Case type")+'</h4><div class="na8-guide">'+t("Chọn đúng loại: <b>Đại lý / KH mới</b> nếu account đặt đơn MANI ĐẦU TIÊN qua NPP trong FY; <b>SKU mới</b> nếu account đã từng mua nhưng lần đầu đặt mã SKU này.","<b>New account</b> = first MANI order via the distributor in the FY · <b>New SKU</b> = existing account ordering this SKU for the first time.")+'</div>'+
+    '<div class="na8-types" id="naTypes"></div></div>'+
+  '<div class="na8-step"><h4><i>2</i>'+t("Account &amp; nhà phân phối","Account &amp; distributor")+'<span id="naS2"></span></h4><div class="na8-guide">'+t("Gõ để tìm account trong danh mục khách hàng (chưa có thì thêm ở tab Khách hàng). Hệ thống tự kiểm tra lịch sử chăm sóc trên báo cáo tuần và lịch sử đơn hàng.","Search the account in the customer list. The CRM checks the weekly-report history automatically.")+'</div>'+
+    '<div class="row">'+(isMgrView()?picFld("na_pic",owner,"PIC"):'')+
+      '<div class="fld sbox" style="flex:2"><label>Account <span class="rq">*</span></label><input class="inp" id="na_acc" autocomplete="off" value="'+esc(w.acc?w.acc.name:"")+'" placeholder="'+t("Bấm để xem danh sách · gõ để lọc","Tap to list · type to filter")+'"><input type="hidden" id="na_accH"></div>'+
+      '<div class="fld"><label>'+t("Nhà phân phối","Distributor")+' <span class="rq">*</span></label><input class="inp" id="na_npp" list="na_nppL" value="'+esc(rec?rec.npp:(NA_NPP_DEF[owner]||""))+'" oninput="naChk()"><datalist id="na_nppL">'+(NA_NPP_LIST[curTeamKey()]||[]).map(function(x){ return '<option value="'+esc(x)+'">'; }).join("")+'</datalist></div></div>'+
+    '<div id="naAccInfo"></div></div>'+
+  '<div class="na8-step"><h4><i>3</i>'+t("Đơn hàng đầu tiên qua NPP","First order via the distributor")+'<span id="naS3"></span></h4><div class="na8-guide">'+
+      (hasOrd?t("Chọn nhanh <b>từ tab Đơn hàng</b> (tự điền ngày, số đơn, SKU, số lượng) hoặc <b>nhập đơn mới</b> giống form Đơn hàng: chọn Product type rồi chọn mã Detail. Tháng của ngày đơn đầu tiên = tháng được tính KPI.","Pick from the Orders tab or enter a new order."):
+               t("Nhập ngày đơn đầu tiên, số đơn và sản phẩm (chọn Product type rồi mã Detail). Tháng của ngày đơn đầu tiên = tháng được tính KPI.","Enter the first-order date, PO number and the products (Product type then Detail code). The month of the first order is the KPI month."))+'</div>'+
+    '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">'+(hasOrd?'<button class="btn" type="button" onclick="naPickOrder()">📋 '+t("Chọn từ đơn hàng có sẵn","Pick an existing order")+'</button>':'')+
+      '<button class="btn" type="button" onclick="naAddLine()">＋ '+t("Thêm dòng sản phẩm","Add a product line")+'</button></div>'+
+    '<div class="row"><div class="fld"><label>'+t("Ngày đơn đầu tiên","First order date")+' <span class="rq">*</span></label><input class="inp" type="date" id="na_date" value="'+esc(rec?rec.orderDate:"")+'" onchange="naChk()"></div>'+
+      '<div class="fld"><label>'+t("Số đơn / PO","Order / PO No.")+'</label><input class="inp" id="na_no" value="'+esc(rec?rec.orderNo:"")+'"></div>'+
+      '<div class="fld"><label>'+t("Tháng tính KPI","KPI month")+'</label><input class="inp piclock" id="na_m" readonly></div></div>'+
+    '<div class="na8-lines" id="naLines"></div>'+
+    (hasOrd?'<label id="naToSheetW" style="display:none;font-size:12.5px;margin-top:8px;align-items:center;gap:8px"><input type="checkbox" id="na_toSheet" onchange="S.na.wz.toSheet=this.checked"> '+t("Ghi luôn đơn này vào tab <b>Đơn hàng (3. SALE ORDER)</b> — để tính KPI C5 / C6 / C7","Also save this order to the Orders tab")+'</label>':'')+
+    '<div class="fld" style="margin-top:8px"><label>'+t("SKU / mã sản phẩm mở mới","New SKU / product codes")+' <span id="naSkuRq"></span></label><textarea class="inp" id="na_sku" style="min-height:50px" placeholder="'+t("Tự điền từ các dòng sản phẩm — mỗi mã một dòng","Filled from the product lines — one code per line")+'" oninput="naChk()">'+esc(rec?rec.sku:"")+'</textarea></div></div>'+
+  '<div class="na8-step"><h4><i>4</i>'+t("Chứng từ (kéo thả)","Evidence (drag &amp; drop)")+'<span id="naS4"></span></h4><div class="na8-guide">'+t("Kéo thả hoặc bấm để chọn — ảnh chụp <b>email NPP xác nhận</b> (bắt buộc), phiếu xuất kho / hoá đơn / đơn đặt hàng, thông báo trúng thầu. Dán ảnh chụp màn hình bằng Ctrl+V cũng được. Ảnh tự nén, tải lên ngay khi thả; gắn đúng loại cho từng file. File được đặt tên PIC_ngàythángnăm_Account_SKU khi lưu.",
+      "Drop or pick files — screenshot of the <b>distributor confirmation e-mail</b> (required), PO / invoice / delivery note, tender award. Ctrl+V pastes a screenshot. Files upload at once; tag each file.")+'</div>'+
+    '<div class="na8-drop" id="naDrop"><div class="big">📥</div><b>'+t("Kéo thả chứng từ vào đây","Drop evidence here")+'</b><small>'+t("hoặc bấm để chọn ảnh / PDF · dán ảnh bằng Ctrl+V · tối đa 15 MB / file","or tap to choose images / PDF · Ctrl+V to paste · max 15 MB per file")+'</small>'+
+      '<input type="file" id="naFile" multiple accept="image/*,application/pdf" style="display:none"></div><div class="na8-files" id="naFiles"></div></div>'+
+  '<div class="na8-step"><h4><i>5</i>'+t("Cam kết theo quy định","Confirmations")+'<span id="naS5"></span></h4>'+
+    [["first",t("Account đặt <b>đơn MANI đầu tiên</b> qua NPP trong FY (đại lý mới) / đặt <b>mã SKU này lần đầu</b> (SKU mới), do tôi mở.","The account placed its <b>first MANI order</b> via the distributor in the FY (new account) / ordered this <b>SKU for the first time</b> (new SKU), opened by me.")],
+     ["month",t("Ghi nhận vào <b>tháng phát sinh đơn đầu tiên</b>, chưa ghi ở tháng / case khác.","Recorded in the <b>month of the first order</b>, not counted elsewhere.")],
+     ["mail",t("Đơn hàng đã được tôi <b>thông báo cho NPP qua email</b> (Zalo chỉ là trao đổi nhanh, không thay email).","I <b>informed the distributor by e-mail</b> about this order.")]]
+    .map(function(x){ var on=rec&&rec.checklist&&rec.checklist[x[0]]; return '<label style="display:flex;gap:9px;align-items:flex-start;font-size:13px;line-height:1.5;margin:6px 0;cursor:pointer"><input type="checkbox" id="na_c_'+x[0]+'"'+(on?" checked":"")+' onchange="naChk()" style="width:18px;height:18px;margin-top:2px;flex:none"> <span>'+x[1]+'</span></label>'; }).join("")+'</div>'+
+  '<div class="na8-step"><h4><i>6</i>'+t("Ghi chú","Note")+'</h4><textarea class="inp" id="na_note" style="min-height:56px" placeholder="'+t("Bối cảnh mở mới, người quyết định mua, kế hoạch tiếp theo…","Context, decision maker, next steps…")+'">'+esc(rec?rec.note:"")+'</textarea></div>'+
+  '<div class="na8-miss" id="naMiss"></div></div>';
+  var foot='<button class="btn" onclick="naCancel()">'+t("Huỷ","Cancel")+'</button><button class="btn" onclick="naSave(false)">💾 '+t("Lưu nháp","Save draft")+'</button>'+
+    '<button class="btn pri" onclick="naSave(true)">📨 '+t("Lưu &amp; gửi email xin xác nhận","Save &amp; send for approval")+'</button>';
+  closeAllModals();
+  openModal(rec?t("Sửa case ","Edit case ")+rec.account:t("Thêm case mở mới địa bàn / SKU mới","New account / new SKU case"),h,foot,true);
+  naDrawTypes(); naDrawLines(); naDrawFiles();
+  accountCombo("na_acc","na_accH",function(c){ w.acc={ name:c.name, code:c.code, type:c.type, province:c.province, pic:c.pic }; naAccInfo(); naChk(); });
+  $("na_acc").addEventListener("input",function(){ if(w.acc && $("na_acc").value.trim()!==w.acc.name) w.acc=null; naChk(); });
+  if($("na_pic")) $("na_pic").onchange=function(){ w.pic=this.value; if(!$("na_npp").value) $("na_npp").value=NA_NPP_DEF[w.pic]||""; naAccInfo(); naChk(); };
+  naWireDrop(); naAccInfo(); naChk();
+  S.modalRewire=function(){ naDrawTypes(); naDrawLines(); naDrawFiles(); naWireDrop(); naChk(); };
 }
-/* vẽ lại các phần động (gọi cả khi quay lại từ form đơn hàng) */
-function naWzRewire(){ S.na.reopen=false; naOrdDraw(); naSkuDraw(); naWzFiles(); naWzCheck(); naDZArm(); }
-function naWzType(t,el){ S.na.wz.type=t; document.querySelectorAll(".na-types label").forEach(function(l){ l.classList.toggle("on",l===el); }); var r=$("naSkuReq"); if(r) r.textContent=t==="new_sku"?" *":""; naWzCheck(); }
-function naWzAcc(v){
-  var c=(S.custIndex||[]).filter(function(x){ return naNorm(x.name)===naNorm(v); })[0];
-  if(c){ if($("naAT")) $("naAT").value=c.type||$("naAT").value; if($("naPv")) $("naPv").value=c.province||$("naPv").value; if($("naCode")) $("naCode").value=c.code||$("naCode").value; }
-  naOrdDraw(); naWzCheck();
+function naDrawTypes(){
+  var el=$("naTypes"); if(!el) return; var w=naWz();
+  el.innerHTML=[["new_account",TX("🏪 Đại lý / khách hàng mới","🏪 New account"),TX("Đơn MANI đầu tiên của account qua NPP trong FY68","First MANI order of the account via the distributor in FY68")],
+                ["new_sku",TX("📦 SKU mới","📦 New SKU"),TX("Account đặt một mã SKU MANI lần đầu","The account orders a MANI SKU for the first time")]]
+    .map(function(x){ return '<button type="button" class="'+(w.type===x[0]?"on":"")+'" onclick="S.na.wz.type=\''+x[0]+'\';naDrawTypes();naChk()"><b>'+x[1]+'</b><small>'+x[2]+'</small></button>'; }).join("");
 }
-
-/* ── đơn hàng của đại lý (sheet Sale Order) ── */
-function naOrders(){
-  var w=S.na.wz||{}, acc=naNorm(($("naAcc")||{}).value||w.account), code=String(($("naCode")||{}).value||w.code||"").trim();
-  if(!acc && !code) return [];
-  var pool=(((S.cache.order||{}).rows)||[]).concat(tGet("order")||[]), seen={}, by={}, out=[];
-  pool.forEach(function(o){
-    if(o._row&&seen[o._row]) return; if(o._row) seen[o._row]=1;
-    if(!((acc&&naNorm(o.name)===acc)||(code&&String(o.code||"")===code))) return;
-    var no=String(o.orderNo||"").trim()||("("+String(o.day||o.month||"")+")");
-    var g=by[no]; if(!g){ g=by[no]={ no:no, day:String(o.day||"").slice(0,10), pic:o.pic||"", lines:[], qty:0, amt:0 }; out.push(g); }
-    var ds=pcSplit(o.detail);
-    g.lines.push({ ptype:o.ptype||"", details:ds.length?ds:[o.ptype||"—"], qty:n(o.qty), amt:n(o.amount) });
-    g.qty+=n(o.qty); g.amt+=n(o.amount);
-    if(!g.day && o.day) g.day=String(o.day).slice(0,10);
-  });
-  return out.sort(function(a,b){ return a.day<b.day?-1:1; });
-}
-function naOrdDraw(){
-  var box=$("naOrdBox"); if(!box) return;
-  var w=S.na.wz||{}, list=naOrders(), loading=!tGet("order");
-  var sel=String(w.orderNo||"");
-  var h='<div class="na-ord"><div class="na-ord-h"><b>'+TX("Đơn hàng trong Sale Order","Orders in the Sale Order sheet")+'</b>'+
-      '<span class="sp" style="flex:1"></span><button class="btn sm" type="button" onclick="naNewOrder()">＋ '+TX("Tạo đơn hàng mới","New order")+'</button></div>';
-  if(!($("naAcc")||{}).value) h+='<div class="hint">'+TX("Chọn đại lý ở bước 2 để xem các đơn đã có.","Pick the account in step 2 to see its orders.")+'</div>';
-  else if(loading) h+='<div class="hint">'+TX("Đang nạp Sale Order…","Loading the Sale Order sheet…")+'</div>';
-  else if(!list.length) h+='<div class="hint">'+TX("Đại lý này chưa có đơn nào trong Sale Order — bấm “＋ Tạo đơn hàng mới”.","No order for this account yet — press “＋ New order”.")+'</div>';
-  else h+='<div class="na-ord-l">'+list.map(function(g){
-      var on=sel&&sel===g.no;
-      return '<div class="na-ord-i'+(on?" on":"")+'" onclick="naPickOrder(\''+esc(g.no).replace(/'/g,"\\'")+'\')">'+
-        '<span class="rd"></span><div style="min-width:0;flex:1"><b>'+esc(g.no)+'</b> <span class="mu">· '+(g.day?fmtVN(g.day):"—")+' · '+g.lines.length+TX(" dòng"," line(s)")+(g.amt?' · '+fmtVND(g.amt):"")+(g.pic?' · '+esc(g.pic):"")+'</span>'+
-        (on?'<div class="na-sku-pick">'+g.lines.map(function(l){
-          return l.details.map(function(d){ var k=(w.skuSel||[]).indexOf(d)>=0;
-            return '<span class="na-skc'+(k?" on":"")+'" onclick="event.stopPropagation();naTogSku(\''+esc(d).replace(/'/g,"\\'")+'\',\''+esc(l.ptype).replace(/'/g,"\\'")+'\')">'+(k?"✓ ":"")+esc(d)+(l.ptype?' <i>'+esc(l.ptype)+'</i>':"")+'</span>'; }).join("");
-        }).join("")+'<div class="hint" style="margin-top:4px">'+TX("Tick mã SKU cần ghi nhận (không cần chọn hết).","Tick the SKU(s) to record (no need to pick all).")+'</div></div>':"")+
-        '</div></div>';
-    }).join("")+'</div>';
-  box.innerHTML=h+'</div>';
-}
-function naPickOrder(no){
-  var g=naOrders().filter(function(x){ return x.no===no; })[0]; if(!g) return;
-  var w=S.na.wz; naWzRead();
-  w.orderNo=g.no.charAt(0)==="("?"":g.no; w.orderDate=g.day||w.orderDate; w.qty=g.qty||w.qty; w.amount=g.amt||w.amount;
-  if($("naON")) $("naON").value=w.orderNo; if($("naOD")&&g.day) $("naOD").value=g.day; if($("naQty")) $("naQty").value=w.qty||""; if($("naAmt")) $("naAmt").value=w.amount||"";
-  if(!w.ptype && g.lines.length===1 && g.lines[0].ptype){ w.ptype=g.lines[0].ptype; if($("naPT")) $("naPT").value=w.ptype; }
-  if(w.type==="new_account" && !(w.skuSel||[]).length){ w.skuSel=[]; g.lines.forEach(function(l){ l.details.forEach(function(d){ if(d!=="—"&&w.skuSel.indexOf(d)<0) w.skuSel.push(d); }); }); }
-  naOrdQty();
-  naOrdDraw(); naSkuDraw(); naWzCheck();
-}
-/* số lượng / giá trị = các dòng của đơn có chứa mã SKU đang chọn (chưa chọn mã nào ⇒ cả đơn) */
-function naOrdQty(){
-  var w=S.na.wz, g=naOrders().filter(function(x){ return x.no===w.orderNo; })[0]; if(!g) return;
-  var L=w.skuSel||[], q=0, a=0, any=false;
-  g.lines.forEach(function(l){ if(!L.length||l.details.some(function(d){ return L.indexOf(d)>=0; })){ q+=l.qty; a+=l.amt; any=true; } });
-  if(!any){ q=g.qty; a=g.amt; }
-  w.qty=q||""; w.amount=a||"";
-  if($("naQty")) $("naQty").value=w.qty; if($("naAmt")) $("naAmt").value=w.amount;
-}
-function naTogSku(d,pt){
-  var w=S.na.wz, L=w.skuSel||(w.skuSel=[]), i=L.indexOf(d);
-  if(i>=0) L.splice(i,1); else L.push(d);
-  naOrdQty();
-  if(pt && !w.ptype){ w.ptype=pt; if($("naPT")) $("naPT").value=pt; }
-  naOrdDraw(); naSkuDraw(); naWzCheck();
-}
-/* tạo đơn mới trong Sale Order rồi quay lại form case */
-function naNewOrder(){
-  naWzRead();
-  var w=S.na.wz, c=(S.custIndex||[]).filter(function(x){ return naNorm(x.name)===naNorm(w.account); })[0]||{};
-  if(!w.account) return toast(TX("Chọn đại lý trước khi tạo đơn.","Pick the account first."),"warn",4000);
-  S.na.reopen=true; S.na.lastOrder=null;
-  formOrder({ name:c.name||w.account, code:c.code||w.code||"", type:c.type||w.accType||"", province:c.province||w.province||"", area:c.area||"", address:c.address||"",
-              pic:w.pic||S.user.pic, day:w.orderDate||todayISO(), partner:w.npp||"" });
-}
-var _naAfterWrite=afterWrite;
-afterWrite=function(tab,row,d){
-  var r=_naAfterWrite.apply(this,arguments);
-  try{ if(tab==="order" && S.na && S.na.reopen && d){ S.na.lastOrder={ no:String(d.orderNo||""), day:String(d.day||"").slice(0,10) }; } }catch(e){}
-  return r;
-};
-var _naCloseAll=closeAllModals;
-closeAllModals=function(){
-  var back=S.na&&S.na.reopen&&S.na.lastOrder;
-  _naCloseAll.apply(this,arguments);
-  if(back){
-    S.na.reopen=false;
-    var lo=S.na.lastOrder; S.na.lastOrder=null;
-    setTimeout(function(){
-      naForm(S.na.wz&&S.na.wz.id,true);
-      setTimeout(function(){ if(lo.no) naPickOrder(lo.no); },120);
-      toast(TX("Đã thêm đơn ","Order ")+lo.no+TX(" vào Sale Order — chọn mã SKU cần ghi nhận"," added to Sale Order — tick the SKU(s) to record"),"ok",4500);
-    },80);
-  } else if(S.na) S.na.reopen=false;
-};
-
-/* ── mã SKU: chọn từ danh mục 12. PRODUCT CODE (dùng lại bộ chọn của form đơn hàng) ── */
-function naSkuDraw(){
-  var box=$("naSkuBox"); if(!box) return;
-  var w=S.na.wz||{}, L=w.skuSel||[], hasPc=!!(S.pcode&&S.pcode.items&&S.pcode.items.length);
-  box.innerHTML='<div class="na-skus">'+(L.length?L.map(function(d,k){ return '<span class="na-skc on" title="'+TX("Bỏ mã này","Remove")+'" onclick="naSkuDel('+k+')">'+esc(d)+' ✕</span>'; }).join("")
-      :'<span class="hint" style="margin:0">'+TX("Chưa chọn mã SKU","No SKU selected yet")+'</span>')+'</div>'+
-    '<div style="display:flex;gap:7px;margin-top:6px;flex-wrap:wrap">'+
-      (hasPc?'<button class="btn sm" type="button" onclick="naSkuPicker()">📦 '+TX("Chọn từ danh mục Product code","Pick from the product code list")+'</button>':"")+
-      '<input class="inp" id="naSkuTx" style="flex:1;min-width:180px;height:32px" placeholder="'+TX("hoặc gõ mã rồi Enter","or type a code and press Enter")+'" onkeydown="if(event.key===\'Enter\'){event.preventDefault();naSkuAdd(this)}" onblur="naSkuAdd(this)"></div>';
-}
-function naSkuAdd(inp){ var v=String(inp.value||"").trim(); if(!v) return; var w=S.na.wz; w.skuSel=w.skuSel||[]; v.split(/\s*;\s*/).forEach(function(x){ if(x&&w.skuSel.indexOf(x)<0) w.skuSel.push(x); }); inp.value=""; naSkuDraw(); naOrdDraw(); naWzCheck(); }
-function naSkuDel(k){ var w=S.na.wz; (w.skuSel||[]).splice(k,1); naSkuDraw(); naOrdDraw(); naWzCheck(); }
-function naSkuPicker(){
-  naWzRead();
-  S._naOrdBak=S.ordProds; S.ordProds=[{ ptype:S.na.wz.ptype||"", details:(S.na.wz.skuSel||[]).slice(), detail:"" }];
-  S.pcMode="na"; openDetailPicker(0);
-}
-var _naPcApply=pcApply;
-pcApply=function(){
-  if(S.pcMode!=="na") return _naPcApply.apply(this,arguments);
-  S.pcMode=""; S.na.wz.skuSel=Object.keys(S.pcPick||{});
-  S.ordProds=S._naOrdBak; S._naOrdBak=null;
-  closeModal2(); naSkuDraw(); naOrdDraw(); naWzCheck();
-};
-var _naClose2=closeModal2;
-closeModal2=function(){
-  if(S.pcMode==="na"){ S.pcMode=""; S.ordProds=S._naOrdBak; S._naOrdBak=null; }
-  if(S.na&&S.na.vw){ S.na.vw=null; try{ $("modal2").style.width=""; $("modal2").style.maxWidth=""; }catch(e){} }
-  return _naClose2.apply(this,arguments);
-};
-
-function naWzRead(){
-  var c=S.na.wz, g=function(i){ var e=$(i); return e?String(e.value||"").trim():null; }, set=function(k,i){ var v=g(i); if(v!==null) c[k]=v; };
-  set("account","naAcc"); set("npp","naNpp"); set("accType","naAT"); set("province","naPv"); set("code","naCode");
-  set("orderDate","naOD"); set("orderNo","naON"); set("qty","naQty"); set("amount","naAmt"); set("note","naNote"); set("ptype","naPT");
-  if($("naPic")) c.pic=$("naPic").value;
-  c.sku=(c.skuSel||[]).join("; "); c.detail=c.ptype||"";
-  if($("naCk_first")){ c.checklist={}; NA_CK.forEach(function(x){ var e=$("naCk_"+x.k); if(e&&e.checked) c.checklist[x.k]=1; }); }
-  return c;
-}
-function naWzCheck(){
-  if(!$("naWz")) return;
-  var c=naWzRead(), loc=naLocalWeekly(c.pic||S.user.pic,c.account,c.orderDate||"");
-  var wk=$("naWk");
-  if(wk) wk.innerHTML=!c.account?"":loc.length
-    ?'<div class="na-wk ok">✓ '+TX("Tìm thấy ","Found ")+loc.length+TX(" lượt chăm sóc trên báo cáo tuần — gần nhất "," follow-up visit(s) in the weekly report — latest ")+fmtVN(loc[0].d)+" · "+esc(loc[0].a)+'</div>'
-    :'<div class="na-wk no">⚠️ '+TX("Chưa thấy lượt chăm sóc “","No follow-up with “")+esc(c.account)+TX("” của "," ” by ")+esc(c.pic||S.user.pic)+TX(" trên báo cáo tuần"," in the weekly report")+(c.orderDate?TX(" trước ngày "," before ")+fmtVN(c.orderDate):"")+TX(". Thêm lượt đi địa bàn trước khi gửi case.",". Add the visit(s) before sending the case.")+'</div>';
-  var tmp=JSON.parse(JSON.stringify(c)); tmp.weekly={ n:loc.length };
-  var miss=naMissing(tmp), box=$("naMiss");
-  if(box) box.innerHTML=miss.length?'<div class="na-miss"><b>'+TX("Còn thiếu để gửi xin xác nhận:","Still missing before sending:")+'</b><br>• '+miss.map(esc).join("<br>• ")+'</div>'
-    :'<div class="na-miss ok"><b>✓ '+TX("Đủ điều kiện","Ready")+'</b> — '+TX("bấm “Lưu &amp; gửi email xin xác nhận”. Email gửi tới ","press “Save &amp; send for approval”. The e-mail goes to ")+esc(((S.na.cur&&S.na.cur.mgrs)||[]).join(" / ")||TX("cấp trên","your manager"))+TX(", CC Giám đốc và vtt.hoa, kèm toàn bộ chứng từ.",", CC the Director and vtt.hoa, with all evidence attached.")+'</div>';
-  naReqDraw();
-}
-
-/* ── chứng từ: MỘT vùng kéo thả lớn, chọn loại chứng từ trước khi thả ── */
-function naNextKind(){
-  var fs=(S.na.wz&&S.na.wz.files)||[];
-  var miss=NA_EV.filter(function(e){ return e.req && !fs.some(function(f){ return f.kind===e.k&&(f.id||f._up); }); })[0];
-  return miss?miss.k:"other";
-}
-function naReqDraw(){
-  var el=$("naReq"); if(!el) return;
-  var fs=(S.na.wz&&S.na.wz.files)||[];
-  el.innerHTML=NA_EV.map(function(e){
-    var n0=fs.filter(function(f){ return f.kind===e.k&&f.id; }).length;
-    return '<span class="na-rq '+(n0?"y":e.req?"n":"o")+'">'+(n0?"✓":e.req?"!":"○")+' '+esc(TX(e.sv,e.se))+(n0?' · '+n0:"")+(e.req&&!n0?TX(" — bắt buộc"," — required"):"")+'</span>';
-  }).join("");
-}
-function naWzFiles(){
-  var box=$("naFiles"); if(!box) return;
-  var c=S.na.wz||{}, fs=c.files||[];
-  if(!S.na.dzKind || !NA_EV.some(function(e){ return e.k===S.na.dzKind; })) S.na.dzKind=naNextKind();
-  var cur=NA_EV.filter(function(e){ return e.k===S.na.dzKind; })[0];
-  box.innerHTML='<div class="na-reqs" id="naReq"></div>'+
-    '<div class="na-kinds"><span class="lb">'+TX("Tệp sắp tải lên là:","The next file is:")+'</span>'+NA_EV.map(function(e){
-      return '<b class="'+(e.k===S.na.dzKind?"on":"")+'" onclick="S.na.dzKind=\''+e.k+'\';naWzFiles()">'+esc(TX(e.sv,e.se))+(e.req?" *":"")+'</b>'; }).join("")+'</div>'+
-    '<label class="na-dz" id="naDZ"><input type="file" multiple accept="image/*,application/pdf,.doc,.docx,.xls,.xlsx,.eml,.msg" onchange="naPick(this)">'+
-      '<div class="ic">📥</div><div class="t1">'+TX("Kéo thả tệp vào đây hoặc bấm để chọn","Drag & drop files here or click to pick")+'</div>'+
-      '<div class="t2">'+TX("Đang tải lên cho: ","Uploading as: ")+'<b>'+esc(TX(cur.vi,cur.en))+'</b> — '+esc(TX(cur.hv,cur.he))+'</div>'+
-      '<div class="t3">'+TX("Ảnh chụp email, ảnh chứng từ, PDF · tự đặt tên PIC_ngày_Đại lý_SKU · tối đa 12 MB / tệp","Email screenshots, document photos, PDFs · auto-named PIC_date_Account_SKU · max 12 MB per file")+'</div></label>'+
-    (fs.length?'<div class="na-fgrid">'+fs.map(function(f){
-      return '<div class="na-ft'+(f._up?" up":"")+(f._err?" er":"")+'"><div class="na-th">'+((f._local||f._obj)?'<img src="'+(f._local||f._obj)+'" alt="">':naThImg(f))+
-        (f._up?'<span class="sp">⏳</span>':"")+'<span class="k">'+esc(naEvS(f.kind))+'</span></div>'+
-        '<small title="'+esc(f.name||f.orig||"")+'">'+esc(String(f.orig||f.name||"").slice(0,34))+'</small>'+
-        (f._up?'<small class="st">'+TX("đang tải…","uploading…")+'</small>':f._err?'<small class="st er">'+esc(f._err)+'</small><a href="#" class="rm" onclick="event.preventDefault();naDropTmp(\''+esc(f.orig||"").replace(/'/g,"")+'\')">✕ '+TX("bỏ","dismiss")+'</a>':(f.id?'<a href="#" class="rm" onclick="event.preventDefault();naDelFile(\''+esc(f.id)+'\')">✕ '+TX("xoá","remove")+'</a>':""))+'</div>';
-    }).join("")+'</div>':"");
-  naReqDraw(); naDZArm();
-  naThumbsFor([{ files:fs }]);
-}
-function naDZArm(){
-  var dz=$("naDZ"); if(!dz||dz._armed) return; dz._armed=1;
-  ["dragenter","dragover"].forEach(function(t){ dz.addEventListener(t,function(e){ e.preventDefault(); e.stopPropagation(); try{ e.dataTransfer.dropEffect="copy"; }catch(x){} dz.classList.add("hov"); }); });
-  ["dragleave","dragend"].forEach(function(t){ dz.addEventListener(t,function(e){ e.preventDefault(); dz.classList.remove("hov"); }); });
-  dz.addEventListener("drop",function(e){ e.preventDefault(); e.stopPropagation(); dz.classList.remove("hov"); naUploadFiles([].slice.call((e.dataTransfer&&e.dataTransfer.files)||[]),S.na.dzKind); });
-}
-/* chặn trình duyệt tự mở tệp khi thả trượt ra ngoài vùng kéo thả trong lúc form đang mở */
-["dragover","drop"].forEach(function(t){ window.addEventListener(t,function(e){ if($("naWz")){ e.preventDefault(); } }); });
-function naDropTmp(o){ S.na.wz.files=(S.na.wz.files||[]).filter(function(f){ return !(f._err&&String(f.orig||"").replace(/'/g,"")===o); }); naWzFiles(); naWzCheck(); }
-function naPick(inp){ naUploadFiles([].slice.call(inp.files||[]),S.na.dzKind); inp.value=""; }
-function naMakeThumb(dataUrl){
-  return new Promise(function(res){
-    if(!/^data:image\//.test(dataUrl||"")) return res("");
-    var img=new Image();
-    img.onload=function(){ var mx=360, w=img.width, h=img.height; if(w>mx||h>mx){ if(w>h){ h=Math.round(h*mx/w); w=mx; } else { w=Math.round(w*mx/h); h=mx; } }
-      var cv=document.createElement("canvas"); cv.width=w; cv.height=h; cv.getContext("2d").drawImage(img,0,0,w,h);
-      var q=.72, out=cv.toDataURL("image/jpeg",q); while(out.length>40000&&q>.3){ q-=.12; out=cv.toDataURL("image/jpeg",q); } res(out.length<46000?out:""); };
-    img.onerror=function(){ res(""); };
-    img.src=dataUrl;
-  });
-}
-function naUploadFiles(list,k){
-  if(!list.length) return;
-  k=k||naNextKind();
-  var big=list.filter(function(f){ return f.size>12*1048576; });
-  if(big.length) toast(TX("Bỏ qua tệp lớn hơn 12 MB: ","Skipped files over 12 MB: ")+big.map(function(f){ return f.name; }).join(", "),"err",6000);
-  list=list.filter(function(f){ return f.size<=12*1048576; });
-  if(!list.length) return;
-  /* hiện ngay ảnh xem trước (object URL), rồi mới lưu case + tải lên */
-  var tmps=list.map(function(file){ return { kind:k, orig:file.name, _up:1, mime:file.type, _obj:/^image\//.test(file.type)?URL.createObjectURL(file):"" }; });
-  S.na.wz.files=(S.na.wz.files||[]).concat(tmps);
-  naWzFiles();
-  naEnsureSaved().then(function(c){
-    /* tải song song 2 tệp một lúc */
-    var q=list.map(function(file,i){ return { file:file, tmp:tmps[i] }; }), run=0, done;
-    var all=new Promise(function(r){ done=r; });
-    function next(){
-      if(!q.length){ if(!run) done(); return; }
-      var it=q.shift(), file=it.file, tmp=it.tmp; run++;
-      naShrink(file).then(function(x){
-        if(/^image\//.test(x.mime)) tmp._local=x.b64;
-        naWzFiles();
-        return naMakeThumb(/^image\//.test(x.mime)?x.b64:"").then(function(th){
-          return apiPost({ action:"naUpload", id:c.id, b64:x.b64, mime:x.mime, name:x.name, kind:k, thumb:th }).then(function(j){
-            tmp._up=0;
-            if(j.file){ tmp.id=j.file.id; tmp.name=j.file.name; tmp.url=j.file.url; if(th){ S.na.th[j.file.id]=th; if(KV.ok) kvSet("k:*:nath:"+j.file.id,th); } }
-            if(j.rec){ S.na.cur=j.rec; naMerge(j.rec); }
-            naWzFiles(); naWzCheck();
-          });
-        });
-      }).catch(function(e){ tmp._up=0; tmp._err=e.message; naWzFiles(); toast(file.name+": "+e.message,"err",6000); })
-        .then(function(){ run--; next(); });
-    }
-    next(); if(q.length) next();
-    var chain=all;
-    chain.then(function(){
-      if(S.na.dzKind===k) S.na.dzKind=naNextKind();
-      apiGet("naGet",{ id:c.id, _ts:Date.now() }).then(function(j){
-        if(!j.rec) return;
-        S.na.cur=j.rec; naMerge(j.rec);
-        var local=(S.na.wz.files||[]).filter(function(f){ return f._err; });
-        S.na.wz.files=(j.rec.files||[]).map(function(f){ var old=tmps.filter(function(t){ return t.id===f.id; })[0]; if(old){ f._local=old._local; f._obj=old._obj; } return f; }).concat(local);
-        S.na.wz.weekly=j.rec.weekly; naWzFiles(); naWzCheck();
-      }).catch(function(){ naWzFiles(); });
-    });
-  }).catch(function(e){
-    tmps.forEach(function(t){ t._up=0; t._err=TX("chưa lưu được case","case not saved"); });
-    naWzFiles();
-  });
-}
-function naEnsureSaved(){
-  var c=naWzRead();
-  if(c.id) return Promise.resolve(c);
-  if(!c.account){ toast(TX("Nhập tên đại lý ở bước 2 trước khi tải chứng từ — app cần lưu case nháp để có nơi lưu file.","Enter the account name in step 2 first — the app saves a draft case to hold the files."),"err",6000); return Promise.reject(new Error("noacc")); }
-  return apiPost({ action:"naSave", data:naPayload(c) }).then(function(j){
-    if(j.rec){ S.na.wz.id=j.rec.id; S.na.cur=j.rec; naMerge(j.rec); return S.na.wz; }
-    return naLoad(true).then(function(rows){
-      var hit=(rows||[]).filter(function(x){ return naNorm(x.account)===naNorm(c.account)&&x.status==="Draft"; })[0];
-      if(!hit) throw new Error(TX("Chưa lưu được case — thử lại.","The case was not saved — try again."));
-      S.na.wz.id=hit.id; S.na.cur=hit; return S.na.wz;
-    });
-  });
-}
-function naPayload(c){
-  var wl=naLocalWeekly(c.pic||S.user.pic,c.account,c.orderDate||"");
-  return { weekly:{ n:wl.length, list:wl.slice(0,12).map(function(w){ return { d:w.d, a:w.a, s:w.s }; }) }, id:c.id||"", pic:c.pic, type:c.type, account:c.account, code:c.code, accType:c.accType, province:c.province, npp:c.npp,
-  sku:(c.skuSel||[]).join("; ")||c.sku||"", detail:c.ptype||c.detail||"", orderDate:c.orderDate, orderNo:c.orderNo, qty:c.qty, amount:c.amount, note:c.note, checklist:c.checklist };
-}
-function naWzSave(send){
-  var c=naWzRead();
-  if(!c.account) return toast(TX("Nhập tên đại lý / khách hàng.","Enter the account name."),"err",4000);
-  if((c.files||[]).some(function(f){ return f._up; })) return toast(TX("Đợi tải xong chứng từ rồi lưu.","Wait for the uploads to finish."),"warn",4000);
-  if(send){
-    var tmp=JSON.parse(JSON.stringify(c)); tmp.weekly={ n:naLocalWeekly(c.pic||S.user.pic,c.account,c.orderDate||"").length };
-    var miss=naMissing(tmp);
-    if(miss.length){ alert(TX("Chưa đủ điều kiện gửi:\n\n• ","Not ready to send:\n\n• ")+miss.join("\n• ")); return; }
+function naAccInfo(){
+  var el=$("naAccInfo"); if(!el) return; var w=naWz();
+  if(!w.acc){ el.innerHTML=""; return; }
+  var key=noAcc(w.acc.name), pic=w.pic, out=[];
+  var wk=(((S.cache.weekly||{}).rows)||[]).filter(function(r){ return noAcc(r.accName||"")===key && String(r.pic)===pic && !/cancel/i.test(r.status||""); });
+  wk.sort(function(a,b){ return String(b.start).localeCompare(String(a.start)); });
+  out.push(wk.length?'<div class="na8-chk ok">📍 '+TX("Báo cáo tuần: ","Weekly report: ")+'<b>'+wk.length+'</b>'+TX(" lượt chăm sóc · gần nhất "," visit(s) · last ")+esc(fmtVN(wk[0].start))+' — '+esc(String(wk[0].result||wk[0].typeAction||"").slice(0,90))+'</div>'
+             :'<div class="na8-chk bad">⚠️ '+TX("Chưa thấy lượt chăm sóc nào của "+pic+" với account này trên Báo cáo tuần — rule yêu cầu phải có lịch sử chăm sóc. Hãy cập nhật tab Đi địa bàn trước khi gửi.","No visit of "+pic+" to this account in the weekly report yet — the rule requires a care history.")+'</div>');
+  var dl=((S.na.cfg||{}).dealerOnly||{})[pic];
+  if(dl && !/dealer/i.test(w.acc.type||"")) out.push('<div class="na8-chk warn">ℹ️ '+TX("KPI "+(((S.na.cfg||{}).kpi||{})[pic]||"C1")+" của "+pic+" chỉ tính Account type = <b>Dealer</b>. Account này là "+esc(w.acc.type||"—")+" ⇒ case vẫn lưu được nhưng không cộng vào KPI.","The KPI of "+pic+" counts Dealer accounts only.")+'</div>');
+  if(!noOrder()){
+    var prev=(tGet("order")||((S.cache.order||{}).rows)||[]).filter(function(o){ return noAcc(o.name)===key; });
+    if(prev.length) out.push('<div class="na8-chk '+(w.type==="new_account"?"warn":"ok")+'">🧾 '+TX("Account đã có ","The account has ")+'<b>'+prev.length+'</b>'+TX(" dòng đơn hàng trong "," order line(s) in ")+esc(S.fy)+TX(" (tháng sớm nhất "," (earliest ")+esc(prev.map(k8Ym).sort()[0])+')'+(w.type==="new_account"?TX(" — nếu đã mua MANI trước đó thì phải chọn <b>SKU mới</b>."," — if it bought MANI before, choose <b>New SKU</b>."):"")+'</div>');
   }
-  busy(true,TX("Đang lưu case…","Saving…"));
-  apiPost({ action:"naSave", data:naPayload(c) }).then(function(j){
-    var rec=j.rec; if(rec){ S.na.cur=rec; naMerge(rec); S.na.wz.id=rec.id; }
-    if(!send){ busy(false); closeModal(); naAfter(j,j.message||TX("Đã lưu nháp","Draft saved")); return; }
-    var id=(rec&&rec.id)||c.id;
-    if(!id){ busy(false); closeModal(); naAfter(j,TX("Đã lưu — mở lại case để gửi email.","Saved — open the case again to send it.")); return; }
-    busy(true,TX("Đang gửi email xin xác nhận…","Sending the request…"));
-    return apiPost({ action:"naSubmit", id:id }).then(function(k){ busy(false); closeModal(); naAfter(k,k.message||TX("Đã gửi email xin xác nhận","Request sent")); });
-  }).catch(function(e){ busy(false); toast(e.message,"err",8000); });
+  out.push('<div style="font-size:12px;color:var(--sub);margin-top:6px">'+esc([w.acc.code,w.acc.type,w.acc.province,w.acc.pic?"PIC "+w.acc.pic:""].filter(String).join(" · "))+'</div>');
+  el.innerHTML=out.join("");
 }
-
-/* ảnh chứng từ: cạnh dài tối đa 2000px, JPEG 0.82 — vẫn đọc rõ chữ trên ảnh chụp email */
+/* dòng sản phẩm: dùng lại hộp chọn mã sản phẩm của form Đơn hàng */
+function naSyncLines(){
+  var w=naWz(); if(!w) return;
+  w.lines.forEach(function(p,i){ var t=$("nl_t"+i), u=$("nl_u"+i), q=$("nl_q"+i); if(t) p.ptype=t.value; if(u) p.price=u.value; if(q) p.qty=q.value; p.detail=(p.details||[]).join("\n"); });
+}
+function naDrawLines(){
+  var el=$("naLines"); if(!el) return; var w=naWz();
+  el.innerHTML=w.lines.map(function(p,i){
+    var L=p.details||[];
+    return '<div class="oprow"><div class="opc t"><span class="oplb">Product type</span><select class="inp" id="nl_t'+i+'" onchange="naSyncLines();naChk()">'+opts(S.master.product,p.ptype,"— chọn —")+'</select></div>'+
+      '<div class="opc d"><span class="oplb">Detail</span><div class="pcbox">'+(L.length?'<div class="pcsel">'+L.map(function(d){ return '<span class="pcchip">'+esc(d)+'</span>'; }).join("")+'</div>':'<div class="pcempty">'+TX("Chưa chọn mã","No code yet")+'</div>')+
+        '<button class="btn sm" type="button" style="width:100%;margin-top:6px" onclick="naPickDetail('+i+')">'+(L.length?"✎ "+L.length+TX(" mã"," code(s)"):"＋ "+TX("Chọn mã sản phẩm","Pick product codes"))+'</button></div></div>'+
+      '<div class="opc n"><span class="oplb">'+TX("Đơn giá","Unit price")+'</span><input class="inp num" id="nl_u'+i+'" inputmode="numeric" value="'+esc(p.price||"")+'" oninput="numOnly(this);naSyncLines();naTot()"></div>'+
+      '<div class="opc n"><span class="oplb">SL</span><input class="inp num" id="nl_q'+i+'" inputmode="numeric" value="'+esc(p.qty||"")+'" oninput="numOnly(this);naSyncLines();naTot()"></div>'+
+      '<div class="opc n"><span class="oplb">Amount</span><input class="inp num piclock" id="nl_a'+i+'" readonly value="'+(n(p.price)*n(p.qty)?fmtN(n(p.price)*n(p.qty)):"")+'"></div>'+
+      '<button class="opdel" type="button" onclick="naDelLine('+i+')">✕</button></div>';
+  }).join("")+(w.lines.length?'<div style="text-align:right;font-size:13px;margin-top:6px">'+TX("Tổng ","Total ")+'<b id="naTot"></b></div>':'');
+  var tw=$("naToSheetW"); if(tw){ tw.style.display=(w.lines.length&&!w.srcOrder)?"flex":"none"; var cb=$("na_toSheet"); if(cb) cb.checked=!!w.toSheet; }
+  naTot();
+}
+function naTot(){ var w=naWz(); if(!w) return; var t=0; w.lines.forEach(function(p,i){ var a=n(p.price)*n(p.qty); t+=a; var el=$("nl_a"+i); if(el) el.value=a?fmtN(a):""; }); var e=$("naTot"); if(e) e.textContent=fmtVND(t); }
+function naAddLine(){ naSyncLines(); var w=naWz(); w.lines.push({ ptype:"", detail:"", details:[], price:"", qty:"" }); if(!w.srcOrder) w.toSheet=!noOrder(); naDrawLines(); naChk(); }
+function naDelLine(i){ naSyncLines(); naWz().lines.splice(i,1); naDrawLines(); naSkuFromLines(true); naChk(); }
+function naPickDetail(i){ naSyncLines(); S.ordProds=naWz().lines; S._pcNa=true; openDetailPicker(i); }
+var _pcApply27=pcApply;
+pcApply=function(){ var na=S._pcNa; _pcApply27.apply(this,arguments); if(na){ S._pcNa=false; if($("naLines")){ naDrawLines(); naSkuFromLines(); naChk(); } } };
+var _closeModal2_27=closeModal2;
+closeModal2=function(){ var r=_closeModal2_27.apply(this,arguments); if(S._pcNa && !$("pc_list")) S._pcNa=false; return r; };
+function naSkuFromLines(force){
+  var el=$("na_sku"); if(!el) return;
+  var all=[]; naWz().lines.forEach(function(p){ (p.details||[]).forEach(function(d){ if(all.indexOf(d)<0) all.push(d); }); });
+  if(force || !el.value.trim() || el._auto){ el.value=all.join("\n"); el._auto=true; }
+}
+/* chọn từ đơn hàng có sẵn */
+function naPickOrder(){
+  var w=naWz(), key=w.acc?noAcc(w.acc.name):"", pic=w.pic;
+  var rows=(tGet("order")||((S.cache.order||{}).rows)||[]).filter(function(o){ return key?noAcc(o.name)===key:String(o.pic||"").toLowerCase().indexOf(String(pic).toLowerCase())>=0; });
+  var groups=[], gi={};
+  rows.forEach(function(o){ var k=String(o.orderNo||"")+"|"+noAcc(o.name)+"|"+String(o.day||k8Ym(o)); if(gi[k]==null){ gi[k]=groups.length; groups.push({ o:o, lines:[] }); } groups[gi[k]].lines.push(o); });
+  groups.sort(function(a,b){ return String(a.o.day||"").localeCompare(String(b.o.day||"")); });
+  S.na.pickG=groups;
+  var h=groups.length?'<div class="hint" style="margin-bottom:8px">'+(key?TX("Đơn của account đã chọn — xếp từ cũ đến mới (đơn đầu tiên ở trên cùng).","Orders of the selected account — oldest first."):TX("Chưa chọn account ⇒ hiện mọi đơn của ","No account selected ⇒ all orders of ")+esc(pic))+'</div><div class="na8-pick">'+groups.slice(0,150).map(function(g,i){
+      var a=g.lines.reduce(function(s,x){ return s+n(x.amount); },0);
+      return '<div class="na8-po" onclick="naUseOrder('+i+')"><b>'+esc(fmtVN(g.o.day)||k8Ym(g.o))+' · '+esc(g.o.orderNo||"—")+' · '+esc(g.o.name)+'</b> <span style="float:right;font-weight:800">'+fmtVND(a)+'</span>'+
+        '<div>🏢 '+esc(String(g.o.partner||"—").split("/")[0])+' · '+g.lines.map(function(x){ return esc(x.ptype||"")+": "+esc(String(x.detail||"").replace(/\n/g,", "))+" ×"+fmtN(x.qty); }).join(" | ")+'</div></div>'; }).join("")+'</div>'
+    :'<div class="empty"><p>'+TX("Chưa có đơn hàng nào của account này trong ","No order of this account in ")+esc(S.fy)+TX(". Bấm “＋ Thêm dòng sản phẩm” để nhập đơn mới.",". Add product lines instead.")+'</p></div>';
+  openModal2(TX("Chọn đơn hàng đầu tiên","Pick the first order"),h,'<button class="btn" onclick="closeModal2()">'+TX("Đóng","Close")+'</button>');
+}
+function naUseOrder(i){
+  var g=S.na.pickG[i]; if(!g) return; var w=naWz(), o=g.o;
+  if(!w.acc){ w.acc={ name:o.name, code:o.code, type:o.type, province:o.province, pic:o.pic }; $("na_acc").value=o.name; }
+  $("na_date").value=String(o.day||"").slice(0,10); $("na_no").value=o.orderNo||"";
+  if(o.partner && !$("na_npp").value.trim()) $("na_npp").value=String(o.partner).split("/")[0];
+  w.lines=g.lines.map(function(x){ return { ptype:x.ptype||"", detail:x.detail||"", details:pcSplit(x.detail), price:x.price||"", qty:x.qty||"" }; });
+  w.srcOrder=o.orderNo||"picked"; w.toSheet=false;
+  closeModal2(); naDrawLines(); naSkuFromLines(true); naAccInfo(); naChk();
+  toast(TX("Đã lấy thông tin từ đơn ","Filled from order ")+(o.orderNo||""),"ok");
+}
+/* ── chứng từ: kéo thả / chọn / dán ── */
+function naWireDrop(){
+  var d=$("naDrop"), inp=$("naFile"); if(!d||d._w) return; d._w=1;
+  d.onclick=function(e){ if(e.target!==inp) inp.click(); };
+  inp.onchange=function(){ naAddFiles(inp.files); inp.value=""; };
+  ["dragenter","dragover"].forEach(function(ev){ d.addEventListener(ev,function(e){ e.preventDefault(); d.classList.add("hov"); }); });
+  ["dragleave","drop"].forEach(function(ev){ d.addEventListener(ev,function(e){ e.preventDefault(); d.classList.remove("hov"); }); });
+  d.addEventListener("drop",function(e){ naAddFiles(e.dataTransfer&&e.dataTransfer.files); });
+}
+document.addEventListener("paste",function(e){
+  if(!naWzOpen()) return;
+  var items=(e.clipboardData&&e.clipboardData.files)||[]; if(!items.length) return;
+  e.preventDefault(); naAddFiles(items);
+});
+function naGuessKind(f){
+  var w=naWz(), has=w.files.some(function(x){ return x.kind==="dist"; });
+  if(/pdf/i.test(f.type)) return has?"order":"dist";
+  return has?"order":"dist";
+}
+function naAddFiles(list){
+  var w=naWz(); if(!w||!list) return;
+  Array.prototype.forEach.call(list,function(file){
+    if(!/^image\/|pdf/i.test(file.type)) return toast(TX("Chỉ nhận ảnh hoặc PDF: ","Images or PDF only: ")+file.name,"warn");
+    if(file.size>15*1024*1024) return toast(TX("File quá 15 MB: ","File over 15 MB: ")+file.name,"warn");
+    var tmp={ id:"tmp_"+uid28(), name:file.name, mime:file.type, kind:naGuessKind(file), st:"up", local:/^image\//.test(file.type)?URL.createObjectURL(file):"" };
+    w.files.push(tmp); naDrawFiles(); naChk();
+    naShrink(file).then(function(b){
+      return postBody({ action:"naUpload", caseId:w.id, b64:b.b64, mime:b.mime, name:b.name, kind:tmp.kind, owner:w.pic,
+        account:(w.acc&&w.acc.name)||($("na_acc")||{}).value||"", sku:(($("na_sku")||{}).value||"").split("\n")[0], orderDate:($("na_date")||{}).value||"", month:ymOf(($("na_date")||{}).value||"")||"" });
+    }).then(function(j){
+      if(!j||!j.file) throw new Error(j&&j.opaque?TX("Trình duyệt không nhận được phản hồi từ máy chủ — thử lại.","No answer from the server — retry."):TX("Tải lên chưa được","Upload failed"));
+      var i=w.files.indexOf(tmp); if(i<0){ apiPost({ action:"naDelFile", fileId:j.file.id }); return; }
+      var f=Object.assign({},j.file,{ kind:tmp.kind, st:"ok" });
+      if(tmp.local) S.na.local[f.id]=tmp.local;
+      w.files[i]=f; w.uploaded.push(f.id); naDrawFiles(); naChk();
+    }).catch(function(e){ tmp.st="err"; tmp.err=e.message; naDrawFiles(); naChk(); toast(e.message,"err",5000); });
+  });
+}
 function naShrink(file){
-  if(!/^image\/(jpeg|png|webp)$/i.test(file.type)||file.size<700*1024) return naReadB64(file);
+  if(!/^image\/(jpeg|png|webp)$/i.test(file.type)||file.size<600*1024) return naReadB64(file);
   return new Promise(function(res){
     var img=new Image(), url=URL.createObjectURL(file);
     img.onload=function(){ var mx=2000, w=img.width, h=img.height; if(w>mx||h>mx){ if(w>h){ h=Math.round(h*mx/w); w=mx; } else { w=Math.round(w*mx/h); h=mx; } }
-      var cv=document.createElement("canvas"); cv.width=w; cv.height=h; cv.getContext("2d").drawImage(img,0,0,w,h); URL.revokeObjectURL(url);
-      res({ b64:cv.toDataURL("image/jpeg",0.82), mime:"image/jpeg", name:file.name.replace(/\.\w+$/,"")+".jpg" }); };
+      var cv=document.createElement("canvas"); cv.width=w; cv.height=h; var ctx=cv.getContext("2d"); ctx.fillStyle="#fff"; ctx.fillRect(0,0,w,h); ctx.drawImage(img,0,0,w,h); URL.revokeObjectURL(url);
+      res({ b64:cv.toDataURL("image/jpeg",0.85), mime:"image/jpeg", name:file.name.replace(/\.\w+$/,"")+".jpg" }); };
     img.onerror=function(){ URL.revokeObjectURL(url); naReadB64(file).then(res); };
     img.src=url;
   });
 }
 function naReadB64(file){ return new Promise(function(res,rej){ var r=new FileReader(); r.onload=function(){ res({ b64:r.result, mime:file.type||"application/octet-stream", name:file.name }); }; r.onerror=function(){ rej(new Error("read")); }; r.readAsDataURL(file); }); }
+function naDrawFiles(){
+  var el=$("naFiles"); if(!el) return; var w=naWz();
+  el.innerHTML=w.files.map(function(f,i){
+    var src=f.local||(f.st==="ok"?naThumb(f,400):"");
+    return '<div class="na8-fi"><div class="im" onclick="'+(f.st==="ok"?'naLbWz('+i+')':'')+'"><span style="font-size:34px">'+(naIsPdf(f)?"📄":"🖼")+'</span>'+(src?'<img src="'+src+'" onerror="this.style.display=\'none\'" style="position:absolute;inset:0">':'')+'</div>'+
+      '<span class="st '+f.st+'">'+(f.st==="up"?TX("Đang tải lên…","Uploading…"):f.st==="ok"?"✓ Drive":"⚠ "+TX("lỗi","error"))+'</span>'+
+      '<button class="x" type="button" onclick="naRmFile('+i+')">✕</button>'+
+      '<select onchange="S.na.wz.files['+i+'].kind=this.value;naChk()">'+NA_KIND.map(function(k){ return '<option value="'+k[0]+'"'+(f.kind===k[0]?" selected":"")+'>'+TX(k[1],k[2])+'</option>'; }).join("")+'</select>'+
+      (f.st==="up"?'<div class="prog"><i></i></div>':'')+'</div>';
+  }).join("");
+}
+function naLbWz(i){ var w=naWz(), ok=w.files.filter(function(x){ return x.st==="ok"; }); naLb("",Math.max(0,ok.indexOf(w.files[i])),ok); }
+function naRmFile(i){
+  var w=naWz(), f=w.files[i]; if(!f) return;
+  w.files.splice(i,1); naDrawFiles(); naChk();
+  if(f.st==="ok" && w.uploaded.indexOf(f.id)>=0) apiPost({ action:"naDelFile", fileId:f.id }).catch(function(){});
+  else if(f.st==="ok") S.na.wz.removed=(S.na.wz.removed||[]).concat([f.id]);
+}
+function naCancel(){
+  var w=naWz();
+  if(w && w.isNew && w.uploaded.length && !confirm(TX("Huỷ case này? "+w.uploaded.length+" chứng từ vừa tải lên sẽ bị xoá.","Cancel? The uploaded files will be deleted."))) return;
+  if(w && w.isNew) w.uploaded.forEach(function(id){ apiPost({ action:"naDelFile", fileId:id }).catch(function(){}); });
+  S.na.wz=null; closeAllModals();
+}
+/* kiểm tra đủ điều kiện theo rule (hiện ngay dưới form) */
+function naMissing(){
+  var w=naWz(), m=[]; if(!w) return m;
+  naSyncLines();
+  if(!w.acc && !($("na_acc")||{}).value) m.push(TX("Account","Account"));
+  if(!String(($("na_npp")||{}).value||"").trim()) m.push(TX("Nhà phân phối","Distributor"));
+  if(!($("na_date")||{}).value) m.push(TX("Ngày đơn đầu tiên","First order date"));
+  if(w.type==="new_sku" && !String(($("na_sku")||{}).value||"").trim()) m.push(TX("Mã SKU mới","New SKU code"));
+  var ok=w.files.filter(function(f){ return f.st==="ok"; });
+  if(!ok.length) m.push(TX("Chứng từ","Evidence file"));
+  else if(!ok.some(function(f){ return f.kind==="dist"; })) m.push(TX("Chứng từ loại “Xác nhận NPP”","A “Distributor confirmation” file"));
+  if(w.files.some(function(f){ return f.st==="up"; })) m.push(TX("Đợi tải xong chứng từ","Wait for the uploads"));
+  ["first","month","mail"].forEach(function(k){ var c=$("na_c_"+k); if(c && !c.checked) m.push(TX("Tích ô cam kết ","Tick confirmation ")+({first:1,month:2,mail:3})[k]); });
+  return m;
+}
+function naChk(){
+  var w=naWz(); if(!w) return;
+  var d=($("na_date")||{}).value||""; if($("na_m")) $("na_m").value=d?mLb(ymOf(d)):"";
+  var rq=$("naSkuRq"); if(rq) rq.innerHTML=w.type==="new_sku"?'<span class="rq">*</span>':'';
+  var m=naMissing(), el=$("naMiss");
+  var st=function(id,ok){ var e=$(id); if(e) e.innerHTML=ok?'<span class="ok">✓ '+TX("đủ","done")+'</span>':'<span class="need">'+TX("còn thiếu","missing")+'</span>'; };
+  st("naS2", (w.acc||($("na_acc")||{}).value) && String(($("na_npp")||{}).value||"").trim());
+  st("naS3", !!d && (w.type!=="new_sku"||String(($("na_sku")||{}).value||"").trim()));
+  var okF=w.files.filter(function(f){ return f.st==="ok"; }); st("naS4", okF.some(function(f){ return f.kind==="dist"; }));
+  st("naS5", ["first","month","mail"].every(function(k){ var c=$("na_c_"+k); return c&&c.checked; }));
+  if(el){ el.className="na8-miss"+(m.length?"":" ok"); el.innerHTML=m.length?'<b>'+TX("Trước khi gửi email cần bổ sung: ","Before sending, complete: ")+'</b>'+m.map(esc).join(" · ")+'<br><small>'+TX("Vẫn có thể “Lưu nháp” để làm tiếp sau.","You can still save a draft.")+'</small>':'✅ '+TX("Đã đủ điều kiện theo quy định — bấm “Lưu &amp; gửi email xin xác nhận”.","Ready — press “Save &amp; send for approval”."); }
+}
+function naSave(send){
+  var w=naWz(); if(!w) return; naSyncLines();
+  var accName=(w.acc&&w.acc.name)||String(($("na_acc")||{}).value||"").trim();
+  if(!accName) return toast(TX("Cần chọn Account","Choose the account"),"warn");
+  if(w.files.some(function(f){ return f.st==="up"; })) return toast(TX("Đợi chứng từ tải lên xong","Wait for the uploads to finish"),"warn");
+  if(send){ var m=naMissing(); if(m.length) return toast(TX("Chưa đủ điều kiện gửi: ","Not ready: ")+m.join(" · "),"warn",7000); }
+  var acc=w.acc||(S.custIndex||[]).filter(function(c){ return noAcc(c.name)===noAcc(accName); })[0]||{ name:accName };
+  var qty=0, amt=0; w.lines.forEach(function(p){ qty+=n(p.qty); amt+=n(p.price)*n(p.qty); });
+  var ptypes=[]; w.lines.forEach(function(p){ if(p.ptype && ptypes.indexOf(p.ptype)<0) ptypes.push(p.ptype); });
+  var data={ id:w.id, pic:w.pic, type:w.type, account:acc.name, code:acc.code||"", accType:acc.type||"", province:acc.province||"",
+    npp:String(($("na_npp")||{}).value||"").trim(), ptype:ptypes.join(", "), sku:String(($("na_sku")||{}).value||"").trim(),
+    orderDate:($("na_date")||{}).value||"", orderNo:String(($("na_no")||{}).value||"").trim(), qty:qty||"", amount:amt||"",
+    lines:w.lines.map(function(p){ return { ptype:p.ptype, detail:(p.details||[]).join("\n")||p.detail||"", qty:p.qty, price:p.price }; }),
+    note:String(($("na_note")||{}).value||""), checklist:{ first:$("na_c_first").checked?1:0, month:$("na_c_month").checked?1:0, mail:$("na_c_mail").checked?1:0 },
+    files:w.files.filter(function(f){ return f.st==="ok"; }).map(function(f){ return { id:f.id, name:f.name, mime:f.mime, size:f.size, kind:f.kind, ym:f.ym, at:f.at, by:f.by }; }) };
+  var toSheet=w.toSheet && w.lines.length && !w.srcOrder && !noOrder();
+  busy(true,send?TX("Đang lưu và gửi email xin xác nhận (kèm chứng từ)…","Saving and sending…"):TX("Đang lưu nháp…","Saving draft…"));
+  apiPost({ action:"naSave", data:data, rid:uid28() }).then(function(j){
+    naMerge(j.rec); w.uploaded=[]; w.isNew=false; (w.removed||[]).forEach(function(id){ apiPost({ action:"naDelFile", fileId:id }).catch(function(){}); });
+    if(toSheet){
+      var rows=w.lines.map(function(p,k){ var a=n(p.price)*n(p.qty);
+        return { code:acc.code||"", channel:"Offline", fy:fyOfMonth(ymOf(data.orderDate)), month:ymOf(data.orderDate), day:data.orderDate, orderNo:data.orderNo||nextOrderNo(),
+          type:acc.type||"", name:acc.name, province:acc.province||"", pic:w.pic, partner:data.npp, partnerType:"Distributor", source:"New account case "+w.id,
+          ptype:p.ptype, detail:(p.details||[]).join("\n"), qty:p.qty, price:p.price, amount:a?String(a):"", note:TX("Ghi từ case mở mới ","From new-account case ")+w.id }; });
+      obAddOrders(rows, (data.orderNo||"")+" · "+acc.name);
+    }
+    if(!send){ busy(false); S.na.wz=null; closeAllModals(); toast(j.message||TX("Đã lưu nháp","Draft saved"),"ok"); naPaint(); return; }
+    return apiPost({ action:"naSubmit", id:j.rec.id, rid:uid28() }).then(function(k){
+      busy(false); naMerge(k.rec); S.na.wz=null; closeAllModals(); toast(k.message||TX("Đã gửi email xin xác nhận","Request sent"),"ok",6500); naPaint();
+    });
+  }).catch(function(e){ busy(false); toast(e.message,"err",9000); });
+}
 
-/* ── biểu tượng ✉️ trên thanh đầu trang + mở thẳng case từ link email (#na=ID) ── */
-(function(){
-  var hdr=document.querySelector("header"), act=$("btnAct");
-  if(act && !$("btnNa")){
-    var b=document.createElement("button"); b.className="hbtn nab"; b.id="btnNa"; b.innerHTML='✉️<span class="cnt"></span>';
-    b.onclick=function(){ naGoPending(); };
-    act.parentNode.insertBefore(b,act);
-  }
-})();
-var _naAfterUser=afterUserKnown;
+/* ── mở thẳng case từ link email (#na=ID) · nạp dữ liệu khi vào app ── */
+var _naAfterUser28=afterUserKnown;
 afterUserKnown=function(){
-  _naAfterUser.apply(this,arguments);
+  _naAfterUser28.apply(this,arguments);
   setTimeout(function(){
+    obFlush();
     naLoad(true).then(function(){
       var m=/#na=([\w-]+)/.exec(location.hash||"");
-      if(m){ go("newacc"); setTimeout(function(){ naOpen(decodeURIComponent(m[1])); },300); try{ history.replaceState(null,"",location.pathname+location.search); }catch(e){} }
+      if(m){ var id=decodeURIComponent(m[1]); try{ history.replaceState(null,"",location.pathname+location.search); }catch(e){} go("newacc"); setTimeout(function(){ naView(id,true); },400); }
+      else if(S.na.pending>0) toast(TX("✉️ Bạn có "+S.na.pending+" case mở mới chờ xác nhận — bấm nút ✉ ở góc dưới","✉️ "+S.na.pending+" case(s) waiting for your approval"),"warn",6500);
     }).catch(function(){});
   },1200);
 };
-setInterval(function(){ if(!document.hidden && S.user && S.user.pic) naLoad(true).then(function(){ if(S.tab==="newacc"&&!$("naWz")) naPaint(); }).catch(function(){}); },180000);
+</script>
+<script>
+/* ═══════════════════════════════════════════════════════════════════════════════════════════
+   ⭐ v28 — BÁO CÁO KPI THÁNG (gửi từ CRM): đọc sheet 5. Member KPI Monthly của file MMH KPI FY68
+   qua backend CRM (actions krData · krPreview · krSend) — không cần Web App riêng của file KPI.
+   ═══════════════════════════════════════════════════════════════════════════════════════════ */
+S.kr8={ by:{}, member:"", month:"", f:{}, prevKey:"", err:"" };
+function kr8Load(member,force){
+  var k=member||S.user.pic;
+  if(!force && S.kr8.by[k] && Date.now()-S.kr8.by[k]._at<60000) return Promise.resolve(S.kr8.by[k]);
+  return apiGet("krData",{ member:k, fresh:force?1:"", _ts:Date.now() }).then(function(j){
+    if(!j||!j.kr) throw new Error(TX("Backend chưa có chức năng Báo cáo KPI — cập nhật Code.gs VN v10.0 / Thái v1.9.","The backend has no KPI report yet — update Code.gs."));
+    j._at=Date.now(); S.kr8.by[j.member]=j; S.kr8.by[k]=j; S.kr8.err=""; return j;
+  });
+}
+function kr8Ring(p){
+  var r=30, c=2*Math.PI*r, v=Math.max(0,Math.min(1.3,p||0))/1.3;
+  return '<svg class="kr8-ring" viewBox="0 0 74 74"><circle cx="37" cy="37" r="'+r+'" fill="none" stroke="#E8EEF6" stroke-width="9"/>'+
+    '<circle cx="37" cy="37" r="'+r+'" fill="none" stroke="'+k8Col(p)+'" stroke-width="9" stroke-linecap="round" stroke-dasharray="'+(c*v).toFixed(1)+' '+c.toFixed(1)+'" transform="rotate(-90 37 37)"/>'+
+    '<text x="37" y="42" text-anchor="middle" font-size="15" font-weight="800" fill="'+k8Col(p)+'">'+(p==null?"—":Math.round(p*100)+"%")+'</text></svg>';
+}
+function kr8Fmt(v,unit){ if(v==null) return "—"; if(/%/.test(unit||"")) return (Math.round(v*1000)/10)+"%"; var a=Math.abs(v); return Number(v).toLocaleString("en-US",{maximumFractionDigits:a>=100?0:(a>=10?1:2)}); }
+function kr8Q(d,m){ var i=d.months.indexOf(String(m)); return i<0?"":"Q"+(Math.floor(i/3)+1); }
+function kr8FyKey(d){ var m=d.months[0]||""; var y=+m.slice(0,4); return "FY"+(y-1958); }
+renderReportKpi=function(){
+  var head=rpKpiHead();
+  var member=S.kr8.member||S.user.pic, d=S.kr8.by[member];
+  if(!d){
+    $("main").innerHTML='<div class="pg">'+head+(S.kr8.err?'<div class="card pad"><b style="color:#A82F2C">'+esc(S.kr8.err)+'</b><div style="margin-top:8px"><button class="btn sm" onclick="S.kr8.err=\'\';renderReport()">⟳ '+TX("Thử lại","Retry")+'</button></div></div>':'<div class="card pad">'+skRows(6,true)+'</div>')+'</div>';
+    if(!S.kr8.err) kr8Load(member).then(function(){ if(S.tab==="report"&&S.rpKind==="kpi") renderReport(); })
+      .catch(function(e){ S.kr8.err=e.message; if(S.tab==="report"&&S.rpKind==="kpi") renderReport(); });
+    return;
+  }
+  S.kr8.member=d.member;
+  var cur=d.cur, ms=d.months;
+  if(!S.kr8.month||ms.indexOf(S.kr8.month)<0){
+    var past=ms.filter(function(m){ return m<cur; }), closed=past.filter(function(m){ return d.closed.indexOf(m)>=0; });
+    S.kr8.month=closed.pop()||past.pop()||ms[0];
+  }
+  var m=S.kr8.month, q=kr8Q(d,m), fy=kr8FyKey(d), T=d.total||{};
+  var tm=(T[m]||{}).pw, tq=(T[q]||{}).pw, tf=(T[fy]||{}).pw;
+  var ml=m.slice(4)+"/"+m.slice(0,4);
+  var mem=(d.members||[]).length>1?'<div class="chipbar" style="margin-bottom:8px">'+d.members.map(function(p){ return '<div class="chip'+(p===d.member?" on":"")+'" onclick="kr8Pick(\''+esc(p)+'\')">'+esc(p)+'</div>'; }).join("")+'</div>':"";
+  var mBar='<div class="chipbar">'+ms.filter(function(x){ return x<=cur; }).map(function(x){
+      var v=(T[x]||{}).pw; return '<div class="chip'+(x===m?" on":"")+'" onclick="kr8Month(\''+x+'\')">'+monLbl("T"+parseInt(x.slice(4),10))+(d.closed.indexOf(x)>=0?" ✓":"")+(v!=null?' <b style="color:'+k8Col(v)+'">'+Math.round(v*100)+'%</b>':'')+'</div>'; }).join("")+'</div>';
+  var cfg='<div class="card pad" style="margin-bottom:12px"><div class="ct" style="margin-bottom:8px"><span class="dot"></span>'+TX("Kỳ báo cáo KPI","KPI report period")+' · <b>'+esc(d.full||d.member)+'</b>'+(d.title?' <span style="color:var(--sub);font-weight:600">· '+esc(d.title)+'</span>':'')+
+    '<span class="sp"></span><span class="k8-live"><i></i>'+TX("đọc lúc ","read at ")+esc(d.readAt)+'</span> <button class="btn sm" onclick="kr8Reload()">⟳</button></div>'+mem+mBar+
+    '<div class="hint" style="margin-top:8px">'+(d.closed.indexOf(m)>=0?TX("Tháng "+ml+" đã chốt số.","Month "+ml+" is closed."):'<b style="color:#B7791F">'+TX("Tháng "+ml+" chưa chốt (chốt 16:00 ngày 2 tháng sau) — số còn có thể đổi.","Month "+ml+" is not closed yet — figures may change.")+'</b>')+
+      ' · <a href="'+esc(d.src)+'" target="_blank">'+TX("Mở sheet 5. Member KPI Monthly ↗","Open sheet 5 ↗")+'</a></div></div>';
+  var hero='<div class="kr8-hero">'+[[TX("KPI THÁNG ","MONTH ")+ml,tm],["KPI "+q+TX(" (đến T"," (to ")+parseInt(m.slice(4),10)+")",tq],["KPI "+fy+TX(" lũy kế"," to date"),tf]].map(function(x){
+      return '<div class="kr8-sc">'+kr8Ring(x[1])+'<div><div class="lb">'+x[0]+'</div><div class="v" style="color:'+k8Col(x[1])+'">'+k8Pct(x[1])+'</div><div class="s">'+TX("Tổng % × trọng số","Σ % × weight")+'</div></div></div>'; }).join("")+'</div>';
+  var groups=[], byG={};
+  d.rows.forEach(function(r){ var v=(r.v||{})[m]||{}, w=v.w!=null?v.w:((r.v||{})[q]||{}).w; if(!w) return; var g=r.group||"KPI"; if(!byG[g]){ byG[g]=[]; groups.push(g); } byG[g].push({ r:r, v:v, w:w }); });
+  var table='<section class="card pad" style="margin-bottom:12px"><div class="ct"><span class="dot"></span>① '+TX("Bảng KPI tháng ","KPI table ")+ml+'<span class="sp"></span><small>'+TX("Thanh màu = % đạt (vạch đen = 100%)","Bar = % achieved (mark = 100%)")+'</small></div>'+
+    (groups.length?groups.map(function(g){
+      return '<div class="kr8-grp">'+esc(g)+'</div>'+byG[g].map(function(x){
+        var r=x.r, v=x.v, p=v.p;
+        return '<div class="kr8-row"><div class="nm"><b>'+esc(r.code)+'</b><span>'+esc(r.name)+'</span>'+k8Bar(p,1)+'</div>'+
+          '<div class="c hide-s">'+k8Pct(x.w)+'<small>'+TX("trọng số","weight")+'</small></div>'+
+          '<div class="c hide-s">'+kr8Fmt(v.t,r.unit)+'<small>Target '+esc(/%/.test(r.unit)?"":r.unit)+'</small></div>'+
+          '<div class="c">'+kr8Fmt(v.a,r.unit)+'<small>Actual</small></div>'+
+          '<div class="p" style="color:'+k8Col(p)+'">'+k8Pct(p)+'<small style="display:block;font-size:10.5px;color:var(--mute)">× W '+k8Pct(v.pw)+'</small></div></div>';
+      }).join("");
+    }).join(""):'<div class="empty"><p>'+TX("Tháng này chưa có KPI có trọng số.","No weighted KPI this month.")+'</p></div>')+'</section>';
+  var key=d.member+"|"+m;
+  if(S.kr8.fKey!==key){
+    S.kr8.fKey=key;
+    S.kr8.f={ to:(d.to||[]).slice(), cc:(d.cc||[]).slice(),
+      subject:"[MMH KPI] "+TX("Báo cáo KPI tháng ","KPI report ")+ml+" — "+d.member,
+      greeting:TX("Dear anh/chị "+(d.toName||"")+",","Dear "+(d.toName||"")+","),
+      intro:TX("Em xin gửi báo cáo KPI tháng "+ml+" như sau:","Please find my KPI report for "+ml+" below:"),
+      analysis:(S.kr8.f&&S.kr8.f.analysis)||"", highlights:(S.kr8.f&&S.kr8.f.highlights)||"",
+      sign:TX("Trân trọng,\n","Best regards,\n")+(d.full||d.member) };
+    var me=String(S.user.email||"").toLowerCase(); if(me && S.kr8.f.to.indexOf(me)<0 && S.kr8.f.cc.indexOf(me)<0) S.kr8.f.cc.push(me);
+    S.kr8.prevKey="";
+  }
+  var F=S.kr8.f;
+  var ta=function(id,lb,ph,h){ return '<div class="fld"><label>'+lb+'</label><textarea class="inp" id="kr8_'+id+'" style="min-height:'+(h||70)+'px" placeholder="'+esc(ph||"")+'" oninput="S.kr8.f.'+id+'=this.value;kr8Dirty()">'+esc(F[id]||"")+'</textarea></div>'; };
+  var cmp='<section class="card pad"><div class="ct" style="margin-bottom:10px"><span class="dot"></span>② '+TX("Soạn email &amp; ③ xem trước","Compose &amp; ③ preview")+'</div><div class="kr8-cmp"><div>'+
+    '<div class="fld"><label>'+TX("Gửi tới (To)","To")+'</label><input class="inp" id="kr8_to" value="'+esc(F.to.join(", "))+'" oninput="S.kr8.f.to=kr8Split(this.value);kr8Dirty()"></div>'+
+    '<div class="fld"><label>CC</label><input class="inp" id="kr8_cc" value="'+esc(F.cc.join(", "))+'" oninput="S.kr8.f.cc=kr8Split(this.value);kr8Dirty()">'+
+      '<div class="hint">'+TX("Người nhận tự điền theo sheet 0. Staff List (Team Leader / HOD / Director) + CC vtt.hoa. Thêm email cách nhau dấu phẩy.","Recipients follow 0. Staff List. Separate e-mails with commas.")+'</div></div>'+
+    '<div class="fld"><label>'+TX("Tiêu đề","Subject")+'</label><input class="inp" id="kr8_subject" value="'+esc(F.subject)+'" oninput="S.kr8.f.subject=this.value;kr8Dirty()"></div>'+
+    ta("greeting",TX("Lời chào","Greeting"),"",44)+ta("intro",TX("Câu mở đầu","Opening"),"",44)+
+    ta("analysis","2. Analysis &amp; Next Actions KPI",TX("Mỗi dòng một ý: vì sao đạt / chưa đạt từng mã, việc sẽ làm tháng tới…","One point per line…"),100)+
+    ta("highlights","3. Highlights &amp; Challenges KPI",TX("Mỗi dòng một ý: điểm nổi bật, khó khăn, đề xuất hỗ trợ…","One point per line…"),90)+
+    ta("sign",TX("Chữ ký","Signature"),"",50)+
+    '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:6px"><button class="btn" onclick="kr8Preview(true)">👁 '+TX("Xem trước","Preview")+'</button>'+
+      (S.user.email?'<button class="btn" onclick="kr8Send(true)">✉️ '+TX("Gửi thử cho tôi","Send a test to me")+'</button>':'')+
+      '<button class="btn pri" onclick="kr8Send(false)">📧 '+TX("Gửi báo cáo KPI","Send the KPI report")+'</button></div></div>'+
+    '<div><div class="hint" id="kr8St" style="margin-bottom:6px">'+TX("Đúng bản email sẽ gửi","Exactly the e-mail that will be sent")+'</div><iframe id="kr8Frame" class="kr8-frame" sandbox="" title="preview"></iframe></div></div></section>';
+  $("main").innerHTML='<div class="pg">'+head+cfg+hero+table+cmp+'</div>';
+  if(S.kr8.prevKey===key && S.kr8.prevHtml) kr8Show(S.kr8.prevHtml); else kr8Preview(false);
+};
+function kr8Call(p){
+  var len=encodeURIComponent(JSON.stringify(p)).length;
+  var pr=len<5000?jsonp(Object.assign({},p),90000):postBody(p);
+  return pr.then(function(j){ if(j&&j.ok===false) throw new Error(j.error||"Error"); return j; });
+}
+function kr8Split(s){ return String(s||"").split(/[,;\s]+/).map(function(x){ return x.trim().toLowerCase(); }).filter(Boolean); }
+function kr8Pick(p){ S.kr8.member=p; S.kr8.month=""; renderReport(); }
+function kr8Month(m){ S.kr8.month=m; renderReport(); }
+function kr8Reload(){ var mbr=S.kr8.member; delete S.kr8.by[mbr]; kr8Load(mbr,true).then(function(){ renderReport(); }).catch(function(e){ toast(e.message,"err",6000); }); }
+var _kr8T=null;
+function kr8Dirty(){ var st=$("kr8St"); if(st) st.textContent=TX("Nội dung đã đổi — đang dựng lại bản xem trước…","Changed — refreshing the preview…"); clearTimeout(_kr8T); _kr8T=setTimeout(function(){ kr8Preview(false); },1200); }
+function kr8Params(){
+  var F=S.kr8.f;
+  return { member:S.kr8.member, month:S.kr8.month, greeting:F.greeting, intro:F.intro, analysis:F.analysis, highlights:F.highlights, sign:F.sign, subject:F.subject, lang:isTH()?"en":"vi" };
+}
+function kr8Show(html){ var f=$("kr8Frame"); if(f) f.srcdoc='<!doctype html><html><head><meta charset="utf-8"></head><body style="margin:0">'+html+'</body></html>'; }
+function kr8Preview(manual){
+  var p=kr8Params(), key=S.kr8.member+"|"+S.kr8.month; p.action="krPreview";
+  var st=$("kr8St"); if(st) st.textContent=TX("Đang dựng bản xem trước…","Building the preview…");
+  kr8Call(p).then(function(j){
+    if(!j||!j.html) throw new Error((j&&j.error)||TX("Không dựng được bản xem trước","Preview failed"));
+    S.kr8.prevHtml=j.html; S.kr8.prevKey=key; kr8Show(j.html);
+    var s2=$("kr8St"); if(s2) s2.textContent=TX("✓ Đúng bản email sẽ gửi","✓ Exactly what will be sent");
+  }).catch(function(e){ var s3=$("kr8St"); if(s3) s3.textContent="⚠️ "+e.message; if(manual) toast(e.message,"err",5000); });
+}
+function kr8Send(test){
+  var F=S.kr8.f, ok=/^[^@\s]+@(manimedicalhanoi\.com|mani\.inc)$/i;
+  var to=test?[String(S.user.email||"").toLowerCase()]:F.to.slice(), cc=test?[]:F.cc.slice();
+  var bad=to.concat(cc).filter(function(e){ return !ok.test(e); });
+  if(!to.length||!to[0]) return toast(TX("Chưa có người nhận (To)","No recipient (To)"),"err");
+  if(bad.length) return toast(TX("Email không hợp lệ: ","Invalid e-mail: ")+bad.join(", "),"err",6000);
+  if(!confirm((test?TX("Gửi bản thử tới ","Send a test to "):TX("Gửi báo cáo KPI tháng ","Send the KPI report ")+S.kr8.month.slice(4)+"/"+S.kr8.month.slice(0,4)+TX(" tới ",": to "))+to.join(", ")+(cc.length?"\nCC: "+cc.join(", "):"")+" ?")) return;
+  var p=kr8Params(); p.action="krSend"; p.to=to.join(","); p.cc=cc.join(","); if(test) p.subject="[TEST] "+p.subject;
+  busy(true,TX("Đang gửi email KPI…","Sending…"));
+  kr8Call(p).then(function(j){ busy(false); if(!j||j.ok===false) throw new Error((j&&j.error)||"Error"); toast("✓ "+(j.message||TX("Đã gửi","Sent")),"ok",6000); })
+    .catch(function(e){ busy(false); toast(e.message,"err",7000); });
+}
 </script>
 
 </body>
