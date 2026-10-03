@@ -3979,7 +3979,7 @@ function buildNav(){
     if(t.grp!==lastGrp){ h+='<div class="grp">'+t.grp+'</div>'; lastGrp=t.grp; }
     h+='<button class="nvi" data-t="'+t.id+'" onclick="go(\''+t.id+'\')"><span class="ic">'+t.ic+'</span><span class="lb">'+t.lb+'</span></button>';
   });
-  h+='<div style="flex:1"></div><div style="padding:10px;font-size:10.5px;color:var(--mute);line-height:1.5">MMH CRM v28.2<br>'+
+  h+='<div style="flex:1"></div><div style="padding:10px;font-size:10.5px;color:var(--mute);line-height:1.5">MMH CRM v28.3<br>'+
      (isMgmt()?'<a href="'+DRIVE_FOLDER+'" target="_blank">📁 Folder ảnh Drive</a>':"")+'</div>';
   $("side").innerHTML=h;
   /* ⭐ v4.5 — thanh dưới trượt ngang, đủ mọi mục, bỏ nút "Thêm" */
@@ -18849,21 +18849,9 @@ renderReportKpi=function(){
     '<span class="sp"></span><span class="k8-live"><i></i>'+TX("đọc lúc ","read at ")+esc(d.readAt)+'</span> <button class="btn sm" onclick="kr8Reload()">⟳</button></div>'+mem+mBar+
     '<div class="hint" style="margin-top:8px">'+(d.closed.indexOf(m)>=0?TX("Tháng "+ml+" đã chốt số.","Month "+ml+" is closed."):'<b style="color:#B7791F">'+TX("Tháng "+ml+" chưa chốt (chốt 16:00 ngày 2 tháng sau) — số còn có thể đổi.","Month "+ml+" is not closed yet — figures may change.")+'</b>')+
       ' · <a href="'+esc(d.src)+'" target="_blank">'+TX("Mở sheet 5. Member KPI Monthly ↗","Open sheet 5 ↗")+'</a></div></div>';
-  var hero='<div class="kr8-hero">'+[[TX("KPI THÁNG ","MONTH ")+ml,tm],["KPI "+q+TX(" (đến T"," (to ")+parseInt(m.slice(4),10)+")",tq],["KPI "+fy+TX(" lũy kế"," to date"),tf]].map(function(x){
-      return '<div class="kr8-sc">'+kr8Ring(x[1])+'<div><div class="lb">'+x[0]+'</div><div class="v" style="color:'+k8Col(x[1])+'">'+k8Pct(x[1])+'</div><div class="s">'+TX("Tổng % × trọng số","Σ % × weight")+'</div></div></div>'; }).join("")+'</div>';
-  var groups=[], byG={};
-  d.rows.forEach(function(r){ var v=(r.v||{})[m]||{}, w=v.w!=null?v.w:((r.v||{})[q]||{}).w; if(!w) return; var g=r.group||"KPI"; if(!byG[g]){ byG[g]=[]; groups.push(g); } byG[g].push({ r:r, v:v, w:w }); });
-  var table='<section class="card pad" style="margin-bottom:12px"><div class="ct"><span class="dot"></span>① '+TX("Bảng KPI tháng ","KPI table ")+ml+'<span class="sp"></span><small>'+TX("Thanh màu = % đạt (vạch đen = 100%)","Bar = % achieved (mark = 100%)")+'</small></div>'+
-    (groups.length?groups.map(function(g){
-      return '<div class="kr8-grp">'+esc(g)+'</div>'+byG[g].map(function(x){
-        var r=x.r, v=x.v, p=v.p;
-        return '<div class="kr8-row"><div class="nm"><b>'+esc(r.code)+'</b><span>'+esc(r.name)+'</span>'+k8Bar(p,1)+'</div>'+
-          '<div class="c hide-s">'+k8Pct(x.w)+'<small>'+TX("trọng số","weight")+'</small></div>'+
-          '<div class="c hide-s">'+kr8Fmt(v.t,r.unit)+'<small>Target '+esc(/%/.test(r.unit)?"":r.unit)+'</small></div>'+
-          '<div class="c">'+kr8Fmt(v.a,r.unit)+'<small>Actual</small></div>'+
-          '<div class="p" style="color:'+k8Col(p)+'">'+k8Pct(p)+'<small style="display:block;font-size:10.5px;color:var(--mute)">× W '+k8Pct(v.pw)+'</small></div></div>';
-      }).join("");
-    }).join(""):'<div class="empty"><p>'+TX("Tháng này chưa có KPI có trọng số.","No weighted KPI this month.")+'</p></div>')+'</section>';
+  var hero='<div class="kr8-hero">'+[[TX("KPI THÁNG ","MONTH ")+ml,tm,TX("Σ % × trọng số của tháng","Σ % × weight of the month")],["KPI "+q+TX(" (đến T"," (to ")+parseInt(m.slice(4),10)+")",tq,TX("so với target cả quý (3 tháng)","vs. the full-quarter target")],["KPI "+fy+TX(" lũy kế"," to date"),tf,TX("so với target cả năm FY","vs. the full-year target")]].map(function(x){
+      return '<div class="kr8-sc" title="'+esc(TX("Số đọc từ dòng TOTAL của sheet 5. Member KPI Monthly — ","From the TOTAL row of sheet 5. Member KPI Monthly — ")+(x[2]||""))+'">'+kr8Ring(x[1])+'<div><div class="lb">'+x[0]+'</div><div class="v" style="color:'+k8Col(x[1])+'">'+k8Pct(x[1])+'</div><div class="s">'+(x[2]||"")+'</div></div></div>'; }).join("")+'</div>';
+  var table='<section class="card pad" style="margin-bottom:12px"><div class="ct" style="margin-bottom:10px"><span class="dot"></span>① '+TX("KPI tháng ","KPI ")+ml+' · '+TX("theo nhóm","by group")+'<span class="sp"></span><small>'+TX("Rê chuột vào từng KPI để xem tên đầy đủ","Hover a KPI to see its full name")+'</small></div>'+kr8Board(d,m)+'</section>';
   var key=d.member+"|"+m;
   if(S.kr8.fKey!==key){
     S.kr8.fKey=key;
@@ -18959,13 +18947,9 @@ function kpi8Paint(){
   var mem8=(d.members||[]).length>1?'<div class="chipbar" style="margin:4px 0 8px">'+d.members.map(function(p){ return '<div class="chip'+(p===d.member?" on":"")+'" onclick="kpi8Pick(\''+esc(p)+'\')">'+esc(p)+'</div>'; }).join("")+'</div>':"";
   var mBar='<div class="chipbar" style="margin-bottom:12px">'+ms.filter(function(x){ return x<=cur; }).map(function(x){ var v=(T[x]||{}).pw;
     return '<div class="chip'+(x===m?" on":"")+'" onclick="kpi8Month(\''+x+'\')">'+monLbl("T"+parseInt(x.slice(4),10))+(d.closed.indexOf(x)>=0?" ✓":"")+(v!=null?' <b style="color:'+k8Col(v)+'">'+Math.round(v*100)+'%</b>':'')+'</div>'; }).join("")+'</div>';
-  var hero='<div class="kr8-hero">'+[[TX("KPI THÁNG ","MONTH ")+ml,tm],["KPI "+q,tq],["KPI "+fy+TX(" lũy kế"," to date"),tf]].map(function(x){
-    return '<div class="kr8-sc">'+kr8Ring(x[1])+'<div><div class="lb">'+x[0]+'</div><div class="v" style="color:'+k8Col(x[1])+'">'+k8Pct(x[1])+'</div><div class="s">'+TX("Tổng % × trọng số","Σ % × weight")+'</div></div></div>'; }).join("")+'</div>';
-  var groups=[], byG={};
-  d.rows.forEach(function(r){ var v=(r.v||{})[m]||{}, w=v.w!=null?v.w:((r.v||{})[q]||{}).w; if(!w) return; var g=r.group||"KPI"; if(!byG[g]){ byG[g]=[]; groups.push(g); } byG[g].push({ r:r, v:v, w:w }); });
-  var rows=groups.map(function(g){ return '<div class="kr8-grp">'+esc(g)+'</div>'+byG[g].map(function(x){ var r=x.r, v=x.v, p=v.p;
-    return '<div class="kr8-row"><div class="nm"><b>'+esc(r.code)+'</b><span>'+esc(r.name)+'</span>'+k8Bar(p,1)+'</div><div class="c hide-s">'+k8Pct(x.w)+'<small>'+TX("trọng số","weight")+'</small></div>'+
-      '<div class="c hide-s">'+kr8Fmt(v.t,r.unit)+'<small>Target</small></div><div class="c">'+kr8Fmt(v.a,r.unit)+'<small>Actual</small></div><div class="p" style="color:'+k8Col(p)+'">'+k8Pct(p)+'</div></div>'; }).join(""); }).join("")||'<div class="hint">'+TX("Tháng này chưa có KPI có trọng số.","No weighted KPI this month.")+'</div>';
+  var hero='<div class="kr8-hero">'+[[TX("KPI THÁNG ","MONTH ")+ml,tm,TX("Σ % × trọng số của tháng","Σ % × weight of the month")],["KPI "+q,tq,TX("so với target cả quý (3 tháng)","vs. the full-quarter target")],["KPI "+fy+TX(" lũy kế"," to date"),tf,TX("so với target cả năm FY","vs. the full-year target")]].map(function(x){
+    return '<div class="kr8-sc" title="'+esc(TX("Số đọc từ dòng TOTAL của sheet 5. Member KPI Monthly — ","From the TOTAL row of sheet 5. Member KPI Monthly — ")+(x[2]||""))+'">'+kr8Ring(x[1])+'<div><div class="lb">'+x[0]+'</div><div class="v" style="color:'+k8Col(x[1])+'">'+k8Pct(x[1])+'</div><div class="s">'+(x[2]||"")+'</div></div></div>'; }).join("")+'</div>';
+  var rows=kr8Board(d,m);
   box.innerHTML='<div class="k8-panel">'+head+'<span class="k8-live"><i></i>'+TX("đọc lúc ","read at ")+esc(d.readAt)+'</span><span style="flex:1"></span>'+
     '<button class="btn sm" onclick="kr8Load(S.kr8.member,true).then(kpi8Paint).catch(function(e){toast(e.message,\'err\')})">⟳ '+TX("Đọc lại","Reload")+'</button>'+
     '<button class="btn sm pri" onclick="S.rpKind=\'kpi\';go(\'report\')">📧 '+TX("Gửi báo cáo KPI","Send KPI report")+'</button></div>'+mem8+mBar+hero+rows+'</div>';
@@ -19001,6 +18985,66 @@ pgKPI=function(){
   _pgKPI28.apply(this,arguments);
   if(!noOrder() && !tGet("order")) ensureTab("order",{},function(rows,ready){ if(ready && S.tab==="kpi" && S.kpi) renderKPI(); });
   if(!S.na.rows && !S.na.err) naLoad(false).then(function(){ if(S.tab==="kpi" && S.kpi) renderKPI(); }).catch(function(){});
+};
+</script>
+<style>
+/* ⭐ v28.3 — KPI theo "khoang" (nhóm KPI) */
+.kr8-board{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:12px;align-items:start}
+.kr8-box{border:1px solid var(--line);border-radius:14px;background:#fff;overflow:hidden}
+.kr8-bh{display:flex;align-items:center;gap:8px;padding:9px 12px;background:#EEF4FC;border-bottom:1px solid var(--line)}
+.kr8-bh b{font-size:13.5px;color:var(--navy);flex:1}
+.kr8-bh span{font-size:11.5px;color:var(--sub);font-weight:700}
+.kr8-bh .gp{font-size:16px;font-weight:800;min-width:46px;text-align:right}
+.kr8-it{padding:9px 12px;border-bottom:1px solid var(--line2);cursor:help}
+.kr8-it:last-child{border-bottom:0}
+.kr8-it:hover{background:#F7FAFF}
+.kr8-it .l1{display:flex;align-items:baseline;gap:7px;margin-bottom:5px}
+.kr8-it .l1 b{font-size:11px;color:#fff;background:#6E8FCB;border-radius:5px;padding:1px 6px;flex:none}
+.kr8-it .l1 .nm{flex:1;font-size:13.5px;font-weight:700;color:var(--ink);line-height:1.3}
+.kr8-it .l1 .pc{font-size:16px;font-weight:800}
+.kr8-it .k8-bar{height:7px}
+.kr8-it .l2{display:flex;justify-content:space-between;font-size:11.5px;color:var(--sub);margin-top:4px;font-weight:600}
+.kr8-it .zero{font-size:10.5px;font-weight:800;color:#1E6B34;background:#E6F5E8;border-radius:5px;padding:1px 6px;margin-left:4px}
+.kr8-sc{cursor:help}
+</style>
+<script>
+/* ⭐ v28.3 — bảng KPI theo nhóm ("khoang KPI"), tên ngắn (VN / EN), tên đầy đủ khi rê chuột, rule Target = 0 ⇒ 100% */
+function kr8Unit(u){ u=String(u||""); if(isTH()) return u; return ({ "Times":"lần", "Pcs":"cái", "Sheets":"vỉ", "Point":"điểm", "Accounts":"account", "Account":"account" })[u]||u; }
+function kr8Board(d,m){
+  var q=kr8Q(d,m), groups=[], byG={};
+  d.rows.forEach(function(r){
+    var v=(r.v||{})[m]||{}, w=v.w!=null?v.w:((r.v||{})[q]||{}).w; if(!w) return;
+    if(v.t===0 && v.p==null && String(m)<=String(d.cur)) v=Object.assign({},v,{ p:1, pw:v.pw!=null?v.pw:w, zero:true });
+    var g=r.gs||r.group||"KPI"; if(!byG[g]){ byG[g]=[]; groups.push(g); } byG[g].push({ r:r, v:v, w:w });
+  });
+  if(!groups.length) return '<div class="hint">'+TX("Tháng này chưa có KPI có trọng số.","No weighted KPI this month.")+'</div>';
+  return '<div class="kr8-board">'+groups.map(function(g){
+    var L=byG[g], sw=L.reduce(function(s,x){ return s+n(x.w); },0), spw=L.reduce(function(s,x){ return s+n(x.v.pw); },0), gp=sw?spw/sw:null;
+    return '<div class="kr8-box"><div class="kr8-bh" title="'+esc(TX("Nhóm ","Group ")+(L[0].r.group||g)+" · "+TX("tổng trọng số ","total weight ")+k8Pct(sw)+" · "+TX("điểm nhóm = Σ(% × trọng số) ÷ Σ trọng số","group score = Σ(% × weight) ÷ Σ weight"))+'"><b>'+esc(g)+'</b><span>'+TX("TS ","W ")+k8Pct(sw)+'</span><span class="gp" style="color:'+k8Col(gp)+'">'+k8Pct(gp)+'</span></div>'+
+      L.map(function(x){
+        var r=x.r, v=x.v, p=v.p, u=kr8Unit(r.unit);
+        var tip=r.code+" · "+r.name+"\n"+TX("Target ","Target ")+kr8Fmt(v.t,r.unit)+" · Actual "+kr8Fmt(v.a,r.unit)+" · "+TX("đạt ","achieved ")+k8Pct(p)+"\n"+TX("Trọng số ","Weight ")+k8Pct(x.w)+" ⇒ "+TX("điểm ","score ")+k8Pct(v.pw)+(v.zero?"\n"+TX("Target tháng = 0 ⇒ tính đạt 100%, nhận đủ trọng số","Monthly target = 0 ⇒ counted as 100%, full weight"):"");
+        return '<div class="kr8-it" title="'+esc(tip)+'"><div class="l1"><b>'+esc(r.code)+'</b><span class="nm">'+esc(r.short||r.name)+(v.zero?'<span class="zero">'+TX("target 0","target 0")+'</span>':'')+'</span><span class="pc" style="color:'+k8Col(p)+'">'+k8Pct(p)+'</span></div>'+k8Bar(p,1)+
+          '<div class="l2"><span>'+kr8Fmt(v.a,r.unit)+' / '+kr8Fmt(v.t,r.unit)+' '+esc(/%/.test(r.unit)?"":u)+'</span><span>'+TX("TS ","W ")+k8Pct(x.w)+' → '+k8Pct(v.pw)+'</span></div></div>';
+      }).join("")+'</div>';
+  }).join("")+'</div>';
+}
+/* bảng KPI tab 9 trên app: rule Target = 0 ⇒ 100% cho quý / FY / lũy kế */
+var _k8ApplyLive28=k8ApplyLive;
+k8ApplyLive=function(k){
+  _k8ApplyLive28(k);
+  if(!k||!k.pics) return;
+  var ms=(k.months&&k.months.length===12?k.months:fyMonths(S.fy)).map(String), cur=ymOf(todayISO());
+  k.pics.forEach(function(p){ (p.rows||[]).forEach(function(r){
+    var t=r.t||[]; if(!t.length) return;
+    var st=function(ix){ return ix.some(function(i){ return ms[i]<=cur; }); };
+    var sum=function(ix){ return ix.reduce(function(s,i){ return s+n(t[i]); },0); };
+    var hasT=function(ix){ return ix.every(function(i){ return t[i]!==""&&t[i]!=null; }); };
+    if(r.q) r.q=r.q.map(function(v,qi){ var ix=[qi*3,qi*3+1,qi*3+2].filter(function(i){ return ms[i]<=cur; }); return (ix.length&&hasT(ix)&&sum(ix)===0)?1:v; });
+    var all=[0,1,2,3,4,5,6,7,8,9,10,11], yix=all.filter(function(i){ return ms[i]<=cur; });
+    if(yix.length&&hasT(yix)&&sum(yix)===0) r.ytd=1;
+    if(st(all)&&hasT(all)&&sum(all)===0){ r.pct=1; if(r.w!=null) r.score=r.w; }
+  }); });
 };
 </script>
 
