@@ -3979,7 +3979,7 @@ function buildNav(){
     if(t.grp!==lastGrp){ h+='<div class="grp">'+t.grp+'</div>'; lastGrp=t.grp; }
     h+='<button class="nvi" data-t="'+t.id+'" onclick="go(\''+t.id+'\')"><span class="ic">'+t.ic+'</span><span class="lb">'+t.lb+'</span></button>';
   });
-  h+='<div style="flex:1"></div><div style="padding:10px;font-size:10.5px;color:var(--mute);line-height:1.5">MMH CRM v28.6<br>'+
+  h+='<div style="flex:1"></div><div style="padding:10px;font-size:10.5px;color:var(--mute);line-height:1.5">MMH CRM v28.7<br>'+
      (isMgmt()?'<a href="'+DRIVE_FOLDER+'" target="_blank">📁 Folder ảnh Drive</a>':"")+'</div>';
   $("side").innerHTML=h;
   /* ⭐ v4.5 — thanh dưới trượt ngang, đủ mọi mục, bỏ nút "Thêm" */
@@ -18428,9 +18428,9 @@ function naView(id,fromFab){
      ["PIC",esc(c.pic)],
      ["Account",'<b>'+esc(c.account)+'</b>'+(c.code?' <small>('+esc(c.code)+')</small>':'')+'<br><small style="color:var(--sub)">'+esc([c.accType,c.province].filter(String).join(" · "))+'</small>'],
      [TX("Nhà phân phối","Distributor"),esc(c.npp||"—")],
-     [TX("Đơn đầu tiên","First order"),esc(fmtVN(c.orderDate)||"—")+(c.orderNo?' · '+esc(c.orderNo):'')+' · '+TX("tháng KPI ","KPI month ")+'<b>'+esc(c.month||"—")+'</b>'],
+     [naNeedOrder()?TX("Đơn đầu tiên","First order"):TX("Ngày NPP xác nhận","Distributor confirmation"),esc(fmtVN(c.orderDate)||"—")+(c.orderNo?' · '+esc(c.orderNo):'')+' · '+TX("tháng KPI ","KPI month ")+'<b>'+esc(c.month||"—")+'</b>'],
      [TX("Sản phẩm / SKU","Product / SKU"),esc(c.ptype||"")+(c.sku?'<div style="white-space:pre-wrap">'+esc(c.sku)+'</div>':'')],
-     [TX("Đơn hàng","Order lines"),(c.lines||[]).map(function(x){ return esc(x.ptype||"")+' · '+esc(String(x.detail||"").replace(/\n/g,", "))+' · SL '+esc(x.qty||"")+(x.price?' × '+fmtN(x.price):''); }).join("<br>")||(c.qty||c.amount?(TX("SL ","Qty ")+esc(c.qty||"—")+' · '+fmtVND(c.amount||0)):"—")],
+     [naNeedOrder()?TX("Đơn hàng","Order lines"):TX("Ghi chú đơn","Order note"),(c.lines||[]).map(function(x){ return esc(x.ptype||"")+' · '+esc(String(x.detail||"").replace(/\n/g,", "))+' · SL '+esc(x.qty||"")+(x.price?' × '+fmtN(x.price):''); }).join("<br>")||(c.qty||c.amount?(TX("SL ","Qty ")+esc(c.qty||"—")+' · '+fmtVND(c.amount||0)):"—")],
      [TX("Báo cáo tuần","Weekly report"),esc(c.weekly||"—")],
      [TX("Ghi chú","Note"),'<div style="white-space:pre-wrap">'+esc(c.note||"—")+'</div>']]
     .map(function(r){ return '<tr><td>'+r[0]+'</td><td>'+r[1]+'</td></tr>'; }).join("")+'</table>';
@@ -18517,6 +18517,8 @@ function naLbClose(){ var lb=$("na8lb"); if(lb){ lb.classList.remove("on"); lb.i
 
 /* ═════════ FORM THÊM / SỬA CASE ═════════ */
 function naWz(){ return S.na.wz; }
+/* Dental: KPI mở mới cần đơn hàng đầu tiên · Surgical / Eyeless / Thái: chỉ cần thông tin đầy đủ + lịch sử chăm sóc + xác nhận NPP */
+function naNeedOrder(){ var c=(S.na&&S.na.cfg)||{}; if(c.needOrder!=null) return !!c.needOrder; return curTeamKey()==="dental"; }
 function naWzOpen(){ return !!$("naWz") && $("ov").classList.contains("on"); }
 function naForm(rec){
   rec=rec||null;
@@ -18530,7 +18532,7 @@ function naForm(rec){
     lines:(rec&&rec.lines&&rec.lines.length?rec.lines:[]).map(function(x){ return { ptype:x.ptype||"", detail:x.detail||"", details:pcSplit(x.detail), price:x.price||"", qty:x.qty||"" }; }),
     toSheet:false, srcOrder:"" };
   var w=S.na.wz, t=function(v,e){ return TX(v,e); };
-  var hasOrd=!noOrder();
+  var needOrd=naNeedOrder(), hasOrd=!noOrder()&&needOrd;
   var h='<div id="naWz">'+
   '<div class="na8-step"><h4><i>1</i>'+t("Loại case","Case type")+'</h4><div class="na8-guide">'+t("Chọn đúng loại: <b>Đại lý / KH mới</b> nếu account đặt đơn MANI ĐẦU TIÊN qua NPP trong FY; <b>SKU mới</b> nếu account đã từng mua nhưng lần đầu đặt mã SKU này.","<b>New account</b> = first MANI order via the distributor in the FY · <b>New SKU</b> = existing account ordering this SKU for the first time.")+'</div>'+
     '<div class="na8-types" id="naTypes"></div></div>'+
@@ -18539,15 +18541,16 @@ function naForm(rec){
       '<div class="fld sbox" style="flex:2"><label>Account <span class="rq">*</span></label><input class="inp" id="na_acc" autocomplete="off" value="'+esc(w.acc?w.acc.name:"")+'" placeholder="'+t("Bấm để xem danh sách · gõ để lọc","Tap to list · type to filter")+'"><input type="hidden" id="na_accH"></div>'+
       '<div class="fld"><label>'+t("Nhà phân phối","Distributor")+' <span class="rq">*</span></label><input class="inp" id="na_npp" list="na_nppL" value="'+esc(rec?rec.npp:(NA_NPP_DEF[owner]||""))+'" oninput="naChk()"><datalist id="na_nppL">'+(NA_NPP_LIST[curTeamKey()]||[]).map(function(x){ return '<option value="'+esc(x)+'">'; }).join("")+'</datalist></div></div>'+
     '<div id="naAccInfo"></div></div>'+
-  '<div class="na8-step"><h4><i>3</i>'+t("Đơn hàng đầu tiên qua NPP","First order via the distributor")+'<span id="naS3"></span></h4><div class="na8-guide">'+
-      (hasOrd?t("Chọn nhanh <b>từ tab Đơn hàng</b> (tự điền ngày, số đơn, SKU, số lượng) hoặc <b>nhập đơn mới</b> giống form Đơn hàng: chọn Product type rồi chọn mã Detail. Tháng của ngày đơn đầu tiên = tháng được tính KPI.","Pick from the Orders tab or enter a new order."):
-               t("Nhập ngày đơn đầu tiên, số đơn và sản phẩm (chọn Product type rồi mã Detail). Tháng của ngày đơn đầu tiên = tháng được tính KPI.","Enter the first-order date, PO number and the products (Product type then Detail code). The month of the first order is the KPI month."))+'</div>'+
-    '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">'+(hasOrd?'<button class="btn" type="button" onclick="naPickOrder()">📋 '+t("Chọn từ đơn hàng có sẵn","Pick an existing order")+'</button>':'')+
-      '<button class="btn" type="button" onclick="naAddLine()">＋ '+t("Thêm dòng sản phẩm","Add a product line")+'</button></div>'+
-    '<div class="row"><div class="fld"><label>'+t("Ngày đơn đầu tiên","First order date")+' <span class="rq">*</span></label><input class="inp" type="date" id="na_date" value="'+esc(rec?rec.orderDate:"")+'" onchange="naChk()"></div>'+
-      '<div class="fld"><label>'+t("Số đơn / PO","Order / PO No.")+'</label><input class="inp" id="na_no" value="'+esc(rec?rec.orderNo:"")+'"></div>'+
+  '<div class="na8-step"><h4><i>3</i>'+(needOrd?t("Đơn hàng đầu tiên qua NPP","First order via the distributor"):t("Ngày ghi nhận & sản phẩm mở mới","Date & new products"))+'<span id="naS3"></span></h4><div class="na8-guide">'+
+      (!needOrd?t("Nhóm này <b>không cần đơn hàng</b>. Chỉ cần: thông tin account đầy đủ · <b>ngày NPP xác nhận</b> mở mới (tháng của ngày này = tháng tính KPI) · mã SKU nếu là SKU mới · lịch sử chăm sóc trên Báo cáo tuần · chứng từ xác nhận của NPP (ảnh chụp email).","No sales order is needed. Required: complete account info · the <b>date the distributor confirmed</b> the opening (its month = KPI month) · the SKU code for a new SKU · a care history in the weekly report · the distributor's confirmation (e-mail screenshot)."):
+     (hasOrd?t("Chọn nhanh <b>từ tab Đơn hàng</b> (tự điền ngày, số đơn, SKU, số lượng) hoặc <b>nhập đơn mới</b> giống form Đơn hàng: chọn Product type rồi chọn mã Detail. Tháng của ngày đơn đầu tiên = tháng được tính KPI.","Pick from the Orders tab or enter a new order."):
+               t("Nhập ngày đơn đầu tiên, số đơn và sản phẩm (chọn Product type rồi mã Detail). Tháng của ngày đơn đầu tiên = tháng được tính KPI.","Enter the first-order date, PO number and the products (Product type then Detail code). The month of the first order is the KPI month.")))+'</div>'+
+    (needOrd?'<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">'+(hasOrd?'<button class="btn" type="button" onclick="naPickOrder()">📋 '+t("Chọn từ đơn hàng có sẵn","Pick an existing order")+'</button>':'')+
+      '<button class="btn" type="button" onclick="naAddLine()">＋ '+t("Thêm dòng sản phẩm","Add a product line")+'</button></div>':'')+
+    '<div class="row"><div class="fld"><label>'+(needOrd?t("Ngày đơn đầu tiên","First order date"):t("Ngày NPP xác nhận mở mới","Distributor confirmation date"))+' <span class="rq">*</span></label><input class="inp" type="date" id="na_date" value="'+esc(rec?rec.orderDate:"")+'" onchange="naChk()"></div>'+
+      (needOrd?'<div class="fld"><label>'+t("Số đơn / PO","Order / PO No.")+'</label><input class="inp" id="na_no" value="'+esc(rec?rec.orderNo:"")+'"></div>':'')+
       '<div class="fld"><label>'+t("Tháng tính KPI","KPI month")+'</label><input class="inp piclock" id="na_m" readonly></div></div>'+
-    '<div class="na8-lines" id="naLines"></div>'+
+    (needOrd?'<div class="na8-lines" id="naLines"></div>':'')+
     (hasOrd?'<label id="naToSheetW" style="display:none;font-size:12.5px;margin-top:8px;align-items:center;gap:8px"><input type="checkbox" id="na_toSheet" onchange="S.na.wz.toSheet=this.checked"> '+t("Ghi luôn đơn này vào tab <b>Đơn hàng (3. SALE ORDER)</b> — để tính KPI C5 / C6 / C7","Also save this order to the Orders tab")+'</label>':'')+
     '<div class="fld" style="margin-top:8px"><label>'+t("SKU / mã sản phẩm mở mới","New SKU / product codes")+' <span id="naSkuRq"></span></label><textarea class="inp" id="na_sku" style="min-height:50px" placeholder="'+t("Tự điền từ các dòng sản phẩm — mỗi mã một dòng","Filled from the product lines — one code per line")+'" oninput="naChk()">'+esc(rec?rec.sku:"")+'</textarea></div></div>'+
   '<div class="na8-step"><h4><i>4</i>'+t("Chứng từ (kéo thả)","Evidence (drag &amp; drop)")+'<span id="naS4"></span></h4><div class="na8-guide">'+t("Kéo thả hoặc bấm để chọn — ảnh chụp <b>email NPP xác nhận</b> (bắt buộc), phiếu xuất kho / hoá đơn / đơn đặt hàng, thông báo trúng thầu. Dán ảnh chụp màn hình bằng Ctrl+V cũng được. Ảnh tự nén, tải lên ngay khi thả; gắn đúng loại cho từng file. File được đặt tên PIC_ngàythángnăm_Account_SKU khi lưu.",
@@ -18555,9 +18558,11 @@ function naForm(rec){
     '<div class="na8-drop" id="naDrop"><div class="big">📥</div><b>'+t("Kéo thả chứng từ vào đây","Drop evidence here")+'</b><small>'+t("hoặc bấm để chọn ảnh / PDF · dán ảnh bằng Ctrl+V · tối đa 15 MB / file","or tap to choose images / PDF · Ctrl+V to paste · max 15 MB per file")+'</small>'+
       '<input type="file" id="naFile" multiple accept="image/*,application/pdf" style="display:none"></div><div class="na8-files" id="naFiles"></div></div>'+
   '<div class="na8-step"><h4><i>5</i>'+t("Cam kết theo quy định","Confirmations")+'<span id="naS5"></span></h4>'+
-    [["first",t("Account đặt <b>đơn MANI đầu tiên</b> qua NPP trong FY (đại lý mới) / đặt <b>mã SKU này lần đầu</b> (SKU mới), do tôi mở.","The account placed its <b>first MANI order</b> via the distributor in the FY (new account) / ordered this <b>SKU for the first time</b> (new SKU), opened by me.")],
+    (needOrd?[["first",t("Account đặt <b>đơn MANI đầu tiên</b> qua NPP trong FY (đại lý mới) / đặt <b>mã SKU này lần đầu</b> (SKU mới), do tôi mở.","The account placed its <b>first MANI order</b> via the distributor in the FY (new account) / ordered this <b>SKU for the first time</b> (new SKU), opened by me.")],
      ["month",t("Ghi nhận vào <b>tháng phát sinh đơn đầu tiên</b>, chưa ghi ở tháng / case khác.","Recorded in the <b>month of the first order</b>, not counted elsewhere.")],
-     ["mail",t("Đơn hàng đã được tôi <b>thông báo cho NPP qua email</b> (Zalo chỉ là trao đổi nhanh, không thay email).","I <b>informed the distributor by e-mail</b> about this order.")]]
+     ["mail",t("Đơn hàng đã được tôi <b>thông báo cho NPP qua email</b> (Zalo chỉ là trao đổi nhanh, không thay email).","I <b>informed the distributor by e-mail</b> about this order.")]]:[["first",t("Account đặt đơn MANI <b>đầu tiên</b> qua NPP (đại lý mới) / đặt <b>mã SKU này lần đầu</b> (SKU mới), do tôi mở — <b>NPP đã xác nhận</b>.","First MANI order via the distributor (new account) / first order of this SKU (new SKU), opened by me — <b>confirmed by the distributor</b>.")],
+     ["month",t("Ghi nhận vào <b>tháng NPP xác nhận</b>, chưa ghi ở tháng / case khác.","Recorded in the <b>month of the distributor confirmation</b>, not counted elsewhere.")],
+     ["mail",t("Đã đính kèm <b>email / ảnh chụp email xác nhận của NPP</b> và có lịch sử chăm sóc account trên Báo cáo tuần.","The <b>distributor confirmation e-mail / screenshot</b> is attached and the account has a care history in the weekly report.")]])
     .map(function(x){ var on=rec&&rec.checklist&&rec.checklist[x[0]]; return '<label style="display:flex;gap:9px;align-items:flex-start;font-size:13px;line-height:1.5;margin:6px 0;cursor:pointer"><input type="checkbox" id="na_c_'+x[0]+'"'+(on?" checked":"")+' onchange="naChk()" style="width:18px;height:18px;margin-top:2px;flex:none"> <span>'+x[1]+'</span></label>'; }).join("")+'</div>'+
   '<div class="na8-step"><h4><i>6</i>'+t("Ghi chú","Note")+'</h4><textarea class="inp" id="na_note" style="min-height:56px" placeholder="'+t("Bối cảnh mở mới, người quyết định mua, kế hoạch tiếp theo…","Context, decision maker, next steps…")+'">'+esc(rec?rec.note:"")+'</textarea></div>'+
   '<div class="na8-miss" id="naMiss"></div></div>';
@@ -18733,7 +18738,12 @@ function naMissing(){
   naSyncLines();
   if(!w.acc && !($("na_acc")||{}).value) m.push(TX("Account","Account"));
   if(!String(($("na_npp")||{}).value||"").trim()) m.push(TX("Nhà phân phối","Distributor"));
-  if(!($("na_date")||{}).value) m.push(TX("Ngày đơn đầu tiên","First order date"));
+  if(!($("na_date")||{}).value) m.push(naNeedOrder()?TX("Ngày đơn đầu tiên","First order date"):TX("Ngày NPP xác nhận","Distributor confirmation date"));
+  if(!naNeedOrder() && w.acc && S.cache.weekly && S.cache.weekly.rows){
+    var _k=noAcc(w.acc.name), _d=($("na_date")||{}).value||"9999";
+    var _n=S.cache.weekly.rows.filter(function(r){ return noAcc(r.accName||"")===_k && String(r.pic)===w.pic && !/cancel/i.test(r.status||"") && String(r.start||"").slice(0,10)<=_d; }).length;
+    if(!_n) m.push(TX("Lịch sử chăm sóc account trên Báo cáo tuần","Care history in the weekly report"));
+  }
   if(w.type==="new_sku" && !String(($("na_sku")||{}).value||"").trim()) m.push(TX("Mã SKU mới","New SKU code"));
   var ok=w.files.filter(function(f){ return f.st==="ok"; });
   if(!ok.length) m.push(TX("Chứng từ","Evidence file"));
@@ -19156,6 +19166,166 @@ verApply=function(vers,mine){
     });
   }
   return r;
+};
+</script>
+<script>
+/* ═══════════════════════════════════════════════════════════════════════════════════════════
+   ⭐ v28.7 (05/10/2026) — Backend: Code.gs VN v10.8 · Thailand v1.16
+   ① Công việc khác: hiện MỌI loại việc của sales (trước chỉ hiện loại có chữ "Sale" ⇒ Management-Reporting,
+      họp hành, chi phí công tác… lưu xong không thấy, email thiếu, sales nhập lại ⇒ trùng). Lưu xong hiện ngay.
+   ② Gửi báo cáo tuần / tháng: chống bấm / gửi trùng (mã yêu cầu + chặn khi đang gửi + hỏi lại nếu vừa gửi).
+   ③ Kế hoạch tuần sau: dòng TBD đã tạo được tính là đã có kế hoạch (không hỏi lại vòng lặp).
+   ④ Đề xuất công tác ghi thẳng vào file Business Trip qua backend CRM (tripMaster2 / tripPropose2).
+   ⑤ Tiền USD cùng một kiểu ($1,234) ở Dashboard · KPI · Doanh số NPP. Số C5 / C6 / C7 trên Dashboard = số tab 9
+      (backend tính từ đơn hàng mới nhất) + đơn đang chờ ghi ⇒ khớp tab KPI cá nhân / file KPI.
+   ═══════════════════════════════════════════════════════════════════════════════════════════ */
+
+/* ── ① công việc khác: không lọc theo loại nữa (đã lọc theo PIC / nhóm) ── */
+otherTypeOk=function(){ return true; };
+
+/* lưu việc khác: chống trùng + hiện ngay */
+var _hubPost287=hubPost;
+hubPost=function(body){
+  body=body||{};
+  var a=String(body.action||"");
+  if(/^(addKey|addSub|updateKey|updateSub)$/.test(a)){
+    var sig=a+"|"+(body.no||"")+"|"+(body.parentNo||"")+"|"+(body.keyTask||body.name||"")+"|"+(body.start||"")+"|"+(body.planned||"");
+    S._hubInflight=S._hubInflight||{};
+    if(S._hubInflight[sig]) return S._hubInflight[sig];
+    if(/^add/.test(a)){
+      var rec=S._hubRecent&&S._hubRecent[sig];
+      if(rec && Date.now()-rec<120000 && !confirm(TX("Việc này vừa được lưu cách đây ít phút. Lưu thêm một dòng nữa?","This task was saved a few minutes ago. Save another copy?")))
+        return Promise.reject(new Error(TX("Đã huỷ — việc đã có sẵn","Cancelled — already saved")));
+    }
+    if(!body.rid) body.rid=uid28();
+    var pr=_hubPost287(body).then(function(r){
+      delete S._hubInflight[sig];
+      (S._hubRecent=S._hubRecent||{})[sig]=Date.now();
+      otherOptimistic(body,r);
+      return r;
+    },function(e){
+      delete S._hubInflight[sig];
+      /* Report Hub chậm: dữ liệu thường đã ghi xong ⇒ đọc lại thay vì báo lỗi để sales không nhập lại */
+      if(String((e&&e.message)||"")==="__HUB_TIMEOUT__"){
+        (S._hubRecent=S._hubRecent||{})[sig]=Date.now();
+        otherOptimistic(body,null);
+        setTimeout(function(){ loadOther(true).then(softRepaint).catch(function(){}); },2500);
+        return { ok:true, message:TX("Report Hub phản hồi chậm — việc đã gửi đi, đang đọc lại để kiểm tra (không cần nhập lại).","Report Hub is slow — the task was sent, reloading to check (no need to enter it again).") };
+      }
+      throw e;
+    });
+    S._hubInflight[sig]=pr;
+    return pr;
+  }
+  return _hubPost287(body);
+};
+/* đưa việc vừa lưu vào danh sách ngay (Report Hub đọc lại sau vài giây sẽ thay bằng bản chính thức) */
+function otherOptimistic(body,r){
+  try{
+    S.other=S.other||{ keys:[], at:Date.now() };
+    var keys=S.other.keys, a=body.action, today=todayISO();
+    var no=(r&&(r.no||r.keyNo||r.subNo))||("tmp-"+uid28());
+    if(a==="addKey"){
+      keys.unshift({ no:no, keyTask:body.keyTask, type:body.type, pic:body.pic, status:body.status||"To Do", progress:body.progress||0,
+        start:body.start||today, planned:body.planned||body.start||today, result:body.result||"", fy:S.fy, subs:[], _tmp:true });
+    } else if(a==="addSub"){
+      var k=keys.filter(function(x){ return String(x.no)===String(body.parentNo); })[0];
+      if(k){ k.subs=k.subs||[]; k.subs.push({ no:no, subTask:body.name, name:body.name, pic:body.pic, status:body.status||"To Do", progress:body.progress||0,
+        start:body.start||today, planned:body.planned||body.start||today, result:body.result||"", _tmp:true }); }
+    } else {
+      keys.forEach(function(k){
+        var hit=String(k.no)===String(body.no)?k:(k.subs||[]).filter(function(x){ return String(x.no)===String(body.no); })[0];
+        if(hit){ ["status","progress","start","planned","result","pic"].forEach(function(f){ if(body[f]!=null) hit[f]=body[f]; });
+          if(body.keyTask) hit.keyTask=body.keyTask; if(body.name){ hit.subTask=body.name; hit.name=body.name; } }
+      });
+    }
+    try{ kvSet(OTHER_KEY,S.other); }catch(e){}
+    if(S.tab==="weekly"){ if(S.wkTab==="cal"&&typeof renderCal==="function") renderCal(); else if(typeof renderOther==="function") renderOther(); }
+    setTimeout(function(){ loadOther(true).then(function(){ softRepaint(); }).catch(function(){}); },4000);
+  }catch(e){}
+}
+
+/* ── ② gửi báo cáo: chống gửi trùng ── */
+W28.weeklyReport=1; W28.monthlyReport=1;
+var _postBody287=postBody;
+postBody=function(body){
+  body=body||{};
+  if(body.action==="weeklyReport" && body.option!=="download"){
+    var key="wr|"+body.from+"|"+(body.toPic||"")+"|"+body.option;
+    S._rpInflight=S._rpInflight||{};
+    if(S._rpInflight[key]){ toast(TX("Báo cáo đang được gửi — vui lòng chờ…","The report is being sent — please wait…"),"warn",3500); return S._rpInflight[key]; }
+    var last=(S._rpSentAt||{})[key];
+    if(last && Date.now()-last<15*60000 && !confirm(TX("Báo cáo tuần này vừa được gửi lúc "+new Date(last).toTimeString().slice(0,5)+". Gửi lại lần nữa?","This report was sent at "+new Date(last).toTimeString().slice(0,5)+". Send it again?")))
+      return Promise.resolve({ ok:true, message:TX("Đã huỷ — không gửi lại","Cancelled — not sent again") });
+    if(!body.rid) body.rid=uid28();
+    var pr=_postBody287(body).then(function(r){ delete S._rpInflight[key]; (S._rpSentAt=S._rpSentAt||{})[key]=Date.now(); return r; },
+                                    function(e){ delete S._rpInflight[key]; throw e; });
+    S._rpInflight[key]=pr; return pr;
+  }
+  return _postBody287(body);
+};
+
+/* ── ③ kế hoạch tuần sau: dòng TBD cũng là kế hoạch ── */
+tbdPlanCount=function(rows,who){
+  var w=tbdNextWeek();
+  return (rows||[]).filter(function(r){
+    if(who && String(r.pic||"")!==who) return false;
+    var a=String(r.start||"").slice(0,10), b=String(r.finish||"").slice(0,10)||a;
+    if(!a || !(a<=w.to && b>=w.from)) return false;
+    return isTbdAcc(r.account) || isFieldType(parseAcc(r.account).type||r.type||"");
+  }).length;
+};
+
+/* ── ④ công tác: danh mục + đề xuất đi qua backend CRM, ghi thẳng file Business Trip ── */
+var _tripHub287=tripHub;
+tripHub=function(body,ms){
+  var a=String((body&&body.action)||"");
+  if(a==="tripMaster"){
+    return apiGet("tripMaster2",{ forPic:body.forPic||S.user.pic, _ts:Date.now() }).then(function(j){
+      if(!j||j.ok===false) throw new Error((j&&j.error)||"tripMaster2");
+      return j;
+    }).catch(function(e){
+      if(/Unknown action/i.test(String(e&&e.message))) return _tripHub287(body,ms);   /* backend cũ */
+      throw e;
+    });
+  }
+  if(a==="tripPropose"){
+    return apiPost({ action:"tripPropose2", trip:body.trip, rid:body.rid||uid28(), forPic:S.user.pic }).then(function(j){
+      /* đồng bộ lịch công tác bên Report Hub ở nền */
+      try{ hubJsonp({ action:"tripSync", pic:S.user.pic, actor:S.user.pic, _ts:Date.now() },60000).catch(function(){}); }catch(e){}
+      return j;
+    }).catch(function(e){
+      if(/Unknown action/i.test(String(e&&e.message))) return _tripHub287(body,ms);
+      throw e;
+    });
+  }
+  return _tripHub287(body,ms);
+};
+
+/* ── ⑤ tiền USD cùng một kiểu: $1,234 ── */
+fmtUSD=function(v){ var x=n(v); return (x<0?"-":"")+"$"+Math.round(Math.abs(x)).toLocaleString("en-US"); };
+kr8Unit=(function(_u){ return function(u){ return /usd/i.test(String(u||""))?"":_u(u); }; })(kr8Unit);
+kr8Fmt=(function(_f){ return function(v,unit){ if(/usd/i.test(String(unit||""))) return v==null?"—":fmtUSD(v); return _f(v,unit); }; })(kr8Fmt);
+
+/* C5 / C6 / C7: lấy số của tab 9 (backend vừa tính từ đơn hàng) + cộng đơn đang chờ ghi trong máy */
+_k8ApplyLive28=function(){};                     /* không ghi đè số tab 9 bằng số tính trên máy nữa */
+function k8PendDelta(pic,key){
+  var keep=k8OrderRows;
+  k8OrderRows=function(){ var o=[]; OB.list().forEach(function(it){ (it.rows||[]).forEach(function(r){ if(!r._row) o.push(r); }); }); return o; };
+  try{ return k8Live(pic,key); } finally { k8OrderRows=keep; }
+}
+k8Series=function(list,useLive){
+  var t=[],a=[],has=[]; for(var i=0;i<12;i++){ t.push(0); a.push(0); has.push(false); }
+  list.forEach(function(x){
+    var pend=useLive&&/^supp_/.test(x.r.key)?k8PendDelta(x.pic,x.r.key):null;
+    for(var i=0;i<12;i++){
+      t[i]+=n((x.r.t||[])[i]);
+      var av=(x.r.a||[])[i];
+      if(pend && pend[i]){ av=n(av)+pend[i]; }
+      if(av!=null&&av!==""){ a[i]+=n(av); has[i]=true; }
+    }
+  });
+  return { t:t, a:a, has:has };
 };
 </script>
 
