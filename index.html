@@ -3979,7 +3979,7 @@ function buildNav(){
     if(t.grp!==lastGrp){ h+='<div class="grp">'+t.grp+'</div>'; lastGrp=t.grp; }
     h+='<button class="nvi" data-t="'+t.id+'" onclick="go(\''+t.id+'\')"><span class="ic">'+t.ic+'</span><span class="lb">'+t.lb+'</span></button>';
   });
-  h+='<div style="flex:1"></div><div style="padding:10px;font-size:10.5px;color:var(--mute);line-height:1.5">MMH CRM v28.7<br>'+
+  h+='<div style="flex:1"></div><div style="padding:10px;font-size:10.5px;color:var(--mute);line-height:1.5">MMH CRM v28.8<br>'+
      (isMgmt()?'<a href="'+DRIVE_FOLDER+'" target="_blank">📁 Folder ảnh Drive</a>':"")+'</div>';
   $("side").innerHTML=h;
   /* ⭐ v4.5 — thanh dưới trượt ngang, đủ mọi mục, bỏ nút "Thêm" */
@@ -17967,6 +17967,8 @@ function k8Card(list,label,unit,code,focusM,opt){
   opt=opt||{};
   var s=k8Series(list,true), ms=k8Months(), fi=Math.max(0,ms.indexOf(String(focusM)));
   var iM=[fi], iQ=k8Idx("Q",focusM), iY=k8Idx("FY",focusM);
+  /* ⭐ v28.8 — "Cả FY" = actual lũy kế so với target CẢ NĂM · "Quý" = so với target cả quý */
+  var q0=Math.floor(fi/3)*3, iQF=[q0,q0+1,q0+2], iFY=[0,1,2,3,4,5,6,7,8,9,10,11];
   function line(lb,ix){
     if(!ix.length) return '<div class="k8-row"><span class="l">'+lb+'</span>'+k8Bar(null)+'<span class="r" style="color:var(--mute)">—<small>'+TX("chưa chốt số","not closed")+'</small></span></div>';
     var t=k8Sum(s.t,ix), a=k8Sum(s.a,ix);
@@ -17977,7 +17979,7 @@ function k8Card(list,label,unit,code,focusM,opt){
   var live=list.every(function(x){ return /^(supp_|newacct)/.test(x.r.key); });
   var fix=function(ix){ if(live) return ix; var k=ix.filter(function(i){ return s.has[i]; }); return k; };
   iQ=fix(iQ); iY=fix(iY); var iM2=fix(iM);
-  var main=opt.range||"M", ix=main==="FY"?iY:main==="Q"?iQ:iM2, T=k8Sum(s.t,ix), A=k8Sum(s.a,ix), P=T?A/T:null;
+  var main=opt.range||"M", ix=main==="FY"?iFY:main==="Q"?iQF:iM2, T=k8Sum(s.t,ix), A=k8Sum(s.a,ix), P=T?A/T:null;
   var npps={}; list.forEach(function(x){ var nn=k8Npp(x.r.name); if(nn) npps[nn]=1; });
   var mx=Math.max.apply(null,s.t.concat(s.a).concat([1]));
   var spark='<div class="k8-sparkw"><div class="k8-spark">'+ms.map(function(m,i){
@@ -17998,21 +18000,23 @@ function k8Card(list,label,unit,code,focusM,opt){
     (Object.keys(npps).length?Object.keys(npps).map(function(x){ return '<span class="npp">🏢 '+esc(x)+'</span>'; }).join(""):"")+
     '<div class="k8-big"><span class="v">'+(ix.length?k8Fmt(A,unit):'<span style="color:var(--mute)">'+TX("chưa chốt","not closed")+'</span>')+'</span><span class="u">/ '+k8Fmt(T,unit)+(unit&&unit!=="USD"?" "+esc(unit):"")+'</span><span class="p" style="color:'+k8Col(P)+'">'+k8Pct(P)+'</span></div>'+
     k8Bar(P,1)+
-    '<div class="k8-rows">'+line(monLbl("T"+parseInt(ms[fi].slice(4),10)),iM2)+line("Q"+(Math.floor(fi/3)+1),iQ)+line(TX("FY lũy kế","FY to date"),iY)+'</div>'+
+    '<div class="k8-rows">'+line(monLbl("T"+parseInt(ms[fi].slice(4),10)),iM2)+line("Q"+(Math.floor(fi/3)+1),iQF)+line(TX("Lũy kế","To date"),iY)+line(TX("Cả FY","Full FY"),iFY)+'</div>'+
     picsHtml+spark+'</div>';
 }
 
 /* bảng theo sales: mỗi dòng 1 PIC (tag NPP), mỗi cột 1 chỉ tiêu — bấm tên để xem riêng */
 function k8PicTable(groups,rng,focus){
   var pics=[]; groups.forEach(function(g){ g.list.forEach(function(x){ if(pics.indexOf(x.pic)<0) pics.push(x.pic); }); });
-  var ix=k8Idx(rng==="M"?"M":rng,focus);
+  var ix=k8Idx("M",focus);
+  if(rng==="FY") ix=[0,1,2,3,4,5,6,7,8,9,10,11];
+  else if(rng==="Q"){ var q0=Math.floor(ix[0]/3)*3; ix=[q0,q0+1,q0+2]; }
   var head='<tr><th>Sales · NPP</th>'+groups.map(function(g){ return '<th>'+esc(g.lb)+'</th>'; }).join("")+'</tr>';
   var body=pics.map(function(pc){
     var npp=[]; groups.forEach(function(g){ g.list.forEach(function(x){ var nn=k8Npp(x.r.name); if(x.pic===pc&&nn&&npp.indexOf(nn)<0) npp.push(nn); }); });
     return '<tr><td><a href="javascript:void 0" onclick="dashPic(\''+esc(pc)+'\')"><b>'+esc(pc)+'</b></a>'+npp.map(function(x){ return '<span class="npp">🏢 '+esc(x)+'</span>'; }).join("")+'</td>'+groups.map(function(g){
       var L=g.list.filter(function(x){ return x.pic===pc; }); if(!L.length) return '<td class="na">—</td>';
       var s=k8Series(L,true), live=L.every(function(x){ return /^(supp_|newacct)/.test(x.r.key); });
-      var ii=live?ix:ix.filter(function(i){ return s.has[i]; }), t=k8Sum(s.t,ii), a=k8Sum(s.a,ii), p=t?a/t:null;
+      var ii=(live||rng!=="M")?ix:ix.filter(function(i){ return s.has[i]; }), t=k8Sum(s.t,ii), a=k8Sum(s.a,ii), p=t?a/t:null;
       if(!ii.length) return '<td class="na">'+TX("chưa chốt","not closed")+'</td>';
       return '<td><b style="color:'+k8Col(p)+'">'+k8Pct(p)+'</b><small>'+k8Fmt(a,g.unit)+' / '+k8Fmt(t,g.unit)+'</small>'+k8Bar(p)+'</td>';
     }).join("")+'</tr>';
@@ -19326,6 +19330,36 @@ k8Series=function(list,useLive){
     }
   });
   return { t:t, a:a, has:has };
+};
+</script>
+<script>
+/* ⭐ v28.8 — Báo cáo tháng: xuất 2 file PDF cho cả team (Report tháng chọn + Plan tháng sau), cuốn chiếu Bắc → Trung → Nam */
+function mnTeamExport(){
+  if(!S.rpMonth) return toast(TX("Chọn tháng báo cáo trước","Choose the month first"),"warn");
+  busy(true,TX("Đang tạo 2 file PDF cho cả team…","Creating 2 PDF files for the team…"));
+  apiPost({ action:"monthlyReport", month:S.rpMonth, option:"teamFiles" }).then(function(r){
+    busy(false);
+    if(!r || !r.files) throw new Error((r&&r.error)||TX("Backend chưa hỗ trợ xuất cả team — cập nhật Code.gs VN v10.9","Backend not updated"));
+    r.files.forEach(function(f,i){ setTimeout(function(){ dlB64(f.b64,f.name); }, i*700); });
+    toast(r.message||TX("Đã tạo 2 file PDF","2 PDF files created"),"ok",6000);
+  }).catch(function(e){ busy(false); toast(e.message,"err",7000); });
+}
+var _renderReport288=renderReport;
+renderReport=function(){
+  var r=_renderReport288.apply(this,arguments);
+  try{
+    if(S.rpKind==="month" && !isTH() && (isMgrView() || /leader|manager|hod|director/i.test((S.user&&S.user.title)||"")) && !$("mnTeamBtn")){
+      var btns=Array.prototype.filter.call(document.querySelectorAll("#main button"),function(b){ return /Tải PDF/.test(b.textContent); });
+      if(btns.length){
+        var b=document.createElement("button"); b.id="mnTeamBtn"; b.className="btn pri";
+        b.innerHTML="📑 "+TX("Xuất báo cáo cả team (Report + Plan)","Export the team report (Report + Plan)");
+        b.title=TX("2 file PDF: Report tháng đã chọn và Plan tháng sau — trình bày lần lượt từng người theo khu vực miền Bắc → miền Trung → miền Nam","2 PDF files, one person after another: North → Central → South");
+        b.onclick=mnTeamExport;
+        btns[0].parentNode.insertBefore(b,btns[0].nextSibling);
+      }
+    }
+  }catch(e){}
+  return r;
 };
 </script>
 
