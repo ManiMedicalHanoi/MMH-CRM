@@ -3979,7 +3979,7 @@ function buildNav(){
     if(t.grp!==lastGrp){ h+='<div class="grp">'+t.grp+'</div>'; lastGrp=t.grp; }
     h+='<button class="nvi" data-t="'+t.id+'" onclick="go(\''+t.id+'\')"><span class="ic">'+t.ic+'</span><span class="lb">'+t.lb+'</span></button>';
   });
-  h+='<div style="flex:1"></div><div style="padding:10px;font-size:10.5px;color:var(--mute);line-height:1.5">MMH CRM v28.8<br>'+
+  h+='<div style="flex:1"></div><div style="padding:10px;font-size:10.5px;color:var(--mute);line-height:1.5">MMH CRM v28.10<br>'+
      (isMgmt()?'<a href="'+DRIVE_FOLDER+'" target="_blank">📁 Folder ảnh Drive</a>':"")+'</div>';
   $("side").innerHTML=h;
   /* ⭐ v4.5 — thanh dưới trượt ngang, đủ mọi mục, bỏ nút "Thêm" */
@@ -19339,7 +19339,7 @@ function mnTeamExport(){
   busy(true,TX("Đang tạo 2 file PDF cho cả team…","Creating 2 PDF files for the team…"));
   apiPost({ action:"monthlyReport", month:S.rpMonth, option:"teamFiles" }).then(function(r){
     busy(false);
-    if(!r || !r.files) throw new Error((r&&r.error)||TX("Backend chưa hỗ trợ xuất cả team — cập nhật Code.gs VN v10.9","Backend not updated"));
+    if(!r || !r.files) throw new Error((r&&r.error)||TX("Backend chưa hỗ trợ xuất cả team — cập nhật Code.gs VN v10.9 / Thái v1.17","The backend does not support the team export yet — update Code.gs (Thailand v1.17)"));
     r.files.forEach(function(f,i){ setTimeout(function(){ dlB64(f.b64,f.name); }, i*700); });
     toast(r.message||TX("Đã tạo 2 file PDF","2 PDF files created"),"ok",6000);
   }).catch(function(e){ busy(false); toast(e.message,"err",7000); });
@@ -19348,8 +19348,8 @@ var _renderReport288=renderReport;
 renderReport=function(){
   var r=_renderReport288.apply(this,arguments);
   try{
-    if(S.rpKind==="month" && !isTH() && (isMgrView() || /leader|manager|hod|director/i.test((S.user&&S.user.title)||"")) && !$("mnTeamBtn")){
-      var btns=Array.prototype.filter.call(document.querySelectorAll("#main button"),function(b){ return /Tải PDF/.test(b.textContent); });
+    if(S.rpKind==="month" && (isMgrView() || /leader|manager|hod|director/i.test((S.user&&S.user.title)||"")) && !$("mnTeamBtn")){
+      var btns=Array.prototype.filter.call(document.querySelectorAll("#main button"),function(b){ return /Tải PDF|Download PDF/.test(b.textContent); });
       if(btns.length){
         var b=document.createElement("button"); b.id="mnTeamBtn"; b.className="btn pri";
         b.innerHTML="📑 "+TX("Xuất báo cáo cả team (Report + Plan)","Export the team report (Report + Plan)");
@@ -19361,6 +19361,16 @@ renderReport=function(){
   }catch(e){}
   return r;
 };
+/* ⭐ v28.10 — bản xem trước báo cáo tháng: bỏ Management-KPI, nhóm Marketing (Event cuối cùng) xuống cuối */
+function mnTypeRank(t){ t=String(t||"").toLowerCase(); return /event/.test(t)&&/marketing|mkt/.test(t)?3:/^(marketing|mkt)/.test(t)?2:1; }
+function mnPrep(rows){
+  return (rows||[]).filter(function(r){ return !/\bkpi\b/i.test(String(r.typeTask||"")); })
+    .map(function(r,i){ return {r:r,i:i}; })
+    .sort(function(x,y){ return (mnTypeRank(x.r.typeTask)-mnTypeRank(y.r.typeTask)) || String(x.r.typeTask||"").localeCompare(String(y.r.typeTask||"")) || (x.i-y.i); })
+    .map(function(x){ return x.r; });
+}
+var _mnPreview2810=mnPreview;
+mnPreview=function(a,b){ return _mnPreview2810(mnPrep(a),mnPrep(b)); };
 </script>
 
 </body>
