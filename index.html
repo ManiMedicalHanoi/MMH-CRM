@@ -2319,7 +2319,7 @@ var ROLES = {
   "Viet":      { grp:"Dental Sales",   title:"Dental Sales Team Leader",     email:"mmh.hanoi@manimedicalhanoi.com",   ini:"VI", team:"dental" },
   "Phuong":    { grp:"Dental Sales",   title:"Dental Sales PIC — South",     email:"mmh.saigon@manimedicalhanoi.com",  ini:"PH", team:"dental" },
   "Vinh":      { grp:"Dental Sales",   title:"Dental Sales PIC — Central",   email:"mmh.danang@manimedicalhanoi.com",  ini:"VN", team:"dental" },
-  "Khang":     { grp:"Surgical Sales", title:"Surgical Sales PIC — South",   email:"mmh.saigon2@manimedicalhanoi.com", ini:"KH", team:"surgical" },
+  "Khang":     { grp:"Surgical Sales", title:"Surgical Sales PIC — South",   email:"mmh.saigon1@manimedicalhanoi.com", ini:"KH", team:"surgical" },
   "Viet Ha":   { grp:"Surgical Sales", title:"Surgical Sales PIC — North",   email:"mmh.hanoi2@manimedicalhanoi.com",  ini:"VH", team:"surgical" },
   /* ⭐ v7.2 — Eyeless Sales */
   "Trang":     { grp:"Eyeless Sales",  title:"Eyeless Sales PIC",            email:"marketing.mmh2@manimedicalhanoi.com", ini:"TR", team:"eyeless" },
@@ -3979,7 +3979,7 @@ function buildNav(){
     if(t.grp!==lastGrp){ h+='<div class="grp">'+t.grp+'</div>'; lastGrp=t.grp; }
     h+='<button class="nvi" data-t="'+t.id+'" onclick="go(\''+t.id+'\')"><span class="ic">'+t.ic+'</span><span class="lb">'+t.lb+'</span></button>';
   });
-  h+='<div style="flex:1"></div><div style="padding:10px;font-size:10.5px;color:var(--mute);line-height:1.5">MMH CRM v29.3<br>'+
+  h+='<div style="flex:1"></div><div style="padding:10px;font-size:10.5px;color:var(--mute);line-height:1.5">MMH CRM v30.0<br>'+
      (isMgmt()?'<a href="'+DRIVE_FOLDER+'" target="_blank">📁 Folder ảnh Drive</a>':"")+'</div>';
   $("side").innerHTML=h;
   /* ⭐ v4.5 — thanh dưới trượt ngang, đủ mọi mục, bỏ nút "Thêm" */
@@ -19478,7 +19478,33 @@ var AUTH=window.AUTH={
   try{
     var d=Object.getOwnPropertyDescriptor(HTMLScriptElement.prototype,"src");
     if(d && d.set && !d.set.__au){
-      var setter=function(v){ d.set.call(this, AUTH.addTk(v)); }; setter.__au=1;
+      /* ⭐ Đọc Apps Script KHÔNG kèm cookie Google: điện thoại / Chrome đang đăng nhập Gmail khác (hoặc nhiều tài khoản)
+         thì thẻ <script> bị Google chuyển sang trang "chọn tài khoản" ⇒ chờ rất lâu rồi báo "Không kết nối được máy chủ".
+         Nay thử fetch(credentials:"omit") trước (web app quyền "Anyone" trả kèm CORS), nhận được ⇒ chạy đúng callback;
+         hỏng (web app chỉ cho tài khoản công ty, link /a/macros/…) ⇒ quay về thẻ <script> như cũ và nhớ cho lần sau. */
+      var NOF={}; try{ NOF=JSON.parse(sessionStorage.getItem("mmh_gas_nofetch")||"{}")||{}; }catch(_){}
+      var gasFetch=function(el, url){
+        var m=/[?&]callback=([^&#]+)/.exec(url), base=url.split("?")[0];
+        if(!m || !window.fetch || /\/a\/macros\//.test(url) || NOF[base]>=2) return false;   /* hỏng 2 lần liền ⇒ thôi thử */
+        var cb=decodeURIComponent(m[1]);
+        window.fetch(url,{ method:"GET", credentials:"omit", cache:"no-store", redirect:"follow" })
+          .then(function(r){ if(!r.ok) throw new Error("http "+r.status); return r.text(); })
+          .then(function(t){
+            t=String(t||"").trim();
+            if(t.slice(0,cb.length+24).indexOf(cb+"(")<0) throw new Error("not jsonp");
+            if(NOF[base]){ delete NOF[base]; try{ sessionStorage.setItem("mmh_gas_nofetch", JSON.stringify(NOF)); }catch(_){} }
+            if(typeof window[cb]!=="function") return;              /* đã hết giờ chờ / đã huỷ */
+            var s=document.createElement("script"); s.text=t; (document.head||document.documentElement).appendChild(s);
+            if(s.parentNode) s.parentNode.removeChild(s);
+            try{ el.dispatchEvent(new Event("load")); }catch(_){}
+          })
+          .catch(function(){
+            NOF[base]=(NOF[base]||0)+1; try{ sessionStorage.setItem("mmh_gas_nofetch", JSON.stringify(NOF)); }catch(_){}
+            if(typeof window[cb]==="function") d.set.call(el, url);  /* dự phòng: thẻ <script> như cũ */
+          });
+        return true;
+      };
+      var setter=function(v){ var u=AUTH.addTk(v); if(typeof u==="string" && GAS_RE.test(u) && gasFetch(this,u)) return; d.set.call(this, u); }; setter.__au=1;
       Object.defineProperty(HTMLScriptElement.prototype,"src",{ configurable:true, enumerable:d.enumerable, get:d.get, set:setter });
     }
   }catch(_){}
@@ -20774,6 +20800,324 @@ window.QS2={ open:qsOpen };
   if(fy){ h.insertBefore(lk, fy); }
   var user=document.getElementById("btnUser"); if(user) h.insertBefore(th, user);
 })();
+})();
+</script>
+
+<style id="v30-css">
+/* ⭐ v30.0 — GIAO DIỆN GỌN & BÌNH TĨNH · TỐI ƯU ĐIỆN THOẠI CHO SALES ĐI ĐỊA BÀN
+   Biểu tượng nét mảnh thay emoji · thẻ lịch 1 vạch màu, chữ loại việc nhỏ · trạng thái = chấm màu + chữ
+   Điện thoại: thanh trên chỉ còn logo · Tìm · Lịch · tên; thanh dưới 5 nút cố định (nút ＋ ở giữa) */
+:root{--v30-line:#E6EAEF;--v30-sub:#5B6B7D;--v30-mute:#8A97A6;--v30-bg:#F6F8FA}
+body{background:var(--v30-bg)}
+.v30i{width:18px;height:18px;flex:none;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;vertical-align:-3px}
+/* thanh trên cùng */
+#app header .hbtn,#app header .tb2,#app header .mc-launch{background:#fff;border:1px solid var(--v30-line);color:var(--navy);box-shadow:none}
+#app header .hbtn:hover,#app header .tb2:hover,#app header .mc-launch:hover{background:var(--pale)}
+#app header .hbtn .v30i,#app header .tb2 .v30i,#app header .mc-launch .v30i{color:#41566F}
+/* menu bên */
+.nvi .ic{display:inline-flex;align-items:center;justify-content:center}
+.nvi .ic .v30i{width:18px;height:18px;color:#7A8899}
+.nvi.on .ic .v30i{color:var(--blue)}
+.nvi.on{background:var(--pale)!important;box-shadow:inset 3px 0 0 var(--blue)!important}
+/* lịch: thẻ việc */
+.cal-card{border:1px solid var(--v30-line)!important;border-left:3px solid var(--c)!important;border-radius:10px!important;background:#fff!important;box-shadow:none!important;padding:8px 10px!important}
+.cal-card:hover{background:#FAFBFC!important;transform:none!important}
+.cal-card .tg{background:none!important;padding:0!important;margin-bottom:2px!important;color:var(--c)!important;font-size:10px!important;font-weight:700!important;letter-spacing:.5px!important;border-radius:0!important}
+.cal-card b{font-weight:600!important;font-size:13px!important}
+.cal-card .k{color:var(--v30-mute)!important}
+.cal-card .st{background:none!important;padding:0!important;font-weight:600!important;font-size:11px!important;border-radius:0!important}
+.cal-card .st::before{content:"";display:inline-block;width:6px;height:6px;border-radius:50%;background:currentColor;margin-right:5px;vertical-align:1px}
+.cal-card .pc{font-weight:600!important;color:var(--v30-mute)!important}
+.cal-card.done{opacity:.6}
+.cal-card.done b{text-decoration:none!important;opacity:1!important;color:var(--v30-sub)!important}
+.cal-card.od{background:#FFF9F8!important}
+.cal-card.ro{background:#fff!important}
+.cal-card .av{width:18px;height:18px}
+.cal-due{background:none!important;border:none!important;padding:0!important;font-weight:600!important;font-size:11px!important;color:var(--v30-sub)!important;display:block;margin-top:4px}
+.cal-due.near,.cal-due.today{color:#B4532A!important}
+.cal-gh{background:#fff!important;border:1px solid var(--v30-line)!important;border-left:3px solid #D9A441!important;border-radius:10px!important}
+.cal-gh-h{color:#7A5A16!important;font-weight:700!important}
+.cal-chip{height:30px!important;background:#fff!important;box-shadow:none!important;font-weight:600!important;font-size:12.5px!important;color:#41566F!important}
+.cal-chip.off{opacity:.55}
+.cal-chip i{width:8px!important;height:8px!important;border-radius:50%!important}
+.cal-kpi{box-shadow:none!important;border-color:var(--v30-line)!important;border-radius:12px!important}
+.cal-kpi .pbx{height:4px!important}
+/* thao tác nhanh trên thẻ (điện thoại) */
+.v30-ic{display:inline-flex;align-items:center;justify-content:center;color:#5B6B7D}
+.v30-ic .v30i{width:max(15px,1.1em);height:max(15px,1.1em)}
+.v30-qa{display:flex;gap:6px;margin-top:8px}
+.v30-qa span{flex:1;display:inline-flex;align-items:center;justify-content:center;gap:6px;height:36px;border-radius:9px;border:1px solid var(--v30-line);background:#fff;color:var(--navy);font-size:13px;font-weight:600}
+.v30-qa span.pri{background:var(--blue);border-color:var(--blue);color:#fff}
+.v30-qa span:active{transform:scale(.98)}
+.v30-qa .v30i{width:17px;height:17px}
+/* bảng "Thêm" trên điện thoại */
+#v30-more{position:fixed;inset:0;z-index:9700;background:rgba(20,35,50,.32);display:none;align-items:flex-end}
+#v30-more.show{display:flex}
+#v30-more .sh{width:100%;max-height:82vh;overflow:auto;background:#fff;border-radius:16px 16px 0 0;padding:8px 14px calc(14px + env(safe-area-inset-bottom))}
+#v30-more .hd{display:flex;align-items:center;padding:8px 2px 10px}
+#v30-more .hd b{font-size:15px;color:var(--navy);flex:1}
+#v30-more .hd button{width:34px;height:34px;border-radius:9px;border:1px solid var(--v30-line);background:#fff;color:var(--navy)}
+#v30-more .gt{font-size:11px;font-weight:700;color:var(--v30-mute);text-transform:uppercase;letter-spacing:.5px;margin:10px 2px 6px}
+#v30-more .gr{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+#v30-more .gr button,#v30-more .gr a{display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px 2px;border-radius:11px;border:1px solid var(--v30-line);background:#fff;color:#1F3347;font-size:11.5px;font-weight:600;text-decoration:none;line-height:1.25;text-align:center}
+#v30-more .gr .on{background:var(--pale);border-color:var(--blue);color:var(--blue)}
+#v30-more .gr .v30i{width:21px;height:21px;color:#41566F}
+#v30-more select{width:100%;height:40px;border:1px solid var(--v30-line);border-radius:10px;padding:0 10px;font-size:14px;background:#fff}
+.cal-wc{scroll-margin-top:12px}
+@media(max-width:720px){
+  /* thanh trên: logo · tìm · lịch · tên */
+  #app header{gap:6px!important;padding:0 10px!important}
+  #app header .brand{min-width:0;flex:1 1 auto;gap:8px}
+  #app header .brand .bm{flex:none}
+  #app header .brand .bt{font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  #app header .sp{display:none}
+  #app header #lkBtn,#app header #fySel,#app header #btnHelp,#app header #btnReload,#app header #thBtn,#app header #btnAct{display:none!important}
+  #app header .hbtn,#app header .tb2,#app header .mc-launch{width:38px!important;height:38px!important;min-width:38px;padding:0!important;justify-content:center}
+  #app header #btnUser{width:38px;height:38px;border-radius:50%!important;background:var(--blue)!important;color:#fff!important;border:none!important}
+  /* thanh dưới 5 nút */
+  nav.mob{overflow:visible!important;justify-content:space-around!important;padding-left:4px!important;padding-right:4px!important;box-shadow:none!important;border-top:1px solid var(--v30-line)!important;background:#fff!important}
+  nav.mob button{flex:1 1 0!important;min-width:0!important;font-size:11px!important;font-weight:600!important;color:#7A8899!important;gap:3px!important}
+  nav.mob button .ic{display:inline-flex}
+  nav.mob button .ic .v30i{width:22px;height:22px}
+  nav.mob button.on{color:var(--blue)!important}
+  nav.mob button.v30-add .ic{width:46px;height:46px;border-radius:14px;background:var(--blue);color:#fff;align-items:center;justify-content:center;margin-top:-18px;box-shadow:0 4px 12px rgba(30,50,80,.18)}
+  nav.mob button.v30-add .ic .v30i{width:24px;height:24px;stroke-width:2.2}
+  nav.mob button.v30-add{color:var(--navy)!important}
+  .fab,.fab.on{display:none!important}
+  #wq-chip{bottom:calc(var(--nav) + 14px + env(safe-area-inset-bottom))!important}
+  .cal-card{padding:10px 12px!important}
+  .cal-card b{font-size:14.5px!important}
+}
+</style>
+<script>
+/* ══ ⭐ v30.0 — GIAO DIỆN GỌN · ĐIỆN THOẠI CHO SALES ĐI ĐỊA BÀN ══
+   ① Biểu tượng SVG nét mảnh thay emoji ở thanh trên, menu bên, thanh dưới; chữ trên nút / nhãn / tiêu đề bỏ emoji màu.
+   ② Lịch: thẻ việc gọn (1 vạch màu theo loại, trạng thái = chấm màu), gộp chuyến công tác bị trùng (2 dòng giống hệt).
+   ③ Điện thoại: thanh trên chỉ giữ Tìm · MMH Calendar · tên; mọi thứ khác vào nút "Thêm" ở thanh dưới.
+      Thanh dưới cố định 5 nút: Lịch · Khách hàng · ＋ (ghi nhanh) · Mở mới / Đơn hàng · Thêm.
+   ④ Thẻ đi địa bàn hôm nay (chưa xong) có nút "Chụp ảnh" (mở thẳng camera) và "Báo kết quả" (chọn sẵn Completed);
+      thẻ công tác có nút "Báo cáo công tác". */
+(function(){
+"use strict";
+var P={
+  calendar:'<rect x="3" y="4.5" width="18" height="16" rx="2.5"/><path d="M3 9.5h18M8 2.5v4M16 2.5v4"/>',
+  search:'<circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/>',
+  link:'<path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/>',
+  help:'<circle cx="12" cy="12" r="9"/><path d="M9.6 9.4a2.5 2.5 0 1 1 3.4 2.4c-.6.3-1 .8-1 1.5v.5M12 17h.01"/>',
+  bell:'<path d="M6 16v-5a6 6 0 0 1 12 0v5l1.5 2h-15z"/><path d="M10 20.5a2 2 0 0 0 4 0"/>',
+  refresh:'<path d="M20 12a8 8 0 1 1-2.3-5.7"/><path d="M20 4v4h-4"/>',
+  palette:'<path d="M12 3a9 9 0 1 0 0 18c1 0 1.5-.7 1.5-1.5 0-.5-.3-.9-.6-1.2-.3-.4-.5-.8-.5-1.3 0-.9.7-1.5 1.6-1.5H16a5 5 0 0 0 5-5c0-4.1-4-7.5-9-7.5z"/><circle cx="7.5" cy="11" r=".9"/><circle cx="10" cy="7.5" r=".9"/><circle cx="14.5" cy="7.5" r=".9"/>',
+  more:'<circle cx="5" cy="12" r="1.2"/><circle cx="12" cy="12" r="1.2"/><circle cx="19" cy="12" r="1.2"/>',
+  grid:'<rect x="4" y="4" width="6.5" height="6.5" rx="1.5"/><rect x="13.5" y="4" width="6.5" height="6.5" rx="1.5"/><rect x="4" y="13.5" width="6.5" height="6.5" rx="1.5"/><rect x="13.5" y="13.5" width="6.5" height="6.5" rx="1.5"/>',
+  pin:'<path d="M12 21s-6.5-5.6-6.5-11a6.5 6.5 0 0 1 13 0c0 5.4-6.5 11-6.5 11z"/><circle cx="12" cy="10" r="2.3"/>',
+  users:'<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><path d="M16 4.6a3.5 3.5 0 0 1 0 6.8M18 14a6.5 6.5 0 0 1 3.5 6"/>',
+  ucheck:'<circle cx="10" cy="8" r="3.5"/><path d="M3.5 20a6.5 6.5 0 0 1 13 0"/><path d="m16 11 2 2 4-4"/>',
+  chart:'<path d="M3 20h18"/><path d="M6.5 16v-5M11.5 16V6M16.5 16v-8"/>',
+  target:'<circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r=".8"/>',
+  spark:'<path d="M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.5 2.5M15.5 15.5 18 18M6 18l2.5-2.5M15.5 8.5 18 6"/>',
+  receipt:'<path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M9 8h6M9 12h6"/>',
+  present:'<rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/>',
+  list:'<path d="M9 6h11M9 12h11M9 18h11"/><path d="M4.5 6h.01M4.5 12h.01M4.5 18h.01"/>',
+  star:'<path d="m12 3.5 2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.9l-5.2 2.7 1-5.8-4.3-4.1 5.9-.9z"/>',
+  clip:'<rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4V3h6v1M9 10h6M9 14h4"/>',
+  send:'<path d="M21 3 10 14"/><path d="m21 3-7 18-4-7-7-4z"/>',
+  image:'<rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="m21 16-5-5-9 9"/>',
+  flag:'<path d="M5 21V4M5 4h11l-2 4 2 4H5"/>',
+  plus:'<path d="M12 5v14M5 12h14"/>',
+  camera:'<path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/>',
+  check:'<path d="m5 12.5 4.5 4.5L19 7.5"/>',
+  doc:'<path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4M9 12h6M9 16h6"/>',
+  plane:'<path d="M10.2 13.8 3.5 11.5 5 10l7 .8 4.3-4.3a1.9 1.9 0 0 1 2.7 2.7L14.7 13.5l.8 7-1.5 1.5-2.3-6.7-2.9 2.9.2 2.3-1.2 1.2-1.4-3.1-3.1-1.4 1.2-1.2 2.3.2z"/>',
+  cap:'<path d="m2.5 9.5 9.5-5 9.5 5-9.5 5z"/><path d="M6.5 11.6v4.4c1.5 1.5 3.5 2.2 5.5 2.2s4-.7 5.5-2.2v-4.4M21.5 9.5v5"/>',
+  globe:'<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.6 3.8 5.6 3.8 9s-1.3 6.4-3.8 9c-2.5-2.6-3.8-5.6-3.8-9S9.5 5.6 12 3z"/>'
+};
+function I(k){ return '<svg class="v30i" viewBox="0 0 24 24" aria-hidden="true">'+(P[k]||"")+'</svg>'; }
+window.V30_ICON=I;
+var TAB_IC={ dash:"chart", kpi:"target", cust:"users", stake:"ucheck", weekly:"calendar", newacc:"spark", event:"flag",
+  order:"receipt", present:"present", monthly:"list", adp:"star", meet:"clip", photos:"image", report:"send" };
+function mob(){ return window.matchMedia && window.matchMedia("(max-width:720px)").matches; }
+
+/* ── ① bỏ emoji màu khỏi chữ trên nút / nhãn / tiêu đề (giữ ✓ ✕ → ⟳ …; nút chỉ có emoji thì giữ nguyên) ── */
+var EMO=/(?:[\u{1F000}-\u{1FAFF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{2712}\u{2716}\u{2718}-\u{27BF}]|[\u{2B00}-\u{2BFF}]|[\u{1F1E6}-\u{1F1FF}]|\u{2139}|\u{231A}|\u{231B}|[\u{23E9}-\u{23FA}]|\u{FE0F}|\u{200D}|\u{20E3})+\s?/gu;
+var LET=/[A-Za-zÀ-ỹ0-9]/;
+var EMI={"📍":"pin","🧩":"list","✈":"plane","🎓":"cap","📅":"calendar","👥":"users","🧾":"receipt","📷":"camera","📸":"camera","📧":"send","🔔":"bell",
+  "🎪":"flag","📊":"chart","🎯":"target","⭐":"star","🗂":"clip","🆕":"spark","🖼":"image","🎤":"present","🤝":"ucheck","🗓":"calendar","🔍":"search","📋":"doc","📝":"doc","🏥":"users"};
+var SEL="button,a.btn,label,h1,h2,h3,h4,h5,th,legend,summary,option,.tg,.cal-due,.cal-gh-h,.te-st,.te-lb,.lab,.grp,.ph,.drw-tabs *,.mh,.tl,.cal-kpi span,.q16-meta span,.tr6-rh,.tr6-dest,.tr6-date,.tr6-cmt,.photorule,.pp-none,.tp-err,.tr6-lock,.hint,.toast,#toast";
+function clean(root){
+  if(!root || root.nodeType!==1 && root.nodeType!==9) return;
+  var tw=document.createTreeWalker(root, NodeFilter.SHOW_TEXT, null), n, todo=[];
+  while((n=tw.nextNode())){
+    var v=n.nodeValue; if(!v || v.length>400) continue;
+    EMO.lastIndex=0; if(!EMO.test(v)) continue;
+    var p=n.parentElement; if(!p || p.closest("textarea,input,script,style,[contenteditable],.v30-keep,#qs2 .r .i>span:first-child")) continue;
+    if(!p.closest(SEL)) continue;
+    var nv=v.replace(EMO,"");
+    if(!LET.test(nv) && p.childNodes.length===1 && EMI[v.replace(/[\uFE0F\s]/g,"")] && !p.closest("#qs2")){   /* ô chỉ chứa 1 emoji quen ⇒ biểu tượng nét */
+      todo.push([n, null, EMI[v.replace(/[\uFE0F\s]/g,"")]]); continue;
+    }
+    if(!LET.test(nv)){                                /* chỉ toàn emoji: bỏ khi nút / nhãn còn chữ khác, không thì giữ */
+      var host=p.closest(SEL); if(!host || !LET.test(String(host.textContent||"").replace(EMO,""))) continue;
+      nv="";
+    }
+    todo.push([n, nv.replace(/^\s+/, v.match(/^\s*/)[0])]);
+  }
+  todo.forEach(function(x){ if(x[2]){ var e=x[0].parentElement; if(e){ e.innerHTML=I(x[2]); e.classList.add("v30-ic"); } } else x[0].nodeValue=x[1]; });
+}
+var pend=[], raf=0;
+function sched(n){ pend.push(n); if(!raf) raf=requestAnimationFrame(function(){ raf=0; var a=pend; pend=[]; a.forEach(function(r){ if(r.isConnected) clean(r.nodeType===3?r.parentElement:r); }); }); }
+try{
+  new MutationObserver(function(ms){
+    ms.forEach(function(m){
+      if(m.type==="characterData") sched(m.target);
+      else for(var i=0;i<m.addedNodes.length;i++) sched(m.addedNodes[i]);
+    });
+  }).observe(document.body,{ childList:true, subtree:true, characterData:true });
+}catch(_){}
+
+/* ── thanh trên cùng: biểu tượng SVG ── */
+function hdrIcons(){
+  var set=function(id,k,keepSpan){ var b=document.getElementById(id); if(!b || b.getAttribute("data-v30")) return;
+    var sp=b.querySelector("span:not(.dot)"), kb=b.querySelector("kbd"), dot=b.querySelector(".dot");
+    b.innerHTML=I(k)+(keepSpan&&sp?'<span>'+sp.textContent.replace(EMO,"")+'</span>':'')+(kb?kb.outerHTML:'')+(dot?dot.outerHTML:'');
+    b.setAttribute("data-v30","1"); };
+  set("mcBtn","calendar",1); set("qsBtn","search",1); set("lkBtn","link",1); set("thBtn","palette");
+  set("btnHelp","help"); set("btnReload","refresh");
+  var a=document.getElementById("btnAct"); if(a && !a.getAttribute("data-v30")){ var d=document.getElementById("actDot"); a.innerHTML=I("bell"); if(d) a.appendChild(d); a.setAttribute("data-v30","1"); }
+}
+hdrIcons(); setTimeout(hdrIcons,0); document.addEventListener("DOMContentLoaded",hdrIcons);
+
+/* ── menu bên + thanh dưới ── */
+var MOB_MAIN=["weekly","cust","+","?","more"];
+var bn=window.buildNav;
+window.buildNav=buildNav=function(){
+  var r=bn.apply(this,arguments);
+  try{
+    document.querySelectorAll("#side .nvi[data-t]").forEach(function(b){ var k=TAB_IC[b.getAttribute("data-t")]; var ic=b.querySelector(".ic"); if(k&&ic) ic.innerHTML=I(k); });
+    var tabs={}; navTabs().forEach(function(t){ tabs[t.id]=t; });
+    var fourth=["newacc","order","event","dash"].filter(function(id){ return tabs[id]; })[0];
+    var h=MOB_MAIN.map(function(id){
+      if(id==="+") return '<button class="v30-add" onclick="V30.add()"><span class="ic">'+I("plus")+'</span>Ghi nhanh</button>';
+      if(id==="more") return '<button data-v30m="1" onclick="V30.more()"><span class="ic">'+I("grid")+'</span>Thêm</button>';
+      if(id==="?") id=fourth;
+      var t=tabs[id]; if(!t) return "";
+      var lb=id==="weekly"?"Lịch":(t.mlb||t.lb.split(" ")[0]);
+      return '<button data-t="'+t.id+'" onclick="go(\''+t.id+'\')"><span class="ic">'+I(TAB_IC[t.id]||"list")+'</span>'+esc(lb)+'</button>';
+    }).join("");
+    var nm=document.getElementById("navMob"); if(nm) nm.innerHTML=h;
+    if(S.tab) document.querySelectorAll("#navMob [data-t]").forEach(function(el){ el.classList.toggle("on", el.getAttribute("data-t")===S.tab); });
+  }catch(e){ try{ console.warn(e); }catch(_){} }
+  return r;
+};
+
+/* ── bảng "Thêm" ── */
+function moreSheet(){
+  var o=document.getElementById("v30-more");
+  if(!o){ o=document.createElement("div"); o.id="v30-more"; document.body.appendChild(o);
+    o.addEventListener("click",function(e){ if(e.target===o) o.classList.remove("show"); }); }
+  var ids={}; [].forEach.call(document.querySelectorAll("#navMob [data-t]"),function(b){ ids[b.getAttribute("data-t")]=1; });
+  var tabs=navTabs().filter(function(t){ return !ids[t.id]; });
+  var btn=function(ic,lb,fn,on){ return '<button class="'+(on?"on":"")+'" data-fn="'+fn+'">'+I(ic)+'<span>'+esc(lb)+'</span></button>'; };
+  var fy=document.getElementById("fySel");
+  var links=[].map.call(document.querySelectorAll("#app header .qlinks a"),function(a){ return {h:a.href,t:a.textContent.replace(EMO,"").trim()}; });
+  links.push({h:"https://manimedicalhanoi.github.io/MMH-Report/",t:"Report Hub"});
+  o.innerHTML='<div class="sh"><div class="hd"><b>Chức năng</b><button onclick="document.getElementById(\'v30-more\').classList.remove(\'show\')">✕</button></div>'
+    +'<div class="gr">'+tabs.map(function(t){ return btn(TAB_IC[t.id]||"list", t.mlb||t.lb, "go:"+t.id, S.tab===t.id); }).join("")+'</div>'
+    +'<div class="gt">Tiện ích</div><div class="gr">'
+      +btn("bell","Bảng tin","act")+btn("refresh","Tải lại","reload")+btn("palette","Màu","theme")+btn("help","Hướng dẫn","help")+'</div>'
+    +(fy?'<div class="gt">Năm tài chính</div><select id="v30-fy">'+fy.innerHTML+'</select>':'')
+    +'<div class="gt">Webapp khác</div><div class="gr">'+links.map(function(l){ return '<a href="'+esc(l.h)+'" target="_blank" rel="noopener">'+I("globe")+'<span>'+esc(l.t)+'</span></a>'; }).join("")+'</div>'
+    +'</div>';
+  var f2=document.getElementById("v30-fy"); if(f2 && fy){ f2.value=fy.value; f2.onchange=function(){ fy.value=f2.value; fy.dispatchEvent(new Event("change")); o.classList.remove("show"); }; }
+  o.querySelectorAll("[data-fn]").forEach(function(b){ b.onclick=function(){
+    var fn=b.getAttribute("data-fn"); o.classList.remove("show");
+    if(fn.indexOf("go:")===0) return go(fn.slice(3));
+    var click=function(id){ var x=document.getElementById(id); if(x) x.click(); };
+    if(fn==="act") click("btnAct"); else if(fn==="reload") click("btnReload"); else if(fn==="help") click("btnHelp");
+    else if(fn==="theme"){ var t=document.getElementById("thBtn"); if(t){ t.style.setProperty("display","inline-flex","important"); t.click(); t.style.removeProperty("display"); } }
+  }; });
+  o.classList.add("show");
+}
+window.V30={
+  more:moreSheet,
+  add:function(){ var f=document.getElementById("fab"); if(f && typeof f.onclick==="function") f.onclick(); else if(typeof pickTaskKind==="function") pickTaskKind(); },
+  photo:function(row){ openTask(row); setTimeout(function(){ var c=document.getElementById("tk-cam"); if(c) c.click(); }, 60); },
+  done:function(row){ openTask(row); setTimeout(function(){
+      var s=document.getElementById("tk-status");
+      if(s && [].some.call(s.options,function(o){ return o.value==="Completed"; })){ s.value="Completed"; s.dispatchEvent(new Event("change",{bubbles:true})); if(typeof markDirty==="function") markDirty("status","Completed"); }
+      var r=document.getElementById("tk-result"); if(r){ r.scrollIntoView({block:"center"}); }
+    }, 80); },
+  trip:function(id){ calOpen(id); }
+};
+var go0=window.go;
+window.go=go=function(t){ var r=go0.apply(this,arguments); try{ document.querySelectorAll("#navMob [data-t]").forEach(function(el){ el.classList.toggle("on", el.getAttribute("data-t")===S.tab); }); }catch(_){} return r; };
+
+/* ── ② lịch: gộp chuyến công tác trùng · nhãn loại việc không emoji · nút nhanh ── */
+var ci=window.calItems;
+window.calItems=calItems=function(){
+  var out=ci.apply(this,arguments), seen={};
+  return out.filter(function(it){
+    if(it.kind!=="t") return true;
+    var k=[String(it.title||"").trim().toLowerCase(), it.pic, it.st, it.en].join("|");
+    if(seen[k]) return false; seen[k]=1; return true;
+  });
+};
+var ct=window.calTag;
+window.calTag=calTag=function(it){ return String(ct.apply(this,arguments)||"").replace(EMO,"").trim(); };
+var cc=window.calCard;
+window.calCard=calCard=function(it){
+  var h=cc.apply(this,arguments);
+  h=h.replace('<div class="k">📂 ','<div class="k">');
+  try{
+    if(!mob()) return h;
+    var today=todayISO(), qa="";
+    if(it.kind==="v" && !it.done && !it.tbd && it.d && it.d<=today && it.w && !it.ro){
+      qa='<span onclick="event.stopPropagation();V30.photo('+(+it.w._row)+')">'+I("camera")+'Chụp ảnh</span>'
+        +'<span class="pri" onclick="event.stopPropagation();V30.done('+(+it.w._row)+')">'+I("check")+'Báo kết quả</span>';
+    } else if(it.kind==="t" && it.st && it.st<=today && !it.done){
+      qa='<span onclick="event.stopPropagation();V30.trip(\''+calQ(it.id)+'\')">'+I("doc")+'Báo cáo công tác</span>';
+    }
+    if(qa) h=h.replace(/<\/button>$/, '<div class="v30-qa">'+qa+'</div></button>');
+  }catch(_){}
+  return h;
+};
+var dt=window.calDueTag;
+if(typeof dt==="function") window.calDueTag=calDueTag=function(){ return String(dt.apply(this,arguments)||"").replace(EMO,""); };
+
+/* điện thoại: mở lịch tuần là cuộn tới HÔM NAY (ngày đã qua nằm phía trên, kéo lên để xem) */
+var rc=window.renderCal, lastWk="";
+window.renderCal=renderCal=function(){
+  var r=rc.apply(this,arguments);
+  try{
+    if(mob() && CAL.view==="week"){
+      var t=document.querySelector("#main .cal-wc.today"), k=(CAL.ref?calISO(CAL.ref):"")+"|"+S.tab;
+      if(t && k!==lastWk && t.querySelector(".cal-card")){ lastWk=k;
+        clearTimeout(window.__v30sc); window.__v30sc=setTimeout(function(){
+          var t2=document.querySelector("#main .cal-wc.today"), m=document.getElementById("main");
+          if(t2 && t2.previousElementSibling && m && m.scrollTop<40) t2.scrollIntoView({block:"start"});
+        }, 350); }
+    }
+  }catch(_){}
+  return r;
+};
+
+/* giao diện tiếng Anh (nhóm Thái): chữ đã bỏ emoji vẫn dịch được — tra từ điển theo khoá đã bỏ emoji */
+if(typeof trEN==="function" && typeof DICT_EN==="object"){
+  var ADD={"Liên kết":"Links","Đào tạo":"Training","Chụp ảnh":"Take photo","Báo kết quả":"Report result","Báo cáo công tác":"Trip report",
+    "Ghi nhanh":"Quick add","Thêm":"More","Lịch":"Calendar","Chức năng":"Functions","Tiện ích":"Tools","Bảng tin":"Activity","Tải lại":"Reload",
+    "Màu":"Theme","Hướng dẫn":"Help","Năm tài chính":"Fiscal year","Webapp khác":"Other apps"};
+  Object.keys(ADD).forEach(function(k){ if(!(k in DICT_EN)) DICT_EN[k]=ADD[k]; });
+  var DS=null, tr0=window.trEN;
+  window.trEN=trEN=function(str){
+    var o=tr0.apply(this,arguments);
+    if(o!==null) return o;
+    var raw=String(str), key=raw.trim(); if(!key) return o;
+    if(!DS){ DS={}; Object.keys(DICT_EN).forEach(function(k){ var k2=k.replace(EMO,"").trim(); if(k2 && k2!==k && !(k2 in DS)) DS[k2]=String(DICT_EN[k]).replace(EMO,"").trim(); }); }
+    return Object.prototype.hasOwnProperty.call(DS,key) ? raw.replace(key,DS[key]) : o;
+  };
+}
+
+/* vẽ lại nếu app đã mở */
+try{ if(S.user){ buildNav(); if(S.tab) go(S.tab); } }catch(_){}
 })();
 </script>
 
