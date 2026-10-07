@@ -3979,7 +3979,7 @@ function buildNav(){
     if(t.grp!==lastGrp){ h+='<div class="grp">'+t.grp+'</div>'; lastGrp=t.grp; }
     h+='<button class="nvi" data-t="'+t.id+'" onclick="go(\''+t.id+'\')"><span class="ic">'+t.ic+'</span><span class="lb">'+t.lb+'</span></button>';
   });
-  h+='<div style="flex:1"></div><div style="padding:10px;font-size:10.5px;color:var(--mute);line-height:1.5">MMH CRM v30.2<br>'+
+  h+='<div style="flex:1"></div><div style="padding:10px;font-size:10.5px;color:var(--mute);line-height:1.5">MMH CRM v30.3<br>'+
      (isMgmt()?'<a href="'+DRIVE_FOLDER+'" target="_blank">📁 Folder ảnh Drive</a>':"")+'</div>';
   $("side").innerHTML=h;
   /* ⭐ v4.5 — thanh dưới trượt ngang, đủ mọi mục, bỏ nút "Thêm" */
@@ -20837,6 +20837,129 @@ window.QS2={ open:qsOpen };
 })();
 </script>
 
+<!-- ⭐ v30.3 — THÔNG BÁO CẬP NHẬT (chép từ Report Hub): dữ liệu updates/notes.js · tự hiện 7 ngày · nút "Có gì mới" trên thanh trên cùng -->
+<script src="updates/notes.js?v=30.3"></script>
+<style id="upd-css">
+#upd,#upd-zoom{--t-pri:var(--blue);--t-pri2:var(--blue-d);--t-ink:var(--navy);--t-soft:var(--pale);--t-line:var(--lb2);--t-bg:#F6F8FA;--mmh-blue:var(--blue);--mmh-navy:var(--navy)}
+
+#upd{position:fixed;inset:0;z-index:770;background:rgba(20,35,50,.52);backdrop-filter:blur(3px);display:none;align-items:center;justify-content:center;padding:16px;font-family:Aptos,'Segoe UI',Calibri,Arial,sans-serif}
+#upd.show{display:flex;animation:updIn .3s ease}
+@keyframes updIn{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+.upd-box{width:min(860px,100%);max-height:92vh;background:#fff;border-radius:18px;box-shadow:0 30px 80px rgba(0,0,0,.35);display:flex;flex-direction:column;overflow:hidden}
+.upd-hd{padding:20px 24px 16px;background:linear-gradient(120deg,#1F3A52,#2E5A86);color:#fff;position:relative}
+.upd-hd .k{display:inline-flex;gap:8px;align-items:center;font-size:11.5px;font-weight:800;letter-spacing:.8px;text-transform:uppercase;color:#1F3A52;background:#FFD400;padding:4px 10px;border-radius:20px}
+.upd-hd h2{font-size:21px;font-weight:800;margin:10px 0 4px;line-height:1.3}
+.upd-hd p{font-size:13.5px;color:#D3E1EE;line-height:1.5}
+.upd-hd .x{position:absolute;top:14px;right:14px;width:34px;height:34px;border-radius:10px;border:none;background:rgba(255,255,255,.14);color:#fff;font-size:17px;cursor:pointer}
+.upd-tabs{display:flex;gap:6px;padding:10px 24px 0;flex-wrap:wrap;border-bottom:1px solid #EEF1F5}
+.upd-tabs button{border:none;background:none;padding:8px 12px;font:inherit;font-size:12.5px;font-weight:700;color:#6B7B8C;border-bottom:3px solid transparent;cursor:pointer}
+.upd-tabs button.on{color:#1F3A52;border-color:#FFD400}
+.upd-bd{overflow:auto;padding:16px 24px 6px;min-height:0}
+.upd-it{display:flex;gap:16px;padding:14px 0;border-bottom:1px dashed #E3E8EE;align-items:flex-start}
+.upd-it:last-child{border-bottom:none}
+.upd-it .ic{flex:none;width:42px;height:42px;border-radius:12px;background:#F2F5F9;display:flex;align-items:center;justify-content:center;font-size:22px}
+.upd-it .tx{flex:1;min-width:0}
+.upd-it h4{font-size:15px;font-weight:800;color:#1F3A52;margin:2px 0 4px}
+.upd-it p{font-size:13.3px;line-height:1.55;color:#40576D}
+.upd-it .tag{display:inline-block;font-size:10.5px;font-weight:800;padding:2px 8px;border-radius:10px;margin-left:6px;vertical-align:2px;background:#E6F3EC;color:#2F6E53}
+.upd-it .tag.fix{background:#FBF1F0;color:#A33A36}.upd-it .tag.imp{background:#EAF1F8;color:#33506B}
+.upd-it a.im{flex:none;display:block;width:250px;border-radius:10px;overflow:hidden;box-shadow:0 0 0 1px #E3E8EE,0 6px 16px rgba(31,58,82,.12);cursor:zoom-in}
+.upd-it a.im{max-height:200px}
+.upd-it a.im img{display:block;width:100%}
+.upd-ft{display:flex;align-items:center;gap:10px;padding:12px 24px 16px;border-top:1px solid #EEF1F5;flex-wrap:wrap}
+.upd-ft label{display:flex;align-items:center;gap:7px;font-size:13px;color:#40576D;cursor:pointer;margin-right:auto}
+.upd-ft label input{width:16px;height:16px;accent-color:var(--mmh-blue)}
+.upd-ft a,.upd-ft button{font:inherit;font-size:13.5px;font-weight:700;padding:9px 16px;border-radius:10px;cursor:pointer;text-decoration:none}
+.upd-ft .doc{border:1px solid #DCE3EA;background:#fff;color:#1F3A52}
+.upd-ft .ok{border:none;background:var(--mmh-blue);color:#fff}
+#upd-zoom{position:fixed;inset:0;z-index:780;background:rgba(10,20,30,.86);display:none;align-items:center;justify-content:center;padding:20px;cursor:zoom-out}
+#upd-zoom.show{display:flex}#upd-zoom img{max-width:100%;max-height:100%;border-radius:10px;box-shadow:0 20px 60px rgba(0,0,0,.5)}
+@media(max-width:700px){ .upd-it{flex-wrap:wrap} .upd-it a.im{width:100%} .upd-hd h2{font-size:18px} }
+#upd{background:rgba(0,48,71,.28);backdrop-filter:blur(2px)}
+.upd-box{border:1px solid #E6EAEF;border-radius:16px;box-shadow:0 20px 50px rgba(0,48,71,.18)}
+.upd-hd{background:#fff;color:#1F3347;border-bottom:1px solid #EEF1F4}
+.upd-hd .k{background:var(--t-soft);color:var(--t-pri);border:1px solid var(--t-line);font-weight:700;letter-spacing:.5px}
+.upd-hd h2{color:var(--t-ink);font-weight:700;font-size:19px}
+.upd-hd p{color:#4A5D70}
+.upd-hd .x{background:#fff;border:1px solid #E6EAEF;color:#6B7B8C}
+.upd-tabs button.on{color:var(--t-ink);border-color:var(--t-pri)}
+.upd-it .ic{background:var(--t-bg);border:1px solid #EEF1F4;font-size:19px}
+.upd-it h4{color:var(--t-ink);font-weight:700}
+.upd-it .tag{background:var(--t-soft);color:var(--t-pri);font-weight:700}
+.upd-it .tag.fix{background:#FBF3F2;color:#8A4F4C}.upd-it .tag.imp{background:#F4F6F8;color:#4A5D70}
+.upd-it a.im{box-shadow:0 0 0 1px #E6EAEF}
+.upd-ft .ok{background:var(--t-pri);font-weight:700}
+.upd-ft .doc{border-color:#DDE3EA;color:var(--t-ink);font-weight:600}
+</style>
+<div id="upd" onclick="if(event.target===this)UPD.close()"></div>
+<div id="upd-zoom" onclick="this.classList.remove('show')"><img alt=""></div>
+<script>
+/* ══════ ⭐ v15.2 — THÔNG BÁO CẬP NHẬT / SỬA LỖI
+   · Dữ liệu ở updates/notes.js (window.MMH_UPDATES) — mỗi lần sửa app thêm 1 mục (quy trình: CLAUDE.md).
+   · Tự hiện mỗi lần đăng nhập trong 7 ngày kể từ ngày cập nhật; PIC tick "Không hiển thị lại" ⇒ ẩn hẳn mục đó.
+   · Bấm số phiên bản cạnh chữ MMH Report ⇒ xem lại toàn bộ lịch sử cập nhật. ══════ */
+(function(){
+var UPD=window.UPD={ cur:0, list:[], after:null };
+var DAYS=7;
+function $(id){ return document.getElementById(id); }
+function esc(s){ return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
+function me(){ return (window.S&&S.user&&S.user.pic)||""; }
+function pad(n){ return (n<10?"0":"")+n; }
+function todayIso(){ var d=new Date(); return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate()); }
+function dmy(s){ var p=String(s||"").split("-"); return p.length===3?p[2]+"/"+p[1]+"/"+p[0]:s; }
+function age(iso){ var p=String(iso).split("-"), d=new Date(+p[0],+p[1]-1,+p[2]), t=new Date(); t.setHours(0,0,0,0); return Math.round((t-d)/86400000); }
+function hidKey(){ return "mmh_upd_hide_"+(me()||"_"); }
+function hidden(){ try{ return JSON.parse(localStorage.getItem(hidKey())||"{}")||{}; }catch(_){ return {}; } }
+function setHidden(id){ try{ var h=hidden(); h[id]=Date.now(); localStorage.setItem(hidKey(), JSON.stringify(h)); }catch(_){} }
+function all(){ return (window.MMH_UPDATES||[]).slice().sort(function(a,b){ return a.date<b.date?1:a.date>b.date?-1:0; }); }
+UPD.active=function(){ var h=hidden(); return all().filter(function(u){ var a=age(u.date); return a>=0 && a<DAYS && !h[u.id]; }); };
+UPD.isOpen=function(){ var e=$("upd"); return !!(e && e.classList.contains("show")); };
+var TAG={ "new":["Mới",""], "imp":["Cải tiến","imp"], "fix":["Sửa lỗi","fix"] };
+function paint(){
+  var u=UPD.list[UPD.cur]; if(!u) return;
+  var a=age(u.date), left=DAYS-a;
+  var tabs=UPD.list.length>1?'<div class="upd-tabs">'+UPD.list.map(function(x,i){ return '<button class="'+(i===UPD.cur?"on":"")+'" onclick="UPD.go('+i+')">'+esc(x.version||"")+' · '+dmy(x.date)+'</button>'; }).join("")+'</div>':'';
+  $("upd").innerHTML='<div class="upd-box" role="dialog" aria-label="Thông báo cập nhật">'
+    +'<div class="upd-hd"><span class="k">🆕 Cập nhật '+esc(u.version||"")+' · '+dmy(u.date)+'</span>'
+      +'<h2>'+esc(u.title||"")+'</h2>'+(u.summary?'<p>'+u.summary+'</p>':'')
+      +'<button class="x" onclick="UPD.close()" title="Đóng">✕</button></div>'
+    +tabs
+    +'<div class="upd-bd">'+(u.items||[]).map(function(it){
+        var tg=TAG[it.type||"new"]||TAG["new"];
+        return '<div class="upd-it"><div class="ic">'+esc(it.icon||"✨")+'</div><div class="tx"><h4>'+esc(it.title||"")+'<span class="tag '+tg[1]+'">'+tg[0]+'</span></h4><p>'+(it.text||"")+'</p></div>'
+          +(it.img?'<a class="im" href="'+esc(it.img)+'" onclick="UPD.zoom(this.href);return false" title="Bấm để phóng to"><img src="'+esc(it.img)+'" alt="" loading="lazy"></a>':'')+'</div>';
+      }).join("")+'</div>'
+    +'<div class="upd-ft">'
+      +(UPD.manual?'<span style="margin-right:auto;font-size:12.5px;color:#7A8999">'+(hidden()[u.id]?'Bạn đã chọn không hiển thị lại thông báo này':a<DAYS&&a>=0?'Tự hiện khi đăng nhập thêm '+left+' ngày':'Đã hết thời gian tự hiện')+'</span>'
+        :'<label><input type="checkbox" id="upd-hide"> Không hiển thị lại thông báo này</label>')
+      +(u.guide?'<a class="doc" href="'+esc(u.guide)+'" target="_blank" rel="noopener">📘 Hướng dẫn chi tiết (PDF)</a>':'')
+      +(u.folder?'<a class="doc" href="'+esc(u.folder)+'" target="_blank" rel="noopener">📁 Thư mục HDSD</a>':'')
+      +'<button class="ok" onclick="UPD.close()">Đã hiểu</button></div></div>';
+}
+UPD.go=function(i){ var c=$("upd-hide"); if(c && c.checked) setHidden(UPD.list[UPD.cur].id); UPD.cur=i; paint(); };
+UPD.zoom=function(src){ var z=$("upd-zoom"); z.querySelector("img").src=src; z.classList.add("show"); };
+UPD.open=function(manual){
+  UPD.manual=!!manual;
+  UPD.list=manual?all():UPD.active();
+  if(!UPD.list.length){ if(manual && typeof toast==="function") toast("Chưa có thông báo cập nhật nào"); return false; }
+  UPD.cur=0; paint(); $("upd").classList.add("show"); return true;
+};
+UPD.close=function(){
+  var c=$("upd-hide"); if(c && c.checked) setHidden(UPD.list[UPD.cur].id);
+  $("upd").classList.remove("show");
+  var f=UPD.after; UPD.after=null; if(f) setTimeout(f, 250);
+};
+document.addEventListener("keydown", function(e){ if(e.key!=="Escape") return; var z=$("upd-zoom"); if(z.classList.contains("show")) z.classList.remove("show"); else if(UPD.isOpen()) UPD.close(); });
+/* (CRM không có thư nhắc việc NT) */
+/* mỗi lần đăng nhập (mỗi PIC) — tự hiện các mục còn trong 7 ngày */
+(function boot(){
+  var who=me(), app=$("app");
+  if(!who || !app || !app.classList.contains("on")){ setTimeout(boot, 800); return; }
+  setTimeout(function(){ if(me()===who && !UPD.isOpen()) UPD.open(false); }, 1200);
+  (function watch(){ if(me()!==who){ UPD.close(); boot(); return; } setTimeout(watch, 3000); })();
+})();
+})();
+</script>
 <style id="dl-css">
 #dl{--t-pri:var(--blue);--t-soft:var(--pale);--t-line:var(--lb2);--t-ink:var(--navy)}
 #dl{position:fixed;inset:0;z-index:765;background:rgba(0,48,71,.28);backdrop-filter:blur(2px);display:none;align-items:center;justify-content:center;padding:16px;font-family:Aptos,'Aptos Display','Segoe UI',Calibri,Arial,sans-serif}
@@ -21915,6 +22038,204 @@ var KT=window.KT={
   _st:T
 };
 try{ (window.QS_EXTRA_CMDS=window.QS_EXTRA_CMDS||[]).push(function(){ var d=window.KPI&&KPI._st&&KPI._st.d; return d&&d.total?{ ic:"📊", title:"Total KPI công ty", hay:"total kpi cong ty chien luoc muc tieu", run:function(){ KT.open(); } }:null; }); }catch(_){}
+})();
+</script>
+
+<script>
+/* ══ ⭐ v30.3 — THÔNG BÁO CẬP NHẬT + EMAIL CẬP NHẬT CHO CRM ══
+   · Nút "Có gì mới" (thanh trên cùng · Thêm ▸ Tiện ích · số phiên bản ở menu bên) ⇒ UPD.open(true) — danh sách cập nhật lấy từ updates/notes.js.
+   · Admin / Director: trong hộp thông báo có "✉ Gửi email cập nhật" (UPM) — email tiếng Anh tới toàn bộ nhân sự dùng CRM (danh sách ROLES). */
+window.UPM_CFG={ app:"crm", name:"MMH CRM", url:"https://manimedicalhanoi.github.io/MMH-CRM/", base:"https://manimedicalhanoi.github.io/MMH-CRM/",
+  pdf:{ url:"https://manimedicalhanoi.github.io/MMH-CRM/docs/HDSD_MMH_CRM_v30.3.pdf", name:"MMH_CRM_User_Guide_v30.3.pdf" },
+  recipients:function(){ var L=[]; try{ Object.keys(ROLES).forEach(function(k){ var e=ROLES[k].email; if(e && L.indexOf(e)<0) L.push(e); }); }catch(_){}
+    return { list:L, count:L.length, label:"Toàn bộ nhân sự dùng MMH CRM ("+L.length+" người)" }; } };
+(function(){
+  var I=window.V30_ICON||function(){ return ""; };
+  function addBtn(){
+    var h=document.querySelector("#app header"); if(!h || document.getElementById("updBtn")) return;
+    var b=document.createElement("button"); b.className="tb2"; b.id="updBtn"; b.title="Có gì mới trên MMH CRM";
+    b.innerHTML=I("spark")+"<span>Có gì mới</span>"; b.onclick=function(){ if(window.UPD) UPD.open(true); };
+    var th=document.getElementById("thBtn")||document.getElementById("btnUser"); if(th) h.insertBefore(b, th); else h.appendChild(b);
+  }
+  addBtn(); setTimeout(addBtn, 0); document.addEventListener("DOMContentLoaded", addBtn);
+  /* số phiên bản ở cuối menu bên ⇒ mở danh sách cập nhật */
+  var bn=window.buildNav;
+  window.buildNav=buildNav=function(){ var r=bn.apply(this,arguments);
+    try{ [].forEach.call(document.querySelectorAll("#side div"),function(d){ if(/^MMH CRM v\d/.test(d.textContent) && !d.__u){ d.__u=1; d.style.cursor="pointer"; d.title="Xem các bản cập nhật"; d.addEventListener("click",function(e){ if(e.target.tagName!=="A" && window.UPD) UPD.open(true); }); } }); }catch(_){}
+    return r; };
+  /* Thêm ▸ Tiện ích ▸ Có gì mới (điện thoại) */
+  var mo=window.V30 && V30.more;
+  if(mo) V30.more=function(){ var r=mo.apply(this,arguments);
+    try{ var g=null; [].forEach.call(document.querySelectorAll("#v30-more .gt"),function(t){ if(/Tiện ích/.test(t.textContent)) g=t.nextElementSibling; }); if(g && !g.querySelector("[data-upd]")){ var b=document.createElement("button"); b.setAttribute("data-upd","1"); b.innerHTML=I("spark")+"<span>Có gì mới</span>";
+      b.onclick=function(){ document.getElementById("v30-more").classList.remove("show"); UPD.open(true); }; g.appendChild(b); } }catch(_){}
+    return r; };
+  /* nhóm Thái: chữ hộp thông báo tiếng Anh nhờ từ điển */
+  try{ if(typeof DICT_EN==="object"){ var A={"Có gì mới":"What's new","Đã hiểu":"Got it","Không hiển thị lại thông báo này":"Don't show this again","✉ Gửi email cập nhật":"✉ Send update email"};
+    Object.keys(A).forEach(function(k){ if(!(k in DICT_EN)) DICT_EN[k]=A[k]; }); } }catch(_){}
+})();
+</script>
+<style id="upm-css">
+/* ⭐ EMAIL THÔNG BÁO CẬP NHẬT (UPM) — Thông báo cập nhật ▸ Gửi email cập nhật (Admin / Director) */
+#upm{position:fixed;inset:0;z-index:9700;background:rgba(20,35,50,.32);display:none;align-items:center;justify-content:center;padding:16px;font-family:Aptos,'Aptos Display','Segoe UI',Calibri,Arial,sans-serif;color:#1F3347}
+#upm.show{display:flex}
+#upm *{box-sizing:border-box}
+#upm .c{width:min(1180px,100%);height:min(860px,94vh);background:#fff;border:1px solid #E6EAEF;border-radius:14px;box-shadow:0 18px 44px rgba(20,35,50,.18);display:flex;flex-direction:column;overflow:hidden}
+#upm .hd{display:flex;align-items:center;gap:10px;padding:14px 18px;border-bottom:1px solid #EEF1F4}
+#upm .hd h3{margin:0;font-size:17px;color:var(--t-ink,#003047);flex:1}
+#upm .hd .x{width:34px;height:34px;border-radius:9px;border:1px solid #E6EAEF;background:#fff;font-size:16px;cursor:pointer;color:#003047}
+#upm .bd{flex:1;display:grid;grid-template-columns:380px 1fr;min-height:0}
+#upm .l{border-right:1px solid #EEF1F4;padding:14px 16px;overflow:auto}
+#upm .r{background:#F6F8FA;padding:12px;display:flex;flex-direction:column;min-height:0}
+#upm .r .lb{font-size:11.5px;font-weight:700;color:#8A97A6;letter-spacing:.4px;text-transform:uppercase;margin:0 0 6px}
+#upm iframe{flex:1;width:100%;border:1px solid #E6EAEF;border-radius:10px;background:#fff}
+#upm .f{margin-bottom:12px}
+#upm .f>label{display:block;font-size:12px;font-weight:700;color:#5B6B7D;margin-bottom:5px}
+#upm input[type=text],#upm textarea{width:100%;border:1px solid #E6EAEF;border-radius:9px;padding:8px 10px;font:inherit;font-size:13px;color:#1F3347;background:#fff}
+#upm textarea{min-height:76px;resize:vertical;line-height:1.5}
+#upm .vs{border:1px solid #E6EAEF;border-radius:10px;max-height:190px;overflow:auto}
+#upm .vs label{display:flex;gap:8px;align-items:flex-start;padding:7px 10px;border-bottom:1px solid #F0F2F5;font-size:12.8px;cursor:pointer}
+#upm .vs label:last-child{border-bottom:none}
+#upm .vs small{display:block;color:#8A97A6;font-size:11.5px}
+#upm .vs .noen{color:#B4532A}
+#upm .rc{font-size:12.5px;color:#41566F;background:#FAFBFC;border:1px solid #EEF1F4;border-radius:9px;padding:8px 10px;max-height:110px;overflow:auto;line-height:1.5}
+#upm .ft{display:flex;align-items:center;gap:8px;padding:12px 18px;border-top:1px solid #EEF1F4;flex-wrap:wrap}
+#upm .ft .msg{flex:1;font-size:12.5px;color:#5B6B7D;min-width:200px}
+#upm .ft .msg.err{color:#9A3B37}#upm .ft .msg.ok{color:#2F6B4A}
+#upm .ft button{height:36px;padding:0 14px;border-radius:9px;border:1px solid #E6EAEF;background:#fff;color:#003047;font:inherit;font-size:13px;font-weight:600;cursor:pointer}
+#upm .ft button.pri{background:var(--t-pri,#3A5CAA);border-color:var(--t-pri,#3A5CAA);color:#fff}
+#upm .ft button:disabled{opacity:.55;cursor:default}
+.upm-btn{font:inherit;font-size:13.5px;font-weight:700;padding:9px 14px;border-radius:10px;cursor:pointer;border:1px solid #DCE3EA;background:#fff;color:#1F3A52}
+@media(max-width:860px){ #upm .bd{grid-template-columns:1fr;overflow:auto} #upm .l{border-right:none} #upm .r{min-height:520px} }
+</style>
+<script>
+/* ══ ⭐ EMAIL THÔNG BÁO CẬP NHẬT HỆ THỐNG (UPM) — dùng chung Report Hub + MMH CRM ══
+   Admin / Director: Thông báo cập nhật ▸ "Gửi email cập nhật" → chọn phiên bản → xem trước đúng bản gửi → Gửi thử cho tôi → Gửi email.
+   · Email tiếng Anh, trang trọng: Dear all · tóm tắt · từng thay đổi (ảnh minh hoạ nhúng trong thư) · HDSD PDF đính kèm ·
+     "This is an automated email, please do not reply". Tiêu đề: "<App> Update – dd/mm/yyyy".
+   · Nội dung tiếng Anh lấy từ trường en của window.MMH_UPDATES (thiếu ⇒ dùng tiếng Việt, có cảnh báo).
+   · Gửi qua Training Hub (action rhUpdMail, Admin / Director). Cấu hình theo app: window.UPM_CFG. */
+(function(){
+"use strict";
+var U={ sel:{}, intro:"", subject:"", busy:false, rid:"" };
+function $(id){ return document.getElementById(id); }
+function E(s){ return String(s==null?"":s).replace(/[&<>"']/g,function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]; }); }
+function cfg(){ return window.UPM_CFG||{}; }
+function pad(n){ return (n<10?"0":"")+n; }
+function dmy(s){ var p=String(s||"").split("-"); return p.length===3?p[2]+"/"+p[1]+"/"+p[0]:s; }
+function today(){ var d=new Date(); return pad(d.getDate())+"/"+pad(d.getMonth()+1)+"/"+d.getFullYear(); }
+function notes(){ return (window.MMH_UPDATES||[]).slice().sort(function(a,b){ return a.date<b.date?1:a.date>b.date?-1:0; }); }
+function user(){ return window.AUTH && AUTH.user && AUTH.user(); }
+function can(){ var u=user(); return !!(u && (u.admin || u.level==="director")); }
+function abs(p){ if(!p) return ""; if(/^https?:/.test(p)) return p; return cfg().base+String(p).replace(/^\.?\//,""); }
+var TY={ "new":"New", "imp":"Improved", "fix":"Fixed" };
+
+/* ── nội dung email ── */
+function picked(){ return notes().filter(function(n){ return U.sel[n.id]; }); }
+function emailHtml(forPreview){
+  /* thư thường kiểu Outlook (không phải bản tin HTML): chữ đen, đề mục đánh số, ảnh chèn ngay dưới từng mục */
+  var c=cfg(), L=picked(), imgs=[], n=0, vers=L.map(function(x){ return x.version; }).reverse();
+  var verTxt=vers.length>1?vers[0]+" – "+vers[vers.length-1]:(vers[0]||"");
+  var P='<p style="margin:0 0 10px">', B="font-family:Aptos,Calibri,'Segoe UI',Arial,sans-serif;font-size:11pt;line-height:1.45;color:#000";
+  var h='<div style="'+B+'">'+P+'Dear All,</p>'+P+E(U.intro).replace(/\n/g,"<br>")+'</p>'
+    +P+'Link: <a href="'+E(c.url)+'">'+E(c.url)+'</a></p>'
+    +(verTxt?P+'Version: <b>'+E(verTxt)+'</b></p>':'')
+    +'<p style="margin:16px 0 8px"><b>WHAT\'S NEW</b></p>';
+  L.forEach(function(v){
+    var en=v.en||{}, items=v.items||[];
+    if(L.length>1) h+='<p style="margin:12px 0 6px"><b><u>'+E(v.version)+' ('+E(dmy(v.date))+')'+(en.title?' – '+E(en.title):'')+'</u></b></p>';
+    items.forEach(function(it,i){
+      var e=(en.items||[])[i]||{}; n++;
+      h+='<p style="margin:0 0 6px 24px"><b>'+n+'.&nbsp; '+E(e.title||it.title)+':</b> '+(e.text||it.text||"")+'</p>';
+      if(it.img){ var cid="img"+n; imgs.push({cid:cid, url:abs(it.img)});
+        h+='<p style="margin:4px 0 14px 48px"><img src="'+(forPreview?E(new URL(it.img,location.href).href):'cid:'+cid)+'" alt="" width="620" style="width:100%;max-width:620px;height:auto;border:1px solid #D0D0D0"></p>'; }
+      else h+='<div style="height:6px"></div>';
+    });
+  });
+  h+=(c.pdf&&c.pdf.url?'<p style="margin:16px 0 10px"><b>USER GUIDE:</b> Please find attached the complete '+E(c.name)+' user guide (PDF), updated with the latest changes.</p>':'')
+    +P+'If you have any questions, please contact the Product Team.</p>'
+    +'<p style="margin:16px 0 16px">Best regards,<br>MMH Product Team<br>MANI Medical Hanoi</p>'
+    +'<p style="margin:0;color:#666;font-size:9pt"><i>Note: This is an automated email sent from '+E(c.name)+'. Please do not reply to this email.</i></p></div>';
+  return { html:h, images:imgs, ver:verTxt };
+}
+function recipients(){ var c=cfg(); return typeof c.recipients==="function"?c.recipients():{audience:"all", label:"Toàn bộ người dùng"}; }
+
+/* ── giao diện ── */
+function shell(){
+  var o=$("upm"); if(o) return o;
+  o=document.createElement("div"); o.id="upm";
+  o.innerHTML='<div class="c" role="dialog" aria-label="Gửi email cập nhật"><div class="hd"><h3>Gửi email thông báo cập nhật</h3><button class="x" data-a="x" title="Đóng">✕</button></div>'
+    +'<div class="bd"><div class="l" id="upm-l"></div><div class="r"><div class="lb">Xem trước — đúng bản sẽ gửi (ảnh nhúng trong thư, PDF đính kèm)</div><iframe id="upm-f" title="Xem trước email" sandbox=""></iframe></div></div>'
+    +'<div class="ft"><span class="msg" id="upm-msg"></span><button data-a="x">Đóng</button><button data-a="test">Gửi thử cho tôi</button><button class="pri" data-a="send">Gửi email</button></div></div>';
+  document.body.appendChild(o);
+  o.addEventListener("click",function(e){ if(e.target===o) return UPM.close(); var b=e.target.closest("[data-a]"); if(!b) return; var a=b.getAttribute("data-a");
+    if(a==="x") UPM.close(); else if(a==="test") send(true); else if(a==="send") send(false); });
+  o.addEventListener("input",function(e){ var t=e.target;
+    if(t.id==="upm-sub") U.subject=t.value; else if(t.id==="upm-intro") U.intro=t.value; else if(t.name==="upm-v"){ U.sel[t.value]=t.checked; }
+    clearTimeout(U.t); U.t=setTimeout(preview, 250); });
+  return o;
+}
+function left(){
+  var c=cfg(), r=recipients(), ns=notes().slice(0,14);
+  $("upm-l").innerHTML=
+     '<div class="f"><label>Tiêu đề</label><input type="text" id="upm-sub" value="'+E(U.subject)+'"></div>'
+    +'<div class="f"><label>Gửi tới</label><div class="rc">'+E(r.label||"")+(r.list?'<br><span style="color:#8A97A6">'+E(r.list.join(", "))+'</span>':'')+'</div></div>'
+    +'<div class="f"><label>Phiên bản đưa vào email</label><div class="vs">'+ns.map(function(n){
+        return '<label><input type="checkbox" name="upm-v" value="'+E(n.id)+'"'+(U.sel[n.id]?" checked":"")+'><span><b>'+E(n.version)+'</b> · '+E(dmy(n.date))+'<small>'+E((n.en&&n.en.title)||n.title)+'</small>'
+          +(n.en?'':'<small class="noen">Chưa có bản tiếng Anh — email sẽ dùng chữ tiếng Việt</small>')+'</span></label>'; }).join("")+'</div></div>'
+    +'<div class="f"><label>Lời mở đầu (tiếng Anh)</label><textarea id="upm-intro">'+E(U.intro)+'</textarea></div>'
+    +(c.pdf&&c.pdf.url?'<div class="f"><label>File đính kèm</label><div class="rc"><a href="'+E(c.pdf.url)+'" target="_blank" rel="noopener">'+E(c.pdf.name)+'</a> — HDSD toàn bộ hệ thống (PDF)</div></div>':'');
+}
+function preview(){ var f=$("upm-f"); if(!f) return; var m=emailHtml(true);
+  f.srcdoc='<!doctype html><html><head><meta charset="utf-8"><style>body{margin:18px;background:#fff}</style></head><body><div style="font:13px Arial,sans-serif;color:#5B6B7D;border-bottom:1px solid #EEF1F4;padding-bottom:10px;margin-bottom:16px"><b style="color:#1F3347">'+E(U.subject)+'</b><br>From: '+E(cfg().name)+' (no-reply)'+(cfg().pdf&&cfg().pdf.url?' &nbsp;·&nbsp; 📎 '+E(cfg().pdf.name):'')+'</div>'+m.html+'</body></html>'; }
+function msg(t,k){ var m=$("upm-msg"); if(m){ m.textContent=t||""; m.className="msg"+(k?" "+k:""); } }
+function send(test){
+  if(U.busy) return;
+  var c=cfg(), L=picked(); if(!L.length) return msg("Chọn ít nhất 1 phiên bản.","err");
+  if(!U.subject.trim()) return msg("Nhập tiêu đề email.","err");
+  var r=recipients();
+  if(!test && !confirm("Gửi email \""+U.subject+"\" tới "+(r.count?r.count+" người":r.label)+"?\nEmail sẽ gửi ngay, không thu hồi được.")) return;
+  var m=emailHtml(false), body={ tk:AUTH.tk(), app:c.app, subject:U.subject.trim(), html:m.html, images:m.images, pdf:c.pdf||null, test:!!test, rid:test?"":U.rid };
+  if(r.audience) body.audience=r.audience; else body.to=r.list||[];
+  U.busy=true; msg(test?"Đang gửi thử…":"Đang gửi… (tải ảnh + PDF đính kèm, có thể mất 10–30 giây)");
+  [].forEach.call(document.querySelectorAll("#upm .ft button"),function(b){ b.disabled=true; });
+  var fd=new URLSearchParams(); fd.set("action","rhUpdMail"); fd.set("payload", JSON.stringify(body));
+  fetch(window.TRAINING_HUB_API, { method:"POST", body:fd }).then(function(x){ return x.text(); }).then(function(t){
+    var j; try{ j=JSON.parse(t); }catch(_){ throw new Error("Máy chủ trả về lỗi."); }
+    if(!j.ok) throw new Error(/Không tìm thấy chức năng/.test(j.error||"")?"Máy chủ Training Hub chưa cập nhật bản mới (cần v3.15).":(j.error||"Gửi lỗi."));
+    msg(test?"✓ Đã gửi thử tới "+(j.to||[]).join(", ")+" — kiểm tra hộp thư.":"✓ Đã gửi tới "+j.sent+" người"+(j.dup?" (đã gửi trước đó, không gửi lại)":"")+".","ok");
+    if(!test) U.rid="u"+Date.now().toString(36);
+  }).catch(function(e){ msg(e.message||"Không gửi được — thử lại.","err"); })
+    .then(function(){ U.busy=false; [].forEach.call(document.querySelectorAll("#upm .ft button"),function(b){ b.disabled=false; }); });
+}
+
+var UPM=window.UPM={
+  can:can,
+  open:function(){
+    if(!can()) return alert("Chỉ Admin / Director được gửi email thông báo cập nhật (đăng nhập bằng email).");
+    var c=cfg(), ns=notes(), t0=ns[0]&&ns[0].date;
+    /* mặc định: các bản trong 7 ngày gần nhất đã có nội dung tiếng Anh (thiếu thì lấy bản mới nhất) */
+    U.sel={}; var lim=new Date(Date.now()-7*864e5).toISOString().slice(0,10);
+    ns.forEach(function(n){ if(n.en && n.date>=lim) U.sel[n.id]=true; });
+    if(!Object.keys(U.sel).length && ns[0]) U.sel[ns[0].id]=true;
+    U.subject=c.name+" Update – "+today();
+    U.intro="We are pleased to inform you that "+c.name+" has been updated with the following improvements. Please take a moment to review the changes below; the full user guide is attached for your reference.";
+    U.rid="u"+Date.now().toString(36);
+    shell().classList.add("show"); left(); preview(); msg("");
+  },
+  close:function(){ var o=$("upm"); if(o) o.classList.remove("show"); },
+  html:function(){ return emailHtml(true).html; }
+};
+/* nút trong hộp Thông báo cập nhật (chỉ Admin / Director) */
+(function hook(){
+  var host=$("upd"); if(!host || !window.MutationObserver){ setTimeout(hook, 600); return; }
+  var put=function(){ var ft=host.querySelector(".upd-ft"); if(!ft || ft.querySelector(".upm-btn") || !can()) return;
+    var b=document.createElement("button"); b.className="upm-btn"; b.type="button"; b.textContent="✉ Gửi email cập nhật"; b.title="Gửi email (tiếng Anh) về các cập nhật này tới toàn bộ người dùng";
+    b.onclick=function(){ UPM.open(); }; var ok=ft.querySelector(".ok"); if(ok) ft.insertBefore(b, ok); else ft.appendChild(b); };
+  UPM._put=put; UPM._host=host;
+  setInterval(function(){ if(host.classList.contains("show")) put(); }, 700);
+  new MutationObserver(put).observe(host,{childList:true,subtree:true}); put();
+  if(window.UPD) ["open","go"].forEach(function(k){ var f=UPD[k]; if(typeof f==="function") UPD[k]=function(){ var r=f.apply(this,arguments); setTimeout(put,0); return r; }; });
+})();
 })();
 </script>
 
