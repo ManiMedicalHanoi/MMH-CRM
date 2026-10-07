@@ -15,3 +15,15 @@ Kiến trúc & quy ước giống MMH Report Hub (repo `ManiMedicalHanoi/MMH-Rep
   Báo cáo KPI tháng (`KR`) và Setting Expectation (`SE`, mẫu `templates/setting_expectation.docx`). Bảng KPI tính từ CRM bên dưới giữ nguyên.
 - `busy()` (v29) chỉ hiện thẻ nhỏ, không chặn màn hình; thao tác mới nên cập nhật giao diện trước rồi ghi ngầm.
 - `script.google.com` bị chặn trong môi trường Claude: test bằng Playwright + `page.route(/script\.google\.com/)`.
+- **Giao diện gọn (v30.0, khối `v30-css` + script cuối file)**: biểu tượng SVG nét mảnh `V30_ICON(k)` (bảng `P`) thay emoji ở thanh trên,
+  menu bên, thanh dưới; bộ quét `MutationObserver` tự bỏ emoji màu trong chữ của nút / nhãn / tiêu đề (danh sách `SEL`, ô chỉ 1 emoji quen ⇒
+  đổi sang biểu tượng `EMI`). Nội dung người dùng gõ (textarea, input) không bị đụng. Giao diện mới: không thêm emoji, dùng `V30_ICON`.
+  Nhóm Thái (tiếng Anh): `trEN` tra thêm từ điển theo khoá đã bỏ emoji — chữ mới cần dịch thêm vào `ADD` trong khối v30.
+- **Điện thoại (v30.0)**: thanh trên chỉ còn logo · Lịch · Tìm · tên; thanh dưới 5 nút cố định (Lịch · Khách hàng · ＋ Ghi nhanh · Mở mới/Đơn hàng
+  · Thêm = bảng mọi chức năng + Bảng tin, Tải lại, Màu, Hướng dẫn, FY, link app khác). Thẻ đi địa bàn hôm nay có nút **Chụp ảnh** (`V30.photo`)
+  và **Báo kết quả** (`V30.done`, chọn sẵn Completed); thẻ công tác có **Báo cáo công tác**. Lịch tuần tự cuộn tới hôm nay. Chuyến công tác trùng được gộp.
+- **Đọc Apps Script không kèm cookie (v30.0, cũng ở Report Hub v16.7)**: bọc `<script>.src` trong module `AUTH` ⇒ URL `script.google.com/macros/s/…`
+  có `callback=` được đọc bằng `fetch(credentials:"omit")` rồi chạy đúng callback; hỏng (web app chỉ cho domain, link `/a/macros/`) ⇒ quay về thẻ
+  `<script>`. Lý do: Chrome đăng nhập Gmail khác / nhiều tài khoản làm thẻ `<script>` bị chuyển sang trang chọn tài khoản ⇒ không đăng nhập được.
+  Mock test: `resourceType()==='script'` trả 404 để giả lập lỗi này.
+- Khang = `mmh.saigon1@manimedicalhanoi.com` (không phải saigon2).
