@@ -3979,7 +3979,7 @@ function buildNav(){
     if(t.grp!==lastGrp){ h+='<div class="grp">'+t.grp+'</div>'; lastGrp=t.grp; }
     h+='<button class="nvi" data-t="'+t.id+'" onclick="go(\''+t.id+'\')"><span class="ic">'+t.ic+'</span><span class="lb">'+t.lb+'</span></button>';
   });
-  h+='<div style="flex:1"></div><div style="padding:10px;font-size:10.5px;color:var(--mute);line-height:1.5">MMH CRM v29.2<br>'+
+  h+='<div style="flex:1"></div><div style="padding:10px;font-size:10.5px;color:var(--mute);line-height:1.5">MMH CRM v29.3<br>'+
      (isMgmt()?'<a href="'+DRIVE_FOLDER+'" target="_blank">📁 Folder ảnh Drive</a>':"")+'</div>';
   $("side").innerHTML=h;
   /* ⭐ v4.5 — thanh dưới trượt ngang, đủ mọi mục, bỏ nút "Thêm" */
@@ -20641,6 +20641,139 @@ saveTask=function(){
   try{ tbdSyncWeek((d&&d.start)||wkDay, String((w&&w.pic)||"")); }catch(_){}
   S.taskRow=0;
 };
+})();
+</script>
+
+<style id="v293-css">
+/* ⭐ v29.3 — 10 chủ đề màu (cùng bộ với Report Hub) · tìm nhanh Ctrl+K · thanh trên cùng gọn */
+html[data-theme="ocean"]{--blue:#3F86A3;--blue-d:#25627B;--blue-l:#8EC3D6;--navy:#0E3646;--lb1:#C6E0EA;--lb2:#D5E8F0;--lb3:#E2F0F5;--pale:#F1F8FA;--paler:#EEF7FA;--info:#3F86A3;--info-bg:#F1F8FA}
+html[data-theme="teal"]{--blue:#3E8C86;--blue-d:#246661;--blue-l:#93CBC6;--navy:#113D3A;--lb1:#C6E3E0;--lb2:#D4EBE8;--lb3:#E1F2F0;--pale:#F0F8F7;--paler:#EDF8F6;--info:#3E8C86;--info-bg:#F0F8F7}
+html[data-theme="sage"]{--blue:#5E8C77;--blue-d:#3E6754;--blue-l:#A6C6B6;--navy:#1F3F35;--lb1:#CFE2D7;--lb2:#DBE9E1;--lb3:#E6F0EA;--pale:#F3F8F5;--paler:#F0F7F3;--info:#5E8C77;--info-bg:#F3F8F5}
+html[data-theme="slate"]{--blue:#5C6B7C;--blue-d:#3D4856;--blue-l:#A9B4C0;--navy:#1E2833;--lb1:#D3D9E0;--lb2:#DFE3E8;--lb3:#E8EBEF;--pale:#F4F5F7;--paler:#F2F4F6;--info:#5C6B7C;--info-bg:#F4F5F7}
+html[data-theme="lavender"]{--blue:#7468B4;--blue-d:#52488E;--blue-l:#B7AEDD;--navy:#2C2652;--lb1:#DAD5EF;--lb2:#E3DFF4;--lb3:#ECE9F7;--pale:#F6F4FB;--paler:#F4F2FC;--info:#7468B4;--info-bg:#F6F4FB}
+html[data-theme="rose"]{--blue:#A8657B;--blue-d:#80475E;--blue-l:#D9AEBC;--navy:#452231;--lb1:#EFD5DD;--lb2:#F3E0E6;--lb3:#F7EAEE;--pale:#FBF5F7;--paler:#FCF3F6;--info:#A8657B;--info-bg:#FBF5F7}
+html[data-theme="sand"]{--blue:#9A7B52;--blue-d:#725A38;--blue-l:#D3BF9F;--navy:#3D3022;--lb1:#EADFCB;--lb2:#F0E7D8;--lb3:#F5EFE4;--pale:#FAF7F1;--paler:#FAF5EC;--info:#9A7B52;--info-bg:#FAF7F1}
+html[data-theme="terracotta"]{--blue:#B06A52;--blue-d:#844A38;--blue-l:#DDB2A3;--navy:#46251A;--lb1:#F0D8CF;--lb2:#F4E2DB;--lb3:#F8ECE7;--pale:#FCF6F3;--paler:#FCF3EF;--info:#B06A52;--info-bg:#FCF6F3}
+html[data-theme="forest"]{--blue:#4C7A5C;--blue-d:#335A41;--blue-l:#9CBDA6;--navy:#1A3324;--lb1:#CADDCF;--lb2:#D8E6DB;--lb3:#E4EEE6;--pale:#F2F7F3;--paler:#EFF6F1;--info:#4C7A5C;--info-bg:#F2F7F3}
+header .qlinks{display:none!important}
+.tb2{display:inline-flex;align-items:center;gap:6px;height:34px;padding:0 11px;border:1px solid var(--line);border-radius:9px;background:#fff;color:var(--navy);font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap}
+.tb2:hover{background:var(--pale)}
+.tb2 kbd{font:inherit;font-size:11px;color:#8A97A6;background:#F3F5F8;border:1px solid #E6EAEF;border-radius:5px;padding:0 5px}
+@media(max-width:900px){ .tb2 span,.tb2 kbd{display:none} .tb2{width:34px;padding:0;justify-content:center} }
+.pop2{position:fixed;z-index:9500;background:#fff;border:1px solid #E6EAEF;border-radius:12px;box-shadow:0 12px 32px rgba(20,35,50,.14);padding:6px;display:none;min-width:220px}
+.pop2.show{display:block}
+.pop2 a,.pop2 button.it{display:flex;align-items:center;gap:10px;width:100%;padding:9px 10px;border:none;background:none;border-radius:8px;font-size:13.5px;color:#1F3347;text-decoration:none;cursor:pointer;text-align:left}
+.pop2 a:hover,.pop2 button.it:hover{background:var(--pale)}
+.pop2 .sw{display:inline-flex;gap:2px}.pop2 .sw i{width:12px;height:18px;border-radius:3px;display:inline-block}
+.pop2 button.it.on{background:var(--pale);font-weight:700}
+#qs2{position:fixed;inset:0;z-index:9800;background:rgba(20,35,50,.32);display:none;align-items:flex-start;justify-content:center;padding:10vh 16px 16px}
+#qs2.show{display:flex}
+#qs2 .c{width:min(640px,100%);background:#fff;border:1px solid #E6EAEF;border-radius:14px;box-shadow:0 18px 44px rgba(20,35,50,.18);overflow:hidden}
+#qs2 input{width:100%;box-sizing:border-box;border:none;border-bottom:1px solid #EEF1F4;padding:15px 18px;font-size:16px;outline:none}
+#qs2 .r{max-height:56vh;overflow:auto;padding:6px}
+#qs2 .g{font-size:11px;font-weight:700;color:#8A97A6;text-transform:uppercase;letter-spacing:.4px;padding:8px 10px 4px}
+#qs2 .i{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:9px;cursor:pointer;font-size:13.5px}
+#qs2 .i.on,#qs2 .i:hover{background:var(--pale)}
+#qs2 .i b{font-weight:600;color:var(--navy)}
+#qs2 .i small{margin-left:auto;color:#8A97A6;font-size:12px;white-space:nowrap}
+#qs2 .e{padding:18px;color:#8A97A6;font-size:13px;text-align:center}
+</style>
+<script>
+/* ══ ⭐ v29.3 — GIAO DIỆN GỌN: chủ đề màu · tìm nhanh Ctrl / ⌘ + K · menu liên kết ══ */
+(function(){
+"use strict";
+var THEMES=
+[{k:"mmh",n:"MMH Navy",d:"Mặc định",c:["#3A5CAA","#003047","#CFE2F3","#F6F8FA"]},{k:"ocean",n:"Biển sâu",d:"Xanh biển dịu",c:["#2E7491","#0E3646","#CBE4EE","#F4F8FA"]},{k:"teal",n:"Ngọc bích",d:"Xanh ngọc mát",c:["#2D7A74","#113D3A","#C8E6E2","#F4F8F8"]},{k:"sage",n:"Lá xô thơm",d:"Xanh lá trầm",c:["#4A7A64","#1F3F35","#D0E5D9","#F5F7F5"]},{k:"slate",n:"Than chì",d:"Xám trung tính",c:["#4A5768","#1E2833","#D9DFE6","#F5F6F7"]},{k:"lavender",n:"Oải hương",d:"Tím nhạt thanh",c:["#6257A6","#2C2652","#DDD8F1","#F7F6FA"]},{k:"rose",n:"Hồng phấn",d:"Hồng đất nhẹ",c:["#985670","#452231","#F0D5DE","#F9F6F7"]},{k:"sand",n:"Be cát",d:"Ấm, trung tính",c:["#876A43","#3D3022","#EADCC5","#F8F6F2"]},{k:"terracotta",n:"Đất nung",d:"Cam gạch trầm",c:["#9C5843","#46251A","#F0D7CC","#F9F6F4"]},{k:"forest",n:"Rừng thông",d:"Xanh rêu đậm",c:["#3E6A4D","#1A3324","#CDE2D3","#F4F6F4"]}];
+function lsG(k){ try{ return localStorage.getItem(k); }catch(_){ return null; } }
+function lsS(k,v){ try{ localStorage.setItem(k,v); }catch(_){} }
+function setTheme(k){ if(!k||k==="mmh") document.documentElement.removeAttribute("data-theme"); else document.documentElement.setAttribute("data-theme",k); lsS("mmh_theme",k||"mmh"); }
+setTheme(lsG("mmh_theme")||"mmh");
+function nk(s){ return String(s||"").normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/đ/g,"d").replace(/Đ/g,"D").toLowerCase(); }
+var POP=null;
+function pop(anchor, html, bind){
+  if(!POP){ POP=document.createElement("div"); POP.className="pop2"; document.body.appendChild(POP);
+    document.addEventListener("mousedown",function(e){ if(POP.classList.contains("show") && !POP.contains(e.target) && !e.target.closest(".tb2")) POP.classList.remove("show"); },true); }
+  if(POP.classList.contains("show") && POP._a===anchor){ POP.classList.remove("show"); return; }
+  POP._a=anchor; POP.innerHTML=html; POP.classList.add("show");
+  var r=anchor.getBoundingClientRect(), w=POP.offsetWidth;
+  POP.style.top=(r.bottom+6)+"px"; POP.style.left=Math.max(8,Math.min(document.documentElement.clientWidth-w-8, r.right-w))+"px";
+  if(bind) bind(POP);
+}
+/* ── tìm nhanh ── */
+var QS={ sel:0, list:[] };
+function qsOpen(){
+  var o=document.getElementById("qs2");
+  if(!o){
+    o=document.createElement("div"); o.id="qs2";
+    o.innerHTML='<div class="c"><input id="qs2-in" placeholder="Tìm khách hàng, task đi địa bàn, chức năng…" autocomplete="off"><div class="r" id="qs2-r"></div></div>';
+    document.body.appendChild(o);
+    o.addEventListener("mousedown",function(e){ if(e.target===o) qsClose(); });
+    var i=document.getElementById("qs2-in");
+    i.addEventListener("input",function(){ QS.sel=0; qsRun(i.value); });
+    i.addEventListener("keydown",function(e){
+      if(e.key==="ArrowDown"){ e.preventDefault(); QS.sel=Math.min(QS.list.length-1,QS.sel+1); qsPaint(); }
+      else if(e.key==="ArrowUp"){ e.preventDefault(); QS.sel=Math.max(0,QS.sel-1); qsPaint(); }
+      else if(e.key==="Enter"){ e.preventDefault(); var it=QS.list[QS.sel]; if(it){ qsClose(); it.run(); } }
+      else if(e.key==="Escape") qsClose();
+    });
+  }
+  o.classList.add("show"); var i2=document.getElementById("qs2-in"); i2.value=""; i2.focus(); QS.sel=0; qsRun("");
+  if(!(S.custIndex&&S.custIndex.length) && typeof loadCustomerIndex==="function") loadCustomerIndex().then(function(){ if(o.classList.contains("show")) qsRun(i2.value); });
+}
+function qsClose(){ var o=document.getElementById("qs2"); if(o) o.classList.remove("show"); }
+function qsRun(q){
+  var t=nk(q).trim(), out=[];
+  var tabs=navTabs().map(function(x){ return { g:"Chức năng", ic:x.ic, t:x.lb, s:"", h:nk(x.lb+" "+x.id), run:function(){ go(x.id); } }; });
+  tabs.unshift({ g:"Chức năng", ic:"📅", t:"MMH Calendar", s:"lịch chung", h:"mmh calendar lich", run:function(){ openMMHCalendar(); } });
+  tabs.push({ g:"Chức năng", ic:"📧", t:"Báo cáo KPI tháng", s:"", h:"bao cao kpi thang email", run:function(){ go("kpi"); setTimeout(function(){ if(window.KR) KR.open(); },400); } });
+  tabs.push({ g:"Chức năng", ic:"📝", t:"Setting Expectation / tự đánh giá quý", s:"", h:"setting expectation tu danh gia quy", run:function(){ go("kpi"); setTimeout(function(){ if(window.SE) SE.open(); },400); } });
+  if(!t){ out=tabs.slice(0,9); }
+  else {
+    var ws=t.split(/\s+/), hit=function(h){ return ws.every(function(w){ return h.indexOf(w)>=0; }); };
+    out=out.concat(tabs.filter(function(x){ return hit(x.h); }).slice(0,5));
+    var cs=(S.custIndex||[]).filter(function(c){ return hit(nk([c.name,c.code,c.province,c.type,c.pic].join(" "))); }).slice(0,12);
+    out=out.concat(cs.map(function(c){ return { g:"Khách hàng", ic:"🏥", t:c.name||c.code, s:[c.province,c.pic].filter(Boolean).join(" · "), run:function(){ openAcc(c.code,c.name); } }; }));
+    var tr=[]; try{ tr=terrRows(); }catch(_){}
+    var ts=tr.filter(function(w){ return hit(nk([w.account,w.accName,w.pic,w.typeAction,w.status,w.start].join(" "))); })
+      .sort(function(a,b){ return String(b.start||"").localeCompare(String(a.start||"")); }).slice(0,10);
+    out=out.concat(ts.map(function(w){ return { g:"Task đi địa bàn", ic:"📍", t:(parseAcc(w.account).name||w.accName||"—"), s:[fmtVN(String(w.start||"").slice(0,10)),w.pic,w.status].filter(Boolean).join(" · "), run:function(){ openTask(w._row); } }; }));
+  }
+  QS.list=out; qsPaint();
+}
+function qsPaint(){
+  var r=document.getElementById("qs2-r"); if(!r) return;
+  if(!QS.list.length){ r.innerHTML='<div class="e">Không thấy kết quả.</div>'; return; }
+  var g="", h="";
+  QS.list.forEach(function(x,i){ if(x.g!==g){ g=x.g; h+='<div class="g">'+esc(g)+'</div>'; }
+    h+='<div class="i'+(i===QS.sel?" on":"")+'" data-i="'+i+'"><span>'+x.ic+'</span><b>'+esc(x.t)+'</b><small>'+esc(x.s||"")+'</small></div>'; });
+  r.innerHTML=h;
+  r.querySelectorAll(".i").forEach(function(el){ el.onclick=function(){ var it=QS.list[+el.getAttribute("data-i")]; qsClose(); it.run(); }; });
+  var on=r.querySelector(".i.on"); if(on) on.scrollIntoView({block:"nearest"});
+}
+document.addEventListener("keydown",function(e){ if((e.ctrlKey||e.metaKey) && (e.key==="k"||e.key==="K") && S.user){ e.preventDefault(); qsOpen(); } });
+window.QS2={ open:qsOpen };
+
+/* ── thanh trên cùng ── */
+(function(){
+  var h=document.querySelector("#app header"); if(!h || document.getElementById("qsBtn")) return;
+  var mac=/Mac|iPhone|iPad/.test(navigator.platform||"");
+  var mk=function(id,html,title,fn){ var b=document.createElement("button"); b.className="tb2"; b.id=id; b.title=title; b.innerHTML=html; b.onclick=function(e){ e.stopPropagation(); fn(b); }; return b; };
+  var qs=mk("qsBtn",'🔍 <span>Tìm nhanh</span><kbd>'+(mac?"⌘K":"Ctrl K")+'</kbd>',"Tìm nhanh ("+(mac?"⌘":"Ctrl")+" + K)",qsOpen);
+  var links=[].map.call(h.querySelectorAll(".qlinks a"),function(a){ return {h:a.href,t:a.textContent.trim()}; });
+  var lk=mk("lkBtn",'🔗 <span>Liên kết</span>',"Các webapp MMH khác",function(b){
+    pop(b, links.map(function(l){ return '<a href="'+esc(l.h)+'" target="_blank" rel="noopener">'+esc(l.t)+'</a>'; }).join("")
+      +'<a href="https://manimedicalhanoi.github.io/MMH-Report/" target="_blank" rel="noopener">📋 MMH Report Hub</a>');
+  });
+  var th=mk("thBtn",'🎨',"Màu giao diện",function(b){
+    var cur=lsG("mmh_theme")||"mmh";
+    pop(b, THEMES.map(function(t){ return '<button class="it'+(t.k===cur?" on":"")+'" data-k="'+t.k+'"><span class="sw">'+t.c.map(function(c){ return '<i style="background:'+c+'"></i>'; }).join("")+'</span><span>'+esc(t.n)+'</span></button>'; }).join(""),
+      function(p){ p.querySelectorAll("[data-k]").forEach(function(x){ x.onclick=function(){ setTheme(x.getAttribute("data-k")); p.querySelectorAll("[data-k]").forEach(function(y){ y.classList.toggle("on",y===x); }); }; }); });
+  });
+  var mc=document.getElementById("mcBtn"), fy=document.getElementById("fySel");
+  if(mc) mc.insertAdjacentElement("afterend",qs); else h.insertBefore(qs, fy);
+  if(fy){ h.insertBefore(lk, fy); }
+  var user=document.getElementById("btnUser"); if(user) h.insertBefore(th, user);
+})();
 })();
 </script>
 
