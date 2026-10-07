@@ -27,3 +27,13 @@ Kiến trúc & quy ước giống MMH Report Hub (repo `ManiMedicalHanoi/MMH-Rep
   `<script>`. Lý do: Chrome đăng nhập Gmail khác / nhiều tài khoản làm thẻ `<script>` bị chuyển sang trang chọn tài khoản ⇒ không đăng nhập được.
   Mock test: `resourceType()==='script'` trả 404 để giả lập lỗi này.
 - Khang = `mmh.saigon1@manimedicalhanoi.com` (không phải saigon2).
+- **v30.1 — một kiểu giao diện mọi tab** (`<style id="v301-css">`): bề mặt trắng, viền `#E6EAEF`, bo 12px, `#main *` không đổ bóng, tab con
+  (`.shtabs`, `.dashg`) = gạch chân, chip / nút nhóm đang chọn = nền nhạt + viền màu chính (không tô đặc), `avColor` bảng màu trầm.
+  Điện thoại: thanh dưới Lịch · Khách hàng · **Hôm nay** (`V31.today()`: việc hôm nay, quá hạn, sắp đến hạn, dùng `calCard`) · Mở mới · Thêm;
+  nút ＋ Ghi nhanh nổi góc phải dưới; danh sách Khách hàng dạng thẻ (CSS `tr[onclick^="openCust"]`). Quản lý đổi nhóm ở menu bên hoặc Thêm ▸ Nhóm đang xem.
+- **Quyền xem**: Management đổi nhóm (Dental / Surgical / Eyeless / Thái); Team Leader (`title` có "Leader") xem cả nhóm mình (`S.user.lead`);
+  PIC chỉ thấy việc của mình.
+- **Đề xuất công tác (v30.1)**: form mở ngay — danh mục `tripMaster` lưu `localStorage.mmh_tripm_<nhóm>_<pic>`, tải trước sau đăng nhập, làm mới nền
+  (>15 phút); chưa có bản lưu ⇒ danh sách tỉnh dự phòng `TP_FB_DEST`.
+- **Popup nhắc hạn** (giống Report Hub): hạn chứng từ kế toán `DL` (ngày 14, 15, 28, 29 + đúng ngày hạn), KPI tháng ngày 02, tự đánh giá quý ngày 09
+  tháng đầu quý trước 17:00. Thứ tự: `DL` → `#kpn`.
