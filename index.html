@@ -3979,7 +3979,7 @@ function buildNav(){
     if(t.grp!==lastGrp){ h+='<div class="grp">'+t.grp+'</div>'; lastGrp=t.grp; }
     h+='<button class="nvi" data-t="'+t.id+'" onclick="go(\''+t.id+'\')"><span class="ic">'+t.ic+'</span><span class="lb">'+t.lb+'</span></button>';
   });
-  h+='<div style="flex:1"></div><div style="padding:10px;font-size:10.5px;color:var(--mute);line-height:1.5">MMH CRM v29.0<br>'+
+  h+='<div style="flex:1"></div><div style="padding:10px;font-size:10.5px;color:var(--mute);line-height:1.5">MMH CRM v29.1<br>'+
      (isMgmt()?'<a href="'+DRIVE_FOLDER+'" target="_blank">📁 Folder ảnh Drive</a>':"")+'</div>';
   $("side").innerHTML=h;
   /* ⭐ v4.5 — thanh dưới trượt ngang, đủ mọi mục, bỏ nút "Thêm" */
@@ -20340,5 +20340,119 @@ setInterval(function(){ if(window.S && S.tab==="kpi" && $("tab-kpi") && !documen
 if(typeof window.renderReportKpi==="function") window.renderReportKpi=function(){ S.rpKind=""; renderReport(); KR.open(); };
 })();
 </script>
+<style id="v291-css">
+/* ⭐ v29.1 — MMH Calendar (nút trên thanh trên cùng) · buổi đào tạo trên lịch */
+.mc-launch{display:inline-flex;align-items:center;gap:6px;height:34px;padding:0 12px;border:1px solid var(--line);border-radius:9px;background:#fff;color:var(--navy);font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap}
+.mc-launch:hover{background:var(--pale)}
+@media(max-width:760px){ .mc-launch span{display:none} .mc-launch{width:34px;padding:0;justify-content:center} }
+.trn-m .row{display:flex;gap:8px;font-size:13.5px;margin:4px 0;color:var(--ink)}
+.trn-m .row b{min-width:92px;color:var(--sub);font-weight:600}
+.trn-m .lk{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+</style>
+<script>
+/* ══ ⭐ v29.1 — MMH CALENDAR CHO SALES ══
+   · Nút "📅 MMH Calendar" trên thanh trên cùng ⇒ mở Lịch công việc toàn màn hình (giống MMH Calendar của Report Hub;
+     thay phần bài đăng / sự kiện marketing bằng task đi địa bàn).
+   · Nguồn trên lịch: 📍 Đi địa bàn · 🧩 Việc khác · ✈️ Công tác · 🎪 Event (nhóm Thái) · 🎓 Đào tạo (Training Hub, rhSessions).
+   · Real time "Việc khác / Công tác": hỏi vân tay dữ liệu Report Hub (action=version) mỗi 20 giây khi đang mở lịch / Cập nhật,
+     có thay đổi (ai đó thêm / sửa task trên Report Hub hoặc trên sheet) ⇒ đọc lại ngay, không cần bấm ⟳. */
+(function(){
+"use strict";
+var TRN_KEY="mmh-rh-training-2026", TRN_COL="#B06A1F";
+var TR={ rows:null, key:"", at:0, loading:false };
+function trnRange(){ var r=calRange(), a=calDate(r.from), b=calDate(r.to); a.setDate(a.getDate()-7); b.setDate(b.getDate()+14); return {from:calISO(a), to:calISO(b)}; }
+function trnLoad(force){
+  if(TR.loading || typeof TRAINING_HUB_API==="undefined") return;
+  var r=trnRange(), k=r.from+"|"+r.to;
+  if(!force && TR.key===k && Date.now()-TR.at<300000) return;
+  TR.loading=true;
+  var cb="__trn_"+Date.now(), sc=document.createElement("script"), tm=setTimeout(function(){ fin(null); }, 40000);
+  function fin(d){ clearTimeout(tm); TR.loading=false; try{ delete window[cb]; }catch(_){} if(sc.parentNode) sc.parentNode.removeChild(sc);
+    if(d && d.ok){ TR.rows=d.sessions||[]; TR.key=k; TR.at=Date.now(); TR.app=d.appUrl||""; if(S.tab==="weekly" && S.wkTab==="cal") renderCal(); } }
+  window[cb]=fin; sc.onerror=function(){ fin(null); };
+  sc.src=TRAINING_HUB_API+"?action=rhSessions&rhKey="+encodeURIComponent(TRN_KEY)+"&actor="+encodeURIComponent((S.user&&S.user.pic)||"")
+    +"&from="+r.from+"&to="+r.to+"&callback="+cb;
+  document.body.appendChild(sc);
+}
+/* thêm 🎓 vào lịch */
+var ci=calItems;
+calItems=function(){
+  var out=ci.apply(this,arguments);
+  if(CAL.show.d===undefined) CAL.show.d=1;
+  if(!CAL.show.d || CAL.onlyIP || !TR.rows) return out;
+  var sel=calPics();
+  TR.rows.forEach(function(s){
+    if(!s.date) return;
+    if(sel.length && !(s.people||[]).some(function(p){ return sel.some(function(x){ return picEq(x,p); }); })) return;
+    var done=s.date<todayISO();
+    if(CAL.hideDone && done) return;
+    var it={ id:"d"+s.sid, kind:"d", st:s.date, en:s.date, d:s.date, pic:"", title:s.topic||"Buổi đào tạo",
+      sub:[(s.timeFrom?s.timeFrom+(s.timeTo?"–"+s.timeTo:""):""), s.trainer].filter(Boolean).join(" · "),
+      status:done?"Đã diễn ra":"Sắp diễn ra", pct:0, done:false, od:false, ro:true, color:TRN_COL, s:s };
+    CAL.map[it.id]=it; out.push(it);
+  });
+  return out;
+};
+var ic0=calIc; calIc=function(k){ return k==="d"?"🎓":ic0.apply(this,arguments); };
+var tg0=calTag; calTag=function(it){ return it.kind==="d"?"🎓 ĐÀO TẠO":tg0.apply(this,arguments); };
+var op0=calOpen;
+calOpen=function(id){
+  var it=CAL.map[id]; if(!it){ calItems(); it=CAL.map[id]; }
+  if(!it || it.kind!=="d") return op0.apply(this,arguments);
+  var s=it.s, row=function(l,v){ return v?'<div class="row"><b>'+l+'</b><span>'+esc(v)+'</span></div>':''; };
+  var a=function(u,t){ return u?'<a class="btn sm" href="'+esc(u)+'" target="_blank" rel="noopener">'+t+'</a>':''; };
+  openModal("🎓 "+(s.topic||"Buổi đào tạo"), '<div class="trn-m">'
+    +row("Ngày", fmtVN(s.date)+(s.timeFrom?" · "+s.timeFrom+(s.timeTo?"–"+s.timeTo:""):""))
+    +row("Người đào tạo", s.trainer)+row("Đối tượng", s.audience)+row("Hình thức", [s.category,s.type].filter(Boolean).join(" · "))+row("Mục tiêu", s.purpose)
+    +'<div class="lk">'+a(s.meetingLink,"🔗 Link họp")+a(s.folderUrl,"📁 Tài liệu")+a(s.recordLink,"🎬 Bản ghi")+a(TR.app,"🎓 Mở Training Hub")+'</div></div>',
+    '<button class="btn" onclick="closeModal()">Đóng</button>');
+};
+/* chip lọc 🎓 + tải buổi đào tạo theo khoảng đang xem */
+var rc0=renderCal;
+renderCal=function(){
+  var r=rc0.apply(this,arguments);
+  try{
+    var bar=document.querySelector("#main .cal-bar");
+    if(bar && !bar.querySelector("[data-trn]")){
+      var b=document.createElement("button"); b.className="cal-chip"+(CAL.show.d?"":" off"); b.setAttribute("data-trn","1");
+      b.innerHTML='<i style="background:'+TRN_COL+'"></i>🎓 Đào tạo'; b.onclick=function(){ calToggle("d"); };
+      var hide=[].filter.call(bar.querySelectorAll(".cal-chip"),function(x){ return /Ẩn việc/.test(x.textContent); })[0];
+      if(hide) bar.insertBefore(b,hide); else bar.appendChild(b);
+    }
+  }catch(_){}
+  trnLoad(false);
+  return r;
+};
+var rf0=refreshCal; refreshCal=function(){ trnLoad(true); return rf0.apply(this,arguments); };
+
+/* nút MMH Calendar trên thanh trên cùng */
+window.openMMHCalendar=function(){
+  if(!S.user) return;
+  if(typeof v21Landing==="function") v21Landing(); else S.wkTab="cal";
+  go("weekly");
+  setTimeout(function(){ if(!CAL.full) calFull(true); }, 60);
+};
+(function(){
+  var h=document.querySelector("#app header"), q=h&&h.querySelector(".qlinks"); if(!h || document.getElementById("mcBtn")) return;
+  var b=document.createElement("button"); b.className="mc-launch"; b.id="mcBtn"; b.title="Lịch chung: đi địa bàn · việc khác · công tác · đào tạo";
+  b.innerHTML='📅 <span>MMH Calendar</span>'; b.onclick=openMMHCalendar;
+  if(q) h.insertBefore(b,q); else h.appendChild(b);
+})();
+
+/* real time Việc khác / Công tác (Report Hub) */
+var hubV="";
+setInterval(function(){
+  if(document.hidden || !S.user || GATE || (typeof ownTasks==="function" && ownTasks())) return;
+  if(S.tab!=="weekly" && S.tab!=="dash") return;
+  hubJsonp({action:"version"},15000).then(function(j){
+    var v=String((j&&j.v)||""); if(!v) return;
+    if(hubV && v!==hubV && Date.now()-(S._lastWriteAt||0)>12000 && !S._otLoading)
+      loadOther(true).then(function(){ softRepaint(); }).catch(function(){});
+    hubV=v;
+  }).catch(function(){});
+}, 20000);
+})();
+</script>
+
 </body>
 </html>
