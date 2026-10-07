@@ -37,3 +37,5 @@ Kiến trúc & quy ước giống MMH Report Hub (repo `ManiMedicalHanoi/MMH-Rep
   (>15 phút); chưa có bản lưu ⇒ danh sách tỉnh dự phòng `TP_FB_DEST`.
 - **Popup nhắc hạn** (giống Report Hub): hạn chứng từ kế toán `DL` (ngày 14, 15, 28, 29 + đúng ngày hạn), KPI tháng ngày 02, tự đánh giá quý ngày 09
   tháng đầu quý trước 17:00. Thứ tự: `DL` → `#kpn`.
+- **v30.2 — KPI, Total KPI, quyền xem lịch**: cùng code với Report Hub v16.9 (xem CLAUDE.md của MMH-Report: `tone`, `.kp-who`, `pendTag`, `KT`, `VIS`).
+  CRM: chuyến công tác người khác lọc trong `calItems` (kind `t`), nút `VIS.chip()` trên `.cal-bar`; quản lý = `isMgrView()` hoặc Admin / Director / HOD.
