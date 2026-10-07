@@ -39,3 +39,8 @@ Kiến trúc & quy ước giống MMH Report Hub (repo `ManiMedicalHanoi/MMH-Rep
   tháng đầu quý trước 17:00. Thứ tự: `DL` → `#kpn`.
 - **v30.2 — KPI, Total KPI, quyền xem lịch**: cùng code với Report Hub v16.9 (xem CLAUDE.md của MMH-Report: `tone`, `.kp-who`, `pendTag`, `KT`, `VIS`).
   CRM: chuyến công tác người khác lọc trong `calItems` (kind `t`), nút `VIS.chip()` trên `.cal-bar`; quản lý = `isMgrView()` hoặc Admin / Director / HOD.
+- **Thông báo cập nhật (v30.3)**: `updates/notes.js` (`window.MMH_UPDATES`, như Report Hub, mỗi mục có `en` cùng số mục với `items`),
+  nút **Có gì mới** `#updBtn` trên thanh trên cùng (điện thoại: Thêm ▸ Có gì mới), số phiên bản ở thanh bên mở lại lịch sử.
+  Mỗi bản phát hành: thêm mục lên đầu + ảnh `updates/vXX.Y/` (dữ liệu giả) + tăng `notes.js?v=`.
+- **Email cập nhật `UPM` (v30.3)**: giống Report Hub (xem CLAUDE.md ở đó); `UPM_CFG.recipients` = email trong `ROLES`;
+  PDF = `docs/HDSD_MMH_CRM_vXX.Y.pdf`, dựng bằng `MMH-Report/tools/guide/buildcrm.js` (ảnh `shots/crm_*`).
