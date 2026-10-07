@@ -3979,7 +3979,7 @@ function buildNav(){
     if(t.grp!==lastGrp){ h+='<div class="grp">'+t.grp+'</div>'; lastGrp=t.grp; }
     h+='<button class="nvi" data-t="'+t.id+'" onclick="go(\''+t.id+'\')"><span class="ic">'+t.ic+'</span><span class="lb">'+t.lb+'</span></button>';
   });
-  h+='<div style="flex:1"></div><div style="padding:10px;font-size:10.5px;color:var(--mute);line-height:1.5">MMH CRM v29.1<br>'+
+  h+='<div style="flex:1"></div><div style="padding:10px;font-size:10.5px;color:var(--mute);line-height:1.5">MMH CRM v29.2<br>'+
      (isMgmt()?'<a href="'+DRIVE_FOLDER+'" target="_blank">📁 Folder ảnh Drive</a>':"")+'</div>';
   $("side").innerHTML=h;
   /* ⭐ v4.5 — thanh dưới trượt ngang, đủ mọi mục, bỏ nút "Thêm" */
@@ -20451,6 +20451,196 @@ setInterval(function(){
     hubV=v;
   }).catch(function(){});
 }, 20000);
+})();
+</script>
+
+<style id="v292-css">
+/* ⭐ v29.2 — hàng đợi ghi: chip trạng thái góc dưới */
+#wq-chip{position:fixed;right:16px;bottom:16px;z-index:9650;display:none;align-items:center;gap:8px;padding:8px 13px;border-radius:999px;background:#fff;border:1px solid #E6EAEF;
+  box-shadow:0 8px 24px rgba(20,35,50,.12);font-size:13px;font-weight:600;color:#41566F;cursor:pointer}
+#wq-chip.show{display:flex}
+#wq-chip.err{border-color:#F0D6D6;background:#FBF1F1;color:#A64B4B}
+#wq-chip .sp{width:13px;height:13px;border:2px solid #CFE2F3;border-top-color:#3A5CAA;border-radius:50%;animation:au-rot .8s linear infinite}
+@media(max-width:760px){ #wq-chip{bottom:84px;right:12px} }
+.wq-li{border:1px solid #E6EAEF;border-radius:10px;padding:9px 11px;margin-bottom:8px;font-size:13px}
+.wq-li b{display:block;color:#003047}
+.wq-li small{color:#A64B4B}
+</style>
+<script>
+/* ══ ⭐ v29.2 — LƯU KHÔNG PHẢI CHỜ + HÀNG ĐỢI GHI BỀN VỮNG (giống Report Hub) ══
+   · Mọi lệnh ghi (apiPost) tự gắn mã yêu cầu rid ⇒ backend CRM chống ghi trùng (idemBegin_). Nhờ vậy mạng chập chờn / hết giờ chờ
+     thì app TỰ GỬI LẠI cùng rid (an toàn), thay vì coi như đã lưu như trước.
+   · Lưu task đi địa bàn (saveTask): kiểm tra xong là đóng khung + cập nhật danh sách / lịch NGAY; việc ghi (kể cả ảnh) chạy nền qua
+     hàng đợi lưu trên máy (localStorage mmh_crm_wq) — tắt app / mất mạng vẫn còn, mở lại tự gửi tiếp.
+   · Chip góc dưới: "Đang lưu n thay đổi…"; lỗi thật ⇒ chip đỏ, bấm để Thử lại / Bỏ. Dữ liệu tải lại trong lúc chờ vẫn giữ thay đổi của bạn. */
+(function(){
+"use strict";
+var LS="mmh_crm_wq", Q=[], RUN=false;
+function load(){ try{ Q=JSON.parse(localStorage.getItem(LS)||"[]")||[]; }catch(_){ Q=[]; } }
+function save(){ try{ localStorage.setItem(LS, JSON.stringify(Q)); }catch(_){ /* ảnh quá lớn: giữ trong bộ nhớ */ } }
+function rid(){ return "w"+Date.now().toString(36)+Math.random().toString(36).slice(2,8); }
+load();
+
+/* ── 1. apiPost: gắn rid + tự gửi lại khi hết giờ / lỗi mạng ── */
+var post0=apiPost;
+apiPost=function(body){
+  if(body && body.action && !body.rid) body.rid=rid();
+  var n=0;
+  function go(){
+    return post0(body).then(function(r){
+      if(r && r.softTimeout && n<2){ n++; return new Promise(function(res){ setTimeout(res, 2500*n); }).then(go); }
+      return r;
+    },function(e){
+      var m=String((e&&e.message)||"");
+      if(n<2 && /Failed to fetch|NetworkError|Load failed|kết nối|__TIMEOUT__|chậm/i.test(m)){ n++; return new Promise(function(res){ setTimeout(res, 3000*n); }).then(go); }
+      throw e;
+    });
+  }
+  return go();
+};
+
+/* ── 2. gửi một mục trong hàng đợi tới đúng backend đã chọn lúc bấm ── */
+function jsonpTo(url, params, ms){
+  return new Promise(function(res, rej){
+    var cb="__wq_"+Date.now()+"_"+Math.floor(Math.random()*1e5), s=document.createElement("script");
+    var t=setTimeout(function(){ done(); rej(new Error("__TIMEOUT__")); }, ms||60000);
+    function done(){ clearTimeout(t); try{ delete window[cb]; }catch(_){} if(s.parentNode) s.parentNode.removeChild(s); }
+    window[cb]=function(d){ done(); res(d); };
+    s.onerror=function(){ done(); rej(new Error("Failed to fetch")); };
+    params.callback=cb;
+    s.src=url+"?"+Object.keys(params).map(function(k){ return encodeURIComponent(k)+"="+encodeURIComponent(params[k]==null?"":params[k]); }).join("&");
+    document.body.appendChild(s);
+  });
+}
+function send(it){
+  var b=it.body, flat={};
+  Object.keys(b).forEach(function(k){ var v=b[k]; flat[k]=(v!==null&&typeof v==="object")?JSON.stringify(v):v; });
+  var qs=Object.keys(flat).map(function(k){ return encodeURIComponent(k)+"="+encodeURIComponent(flat[k]==null?"":flat[k]); }).join("&");
+  if((it.url+"?"+qs).length<=6500) return jsonpTo(it.url, flat, 90000);
+  return fetch(it.url,{ method:"POST", headers:{"Content-Type":"text/plain;charset=utf-8"}, body:JSON.stringify(b), redirect:"follow" })
+    .then(function(r){ return r.json(); })
+    .catch(function(e){
+      if(CORS_OK===false) return fetch(it.url,{ method:"POST", mode:"no-cors", headers:{"Content-Type":"text/plain;charset=utf-8"}, body:JSON.stringify(b) }).then(function(){ return {ok:true, opaque:true}; });
+      throw e;
+    });
+}
+function pump(){
+  if(RUN || !navigator.onLine) return;
+  var it=Q.filter(function(x){ return !x.err; })[0]; if(!it){ paint(); return; }
+  RUN=true; paint(); S._lastWriteAt=Date.now();
+  send(it).then(function(r){
+    RUN=false;
+    if(r && r.ok===false){ it.err=String(r.error||"Lỗi máy chủ"); save(); paint(); toast("Chưa lưu được: "+it.label+" — "+it.err,"err",7000); return pump(); }
+    Q=Q.filter(function(x){ return x.id!==it.id; }); save();
+    S._lastWriteAt=Date.now();
+    try{ if(r && r.photoError) toast("Task đã lưu nhưng ảnh chưa lên được: "+r.photoError,"warn",7000); }catch(_){}
+    try{ if(it.tab) afterWrite(it.tab, it.row, it.patch||null); }catch(_){}
+    if(!Q.length) toast("✓ Đã lưu vào Google Sheet","ok",2600);
+    pump();
+  },function(e){
+    RUN=false; it.n=(it.n||0)+1;
+    var m=String((e&&e.message)||"");
+    if(it.n>=8 && !/__TIMEOUT__|Failed to fetch|NetworkError|Load failed/i.test(m)){ it.err=m||"Lỗi không rõ"; save(); paint(); return; }
+    save(); paint();
+    setTimeout(pump, Math.min(60000, 2500*it.n));   /* cùng rid ⇒ gửi lại an toàn */
+  });
+}
+var WQ=window.WQ={
+  add:function(o){
+    o.id=rid(); o.url=o.url||gasUrl(); o.team=curTeamKey(); o.at=Date.now();
+    if(!o.body.rid) o.body.rid=o.id;
+    if(S.user && S.user.pic && !("pic" in o.body)) o.body.pic=S.user.pic;
+    Q.push(o); save(); paint(); setTimeout(pump, 30);
+  },
+  list:function(){ return Q.slice(); },
+  pending:function(tab){ return Q.filter(function(x){ return !tab || x.tab===tab; }); },
+  retry:function(id){ Q.forEach(function(x){ if(!id || x.id===id){ x.err=""; x.n=0; } }); save(); pump(); },
+  drop:function(id){ Q=Q.filter(function(x){ return x.id!==id; }); save(); paint(); },
+  pump:pump
+};
+/* chip trạng thái */
+function paint(){
+  var c=document.getElementById("wq-chip");
+  if(!c){ c=document.createElement("div"); c.id="wq-chip"; c.onclick=panel; document.body.appendChild(c); }
+  var bad=Q.filter(function(x){ return x.err; }).length, n=Q.length;
+  c.classList.toggle("show", n>0); c.classList.toggle("err", bad>0);
+  c.innerHTML=bad?("⚠️ "+bad+" thay đổi chưa lưu được — bấm để xem"):('<span class="sp"></span>Đang lưu '+n+' thay đổi…'+(navigator.onLine?"":" (đang mất mạng)"));
+}
+function panel(){
+  if(!Q.length) return;
+  openModal("Thay đổi đang chờ lưu", Q.map(function(x){
+    return '<div class="wq-li"><b>'+esc(x.label||x.body.action)+'</b>'+(x.err?'<small>'+esc(x.err)+'</small>':'<span style="color:#7A8999">Đang gửi… (thử '+(x.n||0)+' lần)</span>')
+      +'<div style="margin-top:6px;display:flex;gap:6px"><button class="btn sm" onclick="WQ.retry(\''+x.id+'\');closeModal()">Thử lại</button>'
+      +'<button class="btn sm" onclick="if(confirm(\'Bỏ thay đổi này?\')){WQ.drop(\''+x.id+'\');closeModal();terrRefresh();}">Bỏ</button></div></div>';
+  }).join(""), '<button class="btn" onclick="closeModal()">Đóng</button>');
+}
+window.addEventListener("online", function(){ paint(); pump(); });
+window.addEventListener("offline", paint);
+setInterval(function(){ if(Q.length && !RUN) pump(); }, 20000);
+setTimeout(function(){ paint(); pump(); }, 2500);
+
+/* dữ liệu đi địa bàn tải lại trong lúc còn chờ ⇒ áp lại thay đổi của mình (không bị "nhảy ngược") */
+var lta=loadTerritoryAll;
+loadTerritoryAll=function(){
+  var p=lta.apply(this,arguments);
+  return Promise.resolve(p).then(function(r){
+    var pend=WQ.pending("weekly"); if(pend.length){ pend.forEach(function(x){ try{ patchLocal("weekly", x.row, x.patch, false); }catch(_){} }); try{ repaintTab(); }catch(_){} }
+    return r;
+  });
+};
+
+/* ── 3. Lưu task đi địa bàn: không chờ ── */
+saveTask=function(){
+  var w=S.task||{};
+  var typeAction=curV("tk-ta","typeAction"), status=curV("tk-status","status");
+  var result=curV("tk-result","result"), next=curV("tk-next","nextAction");
+  var bad=[];
+  function mark(id,ok,lb){ var el=$(id); if(el) el.classList.toggle("bad",!ok); if(!ok) bad.push(lb); }
+  var hasCbc=MEET_RE.test(String(result||"")), isDone=/complet/i.test(String(status||""));
+  mark("tk-status",!!String(status).trim(),"Task Status");
+  mark("tk-ta",!!String(typeAction).trim(),"Type action");
+  mark("tk-tt",!!String(curV("tk-tt","typeTask")).trim(),"Type task");
+  mark("tk-next",hasCbc?!!String(next).trim():true,"Next action");
+  mark("tk-fb",hasCbc?!!String(curV("tk-fb","feedback")).trim():true,"Customer feedback");
+  mark("tk-result",isDone?!!String(result).trim():true,"Task Result");
+  if(String(result).trim() && !hasCbc) bad.push("CBC (dòng “Người gặp:” trong Task Result)");
+  if(isStopNA(next) && !String(curV("tk-stop","stopReason")).trim()){ mark("tk-stop",false,"Lý do dừng chăm sóc"); }
+  if(!noPhoto() && isDone && typeAction==="Visiting" && !S.pending && !(w.photos||[]).length) bad.push("ảnh đi địa bàn (bắt buộc với Visiting đã hoàn thành)");
+  if(bad.length){ toast("⚠️ Cần bổ sung: "+bad.join(", "),"warn",6000); return; }
+  var hasData=Object.keys(S.dirty).length>0, hasPh=!!S.pending;
+  if(!hasData&&!hasPh) return toast("Chưa có thay đổi nào");
+
+  var row=S.taskRow, wkDay=String((w&&w.start)||todayISO()).slice(0,10), d=null, body, label=(parseAcc(w.account||"").name||w.accName||"task")+" · "+fmtVN(wkDay);
+  if(hasData){
+    d={_row:row};
+    ["plan","result","status","nextAction","stopReason","feedback","process","typeTask","typeAction","product","start"].forEach(function(f){ if(f in S.dirty) d[f]=S.dirty[f]; });
+    if(d.start) d.finish=d.start;
+    if(("nextAction" in d)&&!isStopNA(d.nextAction)) d.stopReason="";
+    body={action:"saveWeekly", data:d};
+  }
+  if(hasPh){
+    var pp=S.pending;
+    if(body){
+      body.photo={ b64:pp.dataUrl, mime:"image/jpeg" };
+      if(pp.gps){ body.photo.lat=pp.gps.lat; body.photo.lng=pp.gps.lng; body.photo.acc=pp.gps.acc; }
+      body.data.account=body.data.account||w.account; body.data.pic=body.data.pic||w.pic;
+    } else {
+      body={ action:"uploadPhoto", b64:pp.dataUrl, mime:"image/jpeg", row:row, account:w.account, date:wkDay, pic:w.pic||S.user.pic, replace:1 };
+      if(pp.gps){ body.lat=pp.gps.lat; body.lng=pp.gps.lng; body.acc=pp.gps.acc; }
+    }
+  }
+  /* cập nhật trên máy NGAY, đóng khung, ghi nền */
+  var patch=d?Object.assign({}, d):{};
+  if(hasPh){ patch.photos=[{id:"",thumb:S.pending.dataUrl,full:S.pending.dataUrl,open:""}]; }
+  delete patch._row;
+  try{ patchLocal("weekly", row, patch, false); repaintTab(); }catch(_){}
+  WQ.add({ body:body, tab:"weekly", row:row, patch:patch, label:"Task "+label+(hasPh?" (kèm ảnh)":"") });
+  S.pending=null; S.dirty={};
+  closeDrw();
+  toast("✓ Đã cập nhật — đang lưu vào Google Sheet ở nền","ok",2400);
+  try{ tbdSyncWeek((d&&d.start)||wkDay, String((w&&w.pic)||"")); }catch(_){}
+  S.taskRow=0;
+};
 })();
 </script>
 
