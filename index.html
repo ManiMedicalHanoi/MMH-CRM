@@ -3979,7 +3979,7 @@ function buildNav(){
     if(t.grp!==lastGrp){ h+='<div class="grp">'+t.grp+'</div>'; lastGrp=t.grp; }
     h+='<button class="nvi" data-t="'+t.id+'" onclick="go(\''+t.id+'\')"><span class="ic">'+t.ic+'</span><span class="lb">'+t.lb+'</span></button>';
   });
-  h+='<div style="flex:1"></div><div style="padding:10px;font-size:10.5px;color:var(--mute);line-height:1.5">MMH CRM v30.6<br>'+
+  h+='<div style="flex:1"></div><div style="padding:10px;font-size:10.5px;color:var(--mute);line-height:1.5">MMH CRM v30.7<br>'+
      (isMgmt()?'<a href="'+DRIVE_FOLDER+'" target="_blank">📁 Folder ảnh Drive</a>':"")+'</div>';
   $("side").innerHTML=h;
   /* ⭐ v4.5 — thanh dưới trượt ngang, đủ mọi mục, bỏ nút "Thêm" */
@@ -20685,7 +20685,7 @@ window.QS2={ open:qsOpen };
 </script>
 
 <!-- ⭐ v30.3 — THÔNG BÁO CẬP NHẬT (chép từ Report Hub): dữ liệu updates/notes.js · tự hiện 7 ngày · nút "Có gì mới" trên thanh trên cùng -->
-<script src="updates/notes.js?v=30.6"></script>
+<script src="updates/notes.js?v=30.7"></script>
 <style id="upd-css">
 #upd,#upd-zoom{--t-pri:var(--blue);--t-pri2:var(--blue-d);--t-ink:var(--navy);--t-soft:var(--pale);--t-line:var(--lb2);--t-bg:#F6F8FA;--mmh-blue:var(--blue);--mmh-navy:var(--navy)}
 
@@ -22767,7 +22767,7 @@ function done(it, r){
   }catch(_){}
   save();
   try{ if(it.tab) afterWrite(it.tab, row, it.patch||null); }catch(_){}
-  if(!Q.length) toast("✓ Đã lưu hết vào Google Sheet","ok",2400);
+  if(!Q.length) toast((typeof isTH==="function"&&isTH())?"✓ All saved to Google Sheet":"✓ Đã lưu hết vào Google Sheet","ok",2400);
   paint(); setTimeout(pump, 30);
 }
 function fail(it, m, hard){
@@ -22791,9 +22791,11 @@ function paint(){
   var bad=Q.filter(function(x){ return x.err; }).length, n=Q.length, ph=Q.filter(function(x){ return x.kind==="photo"; }).length, off=!navigator.onLine;
   c.classList.toggle("show", n>0); c.classList.toggle("err", bad>0); c.classList.toggle("off", !bad && off);
   var what=(n-ph?(n-ph)+" thay đổi":"")+(n-ph&&ph?" · ":"")+(ph?ph+" ảnh":"");
-  c.innerHTML=bad?(bad+" mục chưa lưu được — bấm để xem")
-    :off?("Chưa có mạng — "+what+" đã lưu trên máy, sẽ tự gửi khi có mạng")
-    :('<span class="sp"></span>Đang gửi '+what+"…");
+  var en=(typeof isTH==="function" && isTH());
+  if(en) what=(n-ph?(n-ph)+(n-ph>1?" changes":" change"):"")+(n-ph&&ph?" · ":"")+(ph?ph+(ph>1?" photos":" photo"):"");
+  c.innerHTML=bad?(en?bad+" item(s) not saved — tap to see":bad+" mục chưa lưu được — bấm để xem")
+    :off?(en?"No signal — "+what+" saved on this phone, will send automatically":"Chưa có mạng — "+what+" đã lưu trên máy, sẽ tự gửi khi có mạng")
+    :('<span class="sp"></span>'+(en?"Sending ":"Đang gửi ")+what+"…");
 }
 function panel(){
   if(!Q.length) return;
@@ -22954,6 +22956,33 @@ try{
 /* hàng đợi lưu trên máy của chế độ thử tách riêng: không trộn với hàng đợi thật của máy này */
 })();
 </script>
+
+<script>/* ⭐ v30.7 — nhóm Eyeless không chụp ảnh đi địa bàn (giống Surgical Thailand) — người dùng xác nhận 08/10/2026 */try{ TEAMS.eyeless.noPhoto=true; }catch(_){}</script>
+<style id="v307-fld">
+/* ⭐ v30.7 — Ô NHẬP LUÔN CÓ VIỀN RÕ (người dùng phản hồi 08/10/2026: hộp thoại "Thêm task" không thấy khung ô Plan / Type task / Process —
+   phải bấm vào mới hiện ⇒ dễ điền sót / điền nhầm). Nguyên nhân: biến màu --c-line chỉ khai báo trong #app, còn hộp thoại #ov / #ov2 và
+   ngăn kéo #drw nằm ngoài #app ⇒ viền bị bỏ hẳn. Nay: khai báo ở :root + màu viền ô nhập đậm hơn (--fld-line), nền trắng, ô chỉ đọc nền xám nhạt. */
+:root{--c-line:#E6EAEF;--c-sub:#5B6B7D;--c-mute:#8A97A6;--c-soft:#F3F5F8;--fld-line:#C3CDD8;--fld-hover:#9FADBD}
+#app .inp,#app select.inp,#app textarea.inp,#app input.inp,
+#ov .inp,#ov2 .inp,#drw .inp,
+#ov input:not([type=checkbox]):not([type=radio]):not([type=file]):not([type=range]):not([type=color]),#ov select,#ov textarea,
+#ov2 input:not([type=checkbox]):not([type=radio]):not([type=file]):not([type=range]):not([type=color]),#ov2 select,#ov2 textarea,
+#drw input:not([type=checkbox]):not([type=radio]):not([type=file]):not([type=range]):not([type=color]),#drw select,#drw textarea{
+  border:1px solid var(--fld-line)!important;background-color:#fff!important;border-radius:10px!important;box-shadow:none!important}
+#ov .inp:hover,#ov2 .inp:hover,#drw .inp:hover,#ov select:hover,#ov textarea:hover,#drw select:hover,#drw textarea:hover{border-color:var(--fld-hover)!important}
+#app .inp:focus,#ov .inp:focus,#ov2 .inp:focus,#drw .inp:focus,#ov input:focus,#ov select:focus,#ov textarea:focus,#ov2 input:focus,#ov2 select:focus,#ov2 textarea:focus,#drw input:focus,#drw select:focus,#drw textarea:focus{
+  border-color:var(--blue)!important;box-shadow:0 0 0 3px rgba(58,92,170,.14)!important;outline:none}
+#ov .inp[readonly],#ov2 .inp[readonly],#drw .inp[readonly],#ov .piclock,#drw .piclock,#ov input[readonly],#drw input[readonly]{background-color:#F5F7FA!important;border-color:#D5DDE6!important;color:#41566F}
+#ov .inp.bad,#ov2 .inp.bad,#drw .inp.bad,#ov select.bad,#ov textarea.bad,#drw select.bad,#drw textarea.bad{border-color:#C0504D!important;box-shadow:0 0 0 3px rgba(192,80,77,.12)!important}
+#ov .kx-chips input,#ov .chipin input,#ov input.bare,#drw input.bare{border:none!important;box-shadow:none!important}
+/* nhãn ô rõ hơn, các ô cách nhau đều */
+#ov .fld>label,#ov2 .fld>label,#drw .fld>label{color:#41566F;font-weight:600}
+#ov .fld,#ov2 .fld,#drw .fld{margin-bottom:12px}
+#ov select,#ov2 select,#drw select,#app select.inp,#ov select.inp,#ov2 select.inp,#drw select.inp,#app select.inp.inp{-webkit-appearance:none;appearance:none;padding-right:34px!important;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%235B6B7D' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E")!important;
+  background-repeat:no-repeat!important;background-position:right 12px center!important}
+#ov select[multiple],#drw select[multiple]{background-image:none!important;padding-right:12px!important}
+</style>
 
 </body>
 </html>

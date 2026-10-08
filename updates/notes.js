@@ -7,13 +7,22 @@
 function E(u){ u.en={ title:u.title, items:u.items.map(function(i){ return { title:i.title, text:i.text }; }) }; return u; }
 window.MMH_UPDATES = [
   E({
+    id:"2026-10-08-v30.7", version:"v30.7", date:"2026-10-08",
+    title:"Clear frames on every form field",
+    summary:"Every field in the forms (Add / update task, customer, CBC, order…) now has a clear frame, so you can see at a glance what still needs filling in. Eyeless no longer asks for field photos.",
+    items:[
+      {type:"fix", icon:"🔲", title:"Every field has a frame", text:"Before, many fields in pop-up forms (Plan, Type task, Sales Process…) had no frame until you tapped them, so it was easy to miss one. Now every field has a visible frame, drop-down lists show a ▾ arrow, and the field you are typing in is highlighted.", img:"updates/v30.7/fields.jpg"},
+      {type:"imp", icon:"📷", title:"Eyeless: no field photo", text:"Like Surgical Thailand, the Eyeless team does not take photos on field visits: the photo step, photo reminders and the photo gallery are hidden for this team."}
+    ]
+  }),
+  E({
     id:"2026-10-08-v30.6", version:"v30.6", date:"2026-10-08",
     title:"Field photos and task updates: instant, never lost",
-    summary:"Saving a field task no longer waits for the server. The text is sent first in a few seconds, the photo uploads in the background, and everything is kept on your phone until Google Sheet confirms — even with no signal.",
+    summary:"Saving a field visit task with a photo used to wait for the server — on weak 4G it could take minutes or fail. Now the task is saved on your phone first, the text is sent in a few seconds and the photo uploads in the background. <b>Eyeless and Surgical Thailand do not take field photos</b>, so for them only the instant saving applies.",
     items:[
-      {type:"imp", icon:"⚡", title:"Save = done", text:"Tap <b>Save</b> on a new task, a task update or <b>Send photo now</b>: the form closes at once and the task shows on your calendar. The small chip at the bottom shows what is still being sent."},
-      {type:"imp", icon:"📶", title:"No signal? Keep working", text:"Tasks and photos are stored on the phone and sent automatically when the network is back — even after closing the app. Nothing is sent twice."},
-      {type:"new", icon:"🧪", title:"Test mode for Admin", text:"Admin: tap <b>Test mode</b> and pick a salesperson to use the CRM exactly like them. Nothing is saved to the sales files; weekly / monthly report e-mails go only to the Admin."}
+      {type:"fix", icon:"⏳", title:"Cause of the slow photo upload", text:"The text and the photo were sent in one big request, and the app waited while the server uploaded the photo to Drive, looked up the GPS address and wrote the Sheet. On weak 4G or with a busy server this took minutes; a timeout meant nothing was saved.", img:"updates/v30.6/photo_flow.jpg"},
+      {type:"imp", icon:"⚡", title:"Now: tap Save = done", text:"Tap <b>Save to Google Sheet</b> (new task, task update or <b>Send photo now</b>): the form closes at once and the task appears on your calendar. The text is sent first; the photo follows in the background."},
+      {type:"imp", icon:"📶", title:"No signal? Nothing is lost", text:"Tasks and photos are stored on the phone until Google Sheet confirms, and are sent automatically when the network is back — even after closing the app. The chip at the bottom shows what is still being sent; nothing is sent twice."}
     ]
   }),
   E({
