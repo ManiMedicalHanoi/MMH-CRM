@@ -37,7 +37,7 @@ window.MMH_UPDATES = [
     summary:"The <b>What's new</b> button on the top bar shows every update; Admins can email the updates with the user guide attached.",
     items:[
       {type:"new", icon:"✨", title:"What's new", text:"Click <b>What's new</b> on the top bar (on phones: <b>More ▸ What's new</b>) to see every update of MMH CRM with screenshots.", img:"updates/v30.3/co_gi_moi.jpg"},
-      {type:"new", icon:"✉️", title:"Update email with user guide (Admin)", text:"Admins and Directors can send the update summary by email to all CRM users, with the full user guide (PDF) attached."}
+      {type:"new", icon:"✉️", title:"Update email with user guide (Admin)", text:"Admins can send the update summary by email to all CRM users, with the full user guide (PDF) attached."}
     ]
   }),
   E({
