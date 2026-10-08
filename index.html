@@ -22076,7 +22076,7 @@ try{ (window.QS_EXTRA_CMDS=window.QS_EXTRA_CMDS||[]).push(function(){ var d=wind
 <script>
 /* ══ ⭐ v30.3 — THÔNG BÁO CẬP NHẬT + EMAIL CẬP NHẬT CHO CRM ══
    · Nút "Có gì mới" (thanh trên cùng · Thêm ▸ Tiện ích · số phiên bản ở menu bên) ⇒ UPD.open(true) — danh sách cập nhật lấy từ updates/notes.js.
-   · Admin / Director: trong hộp thông báo có "✉ Gửi email cập nhật" (UPM) — email tiếng Anh tới toàn bộ nhân sự dùng CRM (danh sách ROLES). */
+   · Admin: trong hộp thông báo có "✉ Gửi email cập nhật" (UPM) — email tiếng Anh tới toàn bộ nhân sự dùng CRM (danh sách ROLES). */
 window.UPM_CFG={ app:"crm", lang:"en", btn:"✉ Send update email", name:"MMH CRM", url:"https://manimedicalhanoi.github.io/MMH-CRM/", base:"https://manimedicalhanoi.github.io/MMH-CRM/",
   pdf:{ url:"https://manimedicalhanoi.github.io/MMH-CRM/docs/HDSD_MMH_CRM_v30.5.pdf", name:"MMH_CRM_User_Guide_v30.5.pdf" },
   recipients:function(){ var L=[]; try{ Object.keys(ROLES).forEach(function(k){ var e=ROLES[k].email; if(e && L.indexOf(e)<0) L.push(e); }); }catch(_){}
@@ -22107,7 +22107,7 @@ window.UPM_CFG={ app:"crm", lang:"en", btn:"✉ Send update email", name:"MMH CR
 })();
 </script>
 <style id="upm-css">
-/* ⭐ EMAIL THÔNG BÁO CẬP NHẬT (UPM) — Thông báo cập nhật ▸ Gửi email cập nhật (Admin / Director) */
+/* ⭐ EMAIL THÔNG BÁO CẬP NHẬT (UPM) — Thông báo cập nhật ▸ Gửi email cập nhật (chỉ Admin) */
 #upm{position:fixed;inset:0;z-index:9700;background:rgba(20,35,50,.32);display:none;align-items:center;justify-content:center;padding:16px;font-family:Aptos,'Aptos Display','Segoe UI',Calibri,Arial,sans-serif;color:#1F3347}
 #upm.show{display:flex}
 #upm *{box-sizing:border-box}
@@ -22141,7 +22141,7 @@ window.UPM_CFG={ app:"crm", lang:"en", btn:"✉ Send update email", name:"MMH CR
 </style>
 <script>
 /* ══ ⭐ EMAIL THÔNG BÁO CẬP NHẬT HỆ THỐNG (UPM v2, 08/10/2026) — dùng chung Report Hub + MMH CRM ══
-   Admin / Director: Thông báo cập nhật ▸ "Gửi email cập nhật" → CHỌN 1 BẢN CẬP NHẬT → xem trước đúng bản gửi → Gửi thử cho tôi → Gửi email.
+   Chỉ Admin: Thông báo cập nhật ▸ "Gửi email cập nhật" → CHỌN 1 BẢN CẬP NHẬT → xem trước đúng bản gửi → Gửi thử cho tôi → Gửi email.
    · Mỗi email chỉ nói về 1 bản cập nhật (người dùng yêu cầu). Thư thường kiểu Outlook: lời chào · tóm tắt · từng thay đổi (ảnh nhúng) ·
      file đính kèm · "email tự động, không trả lời".
    · Ngôn ngữ theo app (UPM_CFG.lang): CRM = tiếng Anh (lấy trường en của MMH_UPDATES), Report Hub = tiếng Việt.
@@ -22160,7 +22160,7 @@ function dmy(s){ var p=String(s||"").split("-"); return p.length===3?p[2]+"/"+p[
 function today(){ var d=new Date(); return pad(d.getDate())+"/"+pad(d.getMonth()+1)+"/"+d.getFullYear(); }
 function notes(){ return (window.MMH_UPDATES||[]).slice().sort(function(a,b){ return a.date<b.date?1:a.date>b.date?-1:0; }); }
 function user(){ return window.AUTH && AUTH.user && AUTH.user(); }
-function can(){ var u=user(); return !!(u && (u.admin || u.level==="director")); }
+function can(){ var u=user(); return !!(u && u.admin); }   /* chỉ Admin (người dùng yêu cầu 08/10/2026) */
 function abs(p){ if(!p) return ""; if(/^https?:/.test(p)) return p; return cfg().base+String(p).replace(/^\.?\//,""); }
 function cur(){ return notes().filter(function(n){ return n.id===U.id; })[0]||null; }
 function txt(v){ /* nội dung theo ngôn ngữ email */
@@ -22267,7 +22267,7 @@ function send(test){
 var UPM=window.UPM={
   can:can,
   open:function(id){
-    if(!can()) return alert("Chỉ Admin / Director được gửi email thông báo cập nhật (đăng nhập bằng email).");
+    if(!can()) return alert("Chỉ Admin được gửi email thông báo cập nhật (đăng nhập bằng email).");
     var ns=notes();
     /* mặc định: bản đang xem trong hộp Thông báo cập nhật, không thì bản mới nhất */
     var showing=window.UPD&&UPD.list&&UPD.list[UPD.cur];
