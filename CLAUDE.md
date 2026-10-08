@@ -44,3 +44,10 @@ Kiến trúc & quy ước giống MMH Report Hub (repo `ManiMedicalHanoi/MMH-Rep
   Mỗi bản phát hành: thêm mục lên đầu + ảnh `updates/vXX.Y/` (dữ liệu giả) + tăng `notes.js?v=`.
 - **Email cập nhật `UPM` (v30.3)**: giống Report Hub (xem CLAUDE.md ở đó); `UPM_CFG.recipients` = email trong `ROLES`;
   PDF = `docs/HDSD_MMH_CRM_vXX.Y.pdf`, dựng bằng `MMH-Report/tools/guide/buildcrm.js` (ảnh `shots/crm_*`).
+- **Nhóm Thái = TOÀN BỘ tiếng Anh (v30.4)**: bộ dịch DOM (`DICT_EN` / `RULES_EN`, bật khi `I18N.on`) + khối `v304-css` / script v30.4 cuối file
+  (từ điển `A`, luật `R` chạy trước luật cũ). Chữ không nằm trên giao diện thì sửa trong code theo `I18N.on`: tên KPI `kpiShortEN` / `grpName`,
+  Total KPI `KEN()` (tên gốc file KPI, Rule tiếng Anh `r.en`), file Word `templates/setting_expectation_en.docx`, email KPI tháng `lang:"en"`
+  (backend kpi), gợi ý chi phí công tác `TPC_SUGGEST_EN`. Máy mới + trình duyệt không phải tiếng Việt ⇒ màn đăng nhập tiếng Anh.
+  **Tính năng mới phải chạy được tiếng Anh cho nhóm Thái** — kiểm bằng bộ quét chữ Việt (Playwright, đăng nhập Dao / team `thai`, liệt kê text node có dấu).
+- **Thông báo cập nhật CRM viết hoàn toàn bằng tiếng Anh** (người dùng yêu cầu 08/10/2026), ảnh chụp giao diện tiếng Anh (chế độ nhóm Thái, dữ liệu giả
+  Thái Lan). HDSD toàn hệ thống bản tiếng Anh: `MMH-Report/tools/guide/buildcrm_en.js` (ảnh `shots/en_*`) → `docs/HDSD_MMH_CRM_vXX.Y.pdf`.

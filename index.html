@@ -3979,7 +3979,7 @@ function buildNav(){
     if(t.grp!==lastGrp){ h+='<div class="grp">'+t.grp+'</div>'; lastGrp=t.grp; }
     h+='<button class="nvi" data-t="'+t.id+'" onclick="go(\''+t.id+'\')"><span class="ic">'+t.ic+'</span><span class="lb">'+t.lb+'</span></button>';
   });
-  h+='<div style="flex:1"></div><div style="padding:10px;font-size:10.5px;color:var(--mute);line-height:1.5">MMH CRM v30.3<br>'+
+  h+='<div style="flex:1"></div><div style="padding:10px;font-size:10.5px;color:var(--mute);line-height:1.5">MMH CRM v30.4<br>'+
      (isMgmt()?'<a href="'+DRIVE_FOLDER+'" target="_blank">📁 Folder ảnh Drive</a>':"")+'</div>';
   $("side").innerHTML=h;
   /* ⭐ v4.5 — thanh dưới trượt ngang, đủ mọi mục, bỏ nút "Thêm" */
@@ -11739,6 +11739,9 @@ function tripProposeOpen(iso){
 }
 var TPC=[], MS={};
 var TPC_SUGGEST=["Vé máy bay","Công tác phí","Khách sạn","Taxi / Grab","Vé tàu / xe","Tiếp khách","Phí hội thảo","Chi phí khác"];
+/* ⭐ CRM v30.4 — nhóm Thái: gợi ý chi phí tiếng Anh */
+var TPC_SUGGEST_EN=["Air ticket","Per diem","Hotel","Taxi / Grab","Train / bus ticket","Customer entertainment","Seminar fee","Other expenses"];
+function tpEN(){ return !!(window.I18N && I18N.on); }
 /* dự phòng khi Report Hub còn chạy bản cũ (đọc nhầm cột: Equipment ra danh sách tỉnh thành) */
 var TRIP_EQ_FB=["Laptop","Mẫu hàm full","Mẫu hàm rời","Đèn quang trùng hợp","Đèn thực hành","Mini motor","Micro motor","Lèn dọc EQ Condenser","Tay rung rửa sóng âm","Máy rung rửa siêu âm","Gương","Cây trám Composite (vàng)","Cây trám Composite (bạc)","Kẹp gắp","Thám trâm","Dụng cụ trám xanh dương","Dụng cụ trám vàng","Thám trâm 2 đầu khác nhau","Cây đo túi lợi","Máy bơm gutta (lèn nhiệt)","Máy cắt cone","Tay khoan nhanh","Tay khoan chậm khuỷu","Khay Inox - Hình chữ nhật","Khay Inox - Hạt đậu","Giá cắm trâm Mani Endo Guard","Giá cắm trâm Mani Bur Guard","Giá cắm trâm Trung Quốc","Giá cắm mũi khoan","Bộ đặt đam","Máy nội nha","Máy chiếu vật thể","Cây đưa MTA","None"];
 var TRIP_CO_FB=["Nguyen Ha","Dao","Hoa","Tuyen","Vu Phuong","Thuong","Long","Hau","Giang","Phuong","Hoang","Dam Ha","Ngoc","Hang","Sui","Innotech","DDI","Minh Viet","SPI","Dam Viet","Vinh","Bui Trang","Viet Ha","Khang","Thao"];
@@ -11757,7 +11760,7 @@ function tripMasterFix(m){
 }
 function tripProposeForm(r){
   var m=tripMasterFix(r&&r.master), d0=TP.iso||todayISO();
-  TPC=[{d:"Công tác phí",a:0},{d:"",a:0}];
+  TPC=[{d:tpEN()?"Per diem":"Công tác phí",a:0},{d:"",a:0}];
   $("mBody").innerHTML=
      '<div class="tp-box">Đề xuất được ghi thẳng vào file <b>Business Trip</b> (Approval Status = <b>Not Yet</b>) và gửi email xin duyệt '
     +'<b>To:</b> '+esc(r.to||"")+(r.cc?' · <b>CC:</b> '+esc(r.cc):'')+'. Quản lý duyệt bằng <b>HOD Menu</b> trên Google Sheet như bình thường; '
@@ -11771,10 +11774,10 @@ function tripProposeForm(r){
     +'<div class="fld"><label>Expected result (Kết quả mong đợi) <span class="rq">*</span></label><textarea class="inp" id="tp-expect" style="min-height:60px"></textarea></div>'
     +'<div class="fld"><label>Estimated costs VND <span class="rq">*</span><span class="tp-hint">mỗi dòng 1 khoản — mô tả + số tiền</span></label>'
       +'<div id="tp-costs" class="tpc"></div>'
-      +'<datalist id="tp-dl-costd">'+TPC_SUGGEST.map(function(x){ return '<option value="'+esc(x)+'">'; }).join("")+'</datalist>'
+      +'<datalist id="tp-dl-costd">'+(tpEN()?TPC_SUGGEST_EN:TPC_SUGGEST).map(function(x){ return '<option value="'+esc(x)+'">'; }).join("")+'</datalist>'
       +'<div class="tpc-foot"><button type="button" class="mini" onclick="tpCostAdd()">＋ Thêm khoản chi phí</button>'
       +'<div class="tpc-sum">Tổng dự trù: <b id="tp-total">0 đ</b></div></div></div>'
-    +'<div class="fld"><label>Schedule (Lịch trình) <span class="rq">*</span></label><textarea class="inp" id="tp-sched" style="min-height:60px" placeholder="24/9: HN - HP - HN"></textarea></div>'
+    +'<div class="fld"><label>Schedule (Lịch trình) <span class="rq">*</span></label><textarea class="inp" id="tp-sched" style="min-height:60px" placeholder="'+(tpEN()?"24/9: BKK - CNX - BKK":"24/9: HN - HP - HN")+'"></textarea></div>'
     +'<div class="fld"><label>Equipment-assets in/out <span class="rq">*</span></label>'+msHtml("eq","Gõ để tìm thiết bị…")+'</div>';
   $("mFoot").innerHTML='<button class="btn" onclick="closeModal()">Huỷ</button><div style="flex:1"></div><button class="btn pri" id="tp-send" onclick="tripProposeSend()">📨 Gửi đề xuất</button>';
   msInit("dest", m.destinations, []);
@@ -19916,10 +19919,35 @@ var GROUPS={"Sales – Turnover":"Doanh số","Sales – New & Relaunched Produc
   "Back-office – Inventory":"Tồn kho","Back-office – Documentation":"Tài liệu"};
 function kpiShort(n){
   n=String(n||"").replace(/\s+/g," ").trim();
+  if(window.I18N && I18N.on) return kpiShortEN(n);   /* ⭐ CRM v30.4 — nhóm Thái: tên KPI tiếng Anh */
   for(var i=0;i<RULES.length;i++){ var m=n.match(RULES[i][0]); if(m) return typeof RULES[i][1]==="function"?RULES[i][1](m):RULES[i][1]; }
   return n;
 }
-window.kpiShort=kpiShort; window.KPI_GROUPS=GROUPS;
+/* ⭐ CRM v30.4 — tên KPI tiếng Anh rút gọn (nhóm Thái) */
+var RULES_ENK=[
+  [/^MMH Sales Amount to Distributors – New & Relaunched Products – (.+?) – (.+)$/, "New product sales · $1 · $2"],
+  [/^MMH Sales Amount to Distributors – (.+)$/, "Distributor sales · $1"],
+  [/^Number of T&E Events – Led by MMH Members – (.+)$/, "MMH-led events · $1"],
+  [/^Number of T&E Events Led by KOLs & Exhibitions – (.+)$/, "KOL events & exhibitions · $1"],
+  [/^Number of T&E Events Led by KOLs, MMH Members & Exhibitions – (.+)$/, "KOL, MMH-led events & exhibitions · $1"],
+  [/^Number of Participants in T&E Events – (.+)$/, "Event participants · $1"],
+  [/^Key Behavioural Indicator Score.*$/, "Behaviour score (KBI)"],
+  [/^Number of New Customer Accounts – (.+)$/, "New accounts · $1"],
+  [/^Number of New Accounts & New SKU Listings – (.+)$/, "New accounts & SKUs · $1"],
+  [/^Number of Customer Visits – (.+)$/, "Customer visits · $1"],
+  [/^Number of Co-visits with Distributor Sales Representatives – (.+)$/, "Co-visits with distributor reps · $1"],
+  [/^Number of Co-visiting Days with Distributor Sales Representatives – (.+)$/, "Co-visit days with distributor reps · $1"],
+  [/^Key Account Profiling Coverage Rate – (.+)$/, "Key account profiling · $1"],
+  [/^Product Knowledge Test Pass Rate – (.+)$/, "Product test pass rate · $1"],
+  [/^Number of New Product Categories Launched – (.+)$/, "New product categories launched · $1"],
+  [/^Number of Product Content Items Published – (.+)$/, "Product content published · $1"]
+];
+function kpiShortEN(n){
+  for(var i=0;i<RULES_ENK.length;i++){ if(RULES_ENK[i][0].test(n)) return n.replace(RULES_ENK[i][0], RULES_ENK[i][1]); }
+  return n;
+}
+function grpName(g){ return (window.I18N && I18N.on) ? String(g||"").replace(/^(Sales|Marketing|People|Back-office) – /,"") : (GROUPS[g]||g); }
+window.kpiShort=kpiShort; window.KPI_GROUPS=GROUPS; window.kpiGrp=grpName;
 
 /* ── năm tài chính ── */
 function fyOf(ym){ var y=+String(ym).slice(0,4), m=+String(ym).slice(4,6); return (m>=9?y+1:y)-1959; }
@@ -20018,7 +20046,7 @@ function trendSvg(mem){
 }
 function groupSvg(mem, per){
   var G={}, order=[];
-  rowsOf(mem).forEach(function(r){ var v=vals(r,per); if(!v||!v[PI.w]) return; var g=GROUPS[r.group]||r.group; if(!G[g]){ G[g]={w:0,pw:0}; order.push(g); } G[g].w+=v[PI.w]; G[g].pw+=(v[PI.pw]||0); });
+  rowsOf(mem).forEach(function(r){ var v=vals(r,per); if(!v||!v[PI.w]) return; var g=grpName(r.group); if(!G[g]){ G[g]={w:0,pw:0}; order.push(g); } G[g].w+=v[PI.w]; G[g].pw+=(v[PI.pw]||0); });
   if(!order.length) return '<div class="kp-legend">Chưa có trọng số '+esc(perLabel(per))+'.</div>';
   var W=420, rh=26, H=order.length*rh+8, L=140, R=W-L-46;
   var g='<svg width="'+W+'" viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Đóng góp theo nhóm KPI">';
@@ -20113,7 +20141,7 @@ function render(){
     var lastG="";
     html+='<table class="kp-tbl"><thead><tr><th>Nhóm KPI</th><th>KPI</th><th>Trọng số</th><th>Target</th><th>Actual</th><th>% đạt</th><th>Tiến độ</th><th>% × W</th></tr></thead><tbody>'
       +rowsP.map(function(r){
-        var v=vals(r,per), g=GROUPS[r.group]||r.group, gs=g===lastG?"":g; lastG=g;
+        var v=vals(r,per), g=grpName(r.group), gs=g===lastG?"":g; lastG=g;
         return '<tr><td class="g">'+esc(gs)+'</td><td title="'+esc(r.code+" · "+r.name)+'"><span class="cd">'+esc(r.code)+'</span>'+esc(kpiShort(r.name))+(v[PI.t]===0?' <span class="z">(target = 0 ⇒ đạt 100%)</span>':'')+'</td>'
           +'<td class="n">'+(v[PI.w]!==null?Math.round(v[PI.w]*100)+"%":"—")+'</td><td class="n">'+fmtN(v[PI.t],r.unit)+'</td><td class="n">'+(v[PI.a]===null?pendTag(r,per):'<b>'+fmtN(v[PI.a],r.unit==="USD"?"":r.unit)+'</b>')+'</td>'
           +'<td class="n g-'+tone(v[PI.p])+'"><b>'+pct(v[PI.p])+'</b></td><td class="pgc">'+bar(v[PI.p])+'</td><td class="n">'+pct(v[PI.pw])+'</td></tr>';
@@ -20149,7 +20177,9 @@ function chipsHtml(w){ return KS[w].map(function(e,i){ return '<span class="'+(o
 function krForm(){
   var L=$("kr-l"), d=ST.d, mem=members(), sel=KS.pic, s=staff(sel);
   var ms=months().filter(function(m){ return m<=ymNow(); });
-  var def={ greeting:"Dear anh/chị"+(KS.data&&KS.data.toName?" "+KS.data.toName:"")+",", intro:"Em xin gửi báo cáo KPI tháng "+monthLabel(KS.month)+" như sau:", sign:"Best regards,\n"+(s.full||sel) };
+  var EN=window.I18N && I18N.on;
+  var def=EN?{ greeting:"Dear"+(KS.data&&KS.data.toName?" "+KS.data.toName:" all")+",", intro:"Please find below my KPI report for "+monthLabel(KS.month)+":", sign:"Best regards,\n"+(s.full||sel) }
+           :{ greeting:"Dear anh/chị"+(KS.data&&KS.data.toName?" "+KS.data.toName:"")+",", intro:"Em xin gửi báo cáo KPI tháng "+monthLabel(KS.month)+" như sau:", sign:"Best regards,\n"+(s.full||sel) };
   var dr=lsG("mmh_kr_draft:"+sel+":"+KS.month)||{};
   L.innerHTML='<div class="kx-row"><div class="kx-f"><label>Người báo cáo</label><select id="kr-pic">'+mem.map(function(m){ return '<option'+(m===sel?" selected":"")+'>'+esc(m)+'</option>'; }).join("")+'</select></div>'
     +'<div class="kx-f"><label>Tổng KPI tháng</label><div style="font-size:22px;font-weight:700;padding-top:2px" class="g-'+tone(total(sel,KS.month))+'">'+pct(total(sel,KS.month))+'</div></div></div>'
@@ -20157,7 +20187,7 @@ function krForm(){
       +'<small>Số tháng chốt sau 16:00 ngày 2 tháng sau.</small></div>'
     +'<div class="kx-f"><label>Gửi tới (To)</label><div class="kx-chips" id="kr-to">'+chipsHtml("to")+'</div></div>'
     +'<div class="kx-f"><label>CC</label><div class="kx-chips" id="kr-cc">'+chipsHtml("cc")+'</div><small>Mặc định theo sơ đồ tổ chức (Team Leader / HOD / Director). Chỉ email công ty.</small></div>'
-    +'<div class="kx-f"><label>Tiêu đề</label><input id="kr-sub" maxlength="200" value="'+esc(dr.subject||("KPI T"+monthLabel(KS.month)+" · "+(s.full||sel)))+'"></div>'
+    +'<div class="kx-f"><label>Tiêu đề</label><input id="kr-sub" maxlength="200" value="'+esc(dr.subject||("KPI "+(EN?"":"T")+monthLabel(KS.month)+" · "+(s.full||sel)))+'"></div>'
     +'<div class="kx-f"><label>Lời chào</label><input id="kr-gr" value="'+esc(dr.greeting||def.greeting)+'"></div>'
     +'<div class="kx-f"><label>Mở đầu</label><textarea id="kr-in" style="min-height:48px">'+esc(dr.intro||def.intro)+'</textarea></div>'
     +'<div class="kx-f"><label>2. Analysis &amp; Next Actions KPI</label><textarea id="kr-an" placeholder="Mỗi dòng là 1 ý — VD: C3-01 viếng thăm đại lý mới đạt 20%: tuần tới lên lịch 6 đại lý khu vực Bắc…">'+esc(dr.analysis||"")+'</textarea></div>'
@@ -20179,7 +20209,7 @@ function bindChipInput(w){
 function repaintChips(w){ var b=$("kr-"+w); b.innerHTML=chipsHtml(w); bindChipInput(w); b.querySelector("input").focus(); krMeta(); }
 function krFields(){
   return { pic:KS.pic, month:KS.month, subject:$("kr-sub").value.trim(), greeting:$("kr-gr").value, intro:$("kr-in").value, analysis:$("kr-an").value.slice(0,3000),
-           highlights:$("kr-hi").value.slice(0,3000), sign:$("kr-sg").value, showQ:$("kr-q").checked?1:0 };
+           highlights:$("kr-hi").value.slice(0,3000), sign:$("kr-sg").value, showQ:$("kr-q").checked?1:0, lang:(window.I18N && I18N.on)?"en":"" };
 }
 function krMeta(){
   var m=$("kr-meta"); if(!m) return;
@@ -20252,8 +20282,9 @@ function seRows(){
   var qm=qMonths(SS.fy,SS.q), wa=qm.filter(function(m){ return hasAct(SS.pic,m); }), upd=wa[wa.length-1];
   return rowsOf(SS.pic).filter(function(r){ var v=vals(r,SS.q); return v && v[PI.w]; }).map(function(r,i){
     var v=vals(r,SS.q);
-    return { no:String(i+1), title:r.code+" · "+r.name, desc:kpiShort(r.name)+". Đơn vị: "+(r.unit||"")+".", tgt:"Target: "+fmtN(v[PI.t],r.unit==="USD"?"":r.unit)+"   ·   Đạt: "+fmtN(v[PI.a],r.unit==="USD"?"":r.unit),
-      upd:upd?"Cập nhật đến tháng "+monthLabel(upd)+".":"Chưa có số thực hiện.", w:Math.round(v[PI.w]*100)+"%", r:pct(v[PI.p]), wr:pct(v[PI.pw]), _w:v[PI.w], _pw:v[PI.pw] };
+    var EN=window.I18N && I18N.on;
+    return { no:String(i+1), title:r.code+" · "+r.name, desc:kpiShort(r.name)+(EN?". Unit: ":". Đơn vị: ")+(r.unit||"")+".", tgt:"Target: "+fmtN(v[PI.t],r.unit==="USD"?"":r.unit)+(EN?"   ·   Actual: ":"   ·   Đạt: ")+fmtN(v[PI.a],r.unit==="USD"?"":r.unit),
+      upd:upd?(EN?"Updated to "+monthLabel(upd)+".":"Cập nhật đến tháng "+monthLabel(upd)+"."):(EN?"No actuals yet.":"Chưa có số thực hiện."), w:Math.round(v[PI.w]*100)+"%", r:pct(v[PI.p]), wr:pct(v[PI.pw]), _w:v[PI.w], _pw:v[PI.pw] };
   });
 }
 function seOv(){
@@ -20325,7 +20356,7 @@ function seDownload(){
   seSave();
   var b=$("se-dl"), t0=b.textContent; b.disabled=true; b.textContent="Đang tạo file…";
   var H=seHeader(), R=seRows(), D=seDraft();
-  Promise.all([loadJsZip(), fetch("templates/setting_expectation.docx").then(function(r){ if(!r.ok) throw new Error("Không tải được file mẫu."); return r.arrayBuffer(); })]).then(function(a){
+  Promise.all([loadJsZip(), fetch(window.I18N && I18N.on ? "templates/setting_expectation_en.docx" : "templates/setting_expectation.docx").then(function(r){ if(!r.ok) throw new Error("Không tải được file mẫu."); return r.arrayBuffer(); })]).then(function(a){
     return a[0].loadAsync(a[1]);
   }).then(function(z){
     return Promise.all([z.file("word/document.xml").async("string"), z.file("word/header4.xml").async("string")]).then(function(t){
@@ -20838,7 +20869,7 @@ window.QS2={ open:qsOpen };
 </script>
 
 <!-- ⭐ v30.3 — THÔNG BÁO CẬP NHẬT (chép từ Report Hub): dữ liệu updates/notes.js · tự hiện 7 ngày · nút "Có gì mới" trên thanh trên cùng -->
-<script src="updates/notes.js?v=30.3"></script>
+<script src="updates/notes.js?v=30.4"></script>
 <style id="upd-css">
 #upd,#upd-zoom{--t-pri:var(--blue);--t-pri2:var(--blue-d);--t-ink:var(--navy);--t-soft:var(--pale);--t-line:var(--lb2);--t-bg:#F6F8FA;--mmh-blue:var(--blue);--mmh-navy:var(--navy)}
 
@@ -20914,34 +20945,34 @@ function setHidden(id){ try{ var h=hidden(); h[id]=Date.now(); localStorage.setI
 function all(){ return (window.MMH_UPDATES||[]).slice().sort(function(a,b){ return a.date<b.date?1:a.date>b.date?-1:0; }); }
 UPD.active=function(){ var h=hidden(); return all().filter(function(u){ var a=age(u.date); return a>=0 && a<DAYS && !h[u.id]; }); };
 UPD.isOpen=function(){ var e=$("upd"); return !!(e && e.classList.contains("show")); };
-var TAG={ "new":["Mới",""], "imp":["Cải tiến","imp"], "fix":["Sửa lỗi","fix"] };
+var TAG={ "new":["New",""], "imp":["Improved","imp"], "fix":["Fixed","fix"] };   /* ⭐ CRM v30.4 — thông báo cập nhật CRM hoàn toàn tiếng Anh */
 function paint(){
   var u=UPD.list[UPD.cur]; if(!u) return;
   var a=age(u.date), left=DAYS-a;
   var tabs=UPD.list.length>1?'<div class="upd-tabs">'+UPD.list.map(function(x,i){ return '<button class="'+(i===UPD.cur?"on":"")+'" onclick="UPD.go('+i+')">'+esc(x.version||"")+' · '+dmy(x.date)+'</button>'; }).join("")+'</div>':'';
-  $("upd").innerHTML='<div class="upd-box" role="dialog" aria-label="Thông báo cập nhật">'
-    +'<div class="upd-hd"><span class="k">🆕 Cập nhật '+esc(u.version||"")+' · '+dmy(u.date)+'</span>'
+  $("upd").innerHTML='<div class="upd-box" role="dialog" aria-label="What is new">'
+    +'<div class="upd-hd"><span class="k">🆕 Update '+esc(u.version||"")+' · '+dmy(u.date)+'</span>'
       +'<h2>'+esc(u.title||"")+'</h2>'+(u.summary?'<p>'+u.summary+'</p>':'')
-      +'<button class="x" onclick="UPD.close()" title="Đóng">✕</button></div>'
+      +'<button class="x" onclick="UPD.close()" title="Close">✕</button></div>'
     +tabs
     +'<div class="upd-bd">'+(u.items||[]).map(function(it){
         var tg=TAG[it.type||"new"]||TAG["new"];
         return '<div class="upd-it"><div class="ic">'+esc(it.icon||"✨")+'</div><div class="tx"><h4>'+esc(it.title||"")+'<span class="tag '+tg[1]+'">'+tg[0]+'</span></h4><p>'+(it.text||"")+'</p></div>'
-          +(it.img?'<a class="im" href="'+esc(it.img)+'" onclick="UPD.zoom(this.href);return false" title="Bấm để phóng to"><img src="'+esc(it.img)+'" alt="" loading="lazy"></a>':'')+'</div>';
+          +(it.img?'<a class="im" href="'+esc(it.img)+'" onclick="UPD.zoom(this.href);return false" title="Click to zoom"><img src="'+esc(it.img)+'" alt="" loading="lazy"></a>':'')+'</div>';
       }).join("")+'</div>'
     +'<div class="upd-ft">'
-      +(UPD.manual?'<span style="margin-right:auto;font-size:12.5px;color:#7A8999">'+(hidden()[u.id]?'Bạn đã chọn không hiển thị lại thông báo này':a<DAYS&&a>=0?'Tự hiện khi đăng nhập thêm '+left+' ngày':'Đã hết thời gian tự hiện')+'</span>'
-        :'<label><input type="checkbox" id="upd-hide"> Không hiển thị lại thông báo này</label>')
-      +(u.guide?'<a class="doc" href="'+esc(u.guide)+'" target="_blank" rel="noopener">📘 Hướng dẫn chi tiết (PDF)</a>':'')
-      +(u.folder?'<a class="doc" href="'+esc(u.folder)+'" target="_blank" rel="noopener">📁 Thư mục HDSD</a>':'')
-      +'<button class="ok" onclick="UPD.close()">Đã hiểu</button></div></div>';
+      +(UPD.manual?'<span style="margin-right:auto;font-size:12.5px;color:#7A8999">'+(hidden()[u.id]?'You chose not to show this notice again':a<DAYS&&a>=0?'Shown at sign-in for '+left+' more day'+(left>1?'s':''):'No longer shown automatically')+'</span>'
+        :'<label><input type="checkbox" id="upd-hide"> Do not show this notice again</label>')
+      +(u.guide?'<a class="doc" href="'+esc(u.guide)+'" target="_blank" rel="noopener">📘 User guide (PDF)</a>':'')
+      +(u.folder?'<a class="doc" href="'+esc(u.folder)+'" target="_blank" rel="noopener">📁 User guide folder</a>':'')
+      +'<button class="ok" onclick="UPD.close()">Got it</button></div></div>';
 }
 UPD.go=function(i){ var c=$("upd-hide"); if(c && c.checked) setHidden(UPD.list[UPD.cur].id); UPD.cur=i; paint(); };
 UPD.zoom=function(src){ var z=$("upd-zoom"); z.querySelector("img").src=src; z.classList.add("show"); };
 UPD.open=function(manual){
   UPD.manual=!!manual;
   UPD.list=manual?all():UPD.active();
-  if(!UPD.list.length){ if(manual && typeof toast==="function") toast("Chưa có thông báo cập nhật nào"); return false; }
+  if(!UPD.list.length){ if(manual && typeof toast==="function") toast("No update notices yet"); return false; }
   UPD.cur=0; paint(); $("upd").classList.add("show"); return true;
 };
 UPD.close=function(){
@@ -21857,7 +21888,8 @@ function num(v,u){
   var s=Math.abs(v)>=1000?Math.round(v).toLocaleString("en-US"):String(Math.round(v*100)/100);
   return u==="USD"?"$"+s:s;
 }
-function kname(k){ var s=NM[k.code]; if(s) return s; try{ if(window.kpiShort){ s=kpiShort(k.name); if(s && s!==String(k.name).replace(/\s+/g," ").trim()) return s; } }catch(_){}
+function KEN(){ return !!(window.I18N && I18N.on); }   /* ⭐ CRM v30.4 — nhóm Thái: Total KPI tiếng Anh (tên gốc trong file KPI) */
+function kname(k){ var s=KEN()?"":NM[k.code]; if(s) return s; try{ if(window.kpiShort){ s=kpiShort(k.name); if(s && s!==String(k.name).replace(/\s+/g," ").trim()) return s; } }catch(_){}
   return String(k.name||"").trim()||k.code; }
 function lower(k){ return /holding period/i.test(k.name||""); }
 function turnover(k){ return /^F\d/.test(k.code||""); }
@@ -21972,7 +22004,7 @@ function pSum(){
     cards+='<div class="card pcard"><h4><span class="k">'+E(p.k)+'</span>'+E(PN[p.k]||p.k)+'<em class="t-'+tone(pp)+'">'+pct(pp)+'</em></h4>'
       +p.obj.map(function(o){
         var L=linked(o.link), op=avgP(L);
-        return '<div class="orow" data-a="obj" title="Mốc FY68: '+E(String(o.anchor).replace(/\n/g," "))+'"><div class="l"><span class="cd">'+E(o.code)+'</span><span class="nm">'+E(OBJ[o.code]||String(o.obj).split("\n")[0])+'</span><span class="pc t-'+tone(op)+'">'+pct(op)+'</span></div>'+bar(op)
+        return '<div class="orow" data-a="obj" title="Mốc FY68: '+E(String(o.anchor).replace(/\n/g," "))+'"><div class="l"><span class="cd">'+E(o.code)+'</span><span class="nm">'+E((KEN()?"":OBJ[o.code])||String(o.obj).split("\n")[0])+'</span><span class="pc t-'+tone(op)+'">'+pct(op)+'</span></div>'+bar(op)
           +'<div class="sub">'+L.map(function(k){ var r=ta(k); return '<div><span>'+E(kname(k))+'</span><b class="t-'+tone(r.p)+'">'+pct(r.p)+'</b></div>'; }).join("")+'</div></div>';
       }).join("")+'</div>';
   });
@@ -22020,10 +22052,10 @@ function pRule(){
     [/^If 10%/i,"Muộn / thiếu 10% báo cáo: trừ 20% thưởng; trên 50%: không xét thưởng (quy định MMH-009)."],
     [/^Result cap/i,"Mỗi KPI tối đa 130% (tháng, quý, năm), trừ Doanh số Turnover và Doanh số sản phẩm mới / tái ra mắt."],
     [/^Quarterly result/i,"Kết quả quý: target và actual là tổng 3 tháng (trung bình với KPI % / điểm; doanh số lũy kế = cuối quý trừ cuối quý trước); % đạt nhân trọng số của quý."]];
-  var tr=function(g){ g=String(g).replace(/^\d+\.\s*/,""); for(var i=0;i<VN.length;i++) if(VN[i][0].test(g)) return VN[i][1]; return g; };
+  var tr=function(g){ g=String(g).replace(/^\d+\.\s*/,""); if(KEN()) return g; for(var i=0;i<VN.length;i++) if(VN[i][0].test(g)) return VN[i][1]; return g; };
   return '<div class="card" style="margin-bottom:12px"><b style="font-size:14px;color:#003047">Quy định vận hành KPI</b><ol class="guide">'+(d.guide||[]).map(function(g){ return '<li>'+E(tr(g))+'</li>'; }).join("")+'</ol></div>'
-    +(d.rules||[]).map(function(r){ var g=String(r.group).split("\n"), vn=(window.KPI_GROUPS||{})[g[0]];
-      return '<details class="card rule"><summary><b>'+E(vn||g[0])+'</b><small>'+E(g.slice(1).join(" "))+'</small></summary><div class="tx">'+E(r.vi)+'</div></details>'; }).join("");
+    +(d.rules||[]).map(function(r){ var g=String(r.group).split("\n"), vn=KEN()?"":(window.KPI_GROUPS||{})[g[0]];
+      return '<details class="card rule"><summary><b>'+E(vn||g[0])+'</b><small>'+E(g.slice(1).join(" "))+'</small></summary><div class="tx">'+E(KEN()?(r.en||r.vi):r.vi)+'</div></details>'; }).join("");
 }
 
 var KT=window.KT={
@@ -22046,7 +22078,7 @@ try{ (window.QS_EXTRA_CMDS=window.QS_EXTRA_CMDS||[]).push(function(){ var d=wind
    · Nút "Có gì mới" (thanh trên cùng · Thêm ▸ Tiện ích · số phiên bản ở menu bên) ⇒ UPD.open(true) — danh sách cập nhật lấy từ updates/notes.js.
    · Admin / Director: trong hộp thông báo có "✉ Gửi email cập nhật" (UPM) — email tiếng Anh tới toàn bộ nhân sự dùng CRM (danh sách ROLES). */
 window.UPM_CFG={ app:"crm", name:"MMH CRM", url:"https://manimedicalhanoi.github.io/MMH-CRM/", base:"https://manimedicalhanoi.github.io/MMH-CRM/",
-  pdf:{ url:"https://manimedicalhanoi.github.io/MMH-CRM/docs/HDSD_MMH_CRM_v30.3.pdf", name:"MMH_CRM_User_Guide_v30.3.pdf" },
+  pdf:{ url:"https://manimedicalhanoi.github.io/MMH-CRM/docs/HDSD_MMH_CRM_v30.4.pdf", name:"MMH_CRM_User_Guide_v30.4.pdf" },
   recipients:function(){ var L=[]; try{ Object.keys(ROLES).forEach(function(k){ var e=ROLES[k].email; if(e && L.indexOf(e)<0) L.push(e); }); }catch(_){}
     return { list:L, count:L.length, label:"Toàn bộ nhân sự dùng MMH CRM ("+L.length+" người)" }; } };
 (function(){
@@ -22229,7 +22261,7 @@ var UPM=window.UPM={
 (function hook(){
   var host=$("upd"); if(!host || !window.MutationObserver){ setTimeout(hook, 600); return; }
   var put=function(){ var ft=host.querySelector(".upd-ft"); if(!ft || ft.querySelector(".upm-btn") || !can()) return;
-    var b=document.createElement("button"); b.className="upm-btn"; b.type="button"; b.textContent="✉ Gửi email cập nhật"; b.title="Gửi email (tiếng Anh) về các cập nhật này tới toàn bộ người dùng";
+    var b=document.createElement("button"); b.className="upm-btn"; b.type="button"; b.textContent="✉ Send update email"; b.title="Gửi email (tiếng Anh) về các cập nhật này tới toàn bộ người dùng";
     b.onclick=function(){ UPM.open(); }; var ok=ft.querySelector(".ok"); if(ok) ft.insertBefore(b, ok); else ft.appendChild(b); };
   UPM._put=put; UPM._host=host;
   setInterval(function(){ if(host.classList.contains("show")) put(); }, 700);
@@ -22239,5 +22271,195 @@ var UPM=window.UPM={
 })();
 </script>
 
+<style id="v304-css">
+/* ⭐ CRM v30.4 — nhóm Thái (tiếng Anh): đơn vị "VND" dài hơn "đ" ⇒ chừa chỗ để không đè chữ "Amount" */
+html[lang=en] .tpc-a input{padding-right:46px}
+</style>
+<script>
+/* ══ ⭐ CRM v30.4 — NHÓM THÁI: TOÀN BỘ TIẾNG ANH ══
+   Người dùng (08/10/2026): với Team Surgical Thailand mọi thông tin trên CRM phải bằng tiếng Anh — công tác, file tự đánh giá
+   cuối quý, tên KPI… Bộ dịch DOM sẵn có (DICT_EN / RULES_EN, chỉ bật khi I18N.on = nhóm Thái) được bổ sung các chữ của những
+   phần mới (KPI & Mục tiêu, Báo cáo KPI tháng, Setting Expectation, nhắc hạn KPI / chứng từ, lịch riêng tư, Hôm nay).
+   Phần không nằm trên giao diện (tên KPI, file Word, email KPI, gợi ý chi phí công tác) đã sửa trong code gốc theo I18N.on.
+   Chữ mới cho nhóm Thái: thêm vào A (khớp nguyên chuỗi) hoặc R (biểu thức, chạy trước luật cũ). */
+(function(){
+if(typeof DICT_EN!=="object" || typeof RULES_EN!=="object") return;
+var A={
+  /* thanh trên · lịch */
+  "Lịch chung: đi địa bàn · việc khác · công tác · đào tạo":"Shared calendar: field visits · other tasks · trips · training",
+  "Tìm nhanh (Ctrl + K)":"Quick search (Ctrl + K)", "Các webapp MMH khác":"Other MMH web apps", "Có gì mới trên MMH CRM":"What's new in MMH CRM",
+  "Màu giao diện":"Colour theme", "Xem các bản cập nhật":"See all updates", "Ghi nhanh: đi địa bàn · việc khác · đề xuất công tác":"Quick add: field visit · other task · business trip",
+  "Chuyến công tác của người khác luôn ẩn — quản lý bấm để bật / tắt xem":"Other people's business trips are hidden — managers can click to show / hide them",
+  "Công tác người khác: Đang ẩn":"Other people's trips: Hidden", "Công tác người khác: Đang hiện":"Other people's trips: Shown",
+  "đi địa bàn xong":"field visits done", "Xem cả tuần":"See the whole week", "＋ Thêm việc hôm nay":"＋ Add a task for today",
+  /* KPI & Mục tiêu */
+  "Toàn công ty":"Whole company", "Phòng ban của bạn":"Your department", "Nhóm của bạn":"Your team", "KPI của bạn":"Your KPI",
+  "Báo cáo KPI tháng":"Monthly KPI report", "Setting Expectation":"Setting Expectation", "Đang cập nhật…":"Updating…",
+  "Đạt ≥ 100%":"Achieved ≥ 100%", "Dưới 90%":"Below 90%", "người":"people", "người cần hỗ trợ":"people need support",
+  "bấm vào thanh để xem chi tiết từng người":"click a bar to see each person's details", "Từng người":"Each person",
+  "● Đang xem":"● Viewing", "Đang xem KPI của":"Viewing KPI of", "Không có KPI dưới 90%":"No KPI below 90%", "KPI dưới 90%":"KPI below 90%",
+  "Xu hướng KPI theo tháng":"KPI trend by month", "tổng % × trọng số · vạch đứt = 100%":"total % × weight · dashed line = 100%",
+  "Đóng góp theo nhóm KPI":"Contribution by KPI group", "Rê chuột vào tên KPI để xem tên gốc trong file KPI.":"Hover over a KPI name to see its full name in the KPI file.",
+  "Nhóm KPI":"KPI group", "Trọng số":"Weight", "% đạt":"% achieved", "Tiến độ":"Progress", "Chưa chốt":"Not closed", "Chưa có số":"No data",
+  "(target = 0 ⇒ đạt 100%)":"(target = 0 ⇒ 100% achieved)", "Màu theo file KPI:":"Colours follow the KPI file:",
+  ". Số liệu chỉ xem — sửa trên file MMH KPI FY68 (tự đồng bộ ~1 phút).":". View only — edit in the MMH KPI FY68 file (syncs in ~1 minute).",
+  "Nguồn dữ liệu:":"Data sources:", "Điểm hành vi":"Behaviour score", "· doanh số đã chốt tới tháng":"· sales closed up to",
+  "Chưa có số liệu kỳ này trên file KPI":"No data for this period in the KPI file", "Chưa tải được KPI.":"Could not load KPI.",
+  "Tổng điểm KPI":"Total KPI score", "Tổng KPI tháng":"Monthly total KPI",
+  /* Setting Expectation */
+  "📝 Setting Expectation & tự đánh giá quý":"📝 Setting Expectation & quarterly self-assessment", "Setting Expectation & tự đánh giá quý":"Setting Expectation & quarterly self-assessment",
+  "Chọn quý":"Choose quarter", "KPI tự điền":"KPI filled in", "Điền tự đánh giá":"Write self-assessment", "Tải file Word":"Download Word file",
+  "Người được đánh giá":"Employee", "Kỳ":"Period", "B. Năng lực":"B. Competencies",
+  "— mục 1, 2 điền đầu quý; cuối quý đối chiếu; mục 3–5 điền cuối quý. Điểm 1–5.":"— items 1–2 at the start of the quarter, reviewed at the end; items 3–5 at the end of the quarter. Score 1–5.",
+  "1. Mục tiêu và định hướng":"1. Objectives and direction", "2. Kế hoạch hành động":"2. Action plan", "3. Cải tiến trong công việc":"3. Work improvement",
+  "4. Phát triển đội nhóm và phối hợp":"4. Team development and collaboration", "5. Thực hiện và đạt kết quả":"5. Execution and results",
+  "Đánh giá chung về Năng lực":"Overall competency rating", "Tự đánh giá (1–5)":"Self-rating (1–5)", "C. Tổng kết — Tự đánh giá":"C. Summary — Self-assessment",
+  "Điểm tốt":"Strengths", "Cần cải thiện và hành động tiếp theo":"Areas to improve and next actions", "Mức tự đánh giá":"Self-assessment rating",
+  "Vượt quá mong đợi":"Exceeds expectations", "Đạt được mong đợi":"Achieves expectations", "Đạt một phần mong đợi":"Partially achieves expectations", "Không đạt mong đợi":"Does not achieve expectations",
+  "Phần tự điền vào file Word":"Filled into the Word file automatically", "lấy từ file MMH KPI FY68":"from the MMH KPI FY68 file",
+  "Kết quả":"Result", "Hệ số":"Weight", "Hệ số × KQ":"Weight × Result", "Bản nháp tự lưu trên máy này.":"Draft is saved automatically on this device.",
+  "⬇️ Tải file Word (.docx)":"⬇️ Download Word file (.docx)", "Tải file Word (.docx)":"Download Word file (.docx)", "Đang tạo file…":"Creating file…",
+  "Đầu quý: …":"Start of quarter: …", "Đối chiếu cuối quý: …":"End-of-quarter review: …",
+  "Setting Expectation cần đăng nhập bằng email.":"Setting Expectation requires signing in with your email.", "Không tải được file mẫu.":"Could not load the template file.",
+  /* Báo cáo KPI tháng */
+  "📧 Báo cáo KPI tháng":"📧 Monthly KPI report", "Chọn kỳ":"Choose period", "Soạn email":"Write email", "Xem trước & gửi":"Preview & send",
+  "Người báo cáo":"Reporter", "Tháng báo cáo":"Report month", "Số tháng chốt sau 16:00 ngày 2 tháng sau.":"Monthly figures are closed after 16:00 on the 2nd of the next month.",
+  "Gửi tới (To)":"Send to (To)", "Mặc định theo sơ đồ tổ chức (Team Leader / HOD / Director). Chỉ email công ty.":"Default from the organisation chart (Team Leader / HOD / Director). Company emails only.",
+  "Tiêu đề":"Subject", "Lời chào":"Greeting", "Mở đầu":"Opening", "Chữ ký":"Signature", "Kèm KPI lũy kế quý":"Include quarter-to-date KPI",
+  "gõ email rồi Enter":"type an email and press Enter", "Mỗi dòng là 1 ý":"One point per line",
+  "Mỗi dòng là 1 ý — VD: C3-01 viếng thăm đại lý mới đạt 20%: tuần tới lên lịch 6 đại lý khu vực Bắc…":"One point per line — e.g. C4-02 customer visits at 60%: schedule 6 more hospital visits next week…",
+  "Xem trước đúng bản sẽ gửi":"Exact preview of the email", "Xem trước email":"Email preview", "Đang cập nhật bản xem trước…":"Updating the preview…",
+  "Đang dựng bản xem trước…":"Building the preview…", "Đang lấy người nhận theo sơ đồ tổ chức…":"Getting recipients from the organisation chart…",
+  "chưa có người nhận":"no recipients yet", "✉️ Gửi thử cho tôi":"✉️ Send me a test", "📧 Gửi báo cáo KPI":"📧 Send KPI report", "Gửi báo cáo KPI":"Send KPI report",
+  "Đang gửi…":"Sending…", "Báo cáo KPI cần đăng nhập bằng email.":"The KPI report requires signing in with your email.",
+  "Chưa có email của bạn.":"Your email is not available yet.", "Chưa có người nhận (To).":"No recipients (To) yet.",
+  /* nhắc hạn KPI · tự đánh giá */
+  "ĐÁNH GIÁ CÔNG VIỆC QUÝ":"QUARTERLY PERFORMANCE REVIEW", "Hạn hoàn thành form Setting Expectation & tự đánh giá":"The deadline for the Setting Expectation & self-assessment form",
+  "là":"is", ". KPI của quý được điền sẵn — bạn chỉ cần viết phần tự đánh giá rồi tải file Word.":". Your KPIs of the quarter are filled in — just write your self-assessment and download the Word file.",
+  "Đã nộp, không nhắc nữa":"Submitted, don't remind me", "Để sau":"Later", "📝 Mở form tự đánh giá":"📝 Open self-assessment form", "Mở form tự đánh giá":"Open self-assessment form",
+  "BÁO CÁO KPI THÁNG":"MONTHLY KPI REPORT", "trước 16:00 hôm nay":"before 16:00 today", "(sau giờ này số liệu tháng được chốt).":"(the monthly figures are closed after this time).",
+  "Mở báo cáo KPI tháng":"Open monthly KPI report", "📧 Mở báo cáo KPI tháng":"📧 Open monthly KPI report",
+  /* nhắc hạn chứng từ (Kế toán) */
+  "Nhắc hạn chứng từ · Bộ phận Kế toán":"Document deadline · Accounting", "Hôm nay là hạn — nộp trước 17:00":"Due today — submit before 17:00",
+  "Lần 1 · chứng từ ngày 01–14":"Round 1 · documents dated 01–14", "Lần 2 · chứng từ ngày 15–cuối tháng":"Round 2 · documents dated 15–end of month",
+  "Ngày 15 rơi vào ngày nghỉ ⇒ nộp ngày làm việc kế tiếp":"If the 15th is a holiday ⇒ submit on the next working day",
+  "Hồ sơ cần hoàn thành trong thời hạn":"Documents to complete by the deadline", "Nộp":"Submit", "bản cứng":"hard copies of",
+  "Phiếu công tác / Bảng kê mua hàng.":"the Business trip form / Purchase list.", "Điền đầy đủ thông tin phần":"Fill in all information in", "đầy đủ chứng từ":"all documents",
+  "trên file Expenses Approval.":"in the Expenses Approval file.", "Trừ điểm Behaviour":"Behaviour score deductions",
+  "Quá hạn: −1 điểm / ngày muộn":"Late: −1 point / day", "Thiếu thông tin After purchase: −1 điểm / lần":"Missing After purchase information: −1 point / time",
+  "Thiếu chứng từ: −1 điểm / lần":"Missing documents: −1 point / time", "Lưu ý:":"Note:",
+  "chứng từ phát sinh trong tháng nào phải nộp trong tháng đó — nộp sang tháng sau mà không có lý do chính đáng sẽ":"documents of a month must be submitted in that month — submitting them in the next month without a valid reason means they will",
+  "không được thanh quyết toán":"not be reimbursed", ". Có lý do chính đáng hoặc vướng mắc: liên hệ trực tiếp Bộ phận Kế toán (kèm minh chứng).":". If you have a valid reason or any issue, contact the Accounting team directly (with evidence).",
+  "— Bộ phận Kế toán":"— Accounting team", "Tắt thông báo":"Turn off reminder", "Không hiện lại trong đợt nộp này":"Don't show again for this submission round",
+  /* Total KPI công ty (KT) */
+  "Total KPI công ty":"Company Total KPI", "Tháng":"Month", "Lũy kế":"Year to date", "Cả năm":"Full year", "Tổng quan":"Overview", "KPI công ty":"Company KPI",
+  "Thành viên":"Members", "Cách tính KPI":"How KPI is calculated", "Doanh số toàn công ty":"Company sales", "Tài chính":"Financial", "Khách hàng":"Customer",
+  "Quy trình nội bộ":"Internal process", "Học hỏi & phát triển":"Learning & growth",
+  "% mục tiêu = trung bình % các KPI liên kết. Bấm mục tiêu để xem KPI liên kết.":"Objective % = average % of its linked KPIs. Click an objective to see its linked KPIs.",
+  "Đóng (Esc)":"Close (Esc)", "· bấm ▸ để xem chi tiết":"· click ▸ to see details", "Thực đạt":"Actual", "Bấm để xem KPI chi tiết":"Click to see detailed KPI",
+  "Quy định vận hành KPI":"KPI operating guidelines", "Chưa có quyền xem Total KPI.":"You don't have access to Total KPI.",
+  /* màn đăng nhập email + mã 6 số */
+  "Đăng nhập bằng email công ty":"Sign in with your company email", "Xác thực email đăng nhập":"Verify your sign-in email",
+  "Nhập email của bạn, hệ thống gửi mã 6 số để xác nhận đúng là bạn. Dùng chung tài khoản với MMH Report Hub.":"Enter your email and we will send you a 6-digit code to confirm it is you. Same account as MMH Report Hub.",
+  "Email công ty":"Company email", "Gửi mã đăng nhập":"Send sign-in code", "Dùng email @manimedicalhanoi.com hoặc @mani.inc.":"Use your @manimedicalhanoi.com or @mani.inc email.",
+  "Chưa đăng nhập được?":"Can't sign in?", "Dùng mật khẩu như trước":"Use your password as before", "Nhập mã 6 số":"Enter the 6-digit code", "Mã 6 số":"6-digit code",
+  "Mã vừa gửi tới":"Code sent to", ", có hiệu lực 10 phút.":", valid for 10 minutes.", "Đăng nhập":"Sign in", "Đổi email":"Change email", "Gửi lại mã":"Resend code",
+  "Không thấy email? Xem thêm thư mục":"No email? Also check your", ". Người gửi: MMH Report.":"folder. Sender: MMH Report.",
+  "Vui lòng nhập email công ty: …@manimedicalhanoi.com hoặc …@mani.inc":"Please enter your company email: …@manimedicalhanoi.com or …@mani.inc",
+  "Đang gửi mã…":"Sending code…", "Chưa gửi được mã.":"Could not send the code.", "Vui lòng nhập đủ 6 số.":"Please enter all 6 digits.", "Đang kiểm tra…":"Checking…",
+  "Đăng nhập thành công":"Signed in", "Mã chưa đúng.":"Incorrect code.", "Máy chủ phản hồi chậm. Vui lòng thử lại.":"The server is slow to respond. Please try again.",
+  "Không có phản hồi.":"No response.", "Không kết nối được máy chủ đăng nhập. Kiểm tra mạng rồi thử lại.":"Cannot reach the sign-in server. Check your connection and try again.",
+  "Đã xác thực email — lần sau mở CRM tự đăng nhập.":"Email verified — next time MMH CRM signs you in automatically.", "Xác thực ngay":"Verify now",
+  "Phiên đăng nhập hết hiệu lực.":"Your session has expired.", "Vui lòng xác thực lại email.":"Please verify your email again.",
+  /* tiêu đề nút (title) phần KPI */
+  "Doanh số lấy từ MMH Turnover Report (kế toán chốt theo tháng)":"Sales come from the MMH Turnover Report (closed monthly by accounting)"
+};
+for(var k in A) if(Object.prototype.hasOwnProperty.call(A,k)) DICT_EN[k]=A[k];
+/* kỳ: "tháng 10/2026" → "10/2026" · "quý 1" → "Q1" · "năm FY68" → "FY68" */
+function P(x){ x=String(x||"").trim(); var m;
+  if((m=/^tháng (\d+\/\d+)$/i.exec(x))) return m[1]; if((m=/^quý (\d)$/i.exec(x))) return "Q"+m[1]; if((m=/^năm (FY\d+)$/i.exec(x))) return m[1]; return x; }
+var PER="(tháng \\d+\\/\\d+|quý \\d|năm FY\\d+)";
+var WD={"Thứ hai":"Monday","Thứ ba":"Tuesday","Thứ tư":"Wednesday","Thứ năm":"Thursday","Thứ sáu":"Friday","Thứ bảy":"Saturday","Chủ nhật":"Sunday","Thứ 2":"Monday","Thứ 3":"Tuesday","Thứ 4":"Wednesday","Thứ 5":"Thursday","Thứ 6":"Friday","Thứ 7":"Saturday"};
+function wd(s){ return String(s).replace(/(Thứ (?:hai|ba|tư|năm|sáu|bảy|\d)|Chủ nhật)/gi, function(x){ var k=Object.keys(WD).filter(function(w){ return w.toLowerCase()===x.toLowerCase(); })[0]; return k?WD[k]:x; }); }
+var R=[
+  [new RegExp("^"+PER+" · (\\d+) người$"), function(m,a,n){ return P(a)+" · "+n+" people"; }],
+  [new RegExp("^"+PER+" · đạt / trọng số$"), function(m,a){ return P(a)+" · achieved / weight"; }],
+  [new RegExp("^So sánh KPI "+PER+"$"), function(m,a){ return "KPI comparison · "+P(a); }],
+  [new RegExp("^KPI đạt "+PER+"$"), function(m,a){ return "KPIs achieved · "+P(a); }],
+  [new RegExp("^Chi tiết KPI "+PER+"$"), function(m,a){ return "KPI details · "+P(a); }],
+  [new RegExp("^Chưa có KPI "+PER+"\\.?$"), function(m,a){ return "No KPI for "+P(a)+"."; }],
+  [/^TB (.+)$/, function(m,a){ return "Average · "+(DICT_EN[a.charAt(0).toUpperCase()+a.slice(1)]||a); }],
+  [/^KPI tháng (\d+\/\d+)$/, "KPI $1"],
+  [/^Quý (\d) \(lũy kế\)$/, "Q$1 (to date)"],
+  [/^Năm (FY\d+) \(lũy kế\)$/, "$1 (to date)"],
+  [/^Năm (FY\d+)$/, "$1"],
+  [/^(\d+)\/(\d+) KPI đạt$/, "$1/$2 KPIs achieved"],
+  [/^([\d.,]+%)\s+◀ đang xem$/, "$1  ◀ viewing"],
+  [/^Số liệu lúc (.+)$/, "Data as of $1"],
+  [/^Chưa chốt · đã chốt (\d+\/\d+)$/, "Not closed · closed to $1"],
+  [/^(?:TỔNG|Tổng) (tháng|quý|năm|THÁNG|QUÝ|NĂM) (.+)$/, function(m,a,b){ return "TOTAL "+P(a.toLowerCase()+" "+b); }],
+  [/^A\. Mục tiêu — KPI (.+)$/, "A. Objectives — KPI $1"],
+  [/^✓ Đúng bản sẽ gửi · cập nhật (.+)$/, "✓ Exact email preview · updated $1"],
+  [/^⚠️ Chưa có email của: (.+) \(sheet KPI EMAIL DIRECTORY\)\.$/, "⚠️ No email found for: $1 (sheet KPI EMAIL DIRECTORY)."],
+  [/^Gửi bản thử tới ([\s\S]+) \?$/, "Send a test to $1 ?"],
+  [/^Gửi báo cáo KPI tháng (\S+) của (\S+) tới ([\s\S]+) \?$/, "Send the KPI report $1 of $2 to $3 ?"],
+  [/^📨 Đã gửi email KPI T?(\S+) tới (.+)$/, "📨 KPI email $1 sent to $2"],
+  [/^⚠️ Chưa gửi được: (.+)$/, "⚠️ Not sent: $1"],
+  [/^Email không hợp lệ: (.+)$/, "Invalid email: $1"],
+  [/^📄 Đã tạo (.+)$/, "📄 Created $1"],
+  [/^Hoàn thành form tự đánh giá (Q\d) (FY\d+)$/, "Complete your self-assessment form $1 $2"],
+  [/^17:00 hôm nay \((\d+\/\d+)\)$/, "17:00 today ($1)"],
+  [/^Hôm nay là hạn gửi báo cáo KPI tháng (\d+\/\d+)$/, "Today is the deadline for the KPI report of $1"],
+  [/^Vui lòng kiểm tra KPI tháng (\d+\/\d+) và gửi báo cáo$/, "Please check your KPI of $1 and send the report"],
+  [/^Hạn nộp Phiếu công tác & Bảng kê mua hàng — Lần (\d): (.+)$/, function(m,n,d){ return "Deadline for the Business trip form & Purchase list — Round "+n+": "+wd(d); }],
+  [/^(\d+:\d+) (Thứ (?:hai|ba|tư|năm|sáu|bảy|\d)|Chủ nhật), (\d+\/\d+\/\d+)$/i, function(m,t,w,d){ return t+" "+wd(w)+", "+d; }],
+  [/^Trước ngày làm việc cuối cùng của tháng (\d+\/\d+)$/, "Before the last working day of $1"],
+  [/^Còn (\d+) ngày — nộp trước (.+)$/, function(m,n,d){ return n+" day"+(n>1?"s":"")+" left — submit before "+wd(d); }],
+  [/^Mở (FY\d+)$/, "Opened $1"],
+  [/^Đơn hàng (\S+)$/, "Order $1"],
+  [/^lũy kế đến tháng (\d+\/\d+)$/, "year to date, up to $1"],
+  [/^tháng (\d+\/\d+)$/, "$1"],
+  [/^Quý (\d)$/, "Q$1"],
+  [/^(\d+) mục tiêu$/, function(m,n){ return n+" objective"+(n>1?"s":""); }],
+  [/^(\S+) \/ (\S+) · ngân sách (FY\d+) (.+)$/, "$1 / $2 · $3 budget $4"],
+  [/^Mốc (FY\d+): ([\s\S]+)$/, "$1 milestone: $2"],
+  [/^Gửi lại mã \((\d+)s\)$/, "Resend code ($1s)"],
+  [/^\(dùng tạm đến hết (.+)\)$/, "(available until $1)"],
+  [/^Đã gửi mã mới tới (.+)$/, "New code sent to $1"],
+  [/^Tài khoản (.+) chưa được cấp quyền dùng CRM\. Vui lòng báo Admin \(Giang\)\.$/, "The account $1 has no access to MMH CRM yet. Please contact the Admin (Giang)."],
+  [/^(\d+) việc quá hạn ›$/, function(m,n){ return n+" overdue task"+(n>1?"s":"")+" ›"; }],
+  [/^Doanh số lấy từ MMH Turnover Report \(kế toán chốt theo tháng\) — tháng đã chốt gần nhất: (.+)$/, "Sales come from the MMH Turnover Report (closed monthly by accounting) — latest closed month: $1"]
+];
+for(var i=R.length-1;i>=0;i--) RULES_EN.unshift(R[i]);
+/* ô ghi chú đầu form Đề xuất / Sửa chuyến công tác */
+function tpBox(){
+  if(!(window.I18N && I18N.on)) return;
+  var bx=document.querySelector("#mBody .tp-box"); if(!bx || bx.getAttribute("data-en")===bx.innerHTML) return;
+  var h=bx.innerHTML, m, out=null;
+  if(/^Đề xuất được ghi thẳng/.test(h)){
+    m=/xin duyệt\s*([\s\S]*?)\.\s*Quản lý duyệt bằng/.exec(h); var who=m?m[1]:"";
+    who=who.replace(/^tới quản lý duyệt của bạn\s*/,"your approving manager ").replace(/quản lý duyệt của bạn/,"your approving manager");
+    out='Your request is written directly to the <b>Business Trip</b> file (Approval Status = <b>Not Yet</b>) and an approval email is sent to '+(who||"your approving manager")
+      +'. Managers approve with <b>HOD Menu</b> on Google Sheet as usual; after sending, the trip appears on the <b>Work calendar</b> immediately.';
+  } else if((m=/^Sửa trực tiếp dòng <b>(.*?)<\/b> trên file <b>Business Trip<\/b> · trạng thái hiện tại: <b>(.*?)<\/b>\.([\s\S]*)$/.exec(h))){
+    out='Editing row <b>'+m[1]+'</b> directly in the <b>Business Trip</b> file · current status: <b>'+m[2]+'</b>.';
+    var w=/đã được <b>(.*?)<\/b>[\s\S]*?xin duyệt<\/b> tới (.*?)\.$/.exec(m[3]);
+    if(w) out+='<br>⚠️ This trip is already <b>'+w[1]+'</b> — saving will reset the status to <b>Not Yet</b> and <b>send the approval email again</b> to '+w[2]+'.';
+  }
+  if(out!==null){ bx.innerHTML=out; bx.setAttribute("data-en", bx.innerHTML); }
+}
+var mo=new MutationObserver(function(){ tpBox(); });
+function watch(){ var b=document.getElementById("mBody"); if(b) mo.observe(b,{childList:true,subtree:true,characterData:true}); }
+if(document.readyState==="loading") document.addEventListener("DOMContentLoaded", watch); else watch();
+/* đăng nhập lần đầu trên máy mới: trình duyệt không phải tiếng Việt ⇒ màn đăng nhập tiếng Anh (chưa biết người dùng thuộc nhóm nào) */
+try{
+  var nv=(navigator.languages&&navigator.languages[0])||navigator.language||"";
+  if(!/^vi\b/i.test(nv) && !localStorage.getItem("mmh_dental_pic") && !(localStorage.getItem("mmh_tk"))){
+    var o=window.i18nOn; if(typeof o==="function") window.i18nOn=i18nOn=function(){ try{ if(window.S && S.user) return o(); }catch(_){} return true; };
+    if(document.readyState!=="loading") i18nApply();
+  }
+}catch(_){}
+})();
+</script>
 </body>
 </html>
