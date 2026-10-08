@@ -8,20 +8,14 @@ function E(u){ u.en={ title:u.title, items:u.items.map(function(i){ return { tit
 window.MMH_UPDATES = [
   E({
     id:"2026-10-08-v30.7", version:"v30.7", date:"2026-10-08",
-    title:"Clear frames on every form field",
-    summary:"Every field in the forms (Add / update task, customer, CBC, order…) now has a clear frame, so you can see at a glance what still needs filling in.",
-    items:[
-      {type:"fix", icon:"🔲", title:"Every field has a frame", text:"Before, many fields in pop-up forms (Plan, Type task, Sales Process…) had no frame until you tapped them, so it was easy to miss one. Now every field has a visible frame, drop-down lists show a ▾ arrow, and the field you are typing in is highlighted.", img:"updates/v30.7/fields.jpg"}
-    ]
-  }),
-  E({
-    id:"2026-10-08-v30.6", version:"v30.6", date:"2026-10-08",
-    title:"Field photos and task updates: instant, never lost",
-    summary:"Saving a field visit task with a photo used to wait for the server — on weak 4G it could take minutes or fail. Now the task is saved on your phone first, the text is sent in a few seconds and the photo uploads in the background. <b>Surgical Thailand does not take field photos</b>, so for that team only the instant saving applies.",
+    title:"Field photos instant & never lost + clear form fields",
+    summary:"Saving a field visit task with a photo no longer waits for the server, and nothing is lost without signal. Every form field now has a clear frame. <b>Surgical Thailand does not take field photos</b>, so for that team only the instant saving and the clearer forms apply.",
     items:[
       {type:"fix", icon:"⏳", title:"Cause of the slow photo upload", text:"The text and the photo were sent in one big request, and the app waited while the server uploaded the photo to Drive, looked up the GPS address and wrote the Sheet. On weak 4G or with a busy server this took minutes; a timeout meant nothing was saved.", img:"updates/v30.6/photo_flow.jpg"},
-      {type:"imp", icon:"⚡", title:"Now: tap Save = done", text:"Tap <b>Save to Google Sheet</b> (new task, task update or <b>Send photo now</b>): the form closes at once and the task appears on your calendar. The text is sent first; the photo follows in the background."},
-      {type:"imp", icon:"📶", title:"No signal? Nothing is lost", text:"Tasks and photos are stored on the phone until Google Sheet confirms, and are sent automatically when the network is back — even after closing the app. The chip at the bottom shows what is still being sent; nothing is sent twice."}
+      {type:"imp", icon:"⚡", title:"Now: tap Save = done", text:"Tap <b>Save to Google Sheet</b> (new task, task update or <b>Send photo now</b>): the form closes at once and the task appears on your calendar. The text is sent first in a few seconds; the photo follows in the background."},
+      {type:"imp", icon:"📶", title:"No signal? Nothing is lost", text:"Tasks and photos are stored on the phone until Google Sheet confirms, and are sent automatically when the network is back — even after closing the app. The chip at the bottom shows what is still being sent; nothing is sent twice."},
+      {type:"imp", icon:"👥", title:"Which teams", text:"Dental, Surgical (Vietnam) and Eyeless: all of the above, including field photos. <b>Surgical Thailand does not take field photos</b>, so for this team only the instant task saving applies."},
+      {type:"fix", icon:"🔲", title:"Clear frames on every form field", text:"Before, many fields in pop-up forms (Plan, Type task, Sales Process…) had no frame until you tapped them, so it was easy to miss one. Now every field has a visible frame, drop-down lists show a ▾ arrow and the field you are typing in is highlighted.", img:"updates/v30.7/fields.jpg"}
     ]
   }),
   E({
