@@ -7,6 +7,16 @@
 function E(u){ u.en={ title:u.title, items:u.items.map(function(i){ return { title:i.title, text:i.text }; }) }; return u; }
 window.MMH_UPDATES = [
   E({
+    id:"2026-10-08-v30.6", version:"v30.6", date:"2026-10-08",
+    title:"Field photos and task updates: instant, never lost",
+    summary:"Saving a field task no longer waits for the server. The text is sent first in a few seconds, the photo uploads in the background, and everything is kept on your phone until Google Sheet confirms — even with no signal.",
+    items:[
+      {type:"imp", icon:"⚡", title:"Save = done", text:"Tap <b>Save</b> on a new task, a task update or <b>Send photo now</b>: the form closes at once and the task shows on your calendar. The small chip at the bottom shows what is still being sent."},
+      {type:"imp", icon:"📶", title:"No signal? Keep working", text:"Tasks and photos are stored on the phone and sent automatically when the network is back — even after closing the app. Nothing is sent twice."},
+      {type:"new", icon:"🧪", title:"Test mode for Admin", text:"Admin: tap <b>Test mode</b> and pick a salesperson to use the CRM exactly like them. Nothing is saved to the sales files; weekly / monthly report e-mails go only to the Admin."}
+    ]
+  }),
+  E({
     id:"2026-10-08-v30.5", version:"v30.5", date:"2026-10-08",
     guide:"docs/Guide_New_accounts_v30.5_EN.pdf", guideName:"MMH_CRM_New_Accounts_Guide_v30.5_EN.pdf",
     guideVi:"docs/HD_Mo_moi_SKU_moi_v30.5_VN.pdf", guideViName:"MMH_CRM_HD_Mo_moi_v30.5_VN.pdf",

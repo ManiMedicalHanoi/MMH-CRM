@@ -61,3 +61,11 @@ Kiến trúc & quy ước giống MMH Report Hub (repo `ManiMedicalHanoi/MMH-Rep
 - **Email cập nhật v2 (`UPM`, dùng chung Report Hub)**: mỗi email = **1 bản cập nhật** (chọn radio). CRM `UPM_CFG.lang:"en"`; đính kèm (theo thứ tự) `guide` (HD bản cập nhật,
   tiếng Anh) + `guideVi` (tiếng Việt) của mục trong notes.js + HDSD toàn hệ thống tiếng Anh `UPM_CFG.pdf` (Training Hub `rhUpdMail` v3.16 `pdfs[]`, ≤ 22 MB, thừa thì chỉ link).
   Mục cập nhật lớn nên có `guide` / `guideVi` (+ `guideName` / `guideViName`).
+- **Lưu task & ảnh (v30.6, khối `v306-css` + script)**: thay hàng đợi v29.2. `saveTask` / `submitNewTask` / `uploadPending` bọc `queued()` ⇒ `apiPost`
+  saveWeekly / uploadPhoto trong lúc đó vào hàng đợi `WQ` và trả kết quả giả ngay (khung đóng tức thì). Chữ đi trước (JSONP, gói nhỏ), ảnh tách thành
+  mục `uploadPhoto` riêng (fetch POST, hết giờ 120 s), ảnh lưu IndexedDB `mmh_crm_wq`, danh sách `localStorage.mmh_crm_wq`. Task mới mang số dòng tạm âm,
+  `TMP` (`mmh_crm_tmp`) ánh xạ sang số thật khi Sheet trả `row`; lệnh nào có số âm tự đổi / tự xếp hàng. Lỗi mạng / bận ⇒ thử lại mãi (≤ 60 s), lỗi thật 3 lần ⇒ chip đỏ.
+- **Chế độ thử của Admin (v30.6, `CRMTEST`)**: Admin (phiên email `admin`) ▸ nút "Chế độ thử" / Thêm ▸ Tiện ích ▸ chọn sales ⇒ `localStorage.mmh_crm_test`,
+  `window.__CRM_TEST`; mọi lệnh ghi tới `script.google.com` (JSONP lẫn fetch) bị chặn trên máy theo danh sách đọc `READ` (lệnh đọc mới ⇒ thêm vào `READ`),
+  trả kết quả giả; ảnh tải thật lên Training Hub `ping` để đo tốc độ; `weeklyReport` / `monthlyReport` gửi thật với `testTo` = email Admin (backend CRM chỉ gửi Admin,
+  không CC, không ghi nhật ký); `rhKpiMailSend` đổi người nhận = Admin. Hàng đợi chế độ thử tách riêng (`mmh_crm_wq_test`).
