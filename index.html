@@ -3979,7 +3979,7 @@ function buildNav(){
     if(t.grp!==lastGrp){ h+='<div class="grp">'+t.grp+'</div>'; lastGrp=t.grp; }
     h+='<button class="nvi" data-t="'+t.id+'" onclick="go(\''+t.id+'\')"><span class="ic">'+t.ic+'</span><span class="lb">'+t.lb+'</span></button>';
   });
-  h+='<div style="flex:1"></div><div style="padding:10px;font-size:10.5px;color:var(--mute);line-height:1.5">MMH CRM v30.5<br>'+
+  h+='<div style="flex:1"></div><div style="padding:10px;font-size:10.5px;color:var(--mute);line-height:1.5">MMH CRM v30.6<br>'+
      (isMgmt()?'<a href="'+DRIVE_FOLDER+'" target="_blank">📁 Folder ảnh Drive</a>':"")+'</div>';
   $("side").innerHTML=h;
   /* ⭐ v4.5 — thanh dưới trượt ngang, đủ mọi mục, bỏ nút "Thêm" */
@@ -19526,7 +19526,11 @@ function grant(pic){
   if(r.team && TEAMS[r.team]) lsS(LS_TEAM, r.team);
   return true;
 }
-(function(){ var u=AUTH.user(); if(!u) return; var p=AUTH.role(u.pic); if(p) grant(p); })();
+(function(){ var u=AUTH.user(); if(!u) return;
+  /* ⭐ v30.6 — Admin đang ở Chế độ thử ⇒ vào tài khoản sales đã chọn (CRMTEST) */
+  var tm=null; try{ tm=JSON.parse(localStorage.getItem("mmh_crm_test")||"null"); }catch(_){}
+  if(tm && u.admin && ROLES[tm.pic]){ window.__CRM_TEST=tm; grant(tm.pic); return; }
+  var p=AUTH.role(u.pic); if(p) grant(p); })();
 
 /* 3. khung nhập email / mã */
 function form(host, opt){
@@ -19669,7 +19673,7 @@ function nudge(on){
   setTimeout(function(){
     var t=AUTH.tk(); if(!t) return;
     AUTH.call("rhAuthMe",{ tk:t }).then(function(d){
-      if(d && d.ok && d.user){ var p=AUTH.role(d.user.pic); if(p && p!==S.user.pic){ try{ if(sessionStorage.getItem("mmh_au_fix")) return; sessionStorage.setItem("mmh_au_fix","1"); }catch(_){} enterAs(p); } return; }
+      if(d && d.ok && d.user){ var p=AUTH.role(d.user.pic); if(p && p!==S.user.pic && !window.__CRM_TEST){ try{ if(sessionStorage.getItem("mmh_au_fix")) return; sessionStorage.setItem("mmh_au_fix","1"); }catch(_){} enterAs(p); } return; }
       if(d && d.code==="AUTH"){ AUTH.clear(); toast((d.error||"Phiên đăng nhập hết hiệu lực.")+" Vui lòng xác thực lại email.","warn",6000); nudge(true); }
     }).catch(function(){});
   }, 4000);
@@ -20545,195 +20549,7 @@ setInterval(function(){
 })();
 </script>
 
-<style id="v292-css">
-/* ⭐ v29.2 — hàng đợi ghi: chip trạng thái góc dưới */
-#wq-chip{position:fixed;right:16px;bottom:16px;z-index:9650;display:none;align-items:center;gap:8px;padding:8px 13px;border-radius:999px;background:#fff;border:1px solid #E6EAEF;
-  box-shadow:0 8px 24px rgba(20,35,50,.12);font-size:13px;font-weight:600;color:#41566F;cursor:pointer}
-#wq-chip.show{display:flex}
-#wq-chip.err{border-color:#F0D6D6;background:#FBF1F1;color:#A64B4B}
-#wq-chip .sp{width:13px;height:13px;border:2px solid #CFE2F3;border-top-color:#3A5CAA;border-radius:50%;animation:au-rot .8s linear infinite}
-@media(max-width:760px){ #wq-chip{bottom:84px;right:12px} }
-.wq-li{border:1px solid #E6EAEF;border-radius:10px;padding:9px 11px;margin-bottom:8px;font-size:13px}
-.wq-li b{display:block;color:#003047}
-.wq-li small{color:#A64B4B}
-</style>
-<script>
-/* ══ ⭐ v29.2 — LƯU KHÔNG PHẢI CHỜ + HÀNG ĐỢI GHI BỀN VỮNG (giống Report Hub) ══
-   · Mọi lệnh ghi (apiPost) tự gắn mã yêu cầu rid ⇒ backend CRM chống ghi trùng (idemBegin_). Nhờ vậy mạng chập chờn / hết giờ chờ
-     thì app TỰ GỬI LẠI cùng rid (an toàn), thay vì coi như đã lưu như trước.
-   · Lưu task đi địa bàn (saveTask): kiểm tra xong là đóng khung + cập nhật danh sách / lịch NGAY; việc ghi (kể cả ảnh) chạy nền qua
-     hàng đợi lưu trên máy (localStorage mmh_crm_wq) — tắt app / mất mạng vẫn còn, mở lại tự gửi tiếp.
-   · Chip góc dưới: "Đang lưu n thay đổi…"; lỗi thật ⇒ chip đỏ, bấm để Thử lại / Bỏ. Dữ liệu tải lại trong lúc chờ vẫn giữ thay đổi của bạn. */
-(function(){
-"use strict";
-var LS="mmh_crm_wq", Q=[], RUN=false;
-function load(){ try{ Q=JSON.parse(localStorage.getItem(LS)||"[]")||[]; }catch(_){ Q=[]; } }
-function save(){ try{ localStorage.setItem(LS, JSON.stringify(Q)); }catch(_){ /* ảnh quá lớn: giữ trong bộ nhớ */ } }
-function rid(){ return "w"+Date.now().toString(36)+Math.random().toString(36).slice(2,8); }
-load();
 
-/* ── 1. apiPost: gắn rid + tự gửi lại khi hết giờ / lỗi mạng ── */
-var post0=apiPost;
-apiPost=function(body){
-  if(body && body.action && !body.rid) body.rid=rid();
-  var n=0;
-  function go(){
-    return post0(body).then(function(r){
-      if(r && r.softTimeout && n<2){ n++; return new Promise(function(res){ setTimeout(res, 2500*n); }).then(go); }
-      return r;
-    },function(e){
-      var m=String((e&&e.message)||"");
-      if(n<2 && /Failed to fetch|NetworkError|Load failed|kết nối|__TIMEOUT__|chậm/i.test(m)){ n++; return new Promise(function(res){ setTimeout(res, 3000*n); }).then(go); }
-      throw e;
-    });
-  }
-  return go();
-};
-
-/* ── 2. gửi một mục trong hàng đợi tới đúng backend đã chọn lúc bấm ── */
-function jsonpTo(url, params, ms){
-  return new Promise(function(res, rej){
-    var cb="__wq_"+Date.now()+"_"+Math.floor(Math.random()*1e5), s=document.createElement("script");
-    var t=setTimeout(function(){ done(); rej(new Error("__TIMEOUT__")); }, ms||60000);
-    function done(){ clearTimeout(t); try{ delete window[cb]; }catch(_){} if(s.parentNode) s.parentNode.removeChild(s); }
-    window[cb]=function(d){ done(); res(d); };
-    s.onerror=function(){ done(); rej(new Error("Failed to fetch")); };
-    params.callback=cb;
-    s.src=url+"?"+Object.keys(params).map(function(k){ return encodeURIComponent(k)+"="+encodeURIComponent(params[k]==null?"":params[k]); }).join("&");
-    document.body.appendChild(s);
-  });
-}
-function send(it){
-  var b=it.body, flat={};
-  Object.keys(b).forEach(function(k){ var v=b[k]; flat[k]=(v!==null&&typeof v==="object")?JSON.stringify(v):v; });
-  var qs=Object.keys(flat).map(function(k){ return encodeURIComponent(k)+"="+encodeURIComponent(flat[k]==null?"":flat[k]); }).join("&");
-  if((it.url+"?"+qs).length<=6500) return jsonpTo(it.url, flat, 90000);
-  return fetch(it.url,{ method:"POST", headers:{"Content-Type":"text/plain;charset=utf-8"}, body:JSON.stringify(b), redirect:"follow" })
-    .then(function(r){ return r.json(); })
-    .catch(function(e){
-      if(CORS_OK===false) return fetch(it.url,{ method:"POST", mode:"no-cors", headers:{"Content-Type":"text/plain;charset=utf-8"}, body:JSON.stringify(b) }).then(function(){ return {ok:true, opaque:true}; });
-      throw e;
-    });
-}
-function pump(){
-  if(RUN || !navigator.onLine) return;
-  var it=Q.filter(function(x){ return !x.err; })[0]; if(!it){ paint(); return; }
-  RUN=true; paint(); S._lastWriteAt=Date.now();
-  send(it).then(function(r){
-    RUN=false;
-    if(r && r.ok===false){ it.err=String(r.error||"Lỗi máy chủ"); save(); paint(); toast("Chưa lưu được: "+it.label+" — "+it.err,"err",7000); return pump(); }
-    Q=Q.filter(function(x){ return x.id!==it.id; }); save();
-    S._lastWriteAt=Date.now();
-    try{ if(r && r.photoError) toast("Task đã lưu nhưng ảnh chưa lên được: "+r.photoError,"warn",7000); }catch(_){}
-    try{ if(it.tab) afterWrite(it.tab, it.row, it.patch||null); }catch(_){}
-    if(!Q.length) toast("✓ Đã lưu vào Google Sheet","ok",2600);
-    pump();
-  },function(e){
-    RUN=false; it.n=(it.n||0)+1;
-    var m=String((e&&e.message)||"");
-    if(it.n>=8 && !/__TIMEOUT__|Failed to fetch|NetworkError|Load failed/i.test(m)){ it.err=m||"Lỗi không rõ"; save(); paint(); return; }
-    save(); paint();
-    setTimeout(pump, Math.min(60000, 2500*it.n));   /* cùng rid ⇒ gửi lại an toàn */
-  });
-}
-var WQ=window.WQ={
-  add:function(o){
-    o.id=rid(); o.url=o.url||gasUrl(); o.team=curTeamKey(); o.at=Date.now();
-    if(!o.body.rid) o.body.rid=o.id;
-    if(S.user && S.user.pic && !("pic" in o.body)) o.body.pic=S.user.pic;
-    Q.push(o); save(); paint(); setTimeout(pump, 30);
-  },
-  list:function(){ return Q.slice(); },
-  pending:function(tab){ return Q.filter(function(x){ return !tab || x.tab===tab; }); },
-  retry:function(id){ Q.forEach(function(x){ if(!id || x.id===id){ x.err=""; x.n=0; } }); save(); pump(); },
-  drop:function(id){ Q=Q.filter(function(x){ return x.id!==id; }); save(); paint(); },
-  pump:pump
-};
-/* chip trạng thái */
-function paint(){
-  var c=document.getElementById("wq-chip");
-  if(!c){ c=document.createElement("div"); c.id="wq-chip"; c.onclick=panel; document.body.appendChild(c); }
-  var bad=Q.filter(function(x){ return x.err; }).length, n=Q.length;
-  c.classList.toggle("show", n>0); c.classList.toggle("err", bad>0);
-  c.innerHTML=bad?("⚠️ "+bad+" thay đổi chưa lưu được — bấm để xem"):('<span class="sp"></span>Đang lưu '+n+' thay đổi…'+(navigator.onLine?"":" (đang mất mạng)"));
-}
-function panel(){
-  if(!Q.length) return;
-  openModal("Thay đổi đang chờ lưu", Q.map(function(x){
-    return '<div class="wq-li"><b>'+esc(x.label||x.body.action)+'</b>'+(x.err?'<small>'+esc(x.err)+'</small>':'<span style="color:#7A8999">Đang gửi… (thử '+(x.n||0)+' lần)</span>')
-      +'<div style="margin-top:6px;display:flex;gap:6px"><button class="btn sm" onclick="WQ.retry(\''+x.id+'\');closeModal()">Thử lại</button>'
-      +'<button class="btn sm" onclick="if(confirm(\'Bỏ thay đổi này?\')){WQ.drop(\''+x.id+'\');closeModal();terrRefresh();}">Bỏ</button></div></div>';
-  }).join(""), '<button class="btn" onclick="closeModal()">Đóng</button>');
-}
-window.addEventListener("online", function(){ paint(); pump(); });
-window.addEventListener("offline", paint);
-setInterval(function(){ if(Q.length && !RUN) pump(); }, 20000);
-setTimeout(function(){ paint(); pump(); }, 2500);
-
-/* dữ liệu đi địa bàn tải lại trong lúc còn chờ ⇒ áp lại thay đổi của mình (không bị "nhảy ngược") */
-var lta=loadTerritoryAll;
-loadTerritoryAll=function(){
-  var p=lta.apply(this,arguments);
-  return Promise.resolve(p).then(function(r){
-    var pend=WQ.pending("weekly"); if(pend.length){ pend.forEach(function(x){ try{ patchLocal("weekly", x.row, x.patch, false); }catch(_){} }); try{ repaintTab(); }catch(_){} }
-    return r;
-  });
-};
-
-/* ── 3. Lưu task đi địa bàn: không chờ ── */
-saveTask=function(){
-  var w=S.task||{};
-  var typeAction=curV("tk-ta","typeAction"), status=curV("tk-status","status");
-  var result=curV("tk-result","result"), next=curV("tk-next","nextAction");
-  var bad=[];
-  function mark(id,ok,lb){ var el=$(id); if(el) el.classList.toggle("bad",!ok); if(!ok) bad.push(lb); }
-  var hasCbc=MEET_RE.test(String(result||"")), isDone=/complet/i.test(String(status||""));
-  mark("tk-status",!!String(status).trim(),"Task Status");
-  mark("tk-ta",!!String(typeAction).trim(),"Type action");
-  mark("tk-tt",!!String(curV("tk-tt","typeTask")).trim(),"Type task");
-  mark("tk-next",hasCbc?!!String(next).trim():true,"Next action");
-  mark("tk-fb",hasCbc?!!String(curV("tk-fb","feedback")).trim():true,"Customer feedback");
-  mark("tk-result",isDone?!!String(result).trim():true,"Task Result");
-  if(String(result).trim() && !hasCbc) bad.push("CBC (dòng “Người gặp:” trong Task Result)");
-  if(isStopNA(next) && !String(curV("tk-stop","stopReason")).trim()){ mark("tk-stop",false,"Lý do dừng chăm sóc"); }
-  if(!noPhoto() && isDone && typeAction==="Visiting" && !S.pending && !(w.photos||[]).length) bad.push("ảnh đi địa bàn (bắt buộc với Visiting đã hoàn thành)");
-  if(bad.length){ toast("⚠️ Cần bổ sung: "+bad.join(", "),"warn",6000); return; }
-  var hasData=Object.keys(S.dirty).length>0, hasPh=!!S.pending;
-  if(!hasData&&!hasPh) return toast("Chưa có thay đổi nào");
-
-  var row=S.taskRow, wkDay=String((w&&w.start)||todayISO()).slice(0,10), d=null, body, label=(parseAcc(w.account||"").name||w.accName||"task")+" · "+fmtVN(wkDay);
-  if(hasData){
-    d={_row:row};
-    ["plan","result","status","nextAction","stopReason","feedback","process","typeTask","typeAction","product","start"].forEach(function(f){ if(f in S.dirty) d[f]=S.dirty[f]; });
-    if(d.start) d.finish=d.start;
-    if(("nextAction" in d)&&!isStopNA(d.nextAction)) d.stopReason="";
-    body={action:"saveWeekly", data:d};
-  }
-  if(hasPh){
-    var pp=S.pending;
-    if(body){
-      body.photo={ b64:pp.dataUrl, mime:"image/jpeg" };
-      if(pp.gps){ body.photo.lat=pp.gps.lat; body.photo.lng=pp.gps.lng; body.photo.acc=pp.gps.acc; }
-      body.data.account=body.data.account||w.account; body.data.pic=body.data.pic||w.pic;
-    } else {
-      body={ action:"uploadPhoto", b64:pp.dataUrl, mime:"image/jpeg", row:row, account:w.account, date:wkDay, pic:w.pic||S.user.pic, replace:1 };
-      if(pp.gps){ body.lat=pp.gps.lat; body.lng=pp.gps.lng; body.acc=pp.gps.acc; }
-    }
-  }
-  /* cập nhật trên máy NGAY, đóng khung, ghi nền */
-  var patch=d?Object.assign({}, d):{};
-  if(hasPh){ patch.photos=[{id:"",thumb:S.pending.dataUrl,full:S.pending.dataUrl,open:""}]; }
-  delete patch._row;
-  try{ patchLocal("weekly", row, patch, false); repaintTab(); }catch(_){}
-  WQ.add({ body:body, tab:"weekly", row:row, patch:patch, label:"Task "+label+(hasPh?" (kèm ảnh)":"") });
-  S.pending=null; S.dirty={};
-  closeDrw();
-  toast("✓ Đã cập nhật — đang lưu vào Google Sheet ở nền","ok",2400);
-  try{ tbdSyncWeek((d&&d.start)||wkDay, String((w&&w.pic)||"")); }catch(_){}
-  S.taskRow=0;
-};
-})();
-</script>
 
 <style id="v293-css">
 /* ⭐ v29.3 — 10 chủ đề màu (cùng bộ với Report Hub) · tìm nhanh Ctrl+K · thanh trên cùng gọn */
@@ -20869,7 +20685,7 @@ window.QS2={ open:qsOpen };
 </script>
 
 <!-- ⭐ v30.3 — THÔNG BÁO CẬP NHẬT (chép từ Report Hub): dữ liệu updates/notes.js · tự hiện 7 ngày · nút "Có gì mới" trên thanh trên cùng -->
-<script src="updates/notes.js?v=30.5"></script>
+<script src="updates/notes.js?v=30.6"></script>
 <style id="upd-css">
 #upd,#upd-zoom{--t-pri:var(--blue);--t-pri2:var(--blue-d);--t-ink:var(--navy);--t-soft:var(--pale);--t-line:var(--lb2);--t-bg:#F6F8FA;--mmh-blue:var(--blue);--mmh-navy:var(--navy)}
 
@@ -22757,5 +22573,387 @@ naRulesHtml=window.naRulesHtml=function(){
 };
 })();
 </script>
+<style id="v306-css">
+/* ⭐ v30.6 — hàng đợi lưu (chữ trước · ảnh tải nền) + chế độ thử của Admin */
+#wq-chip{position:fixed;right:16px;bottom:16px;z-index:9650;display:none;align-items:center;gap:8px;max-width:calc(100vw - 32px);padding:8px 13px;border-radius:999px;background:#fff;border:1px solid #E6EAEF;
+  box-shadow:0 8px 24px rgba(20,35,50,.12);font-size:13px;font-weight:600;color:#41566F;cursor:pointer}
+#wq-chip.show{display:flex}
+#wq-chip.off{background:#FFF8E6;border-color:#F1DFAE;color:#7A5A12}
+#wq-chip.err{border-color:#F0D6D6;background:#FBF1F1;color:#A64B4B}
+#wq-chip .sp{width:13px;height:13px;flex:none;border:2px solid #CFE2F3;border-top-color:#3A5CAA;border-radius:50%;animation:wq-rot .8s linear infinite}
+@keyframes wq-rot{to{transform:rotate(360deg)}}
+@media(max-width:760px){ #wq-chip{bottom:142px;right:12px} }
+.wq-li{border:1px solid #E6EAEF;border-radius:10px;padding:9px 11px;margin-bottom:8px;font-size:13px}
+.wq-li b{display:block;color:#003047}
+.wq-li small{display:block;color:#A64B4B;margin-top:2px}
+.wq-li .mt{color:#7A8999;font-size:12px}
+/* chế độ thử */
+#tm-bar{position:fixed;left:0;right:0;top:0;z-index:9690;display:flex;align-items:center;justify-content:center;gap:10px;padding:5px 12px;background:#FFF4D6;border-bottom:1px solid #F1DFAE;color:#6B4E0E;font-size:12.5px;font-weight:600}
+#tm-bar button{border:1px solid #E2C77E;background:#fff;color:#6B4E0E;border-radius:7px;padding:3px 10px;font:inherit;font-size:12px;cursor:pointer}
+body.tm-on #app{padding-top:30px}
+.tm-pick{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
+.tm-pick button{display:flex;flex-direction:column;align-items:flex-start;gap:2px;padding:10px 12px;border:1px solid #E6EAEF;border-radius:10px;background:#fff;cursor:pointer;text-align:left;font:inherit}
+.tm-pick button:hover{border-color:var(--blue);background:var(--pale)}
+.tm-pick b{font-size:14px;color:var(--navy)} .tm-pick span{font-size:12px;color:#7A8999}
+.tm-h{font-size:12px;font-weight:700;color:#7A8999;text-transform:uppercase;letter-spacing:.4px;margin:12px 0 6px}
+</style>
+<script>
+/* ══ ⭐ v30.6 — LƯU TASK & ẢNH ĐI ĐỊA BÀN: NHANH, KHÔNG MẤT DỮ LIỆU ══
+   Trước: "Lưu vào Google Sheet" gửi chữ + ảnh trong MỘT lần gọi rồi đứng chờ máy chủ (tải Drive + tra địa chỉ GPS + ghi Sheet
+   trong lúc giữ khoá) ⇒ mạng 4G yếu / máy chủ bận là chờ hàng phút, hết giờ thì mất lượt.
+   Nay (thêm task mới · cập nhật task · Gửi ảnh ngay):
+   · Bấm lưu ⇒ đóng khung + hiện trên lịch / danh sách NGAY (task mới mang số tạm âm cho tới khi Sheet trả số dòng thật).
+   · Ghi chú / trạng thái gửi TRƯỚC (gói nhỏ, vài giây) — ẢNH đi sau, riêng một lượt, tải nền.
+   · Mọi thứ nằm trong hàng đợi trên máy (danh sách: localStorage mmh_crm_wq · ảnh: IndexedDB mmh_crm_wq) ⇒ mất mạng, tắt app,
+     hết pin… mở lại là tự gửi tiếp; có mạng trở lại là gửi ngay. Mỗi lệnh có mã rid ⇒ gửi lại không bị ghi trùng.
+   · Lỗi mạng / hết giờ / máy chủ bận ⇒ tự thử lại mãi (giãn dần tới 60 giây); lỗi thật (sheet từ chối) sau 3 lần ⇒ chip đỏ, bấm để Thử lại / Bỏ.
+   · Mọi lệnh ghi khác vẫn có rid + tự gửi lại khi chập mạng (như v29.2). */
+(function(){
+"use strict";
+var TSFX=window.__CRM_TEST?"_test":"", LS="mmh_crm_wq"+TSFX, LT="mmh_crm_tmp"+TSFX, Q=[], RUN=false, TMP={}, QON=0, MEM={}, THUMB={};
+function lsJ(k,d){ try{ return JSON.parse(localStorage.getItem(k)||"null")||d; }catch(_){ return d; } }
+function save(){ try{ localStorage.setItem(LS, JSON.stringify(Q)); }catch(_){} try{ localStorage.setItem(LT, JSON.stringify(TMP)); }catch(_){} }
+Q=lsJ(LS,[]); TMP=lsJ(LT,{});
+/* bỏ hàng đợi kiểu cũ (v29.2): mục nào còn thì chuyển sang */
+Q=Q.map(function(x){ if(!x.kind) x.kind="data"; return x; });
+function rid(){ return "w"+Date.now().toString(36)+Math.random().toString(36).slice(2,8); }
+/* ── ảnh lưu IndexedDB (to, không vướng giới hạn 5 MB của localStorage) ── */
+var DB=null;
+function idb(){
+  if(DB) return DB;
+  DB=new Promise(function(res,rej){
+    try{ var r=indexedDB.open("mmh_crm_wq",1);
+      r.onupgradeneeded=function(){ r.result.createObjectStore("b"); };
+      r.onsuccess=function(){ res(r.result); }; r.onerror=function(){ rej(r.error); };
+    }catch(e){ rej(e); }
+  });
+  return DB;
+}
+function tx(mode, fn){ return idb().then(function(db){ return new Promise(function(res,rej){ var t=db.transaction("b",mode), st=t.objectStore("b"), out=fn(st); t.oncomplete=function(){ res(out&&out.result); }; t.onerror=function(){ rej(t.error); }; }); }); }
+function bput(k,v){ MEM[k]=v; return tx("readwrite",function(s){ s.put(v,k); }).then(function(){ delete MEM[k]; }).catch(function(){}); }
+function bget(k){ if(MEM[k]) return Promise.resolve(MEM[k]); return tx("readonly",function(s){ return s.get(k); }).catch(function(){ return null; }); }
+function bdel(k){ delete MEM[k]; return tx("readwrite",function(s){ s.delete(k); }).catch(function(){}); }
+
+function realRow(r){ r=+r||0; return r<0 ? (+TMP[r]||r) : r; }
+function hasNeg(b){ return !!b && ((b.data && +b.data._row<0) || +b.row<0); }
+var TRANSIENT=/__TIMEOUT__|Failed to fetch|NetworkError|Load failed|network|abort|timeout|kết nối|chậm|bận|busy|thử lại|Lock|Service invoked|too many|quá tải|Internal error|502|503|504/i;
+
+/* ── 1. apiPost: gắn rid · số dòng tạm ⇒ xếp hàng · tự gửi lại khi chập mạng ── */
+var QABLE={ saveWeekly:1, uploadPhoto:1 };
+var post0=apiPost;
+apiPost=function(body){
+  if(body && body.action && !body.rid) body.rid=rid();
+  if(body && (hasNeg(body) && !(body.data && TMP[body.data._row]) && !TMP[body.row])) return enqueue(body);
+  if(body && body.data && +body.data._row<0) body.data._row=realRow(body.data._row);
+  if(body && +body.row<0) body.row=realRow(body.row);
+  if(body && QON && QABLE[body.action]) return enqueue(body);
+  var n=0;
+  function go(){
+    return post0(body).then(function(r){
+      if(r && r.softTimeout && n<2){ n++; return new Promise(function(res){ setTimeout(res, 2500*n); }).then(go); }
+      return r;
+    },function(e){
+      if(n<2 && TRANSIENT.test(String((e&&e.message)||""))){ n++; return new Promise(function(res){ setTimeout(res, 3000*n); }).then(go); }
+      throw e;
+    });
+  }
+  return go();
+};
+function queued(fn){ return function(){ QON++; try{ return fn.apply(this,arguments); } finally{ QON--; } }; }
+
+/* ── 2. xếp hàng: tách chữ / ảnh ── */
+function enqueue(body){
+  var b=Object.assign({}, body), pic=(S.user&&S.user.pic)||"", w=S.task||{}, ph=null, items=[];
+  if(b.data && typeof b.data==="object") b.data=Object.assign({}, b.data);
+  var isNew=b.action==="saveWeekly" && b.data && !(+b.data._row);
+  var tmp=isNew ? -(Math.floor(Date.now()%1e9)+Math.floor(Math.random()*997)) : 0;
+  var row=isNew ? tmp : (b.action==="saveWeekly" && b.data ? +b.data._row : +b.row||0);
+  if(b.action==="saveWeekly" && b.photo && (b.photo.b64||"").length){ ph=b.photo; delete b.photo; }
+  if(b.action==="uploadPhoto"){ ph={ b64:b.b64, lat:b.lat, lng:b.lng, acc:b.acc }; }
+  var acc=(b.data&&b.data.account)||b.account||w.account||"", day=String((b.data&&b.data.start)||b.date||w.start||todayISO()).slice(0,10);
+  var nm=(parseAcc(acc).name||"task")+" · "+fmtVN(day);
+  if(b.action!=="uploadPhoto"){
+    var patch=b.data?Object.assign({}, b.data):null; if(patch) delete patch._row;
+    items.push({ id:rid(), kind:"data", body:b, tab:b.action==="saveWeekly"?"weekly":(b.tab||""), row:row, tmp:tmp, patch:patch, pic:pic,
+      label:(isNew?"Thêm task ":"Cập nhật task ")+nm });
+  }
+  if(ph){
+    var pid=rid(); THUMB[pid]=ph.b64; bput(pid, ph.b64);
+    items.push({ id:pid, kind:"photo", blob:pid, row:row, tab:"weekly", pic:pic, kb:photoSizeKB(ph.b64),
+      body:{ action:"uploadPhoto", mime:"image/jpeg", account:acc, date:day, pic:(b.data&&b.data.pic)||b.pic||w.pic||pic, replace:1, lat:ph.lat, lng:ph.lng, acc:ph.acc, rid:pid },
+      label:"Ảnh "+nm });
+  }
+  items.forEach(function(it){ it.url=gasUrl(); it.team=curTeamKey(); it.at=Date.now(); if(!it.body.rid) it.body.rid=it.id; Q.push(it); });
+  save(); paint(); setTimeout(pump, 30);
+  if(ph) setTimeout(function(){ try{ patchLocal("weekly", row, { photos:[{ id:"", thumb:ph.b64, full:ph.b64, open:"" }] }, false); repaintTab(); }catch(_){} }, 0);
+  S._lastWriteAt=Date.now();
+  return Promise.resolve({ ok:true, queued:true, row:row, url:"", id:"", thumb:ph?ph.b64:"", gpsAddr:"",
+    photo: ph ? { ok:true, url:"", id:"", thumb:ph.b64, gpsAddr:"" } : undefined,
+    message:"Đã lưu trên máy — đang gửi lên Google Sheet" });
+}
+
+/* ── 3. gửi ── */
+function jsonpTo(url, params, ms){
+  return new Promise(function(res, rej){
+    var cb="__wq_"+Date.now()+"_"+Math.floor(Math.random()*1e5), s=document.createElement("script");
+    var t=setTimeout(function(){ done(); rej(new Error("__TIMEOUT__")); }, ms||45000);
+    function done(){ clearTimeout(t); try{ delete window[cb]; }catch(_){} if(s.parentNode) s.parentNode.removeChild(s); }
+    window[cb]=function(d){ done(); res(d); };
+    s.onerror=function(){ done(); rej(new Error("Failed to fetch")); };
+    params.callback=cb;
+    s.src=url+"?"+Object.keys(params).map(function(k){ return encodeURIComponent(k)+"="+encodeURIComponent(params[k]==null?"":params[k]); }).join("&");
+    document.body.appendChild(s);
+  });
+}
+function fetchPost(url, body, ms){
+  var ac=window.AbortController?new AbortController():null, t=setTimeout(function(){ if(ac) ac.abort(); }, ms||60000);
+  return fetch(url,{ method:"POST", headers:{"Content-Type":"text/plain;charset=utf-8"}, body:JSON.stringify(body), redirect:"follow", signal:ac?ac.signal:undefined })
+    .then(function(r){ return r.text(); })
+    .then(function(tx){ clearTimeout(t); var m=String(tx||"").replace(/^[^{[]*/,"").replace(/\);?\s*$/,""); try{ return JSON.parse(m); }catch(_){ throw new Error("Máy chủ trả về lỗi — thử lại"); } },
+          function(e){ clearTimeout(t);
+            if(e && e.name==="AbortError") throw new Error("__TIMEOUT__");
+            if(typeof CORS_OK!=="undefined" && CORS_OK===false)
+              return fetch(url,{ method:"POST", mode:"no-cors", headers:{"Content-Type":"text/plain;charset=utf-8"}, body:JSON.stringify(body) }).then(function(){ return { ok:true, opaque:true }; });
+            throw e; });
+}
+function send(it, body){
+  if(it.kind==="photo") return fetchPost(it.url, body, 120000);
+  var flat={}; Object.keys(body).forEach(function(k){ var v=body[k]; flat[k]=(v!==null&&typeof v==="object")?JSON.stringify(v):v; });
+  var qs=Object.keys(flat).map(function(k){ return encodeURIComponent(k)+"="+encodeURIComponent(flat[k]==null?"":flat[k]); }).join("&");
+  if((it.url+"?"+qs).length<=6500) return jsonpTo(it.url, flat, 45000);
+  return fetchPost(it.url, body, 60000);
+}
+function runnable(it){
+  if(it.err) return false;
+  if(it.tmp) return true;
+  var r=realRow(it.row);
+  if(r>=0 || !it.row) return true;
+  return Q.some(function(x){ return x.tmp===it.row && !x.err; }) ? false : (it.err="Task gốc chưa lưu được — bấm Thử lại ở task gốc", save(), false);
+}
+function pump(){
+  if(RUN || !navigator.onLine) { paint(); return; }
+  var it=Q.filter(runnable)[0]; if(!it){ paint(); return; }
+  RUN=true; paint(); S._lastWriteAt=Date.now();
+  var body=JSON.parse(JSON.stringify(it.body)); body.pic=body.pic||it.pic;
+  if(body.data && typeof body.data==="object") body.data._row = it.tmp ? 0 : realRow(body.data._row);
+  if(it.kind==="photo" || "row" in body) body.row=realRow(it.row);
+  var ready = it.kind==="photo" ? bget(it.blob) : Promise.resolve(null);
+  ready.then(function(b64){
+    if(it.kind==="photo"){
+      if(!b64){ drop(it, "Ảnh không còn trên máy (bộ nhớ trình duyệt bị xoá) — chụp lại giúp nhé."); return; }
+      body.b64=b64;
+    }
+    return send(it, body).then(function(r){ RUN=false; done(it, r); }, function(e){ RUN=false; fail(it, String((e&&e.message)||"")); });
+  }).catch(function(e){ RUN=false; fail(it, String((e&&e.message)||"")); });
+}
+function drop(it, msg){ RUN=false; Q=Q.filter(function(x){ return x.id!==it.id; }); if(it.blob) bdel(it.blob); save(); paint(); if(msg) toast(msg,"warn",7000); setTimeout(pump,50); }
+function done(it, r){
+  if(r && r.ok===false){ return fail(it, String(r.error||"Lỗi máy chủ"), !TRANSIENT.test(String(r.error||""))); }
+  Q=Q.filter(function(x){ return x.id!==it.id; });
+  var row=realRow(it.row);
+  try{
+    if(it.kind==="data" && it.tmp && r && +r.row>0){
+      TMP[it.tmp]=+r.row; row=+r.row;
+      patchLocal("weekly", it.tmp, null, true);
+      if(S.taskRow===it.tmp) S.taskRow=row;
+      if(S.task && S.task._row===it.tmp) S.task._row=row;
+    }
+    if(it.kind==="photo"){
+      if(it.blob) bdel(it.blob);
+      var th=THUMB[it.id]; delete THUMB[it.id];
+      if(r && r.url) patchLocal("weekly", row, { photo:r.url, photos:[{ id:r.id, thumb:r.thumb||th||"", full:r.thumb||th||"", open:r.url }], gpsAddr:r.gpsAddr||"" }, false);
+      if(r && r.gpsAddr) toast("✓ Đã tải ảnh lên Drive · "+r.gpsAddr,"ok",3200);
+    }
+  }catch(_){}
+  save();
+  try{ if(it.tab) afterWrite(it.tab, row, it.patch||null); }catch(_){}
+  if(!Q.length) toast("✓ Đã lưu hết vào Google Sheet","ok",2400);
+  paint(); setTimeout(pump, 30);
+}
+function fail(it, m, hard){
+  it.n=(it.n||0)+1; it.last=m;
+  if(hard && it.n>=3){ it.err=m||"Lỗi không rõ"; save(); paint(); toast("Chưa lưu được: "+it.label+" — "+it.err,"err",8000); setTimeout(pump,50); return; }
+  save(); paint();
+  clearTimeout(it._t); setTimeout(pump, Math.min(60000, 2000*it.n));     /* cùng rid ⇒ gửi lại an toàn */
+}
+var WQ=window.WQ={
+  add:function(o){ /* tương thích bản cũ */ return enqueue(o.body||o); },
+  list:function(){ return Q.slice(); },
+  pending:function(tab){ return Q.filter(function(x){ return !tab || x.tab===tab; }); },
+  retry:function(id){ Q.forEach(function(x){ if(!id || x.id===id){ x.err=""; x.n=0; } }); save(); pump(); },
+  drop:function(id){ var it=Q.filter(function(x){ return x.id===id; })[0]; if(it) drop(it); },
+  pump:pump, realRow:realRow
+};
+/* chip trạng thái */
+function paint(){
+  var c=document.getElementById("wq-chip");
+  if(!c){ c=document.createElement("div"); c.id="wq-chip"; c.onclick=panel; document.body.appendChild(c); }
+  var bad=Q.filter(function(x){ return x.err; }).length, n=Q.length, ph=Q.filter(function(x){ return x.kind==="photo"; }).length, off=!navigator.onLine;
+  c.classList.toggle("show", n>0); c.classList.toggle("err", bad>0); c.classList.toggle("off", !bad && off);
+  var what=(n-ph?(n-ph)+" thay đổi":"")+(n-ph&&ph?" · ":"")+(ph?ph+" ảnh":"");
+  c.innerHTML=bad?(bad+" mục chưa lưu được — bấm để xem")
+    :off?("Chưa có mạng — "+what+" đã lưu trên máy, sẽ tự gửi khi có mạng")
+    :('<span class="sp"></span>Đang gửi '+what+"…");
+}
+function panel(){
+  if(!Q.length) return;
+  openModal("Đang chờ lưu lên Google Sheet", '<div style="font-size:13px;color:#7A8999;margin-bottom:10px">Các mục dưới đây đã lưu an toàn trên máy này và tự gửi lên khi có mạng. Đừng xoá dữ liệu trình duyệt trước khi gửi xong.</div>'
+    +Q.map(function(x){
+      return '<div class="wq-li"><b>'+esc(x.label||x.body.action)+'</b><span class="mt">'+(x.kind==="photo"?(x.kb||"")+" KB · ":"")+(x.err?"":"đang gửi · thử "+(x.n||0)+" lần")+'</span>'
+        +(x.err?'<small>'+esc(x.err)+'</small>':(x.last&&x.n?'<small style="color:#7A8999">Lần trước: '+esc(x.last.replace(/__TIMEOUT__/,"hết giờ chờ"))+'</small>':''))
+        +'<div style="margin-top:6px;display:flex;gap:6px"><button class="btn sm" onclick="WQ.retry(\''+x.id+'\');closeModal()">Thử lại ngay</button>'
+        +'<button class="btn sm" onclick="if(confirm(\'Bỏ mục này? Dữ liệu chưa lưu lên Sheet sẽ mất.\')){WQ.drop(\''+x.id+'\');closeModal();terrRefresh();}">Bỏ</button></div></div>';
+    }).join(""), '<button class="btn" onclick="closeModal()">Đóng</button>');
+}
+window.addEventListener("online", function(){ paint(); Q.forEach(function(x){ if(!x.err) x.n=0; }); pump(); });
+window.addEventListener("offline", paint);
+document.addEventListener("visibilitychange", function(){ if(!document.hidden) pump(); });
+setInterval(function(){ if(Q.length && !RUN) pump(); }, 15000);
+setTimeout(function(){ paint(); pump(); }, 2000);
+
+/* dữ liệu đi địa bàn tải lại trong lúc còn chờ ⇒ giữ thay đổi của mình (không "nhảy ngược", task mới không biến mất) */
+var lta=loadTerritoryAll;
+loadTerritoryAll=function(){
+  return Promise.resolve(lta.apply(this,arguments)).then(function(r){
+    var pend=Q.filter(function(x){ return x.tab==="weekly"; }); if(!pend.length) return r;
+    pend.forEach(function(x){ try{
+      if(x.kind==="data" && x.patch) patchLocal("weekly", realRow(x.row), x.patch, false);
+      if(x.kind==="photo" && THUMB[x.id]) patchLocal("weekly", realRow(x.row), { photos:[{ id:"", thumb:THUMB[x.id], full:THUMB[x.id], open:"" }] }, false);
+    }catch(_){} });
+    try{ repaintTab(); }catch(_){}
+    return r;
+  });
+};
+/* 3 thao tác chính của sales đi địa bàn: không chờ */
+saveTask=queued(saveTask);
+submitNewTask=queued(submitNewTask);
+uploadPending=queued(uploadPending);
+})();
+
+/* ══ ⭐ v30.6 — CHẾ ĐỘ THỬ CỦA ADMIN ══
+   Admin (RH_Users ▸ Admin) chọn "Chế độ thử" ▸ một bạn sales ⇒ dùng CRM y như bạn đó (đọc dữ liệu THẬT của bạn đó).
+   · MỌI lệnh ghi (task, ảnh, khách hàng, CBC, đơn hàng, mở mới, công tác, việc khác, KPI…) bị chặn ngay trên máy ⇒ trả kết quả giả lập,
+     KHÔNG gửi tới backend sales / Report Hub. Hàng đợi, ảnh, giao diện chạy đúng như thật.
+   · Ảnh: vẫn nén + tải thật lên máy chủ Google (lệnh ping của Training Hub, không lưu ở đâu) để đo đúng tốc độ mạng ⇒ báo thời gian.
+   · Email báo cáo tuần / tháng: gửi THẬT nhưng chỉ tới email của Admin (backend CRM tham số testTo, không CC, không ghi nhật ký).
+     Email KPI tháng: người nhận đổi thành Admin. Email khác (họp tuần, công tác, mở mới…) không gửi.
+   · Thanh vàng trên cùng ▸ Thoát để về tài khoản của mình. */
+(function(){
+"use strict";
+var LK="mmh_crm_test";
+function u(){ try{ return AUTH.user(); }catch(_){ return null; } }
+function adminEmail(){ var x=u(); return (x&&x.email)||""; }
+var TM=window.__CRM_TEST||null;
+if(TM && !(u()&&u().admin)){ try{ localStorage.removeItem(LK); }catch(_){} TM=null; window.__CRM_TEST=null; }
+window.CRMTEST={
+  on:function(){ return !!TM; },
+  start:function(pic){
+    var r=ROLES[pic]; if(!r) return;
+    try{ localStorage.setItem(LK, JSON.stringify({ pic:pic, by:adminEmail(), at:Date.now() }));
+      localStorage.setItem(LS_PIC,pic); localStorage.setItem(LS_AUTH,"1"); if(r.team==="thai") localStorage.setItem(LS_TH,"1"); if(r.team&&TEAMS[r.team]) localStorage.setItem(LS_TEAM,r.team); }catch(_){}
+    location.reload();
+  },
+  stop:function(){ try{ localStorage.removeItem(LK); localStorage.removeItem(LS_PIC); }catch(_){} location.reload(); },
+  pick:function(){
+    var groups={}; Object.keys(ROLES).forEach(function(n){ var r=ROLES[n]; if(!r.team) return; (groups[r.grp]=groups[r.grp]||[]).push(n); });
+    openModal("Chế độ thử — dùng CRM như một bạn sales",
+      '<div style="font-size:13px;color:#5E738C;line-height:1.55;margin-bottom:6px">Bạn sẽ thấy đúng dữ liệu và thao tác được mọi tính năng như bạn sales đó (thêm task, chụp / gửi ảnh, khách hàng, đơn hàng, báo cáo…). '
+      +'<b>Không có gì được lưu vào file dữ liệu của sales.</b> Email báo cáo tuần / tháng chỉ gửi về <b>'+esc(adminEmail())+'</b>.</div>'
+      +Object.keys(groups).map(function(g){ return '<div class="tm-h">'+esc(g)+'</div><div class="tm-pick">'+groups[g].map(function(n){
+        return '<button onclick="CRMTEST.start(\''+n.replace(/'/g,"\\'")+'\')"><b>'+esc(n)+'</b><span>'+esc(ROLES[n].title||"")+'</span></button>'; }).join("")+'</div>'; }).join(""),
+      '<button class="btn" onclick="closeModal()">Đóng</button>');
+  }
+};
+/* lối vào: Admin — menu Thêm (điện thoại) + nút trên thanh trên cùng (máy tính) */
+function entry(){
+  var x=u(); if(!x || !x.admin || TM) return;
+  var h=document.querySelector("#app header");
+  if(h && !document.getElementById("tmBtn")){
+    var b=document.createElement("button"); b.className="tb2"; b.id="tmBtn"; b.title="Chế độ thử: dùng CRM như một bạn sales, không lưu dữ liệu";
+    b.innerHTML='<span>Chế độ thử</span>'; b.onclick=CRMTEST.pick;
+    var us=document.getElementById("btnUser"); if(us) h.insertBefore(b, us); else h.appendChild(b);
+  }
+}
+var mo=window.V30 && V30.more;
+if(mo) V30.more=function(){ var r=mo.apply(this,arguments);
+  try{ var x=u(); if(x && x.admin){ var g=null; [].forEach.call(document.querySelectorAll("#v30-more .gt"),function(t){ if(/Tiện ích/.test(t.textContent)) g=t.nextElementSibling; });
+    if(g && !g.querySelector("[data-tm]")){ var b=document.createElement("button"); b.setAttribute("data-tm","1");
+      b.innerHTML=(typeof V30_ICON==="function"?V30_ICON("check"):"")+'<span>'+(TM?"Thoát chế độ thử":"Chế độ thử")+'</span>';
+      b.onclick=function(){ document.getElementById("v30-more").classList.remove("show"); if(TM) CRMTEST.stop(); else CRMTEST.pick(); }; g.appendChild(b); } } }catch(_){}
+  return r; };
+(function wait(){ var a=document.getElementById("app"); if(a && a.classList.contains("on")) entry(); else setTimeout(wait, 1200); })();
+if(!TM) return;
+
+/* ── đang ở chế độ thử ── */
+document.body.classList.add("tm-on");
+var bar=document.createElement("div"); bar.id="tm-bar";
+bar.innerHTML='<span>CHẾ ĐỘ THỬ · đang dùng như <b>'+esc(TM.pic)+'</b> · không lưu dữ liệu · email chỉ gửi về '+esc(adminEmail())+'</span><button type="button" onclick="CRMTEST.pick()">Đổi người</button><button type="button" onclick="CRMTEST.stop()">Thoát</button>';
+document.body.appendChild(bar);
+var READ={ bundle:1, version:1, list:1, multi:1, visitFeed:1, customerIndex:1, kpi:1, krData:1, productCodes:1, photoMeta:1, custLog:1, activity:1,
+  mtList:1, mtGet:1, mtTenders:1, mtPrices:1, naList:1, naPending:1, weekly:1, boot:1, monthly:1, myTasks:1, sheets:1, tripMaster:1, tripMaster2:1, tripInfo:1, tripSync:1,
+  getTurnoverData:1, getNppDetail:1, customers:1, ping:1, rhKpi:1, rhKpiMail:1, rhKpiMailPreview:1, rhAuthMe:1, rhAuthStart:1, rhAuthVerify:1,
+  rhSessions:1, rhMeta:1, rhMaterials:1, rhDirectory:1, rhAssignList:1, rhMyChecks:1, refStatus:1, mmList:1, mmGet:1, string:1, version2:1, kpiApiMembers:1, kpiApiMember:1, rhKpiTotal:1, photoB64:1, account360:1 };
+var MAIL={ weeklyReport:1, monthlyReport:1 };
+var GAS=/^https:\/\/script\.google\.com\//, seq=0, warned={};
+function qp(url){ var o={}; try{ new URL(url).searchParams.forEach(function(v,k){ o[k]=v; }); }catch(_){} return o; }
+function fake(action, body){
+  seq++;
+  var b64=(body&&(body.b64||(body.photo&&body.photo.b64)))||"";
+  var r={ ok:true, test:true, row:900000+seq, id:"test-"+seq, url:"", rid:"test", message:"Chế độ thử — không lưu vào file dữ liệu", dup:false };
+  if(b64){ r.thumb=b64; r.photo={ ok:true, url:"", id:"", thumb:b64, gpsAddr:"" }; }
+  if(!warned[action]){ warned[action]=1; setTimeout(function(){ toast("Chế độ thử: «"+action+"» được giả lập, không lưu","",2600); }, 50); }
+  return r;
+}
+/* ảnh: tải thật lên Google (ping, không lưu) để đo tốc độ */
+function photoProbe(b64){
+  var t0=Date.now(), kb=Math.round(b64.length*0.75/1024);
+  return window.__tmFetch0(TRAINING_HUB_API, { method:"POST", headers:{"Content-Type":"text/plain;charset=utf-8"}, body:JSON.stringify({ action:"ping", probe:b64 }), redirect:"follow", credentials:"omit" })
+    .then(function(r){ return r.text(); }).then(function(){ var s=((Date.now()-t0)/1000).toFixed(1); toast("Chế độ thử: ảnh "+kb+" KB tải lên Google trong "+s+" giây (không lưu)","ok",6000); },
+      function(){ toast("Chế độ thử: tải ảnh "+kb+" KB lên Google KHÔNG thành công (mạng yếu?) — bản thật sẽ tự gửi lại","warn",7000); });
+}
+/* fetch */
+var f0=window.fetch; window.__tmFetch0=f0;
+window.fetch=function(input, init){
+  var url=typeof input==="string"?input:(input&&input.url)||"";
+  if(!GAS.test(url)) return f0.apply(this,arguments);
+  var body=null, raw=init&&init.body;
+  try{ if(typeof raw==="string") body=JSON.parse(raw); else if(raw && typeof raw.get==="function"){ body={ action:raw.get("action") }; try{ Object.assign(body, JSON.parse(raw.get("payload")||"{}")); }catch(_){} } }catch(_){}
+  var action=(body&&body.action)||qp(url).action||"";
+  if(action==="kpiLate" && !(body&&body.set) && !qp(url).set) action="ping";
+  if(READ[action] || (!body && !(init&&init.method&&init.method!=="GET") && !action)) return f0.apply(this,arguments);
+  if(MAIL[action] && body){ body.testTo=adminEmail(); return f0.call(this, url, Object.assign({}, init, { body:JSON.stringify(body) })); }
+  if(action==="rhKpiMailSend" && raw && typeof raw.get==="function"){
+    var pl={}; try{ pl=JSON.parse(raw.get("payload")||"{}"); }catch(_){}
+    pl.to=adminEmail(); pl.cc=""; pl.subject="(THỬ) "+(pl.subject||"");
+    var nb=new URLSearchParams(); nb.set("action","rhKpiMailSend"); nb.set("payload",JSON.stringify(pl));
+    return f0.call(this, url, Object.assign({}, init, { body:nb }));
+  }
+  var b64=body&&(body.b64||(body.photo&&body.photo.b64));
+  var fk=fake(action, body);
+  return (b64?photoProbe(b64):new Promise(function(r){ setTimeout(r, 400); })).then(function(){
+    return new Response(JSON.stringify(fk), { status:200, headers:{"Content-Type":"application/json"} }); });
+};
+/* <script src> (JSONP) */
+try{
+  var d=Object.getOwnPropertyDescriptor(HTMLScriptElement.prototype,"src");
+  Object.defineProperty(HTMLScriptElement.prototype,"src",{ configurable:true, enumerable:d.enumerable, get:d.get, set:function(v){
+    var url=String(v||"");
+    if(GAS.test(url)){
+      var p=qp(url), a=p.action||"";
+      if(a==="kpiLate" && !p.set) a="ping";
+      if(MAIL[a] && !p.testTo){ return d.set.call(this, url+"&testTo="+encodeURIComponent(adminEmail())); }
+      if(a && !READ[a] && !MAIL[a] && p.callback){
+        var cb=p.callback, fk=fake(a, p);
+        setTimeout(function(){ try{ if(typeof window[cb]==="function") window[cb](fk); }catch(_){} }, 350);
+        return;
+      }
+    }
+    return d.set.call(this, v);
+  } });
+}catch(_){}
+/* hàng đợi lưu trên máy của chế độ thử tách riêng: không trộn với hàng đợi thật của máy này */
+})();
+</script>
+
 </body>
 </html>
