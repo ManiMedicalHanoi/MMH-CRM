@@ -20238,8 +20238,8 @@ function krOpen(pic, month){
     var wa=monthsWithAct(); KS.month=month||(KS.month&&KS.pic===pic?KS.month:"")||ymPrev(ymNow()); if(months().indexOf(KS.month)<0) KS.month=wa[wa.length-1]||months()[0];
     $("kr-st").textContent="Đang lấy người nhận theo sơ đồ tổ chức…";
     post("rhKpiMail",{ pic:KS.pic, month:KS.month }).then(function(r){
-      KS.data=r.data||{}; var sp=function(x){ return String(x||"").split(/[,;\s]+/).map(function(e){ return e.trim().toLowerCase(); }).filter(Boolean); };
-      KS.to=sp(KS.data.to); KS.cc=sp(KS.data.cc); var mm=myEmail().toLowerCase();
+      KS.data=r.data||{}; var sp=function(x){ return String(x||"").split(/[,;\s]+/).map(function(e){ return e.trim().toLowerCase().replace(/@mani\.inc$/,"@manimedicalhanoi.com"); }).filter(Boolean); };   /* 08/10/2026: email gửi đi luôn dùng @manimedicalhanoi.com */
+      KS.to=sp(KS.data.to); KS.cc=sp(KS.data.cc); var mm=myEmail().toLowerCase().replace(/@mani\.inc$/,"@manimedicalhanoi.com");
       if(mm && KS.to.indexOf(mm)<0 && KS.cc.indexOf(mm)<0) KS.cc.push(mm);
       krForm();
       if(KS.data.miss && KS.data.miss.length) $("kr-msg").textContent="⚠️ Chưa có email của: "+KS.data.miss.join(", ")+" (sheet KPI EMAIL DIRECTORY).";
