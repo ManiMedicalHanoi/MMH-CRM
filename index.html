@@ -3979,7 +3979,7 @@ function buildNav(){
     if(t.grp!==lastGrp){ h+='<div class="grp">'+t.grp+'</div>'; lastGrp=t.grp; }
     h+='<button class="nvi" data-t="'+t.id+'" onclick="go(\''+t.id+'\')"><span class="ic">'+t.ic+'</span><span class="lb">'+t.lb+'</span></button>';
   });
-  h+='<div style="flex:1"></div><div style="padding:10px;font-size:10.5px;color:var(--mute);line-height:1.5">MMH CRM v30.4<br>'+
+  h+='<div style="flex:1"></div><div style="padding:10px;font-size:10.5px;color:var(--mute);line-height:1.5">MMH CRM v30.5<br>'+
      (isMgmt()?'<a href="'+DRIVE_FOLDER+'" target="_blank">📁 Folder ảnh Drive</a>':"")+'</div>';
   $("side").innerHTML=h;
   /* ⭐ v4.5 — thanh dưới trượt ngang, đủ mọi mục, bỏ nút "Thêm" */
@@ -20869,7 +20869,7 @@ window.QS2={ open:qsOpen };
 </script>
 
 <!-- ⭐ v30.3 — THÔNG BÁO CẬP NHẬT (chép từ Report Hub): dữ liệu updates/notes.js · tự hiện 7 ngày · nút "Có gì mới" trên thanh trên cùng -->
-<script src="updates/notes.js?v=30.4"></script>
+<script src="updates/notes.js?v=30.5"></script>
 <style id="upd-css">
 #upd,#upd-zoom{--t-pri:var(--blue);--t-pri2:var(--blue-d);--t-ink:var(--navy);--t-soft:var(--pale);--t-line:var(--lb2);--t-bg:#F6F8FA;--mmh-blue:var(--blue);--mmh-navy:var(--navy)}
 
@@ -22077,8 +22077,8 @@ try{ (window.QS_EXTRA_CMDS=window.QS_EXTRA_CMDS||[]).push(function(){ var d=wind
 /* ══ ⭐ v30.3 — THÔNG BÁO CẬP NHẬT + EMAIL CẬP NHẬT CHO CRM ══
    · Nút "Có gì mới" (thanh trên cùng · Thêm ▸ Tiện ích · số phiên bản ở menu bên) ⇒ UPD.open(true) — danh sách cập nhật lấy từ updates/notes.js.
    · Admin / Director: trong hộp thông báo có "✉ Gửi email cập nhật" (UPM) — email tiếng Anh tới toàn bộ nhân sự dùng CRM (danh sách ROLES). */
-window.UPM_CFG={ app:"crm", name:"MMH CRM", url:"https://manimedicalhanoi.github.io/MMH-CRM/", base:"https://manimedicalhanoi.github.io/MMH-CRM/",
-  pdf:{ url:"https://manimedicalhanoi.github.io/MMH-CRM/docs/HDSD_MMH_CRM_v30.4.pdf", name:"MMH_CRM_User_Guide_v30.4.pdf" },
+window.UPM_CFG={ app:"crm", lang:"en", btn:"✉ Send update email", name:"MMH CRM", url:"https://manimedicalhanoi.github.io/MMH-CRM/", base:"https://manimedicalhanoi.github.io/MMH-CRM/",
+  pdf:{ url:"https://manimedicalhanoi.github.io/MMH-CRM/docs/HDSD_MMH_CRM_v30.5.pdf", name:"MMH_CRM_User_Guide_v30.5.pdf" },
   recipients:function(){ var L=[]; try{ Object.keys(ROLES).forEach(function(k){ var e=ROLES[k].email; if(e && L.indexOf(e)<0) L.push(e); }); }catch(_){}
     return { list:L, count:L.length, label:"Toàn bộ nhân sự dùng MMH CRM ("+L.length+" người)" }; } };
 (function(){
@@ -22140,18 +22140,21 @@ window.UPM_CFG={ app:"crm", name:"MMH CRM", url:"https://manimedicalhanoi.github
 @media(max-width:860px){ #upm .bd{grid-template-columns:1fr;overflow:auto} #upm .l{border-right:none} #upm .r{min-height:520px} }
 </style>
 <script>
-/* ══ ⭐ EMAIL THÔNG BÁO CẬP NHẬT HỆ THỐNG (UPM) — dùng chung Report Hub + MMH CRM ══
-   Admin / Director: Thông báo cập nhật ▸ "Gửi email cập nhật" → chọn phiên bản → xem trước đúng bản gửi → Gửi thử cho tôi → Gửi email.
-   · Email tiếng Anh, trang trọng: Dear all · tóm tắt · từng thay đổi (ảnh minh hoạ nhúng trong thư) · HDSD PDF đính kèm ·
-     "This is an automated email, please do not reply". Tiêu đề: "<App> Update – dd/mm/yyyy".
-   · Nội dung tiếng Anh lấy từ trường en của window.MMH_UPDATES (thiếu ⇒ dùng tiếng Việt, có cảnh báo).
-   · Gửi qua Training Hub (action rhUpdMail, Admin / Director). Cấu hình theo app: window.UPM_CFG. */
+/* ══ ⭐ EMAIL THÔNG BÁO CẬP NHẬT HỆ THỐNG (UPM v2, 08/10/2026) — dùng chung Report Hub + MMH CRM ══
+   Admin / Director: Thông báo cập nhật ▸ "Gửi email cập nhật" → CHỌN 1 BẢN CẬP NHẬT → xem trước đúng bản gửi → Gửi thử cho tôi → Gửi email.
+   · Mỗi email chỉ nói về 1 bản cập nhật (người dùng yêu cầu). Thư thường kiểu Outlook: lời chào · tóm tắt · từng thay đổi (ảnh nhúng) ·
+     file đính kèm · "email tự động, không trả lời".
+   · Ngôn ngữ theo app (UPM_CFG.lang): CRM = tiếng Anh (lấy trường en của MMH_UPDATES), Report Hub = tiếng Việt.
+   · Đính kèm: HDSD toàn hệ thống mới nhất (UPM_CFG.pdf) + HDSD riêng của bản cập nhật (mục guide / guideVi trong notes.js).
+   · Gửi qua Training Hub (rhUpdMail v3.16, pdfs[]: tối đa 22 MB, file thừa để link). Cấu hình theo app: window.UPM_CFG. */
 (function(){
 "use strict";
-var U={ sel:{}, intro:"", subject:"", busy:false, rid:"" };
+var U={ id:"", intro:"", subject:"", busy:false, rid:"" };
 function $(id){ return document.getElementById(id); }
 function E(s){ return String(s==null?"":s).replace(/[&<>"']/g,function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]; }); }
 function cfg(){ return window.UPM_CFG||{}; }
+function EN(){ return cfg().lang!=="vi"; }
+function L(en,vi){ return EN()?en:vi; }
 function pad(n){ return (n<10?"0":"")+n; }
 function dmy(s){ var p=String(s||"").split("-"); return p.length===3?p[2]+"/"+p[1]+"/"+p[0]:s; }
 function today(){ var d=new Date(); return pad(d.getDate())+"/"+pad(d.getMonth()+1)+"/"+d.getFullYear(); }
@@ -22159,39 +22162,58 @@ function notes(){ return (window.MMH_UPDATES||[]).slice().sort(function(a,b){ re
 function user(){ return window.AUTH && AUTH.user && AUTH.user(); }
 function can(){ var u=user(); return !!(u && (u.admin || u.level==="director")); }
 function abs(p){ if(!p) return ""; if(/^https?:/.test(p)) return p; return cfg().base+String(p).replace(/^\.?\//,""); }
-var TY={ "new":"New", "imp":"Improved", "fix":"Fixed" };
+function cur(){ return notes().filter(function(n){ return n.id===U.id; })[0]||null; }
+function txt(v){ /* nội dung theo ngôn ngữ email */
+  if(!v) return { title:"", summary:"", items:[] };
+  if(!EN()) return { title:v.title, summary:v.summary||"", items:(v.items||[]).map(function(it){ return { title:it.title, text:it.text, img:it.img }; }) };
+  var en=v.en||{};
+  return { title:en.title||v.title, summary:en.summary||(v.en?"":v.summary)||"", items:(v.items||[]).map(function(it,i){ var e=(en.items||[])[i]||{}; return { title:e.title||it.title, text:e.text||it.text, img:it.img }; }) };
+}
+function fname(p){ return String(p||"").split("/").pop(); }
+/* file đính kèm: HDSD toàn hệ thống + HDSD của bản cập nhật (EN / VN), bỏ trùng */
+function files(v){
+  var c=cfg(), out=[], seen={};
+  var add=function(url,name,what){ if(!url) return; url=abs(url); if(seen[url]) return; seen[url]=1; out.push({ url:url, name:name||fname(url), what:what }); };
+  if(v && v.guide && abs(v.guide)!==abs(c.pdf&&c.pdf.url)) add(v.guide, v.guideName, L("Guide to this update"+(v.guideVi?" (English)":""),"Hướng dẫn bản cập nhật này"));
+  if(v && v.guideVi) add(v.guideVi, v.guideViName, L("Guide to this update (Vietnamese)","Hướng dẫn bản cập nhật này (tiếng Việt)"));
+  if(c.pdf && c.pdf.url) add(c.pdf.url, c.pdf.name, L("Complete "+c.name+" user guide","Hướng dẫn sử dụng toàn bộ "+c.name));
+  return out;
+}
+var TY={ "new":["New","Mới"], "imp":["Improved","Cải tiến"], "fix":["Fixed","Sửa lỗi"] };
 
 /* ── nội dung email ── */
-function picked(){ return notes().filter(function(n){ return U.sel[n.id]; }); }
 function emailHtml(forPreview){
-  /* thư thường kiểu Outlook (không phải bản tin HTML): chữ đen, đề mục đánh số, ảnh chèn ngay dưới từng mục */
-  var c=cfg(), L=picked(), imgs=[], n=0, vers=L.map(function(x){ return x.version; }).reverse();
-  var verTxt=vers.length>1?vers[0]+" – "+vers[vers.length-1]:(vers[0]||"");
+  var c=cfg(), v=cur(), t=txt(v), imgs=[], n=0, fs=files(v);
   var P='<p style="margin:0 0 10px">', B="font-family:Aptos,Calibri,'Segoe UI',Arial,sans-serif;font-size:11pt;line-height:1.45;color:#000";
-  var h='<div style="'+B+'">'+P+'Dear All,</p>'+P+E(U.intro).replace(/\n/g,"<br>")+'</p>'
-    +P+'Link: <a href="'+E(c.url)+'">'+E(c.url)+'</a></p>'
-    +(verTxt?P+'Version: <b>'+E(verTxt)+'</b></p>':'')
-    +'<p style="margin:16px 0 8px"><b>WHAT\'S NEW</b></p>';
-  L.forEach(function(v){
-    var en=v.en||{}, items=v.items||[];
-    if(L.length>1) h+='<p style="margin:12px 0 6px"><b><u>'+E(v.version)+' ('+E(dmy(v.date))+')'+(en.title?' – '+E(en.title):'')+'</u></b></p>';
-    items.forEach(function(it,i){
-      var e=(en.items||[])[i]||{}; n++;
-      h+='<p style="margin:0 0 6px 24px"><b>'+n+'.&nbsp; '+E(e.title||it.title)+':</b> '+(e.text||it.text||"")+'</p>';
-      if(it.img){ var cid="img"+n; imgs.push({cid:cid, url:abs(it.img)});
-        h+='<p style="margin:4px 0 14px 48px"><img src="'+(forPreview?E(new URL(it.img,location.href).href):'cid:'+cid)+'" alt="" width="620" style="width:100%;max-width:620px;height:auto;border:1px solid #D0D0D0"></p>'; }
-      else h+='<div style="height:6px"></div>';
-    });
+  var h='<div style="'+B+'">'+P+L("Dear All,","Kính gửi anh/chị,")+'</p>'+P+E(U.intro).replace(/\n/g,"<br>")+'</p>'
+    +P+L("Link: ","Đường dẫn: ")+'<a href="'+E(c.url)+'">'+E(c.url)+'</a></p>'
+    +(v?P+L("Version: ","Phiên bản: ")+'<b>'+E(v.version)+'</b> ('+E(dmy(v.date))+')</p>':'')
+    +'<p style="margin:16px 0 8px"><b>'+(v?E(EN()?String(t.title).toUpperCase():t.title):L("WHAT'S NEW","NỘI DUNG CẬP NHẬT"))+'</b></p>'
+    +(t.summary?P+t.summary+'</p>':'');
+  t.items.forEach(function(it){
+    n++;
+    h+='<p style="margin:0 0 6px 24px"><b>'+n+'.&nbsp; '+E(it.title)+':</b> '+(it.text||"")+'</p>';
+    if(it.img){ var cid="img"+n; imgs.push({cid:cid, url:abs(it.img)});
+      h+='<p style="margin:4px 0 14px 48px"><img src="'+(forPreview?E(new URL(it.img,location.href).href):'cid:'+cid)+'" alt="" width="620" style="width:100%;max-width:620px;height:auto;border:1px solid #D0D0D0"></p>'; }
+    else h+='<div style="height:6px"></div>';
   });
-  h+=(c.pdf&&c.pdf.url?'<p style="margin:16px 0 10px"><b>USER GUIDE:</b> Please find attached the complete '+E(c.name)+' user guide (PDF), updated with the latest changes.</p>':'')
-    +P+'If you have any questions, please contact the Product Team.</p>'
-    +'<p style="margin:16px 0 16px">Best regards,<br>MMH Product Team<br>MANI Medical Hanoi</p>'
-    +'<p style="margin:0;color:#666;font-size:9pt"><i>Note: This is an automated email sent from '+E(c.name)+'. Please do not reply to this email.</i></p></div>';
-  return { html:h, images:imgs, ver:verTxt };
+  if(fs.length){
+    h+='<p style="margin:16px 0 6px"><b>'+L("ATTACHMENTS:","FILE ĐÍNH KÈM:")+'</b></p>'
+      +fs.map(function(f){ return '<p style="margin:0 0 4px 24px">• '+E(f.what)+': <a href="'+E(f.url)+'">'+E(f.name)+'</a></p>'; }).join("")
+      +'<p style="margin:6px 0 10px 24px;color:#444;font-size:10pt">'+L("The files are attached to this email; you can also open them with the links above.","Các file được đính kèm trong email này; anh/chị cũng có thể mở bằng đường dẫn ở trên.")+'</p>';
+  }
+  h+=P+L("If you have any questions, please contact the Product Team.","Nếu có thắc mắc, anh/chị vui lòng liên hệ Product Team.")+'</p>'
+    +'<p style="margin:16px 0 16px">'+L("Best regards,","Trân trọng,")+'<br>MMH Product Team<br>MANI Medical Hanoi</p>'
+    +'<p style="margin:0;color:#666;font-size:9pt"><i>'+L("Note: This is an automated email sent from "+E(c.name)+". Please do not reply to this email.","Lưu ý: Đây là email tự động gửi từ "+E(c.name)+". Vui lòng không trả lời email này.")+'</i></p></div>';
+  return { html:h, images:imgs, files:fs };
 }
 function recipients(){ var c=cfg(); return typeof c.recipients==="function"?c.recipients():{audience:"all", label:"Toàn bộ người dùng"}; }
+function defSubject(v){ var c=cfg(), t=txt(v); return c.name+" Update – "+(t.title?t.title+" – ":"")+(v?dmy(v.date):today()); }
+function defIntro(){ var c=cfg();
+  return L("We are pleased to inform you that "+c.name+" has been updated as described below. Please take a moment to review the changes; the user guides are attached for your reference.",
+           c.name+" vừa được cập nhật với nội dung dưới đây. Anh/chị vui lòng dành ít phút xem các thay đổi; hướng dẫn chi tiết được đính kèm trong email."); }
 
-/* ── giao diện ── */
+/* ── giao diện (Admin — tiếng Việt) ── */
 function shell(){
   var o=$("upm"); if(o) return o;
   o=document.createElement("div"); o.id="upm";
@@ -22202,39 +22224,41 @@ function shell(){
   o.addEventListener("click",function(e){ if(e.target===o) return UPM.close(); var b=e.target.closest("[data-a]"); if(!b) return; var a=b.getAttribute("data-a");
     if(a==="x") UPM.close(); else if(a==="test") send(true); else if(a==="send") send(false); });
   o.addEventListener("input",function(e){ var t=e.target;
-    if(t.id==="upm-sub") U.subject=t.value; else if(t.id==="upm-intro") U.intro=t.value; else if(t.name==="upm-v"){ U.sel[t.value]=t.checked; }
+    if(t.id==="upm-sub") U.subject=t.value; else if(t.id==="upm-intro") U.intro=t.value;
+    else if(t.name==="upm-v"){ var auto=U.subject===defSubject(cur()); U.id=t.value; if(auto) U.subject=defSubject(cur()); left(); }
     clearTimeout(U.t); U.t=setTimeout(preview, 250); });
   return o;
 }
 function left(){
-  var c=cfg(), r=recipients(), ns=notes().slice(0,14);
+  var c=cfg(), r=recipients(), ns=notes().slice(0,14), v=cur(), fs=files(v);
   $("upm-l").innerHTML=
-     '<div class="f"><label>Tiêu đề</label><input type="text" id="upm-sub" value="'+E(U.subject)+'"></div>'
+     '<div class="f"><label>Chọn bản cập nhật (mỗi email 1 bản)</label><div class="vs">'+ns.map(function(n){ var t=txt(n);
+        return '<label><input type="radio" name="upm-v" value="'+E(n.id)+'"'+(n.id===U.id?" checked":"")+'><span><b>'+E(n.version)+'</b> · '+E(dmy(n.date))+'<small>'+E(t.title)+'</small>'
+          +(EN()&&!n.en?'<small class="noen">Chưa có bản tiếng Anh — email sẽ dùng chữ tiếng Việt</small>':'')+(n.guide?'<small>📘 có HD riêng'+(n.guideVi?' (EN + VN)':'')+'</small>':'')+'</span></label>'; }).join("")+'</div></div>'
+    +'<div class="f"><label>Tiêu đề</label><input type="text" id="upm-sub" value="'+E(U.subject)+'"></div>'
     +'<div class="f"><label>Gửi tới</label><div class="rc">'+E(r.label||"")+(r.list?'<br><span style="color:#8A97A6">'+E(r.list.join(", "))+'</span>':'')+'</div></div>'
-    +'<div class="f"><label>Phiên bản đưa vào email</label><div class="vs">'+ns.map(function(n){
-        return '<label><input type="checkbox" name="upm-v" value="'+E(n.id)+'"'+(U.sel[n.id]?" checked":"")+'><span><b>'+E(n.version)+'</b> · '+E(dmy(n.date))+'<small>'+E((n.en&&n.en.title)||n.title)+'</small>'
-          +(n.en?'':'<small class="noen">Chưa có bản tiếng Anh — email sẽ dùng chữ tiếng Việt</small>')+'</span></label>'; }).join("")+'</div></div>'
-    +'<div class="f"><label>Lời mở đầu (tiếng Anh)</label><textarea id="upm-intro">'+E(U.intro)+'</textarea></div>'
-    +(c.pdf&&c.pdf.url?'<div class="f"><label>File đính kèm</label><div class="rc"><a href="'+E(c.pdf.url)+'" target="_blank" rel="noopener">'+E(c.pdf.name)+'</a> — HDSD toàn bộ hệ thống (PDF)</div></div>':'');
+    +'<div class="f"><label>Lời mở đầu ('+(EN()?"tiếng Anh":"tiếng Việt")+')</label><textarea id="upm-intro">'+E(U.intro)+'</textarea></div>'
+    +'<div class="f"><label>File đính kèm ('+fs.length+')</label><div class="rc">'+(fs.map(function(f){ return '<a href="'+E(f.url)+'" target="_blank" rel="noopener">'+E(f.name)+'</a> — '+E(f.what); }).join("<br>")||"—")+'</div></div>';
 }
 function preview(){ var f=$("upm-f"); if(!f) return; var m=emailHtml(true);
-  f.srcdoc='<!doctype html><html><head><meta charset="utf-8"><style>body{margin:18px;background:#fff}</style></head><body><div style="font:13px Arial,sans-serif;color:#5B6B7D;border-bottom:1px solid #EEF1F4;padding-bottom:10px;margin-bottom:16px"><b style="color:#1F3347">'+E(U.subject)+'</b><br>From: '+E(cfg().name)+' (no-reply)'+(cfg().pdf&&cfg().pdf.url?' &nbsp;·&nbsp; 📎 '+E(cfg().pdf.name):'')+'</div>'+m.html+'</body></html>'; }
+  f.srcdoc='<!doctype html><html><head><meta charset="utf-8"><style>body{margin:18px;background:#fff}</style></head><body><div style="font:13px Arial,sans-serif;color:#5B6B7D;border-bottom:1px solid #EEF1F4;padding-bottom:10px;margin-bottom:16px"><b style="color:#1F3347">'+E(U.subject)+'</b><br>From: '+E(cfg().name)+' (no-reply)'+(m.files.length?' &nbsp;·&nbsp; 📎 '+m.files.map(function(x){ return E(x.name); }).join(", "):'')+'</div>'+m.html+'</body></html>'; }
 function msg(t,k){ var m=$("upm-msg"); if(m){ m.textContent=t||""; m.className="msg"+(k?" "+k:""); } }
 function send(test){
   if(U.busy) return;
-  var c=cfg(), L=picked(); if(!L.length) return msg("Chọn ít nhất 1 phiên bản.","err");
+  var c=cfg(), v=cur(); if(!v) return msg("Chọn 1 bản cập nhật.","err");
   if(!U.subject.trim()) return msg("Nhập tiêu đề email.","err");
   var r=recipients();
   if(!test && !confirm("Gửi email \""+U.subject+"\" tới "+(r.count?r.count+" người":r.label)+"?\nEmail sẽ gửi ngay, không thu hồi được.")) return;
-  var m=emailHtml(false), body={ tk:AUTH.tk(), app:c.app, subject:U.subject.trim(), html:m.html, images:m.images, pdf:c.pdf||null, test:!!test, rid:test?"":U.rid };
+  var m=emailHtml(false), body={ tk:AUTH.tk(), app:c.app, subject:U.subject.trim(), html:m.html, images:m.images, pdfs:m.files.map(function(f){ return { url:f.url, name:f.name }; }), test:!!test, rid:test?"":U.rid };
   if(r.audience) body.audience=r.audience; else body.to=r.list||[];
-  U.busy=true; msg(test?"Đang gửi thử…":"Đang gửi… (tải ảnh + PDF đính kèm, có thể mất 10–30 giây)");
+  U.busy=true; msg(test?"Đang gửi thử…":"Đang gửi… (tải ảnh + PDF đính kèm, có thể mất 10–40 giây)");
   [].forEach.call(document.querySelectorAll("#upm .ft button"),function(b){ b.disabled=true; });
   var fd=new URLSearchParams(); fd.set("action","rhUpdMail"); fd.set("payload", JSON.stringify(body));
   fetch(window.TRAINING_HUB_API, { method:"POST", body:fd }).then(function(x){ return x.text(); }).then(function(t){
     var j; try{ j=JSON.parse(t); }catch(_){ throw new Error("Máy chủ trả về lỗi."); }
-    if(!j.ok) throw new Error(/Không tìm thấy chức năng/.test(j.error||"")?"Máy chủ Training Hub chưa cập nhật bản mới (cần v3.15).":(j.error||"Gửi lỗi."));
-    msg(test?"✓ Đã gửi thử tới "+(j.to||[]).join(", ")+" — kiểm tra hộp thư.":"✓ Đã gửi tới "+j.sent+" người"+(j.dup?" (đã gửi trước đó, không gửi lại)":"")+".","ok");
+    if(!j.ok) throw new Error(/Không tìm thấy chức năng/.test(j.error||"")?"Máy chủ Training Hub chưa cập nhật bản mới (cần v3.16).":(j.error||"Gửi lỗi."));
+    msg((test?"✓ Đã gửi thử tới "+(j.to||[]).join(", ")+" — kiểm tra hộp thư.":"✓ Đã gửi tới "+j.sent+" người"+(j.dup?" (đã gửi trước đó, không gửi lại)":"")+".")
+      +((j.linked||[]).length?" File quá lớn chỉ gửi link: "+j.linked.join(", ")+".":""),"ok");
     if(!test) U.rid="u"+Date.now().toString(36);
   }).catch(function(e){ msg(e.message||"Không gửi được — thử lại.","err"); })
     .then(function(){ U.busy=false; [].forEach.call(document.querySelectorAll("#upm .ft button"),function(b){ b.disabled=false; }); });
@@ -22242,26 +22266,25 @@ function send(test){
 
 var UPM=window.UPM={
   can:can,
-  open:function(){
+  open:function(id){
     if(!can()) return alert("Chỉ Admin / Director được gửi email thông báo cập nhật (đăng nhập bằng email).");
-    var c=cfg(), ns=notes(), t0=ns[0]&&ns[0].date;
-    /* mặc định: các bản trong 7 ngày gần nhất đã có nội dung tiếng Anh (thiếu thì lấy bản mới nhất) */
-    U.sel={}; var lim=new Date(Date.now()-7*864e5).toISOString().slice(0,10);
-    ns.forEach(function(n){ if(n.en && n.date>=lim) U.sel[n.id]=true; });
-    if(!Object.keys(U.sel).length && ns[0]) U.sel[ns[0].id]=true;
-    U.subject=c.name+" Update – "+today();
-    U.intro="We are pleased to inform you that "+c.name+" has been updated with the following improvements. Please take a moment to review the changes below; the full user guide is attached for your reference.";
+    var ns=notes();
+    /* mặc định: bản đang xem trong hộp Thông báo cập nhật, không thì bản mới nhất */
+    var showing=window.UPD&&UPD.list&&UPD.list[UPD.cur];
+    U.id=id||(showing&&showing.id)||(ns[0]&&ns[0].id)||"";
+    U.subject=defSubject(cur()); U.intro=defIntro();
     U.rid="u"+Date.now().toString(36);
     shell().classList.add("show"); left(); preview(); msg("");
   },
   close:function(){ var o=$("upm"); if(o) o.classList.remove("show"); },
-  html:function(){ return emailHtml(true).html; }
+  html:function(){ return emailHtml(true).html; },
+  _files:function(){ return files(cur()); }
 };
 /* nút trong hộp Thông báo cập nhật (chỉ Admin / Director) */
 (function hook(){
   var host=$("upd"); if(!host || !window.MutationObserver){ setTimeout(hook, 600); return; }
   var put=function(){ var ft=host.querySelector(".upd-ft"); if(!ft || ft.querySelector(".upm-btn") || !can()) return;
-    var b=document.createElement("button"); b.className="upm-btn"; b.type="button"; b.textContent="✉ Send update email"; b.title="Gửi email (tiếng Anh) về các cập nhật này tới toàn bộ người dùng";
+    var b=document.createElement("button"); b.className="upm-btn"; b.type="button"; b.textContent=cfg().btn||"✉ Gửi email cập nhật"; b.title="Gửi email về bản cập nhật đang xem tới toàn bộ người dùng";
     b.onclick=function(){ UPM.open(); }; var ok=ft.querySelector(".ok"); if(ok) ft.insertBefore(b, ok); else ft.appendChild(b); };
   UPM._put=put; UPM._host=host;
   setInterval(function(){ if(host.classList.contains("show")) put(); }, 700);
@@ -22459,6 +22482,269 @@ try{
     if(document.readyState!=="loading") i18nApply();
   }
 }catch(_){}
+})();
+</script>
+<style id="v305-css">
+/* ⭐ CRM v30.5 — MỞ MỚI GỌN: 1 dòng lọc · thẻ KPI nhỏ · danh sách gọn · màn duyệt có bằng chứng lớn */
+.na9-kpis{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:10px;margin-bottom:12px}
+.na9-kpi{background:#fff;border:1px solid #E6EAEF;border-radius:12px;padding:10px 12px;cursor:pointer}
+.na9-kpi.on{border-color:var(--t-pri,#3A5CAA);box-shadow:inset 0 0 0 1px var(--t-pri,#3A5CAA)}
+.na9-kpi .h{display:flex;align-items:baseline;gap:6px;font-size:12px;color:#5F6B78}.na9-kpi .h b{color:#1F3347;font-size:13px}
+.na9-kpi .v{display:flex;align-items:baseline;gap:6px;margin-top:4px}.na9-kpi .v b{font-size:22px;color:#1F3347}.na9-kpi .v span{color:#8A97A6;font-size:13px}
+.na9-kpi .v em{margin-left:auto;font-style:normal;font-weight:700;font-size:13px}
+.na9-kpi .bar{height:5px;border-radius:3px;background:#EEF1F4;margin-top:6px;overflow:hidden}.na9-kpi .bar i{display:block;height:100%;border-radius:3px}
+.na9-kpi small{display:block;margin-top:5px;font-size:11.5px;color:#7A5C00}
+.na9-tool{display:flex;align-items:center;gap:8px;flex-wrap:wrap;background:#fff;border:1px solid #E6EAEF;border-radius:12px;padding:6px 8px;margin-bottom:12px}
+.na9-tabs{display:flex;gap:2px;flex-wrap:wrap;flex:1;min-width:0}
+.na9-tabs button{font:inherit;font-size:13px;border:none;background:none;padding:6px 10px;border-radius:8px;color:#4A5D70;cursor:pointer;white-space:nowrap}
+.na9-tabs button b{font-weight:700;margin-left:4px;color:#8A97A6}
+.na9-tabs button.on{background:var(--t-soft,#F0F7FF);color:var(--t-ink,#003047);font-weight:600}.na9-tabs button.on b{color:var(--t-pri,#3A5CAA)}
+.na9-tabs button.rv{color:#8A4B00}.na9-tabs button.rv b{background:#D9822B;color:#fff;border-radius:9px;padding:0 6px}
+.na9-tool select{font:inherit;font-size:13px;height:32px;border:1px solid #E1E6EC;border-radius:8px;padding:0 8px;background:#fff;color:#1F3347;max-width:170px}
+@media(max-width:700px){.na9-tabs{flex-wrap:nowrap;overflow-x:auto;flex-basis:100%;scrollbar-width:none}.na9-tabs::-webkit-scrollbar{display:none}.na9-tool select{flex:1;max-width:none}.na9-row .s{white-space:normal}}
+.na9-alert{display:flex;align-items:center;gap:12px;background:#FFF8EC;border:1px solid #F1D9B0;border-radius:12px;padding:10px 14px;margin-bottom:12px;cursor:pointer}
+.na9-alert b{color:#7A4A00}.na9-alert span{font-size:12.5px;color:#7A6A55}.na9-alert .btn{margin-left:auto}
+.na9-list{display:flex;flex-direction:column;gap:8px}
+.na9-row{display:flex;gap:12px;align-items:center;background:#fff;border:1px solid #E6EAEF;border-radius:12px;padding:10px 12px;cursor:pointer}
+.na9-row:hover{border-color:#C9D6E4}
+.na9-row .th{flex:none;width:64px;height:52px;border-radius:8px;background:#F3F6F9;overflow:hidden;position:relative;display:flex;align-items:center;justify-content:center;font-size:12px;color:#8A97A6}
+.na9-row .th img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.na9-row .th .n{position:absolute;right:3px;bottom:3px;background:rgba(0,0,0,.55);color:#fff;font-size:10.5px;border-radius:6px;padding:0 5px}
+.na9-row .m{flex:1;min-width:0}.na9-row .a{font-weight:700;color:#1F3347;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.na9-row .s{font-size:12.5px;color:#5F6B78;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.na9-row .r{flex:none;display:flex;flex-direction:column;align-items:flex-end;gap:4px;font-size:12px;color:#5F6B78}
+.na9-pill{font-size:11.5px;font-weight:600;padding:2px 9px;border-radius:999px;white-space:nowrap}
+.na9-pill.Draft{background:#EEF1F5;color:#5F6B78}.na9-pill.Pending{background:#FFF3D6;color:#7A5C00}.na9-pill.Returned{background:#FDEBD8;color:#8A4B00}
+.na9-pill.Approved{background:#E3F3E7;color:#1E6B34}.na9-pill.Rejected{background:#FBE6E5;color:#9B2C28}
+.na9-go{font-size:12px;font-weight:700;color:#fff;background:#D9822B;border-radius:8px;padding:3px 9px}
+.na9-empty{background:#fff;border:1px dashed #D9E0E8;border-radius:12px;padding:28px;text-align:center;color:#6B7B8C;font-size:13.5px}
+/* màn chi tiết / duyệt */
+.na9-steps{display:flex;gap:6px;align-items:center;font-size:12px;color:#8A97A6;margin-bottom:12px;flex-wrap:wrap}
+.na9-steps span{padding:3px 9px;border-radius:999px;background:#F3F6F9}.na9-steps span.on{background:var(--t-soft,#F0F7FF);color:var(--t-ink,#003047);font-weight:600}
+.na9-steps span.ok{background:#E3F3E7;color:#1E6B34}.na9-steps span.bad{background:#FBE6E5;color:#9B2C28}.na9-steps i{font-style:normal;color:#C5CED8}
+.na9-det{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);gap:16px}
+@media(max-width:860px){.na9-det{grid-template-columns:1fr}}
+.na9-info{width:100%;border-collapse:collapse;font-size:13px}.na9-info td{padding:6px 4px;border-bottom:1px solid #F0F2F5;vertical-align:top}
+.na9-info td:first-child{color:#6B7B8C;width:34%;white-space:nowrap}
+.na9-chk{margin-top:12px;border:1px solid #E6EAEF;border-radius:12px;padding:10px 12px}
+.na9-chk h5{margin:0 0 6px;font-size:12.5px;color:#1F3347}
+.na9-chk div{display:flex;gap:8px;font-size:12.5px;padding:3px 0;color:#41566F;line-height:1.45}.na9-chk div i{font-style:normal;flex:none;width:18px;text-align:center}
+.na9-chk div.ok i{color:#2E8B57}.na9-chk div.no i{color:#D9822B}
+.na9-view{border:1px solid #E6EAEF;border-radius:12px;overflow:hidden;background:#F7F9FB}
+.na9-big{height:340px;display:flex;align-items:center;justify-content:center;position:relative;cursor:zoom-in;background:#F3F6F9}
+.na9-big img{max-width:100%;max-height:100%;object-fit:contain}.na9-big iframe{width:100%;height:100%;border:0;background:#fff}
+.na9-big .lb{position:absolute;left:8px;top:8px;background:rgba(255,255,255,.92);border:1px solid #E6EAEF;border-radius:8px;padding:2px 8px;font-size:12px;color:#1F3347}
+.na9-strip{display:flex;gap:6px;padding:8px;overflow-x:auto;background:#fff;border-top:1px solid #EEF1F4}
+.na9-strip button{flex:none;width:76px;border:1px solid #E1E6EC;border-radius:8px;background:#fff;padding:0;cursor:pointer;overflow:hidden;font:inherit;text-align:left}
+.na9-strip button.on{border-color:var(--t-pri,#3A5CAA);box-shadow:0 0 0 1px var(--t-pri,#3A5CAA)}
+.na9-strip .im{height:52px;position:relative;background:#F3F6F9;display:flex;align-items:center;justify-content:center;font-size:11px;color:#8A97A6}
+.na9-strip .im img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.na9-strip small{display:block;font-size:10.5px;color:#5F6B78;padding:2px 4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.na9-dec{margin-top:12px;border:1px solid #F1D9B0;background:#FFFBF4;border-radius:12px;padding:12px}
+.na9-dec h4{margin:0 0 4px;font-size:14px;color:#1F3347}.na9-dec p{margin:0 0 8px;font-size:12.5px;color:#6B6152;line-height:1.5}
+.na9-dec textarea{width:100%;min-height:58px;box-sizing:border-box}
+.na9-dec .bt{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.na9-dec .bt button{font:inherit;font-size:13.5px;font-weight:600;border-radius:10px;padding:9px 14px;cursor:pointer;border:1px solid #E1E6EC;background:#fff;color:#1F3347}
+.na9-dec .bt .ok{background:#2E8B57;border-color:#2E8B57;color:#fff}.na9-dec .bt .ret{color:#8A4B00;border-color:#E8C79A}.na9-dec .bt .no{color:#9B2C28;border-color:#EBC3C1}
+.na9-bok{background:#2E8B57!important;border-color:#2E8B57!important;color:#fff!important;font-weight:700}.na9-bret{color:#8A4B00!important;border-color:#E8C79A!important}.na9-bno{color:#9B2C28!important;border-color:#EBC3C1!important}
+.na9-ret{border:1px solid #F1D9B0;background:#FFF8EC;border-radius:12px;padding:10px 12px;margin-bottom:12px;font-size:13px;color:#5C4A2E}
+.na9-res{border-radius:12px;padding:10px 12px;margin-top:12px;font-size:13px}.na9-res.Approved{background:#EEF8F1;color:#1E6B34}.na9-res.Rejected{background:#FCEFEE;color:#8A2C28}
+.na9-log{margin-top:10px;font-size:11.5px;color:#8A97A6;white-space:pre-wrap;max-height:90px;overflow:auto}
+.na9-rule table{width:100%;border-collapse:collapse;font-size:13px;margin:6px 0 4px}.na9-rule td,.na9-rule th{border-bottom:1px solid #EEF1F4;padding:6px 6px;text-align:left;vertical-align:top}
+.na9-rule th{font-size:11.5px;color:#6B7B8C;font-weight:600}.na9-rule h4{margin:14px 0 4px;font-size:14px;color:#1F3347}.na9-rule ul{margin:4px 0;padding-left:18px;font-size:13px;color:#41566F;line-height:1.55}
+.na9-rule tr.me td{background:var(--t-soft,#F0F7FF)}
+</style>
+<script>
+/* ══ ⭐ CRM v30.5 — MỞ MỚI ĐỊA BÀN & SKU MỚI: GỌN HƠN + LUỒNG QUẢN LÝ XÁC NHẬN RÕ RÀNG ══
+   Người dùng (08/10/2026): bộ lọc chiếm gần hết màn hình; quản lý cần xem ngay thông tin sales đề xuất / gửi lại + bằng chứng rồi xác nhận.
+   · Trang: thẻ KPI nhỏ theo PIC (C1-01…C1-05, C2-03) · 1 dòng lọc (trạng thái dạng tab + chọn PIC / tháng) · danh sách gọn.
+   · Chi tiết / duyệt: các bước (Nháp → Chờ duyệt → Xác nhận), thông tin, KIỂM TRA 4 ĐIỀU KIỆN KPI (sheet 4. Rule) tự đối chiếu,
+     xem chứng từ cỡ lớn ngay trong khung (ảnh / PDF) + dải ảnh nhỏ, quyết định: Xác nhận (tính KPI) · Trả lại bổ sung (giữ chứng từ) · Từ chối.
+   · "Trả lại bổ sung" (backend naDecide decision=return): case về Nháp kèm nhận xét, PIC sửa rồi gửi lại.
+   · Quy định theo file MMH KPI FY68 (4. Rule · 5. Member KPI Monthly): bảng KPI mở mới từng nhóm / PIC. */
+(function(){
+if(typeof naPaint!=="function") return;
+var T=function(v,e){ return TX(v,e); };
+NA_ST_LB.Returned=["Cần bổ sung","Changes requested"];
+function isRet(c){ return c && c.status==="Draft" && !!c.decBy && !!c.comment; }
+function stOf(c){ return isRet(c)?"Returned":c.status; }
+function mk(x){ return String(x||"").replace(/\D/g,"").slice(0,6); }
+function mLb(m){ m=mk(m); return m.length===6?m.slice(4)+"/"+m.slice(0,4):"—"; }
+function toneC(p){ return p==null?"#A7B3C0":p>1.2?"#2E8B57":p>=1?"#C99A06":p>=0.9?"#3A5CAA":"#8A97A6"; }
+function isMgr(){ var me=S.na.me||{}; return !!(me.all||(me.approverOf||[]).length); }
+function mine(){ return naPendingList(); }
+window.naIsRet=isRet;
+
+/* ── KPI mở mới theo file MMH KPI FY68 (5. Member KPI Monthly + 4. Rule) ── */
+var KPI_NA=[
+  { team:"dental", code:"C1-01", pic:"Viet", area:["Bắc","North"], what:["Đại lý mới & SKU mới · Dental","New dealers & new SKUs · Dental"] },
+  { team:"dental", code:"C1-02", pic:"Vinh", area:["Trung","Central"], what:["Đại lý mới & SKU mới · Dental","New dealers & new SKUs · Dental"] },
+  { team:"dental", code:"C1-03", pic:"Phuong", area:["Nam","South"], what:["Đại lý mới & SKU mới · Dental","New dealers & new SKUs · Dental"] },
+  { team:"surgical", code:"C1-04", pic:"Viet Ha", area:["Bắc","North"], what:["Khách hàng mới & SKU mới · Surgical","New accounts & new SKUs · Surgical"] },
+  { team:"surgical", code:"C1-05", pic:"Khang", area:["Nam","South"], what:["Khách hàng mới & SKU mới · Surgical","New accounts & new SKUs · Surgical"] },
+  { team:"thai", code:"C2-03", pic:"Miew", area:["Thái Lan","Thailand"], what:["Khách hàng mới & SKU mới · Manipler","New accounts & new SKUs · Manipler"] }
+];
+window.NA_KPI_MAP=KPI_NA;
+
+/* ── trang chính ── */
+naHead=window.naHead=function(){
+  return '<div class="ph"><div><h2>'+T("Mở mới địa bàn &amp; SKU mới","New accounts &amp; new SKUs")+'</h2><p>'+
+    T("Ghi nhận khách hàng / đại lý mới, SKU mới kèm bằng chứng → quản lý xác nhận → được tính KPI mở mới","Record a new account / SKU with evidence → your manager approves → it counts for your new-account KPI")+'</p></div>'+
+    '<div class="sp"></div><button class="btn" onclick="naRules()">'+T("Quy định KPI","KPI rules")+'</button>'+
+    '<button class="btn pri" onclick="naForm(null)">＋ '+T("Thêm case","Add a case")+'</button></div>';
+};
+naPaint=window.naPaint=function(){
+  if(S.tab!=="newacc") return;
+  var head=naHead();
+  if(S.na.err && !S.na.rows){ $("main").innerHTML='<div class="pg">'+head+'<div class="na9-empty"><b style="color:#A82F2C">'+esc(S.na.err)+'</b><div style="margin-top:10px"><button class="btn sm" onclick="S.na.err=\'\';pgNewAcc()">⟳ '+T("Thử lại","Retry")+'</button></div></div></div>'; return; }
+  var all=S.na.rows||[], f=S.na.f, me=S.na.me||{}, mgr=isMgr();
+  var base=all.filter(function(c){ return (!f.pic||c.pic===f.pic) && (!f.month||mk(c.month)===mk(f.month)); });
+  var cnt={ all:base.length, review:0 }; base.forEach(function(c){ var k=stOf(c); cnt[k]=(cnt[k]||0)+1; if(c.canDecide) cnt.review++; });
+  var st=f.st||"";
+  var rows=base.filter(function(c){ return !st || (st==="review"?c.canDecide:stOf(c)===st); });
+  /* thẻ KPI */
+  var kp="", pics=(S.na.cfg.pics||[]).filter(function(p){ return mgr ? (me.all||(me.approverOf||[]).indexOf(p)>=0||p===S.user.pic) : p===S.user.pic; });
+  if(S.kpi && S.kpi._fy===S.fy){
+    kp=pics.map(function(p){
+      var L=k8RowsOf(p,/^newacct_/); if(!L.length) return "";
+      var s=k8Series(L,true), t=s.t.reduce(function(a,b){ return a+b; },0), a=s.a.reduce(function(x,y){ return x+y; },0), pp=t?a/t:null;
+      var pend=all.filter(function(c){ return c.pic===p && c.status==="Pending"; }).length;
+      return '<div class="na9-kpi'+(f.pic===p?" on":"")+'" onclick="naSetF(\'pic\',\''+(f.pic===p?"":esc(p))+'\')"><div class="h"><b>'+esc(p)+'</b> KPI '+esc(L[0].r.code)+' · FY</div>'+
+        '<div class="v"><b>'+a+'</b><span>/ '+t+'</span><em style="color:'+toneC(pp)+'">'+k8Pct(pp)+'</em></div><div class="bar"><i style="width:'+Math.min(100,Math.round((pp||0)*100/1.3))+'%;background:'+toneC(pp)+'"></i></div>'+
+        (pend?'<small>'+pend+T(" case chờ duyệt"," pending approval")+'</small>':'')+'</div>';
+    }).join("");
+  } else k8Ensure().then(function(){ if(S.tab==="newacc"&&!naWzOpen()) naPaint(); });
+  var tabs=[["",T("Tất cả","All"),cnt.all]].concat(mgr?[["review",T("Cần tôi duyệt","To review"),cnt.review,"rv"]]:[])
+    .concat([["Pending",T("Chờ duyệt","Pending"),cnt.Pending],["Returned",T("Cần bổ sung","Changes requested"),cnt.Returned],["Draft",T("Nháp","Draft"),cnt.Draft],["Approved",T("Đã xác nhận","Approved"),cnt.Approved],["Rejected",T("Từ chối","Rejected"),cnt.Rejected]])
+    .filter(function(x){ return !x[0] || x[0]==="review" || x[2] || st===x[0]; });
+  var picSel=mgr?'<select onchange="naSetF(\'pic\',this.value)"><option value="">'+T("Cả nhóm","Whole team")+'</option>'+(S.na.cfg.pics||[]).map(function(p){ return '<option'+(f.pic===p?" selected":"")+'>'+esc(p)+'</option>'; }).join("")+'</select>':"";
+  var ms=fyMonths(S.fy), mc={}; all.forEach(function(c){ mc[mk(c.month)]=(mc[mk(c.month)]||0)+1; });
+  var monSel='<select onchange="naSetF(\'month\',this.value)"><option value="">'+T("Cả năm FY","Whole FY")+'</option>'+ms.map(function(m){ return '<option value="'+m+'"'+(mk(f.month)===mk(m)?" selected":"")+'>'+T("Tháng ","")+mLb(m)+(mc[mk(m)]?' ('+mc[mk(m)]+')':'')+'</option>'; }).join("")+'</select>';
+  var tool='<div class="na9-tool"><div class="na9-tabs">'+tabs.map(function(x){ return '<button type="button" class="'+(st===x[0]?"on ":"")+(x[3]||"")+'" onclick="naSetF(\'st\',\''+x[0]+'\')">'+x[1]+'<b>'+(x[2]||0)+'</b></button>'; }).join("")+'</div>'+picSel+monSel+'</div>';
+  var nP=mine().length;
+  var alert=(nP && st!=="review")?'<div class="na9-alert" onclick="naApprovals()"><div><b>'+nP+T(" case đang chờ bạn xác nhận"," case(s) waiting for your approval")+'</b><br><span>'+T("Xem thông tin sales gửi và bằng chứng ngay trên màn hình, rồi Xác nhận / Trả lại bổ sung / Từ chối.","See what the sales rep sent and the evidence on screen, then Approve / Return for changes / Reject.")+'</span></div><button class="btn pri sm">'+T("Duyệt ngay","Review now")+'</button></div>':"";
+  var my=all.filter(function(c){ return c.pic===S.user.pic && isRet(c); }).length;
+  if(my && !mgr) alert+='<div class="na9-alert" onclick="naSetF(\'st\',\'Returned\')"><div><b>'+my+T(" case quản lý trả lại cần bổ sung"," case(s) returned to you for changes")+'</b><br><span>'+T("Mở case, bổ sung theo nhận xét rồi gửi lại.","Open the case, complete it as requested and send it again.")+'</span></div></div>';
+  var list=rows.length?'<div class="na9-list">'+rows.map(naCardHtml).join("")+'</div>'
+    :'<div class="na9-empty">'+(st==="review"?T("Không còn case nào chờ bạn xác nhận.","Nothing is waiting for your approval."):T("Chưa có case nào. Bấm “＋ Thêm case” để ghi nhận khách hàng / đại lý mới hoặc SKU mới.","No case yet. Press “＋ Add a case” to record a new account or a new SKU."))+'</div>';
+  $("main").innerHTML='<div class="pg">'+head+alert+(kp?'<div class="na9-kpis">'+kp+'</div>':"")+tool+list+'</div>';
+};
+naCardHtml=window.naCardHtml=function(c){
+  var fs=c.files||[], f0=fs[0], k=stOf(c);
+  var th='<div class="th">'+(f0?(naIsPdf(f0)?'PDF':'')+'<img loading="lazy" src="'+naThumb(f0,200)+'" onerror="this.style.display=\'none\'">'+(fs.length>1?'<span class="n">+'+(fs.length-1)+'</span>':''):T("chưa có<br>bằng chứng","no<br>evidence"))+'</div>';
+  var sub=[naTypeLb(c.type).replace(/^\S+\s/,""), c.npp?T("NPP ","Distributor ")+c.npp:"", c.sku?String(c.sku).split(/\n/)[0]:"", c.month?T("tháng KPI ","KPI month ")+mLb(c.month):""].filter(String).join(" · ");
+  return '<div class="na9-row" onclick="naView(\''+esc(c.id)+'\')">'+th+'<div class="m"><div class="a">'+esc(c.account||"—")+'</div><div class="s">'+esc(sub)+'</div></div>'+
+    '<div class="r"><span class="na9-pill '+k+'">'+esc(naStLb(k))+'</span><span>'+esc(c.pic)+(c.kpi?' · '+esc(c.kpi):'')+'</span>'+(c.canDecide?'<span class="na9-go">'+T("Duyệt","Review")+'</span>':'')+'</div></div>';
+};
+
+/* ── 4 điều kiện KPI (sheet 4. Rule) — tự đối chiếu từ dữ liệu case ── */
+function checks(c){
+  var fs=c.files||[], has=function(k){ return fs.some(function(f){ return f.kind===k; }); };
+  var wk=String(c.weekly||""), wkOk=!!wk && !/chưa có|no visit/i.test(wk);
+  var info=!!(c.account && c.npp && (c.type!=="new_sku" || c.sku));
+  var ord=!!c.orderDate && (!naNeedOrder() || (c.lines||[]).length>0 || has("order"));
+  return [
+    [wkOk, T("Lịch sử chăm sóc / làm việc với khách trên báo cáo tuần","Care / work history with the account in the weekly report"), wk||T("chưa thấy trên báo cáo tuần","not found in the weekly report yet")],
+    [has("dist")||has("tender"), T("Xác nhận của nhà phân phối","Distributor confirmation"), has("dist")||has("tender")?T("có file xác nhận","confirmation file attached"):T("chưa có file loại “Xác nhận NPP”","no “Distributor confirmation” file")],
+    [info, T("Thông tin khách hàng mới / SKU mới đúng format","New account / SKU information in the required format"), info?T("đủ account, NPP","account and distributor filled in")+(c.type==="new_sku"?", SKU":""):T("thiếu account / NPP / SKU","account / distributor / SKU missing")],
+    [ord, T("Thông tin đơn hàng đầu tiên qua NPP","First order through the distributor"), c.orderDate?(fmtVN(c.orderDate)+(c.orderNo?" · "+c.orderNo:"")):T("chưa có ngày đơn đầu tiên","no first-order date")]
+  ];
+}
+window.naChecks=checks;
+
+/* ── xem / duyệt ── */
+var VSEL={};
+function viewer(c){
+  var fs=c.files||[]; if(!fs.length) return '<div class="na9-empty" style="padding:40px 16px">'+(c.status==="Rejected"?T("Chứng từ đã xoá khi từ chối","Evidence removed on rejection"):T("Chưa có bằng chứng","No evidence yet"))+'</div>';
+  var i=Math.min(VSEL[c.id]||0, fs.length-1), f=fs[i], local=S.na.local[f.id];
+  var big=naIsPdf(f)&&!local?'<iframe src="https://drive.google.com/file/d/'+encodeURIComponent(f.id)+'/preview"></iframe>'
+    :'<img src="'+(local||naThumb(f,1600))+'" alt="">';
+  return '<div class="na9-view"><div class="na9-big" onclick="naLb(\''+esc(c.id)+'\','+i+')" title="'+T("Bấm để phóng to","Click to enlarge")+'">'+big+'<span class="lb">'+esc(naKindLb(f.kind))+' · '+(i+1)+'/'+fs.length+'</span></div>'+
+    (fs.length>1?'<div class="na9-strip">'+fs.map(function(x,j){ return '<button type="button" class="'+(j===i?"on":"")+'" onclick="naPick(\''+esc(c.id)+'\','+j+')"><div class="im">'+(naIsPdf(x)?"PDF":"")+'<img loading="lazy" src="'+naThumb(x,200)+'" onerror="this.style.display=\'none\'"></div><small>'+esc(naKindLb(x.kind).replace(/^\S+\s/,""))+'</small></button>'; }).join("")+'</div>':'')+'</div>';
+}
+window.naPick=function(id,j){ VSEL[id]=j; var c=naGet(id), b=$("na9V"); if(c&&b) b.innerHTML=viewer(c); };
+naView=window.naView=function(id,fromFab){
+  var c=naGet(id);
+  if(!c){ naLoad(true).then(function(){ if(naGet(id)) naView(id,fromFab); else toast(T("Không thấy case ","Case not found ")+id,"warn"); }).catch(function(e){ toast(e.message,"err"); }); return; }
+  var k=stOf(c), pend=naPendingList(), pi=pend.map(function(x){ return x.id; }).indexOf(id);
+  var steps='<div class="na9-steps"><span class="'+(k==="Draft"||k==="Returned"?"on":"ok")+'">1 · '+T("Sales tạo case","Sales creates the case")+'</span><i>→</i>'+
+    '<span class="'+(k==="Pending"?"on":(k==="Approved"||k==="Rejected")?"ok":"")+'">2 · '+T("Gửi quản lý xác nhận","Sent for approval")+(c.subTo?' ('+esc(c.subTo)+')':'')+'</span><i>→</i>'+
+    '<span class="'+(k==="Approved"?"ok":k==="Rejected"?"bad":"")+'">3 · '+(k==="Rejected"?T("Từ chối","Rejected"):T("Xác nhận → tính KPI","Approved → counts for KPI"))+'</span></div>';
+  var ret=isRet(c)?'<div class="na9-ret"><b>'+T("Quản lý yêu cầu bổ sung","Changes requested by")+' · '+esc(c.decBy)+'</b> · '+esc(c.decAt||"")+'<div style="margin-top:4px">'+esc(c.comment)+'</div></div>':'';
+  var info='<table class="na9-info">'+
+    [[T("Loại","Type"),esc(naTypeLb(c.type))+(c.kpi?' · KPI <b>'+esc(c.kpi)+'</b>':'')],
+     ["PIC",esc(c.pic)],
+     [T("Khách hàng","Account"),'<b>'+esc(c.account)+'</b>'+(c.code?' <small>('+esc(c.code)+')</small>':'')+((c.accType||c.province)?'<br><small style="color:#6B7B8C">'+esc([c.accType,c.province].filter(String).join(" · "))+'</small>':'')],
+     [T("Nhà phân phối","Distributor"),esc(c.npp||"—")],
+     [naNeedOrder()?T("Đơn đầu tiên","First order"):T("Ngày NPP xác nhận","Distributor confirmation date"),esc(fmtVN(c.orderDate)||"—")+(c.orderNo?' · '+esc(c.orderNo):'')],
+     [T("Tháng tính KPI","KPI month"),'<b>'+esc(mLb(c.month))+'</b>'],
+     [T("Sản phẩm / SKU","Product / SKU"),(esc(c.ptype||"")+(c.sku?'<div style="white-space:pre-wrap">'+esc(c.sku)+'</div>':''))||"—"],
+     [T("Đơn hàng","Order lines"),(c.lines||[]).map(function(x){ return esc(x.ptype||"")+' · '+esc(String(x.detail||"").replace(/\n/g,", "))+' · '+T("SL ","Qty ")+esc(x.qty||""); }).join("<br>")||"—"],
+     [T("Ghi chú","Note"),'<div style="white-space:pre-wrap">'+esc(c.note||"—")+'</div>']]
+    .map(function(r){ return '<tr><td>'+r[0]+'</td><td>'+r[1]+'</td></tr>'; }).join("")+'</table>';
+  var ck=checks(c), nOk=ck.filter(function(x){ return x[0]; }).length;
+  info+='<div class="na9-chk"><h5>'+T("Điều kiện tính KPI (file KPI ▸ 4. Rule)","KPI conditions (KPI file ▸ 4. Rule)")+' · '+nOk+'/4</h5>'+ck.map(function(x){ return '<div class="'+(x[0]?"ok":"no")+'"><i>'+(x[0]?"✓":"!")+'</i><span><b>'+x[1]+'</b><br><small style="color:#6B7B8C">'+esc(x[2])+'</small></span></div>'; }).join("")+
+    '<div style="color:#6B7B8C;font-size:12px;margin-top:4px">'+T("Chỉ tính vào tháng phát sinh đầu tiên · tối đa 130%.","Counted only in the month it first happens · max 130%.")+'</div></div>';
+  if(c.status==="Approved"||c.status==="Rejected") info+='<div class="na9-res '+c.status+'"><b>'+(c.status==="Approved"?T("Đã xác nhận bởi ","Approved by "):T("Từ chối bởi ","Rejected by "))+esc(c.decBy)+'</b> · '+esc(c.decAt)+(c.comment?'<div style="margin-top:4px">'+esc(c.comment)+'</div>':'')+'</div>';
+  if(c.log) info+='<div class="na9-log">'+esc(c.log)+'</div>';
+  var dec="";
+  if(c.canDecide){
+    dec='<div class="na9-dec"><h4>'+T("Quyết định của quản lý","Manager decision")+'</h4><p>'+T("Xác nhận ⇒ case được tính KPI tháng ","Approve ⇒ the case counts for KPI in ")+'<b>'+esc(mLb(c.month))+'</b>'+T(", email báo PIC, Director, kế toán. Trả lại bổ sung ⇒ giữ bằng chứng, PIC sửa rồi gửi lại. Từ chối ⇒ xoá bằng chứng."," and the PIC, Director and accounting are e-mailed. Return for changes ⇒ evidence kept, the PIC completes and resends. Reject ⇒ evidence deleted.")+'</p>'+
+      '<textarea class="inp" id="naCm" placeholder="'+T("Nhận xét — bắt buộc khi Trả lại / Từ chối (cần bổ sung gì, vì sao)…","Comment — required to return or reject (what is missing, why)…")+'"></textarea>'+
+      '</div>';
+  }
+  var right='<div><div style="display:flex;align-items:center;margin-bottom:6px;font-size:13px;font-weight:600;color:#1F3347">'+T("Bằng chứng","Evidence")+' ('+(c.files||[]).length+')<span style="flex:1"></span>'+(c.folder?'<a class="btn sm" href="'+esc(c.folder)+'" target="_blank" rel="noopener">Drive ↗</a>':'')+'</div><div id="na9V">'+viewer(c)+'</div>'+dec+'</div>';
+  var body=steps+ret+'<div class="na9-det"><div>'+info+'</div>'+right+'</div>';
+  var own=c.pic===S.user.pic||(S.na.me||{}).all;
+  var foot=(pi>=0&&pend.length>1?'<span style="margin-right:auto;font-size:12.5px;color:#6B7B8C">'+(pi+1)+' / '+pend.length+' '+T("chờ duyệt","to review")+' '+
+      '<button class="btn sm" onclick="naView(\''+esc(pend[(pi+pend.length-1)%pend.length].id)+'\',1)">‹</button> <button class="btn sm" onclick="naView(\''+esc(pend[(pi+1)%pend.length].id)+'\',1)">›</button></span>':'')+
+    (own&&c.status!=="Approved"&&c.canEdit?'<button class="btn dg" onclick="naDel(\''+esc(c.id)+'\')">'+T("Xoá","Delete")+'</button>':'')+
+    (c.canEdit?'<button class="btn" onclick="naForm(naGet(\''+esc(c.id)+'\'))">✎ '+(c.status==="Rejected"?T("Mở lại & sửa","Reopen & edit"):T("Sửa","Edit"))+'</button>':'')+
+    (own&&c.status==="Draft"?'<button class="btn pri" onclick="naSubmit(\''+esc(c.id)+'\')">'+(isRet(c)?T("Gửi lại xin xác nhận","Send for approval again"):T("Gửi xin xác nhận","Send for approval"))+'</button>':'')+
+    (c.canDecide?'<button class="btn na9-bno" onclick="naDecide(\''+esc(c.id)+'\',\'reject\')">✕ '+T("Từ chối","Reject")+'</button><button class="btn na9-bret" onclick="naDecide(\''+esc(c.id)+'\',\'return\')">↩ '+T("Trả lại bổ sung","Return for changes")+'</button><button class="btn na9-bok" onclick="naDecide(\''+esc(c.id)+'\',\'approve\')">✓ '+T("Xác nhận","Approve")+'</button>'
+      :'<button class="btn" onclick="closeAllModals()">'+T("Đóng","Close")+'</button>');
+  closeAllModals();
+  openModal(naTypeLb(c.type)+" · "+c.account,body,foot,true);
+};
+naDecide=window.naDecide=function(id,dec){
+  var cm=String(($("naCm")||{}).value||"").trim(), c=naGet(id);
+  if((dec==="reject"||dec==="return") && cm.length<5){ toast(dec==="return"?T("Ghi rõ cần bổ sung gì (ít nhất 5 ký tự)","Say what needs to be added (5+ characters)"):T("Từ chối cần ghi rõ lý do (ít nhất 5 ký tự)","A rejection needs a reason (5+ characters)"),"warn",5000); var el=$("naCm"); if(el){ el.focus(); el.style.borderColor="#C0504D"; } return; }
+  var q=dec==="approve"?T("Xác nhận case mở mới của "+c.pic+" — "+c.account+"? Case sẽ được tính KPI.","Approve the case of "+c.pic+" — "+c.account+"? It will count for KPI.")
+    :dec==="return"?T("Trả lại case cho "+c.pic+" bổ sung? Bằng chứng được giữ nguyên.","Return the case to "+c.pic+" for changes? The evidence is kept.")
+    :T("Từ chối case này? Toàn bộ chứng từ sẽ bị xoá khỏi Drive và email báo kết quả sẽ được gửi.","Reject this case? All evidence files will be deleted and the result e-mailed.");
+  if(!confirm(q)) return;
+  busy(true,T("Đang ghi kết quả và gửi email…","Saving and e-mailing…"));
+  apiPost({ action:"naDecide", id:id, decision:dec, comment:cm, rid:uid28() }).then(function(j){
+    busy(false);
+    if(dec==="return" && j && j.rec && j.rec.status!=="Draft"){ toast(T("Máy chủ CRM chưa có chức năng Trả lại bổ sung — đang cập nhật, thử lại sau ít phút.","The CRM server does not support Return yet — please try again in a few minutes."),"warn",7000); return; }
+    naMerge(j.rec); toast(j.message||"OK","ok",5200);
+    S.na.pending=naPendingList().length; naFab(); S.kpi=null; kpiPushSoon(1000);
+    var next=naPendingList()[0];
+    if(next) naView(next.id,true); else { closeAllModals(); if(S.tab==="newacc") naPaint(); }
+  }).catch(function(e){ busy(false); toast(/decision\?/.test(e.message)?T("Máy chủ CRM chưa có chức năng Trả lại bổ sung — thử lại sau ít phút.","The CRM server does not support Return yet — try again in a few minutes."):e.message,"err",7000); });
+};
+
+/* ── quy định (theo file MMH KPI FY68) ── */
+naRulesHtml=window.naRulesHtml=function(){
+  var EN=isTH(), L=function(a){ return EN?a[1]:a[0]; }, team=curTeamKey();
+  var rows=KPI_NA.map(function(k){ return '<tr class="'+(k.team===team?"me":"")+'"><td><b>'+k.code+'</b></td><td>'+esc(k.pic)+'</td><td>'+L(k.what)+' · '+L(k.area)+'</td></tr>'; }).join("");
+  return '<div class="na9-rule">'+
+    '<h4>'+T("KPI mở mới của từng nhóm","New-account KPIs by team")+'</h4><table><thead><tr><th>KPI</th><th>PIC</th><th>'+T("Nội dung","What counts")+'</th></tr></thead><tbody>'+rows+'</tbody></table>'+
+    '<div style="font-size:12px;color:#6B7B8C">'+T("Target từng tháng: xem thẻ KPI ở đầu trang (lấy từ file MMH KPI FY68 ▸ 5. Member KPI Monthly).","Monthly targets: see the KPI cards at the top (from the MMH KPI FY68 file ▸ 5. Member KPI Monthly).")+'</div>'+
+    '<h4>1. '+T("Thế nào là mở mới","What counts")+'</h4><ul>'+
+      '<li>'+T("<b>Khách hàng / đại lý mới</b> = đặt đơn MANI <b>đầu tiên</b> qua nhà phân phối trong FY68, do sale rep mở.","<b>New account / dealer</b> = places its <b>first</b> MANI order through the distributor in FY68, opened by the sales rep.")+'</li>'+
+      '<li>'+T("<b>SKU mới</b> = khách hàng đặt một mã SKU MANI lần đầu.","<b>New SKU</b> = the account orders a MANI SKU for the first time.")+'</li>'+
+      '<li>'+T("Chỉ ghi nhận vào <b>tháng phát sinh đầu tiên</b>; % KPI tối đa 130%.","Counted only in the <b>month it first happens</b>; KPI % capped at 130%.")+'</li></ul>'+
+    '<h4>2. '+T("Cần đủ 4 điều kiện","All 4 conditions are required")+'</h4><ul>'+
+      '<li>'+T("Lịch sử chăm sóc, làm việc với khách trên <b>báo cáo tuần</b>.","Care / work history with the account in the <b>weekly report</b>.")+'</li>'+
+      '<li>'+T("<b>Xác nhận của nhà phân phối</b> (ảnh email / tin nhắn NPP xác nhận).","<b>Distributor confirmation</b> (screenshot of the distributor e-mail / message).")+'</li>'+
+      '<li>'+T("Thông tin khách hàng mới / SKU mới <b>đúng format</b> (account, NPP, SKU).","New account / SKU information in the <b>required format</b> (account, distributor, SKU).")+'</li>'+
+      '<li>'+T("Thông tin <b>đơn hàng đầu tiên</b> bán qua nhà phân phối (PO / hoá đơn / phiếu xuất).","Details of the <b>first order</b> sold through the distributor (PO / invoice / delivery note).")+'</li></ul>'+
+    '<h4>3. '+T("Các bước trên CRM","Steps in the CRM")+'</h4><ul>'+
+      '<li>'+T("<b>Sales</b>: ＋ Thêm case → chọn khách hàng mới / SKU mới → account, NPP, đơn đầu tiên → kéo thả bằng chứng, gắn loại từng file → <b>Lưu &amp; gửi xin xác nhận</b>.","<b>Sales</b>: ＋ Add a case → new account / new SKU → account, distributor, first order → drop the evidence and tag each file → <b>Save &amp; send for approval</b>.")+'</li>'+
+      '<li>'+T("<b>Quản lý trực tiếp / Director</b>: nhận email, hoặc mở tab Mở mới ▸ <b>Cần tôi duyệt</b> → xem thông tin, 4 điều kiện và bằng chứng → <b>Xác nhận</b> · <b>Trả lại bổ sung</b> · <b>Từ chối</b>.","<b>Line manager / Director</b>: open the e-mail or New accounts ▸ <b>To review</b> → check the information, the 4 conditions and the evidence → <b>Approve</b> · <b>Return for changes</b> · <b>Reject</b>.")+'</li>'+
+      '<li>'+T("Case <b>Đã xác nhận</b> tự cộng vào KPI mở mới của PIC (tab KPI cập nhật trong ít phút).","<b>Approved</b> cases are added to the PIC's new-account KPI automatically (KPI tab updates within minutes).")+'</li></ul></div>';
+};
 })();
 </script>
 </body>

@@ -7,6 +7,19 @@
 function E(u){ u.en={ title:u.title, items:u.items.map(function(i){ return { title:i.title, text:i.text }; }) }; return u; }
 window.MMH_UPDATES = [
   E({
+    id:"2026-10-08-v30.5", version:"v30.5", date:"2026-10-08",
+    guide:"docs/Guide_New_accounts_v30.5_EN.pdf", guideName:"MMH_CRM_New_Accounts_Guide_v30.5_EN.pdf",
+    guideVi:"docs/HD_Mo_moi_SKU_moi_v30.5_VN.pdf", guideViName:"MMH_CRM_HD_Mo_moi_v30.5_VN.pdf",
+    title:"New accounts: cleaner tab and clear manager approval",
+    summary:"The <b>New accounts &amp; SKUs</b> tab is simpler, and line managers / the Director can review each case with its evidence on screen and <b>Approve</b>, <b>Return for changes</b> or <b>Reject</b>. Approved cases count for the new-account KPI (C1-01 … C1-05, C2-03).",
+    items:[
+      {type:"imp", icon:"🧭", title:"Cleaner New accounts tab", text:"Small KPI cards per PIC, one filter bar (All · To review · Pending · Changes requested · Draft · Approved · Rejected + PIC and month) and a compact case list.", img:"updates/v30.5/new_layout.jpg"},
+      {type:"new", icon:"✅", title:"Review with evidence on screen (managers)", text:"Open the e-mail or <b>New accounts ▸ To review</b>: each case shows what the sales rep sent, the <b>4 KPI conditions</b> checked automatically and the <b>evidence in large view</b>. Then <b>Approve</b> (counts for KPI), <b>Return for changes</b> (evidence kept) or <b>Reject</b>.", img:"updates/v30.5/review.jpg"},
+      {type:"new", icon:"↩️", title:"Returned cases: complete and resend (sales)", text:"A returned case shows <b>Changes requested</b> with the manager's comment. Click <b>Edit</b>, add what is missing, then <b>Send for approval again</b>.", img:"updates/v30.5/returned.jpg"},
+      {type:"imp", icon:"✉️", title:"One e-mail per update (Admin)", text:"<b>Send update email</b> now sends one chosen update, with the update guide (English and Vietnamese) and the complete English user guide attached."}
+    ]
+  }),
+  E({
     id:"2026-10-08-v30.4", version:"v30.4", date:"2026-10-08",
     guide:"docs/HDSD_MMH_CRM_v30.4.pdf",
     title:"Thailand team: MMH CRM fully in English",
