@@ -51,3 +51,13 @@ Kiến trúc & quy ước giống MMH Report Hub (repo `ManiMedicalHanoi/MMH-Rep
   **Tính năng mới phải chạy được tiếng Anh cho nhóm Thái** — kiểm bằng bộ quét chữ Việt (Playwright, đăng nhập Dao / team `thai`, liệt kê text node có dấu).
 - **Thông báo cập nhật CRM viết hoàn toàn bằng tiếng Anh** (người dùng yêu cầu 08/10/2026), ảnh chụp giao diện tiếng Anh (chế độ nhóm Thái, dữ liệu giả
   Thái Lan). HDSD toàn hệ thống bản tiếng Anh: `MMH-Report/tools/guide/buildcrm_en.js` (ảnh `shots/en_*`) → `docs/HDSD_MMH_CRM_vXX.Y.pdf`.
+- **Mở mới địa bàn & SKU mới (v30.5, khối `v305-css` + script cuối file, ghi đè `naHead` / `naPaint` / `naCardHtml` / `naView` / `naDecide` / `naRulesHtml`)**:
+  KPI theo file MMH KPI FY68 (4. Rule, 5. Member KPI Monthly): C1-01 Viet · C1-02 Vinh · C1-03 Phuong (Dental VN), C1-04 Viet Ha · C1-05 Khang (Surgical VN),
+  C2-03 Miew (Surgical Thái, Manipler) — bảng `NA_KPI_MAP`. 4 điều kiện (báo cáo tuần · xác nhận NPP · thông tin đúng format · đơn đầu tiên) tự đối chiếu ở `naChecks`;
+  chỉ tính tháng phát sinh đầu tiên, tối đa 130%. Trang: thẻ KPI nhỏ + 1 dòng lọc (tab trạng thái + chọn PIC / tháng) + danh sách gọn.
+  Duyệt: bằng chứng cỡ lớn trong khung, 3 nút ở chân hộp: Xác nhận · **Trả lại bổ sung** (backend `naDecide decision=return`: về Draft, giữ chứng từ,
+  `decBy/comment` ⇒ hiện "Cần bổ sung", `naIsRet`) · Từ chối. HD riêng: `docs/HD_Mo_moi_SKU_moi_v30.5_VN.pdf` + `docs/Guide_New_accounts_v30.5_EN.pdf`
+  (`MMH-Report/tools/guide/na_slides.js` + `build_na.js`, LANG=vi|en; ảnh `shots/na_<vi|en>_*`).
+- **Email cập nhật v2 (`UPM`, dùng chung Report Hub)**: mỗi email = **1 bản cập nhật** (chọn radio). CRM `UPM_CFG.lang:"en"`; đính kèm (theo thứ tự) `guide` (HD bản cập nhật,
+  tiếng Anh) + `guideVi` (tiếng Việt) của mục trong notes.js + HDSD toàn hệ thống tiếng Anh `UPM_CFG.pdf` (Training Hub `rhUpdMail` v3.16 `pdfs[]`, ≤ 22 MB, thừa thì chỉ link).
+  Mục cập nhật lớn nên có `guide` / `guideVi` (+ `guideName` / `guideViName`).
