@@ -9,16 +9,15 @@ window.MMH_UPDATES = [
   E({
     id:"2026-10-08-v30.7", version:"v30.7", date:"2026-10-08",
     title:"Clear frames on every form field",
-    summary:"Every field in the forms (Add / update task, customer, CBC, order…) now has a clear frame, so you can see at a glance what still needs filling in. Eyeless no longer asks for field photos.",
+    summary:"Every field in the forms (Add / update task, customer, CBC, order…) now has a clear frame, so you can see at a glance what still needs filling in.",
     items:[
-      {type:"fix", icon:"🔲", title:"Every field has a frame", text:"Before, many fields in pop-up forms (Plan, Type task, Sales Process…) had no frame until you tapped them, so it was easy to miss one. Now every field has a visible frame, drop-down lists show a ▾ arrow, and the field you are typing in is highlighted.", img:"updates/v30.7/fields.jpg"},
-      {type:"imp", icon:"📷", title:"Eyeless: no field photo", text:"Like Surgical Thailand, the Eyeless team does not take photos on field visits: the photo step, photo reminders and the photo gallery are hidden for this team."}
+      {type:"fix", icon:"🔲", title:"Every field has a frame", text:"Before, many fields in pop-up forms (Plan, Type task, Sales Process…) had no frame until you tapped them, so it was easy to miss one. Now every field has a visible frame, drop-down lists show a ▾ arrow, and the field you are typing in is highlighted.", img:"updates/v30.7/fields.jpg"}
     ]
   }),
   E({
     id:"2026-10-08-v30.6", version:"v30.6", date:"2026-10-08",
     title:"Field photos and task updates: instant, never lost",
-    summary:"Saving a field visit task with a photo used to wait for the server — on weak 4G it could take minutes or fail. Now the task is saved on your phone first, the text is sent in a few seconds and the photo uploads in the background. <b>Eyeless and Surgical Thailand do not take field photos</b>, so for them only the instant saving applies.",
+    summary:"Saving a field visit task with a photo used to wait for the server — on weak 4G it could take minutes or fail. Now the task is saved on your phone first, the text is sent in a few seconds and the photo uploads in the background. <b>Surgical Thailand does not take field photos</b>, so for that team only the instant saving applies.",
     items:[
       {type:"fix", icon:"⏳", title:"Cause of the slow photo upload", text:"The text and the photo were sent in one big request, and the app waited while the server uploaded the photo to Drive, looked up the GPS address and wrote the Sheet. On weak 4G or with a busy server this took minutes; a timeout meant nothing was saved.", img:"updates/v30.6/photo_flow.jpg"},
       {type:"imp", icon:"⚡", title:"Now: tap Save = done", text:"Tap <b>Save to Google Sheet</b> (new task, task update or <b>Send photo now</b>): the form closes at once and the task appears on your calendar. The text is sent first; the photo follows in the background."},

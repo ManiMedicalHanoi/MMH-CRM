@@ -71,4 +71,5 @@ Kiến trúc & quy ước giống MMH Report Hub (repo `ManiMedicalHanoi/MMH-Rep
   không CC, không ghi nhật ký); `rhKpiMailSend` đổi người nhận = Admin. Hàng đợi chế độ thử tách riêng (`mmh_crm_wq_test`).
 - **Ô nhập luôn có viền rõ (v30.7, `<style id="v307-fld">`)**: lỗi cũ — biến `--c-line` chỉ khai báo trong `#app` nên hộp thoại `#ov` / `#ov2` / ngăn kéo `#drw`
   (nằm ngoài `#app`) mất viền. Nay khai báo ở `:root` + `--fld-line` (#C3CDD8) cho mọi ô, select có mũi tên ▾. Biến CSS mới phải khai báo ở `:root`.
-- **Nhóm không chụp ảnh đi địa bàn**: Surgical Thailand và **Eyeless** (`TEAMS.eyeless.noPhoto=true`, v30.7) — người dùng xác nhận 08/10/2026.
+- **Ảnh đi địa bàn**: chỉ Surgical Thailand không chụp ảnh (`noPhoto`). **Eyeless VẪN chụp ảnh** như Dental / Surgical VN; Eyeless chỉ khác ở chỗ không bắt buộc
+  kế hoạch / TBD tuần sau khi gửi báo cáo tuần (`curTeamKey()!=="eyeless"`, v25) — người dùng xác nhận 08/10/2026.
