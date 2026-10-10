@@ -79,3 +79,7 @@ Kiến trúc & quy ước giống MMH Report Hub (repo `ManiMedicalHanoi/MMH-Rep
 - **Lịch công tác Sales (10/10/2026, khối `TFT` trước khối TFA)**: file MKT không còn lưu chuyến công tác của Sales Team (người dùng yêu cầu). `loadOther` được bọc ⇒
   gọi `tfTrips` (backend CRM nhóm đang xem, đọc file Business Trip) cho PIC Dental / Surgical / Eyeless, ghép vào `S.other.keys` thành key `_tf` "Lịch công tác MMYYYY"
   (sub `vSrc:"trip"`, `vMeta {id,r,m}` như Report Hub) ⇒ lịch, Họp tuần, tripInfo / tripReport chạy như cũ. Bộ nhớ `localStorage.mmh_crm_tft`.
+- **"Ai về nhà đấy" (v30.9, khối `ATS` trước khối TFT)**: Dental / Surgical / Eyeless — Công việc khác đọc / ghi sheet **ALL TASK** của file CRM nhóm (backend
+  `MMH_SalesTasks.gs`, `at=1`): bọc `hubJsonp` (action task, trừ khi gọi `hubJsonpAt`) + `hubUrl`; `OTHER_KEY` = `k:<nhóm>:alltask`; `otherTypeOk` luôn đúng.
+  Việc cũ trong file MKT: `ATS.migrate` (≤ 10 phút/lần/máy, cần phiên email, bỏ qua chế độ thử) ⇒ `atImport` rồi Marketing `salesTasksDrop`.
+  File MKT không còn nhận lịch đi địa bàn của Sales (`VS_MOVED`). Lệnh công tác vẫn qua Report Hub (`tripHub`). Thái giữ nguyên (`ownTasks`).

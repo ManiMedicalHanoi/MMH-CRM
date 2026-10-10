@@ -2714,7 +2714,7 @@ function pickTaskKind(){
     '<button class="pick2-c other" onclick="closeModal();S.wkTab=\'other\';pgWeekly();setTimeout(function(){formOtherKey(\'\');},260)">'+
       '<div class="ic">🧩</div><div class="ti">Công việc khác</div>'+
       '<div class="ds">Họp, hỗ trợ NPP, hồ sơ thầu, sự kiện, việc nội bộ — không phải đi gặp khách</div>'+
-      (ownTasks()?'<div class="sh">Ghi vào <b>'+esc(curTeam().crmFile)+'</b> · sheet ALL TASK</div></button>':'<div class="sh">Ghi vào <b>Sales &amp; Marketing</b> · tab WEEKYLY new</div></button>')+
+      ((ownTasks()||(window.ATS_ON&&ATS_ON()))?'<div class="sh">Ghi vào <b>'+esc(curTeam().crmFile)+'</b> · sheet ALL TASK</div></button>':'<div class="sh">Ghi vào <b>Sales &amp; Marketing</b> · tab WEEKYLY new</div></button>')+
   '</div>';
   openModal("Thêm công việc mới",h,'<button class="btn" onclick="closeModal()">Huỷ</button>');
 }
@@ -3979,7 +3979,7 @@ function buildNav(){
     if(t.grp!==lastGrp){ h+='<div class="grp">'+t.grp+'</div>'; lastGrp=t.grp; }
     h+='<button class="nvi" data-t="'+t.id+'" onclick="go(\''+t.id+'\')"><span class="ic">'+t.ic+'</span><span class="lb">'+t.lb+'</span></button>';
   });
-  h+='<div style="flex:1"></div><div style="padding:10px;font-size:10.5px;color:var(--mute);line-height:1.5">MMH CRM v30.8<br>'+
+  h+='<div style="flex:1"></div><div style="padding:10px;font-size:10.5px;color:var(--mute);line-height:1.5">MMH CRM v30.9<br>'+
      (isMgmt()?'<a href="'+DRIVE_FOLDER+'" target="_blank">📁 Folder ảnh Drive</a>':"")+'</div>';
   $("side").innerHTML=h;
   /* ⭐ v4.5 — thanh dưới trượt ngang, đủ mọi mục, bỏ nút "Thêm" */
@@ -11661,7 +11661,7 @@ function calAdd(iso){
   openModal("＋ Thêm việc · "+CAL_WDF[d.getDay()]+" "+fmtVN(iso),
     '<div class="cal-pick">'
     +'<button onclick="calAddVisit(\''+iso+'\')"><span class="ic">📍</span><span class="ti">Đi địa bàn</span><span class="ds">'+(isTH()?'Customer visit, meeting doctors, demo — saved to sheet 6. CUSTOMER VISITING':'Viếng thăm khách hàng, gặp bác sĩ, demo — ghi vào tab 6. WEEKLY REPORT')+'</span></button>'
-    +'<button onclick="calAddOther(\''+iso+'\')"><span class="ic">🧩</span><span class="ti">Công việc khác</span><span class="ds">'+(ownTasks()?'Meetings, distributor support, tenders, events… — saved to sheet ALL TASK':'Họp, hỗ trợ NPP, hồ sơ thầu, sự kiện… — ghi vào Report Hub')+'</span></button>'
+    +'<button onclick="calAddOther(\''+iso+'\')"><span class="ic">🧩</span><span class="ti">Công việc khác</span><span class="ds">'+(ownTasks()?'Meetings, distributor support, tenders, events… — saved to sheet ALL TASK':((window.ATS_ON&&ATS_ON())?'Họp, hỗ trợ NPP, hồ sơ thầu, sự kiện… — ghi vào sheet ALL TASK của file CRM nhóm':'Họp, hỗ trợ NPP, hồ sơ thầu, sự kiện… — ghi vào Report Hub'))+'</span></button>'
     +(noTrip()?'':'<button onclick="closeModal();tripProposeOpen(\''+iso+'\')"><span class="ic">✈️</span><span class="ti">Đề xuất công tác</span><span class="ds">Ghi vào file Business Trip và gửi email xin duyệt ngay</span></button>')
     +'</div>',
     '<button class="btn" onclick="closeModal()">Huỷ</button>');
@@ -20685,7 +20685,7 @@ window.QS2={ open:qsOpen };
 </script>
 
 <!-- ⭐ v30.3 — THÔNG BÁO CẬP NHẬT (chép từ Report Hub): dữ liệu updates/notes.js · tự hiện 7 ngày · nút "Có gì mới" trên thanh trên cùng -->
-<script src="updates/notes.js?v=30.8.1"></script>
+<script src="updates/notes.js?v=30.9"></script>
 <style id="upd-css">
 #upd,#upd-zoom{--t-pri:var(--blue);--t-pri2:var(--blue-d);--t-ink:var(--navy);--t-soft:var(--pale);--t-line:var(--lb2);--t-bg:#F6F8FA;--mmh-blue:var(--blue);--mmh-navy:var(--navy)}
 
@@ -22891,7 +22891,7 @@ document.body.classList.add("tm-on");
 var bar=document.createElement("div"); bar.id="tm-bar";
 bar.innerHTML='<span>CHẾ ĐỘ THỬ · đang dùng như <b>'+esc(TM.pic)+'</b> · không lưu dữ liệu · email chỉ gửi về '+esc(adminEmail())+'</span><button type="button" onclick="CRMTEST.pick()">Đổi người</button><button type="button" onclick="CRMTEST.stop()">Thoát</button>';
 document.body.appendChild(bar);
-var READ={ tfPending:1, tfLog:1, tfTrips:1, bundle:1, version:1, list:1, multi:1, visitFeed:1, customerIndex:1, kpi:1, krData:1, productCodes:1, photoMeta:1, custLog:1, activity:1,
+var READ={ tfPending:1, tfLog:1, tfTrips:1, weekly:1, bundle:1, version:1, list:1, multi:1, visitFeed:1, customerIndex:1, kpi:1, krData:1, productCodes:1, photoMeta:1, custLog:1, activity:1,
   mtList:1, mtGet:1, mtTenders:1, mtPrices:1, naList:1, naPending:1, weekly:1, boot:1, monthly:1, myTasks:1, sheets:1, tripMaster:1, tripMaster2:1, tripInfo:1, tripSync:1,
   getTurnoverData:1, getNppDetail:1, customers:1, ping:1, rhKpi:1, rhKpiMail:1, rhKpiMailPreview:1, rhAuthMe:1, rhAuthStart:1, rhAuthVerify:1,
   rhSessions:1, rhMeta:1, rhMaterials:1, rhDirectory:1, rhAssignList:1, rhMyChecks:1, refStatus:1, mmList:1, mmGet:1, string:1, version2:1, kpiApiMembers:1, kpiApiMember:1, rhKpiTotal:1, photoB64:1, account360:1 };
@@ -22983,6 +22983,76 @@ try{
 #ov select[multiple],#drw select[multiple]{background-image:none!important;padding-right:12px!important}
 </style>
 
+<script>
+/* ══ ⭐ v30.9 — "AI VỀ NHÀ ĐẤY": CÔNG VIỆC KHÁC CỦA SALES Ở FILE CRM CỦA NHÓM ══
+   Dental / Surgical / Eyeless: Công việc khác đọc / ghi sheet ALL TASK của file CRM nhóm (backend MMH_SalesTasks.gs, gửi kèm at=1)
+   thay cho tab WEEKYLY new của file MKT. Lệnh công tác (trip*) vẫn đi Report Hub (tripHub / hubJsonpAt không đổi).
+   Việc cũ còn trong file MKT: tự chép sang ALL TASK (atImport, chống trùng) rồi xoá khỏi file MKT (salesTasksDrop) — tối đa 10 phút/lần/máy.
+   Nhóm Thái giữ nguyên (đã có ALL TASK riêng từ v18). Báo cáo tuần / tháng vẫn tách riêng đi địa bàn và Công việc khác. */
+(function(){
+"use strict";
+var TEAM_RE={ dental:/dental|nha khoa/i, surgical:/surgical|ophthal|nh[aã]n khoa|ngo[aạ]i khoa/i, eyeless:/eyeless/i };
+var ACT={ weekly:1, addKey:1, addSub:1, updateKey:1, updateSub:1, updateProgress:1, updateStatus:1, deleteKey:1, deleteSub:1 };
+function on(){ try{ var k=curTeamKey(); return !ownTasks() && !!TEAM_RE[k]; }catch(_){ return false; } }
+window.ATS_ON=on;
+var _ot=otherTypeOk; otherTypeOk=function(t){ return on() || _ot.apply(this, arguments); };   /* ALL TASK chỉ chứa việc của nhóm ⇒ không lọc theo Type */
+if(on()){ try{ OTHER_KEY="k:"+curTeamKey()+":alltask"; }catch(_){} }
+var _hu=hubUrl, _team=0;
+hubUrl=function(){ if(_team){ try{ return curTeam().url; }catch(_){} } return _hu.apply(this, arguments); };
+var _hj=hubJsonp;
+hubJsonp=function(params, ms){
+  if(on() && params && ACT[params.action] && !(S && S._hubAt)){   /* hubJsonpAt(url,…) = gọi đúng địa chỉ đã chỉ định ⇒ không đổi */
+    params.at="1"; try{ params.actor=params.actor||S.user.pic; }catch(_){}
+    _team=1; try{ return _hj.apply(this, arguments); } finally { _team=0; }
+  }
+  return _hj.apply(this, arguments);
+};
+/* ── chuyển việc cũ từ file MKT ── */
+function legacy(keys){
+  var k=curTeamKey(), re=TEAM_RE[k], pics=teamPicNames(k);
+  return (keys||[]).filter(function(x){
+    if(!x || !x.row || x.vSrc || /^trip|visit/i.test(String(x.vSrc||""))) return false;
+    if((x.subs||[]).some(function(s){ return s.vSrc; })) return false;
+    var t=String(x.type||"");
+    if(/^sales-/i.test(t)) return re.test(t);
+    return !t.trim() && pics.some(function(p){ return picEq(p, x.pic); });
+  });
+}
+var M={ busy:false };
+function migrate(force){
+  if(!on() || M.busy || !window.AUTH || !AUTH.tk || !AUTH.tk()) return;
+  if(window.__CRM_TEST) return;                                  /* chế độ thử của Admin: không chuyển dữ liệu thật */
+  var lk="mmh_at_mig_"+curTeamKey(), last=0; try{ last=+localStorage.getItem(lk)||0; }catch(_){}
+  if(!force && Date.now()-last<600000) return;
+  M.busy=true; try{ localStorage.setItem(lk, String(Date.now())); }catch(_){}
+  hubJsonpAt(REPORTHUB_URL, { action:"weekly", pic:S.user.pic, _ts:Date.now() }, 70000).then(function(j){
+    var L=legacy(j && j.keyTasks);
+    if(!L.length) return null;
+    var keys=L.map(function(x){ return { keyTask:x.keyTask, type:x.type, pic:x.pic, result:x.result, start:x.start, planned:x.planned, revised:x.revised,
+      status:x.status, progress:x.progress, subs:(x.subs||[]).map(function(s){ return { name:s.subTask||s.name, pic:s.pic, result:s.result, start:s.start,
+      planned:s.planned, revised:s.revised, status:s.status, progress:s.progress }; }) }; });
+    return apiPost({ action:"atImport", at:"1", actor:S.user.pic, keys:keys, rid:"ati"+Date.now().toString(36) }).then(function(r){
+      if(!r || r.ok===false || r.softTimeout) throw new Error((r&&r.error)||"Chưa chép xong");
+      var items=L.map(function(x){ return { keyTask:x.keyTask, pic:x.pic, start:x.start }; }), i=0;
+      function next(){
+        if(i>=items.length) return Promise.resolve();
+        var part=items.slice(i, i+25); i+=25;
+        return hubJsonpAt(REPORTHUB_URL, { action:"salesTasksDrop", pic:S.user.pic, actor:S.user.pic, tk:AUTH.tk(), items:JSON.stringify(part), _ts:Date.now() }, 70000).then(next);
+      }
+      return next().then(function(){ return r; });
+    });
+  }).then(function(r){
+    M.busy=false;
+    if(r && (r.addedKeys||r.addedSubs)){ S.other=null; loadOther(true).then(function(){ try{ softRepaint(); }catch(_){} }).catch(function(){}); }
+  }).catch(function(){ M.busy=false; });
+}
+if(typeof loadOther==="function"){
+  var _lo=loadOther;
+  loadOther=function(){ var p=_lo.apply(this, arguments); try{ setTimeout(function(){ migrate(false); }, 4000); }catch(_){} return p; };
+}
+window.ATS={ migrate:migrate, legacy:legacy };
+})();
+</script>
 <script>
 /* ══ ⭐ v30.9 — LỊCH CÔNG TÁC CỦA SALES ĐỌC THẲNG FILE BUSINESS TRIP ══
    Trước: chuyến công tác của Sales được đồng bộ (sao chép) vào file MKT (Report Hub ▸ WEEKLY) rồi CRM đọc từ đó.
