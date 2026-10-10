@@ -20685,7 +20685,7 @@ window.QS2={ open:qsOpen };
 </script>
 
 <!-- ⭐ v30.3 — THÔNG BÁO CẬP NHẬT (chép từ Report Hub): dữ liệu updates/notes.js · tự hiện 7 ngày · nút "Có gì mới" trên thanh trên cùng -->
-<script src="updates/notes.js?v=30.8"></script>
+<script src="updates/notes.js?v=30.8.1"></script>
 <style id="upd-css">
 #upd,#upd-zoom{--t-pri:var(--blue);--t-pri2:var(--blue-d);--t-ink:var(--navy);--t-soft:var(--pale);--t-line:var(--lb2);--t-bg:#F6F8FA;--mmh-blue:var(--blue);--mmh-navy:var(--navy)}
 
@@ -22891,7 +22891,7 @@ document.body.classList.add("tm-on");
 var bar=document.createElement("div"); bar.id="tm-bar";
 bar.innerHTML='<span>CHẾ ĐỘ THỬ · đang dùng như <b>'+esc(TM.pic)+'</b> · không lưu dữ liệu · email chỉ gửi về '+esc(adminEmail())+'</span><button type="button" onclick="CRMTEST.pick()">Đổi người</button><button type="button" onclick="CRMTEST.stop()">Thoát</button>';
 document.body.appendChild(bar);
-var READ={ tfPending:1, tfLog:1, bundle:1, version:1, list:1, multi:1, visitFeed:1, customerIndex:1, kpi:1, krData:1, productCodes:1, photoMeta:1, custLog:1, activity:1,
+var READ={ tfPending:1, tfLog:1, tfTrips:1, bundle:1, version:1, list:1, multi:1, visitFeed:1, customerIndex:1, kpi:1, krData:1, productCodes:1, photoMeta:1, custLog:1, activity:1,
   mtList:1, mtGet:1, mtTenders:1, mtPrices:1, naList:1, naPending:1, weekly:1, boot:1, monthly:1, myTasks:1, sheets:1, tripMaster:1, tripMaster2:1, tripInfo:1, tripSync:1,
   getTurnoverData:1, getNppDetail:1, customers:1, ping:1, rhKpi:1, rhKpiMail:1, rhKpiMailPreview:1, rhAuthMe:1, rhAuthStart:1, rhAuthVerify:1,
   rhSessions:1, rhMeta:1, rhMaterials:1, rhDirectory:1, rhAssignList:1, rhMyChecks:1, refStatus:1, mmList:1, mmGet:1, string:1, version2:1, kpiApiMembers:1, kpiApiMember:1, rhKpiTotal:1, photoB64:1, account360:1 };
@@ -22983,6 +22983,54 @@ try{
 #ov select[multiple],#drw select[multiple]{background-image:none!important;padding-right:12px!important}
 </style>
 
+<script>
+/* ══ ⭐ v30.9 — LỊCH CÔNG TÁC CỦA SALES ĐỌC THẲNG FILE BUSINESS TRIP ══
+   Trước: chuyến công tác của Sales được đồng bộ (sao chép) vào file MKT (Report Hub ▸ WEEKLY) rồi CRM đọc từ đó.
+   Nay (người dùng yêu cầu 10/10/2026): file MKT không lưu chuyến của Sales Team nữa — CRM hỏi backend CRM của nhóm
+   (MMH_TripFlow.gs ▸ tfTrips, đọc file Business Trip) rồi ghép vào S.other như các key "Lịch công tác" cũ
+   ⇒ lịch, Họp tuần, báo cáo, xem / báo cáo chuyến đi (tripInfo / tripReport) chạy như trước. Trùng chuyến (vMeta.id) ⇒ giữ bản Report Hub. */
+(function(){
+"use strict";
+var LS="mmh_crm_tft", T={ trips:null, at:0, ld:null };
+try{ var c=JSON.parse(localStorage.getItem(LS)||"null"); if(c && c.trips){ T.trips=c.trips; T.at=0; } }catch(_){}
+function pics(){ var a=[]; ["dental","surgical","eyeless"].forEach(function(k){ try{ a=a.concat(teamPicNames(k)); }catch(_){} }); return a.filter(function(x,i){ return x && a.indexOf(x)===i; }); }
+function merge(){
+  if(!S.other || !T.trips) return;
+  var keys=(S.other.keys||[]).filter(function(k){ return !k._tf; }), have={};
+  keys.forEach(function(k){ (k.subs||[]).forEach(function(x){ var m=x.vMeta; if(typeof m==="string"){ try{ m=JSON.parse(m); }catch(_){ m=null; } } if(m&&m.id) have[m.id]=1; }); });
+  var by={};
+  T.trips.forEach(function(t){ if(t.vMeta && have[t.vMeta.id]) return; var m=(t.vMeta&&t.vMeta.m)||t.start.replace(/-/g,"").slice(0,6); (by[m]=by[m]||[]).push(t); });
+  Object.keys(by).sort().forEach(function(m){
+    keys.push({ _tf:1, no:"BTK"+m, row:0, keyTask:"Lịch công tác "+m.slice(4,6)+m.slice(0,4), type:"Business trip", pic:"", status:"", progress:0,
+      start:m.slice(0,4)+"-"+m.slice(4,6)+"-01", vSrc:"trip-key", vMeta:{m:m}, subs:by[m] });
+  });
+  S.other.keys=keys;
+}
+function fetchTrips(force){
+  if(noTrip() || ownTasks()) return Promise.resolve(null);
+  if(T.ld) return T.ld;
+  if(!force && T.trips && Date.now()-T.at<120000) return Promise.resolve(T.trips);
+  T.ld=apiGet("tfTrips",{ pics:JSON.stringify(pics()), force:force?1:"", _ts:Date.now() }).then(function(j){
+    T.ld=null; if(!j || !j.trips) return T.trips;
+    T.trips=j.trips; T.at=Date.now();
+    try{ localStorage.setItem(LS, JSON.stringify({ trips:T.trips, at:T.at })); }catch(_){}
+    merge(); try{ if(S.other) kvSet(OTHER_KEY,S.other); }catch(_){}
+    try{ if(S.tab==="weekly" && S.wkTab==="cal") renderCal(); else if(S.tab==="weekly" && S.wkTab==="other" && typeof renderOther==="function") renderOther(); }catch(_){}
+    return T.trips;
+  }).catch(function(){ T.ld=null; return T.trips; });
+  return T.ld;
+}
+if(typeof loadOther==="function"){
+  var _lo=loadOther;
+  loadOther=function(force){
+    var p=_lo.apply(this, arguments);
+    return p.then(function(o){ merge(); fetchTrips(!!force); return S.other || o; },
+                  function(e){ fetchTrips(!!force); throw e; });
+  };
+}
+window.TFT={ fetch:fetchTrips, merge:merge, state:T };
+})();
+</script>
 <script>
 /* ⭐ v30.8 — Duyệt công tác (TFA, dùng chung Report Hub v17.4): backend CRM Dental (MMH_TripFlow.gs) · nút trên thanh trên cùng · nhắc sau DL → #kpn → Có gì mới */
 window.TFA_CFG={
