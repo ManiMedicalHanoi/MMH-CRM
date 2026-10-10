@@ -7,6 +7,15 @@
 function E(u){ u.en={ title:u.title, items:u.items.map(function(i){ return { title:i.title, text:i.text }; }) }; return u; }
 window.MMH_UPDATES = [
   E({
+    id:"2026-10-10-v30.9", version:"v30.9", date:"2026-10-10",
+    title:"Each team's data now lives in its own CRM file",
+    summary:"Other tasks, field visits and business trips of the Dental, Surgical and Eyeless teams are no longer stored in the Marketing file. Everything stays in your team's CRM file. Nothing changes in how you use the app.",
+    items:[
+      {type:"imp", icon:"🗂", title:"Other tasks saved in your team's CRM file", text:"Click <b>＋</b> ▸ <b>Other tasks</b> as usual: tasks are now saved to the new <b>ALL TASK</b> sheet of your team's CRM file instead of the Marketing file. Your existing other tasks are moved there automatically, with no duplicates.", img:""},
+      {type:"imp", icon:"📍", title:"Field visits and trips are no longer copied to Marketing", text:"Field visits stay in tab <b>6. WEEKLY REPORT</b> of your CRM file, and business trips are read directly from the Business Trip file. The weekly and monthly reports still list field visits and other tasks in separate sections.", img:""}
+    ]
+  }),
+  E({
     id:"2026-10-10-v30.8", version:"v30.8", date:"2026-10-10",
     title:"Business trip proposals go to the Director, who can approve them in the CRM",
     summary:"Trip proposal emails from the CRM now use the same <b>Business Trip Approval Request</b> format as the Business Trip system and go straight to the Director. The Director can approve several proposals at once in the CRM or Report Hub, and each proposer gets their own approval email.",
