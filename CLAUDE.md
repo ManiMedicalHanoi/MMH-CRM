@@ -76,3 +76,6 @@ Kiến trúc & quy ước giống MMH Report Hub (repo `ManiMedicalHanoi/MMH-Rep
 - **Duyệt công tác `TFA` (v30.8, cùng module Report Hub v17.4)**: khối `tfa-css` + script cuối file, `window.TFA_CFG` (`url` = backend CRM Dental, `lang` theo `I18N.on`,
   `busy` = `#ov` / `#ov2` / `#upd` / `#dl` / `#kpn` đang mở). Backend `MMH_TripFlow.gs` (mmh-backend) ở crm-dental / surgical / eyeless: `tripPropose2` gửi email đúng mẫu
   "Business Trip Approval Request" To Giám đốc + ghi tab "Business Trip Log" của file CRM nhóm; `tfPending` / `tfDecide` chỉ phiên email Director. `tfPending` / `tfLog` nằm trong `READ`.
+- **Lịch công tác Sales (10/10/2026, khối `TFT` trước khối TFA)**: file MKT không còn lưu chuyến công tác của Sales Team (người dùng yêu cầu). `loadOther` được bọc ⇒
+  gọi `tfTrips` (backend CRM nhóm đang xem, đọc file Business Trip) cho PIC Dental / Surgical / Eyeless, ghép vào `S.other.keys` thành key `_tf` "Lịch công tác MMYYYY"
+  (sub `vSrc:"trip"`, `vMeta {id,r,m}` như Report Hub) ⇒ lịch, Họp tuần, tripInfo / tripReport chạy như cũ. Bộ nhớ `localStorage.mmh_crm_tft`.
