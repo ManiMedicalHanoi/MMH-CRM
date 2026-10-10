@@ -73,3 +73,6 @@ Kiến trúc & quy ước giống MMH Report Hub (repo `ManiMedicalHanoi/MMH-Rep
   (nằm ngoài `#app`) mất viền. Nay khai báo ở `:root` + `--fld-line` (#C3CDD8) cho mọi ô, select có mũi tên ▾. Biến CSS mới phải khai báo ở `:root`.
 - **Ảnh đi địa bàn**: chỉ Surgical Thailand không chụp ảnh (`noPhoto`). **Eyeless VẪN chụp ảnh** như Dental / Surgical VN; Eyeless chỉ khác ở chỗ không bắt buộc
   kế hoạch / TBD tuần sau khi gửi báo cáo tuần (`curTeamKey()!=="eyeless"`, v25) — người dùng xác nhận 08/10/2026.
+- **Duyệt công tác `TFA` (v30.8, cùng module Report Hub v17.4)**: khối `tfa-css` + script cuối file, `window.TFA_CFG` (`url` = backend CRM Dental, `lang` theo `I18N.on`,
+  `busy` = `#ov` / `#ov2` / `#upd` / `#dl` / `#kpn` đang mở). Backend `MMH_TripFlow.gs` (mmh-backend) ở crm-dental / surgical / eyeless: `tripPropose2` gửi email đúng mẫu
+  "Business Trip Approval Request" To Giám đốc + ghi tab "Business Trip Log" của file CRM nhóm; `tfPending` / `tfDecide` chỉ phiên email Director. `tfPending` / `tfLog` nằm trong `READ`.
