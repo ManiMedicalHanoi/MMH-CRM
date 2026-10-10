@@ -7,6 +7,16 @@
 function E(u){ u.en={ title:u.title, items:u.items.map(function(i){ return { title:i.title, text:i.text }; }) }; return u; }
 window.MMH_UPDATES = [
   E({
+    id:"2026-10-10-v30.8", version:"v30.8", date:"2026-10-10",
+    title:"Business trip proposals go to the Director, who can approve them in the CRM",
+    summary:"Trip proposal emails from the CRM now use the same <b>Business Trip Approval Request</b> format as the Business Trip system and go straight to the Director. The Director can approve several proposals at once in the CRM or Report Hub, and each proposer gets their own approval email.",
+    items:[
+      {type:"imp", icon:"📨", title:"One proposal email format, sent to the Director", text:"Click <b>Business trip proposal</b> and send as usual. The email now uses the standard Business Trip format (trip table, Equipment Commitment, Click here to review), To the Director and CC your Head of Department and you. Every proposal is also logged in the <b>Business Trip Log</b> tab of your team's CRM file.", img:""},
+      {type:"new", icon:"✈️", title:"Director: Approve trips button", text:"The Director sees <b>Approve trips</b> in the top bar, with a red badge showing how many proposals are waiting. While any proposal is waiting, the list opens once a day.", img:"updates/v30.8/btn.jpg"},
+      {type:"new", icon:"✅", title:"Approve several proposals at once", text:"Tick the proposals (or <b>Select all</b>), add a note if needed, then click <b>Approve</b> or <b>Reject</b>. A rejection needs a reason. Each proposer gets their own email, and every approved trip gets its document folder automatically.", img:"updates/v30.8/list.jpg"}
+    ]
+  }),
+  E({
     id:"2026-10-08-v30.7", version:"v30.7", date:"2026-10-08",
     title:"Field photos instant & never lost + clear form fields",
     summary:"Saving a field visit task with a photo no longer waits for the server, and nothing is lost without signal. Every form field now has a clear frame. <b>Surgical Thailand does not take field photos</b>, so for that team only the instant saving and the clearer forms apply.",
