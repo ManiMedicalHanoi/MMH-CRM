@@ -11,24 +11,27 @@ function wk(t){ return function(){ try{ go("weekly"); }catch(_){} try{ setWkTab(
 function pg(p){ return function(){ try{ go(p); }catch(_){} }; }
 function me(){ try{ return window.AUTH && AUTH.user && AUTH.user(); }catch(_){ return null; } }
 function th(){ try{ return curTeamKey()==="thai"; }catch(_){ return false; } }
+/* điện thoại: menu bên / FY / màu / bảng tin nằm trong nút Thêm (thanh dưới); bộ lọc lịch nằm sau nút ⋯ */
+function more(sel){ return function(){ return TOUR.find(sel) || TOUR.find("nav.mob button:last-of-type"); }; }
+function calTools(){ try{ if(window.CAL && !CAL.mt && TOUR.find(".cal-dots3")){ CAL.mt=true; renderCal(); } }catch(_){} }
 function V(vi,en){ return { vi:vi, en:en }; }
 TOUR.add([
- { id:"start", v:1, d:"2026-10-11", g:V("Bắt đầu","Getting started"), ic:"start", t:V("Làm quen MMH CRM","Tour of MMH CRM"), x:V("Các khu vực chính và chỗ tìm mọi chức năng.","The main areas and where to find every feature."),
+ { id:"start", v:2, d:"2026-10-11", g:V("Bắt đầu","Getting started"), ic:"start", t:V("Làm quen MMH CRM","Tour of MMH CRM"), x:V("Các khu vực chính và chỗ tìm mọi chức năng.","The main areas and where to find every feature."),
    steps:[
-    { el:"#side", do:wk("cal"), zoom:false, t:V("Menu chức năng","Feature menu"), x:V("Mọi chức năng ở cột trái: Dashboard, KPI, Khách hàng, Cập nhật, Mở mới, Đơn hàng, Họp tuần, Gửi báo cáo…","Every feature is in the left menu: Dashboard, KPI, Customers, Updates, New accounts, Orders, Weekly meeting, Send report…") },
+    { el:more("#side"), do:wk("cal"), zoom:false, t:V("Menu chức năng","Feature menu"), x:V("<i>(Điện thoại: nút <b>Thêm</b> ở thanh dưới.)</i> ","<i>(Phone: the <b>More</b> button in the bottom bar.)</i> Mọi chức năng ở cột trái: Dashboard, KPI, Khách hàng, Cập nhật, Mở mới, Đơn hàng, Họp tuần, Gửi báo cáo…","Every feature is in the left menu: Dashboard, KPI, Customers, Updates, New accounts, Orders, Weekly meeting, Send report…") },
     { el:"#mcBtn", t:V("MMH Calendar","MMH Calendar"), x:V("Lịch chung của công ty: công tác, đào tạo, sự kiện.","The company calendar: trips, trainings, events.") },
     { el:"#qsBtn", t:V("Tìm nhanh","Quick search"), x:V("Bấm hoặc nhấn <b>Ctrl + K</b> để tìm khách hàng, việc, đơn hàng.","Click or press <b>Ctrl + K</b> to find customers, tasks, orders.") },
-    { el:"#fySel", t:V("Năm tài chính","Fiscal year"), x:V("Chọn FY cần xem (FY bắt đầu từ tháng 9).","Pick the fiscal year to view (FY starts in September).") },
+    { el:more("#fySel"), t:V("Năm tài chính","Fiscal year"), x:V("Chọn FY cần xem (FY bắt đầu từ tháng 9).","Pick the fiscal year to view (FY starts in September).") },
     { el:"#updBtn", t:V("Có gì mới","What's new"), x:V("Xem các bản cập nhật của app.","See the latest app updates.") },
     { el:"#btnUser", t:V("Tài khoản","Account"), x:V("Bấm để xem tài khoản, đổi nhóm (quản lý) hoặc đăng xuất.","Click to see your account, switch team (managers) or sign out.") }
    ] },
- { id:"calendar", v:1, d:"2026-10-11", g:V("Lịch & công việc","Calendar & tasks"), ic:"cal", t:V("Lịch công việc","Work calendar"), x:V("Xem đi địa bàn, việc khác, công tác theo tuần / tháng.","Field visits, other tasks and trips by week or month."),
+ { id:"calendar", v:2, d:"2026-10-11", g:V("Lịch & công việc","Calendar & tasks"), ic:"cal", t:V("Lịch công việc","Work calendar"), x:V("Xem đi địa bàn, việc khác, công tác theo tuần / tháng.","Field visits, other tasks and trips by week or month."),
    steps:[
-    { el:function(){ return par("[onclick=\"calView('week')\"]"); }, do:wk("cal"), t:V("Kiểu xem","View"), x:V("Đổi giữa <b>Tuần</b>, <b>Tháng</b> và <b>Danh sách</b>.","Switch between <b>Week</b>, <b>Month</b> and <b>List</b>.") },
+    { el:function(){ return TOUR.find("select.cal-vs") || par("[onclick=\"calView('week')\"]"); }, do:wk("cal"), t:V("Kiểu xem","View"), x:V("Đổi giữa <b>Tuần</b>, <b>Tháng</b> và <b>Danh sách</b>.","Switch between <b>Week</b>, <b>Month</b> and <b>List</b>.") },
     { el:"[onclick=\"calNav(0)\"]", t:V("Hôm nay","Today"), x:V("Dùng ‹ › để chuyển tuần, bấm <b>Hôm nay</b> để quay về tuần này.","Use ‹ › to move between weeks, <b>Today</b> to come back.") },
-    { el:function(){ return par(".cal-chip[onclick=\"calToggle('v')\"]"); }, t:V("Lọc loại việc","Filter by type"), x:V("Bật / tắt Đi địa bàn, Việc khác, Công tác, Đào tạo; ẩn việc đã xong.","Show or hide Field visits, Other tasks, Trips, Trainings; hide done tasks.") },
+    { el:function(){ return par(".cal-chip[onclick=\"calToggle('v')\"]"); }, do:calTools, wait:200, t:V("Lọc loại việc","Filter by type"), x:V("Bật / tắt Đi địa bàn, Việc khác, Công tác, Đào tạo; ẩn việc đã xong.","Show or hide Field visits, Other tasks, Trips, Trainings; hide done tasks.") },
     { el:function(){ return par(".cal-chip[onclick=\"calSetPics('all')\"]"); }, t:V("Xem của ai","Whose tasks"), x:V("Team Leader và quản lý chọn được cả đội hoặc từng người.","Team leaders and managers can view the whole team or one person.") },
-    { el:".cal-add", t:V("Thêm việc vào ngày","Add a task on a day"), x:V("Bấm <b>＋ Thêm việc</b> dưới một ngày để chọn: đi địa bàn hay việc khác.","Click <b>＋ Add task</b> under a day, then choose field visit or other task.") }
+    { el:function(){ return TOUR.find(".cal-add") || TOUR.find(".cal-wc.today .cal-wh") || TOUR.find(".cal-wh"); }, t:V("Thêm việc vào ngày","Add a task on a day"), x:V("Bấm <b>＋ Thêm việc</b> dưới một ngày để chọn: đi địa bàn hay việc khác.","Click <b>＋ Add task</b> under a day, then choose field visit or other task.") }
    ] },
  { id:"visit", v:2, d:"2026-10-11", g:V("Lịch & công việc","Calendar & tasks"), ic:"photo", t:V("Ghi nhanh đi địa bàn","Log a field visit"), x:V("Chọn account, ghi kết quả, lưu ngay.","Pick the account, write the result, save instantly."),
    steps:[
@@ -112,10 +115,10 @@ TOUR.add([
     { el:function(){ return par("[onclick=\"setDashG('all')\"]"); }, t:V("Nhóm chỉ số","Metric groups"), x:V("Tổng quan · Khách hàng · Đi địa bàn · Kinh doanh · ADP.","Overview · Customers · Field visits · Sales · ADP.") },
     { el:"#clogCard", t:V("Cập nhật dữ liệu khách hàng","Customer data updates"), x:V("Account nào vừa được cập nhật hoặc thêm mới.","Which accounts were updated or added.") }
    ] },
- { id:"theme", v:1, d:"2026-10-11", g:V("Cá nhân hoá","Personalise"), ic:"gear", t:V("Màu giao diện","Colour theme"), x:V("Chọn tông màu bạn thích.","Pick the colour theme you like."),
+ { id:"theme", v:2, d:"2026-10-11", g:V("Cá nhân hoá","Personalise"), ic:"gear", t:V("Màu giao diện","Colour theme"), x:V("Chọn tông màu bạn thích.","Pick the colour theme you like."),
    steps:[
-    { el:"#thBtn", t:V("Màu giao diện","Colour theme"), x:V("10 tông màu, lưu trên máy này.","10 themes, saved on this device.") },
-    { el:"#btnAct", t:V("Bảng tin hoạt động","Activity feed"), x:V("Ai vừa thêm / sửa gì trong nhóm.","Who added or changed what in your team.") }
+    { el:more("#thBtn"), t:V("Màu giao diện","Colour theme"), x:V("10 tông màu, lưu trên máy này.","10 themes, saved on this device.") },
+    { el:more("#btnAct"), t:V("Bảng tin hoạt động","Activity feed"), x:V("Ai vừa thêm / sửa gì trong nhóm.","Who added or changed what in your team.") }
    ] }
 ]);
 })();

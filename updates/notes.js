@@ -7,6 +7,15 @@
 function E(u){ u.en={ title:u.title, items:u.items.map(function(i){ return { title:i.title, text:i.text }; }) }; return u; }
 window.MMH_UPDATES = [
   E({
+    id:"2026-10-11-v31.1", version:"v31.1", date:"2026-10-11",
+    title:"Smoother guides, and a Help button on the phone top bar",
+    summary:"Step-by-step guides no longer lag or shrink the page on phones: the screen scrolls smoothly to the right place and only the button or field being explained is enlarged. On phones, the <b>?</b> button now sits in the top bar.",
+    items:[
+      {type:"fix", icon:"⚡", title:"Smooth, no lag", text:"Pick any guide: the screen scrolls smoothly, the yellow frame glides to the next step and small buttons are enlarged on their own. The page no longer shrinks or shows the activity feed on phones.", img:"updates/v31.1/mobile.jpg"},
+      {type:"imp", icon:"❓", title:"Help button on the phone top bar", text:"On phones, tap <b>?</b> in the top bar (next to Approve trips) to open the guides. Admins open Test mode from More ▸ Tools.", img:""}
+    ]
+  }),
+  E({
     id:"2026-10-11-v31.0", version:"v31.0", date:"2026-10-11",
     title:"Step-by-step guides for every feature",
     summary:"Click the <b>?</b> button in the top bar and pick a feature: the app dims the screen, zooms in on the exact place to click and walks you through each step.",

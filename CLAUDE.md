@@ -88,3 +88,6 @@ Kiến trúc & quy ước giống MMH Report Hub (repo `ManiMedicalHanoi/MMH-Rep
 - **Hướng dẫn từng bước `TOUR` (v31.0, cùng bộ máy Report Hub v17.5)**: `tour/tour.js` GIỐNG HỆT MMH-Report (sửa 1 nơi chép sang nơi kia) + bài `tour/tours.js`.
   Nút ❓ `#btnHelp` (điện thoại: Thêm ▸ Hướng dẫn) mở danh mục; sổ tay cũ `openHelp()` ở chân danh mục (`TOUR_CFG.extra`). `TOUR_CFG.lang` theo `I18N.on`.
   Đang chạy tour ⇒ popup `UPD` / `DL` xếp hàng. Bước chỉ đúng với một số nhóm ⇒ `when` (vd. ảnh: `!noPhoto()`).
+- **Tour v1.1 (v31.1 / Report Hub v17.6)**: KHÔNG biến đổi `<body>` (giật, điện thoại co trang) — cuộn mượt + vùng sáng + phóng to riêng phần tử (≤ 1,3).
+  Điện thoại: nút Hướng dẫn `#tourMob` (biểu tượng) trên thanh trên cùng thay chỗ Chế độ thử (`#tmBtn` ẩn ≤ 720px, vẫn ở Thêm ▸ Tiện ích).
+  Kiểm tra thêm khung điện thoại: `tools/tour_check.js --mobile` (kèm `--thai`).
