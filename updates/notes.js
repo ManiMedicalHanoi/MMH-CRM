@@ -7,6 +7,16 @@
 function E(u){ u.en={ title:u.title, items:u.items.map(function(i){ return { title:i.title, text:i.text }; }) }; return u; }
 window.MMH_UPDATES = [
   E({
+    id:"2026-10-11-v31.0", version:"v31.0", date:"2026-10-11",
+    title:"Step-by-step guides for every feature",
+    summary:"Click the <b>?</b> button in the top bar and pick a feature: the app dims the screen, zooms in on the exact place to click and walks you through each step.",
+    items:[
+      {type:"new", icon:"❓", title:"Guides list", text:"Click <b>?</b> in the top bar (phone: More ▸ Help) to open 14 guides: calendar, logging a field visit, other tasks, trips, customers, orders, new accounts, reports, KPI, weekly meeting… A yellow dot means a guide is new or just updated.", img:"updates/v31.0/catalog.jpg"},
+      {type:"new", icon:"🔍", title:"Zooms in on each step", text:"Pick a guide: the app opens the right screen, zooms in on the field to fill and explains it. Use <b>Next</b> / <b>Back</b> or the arrow keys, <b>Exit</b> at any time. The Thailand team sees every guide in English.", img:"updates/v31.0/zoom.jpg"},
+      {type:"imp", icon:"🔄", title:"Always in sync with the app", text:"Whenever a feature is added or changed, its guide is updated with it and shows an <b>Updated</b> label for 14 days. The old chapter-style manual is still at the bottom of the guides list.", img:""}
+    ]
+  }),
+  E({
     id:"2026-10-10-v30.9", version:"v30.9", date:"2026-10-10",
     title:"Each team's data now lives in its own CRM file",
     summary:"Other tasks, field visits and business trips of the Dental, Surgical and Eyeless teams are no longer stored in the Marketing file. Everything stays in your team's CRM file. Nothing changes in how you use the app.",

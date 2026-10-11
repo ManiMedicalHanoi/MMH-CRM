@@ -3979,7 +3979,7 @@ function buildNav(){
     if(t.grp!==lastGrp){ h+='<div class="grp">'+t.grp+'</div>'; lastGrp=t.grp; }
     h+='<button class="nvi" data-t="'+t.id+'" onclick="go(\''+t.id+'\')"><span class="ic">'+t.ic+'</span><span class="lb">'+t.lb+'</span></button>';
   });
-  h+='<div style="flex:1"></div><div style="padding:10px;font-size:10.5px;color:var(--mute);line-height:1.5">MMH CRM v30.9<br>'+
+  h+='<div style="flex:1"></div><div style="padding:10px;font-size:10.5px;color:var(--mute);line-height:1.5">MMH CRM v31.0<br>'+
      (isMgmt()?'<a href="'+DRIVE_FOLDER+'" target="_blank">📁 Folder ảnh Drive</a>':"")+'</div>';
   $("side").innerHTML=h;
   /* ⭐ v4.5 — thanh dưới trượt ngang, đủ mọi mục, bỏ nút "Thêm" */
@@ -20685,7 +20685,7 @@ window.QS2={ open:qsOpen };
 </script>
 
 <!-- ⭐ v30.3 — THÔNG BÁO CẬP NHẬT (chép từ Report Hub): dữ liệu updates/notes.js · tự hiện 7 ngày · nút "Có gì mới" trên thanh trên cùng -->
-<script src="updates/notes.js?v=30.9"></script>
+<script src="updates/notes.js?v=31.0"></script>
 <style id="upd-css">
 #upd,#upd-zoom{--t-pri:var(--blue);--t-pri2:var(--blue-d);--t-ink:var(--navy);--t-soft:var(--pale);--t-line:var(--lb2);--t-bg:#F6F8FA;--mmh-blue:var(--blue);--mmh-navy:var(--navy)}
 
@@ -23302,5 +23302,25 @@ setInterval(function(){ if(can() && !T.busy && !document.getElementById("tfa-ov"
 window.TFA={ open:open, reload:load, state:T };
 })();
 </script>
+<script>
+/* ⭐ v31.0 — HƯỚNG DẪN TỪNG BƯỚC (tour/tour.js + tour/tours.js, cùng bộ máy Report Hub v17.5).
+   Nút ❓ #btnHelp (điện thoại: Thêm ▸ Hướng dẫn) mở danh mục tour; sổ tay cũ (openHelp) vẫn mở được ở chân danh mục. Nhóm Thái: tiếng Anh. */
+window.TOUR_CFG={ app:"crm",
+  lang:function(){ return (window.I18N && I18N.on) ? "en" : "vi"; },
+  mount:function(fn){ var b=document.getElementById("btnHelp"); if(!b) return null; b.onclick=function(e){ if(e) e.stopPropagation(); fn(); }; b.title=(window.I18N&&I18N.on)?"How-to guides":"Hướng dẫn sử dụng"; return b; },
+  extra:{ label:{ vi:"Mở sổ tay hướng dẫn (đọc theo chương)", en:"Open the user manual (chapters)" }, run:function(){ try{ openHelp(); }catch(_){} } },
+  before:function(){ window.__tourClean&&__tourClean(); },
+  after:function(){ window.__tourClean&&__tourClean(); var q=window.__tourQ||[]; window.__tourQ=[]; setTimeout(function(){ q.forEach(function(f){ try{ f(); }catch(_){} }); },500); }
+};
+["UPD","DL"].forEach(function(k){ var m=window[k]; if(!m || typeof m.open!=="function") return; var o=m.open;
+  m.open=function(manual){ if(window.__tourOn && manual!==true){ var me=this, ar=arguments; (window.__tourQ=window.__tourQ||[]).push(function(){ o.apply(me, ar); }); return; } return o.apply(this, arguments); }; });
+window.__tourClean=function(){
+  try{ if(typeof closeModal==="function") closeModal(); }catch(_){}
+  try{ var t=document.getElementById("tfa-ov"); if(t) t.remove(); }catch(_){}
+  ["upd","dl","kpn"].forEach(function(id){ var e=document.getElementById(id); if(e) e.classList.remove("show"); });
+};
+</script>
+<script src="tour/tour.js?v=1.0"></script>
+<script src="tour/tours.js?v=31.0"></script>
 </body>
 </html>
