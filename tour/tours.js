@@ -30,7 +30,7 @@ TOUR.add([
     { el:function(){ return par(".cal-chip[onclick=\"calSetPics('all')\"]"); }, t:V("Xem của ai","Whose tasks"), x:V("Team Leader và quản lý chọn được cả đội hoặc từng người.","Team leaders and managers can view the whole team or one person.") },
     { el:".cal-add", t:V("Thêm việc vào ngày","Add a task on a day"), x:V("Bấm <b>＋ Thêm việc</b> dưới một ngày để chọn: đi địa bàn hay việc khác.","Click <b>＋ Add task</b> under a day, then choose field visit or other task.") }
    ] },
- { id:"visit", v:1, d:"2026-10-11", g:V("Lịch & công việc","Calendar & tasks"), ic:"photo", t:V("Ghi nhanh đi địa bàn","Log a field visit"), x:V("Chọn account, ghi kết quả, chụp ảnh, lưu ngay.","Pick the account, write the result, add a photo, save instantly."),
+ { id:"visit", v:2, d:"2026-10-11", g:V("Lịch & công việc","Calendar & tasks"), ic:"photo", t:V("Ghi nhanh đi địa bàn","Log a field visit"), x:V("Chọn account, ghi kết quả, lưu ngay.","Pick the account, write the result, save instantly."),
    steps:[
     { el:"#fab", do:wk("cal"), t:V("Nút ＋ Ghi nhanh","Quick-add button"), x:V("Nút tròn góc phải dưới — có ở mọi màn hình.","The round button at the bottom right — on every screen.") },
     { el:"#nt_accName", do:function(){ try{ formWeekly(null); }catch(_){} }, wait:700, t:V("Chọn account","Choose the account"), x:V("Bấm để xem danh sách hoặc gõ để lọc. Type / Province tự điền.","Click to list or type to filter. Type and province fill in automatically.") },
