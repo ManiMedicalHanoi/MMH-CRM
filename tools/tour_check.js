@@ -1,10 +1,11 @@
 /* Kiểm tra bài hướng dẫn (tour/tours.js) của MMH CRM: chạy MỌI bài với backend giả lập, báo bước nào không tìm thấy phần tử.
-   Chạy: NODE_PATH=$(npm root -g) node tools/tour_check.js [--thai] [id …]   ·  thoát mã 1 nếu có bước hỏng.
+   Chạy: NODE_PATH=$(npm root -g) node tools/tour_check.js [--thai] [--mobile] [id …]   ·  thoát mã 1 nếu có bước hỏng.
    --thai: chạy như nhóm Thái (tiếng Anh, không ảnh, không công tác). Mỗi lần sửa chức năng ⇒ sửa tours.js rồi chạy lại. */
 const { chromium } = require("playwright"); const path=require("path");
 const ARGS=process.argv.slice(2), THAI=ARGS.includes("--thai"), ONLY=ARGS.filter(a=>!a.startsWith("--"));
+const MOB=ARGS.includes("--mobile");   /* --mobile: khung điện thoại 390×844 */
 (async()=>{
-  const b=await chromium.launch(); const p=await (await b.newContext({viewport:{width:1440,height:900}})).newPage();
+  const b=await chromium.launch(); const p=await (await b.newContext(MOB?{viewport:{width:390,height:844},isMobile:true,hasTouch:true}:{viewport:{width:1440,height:900}})).newPage();
   const errs=[]; p.on("pageerror",e=>errs.push(e.message));
   const pic=THAI?"Dao":"Viet";
   await p.addInitScript((pic)=>{ localStorage.setItem("mmh_tk",JSON.stringify({tk:"xxxxxxxxxxxx.sig",exp:Date.now()+864e5,user:{pic:pic,email:"x@manimedicalhanoi.com",local:"x",level:"lead",admin:true}}));
