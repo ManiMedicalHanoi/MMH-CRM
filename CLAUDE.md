@@ -4,6 +4,8 @@
 Kiến trúc & quy ước giống MMH Report Hub (repo `ManiMedicalHanoi/MMH-Report`, xem CLAUDE.md ở đó).
 
 - Khi người dùng bảo sửa / gộp: commit → PR → squash merge `main`. Tăng số phiên bản ở thanh bên (`MMH CRM vXX.Y`).
+- **BẮT BUỘC — bài hướng dẫn (tour)**: chức năng mới / đổi giao diện ⇒ sửa hoặc thêm bài trong `tour/tours.js` (chữ `{vi,en}`, tăng `v`, `d` = ngày sửa) trong CÙNG PR, rồi chạy
+  `NODE_PATH=$(npm root -g) node tools/tour_check.js` và `… --thai` — phải ra "Tất cả bài hướng dẫn đều khớp".
 - Vá lớp bằng khối `<script>` / `<style>` mới trước `</body>` (`window.fn = …`), giữ nguyên code cũ.
 - **Backend**: code `.gs` ở kho riêng tư `ManiMedicalHanoi/mmh-backend` — `crm-dental`, `crm-surgical`, `crm-eyeless`, `crm-thai`,
   `cust-data` (Data khách hàng / Event), `turnover`, `thai-mkt`, cùng `marketing` (Report Hub: Công việc khác, Công tác) và `kpi`.
@@ -83,3 +85,6 @@ Kiến trúc & quy ước giống MMH Report Hub (repo `ManiMedicalHanoi/MMH-Rep
   `MMH_SalesTasks.gs`, `at=1`): bọc `hubJsonp` (action task, trừ khi gọi `hubJsonpAt`) + `hubUrl`; `OTHER_KEY` = `k:<nhóm>:alltask`; `otherTypeOk` luôn đúng.
   Việc cũ trong file MKT: `ATS.migrate` (≤ 10 phút/lần/máy, cần phiên email, bỏ qua chế độ thử) ⇒ `atImport` rồi Marketing `salesTasksDrop`.
   File MKT không còn nhận lịch đi địa bàn của Sales (`VS_MOVED`). Lệnh công tác vẫn qua Report Hub (`tripHub`). Thái giữ nguyên (`ownTasks`).
+- **Hướng dẫn từng bước `TOUR` (v31.0, cùng bộ máy Report Hub v17.5)**: `tour/tour.js` GIỐNG HỆT MMH-Report (sửa 1 nơi chép sang nơi kia) + bài `tour/tours.js`.
+  Nút ❓ `#btnHelp` (điện thoại: Thêm ▸ Hướng dẫn) mở danh mục; sổ tay cũ `openHelp()` ở chân danh mục (`TOUR_CFG.extra`). `TOUR_CFG.lang` theo `I18N.on`.
+  Đang chạy tour ⇒ popup `UPD` / `DL` xếp hàng. Bước chỉ đúng với một số nhóm ⇒ `when` (vd. ảnh: `!noPhoto()`).
