@@ -7,6 +7,15 @@
 function E(u){ u.en={ title:u.title, items:u.items.map(function(i){ return { title:i.title, text:i.text }; }) }; return u; }
 window.MMH_UPDATES = [
   E({
+    id:"2026-10-12-v31.2", version:"v31.2", date:"2026-10-12",
+    title:"Thailand team: trip costs in Thai Baht, expense names in English",
+    summary:"In the business trip request, the Thailand team now enters estimated costs in <b>THB</b>, and every expense name is in English.",
+    items:[
+      {type:"imp", icon:"฿", title:"Estimated costs in THB", text:"Click <b>Business trip proposal</b> ▸ <b>Estimated costs (THB)</b>: amounts are shown as <b>4,585 THB</b> and the total as <b>Total estimated: … THB</b>. The proposal email to the approver also shows the costs in THB.", img:"updates/v31.2/trip-thb.jpg"},
+      {type:"imp", icon:"✎", title:"Expense names in English", text:"Type in the description box to pick from the list: Air ticket, <b>Daily allowance</b> (was Per diem), Hotel, Taxi / Grab, Train / bus ticket, Customer entertainment, Seminar fee, Other expenses."}
+    ]
+  }),
+  E({
     id:"2026-10-11-v31.1", version:"v31.1", date:"2026-10-11",
     title:"Smoother guides, and a Help button on the phone top bar",
     summary:"Step-by-step guides no longer lag or shrink the page on phones: the screen scrolls smoothly to the right place and only the button or field being explained is enlarged. On phones, the <b>?</b> button now sits in the top bar.",
