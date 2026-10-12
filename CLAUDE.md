@@ -91,3 +91,6 @@ Kiến trúc & quy ước giống MMH Report Hub (repo `ManiMedicalHanoi/MMH-Rep
 - **Tour v1.1 (v31.1 / Report Hub v17.6)**: KHÔNG biến đổi `<body>` (giật, điện thoại co trang) — cuộn mượt + vùng sáng + phóng to riêng phần tử (≤ 1,3).
   Điện thoại: nút Hướng dẫn `#tourMob` (biểu tượng) trên thanh trên cùng thay chỗ Chế độ thử (`#tmBtn` ẩn ≤ 720px, vẫn ở Thêm ▸ Tiện ích).
   Kiểm tra thêm khung điện thoại: `tools/tour_check.js --mobile` (kèm `--thai`).
+- **Báo cáo tháng (v31.4, khối `v314-js`)**: khung sửa hạng mục tháng (`openMonthly`) lưu bằng `mnDomDiff()` — so từng ô trên màn hình với bản đang có
+  (không chỉ dựa `S.dirty`, vì 🎤 Nói trước đây không gọi `markDirtyM` ⇒ nội dung nói không được gửi). `toggleVoice` phát sự kiện `input`.
+  Đóng khung khi còn nội dung chưa lưu ⇒ hỏi Lưu / Bỏ (`closeDrw(true)` = đóng không hỏi). Chặn bấm Lưu 2 lần (`S._mnSaving`).

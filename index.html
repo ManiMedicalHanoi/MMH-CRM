@@ -3979,7 +3979,7 @@ function buildNav(){
     if(t.grp!==lastGrp){ h+='<div class="grp">'+t.grp+'</div>'; lastGrp=t.grp; }
     h+='<button class="nvi" data-t="'+t.id+'" onclick="go(\''+t.id+'\')"><span class="ic">'+t.ic+'</span><span class="lb">'+t.lb+'</span></button>';
   });
-  h+='<div style="flex:1"></div><div style="padding:10px;font-size:10.5px;color:var(--mute);line-height:1.5">MMH CRM v31.3<br>'+
+  h+='<div style="flex:1"></div><div style="padding:10px;font-size:10.5px;color:var(--mute);line-height:1.5">MMH CRM v31.4<br>'+
      (isMgmt()?'<a href="'+DRIVE_FOLDER+'" target="_blank">📁 Folder ảnh Drive</a>':"")+'</div>';
   $("side").innerHTML=h;
   /* ⭐ v4.5 — thanh dưới trượt ngang, đủ mọi mục, bỏ nút "Thêm" */
@@ -20685,7 +20685,7 @@ window.QS2={ open:qsOpen };
 </script>
 
 <!-- ⭐ v30.3 — THÔNG BÁO CẬP NHẬT (chép từ Report Hub): dữ liệu updates/notes.js · tự hiện 7 ngày · nút "Có gì mới" trên thanh trên cùng -->
-<script src="updates/notes.js?v=31.3"></script>
+<script src="updates/notes.js?v=31.4"></script>
 <style id="upd-css">
 #upd,#upd-zoom{--t-pri:var(--blue);--t-pri2:var(--blue-d);--t-ink:var(--navy);--t-soft:var(--pale);--t-line:var(--lb2);--t-bg:#F6F8FA;--mmh-blue:var(--blue);--mmh-navy:var(--navy)}
 
@@ -23450,6 +23450,91 @@ window.__tourClean=function(){
 .tpc-a select.tpc-cur{border:0;background:transparent;font:inherit;font-size:12px;font-weight:700;color:var(--mute,#6B7C93);padding:0 2px;cursor:pointer;flex:none}
 .tpc-a select.tpc-cur:focus{outline:2px solid var(--t-pri,#3A5CAA);border-radius:6px}
 </style>
+<script id="v314-js">
+/* ══ v31.4 (12/10/2026) — BÁO CÁO THÁNG: NỘI DUNG GÕ / NÓI LUÔN ĐƯỢC GHI VÀO SHEET ══════════════════════════════
+   Lỗi (nhóm Thái báo): khung sửa hạng mục tháng (openMonthly) chỉ gửi các ô có trong S.dirty. Nội dung nhập bằng
+   🎤 Nói không gọi markDirtyM ⇒ bấm Lưu thì phần đó KHÔNG gửi đi (hoặc báo "Chưa có thay đổi"), trong khi chữ vẫn
+   hiện trên màn hình. Đóng khung (×, Esc, bấm nền) khi chưa lưu cũng mất nội dung mà không hỏi.
+   Sửa: ① Lưu = so từng ô trên màn hình với bản đang có, gửi mọi ô đã đổi (không phụ thuộc sự kiện input).
+        ② 🎤 Nói phát sự kiện input ⇒ mọi khung dùng S.dirty đều nhận.
+        ③ Đóng khung báo cáo tháng khi còn nội dung chưa lưu ⇒ hỏi Lưu / Bỏ.
+        ④ Chặn bấm Lưu 2 lần khi đang gửi; lưu xong báo rõ "đã ghi vào sheet 5. MONTHLY REPORT, dòng N". */
+(function(){
+  var MN_F={ "mn-tt":"typeTask", "mn-pe":"period", "mn-pic":"pic", "mn-ar":"area", "mn-plan":"plan", "mn-res":"result" };
+  function mnDomDiff(){
+    var ed=S.mnEdit; if(!ed || !$("mn-plan")) return null;
+    var r=ed.data||{}, d={};
+    Object.keys(MN_F).forEach(function(id){
+      var el=$(id); if(!el) return; var f=MN_F[id], v=String(el.value==null?"":el.value);
+      if(f==="pic" && el.readOnly) return;
+      if(v!==String(r[f]==null?"":r[f])) d[f]=v;
+    });
+    if(d.period) d.fy=fyOfMonth(d.period);
+    if(d.pic && PIC_AREA[d.pic] && !("area" in d)) d.area=PIC_AREA[d.pic];
+    return d;
+  }
+  window.mnDomDiff=mnDomDiff;
+
+  window.saveMonthlyDrw=saveMonthlyDrw=function(after){
+    if(!S.mnEdit) return;
+    if(S._mnSaving) return toast(TX("Đang lưu, vui lòng chờ…","Saving, please wait…"),"warn");
+    var diff=mnDomDiff()||{};
+    Object.keys(S.dirty||{}).forEach(function(f){ if(!(f in diff) && ["typeTask","period","pic","area","plan","result","fy"].indexOf(f)>=0) diff[f]=S.dirty[f]; });
+    if(!Object.keys(diff).length){ toast(TX("Chưa có thay đổi nào","No changes to save")); if(after) after(); return; }
+    var row=S.mnEdit.row, d=Object.assign({ _row:row, fy:S.fy }, diff);
+    S._mnSaving=true; busy(true,TX("Đang lưu vào Google Sheet…","Saving to Google Sheet…"));
+    apiPost({action:"saveMonthly",data:d}).then(function(r){
+      S._mnSaving=false; busy(false);
+      if(r && (r.softTimeout || r.opaque)) toast(TX("Đã gửi lên máy chủ (mạng chậm) — kiểm tra lại sau ít phút.","Sent (slow network) — please check again in a few minutes."),"warn",6500);
+      else toast(TX("Đã ghi vào sheet 5. MONTHLY REPORT, dòng ","Saved to sheet 5. MONTHLY REPORT, row ")+(r.row||row),"ok",4500);
+      S.mnEdit=null; S.dirty={};
+      closeDrw(true);
+      afterWrite("monthly", r.row||row, d);
+      if(S.tab==="monthly") renderMonthly();
+      if(after) after();
+    }).catch(function(e){
+      S._mnSaving=false; busy(false);
+      toast(TX("Chưa lưu được: ","Not saved: ")+e.message+TX(" — nội dung vẫn giữ trong khung, bấm Lưu lại."," — your text is kept, press Save again."),"err",8000);
+    });
+  };
+
+  /* ③ đóng khung báo cáo tháng khi còn nội dung chưa lưu */
+  var close0=closeDrw;
+  window.closeDrw=closeDrw=function(force){
+    if(force!==true && S.mnEdit && $("drw") && $("drw").classList.contains("on") && $("mn-plan")){
+      var diff=mnDomDiff()||{};
+      if(Object.keys(diff).length){
+        if(confirm(TX("Bạn có nội dung báo cáo tháng CHƯA LƯU.\n\nOK = Lưu vào sheet · Cancel = Bỏ thay đổi",
+                      "You have UNSAVED monthly report content.\n\nOK = Save to the sheet · Cancel = Discard changes"))){
+          return saveMonthlyDrw();
+        }
+      }
+      S.mnEdit=null;
+    }
+    return close0.apply(this,arguments);
+  };
+
+  /* ② 🎤 Nói: phát sự kiện input để mọi ô (kể cả khung báo cáo tháng) ghi nhận nội dung */
+  window.toggleVoice=toggleVoice=function(id,btn){
+    var SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+    if(!SR) return toast(TX("Trình duyệt không hỗ trợ nhập bằng giọng nói","This browser does not support voice input"),"warn");
+    if(_rec) return stopVoice();
+    _rec=new SR(); _rec.lang=isTH()?"en-US":"vi-VN"; _rec.continuous=true; _rec.interimResults=true;
+    _recT=$(id); _recB=btn; if(!_recT) return;
+    var base=_recT.value?(_recT.value+" "):"";
+    btn.classList.add("listening"); btn.innerHTML=TX("⏺ Đang nghe…","⏺ Listening…");
+    _rec.onresult=function(e){
+      var t=""; for(var i=e.resultIndex;i<e.results.length;i++) t+=e.results[i][0].transcript;
+      _recT.value=base+t;
+      try{ _recT.dispatchEvent(new Event("input",{bubbles:true})); }catch(_){}
+      var f={"tk-plan":"plan","tk-result":"result","tk-stop":"stopReason"}[_recT.id];
+      if(f) markDirty(f,_recT.value);
+    };
+    _rec.onend=stopVoice; _rec.onerror=stopVoice;
+    try{ _rec.start(); }catch(e){}
+  };
+})();
+</script>
 <script src="tour/tour.js?v=1.1"></script>
 <script src="tour/tours.js?v=31.1"></script>
 </body>
