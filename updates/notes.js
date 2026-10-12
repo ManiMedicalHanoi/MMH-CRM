@@ -12,8 +12,10 @@ window.MMH_UPDATES = [
     summary:"Fixed: in a monthly task, text entered with <b>Speak</b> (voice) was shown on screen but not sent to the sheet, and closing the panel without saving lost the text without warning.",
     items:[
       {type:"fix", icon:"🎤", title:"Voice and typed text are always saved", text:"Open <b>Monthly tasks</b> ▸ click an item ▸ type or press <b>Speak</b> in PLAN / RESULT ▸ <b>Save to Sheet</b>. Every box that changed is sent, and a message confirms the sheet row, e.g. <b>Saved to sheet 5. MONTHLY REPORT, row 102</b>.", img:"updates/v31.4/monthly-save.jpg"},
-      {type:"imp", icon:"⚠", title:"No more lost text when closing", text:"If you close the panel (×, Esc or Close) with unsaved text, the app asks: <b>OK</b> = save to the sheet, <b>Cancel</b> = discard. Pressing Save twice no longer sends the item twice.", img:"updates/v31.4/monthly-drawer.jpg"}
-    ]
+      {type:"imp", icon:"⚠", title:"No more lost text when closing", text:"If you close the panel (×, Esc or Close) with unsaved text, the app asks: <b>OK</b> = save to the sheet, <b>Cancel</b> = discard. Pressing Save twice no longer sends the item twice.", img:"updates/v31.4/monthly-drawer.jpg"},
+      {type:"imp", icon:"📄", title:"Monthly report guide (PDF) and English labels", text:"Click <b>Send report</b> ▸ <b>Monthly report</b> ▸ pick the month ▸ <b>Send officially to the team</b>. The preview and the Compare tab are now fully in English. Step-by-step guide with screenshots: <b>Guide_Monthly_report_Thailand_Surgical_v31.4_EN.pdf</b>.", img:"updates/v31.4/monthly-send.jpg"}
+    ],
+    guide:"docs/Guide_Monthly_report_Thailand_Surgical_v31.4_EN.pdf", guideName:"Monthly report guide (Thailand Surgical)"
   }),
   E({
     id:"2026-10-12-v31.3", version:"v31.3", date:"2026-10-12",

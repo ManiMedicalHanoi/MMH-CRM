@@ -23533,6 +23533,15 @@ window.__tourClean=function(){
     _rec.onend=stopVoice; _rec.onerror=stopVoice;
     try{ _rec.start(); }catch(e){}
   };
+  /* nhóm Thái (tiếng Anh): chữ còn sót ở báo cáo tháng / so sánh / gửi báo cáo */
+  try{
+    if(window.DICT_EN){ DICT_EN["So theo"]="Compare by"; DICT_EN["Kết quả"]="Result"; DICT_EN["Kế hoạch"]="Plan"; }
+    if(window.RULES_EN) RULES_EN.unshift(
+      [/^(?:📘\s*|②\s*)?Kế hoạch tháng (\d+\/\d+)$/, "Plan for $1"],
+      [/^(?:①\s*)?Kết quả tháng (\d+\/\d+)$/, "Results for $1"],
+      [/^(.*)RESULT — kết quả$/, "$1RESULT — outcome"],
+      [/^(.*)PLAN — kế hoạch$/, "$1PLAN — plan"]);
+  }catch(_){}
 })();
 </script>
 <script src="tour/tour.js?v=1.1"></script>
