@@ -3979,7 +3979,7 @@ function buildNav(){
     if(t.grp!==lastGrp){ h+='<div class="grp">'+t.grp+'</div>'; lastGrp=t.grp; }
     h+='<button class="nvi" data-t="'+t.id+'" onclick="go(\''+t.id+'\')"><span class="ic">'+t.ic+'</span><span class="lb">'+t.lb+'</span></button>';
   });
-  h+='<div style="flex:1"></div><div style="padding:10px;font-size:10.5px;color:var(--mute);line-height:1.5">MMH CRM v31.1<br>'+
+  h+='<div style="flex:1"></div><div style="padding:10px;font-size:10.5px;color:var(--mute);line-height:1.5">MMH CRM v31.2<br>'+
      (isMgmt()?'<a href="'+DRIVE_FOLDER+'" target="_blank">📁 Folder ảnh Drive</a>':"")+'</div>';
   $("side").innerHTML=h;
   /* ⭐ v4.5 — thanh dưới trượt ngang, đủ mọi mục, bỏ nút "Thêm" */
@@ -20685,7 +20685,7 @@ window.QS2={ open:qsOpen };
 </script>
 
 <!-- ⭐ v30.3 — THÔNG BÁO CẬP NHẬT (chép từ Report Hub): dữ liệu updates/notes.js · tự hiện 7 ngày · nút "Có gì mới" trên thanh trên cùng -->
-<script src="updates/notes.js?v=31.1"></script>
+<script src="updates/notes.js?v=31.2"></script>
 <style id="upd-css">
 #upd,#upd-zoom{--t-pri:var(--blue);--t-pri2:var(--blue-d);--t-ink:var(--navy);--t-soft:var(--pale);--t-line:var(--lb2);--t-bg:#F6F8FA;--mmh-blue:var(--blue);--mmh-navy:var(--navy)}
 
@@ -23331,6 +23331,44 @@ window.__tourClean=function(){
 #tourMob{display:none}
 @media(max-width:720px){ #app header #tmBtn{display:none!important} #app header #tourMob{display:inline-flex!important;align-items:center} #app header #tourMob svg{width:19px;height:19px} }
 </style>
+<script id="v312-js">
+/* ══ v31.2 — nhóm Thái: dự trù chi phí công tác bằng Baht (THB), tên khoản chi phí tiếng Anh ══
+   tpEN() (I18N.on) ⇒ nhãn "Estimated costs THB", số tiền dạng 4,585 + "THB", tổng "6,247 THB", gợi ý khoản chi phí tiếng Anh
+   (Per diem ⇒ Daily allowance). Backend crm-thai dựng lại dòng chi phí từ costLines kèm "THB". Nhóm Việt Nam giữ nguyên VND. */
+(function(){
+  if(typeof tpCostPaint!=="function") return;
+  TPC_SUGGEST_EN=["Air ticket","Daily allowance","Hotel","Taxi / Grab","Train / bus ticket","Customer entertainment","Seminar fee","Other expenses"];
+  var EN=function(){ return typeof tpEN==="function" && tpEN(); };
+  var fmt0=tpFmt;
+  window.tpFmt=tpFmt=function(n){ return EN()? (n?Number(n).toLocaleString("en-US"):"") : fmt0(n); };
+  var tot0=tpCostTotal;
+  window.tpCostTotal=tpCostTotal=function(){
+    if(!EN()) return tot0.apply(this,arguments);
+    var s=TPC.reduce(function(a,r){ return a+(r.a||0); },0), t=$("tp-total"); if(t) t.textContent=(s?s.toLocaleString("en-US"):"0")+" THB"; return s;
+  };
+  var paint0=tpCostPaint;
+  window.tpCostPaint=tpCostPaint=function(){
+    paint0.apply(this,arguments);
+    if(!EN()) return;
+    document.querySelectorAll("#tp-costs .tpc-a span").forEach(function(x){ x.textContent="THB"; });
+    document.querySelectorAll("#tp-costs .tpc-d").forEach(function(x){ x.placeholder="Description, e.g. Air ticket"; });
+    document.querySelectorAll("#tp-costs .tpc-a input").forEach(function(x){ x.placeholder="Amount"; });
+  };
+  var form0=tripProposeForm;
+  window.tripProposeForm=tripProposeForm=function(){
+    var r=form0.apply(this,arguments);
+    if(EN()){
+      TPC.forEach(function(x){ if(/^(per diem|công tác phí)$/i.test(String(x.d||"").trim())) x.d="Daily allowance"; });
+      var c=$("tp-costs"), f=c&&c.closest(".fld"), lb=f&&f.querySelector("label");
+      if(lb && lb.firstChild && lb.firstChild.nodeType===3) lb.firstChild.nodeValue="Estimated costs (THB) ";
+      var add=f&&f.querySelector(".tpc-foot .mini"); if(add) add.textContent="＋ Add expense";
+      var sum=f&&f.querySelector(".tpc-sum"); if(sum && sum.firstChild && sum.firstChild.nodeType===3) sum.firstChild.nodeValue="Total estimated: ";
+      tpCostPaint();
+    }
+    return r;
+  };
+})();
+</script>
 <script src="tour/tour.js?v=1.1"></script>
 <script src="tour/tours.js?v=31.1"></script>
 </body>
