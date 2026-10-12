@@ -7,6 +7,15 @@
 function E(u){ u.en={ title:u.title, items:u.items.map(function(i){ return { title:i.title, text:i.text }; }) }; return u; }
 window.MMH_UPDATES = [
   E({
+    id:"2026-10-12-v31.3", version:"v31.3", date:"2026-10-12",
+    title:"Trip costs in several currencies, with a separate total for each",
+    summary:"In the business trip request, each expense line now has its own currency (VND, THB or USD), and the total is added up separately for each currency.",
+    items:[
+      {type:"new", icon:"💱", title:"Pick a currency for each expense", text:"Click <b>Business trip proposal</b> ▸ <b>Estimated costs</b>: next to each amount, choose <b>VND</b>, <b>THB</b> or <b>USD</b>. The Thailand team starts with THB, Vietnam teams with VND.", img:"updates/v31.3/trip-currency.jpg"},
+      {type:"imp", icon:"Σ", title:"Separate total for each currency", text:"The total shows one figure per currency, e.g. <b>4,585 THB · 1.200.000 VND</b>, never mixed. The approval email, the Business Trip file and the Approve trips list show the same totals."}
+    ]
+  }),
+  E({
     id:"2026-10-12-v31.2", version:"v31.2", date:"2026-10-12",
     title:"Thailand team: trip costs in Thai Baht, expense names in English",
     summary:"In the business trip request, the Thailand team now enters estimated costs in <b>THB</b>, and every expense name is in English.",
