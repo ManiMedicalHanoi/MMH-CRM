@@ -3979,7 +3979,7 @@ function buildNav(){
     if(t.grp!==lastGrp){ h+='<div class="grp">'+t.grp+'</div>'; lastGrp=t.grp; }
     h+='<button class="nvi" data-t="'+t.id+'" onclick="go(\''+t.id+'\')"><span class="ic">'+t.ic+'</span><span class="lb">'+t.lb+'</span></button>';
   });
-  h+='<div style="flex:1"></div><div style="padding:10px;font-size:10.5px;color:var(--mute);line-height:1.5">MMH CRM v31.2<br>'+
+  h+='<div style="flex:1"></div><div style="padding:10px;font-size:10.5px;color:var(--mute);line-height:1.5">MMH CRM v31.3<br>'+
      (isMgmt()?'<a href="'+DRIVE_FOLDER+'" target="_blank">📁 Folder ảnh Drive</a>':"")+'</div>';
   $("side").innerHTML=h;
   /* ⭐ v4.5 — thanh dưới trượt ngang, đủ mọi mục, bỏ nút "Thêm" */
@@ -20685,7 +20685,7 @@ window.QS2={ open:qsOpen };
 </script>
 
 <!-- ⭐ v30.3 — THÔNG BÁO CẬP NHẬT (chép từ Report Hub): dữ liệu updates/notes.js · tự hiện 7 ngày · nút "Có gì mới" trên thanh trên cùng -->
-<script src="updates/notes.js?v=31.2"></script>
+<script src="updates/notes.js?v=31.3"></script>
 <style id="upd-css">
 #upd,#upd-zoom{--t-pri:var(--blue);--t-pri2:var(--blue-d);--t-ink:var(--navy);--t-soft:var(--pale);--t-line:var(--lb2);--t-bg:#F6F8FA;--mmh-blue:var(--blue);--mmh-navy:var(--navy)}
 
@@ -23167,7 +23167,7 @@ function tk(){ try{ return (window.AUTH && AUTH.tk && AUTH.tk()) || ""; }catch(_
 function isDir(u){ return !!u && (u.level==="director" || u.local==="nt.ha"); }
 function can(){ var u=me(); return !!u && (isDir(u) || u.admin); }
 function dmy(iso){ var m=/^(\d{4})-(\d{2})-(\d{2})/.exec(iso||""); return m?m[3]+"/"+m[2]+"/"+m[1]:""; }
-function money(n){ return n?String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g,"."):""; }
+function money(n){ if(n && isNaN(Number(n))) return String(n); return n?String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g,"."):""; }
 function lsG(k){ try{ return localStorage.getItem(k); }catch(_){ return null; } }
 function lsS(k,v){ try{ localStorage.setItem(k,v); }catch(_){} }
 function call(params, ms){
@@ -23369,6 +23369,87 @@ window.__tourClean=function(){
   };
 })();
 </script>
+<script id="v313-js">
+/* ══ v31.3 — chi phí công tác NHIỀU ĐƠN VỊ TIỀN: mỗi dòng chọn VND / THB / USD, tổng cộng RIÊNG từng đơn vị ══
+   Mặc định: nhóm Thái (tiếng Anh) THB, nhóm Việt Nam VND. Gửi đi: costLines [{d,a,c}], estimatedCost "Hotel: 1,662 THB" mỗi dòng,
+   totalCost = số (1 đơn vị) hoặc chữ "4,585 THB; 1.200.000 VND" (nhiều đơn vị). Sửa chuyến cũ: đọc lại đơn vị từ cuối dòng (thiếu ⇒ VND). */
+(function(){
+  if(typeof tpCostPaint!=="function") return;
+  var CURS=["VND","THB","USD"];
+  var EN=function(){ return typeof tpEN==="function" && tpEN(); };
+  var DEF=function(){ return EN()?"THB":"VND"; };
+  var cf=function(n,c){ n=Math.round(+n||0); return c==="VND"?String(n).replace(/\B(?=(\d{3})+(?!\d))/g,"."):n.toLocaleString("en-US"); };
+  window.tpCurTotals=function(rows){ var t={},o=[]; (rows||TPC).forEach(function(r){ if(!r.a) return; var c=r.c||DEF(); if(!(c in t)){ t[c]=0; o.push(c); } t[c]+=r.a; }); return o.map(function(c){ return { c:c, a:t[c] }; }); };
+  var totTxt=function(sep){ var T=tpCurTotals(); return T.length?T.map(function(x){ return cf(x.a,x.c)+" "+x.c; }).join(sep||" · "):("0 "+DEF()); };
+  /* "Hotel: 1,662 THB" ⇒ {d,a,c} */
+  window.tpParseCostLine=function(l){ var m=/^(.*?)[:：]\s*([\d.,\s]+)\s*(VND|THB|USD|đ|d|฿|\$)?\s*$/i.exec(String(l||"").trim()); if(!m) return { d:String(l||"").trim(), a:0, c:DEF() };
+    var c=String(m[3]||"").toUpperCase(); c=c==="฿"?"THB":c==="$"?"USD":/^(VND|THB|USD)$/.test(c)?c:"VND"; return { d:m[1].trim(), a:tpNum(m[2]), c:c }; };
+  window.tpCostPaint=tpCostPaint=function(){
+    var box=$("tp-costs"); if(!box) return; var en=EN();
+    TPC.forEach(function(r){ if(!r.c) r.c=DEF(); });
+    box.innerHTML=TPC.map(function(r,i){
+      return '<div class="tpc-row"><input class="inp tpc-d" list="tp-dl-costd" placeholder="'+(en?'Description, e.g. Air ticket':'Mô tả — vd: Vé máy bay')+'" value="'+esc(r.d)+'" oninput="TPC['+i+'].d=this.value">'
+        +'<div class="tpc-a"><input class="inp" inputmode="numeric" placeholder="'+(en?'Amount':'Số tiền')+'" value="'+esc(r.a?cf(r.a,r.c):"")+'" oninput="tpCostAmt('+i+',this)">'
+        +'<select class="tpc-cur" aria-label="'+(en?'Currency':'Đơn vị tiền')+'" onchange="TPC['+i+'].c=this.value;tpCostPaint()">'+CURS.map(function(c){ return '<option'+(c===r.c?' selected':'')+'>'+c+'</option>'; }).join("")+'</select></div>'
+        +'<button type="button" class="tpc-x" title="'+(en?'Remove':'Xoá dòng')+'" onclick="TPC.splice('+i+',1);if(!TPC.length)TPC.push({d:\'\',a:0});tpCostPaint()">✕</button></div>';
+    }).join("");
+    tpCostTotal();
+  };
+  window.tpCostAmt=tpCostAmt=function(i,el){
+    var n=tpNum(el.value); TPC[i].a=n;
+    var pos=el.value.length-(el.selectionStart||0); el.value=n?cf(n,TPC[i].c||DEF()):"";
+    try{ var p=Math.max(0,el.value.length-pos); el.setSelectionRange(p,p); }catch(_){}
+    tpCostTotal();
+  };
+  window.tpCostTotal=tpCostTotal=function(){
+    var s=TPC.reduce(function(a,r){ return a+(r.a||0); },0), t=$("tp-total"); if(t) t.textContent=totTxt(" · "); return s;
+  };
+  window.tpCostAdd=tpCostAdd=function(){ var last=TPC[TPC.length-1]; TPC.push({d:"",a:0,c:(last&&last.c)||DEF()}); tpCostPaint(); var r=document.querySelectorAll("#tp-costs .tpc-d"); if(r.length) r[r.length-1].focus(); };
+  var form0=tripProposeForm;
+  window.tripProposeForm=tripProposeForm=function(){
+    var r=form0.apply(this,arguments);
+    var c=$("tp-costs"), f=c&&c.closest(".fld"), lb=f&&f.querySelector("label");
+    if(lb && lb.firstChild && lb.firstChild.nodeType===3) lb.firstChild.nodeValue=EN()?"Estimated costs ":"Estimated costs ";
+    var h=f&&f.querySelector(".tp-hint"); if(h) h.textContent=EN()?"one item per row — description, amount, currency":"mỗi dòng 1 khoản — mô tả, số tiền, đơn vị tiền";
+    if(TP && TP.edit){ TPC=String(TP.edit.estCost||"").split(/\n+/).map(function(l){ return l.trim(); }).filter(Boolean).map(tpParseCostLine);
+      if(!TPC.length) TPC=[{ d:EN()?"Expense":"Chi phí", a:+TP.edit.total||0, c:DEF() }]; }
+    tpCostPaint();
+    return r;
+  };
+  /* gửi đi: dựng lại chi phí kèm đơn vị tiền */
+  var hub0=tripHub;
+  window.tripHub=tripHub=function(body){
+    var a=String((body&&body.action)||"");
+    if(body && /^(tripPropose|tripUpdate)$/.test(a) && body.trip){
+      try{ var f=typeof body.trip==="string"?JSON.parse(body.trip):body.trip;
+        var L=TPC.filter(function(r){ return String(r.d||"").trim()||r.a; }), T=tpCurTotals(L);
+        f.costLines=L.map(function(r){ return { d:String(r.d||"").trim(), a:r.a||0, c:r.c||DEF() }; });
+        f.estimatedCost=L.map(function(r){ return (String(r.d||"").trim()||(EN()?"Expense":"Chi phí"))+": "+cf(r.a,r.c||DEF())+" "+(r.c||DEF()); }).join("\n");
+        f.totalCost=T.length===1?String(T[0].a):T.map(function(x){ return cf(x.a,x.c)+" "+x.c; }).join("; ");
+        f.currency=T.length===1?T[0].c:"MIXED";
+        body.trip=typeof body.trip==="string"?JSON.stringify(f):f;
+      }catch(_){}
+    }
+    return hub0.apply(this,arguments);
+  };
+  /* xem chuyến: dòng "Tổng" cộng riêng từng đơn vị */
+  if(typeof tripViewPaint==="function"){
+    var view0=tripViewPaint;
+    window.tripViewPaint=tripViewPaint=function(t){
+      var r=view0.apply(this,arguments);
+      try{ if(t && t.estCost){ var L=String(t.estCost).split(/\n+/).filter(Boolean).map(tpParseCostLine), T=tpCurTotals(L);
+        if(T.length && /\b(VND|THB|USD)\s*$/im.test(t.estCost)){
+          document.querySelectorAll("#mBody div").forEach(function(d){ if(!d.children.length && /^(Tổng|Total):/.test(d.textContent.trim())) d.textContent=(EN()?"Total: ":"Tổng: ")+T.map(function(x){ return cf(x.a,x.c)+" "+x.c; }).join(" · "); });
+        } } }catch(_){}
+      return r;
+    };
+  }
+})();
+</script>
+<style id="v313-css">
+.tpc-a select.tpc-cur{border:0;background:transparent;font:inherit;font-size:12px;font-weight:700;color:var(--mute,#6B7C93);padding:0 2px;cursor:pointer;flex:none}
+.tpc-a select.tpc-cur:focus{outline:2px solid var(--t-pri,#3A5CAA);border-radius:6px}
+</style>
 <script src="tour/tour.js?v=1.1"></script>
 <script src="tour/tours.js?v=31.1"></script>
 </body>
