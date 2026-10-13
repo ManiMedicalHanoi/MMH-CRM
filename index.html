@@ -3994,7 +3994,7 @@ function buildNav(){
     if(t.grp!==lastGrp){ h+='<div class="grp">'+t.grp+'</div>'; lastGrp=t.grp; }
     h+='<button class="nvi" data-t="'+t.id+'" onclick="go(\''+t.id+'\')"><span class="ic">'+t.ic+'</span><span class="lb">'+t.lb+'</span></button>';
   });
-  h+='<div style="flex:1"></div><div style="padding:10px;font-size:10.5px;color:var(--mute);line-height:1.5">MMH CRM v31.8<br>'+
+  h+='<div style="flex:1"></div><div style="padding:10px;font-size:10.5px;color:var(--mute);line-height:1.5">MMH CRM v31.9<br>'+
      (isMgmt()?'<a href="'+DRIVE_FOLDER+'" target="_blank">📁 Folder ảnh Drive</a>':"")+'</div>';
   $("side").innerHTML=h;
   /* ⭐ v4.5 — thanh dưới trượt ngang, đủ mọi mục, bỏ nút "Thêm" */
@@ -6466,7 +6466,7 @@ function taskEditorHTML(w){
       +'<button class="mini" onclick="toggleVoice(\'tk-result\',this)">🎤 Nói</button></div>'
       +'<textarea id="tk-result" style="min-height:176px" oninput="markDirty(\'result\',this.value)" placeholder="'+phAttr(RESULT_PH_TXT)+'">'+esc(w.result||"")+'</textarea>'
       +'<div style="font-size:11.5px;color:'+(hasMeet(w)?"var(--ok)":"var(--dang)")+';margin-top:6px;font-weight:700" id="tk-meetflag">'
-        +(hasMeet(w)?"✓ Đã ghi CBC (người gặp)":"⚠️ Bắt buộc có dòng “Người gặp:” — bấm nút CBC ở trên")+'</div>'
+        +(hasMeet(w)?(window.I18N&&I18N.on?"✓ CBC (person met) recorded":"✓ Đã ghi CBC (người gặp)"):(window.I18N&&I18N.on?"⚠️ A “Person met:” line is required — tap the CBC button above":"⚠️ Bắt buộc có dòng “Người gặp:” — bấm nút CBC ở trên"))+'</div>'
       +(stk.length?"":'<button class="mini" style="margin-top:8px;width:100%;justify-content:center;height:34px" onclick="openStakeAdd(\'tk-result\')">＋ Thêm Key stakeholder cho địa bàn này</button>')+'</div>'
 
     +'<div class="te-sec"><div class="te-g2">'
@@ -6526,8 +6526,8 @@ function markDirty(field,val){
     var f=$("tk-meetflag"); if(f){
       var has=!!String(val||"").trim(), ok=MEET_RE.test(val||"");
       f.style.color=!has?"var(--mute)":(ok?"var(--ok)":"var(--dang)");
-      f.textContent=!has?"Để trống nếu mới lên kế hoạch — ghi kết quả sau khi đi"
-                   :(ok?"✓ Đã ghi CBC (người gặp)":"⚠️ Đã có nội dung thì bắt buộc dòng “Người gặp:” — bấm nút CBC ở trên");
+      f.textContent=!has?(window.I18N&&I18N.on?"Leave blank if only planned — fill in the result after the visit":"Để trống nếu mới lên kế hoạch — ghi kết quả sau khi đi")
+                   :(ok?(window.I18N&&I18N.on?"✓ CBC (person met) recorded":"✓ Đã ghi CBC (người gặp)"):(window.I18N&&I18N.on?"⚠️ A “Person met:” line is required — tap the CBC button above":"⚠️ Đã có nội dung thì bắt buộc dòng “Người gặp:” — bấm nút CBC ở trên"));
     }
   }
   if(field==="result"||field==="status"||field==="nextAction"||field==="typeAction") tkReqSync();
@@ -7314,8 +7314,8 @@ function ntMeetFlag(){
     f.textContent="Có thể để trống nếu mới lên kế hoạch — ghi kết quả sau khi đi";
   }else{
     f.style.color=ok?"var(--ok)":"var(--dang)";
-    f.textContent=ok?"✓ Đã ghi CBC (người gặp) — có thể lưu"
-                    :"⚠️ Đã có nội dung thì bắt buộc dòng “Người gặp:” — bấm nút CBC ở trên";
+    f.textContent=ok?(window.I18N&&I18N.on?"✓ CBC (person met) recorded — ready to save":"✓ Đã ghi CBC (người gặp) — có thể lưu")
+                    :(window.I18N&&I18N.on?"⚠️ A “Person met:” line is required — tap the CBC button above":"⚠️ Đã có nội dung thì bắt buộc dòng “Người gặp:” — bấm nút CBC ở trên");
   }
   ntAutoStatus();
 }
@@ -20721,7 +20721,7 @@ window.QS2={ open:qsOpen };
 </script>
 
 <!-- ⭐ v30.3 — THÔNG BÁO CẬP NHẬT (chép từ Report Hub): dữ liệu updates/notes.js · tự hiện 7 ngày · nút "Có gì mới" trên thanh trên cùng -->
-<script src="updates/notes.js?v=31.8"></script>
+<script src="updates/notes.js?v=31.9"></script>
 <style id="upd-css">
 #upd,#upd-zoom{--t-pri:var(--blue);--t-pri2:var(--blue-d);--t-ink:var(--navy);--t-soft:var(--pale);--t-line:var(--lb2);--t-bg:#F6F8FA;--mmh-blue:var(--blue);--mmh-navy:var(--navy)}
 
@@ -24829,5 +24829,17 @@ window.V317NPP={ list:list, apply:apply };
 <script src="testflow/testflow.js?v=1.0"></script>
 <script src="tour/tour.js?v=1.1"></script>
 <script src="tour/tours.js?v=31.8"></script>
+<script id="v319-i18n">
+/* v31.9 — bổ sung bản dịch EN (nhóm Thái): ô chọn account "N kết quả" */
+(function(){ try{ if(typeof RULES_EN!=="undefined" && RULES_EN.unshift){
+  RULES_EN.unshift([/^(\d+\+?) kết quả · bấm chọn hoặc gõ để lọc$/, "$1 results · click to pick or type to filter"]);
+  RULES_EN.unshift([/^(\d+\+?) kết quả$/, "$1 results"]);
+  RULES_EN.unshift([/^⏳ Ảnh chờ gửi · ⚠ không lấy được GPS$/, "⏳ Photo waiting to send · ⚠ no GPS fix"]);
+  RULES_EN.unshift([/^⏳ Ảnh chờ gửi · (.*)$/, "⏳ Photo waiting to send · $1"]);
+  RULES_EN.unshift([/^📷 Mở camera chụp ảnh$/, "📷 Open camera"]); RULES_EN.unshift([/^Mở camera chụp ảnh$/, "Open camera"]);
+  RULES_EN.unshift([/^📷 Chụp đè ảnh mới$/, "📷 Retake photo"]);
+  RULES_EN.unshift([/^Ảnh nén ≤1600px, tự lưu kèm toạ độ GPS và địa chỉ nơi chụp\.?$/, "Photo compressed to ≤1600px, saved with GPS coordinates and the address where it was taken."]); RULES_EN.unshift([/^Chụp đè ảnh mới$/, "Retake photo"]);
+} }catch(_){} })();
+</script>
 </body>
 </html>

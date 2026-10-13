@@ -7,6 +7,14 @@
 function E(u){ u.en={ title:u.title, items:u.items.map(function(i){ return { title:i.title, text:i.text }; }) }; return u; }
 window.MMH_UPDATES = [
   E({
+    id:"2026-10-13-v31.9", version:"v31.9", date:"2026-10-13",
+    title:"English text fixes in the visit form and photo block",
+    summary:"The field-visit form, the account picker and the photo block no longer show Vietnamese text in English mode.",
+    items:[
+      { type:"fix", icon:"🌐", title:"Missing English text", text:"Open a field visit ▸ the Task Result hints (\"CBC (person met) recorded\"), the account picker (\"N results\") and the photo block (Open camera, Photo waiting to send, GPS note) are now in English." }
+    ]
+  }),
+  E({
     id:"2026-10-13-v31.8", version:"v31.8", date:"2026-10-13",
     title:"Business trips: proposal only · TEST data screen no longer hangs",
     summary:"The <b>Approve trips</b> button is removed from the CRM — you only <b>propose</b> trips here; the Director approves through the Business Trip email. Admin TEST mode now shows a clear message with <b>Rebuild</b> / <b>Exit TEST</b> if the TEST data cannot be prepared.",
