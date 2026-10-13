@@ -106,3 +106,11 @@ Kiến trúc & quy ước giống MMH Report Hub (repo `ManiMedicalHanoi/MMH-Rep
   deleteRow weekly / deletePhoto / uploadPhoto ⇒ backend `wkResolve_` tìm đúng dòng, `stale` ⇒ báo tải lại; (2) **Công việc khác ghi tức thì** (`ATS_ON()`): bọc `hubPost` ⇒ hàng đợi `OQ`
   (`localStorage.mmh_crm_oq_<nhóm>`), cập nhật màn hình trước, gửi tuần tự cùng `rid`, kèm `expect` / `parentName` (tên việc gốc `_sn`) vì số No của ALL TASK đánh lại; việc chưa ghi có No tạm `t…`
   (`_oq`); `loadOther` phủ lại lệnh chưa ghi; chip `#oqc`. Nhóm Thái giữ cách cũ. Ảnh phát hành chức năng chỉ của nhóm VN: giao diện tiếng Việt, dữ liệu giả.
+- **v31.7 — Chế độ TEST = hộp cát (khối `sbx-early` đầu `<head>` + `sbx-js`, backend `MMH_CrmSandbox.gs` + `MMH_TestMode.gs` v2.0)**: Admin ▸ nút **TEST** (`#tmBtn` / Thêm ▸ Tiện ích) ▸ chọn nhóm
+  (Dental · Surgical · Eyeless) + người (sales, trưởng nhóm, Tuyen, Nguyen Ha, Giang) ⇒ `localStorage.mmh_sbx_crm={team,as}`, tải lại: `grant(as)`, `AUTH.user()` trả người đóng vai,
+  chip `#sbx-chip` (đổi vai · Làm mới dữ liệu TEST · Mở file TEST · Thoát). Bộ nhớ máy tách riêng: localStorage `sbx_…`, IndexedDB `…_sbx` (dữ liệu thật không lẫn).
+  Lệnh tới backend CRM Dental / Surgical / Eyeless gắn `tm=1&tmSb=1&tmAs=<người>` ⇒ backend dùng FILE SHEET TEST + THƯ MỤC TEST riêng có dữ liệu ảo (tự dựng lần đầu:
+  `tmSetup` → màn chờ hỏi `tmInfo`); Training Hub `rhCustTrain` + KPI gắn `tm=1` (bản TEST cũ); lệnh GHI tới hệ thống khác (Report Hub…) giả lập trên máy (danh sách đọc `READ`).
+  Không giải thích chế độ TEST trên app (người dùng yêu cầu). Nhóm Thái chưa có hộp cát. Chế độ TEST cũ (`testflow.js`, tên TEST) không còn lối vào trong CRM.
+  **NPP theo PIC (khối `v317-npp`)**: đơn hàng Dental — ô Partner tự điền theo PIC từ `bundle.nppByPic` (backend `nppByPic_` = K68_NPP): Viet → Nam Dũng, Vinh → S.P.I (khoá),
+  Phuong → chọn Meci / Việt Thái; Partner type = Distributor.

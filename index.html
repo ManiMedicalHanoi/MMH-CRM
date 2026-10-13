@@ -2,6 +2,21 @@
 <html lang="vi" data-theme="light">
 <head>
 <meta charset="utf-8">
+<script id="sbx-early">
+/* ⭐ v31.7 — CHẾ ĐỘ TEST (hộp cát) của Admin: tách hẳn bộ nhớ máy (localStorage "sbx_…", IndexedDB "…_sbx") ⇒ dữ liệu TEST không lẫn dữ liệu thật */
+(function(){ try{
+  var raw=localStorage.getItem("mmh_sbx_crm"); if(!raw) return;
+  var sb=JSON.parse(raw), tk=JSON.parse(localStorage.getItem("mmh_tk")||"null");
+  if(!sb || !sb.as || !tk || !tk.user || !tk.user.admin){ localStorage.removeItem("mmh_sbx_crm"); return; }
+  window.__CRM_SB=sb;
+  var KEEP=/^(mmh_tk|mmh_sbx_crm|mmh_auth_later|mmh_last_email|mmh_theme|mmh_tour_seen|mmh_lang|sbx_)/, P=Storage.prototype, g=P.getItem, st=P.setItem, rm=P.removeItem;
+  function m(o,x){ x=String(x); return (o===window.localStorage && !KEEP.test(x)) ? "sbx_"+x : x; }
+  P.getItem=function(x){ return g.call(this, m(this,x)); };
+  P.setItem=function(x,v){ return st.call(this, m(this,x), v); };
+  P.removeItem=function(x){ return rm.call(this, m(this,x)); };
+  if(window.indexedDB){ var op=indexedDB.open; indexedDB.open=function(n,v){ return v==null ? op.call(indexedDB, String(n)+"_sbx") : op.call(indexedDB, String(n)+"_sbx", v); }; }
+}catch(e){} })();
+</script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1">
 <meta name="theme-color" content="#FFFFFF">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -3979,7 +3994,7 @@ function buildNav(){
     if(t.grp!==lastGrp){ h+='<div class="grp">'+t.grp+'</div>'; lastGrp=t.grp; }
     h+='<button class="nvi" data-t="'+t.id+'" onclick="go(\''+t.id+'\')"><span class="ic">'+t.ic+'</span><span class="lb">'+t.lb+'</span></button>';
   });
-  h+='<div style="flex:1"></div><div style="padding:10px;font-size:10.5px;color:var(--mute);line-height:1.5">MMH CRM v31.6<br>'+
+  h+='<div style="flex:1"></div><div style="padding:10px;font-size:10.5px;color:var(--mute);line-height:1.5">MMH CRM v31.7<br>'+
      (isMgmt()?'<a href="'+DRIVE_FOLDER+'" target="_blank">📁 Folder ảnh Drive</a>':"")+'</div>';
   $("side").innerHTML=h;
   /* ⭐ v4.5 — thanh dưới trượt ngang, đủ mọi mục, bỏ nút "Thêm" */
@@ -19527,6 +19542,13 @@ function grant(pic){
   return true;
 }
 (function(){ var u=AUTH.user(); if(!u) return;
+  /* ⭐ v31.7 — Chế độ TEST (hộp cát): Admin đóng vai người đã chọn trên file TEST của nhóm (khối sbx-js) */
+  var sbx=window.__CRM_SB;
+  if(sbx && u.admin && ROLES[sbx.as]){
+    try{ localStorage.removeItem(LS_MGMT); localStorage.removeItem(LS_TH); }catch(_){}
+    grant(sbx.as); if(TEAMS[sbx.team]) try{ localStorage.setItem(LS_TEAM, sbx.team); }catch(_){}
+    return;
+  }
   /* ⭐ v31.5 — Chế độ TEST (testflow/testflow.js): Admin dùng CRM như người dùng "TEST" của nhóm đã chọn — ghi THẬT, email chỉ về Admin */
   var tf=null; try{ tf=JSON.parse(localStorage.getItem("mmh_test_crm")||"null"); }catch(_){}
   if(tf && tf.on && u.admin){
@@ -19685,7 +19707,7 @@ function nudge(on){
   setTimeout(function(){
     var t=AUTH.tk(); if(!t) return;
     AUTH.call("rhAuthMe",{ tk:t }).then(function(d){
-      if(d && d.ok && d.user){ var p=AUTH.role(d.user.pic); if(p && p!==S.user.pic && !window.__CRM_TEST && !window.__CRM_TF){ try{ if(sessionStorage.getItem("mmh_au_fix")) return; sessionStorage.setItem("mmh_au_fix","1"); }catch(_){} enterAs(p); } return; }
+      if(d && d.ok && d.user){ var p=AUTH.role(d.user.pic); if(p && p!==S.user.pic && !window.__CRM_TEST && !window.__CRM_TF && !window.__CRM_SB){ try{ if(sessionStorage.getItem("mmh_au_fix")) return; sessionStorage.setItem("mmh_au_fix","1"); }catch(_){} enterAs(p); } return; }
       if(d && d.code==="AUTH"){ AUTH.clear(); toast((d.error||"Phiên đăng nhập hết hiệu lực.")+" Vui lòng xác thực lại email.","warn",6000); nudge(true); }
     }).catch(function(){});
   }, 4000);
@@ -20699,7 +20721,7 @@ window.QS2={ open:qsOpen };
 </script>
 
 <!-- ⭐ v30.3 — THÔNG BÁO CẬP NHẬT (chép từ Report Hub): dữ liệu updates/notes.js · tự hiện 7 ngày · nút "Có gì mới" trên thanh trên cùng -->
-<script src="updates/notes.js?v=31.6"></script>
+<script src="updates/notes.js?v=31.7"></script>
 <style id="upd-css">
 #upd,#upd-zoom{--t-pri:var(--blue);--t-pri2:var(--blue-d);--t-ink:var(--navy);--t-soft:var(--pale);--t-line:var(--lb2);--t-bg:#F6F8FA;--mmh-blue:var(--blue);--mmh-navy:var(--navy)}
 
@@ -22890,8 +22912,8 @@ function entry(){
   var h=document.querySelector("#app header");
   if(h && !document.getElementById("tmBtn")){
     /* ⭐ v31.5 — mở hộp chọn Chế độ TEST (ghi thật dưới tên TEST, testflow.js); "Xem như một bạn sales (không lưu)" là lựa chọn phụ trong hộp */
-    var b=document.createElement("button"); b.className="tb2"; b.id="tmBtn"; b.title=(typeof isTH==="function"&&isTH())?"TEST mode: try every function as user TEST (real saves, e-mails to the Admin only)":"Chế độ TEST: thử mọi chức năng dưới tên TEST (ghi thật, email chỉ về Admin)";
-    b.innerHTML='<span>'+((typeof isTH==="function"&&isTH())?"TEST mode":"Chế độ TEST")+'</span>'; b.onclick=function(){ if(window.TESTFLOW) TESTFLOW.pick(); else CRMTEST.pick(); };
+    var b=document.createElement("button"); b.className="tb2"; b.id="tmBtn"; b.title="TEST";
+    b.innerHTML='<span>TEST</span>'; b.onclick=function(){ if(window.SBX) SBX.pick(); else if(window.TESTFLOW) TESTFLOW.pick(); else CRMTEST.pick(); };
     var us=document.getElementById("btnUser"); if(us) h.insertBefore(b, us); else h.appendChild(b);
   }
 }
@@ -22901,7 +22923,7 @@ if(mo) V30.more=function(){ var r=mo.apply(this,arguments);
     if(g && !g.querySelector("[data-tm]")){ var b=document.createElement("button"); b.setAttribute("data-tm","1");
       var tf=!!window.__CRM_TF, th=(typeof isTH==="function"&&isTH());
       b.innerHTML=(typeof V30_ICON==="function"?V30_ICON("check"):"")+'<span>'+(TM?"Thoát chế độ thử":tf?(th?"TEST mode · data flow":"Chế độ TEST · Luồng dữ liệu"):(th?"TEST mode":"Chế độ TEST"))+'</span>';
-      b.onclick=function(){ document.getElementById("v30-more").classList.remove("show"); if(TM) CRMTEST.stop(); else if(window.TESTFLOW) (tf?TESTFLOW.open():TESTFLOW.pick()); else CRMTEST.pick(); }; g.appendChild(b); } } }catch(_){}
+      b.onclick=function(){ document.getElementById("v30-more").classList.remove("show"); if(window.SBX) SBX.pick(); else if(TM) CRMTEST.stop(); else if(window.TESTFLOW) (tf?TESTFLOW.open():TESTFLOW.pick()); else CRMTEST.pick(); }; g.appendChild(b); } } }catch(_){}
   return r; };
 (function wait(){ var a=document.getElementById("app"); if(a && a.classList.contains("on")) entry(); else setTimeout(wait, 1200); })();
 if(!TM) return;
@@ -24556,8 +24578,238 @@ window.addEventListener("online", function(){ sched(500); });
 setTimeout(function(){ load(); try{ if(S.other && S.other.keys) stamp(S.other.keys); }catch(_){} paint(); if(Q.length) sched(1500); }, 2500);
 })();
 </script>
+<style id="sbx-css">
+/* ⭐ v31.7 — chế độ TEST (hộp cát) */
+#sbx-chip{display:inline-flex;align-items:center;gap:6px;height:30px;padding:0 10px;border-radius:15px;border:1px solid #E8C95A;background:#FFF6D6;color:#5A4500;font:700 12px/1 Aptos,"Segoe UI",sans-serif;cursor:pointer;white-space:nowrap}
+#sbx-chip b{background:#1E3A4F;color:#FFE100;border-radius:5px;padding:2px 5px;font-size:10.5px;letter-spacing:.05em}
+#sbx-strip{position:fixed;left:0;right:0;top:0;height:3px;background:#F2B705;z-index:10080;pointer-events:none}
+.sbx-teams{display:flex;gap:6px;margin:0 0 12px;flex-wrap:wrap}
+.sbx-teams button{border:1px solid #D7DEE6;background:#fff;border-radius:999px;padding:6px 14px;font:600 13px Aptos,"Segoe UI",sans-serif;color:#34465A;cursor:pointer}
+.sbx-teams button.on{border-color:var(--c-pri,#3A5CAA);background:#F0F5FF;color:#003047}
+.sbx-h{font-size:11.5px;font-weight:700;color:#6B7B8C;text-transform:uppercase;letter-spacing:.04em;margin:10px 0 6px}
+.sbx-people{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:8px}
+.sbx-people button{display:flex;flex-direction:column;align-items:flex-start;gap:2px;text-align:left;border:1px solid #E6EAEF;background:#fff;border-radius:12px;padding:9px 12px;cursor:pointer;font-family:Aptos,"Segoe UI",sans-serif}
+.sbx-people button b{font-size:14px;color:#003047}.sbx-people button span{font-size:11.5px;color:#6B7B8C}
+.sbx-people button.on{border-color:#E8C95A;background:#FFFBEA}
+#sbx-wait{position:fixed;inset:0;z-index:10090;background:rgba(255,255,255,.92);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:14px;font:600 15px Aptos,"Segoe UI",sans-serif;color:#003047}
+#sbx-wait i{width:34px;height:34px;border-radius:50%;border:3px solid #CFE2F3;border-top-color:#3A5CAA;animation:sbxr 1s linear infinite}
+#sbx-wait small{font-weight:500;color:#6B7B8C;font-size:12.5px}
+@keyframes sbxr{to{transform:rotate(360deg)}}
+</style>
+<script id="sbx-js">
+/* ════════════════════════════════════════════════════════════════════════════════════════
+   ⭐ v31.7 (13/10/2026) — CHẾ ĐỘ TEST = HỘP CÁT (backend MMH_CrmSandbox.gs + MMH_TestMode.gs v2.0)
+   Admin ▸ nút TEST ▸ chọn nhóm + người (sales · trưởng nhóm · HOD · Giám đốc · Admin) ⇒ app chạy như người đó trên FILE SHEET TEST
+   riêng của nhóm (dữ liệu ảo có sẵn: địa bàn, khách hàng, CBC, đi địa bàn có ảnh, đơn hàng qua NPP, thuyết trình, công tác chờ duyệt),
+   ảnh / chứng từ vào THƯ MỤC TEST riêng, email chỉ về Admin. Không giải thích trên app (người dùng yêu cầu) — chỉ chip "TEST · <người>".
+   · localStorage.mmh_sbx_crm = {team, as}; khối sbx-early (đầu <head>) tách bộ nhớ máy; khối đăng nhập grant(as).
+   · Lệnh tới backend CRM Dental / Surgical / Eyeless ⇒ gắn tm=1 & tmSb=1 & tmAs=<người>; Training Hub rhCustTrain + KPI ⇒ tm=1 (bản TEST sẵn có);
+     lệnh GHI tới hệ thống khác (Report Hub…) ⇒ giả lập trên máy (không ghi), lệnh đọc đi bình thường.
+   · Lần đầu (hoặc "Làm mới dữ liệu TEST"): backend dựng file TEST ở nền (tmSetup / tmReset) ⇒ màn chờ hỏi tmInfo tới khi xong rồi tải lại.
+   ════════════════════════════════════════════════════════════════════════════════════════ */
+(function(){
+"use strict";
+var KEY="mmh_sbx_crm", SB=window.__CRM_SB||null, GAS=/^https:\/\/script\.google\.com\//;
+var READ=/^(weekly|boot|bundle|version|list|multi|visitFeed|customerIndex|customerDetail|account360|kpi|krData|productCodes|photoMeta|photoB64|custLog|activity|mt(List|Get|Tenders|Prices)|na(List|Pending|Get)|monthly|myTasks|sheets|trip(Master2?|Info|Sync)|tf(Pending|Log|Trips)|getTurnoverData|getNppDetail|customers|ping|sheetInfo|rh(Kpi|KpiMail|KpiMailPreview|AuthMe|AuthStart|AuthVerify|Sessions|Meta|Materials|Directory|AssignList|MyChecks|KpiTotal|CoachReview)|refStatus|mm(List|Get)|kpiApiMembers?|orderPending|tmInfo|string|version2|events|list)$/;
+function au0(){ try{ var o=JSON.parse(localStorage.getItem("mmh_tk")||"null"); return o&&o.user||null; }catch(_){ return null; } }
+function isAdmin(){ var u=au0(); return !!(u&&u.admin); }
+function esc2(s){ return String(s==null?"":s).replace(/[&<>"]/g,function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]; }); }
+function tkv(){ try{ return (window.AUTH&&AUTH.tk())||""; }catch(_){ return ""; } }
+function sbUrls(){ var o={}; ["dental","surgical","eyeless"].forEach(function(k){ try{ if(TEAMS[k]&&TEAMS[k].url) o[TEAMS[k].url.split("?")[0]]=k; }catch(_){} }); return o; }
+function base(u){ return String(u||"").split("?")[0]; }
+function kind(url){
+  var b=base(url);
+  if(sbUrls()[b]) return "sb";
+  try{ if(window.TRAINING_HUB_API && b===base(TRAINING_HUB_API)) return "trn"; }catch(_){}
+  try{ if(window.KPI_API && b===base(KPI_API)) return "kpi"; }catch(_){}
+  return "other";
+}
+function lvl(p){ var r=ROLES[p]||{}, t=String(r.title||""); return /director/i.test(t)?"director":/head of/i.test(t)?"hod":/leader/i.test(t)?"lead":"pic"; }
+/* lệnh gọi riêng của SBX (đọc JSON, không qua JSONP) */
+function call(url, action, extra){
+  var q=Object.assign({ action:action, tm:1, tmSb:1, tmAs:(SB&&SB.as)||"", pic:(SB&&SB.as)||"", tk:tkv(), _ts:Date.now() }, extra||{});
+  var f=window.__sbxFetch0||window.fetch;
+  return f(base(url)+"?"+Object.keys(q).map(function(k){ return encodeURIComponent(k)+"="+encodeURIComponent(q[k]); }).join("&"), { credentials:"omit", redirect:"follow" })
+    .then(function(r){ return r.text(); }).then(function(t){ var m=/^[\w$.]*\(([\s\S]*)\);?\s*$/.exec(t); return JSON.parse(m?m[1]:t); });
+}
+window.SBX={ on:!!SB, state:SB };
+
+/* ───────── bật / tắt ───────── */
+function start(team, as){
+  try{ localStorage.removeItem("mmh_test_crm"); localStorage.removeItem("mmh_crm_test"); }catch(_){}
+  try{ localStorage.setItem(KEY, JSON.stringify({ team:team, as:as, at:Date.now() })); }catch(_){}
+  location.reload();
+}
+function stop(){ try{ localStorage.removeItem(KEY); }catch(_){} location.reload(); }
+SBX.start=start; SBX.stop=stop;
+
+/* ───────── hộp chọn ───────── */
+var PICK={ team:(SB&&SB.team)||"dental" };
+function people(team){
+  var out=[], mgmt=[];
+  Object.keys(ROLES).forEach(function(p){ var r=ROLES[p]; if(r.team===team) out.push(p); else if(!r.team && r.grp==="Management" && p!=="Hoa") mgmt.push(p); });
+  return { team:out, mgmt:mgmt };
+}
+function pickHtml(){
+  var L=people(PICK.team), cur=SB&&SB.team===PICK.team?SB.as:"";
+  var btn=function(p){ var r=ROLES[p]||{}; return '<button type="button" class="'+(p===cur?"on":"")+'" onclick="SBX.start(\''+PICK.team+'\',\''+String(p).replace(/'/g,"\\'")+'\')"><b>'+esc2(p)+'</b><span>'+esc2(r.title||"")+'</span></button>'; };
+  return '<div class="sbx-teams">'+["dental","surgical","eyeless"].map(function(k){ return '<button type="button" class="'+(PICK.team===k?"on":"")+'" onclick="SBX.team(\''+k+'\')">'+esc2((TEAMS[k]||{}).label||k)+'</button>'; }).join("")+'</div>'+
+    '<div class="sbx-people">'+L.team.map(btn).join("")+'</div>'+
+    '<div class="sbx-h">Management</div><div class="sbx-people">'+L.mgmt.map(btn).join("")+'</div>';
+}
+SBX.team=function(k){ PICK.team=k; var b=document.getElementById("sbx-body"); if(b) b.innerHTML=pickHtml(); };
+SBX.pick=function(){
+  if(!SB && !isAdmin()) return;
+  var foot='<button class="btn" onclick="closeModal()">Đóng</button><div style="flex:1"></div>'+
+    (SB?'<button class="btn" onclick="SBX.reset()">Làm mới dữ liệu TEST</button><button class="btn" onclick="SBX.file()">Mở file TEST</button><button class="btn pri" onclick="SBX.stop()">Thoát TEST</button>':'');
+  openModal("TEST", '<div id="sbx-body">'+pickHtml()+'</div>', foot, true);
+};
+SBX.file=function(){ var u=TEAMS[curTeamKey()]||TEAMS[SB.team]; call(u.url,"tmInfo").then(function(j){ if(j&&j.url) window.open(j.url,"_blank"); else toast((j&&j.error)||"Chưa có file TEST","warn"); }).catch(function(e){ toast(e.message,"err"); }); };
+SBX.reset=function(){ var u=TEAMS[curTeamKey()]||TEAMS[SB.team]; try{ closeModal(); }catch(_){} wait(true); call(u.url,"tmReset").then(function(){ poll(u.url, Date.now()); }).catch(function(e){ wait(false); toast(e.message,"err"); }); };
+
+if(!SB){ return; }
+
+/* ───────── đang ở chế độ TEST ───────── */
+/* danh tính trên giao diện = người đang đóng vai (quyền Admin chỉ dùng để mở hộp cát ở backend) */
+try{
+  var _au=AUTH.user;
+  AUTH.user=function(){ var u=_au.apply(this, arguments); if(!u) return u; var r=ROLES[SB.as]||{}, em=String(r.email||u.email||"");
+    return Object.assign({}, u, { pic:SB.as, email:em, local:em.split("@")[0], admin:em.toLowerCase()===String(u.email||"").toLowerCase(), level:lvl(SB.as) }); };
+}catch(_){}
+document.documentElement.classList.add("sbx-on");
+function chip(){
+  var h=document.querySelector("#app header"); if(!h || document.getElementById("sbx-chip")) return;
+  var b=document.createElement("button"); b.type="button"; b.id="sbx-chip"; b.innerHTML='<b>TEST</b><span>'+esc2(SB.as)+'</span>'; b.onclick=SBX.pick;
+  var us=document.getElementById("btnUser"); if(us && us.parentNode===h) h.insertBefore(b, us); else h.appendChild(b);
+  if(!document.getElementById("sbx-strip")){ var st=document.createElement("div"); st.id="sbx-strip"; document.body.appendChild(st); }
+}
+(function w(){ chip(); setTimeout(w, 1500); })();
+
+/* màn chờ dựng dữ liệu TEST */
+function wait(on, msg){
+  var el=document.getElementById("sbx-wait");
+  if(!on){ if(el) el.remove(); return; }
+  if(!el){ el=document.createElement("div"); el.id="sbx-wait"; el.innerHTML='<i></i><div>Đang chuẩn bị dữ liệu TEST…</div><small></small>'; document.body.appendChild(el); }
+  if(msg!=null) el.querySelector("small").textContent=msg;
+}
+function poll(url, t0){
+  call(url,"tmInfo").then(function(j){
+    if(j && j.ready){ wait(false); location.reload(); return; }
+    if(j && j.state==="error"){ wait(true, j.log||"Lỗi"); return; }
+    wait(true, Math.round((Date.now()-t0)/1000)+" s");
+    setTimeout(function(){ poll(url, t0); }, 4000);
+  }).catch(function(){ setTimeout(function(){ poll(url, t0); }, 6000); });
+}
+var CHK={};
+function ensure(){
+  var k=""; try{ k=curTeamKey(); }catch(_){ k=SB.team; }
+  if(!TEAMS[k] || !sbUrls()[base(TEAMS[k].url)] || CHK[k]) return; CHK[k]=1;
+  var url=TEAMS[k].url;
+  call(url,"tmInfo").then(function(j){
+    if(j && j.ready) return;
+    if(j && j.ok===false){ toast(j.error||"TEST","err",8000); return; }
+    wait(true); var t0=Date.now();
+    (j && j.building ? Promise.resolve() : call(url,"tmSetup")).then(function(){ poll(url, t0); }, function(){ poll(url, t0); });
+  }).catch(function(){ CHK[k]=0; });
+}
+setTimeout(ensure, 300); setInterval(ensure, 15000);
+
+/* ───────── gắn tham số / chặn ghi ───────── */
+function actOf(url, body){
+  var a=""; try{ a=new URL(url).searchParams.get("action")||""; }catch(_){}
+  if(!a && body){
+    if(typeof body==="string"){ try{ a=(JSON.parse(body)||{}).action||""; }catch(_){ var m=/(?:^|&)action=([^&]+)/.exec(body); if(m) a=decodeURIComponent(m[1]); } }
+    else if(typeof body.get==="function") a=body.get("action")||"";
+  }
+  return a;
+}
+function addQ(url, o){ var q=Object.keys(o).map(function(k){ return encodeURIComponent(k)+"="+encodeURIComponent(o[k]); }).join("&"); return url+(url.indexOf("?")<0?"?":"&")+q; }
+function tagFor(k, a){
+  if(k==="sb") return { tm:1, tmSb:1, tmAs:SB.as };
+  if(k==="trn" && a==="rhCustTrain") return { tm:1 };
+  if(k==="kpi") return { tm:1 };
+  return null;
+}
+var seq=0;
+function fake(a){ seq++; return { ok:true, test:true, row:900000+seq, id:"test-"+seq, message:"TEST", dup:false }; }
+/* JSONP <script src> */
+try{
+  var d=Object.getOwnPropertyDescriptor(HTMLScriptElement.prototype,"src");
+  Object.defineProperty(HTMLScriptElement.prototype,"src",{ configurable:true, enumerable:d.enumerable, get:d.get, set:function(v){
+    var url=String(v||"");
+    if(GAS.test(url) && !/[?&]tmSb=1/.test(url)){
+      var k=kind(url), a=actOf(url), t=tagFor(k, a);
+      if(t) url=addQ(url, t);
+      else if(k==="other" && a && !READ.test(a)){
+        var cb=""; try{ cb=new URL(url).searchParams.get("callback")||""; }catch(_){}
+        if(cb) url="data:text/javascript,"+encodeURIComponent(cb+"("+JSON.stringify(fake(a))+");");
+      }
+    }
+    return d.set.call(this, url);
+  } });
+}catch(_){}
+/* fetch */
+var f0=window.fetch; window.__sbxFetch0=f0;
+window.fetch=function(input, init){
+  var url=typeof input==="string"?input:(input&&input.url)||"";
+  if(!GAS.test(url) || /[?&]tmSb=1/.test(url)) return f0.apply(this, arguments);
+  var body=init&&init.body, k=kind(url), a=actOf(url, body), t=tagFor(k, a);
+  if(t){
+    var ni=init?Object.assign({}, init):undefined;
+    try{
+      if(typeof body==="string" && /^\s*\{/.test(body)){ var o=JSON.parse(body); Object.assign(o, t); if(k==="sb" && !o.tk) o.tk=tkv(); ni.body=JSON.stringify(o); }
+      else if(body && typeof body.set==="function"){ Object.keys(t).forEach(function(x){ body.set(x, String(t[x])); }); if(k==="sb" && !body.get("tk")) body.set("tk", tkv());
+        var pl=null; try{ pl=JSON.parse(body.get("payload")||"null"); }catch(_){} if(pl && typeof pl==="object"){ Object.assign(pl, t); body.set("payload", JSON.stringify(pl)); } }
+    }catch(_){}
+    return f0.call(this, typeof input==="string"?addQ(url, t):input, ni);
+  }
+  if(k==="other" && a && !READ.test(a) && !/[?&]callback=/.test(url))
+    return Promise.resolve(new Response(JSON.stringify(fake(a)), { status:200, headers:{ "Content-Type":"application/json" } }));
+  return f0.apply(this, arguments);
+};
+})();
+</script>
+<script id="v317-npp">
+/* ⭐ v31.7 — ĐƠN HÀNG DENTAL: NPP (Partner) tự điền theo PIC — Viet → Nam Dũng · Vinh → S.P.I · Phuong → chọn Meci / Việt Thái
+   (danh sách từ backend bundle.nppByPic = tên đầy đủ trong danh mục khách hàng; dự phòng bên dưới khi chưa có bản backend mới). */
+(function(){
+"use strict";
+var FB={ Viet:["Công ty TNHH Đầu Tư và Thương Mại Nam Dũng/Distributor/Hanoi/North"],
+         Vinh:["Công ty cp Thương Mại và Đầu tư S.P.I Việt Nam/Distributor/Da Nang/Central"],
+         Phuong:["Công ty Cổ Phần Laphaco Meci/Distributor/Ho Chi Minh/South","Công ty TNHH Thiết bị y Tế Việt Thái/Distributor/Ho Chi Minh/South"] };
+var _ab=window.applyBundle;
+if(typeof _ab==="function") window.applyBundle=applyBundle=function(b){ try{ if(b && b.nppByPic) S.nppByPic=b.nppByPic; }catch(_){} return _ab.apply(this, arguments); };
+function list(pic){ var m=(S.nppByPic&&Object.keys(S.nppByPic).length)?S.nppByPic:FB; return (m[pic]||[]).slice(); }
+function on(){ try{ return curTeamKey()==="dental"; }catch(_){ return false; } }
+function short(x){ return String(x||"").split("/")[0]; }
+function apply(){
+  var inp=document.getElementById("o_partner"), pk=document.getElementById("o_pic"); if(!inp || !on()) return;
+  var pic=(pk&&pk.value)||(S.user&&S.user.pic)||"", L=list(pic), host=inp.parentNode, sel=document.getElementById("o_partnerSel");
+  if(!L.length){ if(sel){ sel.remove(); inp.style.display=""; } inp.readOnly=false; return; }
+  var cur=inp.value, keep=L.filter(function(x){ return short(x).toLowerCase()===short(cur).toLowerCase() || x===cur; })[0];
+  if(!keep) inp.value=L[0]; else inp.value=keep;
+  if(L.length===1){ if(sel){ sel.remove(); } inp.style.display=""; inp.readOnly=true; inp.classList.add("piclock"); }
+  else {
+    inp.style.display="none";
+    if(!sel){ sel=document.createElement("select"); sel.className="inp"; sel.id="o_partnerSel"; host.appendChild(sel); sel.addEventListener("change", function(){ inp.value=sel.value; }); }
+    sel.innerHTML=L.map(function(x){ return '<option value="'+esc(x)+'"'+(x===inp.value?" selected":"")+'>'+esc(short(x))+'</option>'; }).join("");
+  }
+  var pt=document.getElementById("o_partnerType"); if(pt && !pt.value){ [].some.call(pt.options, function(o){ if(/distributor/i.test(o.value)){ pt.value=o.value; return true; } return false; }); }
+}
+var _fo=window.formOrder;
+if(typeof _fo==="function") window.formOrder=formOrder=function(){
+  var r=_fo.apply(this, arguments);
+  setTimeout(function(){ apply(); var pk=document.getElementById("o_pic"); if(pk && !pk._nppW){ pk._nppW=1; pk.addEventListener("change", apply); } }, 0);
+  return r;
+};
+/* chọn account ⇒ PIC đổi theo account ⇒ NPP đổi theo */
+var _sp=window.setPicSel;
+if(typeof _sp==="function") window.setPicSel=setPicSel=function(id){ var r=_sp.apply(this, arguments); if(id==="o_pic") setTimeout(apply, 0); return r; };
+window.V317NPP={ list:list, apply:apply };
+})();
+</script>
 <script src="testflow/testflow.js?v=1.0"></script>
 <script src="tour/tour.js?v=1.1"></script>
-<script src="tour/tours.js?v=31.6"></script>
+<script src="tour/tours.js?v=31.7"></script>
 </body>
 </html>
