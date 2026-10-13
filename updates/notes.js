@@ -7,6 +7,19 @@
 function E(u){ u.en={ title:u.title, items:u.items.map(function(i){ return { title:i.title, text:i.text }; }) }; return u; }
 window.MMH_UPDATES = [
   E({
+    id:"2026-10-13-v31.6", version:"v31.6", date:"2026-10-13",
+    title:"Instant other tasks, reliable field-visit dates, order approval and customer training (T&E)",
+    summary:"Other tasks now appear the moment you save and are written to the ALL TASK sheet in the background. Field-visit tasks always keep their start date and photos land on the right task. Sales orders get an <b>Order Type</b> and a manager approval; Dental can log <b>customer training (T&E)</b>. The exchange rate is fixed at <b>26,700 VND/USD</b>.",
+    items:[
+      {type:"new", icon:"⚡", title:"Other tasks appear instantly", text:"Add, edit or delete an item in <b>Update ▸ Other tasks</b> ▸ it shows on screen at once; the app writes it to the ALL TASK sheet behind the scenes (a small chip shows <b>Saving…</b>). No signal? It retries by itself; a red chip lets you retry or discard. New items always get a start date (today) and a deadline.", img:"updates/v31.6/other-instant.jpg"},
+      {type:"fix", icon:"📍", title:"Field visits keep their start date and photo", text:"Saving a field visit always fills the <b>Start date</b>. Updates, photos and deletes now identify the task by its number, account and PIC, so when another row on the sheet was removed the app finds the right task instead of writing to the wrong row. Tasks that had lost their date were repaired from the photo time stamp."},
+      {type:"fix", icon:"📅", title:"Dates on the sheets are consistent", text:"Start / finish dates typed as month/day by mistake (e.g. 10/09 saved as 9 October) are corrected when the Start Month column confirms it, extra hours are removed and text dates become real dates — so weekly and per-day counts are right. The CRM files now read typed dates as day/month/year."},
+      {type:"new", icon:"✔", title:"Order Type + manager approval (C5)", text:"Each order from 10/2026 has an <b>Order Type</b> (tender award · new account · consulting) and documents. Approvers open <b>Sales order ▸ Approve orders</b> ▸ approve one order or a whole month per PIC. Only approved orders count for C5 (fixed rate 26,700).", img:"updates/v31.6/order-approve.jpg"},
+      {type:"new", icon:"🎓", title:"Customer training (T&E) — Dental", text:"Open <b>Presentation · Customer training ▸ Customer training (T&E)</b> ▸ <b>New session</b>: date, topic, product, attendees picked from the customer list. Sessions are saved to the Training Master; only <b>Completed</b> sessions with actual attendees and the 5-line review count for C10-03 / 04 / 05.", img:"updates/v31.6/te-form.jpg"},
+      {type:"imp", icon:"🧾", title:"Fixed rate · visits with photos · presentation review", text:"The exchange-rate setting is gone (fixed 26,700 VND/USD). A visit counts for KPI only with a photo (Surgical Thailand excepted). A product presentation needs <b>Actual participant</b> > 0 and the fixed 5-line <b>Event review</b> before it can be saved."}
+    ]
+  }),
+  E({
     id:"2026-10-13-v31.5", version:"v31.5", date:"2026-10-13",
     title:"Admin TEST mode: try every function with real saves and see where the data goes",
     summary:"For the Admin only. The CRM runs as a user named <b>TEST</b>: tasks, photos, customers, orders, reports, trips and new accounts are <b>really saved</b> under the name TEST, every e-mail goes only to the Admin, and a <b>Data flow</b> panel shows which file, tab and row each save went to. Nobody else sees TEST data and it is never counted in KPI.",

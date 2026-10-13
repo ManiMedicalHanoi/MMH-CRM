@@ -3979,7 +3979,7 @@ function buildNav(){
     if(t.grp!==lastGrp){ h+='<div class="grp">'+t.grp+'</div>'; lastGrp=t.grp; }
     h+='<button class="nvi" data-t="'+t.id+'" onclick="go(\''+t.id+'\')"><span class="ic">'+t.ic+'</span><span class="lb">'+t.lb+'</span></button>';
   });
-  h+='<div style="flex:1"></div><div style="padding:10px;font-size:10.5px;color:var(--mute);line-height:1.5">MMH CRM v31.5<br>'+
+  h+='<div style="flex:1"></div><div style="padding:10px;font-size:10.5px;color:var(--mute);line-height:1.5">MMH CRM v31.6<br>'+
      (isMgmt()?'<a href="'+DRIVE_FOLDER+'" target="_blank">📁 Folder ảnh Drive</a>':"")+'</div>';
   $("side").innerHTML=h;
   /* ⭐ v4.5 — thanh dưới trượt ngang, đủ mọi mục, bỏ nút "Thêm" */
@@ -20699,7 +20699,7 @@ window.QS2={ open:qsOpen };
 </script>
 
 <!-- ⭐ v30.3 — THÔNG BÁO CẬP NHẬT (chép từ Report Hub): dữ liệu updates/notes.js · tự hiện 7 ngày · nút "Có gì mới" trên thanh trên cùng -->
-<script src="updates/notes.js?v=31.5"></script>
+<script src="updates/notes.js?v=31.6"></script>
 <style id="upd-css">
 #upd,#upd-zoom{--t-pri:var(--blue);--t-pri2:var(--blue-d);--t-ink:var(--navy);--t-soft:var(--pale);--t-line:var(--lb2);--t-bg:#F6F8FA;--mmh-blue:var(--blue);--mmh-navy:var(--navy)}
 
@@ -24482,7 +24482,8 @@ function paint(){
   var c=document.getElementById("oqc");
   if(!c){ if(!document.body) return; c=document.createElement("div"); c.id="oqc"; c.innerHTML="<i></i><span></span>"; c.onclick=panel; document.body.appendChild(c); }
   var bad=Q.filter(function(x){ return x.err; }).length;
-  c.className=Q.length ? ("on"+(bad?" err":"")) : "";
+  var logged=false; try{ logged=!!(S.user && S.user.pic); }catch(_){}
+  c.className=(Q.length && logged) ? ("on"+(bad?" err":"")) : "";
   c.querySelector("span").textContent = bad
     ? T(bad+" việc chưa lưu được — bấm để xử lý", bad+" task(s) not saved — tap to fix")
     : T("Đang lưu "+Q.length+" công việc vào sheet…","Saving "+Q.length+" task(s) to the sheet…");
@@ -24557,6 +24558,6 @@ setTimeout(function(){ load(); try{ if(S.other && S.other.keys) stamp(S.other.ke
 </script>
 <script src="testflow/testflow.js?v=1.0"></script>
 <script src="tour/tour.js?v=1.1"></script>
-<script src="tour/tours.js?v=31.5"></script>
+<script src="tour/tours.js?v=31.6"></script>
 </body>
 </html>

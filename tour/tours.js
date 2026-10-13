@@ -77,12 +77,20 @@ TOUR.add([
     { el:"#custPicBar", t:V("Theo PIC","By PIC"), x:V("Xem account của từng người.","See each person's accounts.") },
     { el:"[onclick=\"formCustomer(null)\"]", t:V("Account mới","New account"), x:V("Thêm khách hàng mới vào danh mục.","Add a new customer.") }
    ] },
- { id:"order", v:1, d:"2026-10-11", g:V("Khách hàng & bán hàng","Customers & sales"), ic:"report", t:V("Đơn hàng","Sales orders"), x:V("Ghi và tra cứu đơn hàng theo tháng.","Record and look up orders by month."),
+ { id:"order", v:2, d:"2026-10-13", g:V("Khách hàng & bán hàng","Customers & sales"), ic:"report", t:V("Đơn hàng","Sales orders"), x:V("Ghi và tra cứu đơn hàng theo tháng.","Record and look up orders by month."),
    when:function(){ try{ return !noOrder(); }catch(_){ return true; } },
    steps:[
     { el:"[onclick=\"formOrder(null)\"]", do:pg("order"), wait:600, t:V("Đơn hàng mới","New order"), x:V("Ghi đơn: account, sản phẩm, số lượng, giá.","Record account, products, quantity and price.") },
     { el:"#ord_q", t:V("Tìm đơn","Find an order"), x:V("Tìm theo account, mã, sản phẩm, NPP.","Search by account, code, product or distributor.") },
-    { el:function(){ return par("[onclick^=\"S.filt.month=''\"]"); }, t:V("Theo tháng","By month"), x:V("Chọn tháng hoặc cả FY.","Pick a month or the whole FY.") }
+    { el:function(){ return par("[onclick^=\"S.filt.month=''\"]"); }, t:V("Theo tháng","By month"), x:V("Chọn tháng hoặc cả FY.","Pick a month or the whole FY.") },
+    { el:"#oa-btn", when:function(){ try{ return !!(window.v316OrdIsAp && v316OrdIsAp()); }catch(_){ return false; } }, t:V("Duyệt đơn hàng","Approve orders"),
+      x:V("Đơn từ 10/2026 cần Order Type + chứng từ và được duyệt mới tính KPI C5. Duyệt từng đơn hoặc cả tháng của một sales.","Orders from 10/2026 need an order type + documents and approval before they count for C5. Approve one by one or a whole month per sales PIC.") }
+   ] },
+ { id:"te", v:1, d:"2026-10-13", g:V("Khách hàng & bán hàng","Customers & sales"), ic:"people", t:V("Đào tạo khách hàng (T&E)","Customer training (T&E)"), x:V("Ghi buổi đào tạo khách hàng — lưu Training Master, tính KPI C10.","Log customer training sessions — saved to the Training Master, counted for C10."),
+   when:function(){ try{ return !!(window.v316TeOn && v316TeOn()); }catch(_){ return false; } },
+   steps:[
+    { el:"#te-tab", do:function(){ try{ go("present"); S.presTab="te"; renderPresent(); }catch(_){} }, wait:700, t:V("Tab Đào tạo khách hàng","Customer training tab"), x:V("Trong trang Thuyết trình · Đào tạo KH.","Inside the Presentation · Customer training page.") },
+    { el:"#te-add", t:V("Thêm buổi đào tạo","New session"), x:V("Ngày, chủ đề, sản phẩm, khách tham dự (chọn từ danh mục khách hàng). Hoàn thành cần Actual > 0 và review đủ 5 dòng mẫu.","Date, topic, product and attendees (picked from the customer list). Completed needs Actual > 0 and the 5-line review.") }
    ] },
  { id:"newacc", v:1, d:"2026-10-11", g:V("Khách hàng & bán hàng","Customers & sales"), ic:"kpi", t:V("Mở mới & SKU mới","New accounts & SKUs"), x:V("Ghi case mở mới để tính KPI, quản lý duyệt.","Log new-account cases for KPI; managers approve."),
    steps:[
