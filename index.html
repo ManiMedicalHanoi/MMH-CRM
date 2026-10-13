@@ -3994,7 +3994,7 @@ function buildNav(){
     if(t.grp!==lastGrp){ h+='<div class="grp">'+t.grp+'</div>'; lastGrp=t.grp; }
     h+='<button class="nvi" data-t="'+t.id+'" onclick="go(\''+t.id+'\')"><span class="ic">'+t.ic+'</span><span class="lb">'+t.lb+'</span></button>';
   });
-  h+='<div style="flex:1"></div><div style="padding:10px;font-size:10.5px;color:var(--mute);line-height:1.5">MMH CRM v31.7<br>'+
+  h+='<div style="flex:1"></div><div style="padding:10px;font-size:10.5px;color:var(--mute);line-height:1.5">MMH CRM v31.8<br>'+
      (isMgmt()?'<a href="'+DRIVE_FOLDER+'" target="_blank">📁 Folder ảnh Drive</a>':"")+'</div>';
   $("side").innerHTML=h;
   /* ⭐ v4.5 — thanh dưới trượt ngang, đủ mọi mục, bỏ nút "Thêm" */
@@ -20721,7 +20721,7 @@ window.QS2={ open:qsOpen };
 </script>
 
 <!-- ⭐ v30.3 — THÔNG BÁO CẬP NHẬT (chép từ Report Hub): dữ liệu updates/notes.js · tự hiện 7 ngày · nút "Có gì mới" trên thanh trên cùng -->
-<script src="updates/notes.js?v=31.7"></script>
+<script src="updates/notes.js?v=31.8"></script>
 <style id="upd-css">
 #upd,#upd-zoom{--t-pri:var(--blue);--t-pri2:var(--blue-d);--t-ink:var(--navy);--t-soft:var(--pale);--t-line:var(--lb2);--t-bg:#F6F8FA;--mmh-blue:var(--blue);--mmh-navy:var(--navy)}
 
@@ -23145,7 +23145,8 @@ window.TFT={ fetch:fetchTrips, merge:merge, state:T };
 </script>
 <script>
 /* ⭐ v30.8 — Duyệt công tác (TFA, dùng chung Report Hub v17.4): backend CRM Dental (MMH_TripFlow.gs) · nút trên thanh trên cùng · nhắc sau DL → #kpn → Có gì mới */
-window.TFA_CFG={
+window.TFA_CFG={ off:true };   /* 13/10/2026: bỏ nút / popup Duyệt công tác — chỉ còn Đề xuất công tác */
+window.TFA_CFG_OLD={
   url:function(){ return TEAMS.dental.url; },
   lang:function(){ return (window.I18N && I18N.on) ? "en" : "vi"; },
   mount:function(fn){
@@ -23202,6 +23203,8 @@ window.TFA_CFG={
 (function(){
 "use strict";
 var C=window.TFA_CFG||{}, T={ items:[], sel:{}, busy:false, count:0, at:0 };
+/* 13/10/2026 — người dùng yêu cầu bỏ Duyệt công tác trên app (chỉ còn luồng Đề xuất; Giám đốc duyệt qua email / hệ thống Business Trip) */
+if(C.off){ window.TFA={ open:function(){}, reload:function(){ return Promise.resolve(); }, state:T, off:true }; return; }
 function esc(s){ return String(s==null?"":s).replace(/[&<>"']/g,function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]; }); }
 function L(vi,en){ try{ return (C.lang && C.lang()==="en") ? en : vi; }catch(_){ return vi; } }
 function me(){ try{ return window.AUTH && AUTH.user && AUTH.user(); }catch(_){ return null; } }
@@ -23623,7 +23626,7 @@ window.TESTFLOW_CFG={ app:"crm", key:"mmh_test_crm", name:["MMH CRM","MMH CRM"],
     deleteRow:{t:["Xoá dòng","Delete row"]}, deleteAccount:{t:["Xoá khách hàng","Delete account"],tab:"CUSTOMER · CBC"},
     weeklyReport:{ext:1,t:["Gửi báo cáo tuần","Send weekly report"],tab:["PDF lưu vào folder Báo cáo tuần (Drive)","PDF saved to the weekly report folder"],next:[["Bản thật gửi nhóm + quản lý; chế độ TEST chỉ gửi Admin","Real report goes to the team + managers; TEST mode: Admin only"]]},
     monthlyReport:{ext:1,t:["Gửi báo cáo tháng","Send monthly report"],tab:["PDF báo cáo tháng","Monthly report PDF"]},
-    tripPropose2:{ext:1,t:["Đề xuất công tác","Business trip proposal"],tab:["File Business Trip ▸ MMH Travel report · nhật ký tab Business Trip Log","Business Trip file ▸ MMH Travel report · log tab Business Trip Log"],next:[["Hiện ở Duyệt công tác — đổi vai Giám đốc để duyệt","Shows in Approve trips — switch to the Director role to approve"],["Lịch công việc: thẻ công tác \"chờ duyệt\"","Calendar: trip card \"waiting\""]]},
+    tripPropose2:{ext:1,t:["Đề xuất công tác","Business trip proposal"],tab:["File Business Trip ▸ MMH Travel report · nhật ký tab Business Trip Log","Business Trip file ▸ MMH Travel report · log tab Business Trip Log"],next:[["Shows in Approve trips — switch to the Director role to approve"],["Lịch công việc: thẻ công tác \"chờ duyệt\"","Calendar: trip card \"waiting\""]]},
     tfDecide:{ext:1,t:["Giám đốc duyệt / từ chối công tác","Director decides the trip"],tab:["File Business Trip ▸ cột Approval · folder công tác (Drive)","Business Trip file ▸ Approval column · trip folder"],next:[["Lịch công tác + báo cáo công tác dùng trạng thái mới","Trip calendar + trip report use the new status"]]},
     naSave:{t:["Lưu case Mở mới / SKU mới","Save new account / SKU case"],tab:"16. NEW ACCOUNT & SKU"},
     naUpload:{ext:1,t:["Tải chứng từ Mở mới","Upload new-account evidence"],tab:["Drive ▸ folder chứng từ Mở mới (tháng)","Drive ▸ evidence folder (month)"],next:[["Tên file: TEST_<ngày>_<account>_<SKU>","File name: TEST_<date>_<account>_<SKU>"]]},
@@ -24594,6 +24597,9 @@ setTimeout(function(){ load(); try{ if(S.other && S.other.keys) stamp(S.other.ke
 #sbx-wait{position:fixed;inset:0;z-index:10090;background:rgba(255,255,255,.92);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:14px;font:600 15px Aptos,"Segoe UI",sans-serif;color:#003047}
 #sbx-wait i{width:34px;height:34px;border-radius:50%;border:3px solid #CFE2F3;border-top-color:#3A5CAA;animation:sbxr 1s linear infinite}
 #sbx-wait small{font-weight:500;color:#6B7B8C;font-size:12.5px}
+#sbx-wait small{max-width:min(560px,90vw);text-align:center;line-height:1.5}
+#sbx-wait.err{color:#7A2E2A}
+#sbx-wait .sbx-wb{display:flex;gap:10px;margin:4px 0 0}
 @keyframes sbxr{to{transform:rotate(360deg)}}
 </style>
 <script id="sbx-js">
@@ -24692,11 +24698,22 @@ function wait(on, msg){
   if(!el){ el=document.createElement("div"); el.id="sbx-wait"; el.innerHTML='<i></i><div>Đang chuẩn bị dữ liệu TEST…</div><small></small>'; document.body.appendChild(el); }
   if(msg!=null) el.querySelector("small").textContent=msg;
 }
+/* 13/10/2026 — dựng lỗi ⇒ không treo màn chờ: hiện lỗi ngắn gọn + Dựng lại / Thoát TEST (trước đây chỉ quay mãi) */
+function failed(url, log){
+  var el=document.getElementById("sbx-wait"); if(!el){ wait(true); el=document.getElementById("sbx-wait"); }
+  el.classList.add("err");
+  var m=/LỖI\s*([^·]+)/.exec(String(log||"")), msg=(m?m[1]:String(log||"Lỗi")).trim().slice(0,220);
+  el.innerHTML='<div>Chưa chuẩn bị được dữ liệu TEST</div><small>'+esc2(msg)+'</small><p class="sbx-wb"><button type="button" class="btn pri" id="sbx-retry">Dựng lại</button><button type="button" class="btn" id="sbx-quit">Thoát TEST</button></p>';
+  document.getElementById("sbx-retry").onclick=function(){ el.remove(); wait(true); var t0=Date.now(); call(url,"tmReset").then(function(){ poll(url, t0); }, function(){ poll(url, t0); }); };
+  document.getElementById("sbx-quit").onclick=stop;
+}
 function poll(url, t0){
   call(url,"tmInfo").then(function(j){
     if(j && j.ready){ wait(false); location.reload(); return; }
-    if(j && j.state==="error"){ wait(true, j.log||"Lỗi"); return; }
-    wait(true, Math.round((Date.now()-t0)/1000)+" s");
+    if(j && j.state==="error"){ failed(url, j.log); return; }
+    if(Date.now()-t0>16*60000){ failed(url, "Quá 16 phút chưa xong — bấm Dựng lại."); return; }
+    var s=Math.round((Date.now()-t0)/1000);
+    wait(true, (s<60?s+" giây":Math.floor(s/60)+" phút "+(s%60)+" giây")+" · lần đầu mất khoảng 1–3 phút");
     setTimeout(function(){ poll(url, t0); }, 4000);
   }).catch(function(){ setTimeout(function(){ poll(url, t0); }, 6000); });
 }
@@ -24708,6 +24725,7 @@ function ensure(){
   call(url,"tmInfo").then(function(j){
     if(j && j.ready) return;
     if(j && j.ok===false){ toast(j.error||"TEST","err",8000); return; }
+    if(j && j.state==="error" && !j.building){ failed(url, j.log); return; }
     wait(true); var t0=Date.now();
     (j && j.building ? Promise.resolve() : call(url,"tmSetup")).then(function(){ poll(url, t0); }, function(){ poll(url, t0); });
   }).catch(function(){ CHK[k]=0; });
@@ -24810,6 +24828,6 @@ window.V317NPP={ list:list, apply:apply };
 </script>
 <script src="testflow/testflow.js?v=1.0"></script>
 <script src="tour/tour.js?v=1.1"></script>
-<script src="tour/tours.js?v=31.7"></script>
+<script src="tour/tours.js?v=31.8"></script>
 </body>
 </html>
