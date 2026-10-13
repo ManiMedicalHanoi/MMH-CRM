@@ -7,6 +7,15 @@
 function E(u){ u.en={ title:u.title, items:u.items.map(function(i){ return { title:i.title, text:i.text }; }) }; return u; }
 window.MMH_UPDATES = [
   E({
+    id:"2026-10-13-v31.8", version:"v31.8", date:"2026-10-13",
+    title:"Business trips: proposal only · TEST data screen no longer hangs",
+    summary:"The <b>Approve trips</b> button is removed from the CRM — you only <b>propose</b> trips here; the Director approves through the Business Trip email. Admin TEST mode now shows a clear message with <b>Rebuild</b> / <b>Exit TEST</b> if the TEST data cannot be prepared.",
+    items:[
+      { type:"imp", icon:"🧳", title:"Approve trips removed", text:"The Approve trips button on the top bar is gone. Calendar ▸ <b>Propose a trip</b> works as before: the <b>Business Trip Approval Request</b> email goes to the Director, CC your head of department and you." },
+      { type:"fix", icon:"🧪", title:"TEST data: no more endless loading", text:"Admin ▸ TEST: preparing the TEST data no longer fails on a validation rule (cell D5 of the trip sheet). If something still goes wrong the screen shows the reason with <b>Rebuild</b> and <b>Exit TEST</b> buttons instead of spinning forever." }
+    ]
+  }),
+  E({
     id:"2026-10-13-v31.7", version:"v31.7", date:"2026-10-13",
     title:"Dental orders: the distributor is filled in by PIC",
     summary:"When a Dental sales order is created, the <b>Partner</b> (distributor) now follows the sales PIC automatically: Viet → Nam Dung, Vinh → S.P.I, Phuong chooses Meci or Viet Thai.",

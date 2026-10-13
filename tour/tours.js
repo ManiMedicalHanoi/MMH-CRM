@@ -63,13 +63,6 @@ TOUR.add([
     { el:"#tp-sched", t:V("Lịch trình","Schedule"), x:V("Ghi theo ngày.","Write it day by day.") },
     { el:"#tp-send", t:V("Gửi đề xuất","Send"), x:V("Email <b>Business Trip Approval Request</b> gửi Giám đốc, CC trưởng phòng và bạn. Ghi nhật ký ở tab Business Trip Log của file CRM nhóm.","A <b>Business Trip Approval Request</b> email goes to the Director, CC your head of department and you.") }
    ] },
- { id:"approve", v:1, d:"2026-10-11", g:V("Công tác","Business trips"), ic:"trip", t:V("Duyệt đề xuất công tác","Approve trip proposals"), x:V("Dành cho Giám đốc: duyệt nhiều đề xuất cùng lúc.","For the Director: approve several proposals at once."),
-   when:function(){ var u=me(); return !!u && (u.level==="director" || u.admin); },
-   steps:[
-    { el:"#tfa-btn", t:V("Nút Duyệt công tác","Approve trips button"), x:V("Số đỏ = đề xuất đang chờ.","The red number = proposals waiting.") },
-    { el:"#tfa-ov .tfa-it", do:function(){ try{ TFA.open(); }catch(_){} }, wait:900, t:V("Từng đề xuất","Each proposal"), x:V("Bấm thẻ để chọn.","Click a card to select it.") },
-    { el:"#tfa-ov .tfa-ok", t:V("Duyệt / Từ chối","Approve / Reject"), x:V("Mỗi người đề xuất nhận 1 email riêng. Từ chối phải ghi lý do.","Each proposer gets their own email. A rejection needs a reason.") }
-   ] },
  { id:"cust", v:1, d:"2026-10-11", g:V("Khách hàng & bán hàng","Customers & sales"), ic:"people", t:V("Khách hàng","Customers"), x:V("Tìm, lọc và thêm account.","Find, filter and add accounts."),
    steps:[
     { el:"#cq", do:pg("cust"), wait:600, t:V("Tìm khách hàng","Find a customer"), x:V("Gõ tên, mã, tỉnh, PIC — không cần dấu.","Type a name, code, province or PIC.") },

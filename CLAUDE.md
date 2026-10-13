@@ -114,3 +114,6 @@ Kiến trúc & quy ước giống MMH Report Hub (repo `ManiMedicalHanoi/MMH-Rep
   Không giải thích chế độ TEST trên app (người dùng yêu cầu). Nhóm Thái chưa có hộp cát. Chế độ TEST cũ (`testflow.js`, tên TEST) không còn lối vào trong CRM.
   **NPP theo PIC (khối `v317-npp`)**: đơn hàng Dental — ô Partner tự điền theo PIC từ `bundle.nppByPic` (backend `nppByPic_` = K68_NPP): Viet → Nam Dũng, Vinh → S.P.I (khoá),
   Phuong → chọn Meci / Việt Thái; Partner type = Distributor.
+- **v31.8 (13/10/2026)**: bỏ Duyệt công tác trên app (`TFA_CFG={off:true}`, cùng Report Hub v17.9) — chỉ còn Đề xuất công tác. Hộp cát TEST: dựng lỗi ⇒ màn chờ hiện
+  lý do + **Dựng lại** (`tmReset`) / **Thoát TEST** (`failed()` trong `sbx-js`), quá 16 phút cũng báo; backend `MMH_CrmSandbox.gs` v1.1 chuyển quy tắc xác thực của file TEST
+  sang "cảnh báo" (lỗi cũ: ô D5 = PIC của tab MMH Travel report từ chối tên sales ⇒ cả lượt dựng hỏng).
