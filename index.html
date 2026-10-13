@@ -22694,7 +22694,8 @@ function enqueue(body){
   if(ph){
     var pid=rid(); THUMB[pid]=ph.b64; bput(pid, ph.b64);
     items.push({ id:pid, kind:"photo", blob:pid, row:row, tab:"weekly", pic:pic, kb:photoSizeKB(ph.b64),
-      body:{ action:"uploadPhoto", mime:"image/jpeg", account:acc, date:day, pic:(b.data&&b.data.pic)||b.pic||w.pic||pic, replace:1, lat:ph.lat, lng:ph.lng, acc:ph.acc, rid:pid },
+      body:{ action:"uploadPhoto", mime:"image/jpeg", account:acc, date:day, pic:(b.data&&b.data.pic)||b.pic||w.pic||pic, replace:1, lat:ph.lat, lng:ph.lng, acc:ph.acc, rid:pid,
+             _no:(b.data&&b.data._no)||b._no||"", _acc:acc, _pic:(b.data&&b.data.pic)||(b.data&&b.data._pic)||b.pic||w.pic||pic, _start:day },   /* ⭐ v31.6 — gợi ý nhận đúng dòng */
       label:"Ảnh "+nm });
   }
   items.forEach(function(it){ it.url=gasUrl(); it.team=curTeamKey(); it.at=Date.now(); if(!it.body.rid) it.body.rid=it.id; Q.push(it); });
@@ -22762,6 +22763,8 @@ function pump(){
 }
 function drop(it, msg){ RUN=false; Q=Q.filter(function(x){ return x.id!==it.id; }); if(it.blob) bdel(it.blob); save(); paint(); if(msg) toast(msg,"warn",7000); setTimeout(pump,50); }
 function done(it, r){
+  /* ⭐ v31.6 — dòng trên sheet đã đổi (task bị xoá / dời): không gửi lại mù quáng — báo đỏ + tải lại dữ liệu */
+  if(r && r.ok===false && r.stale){ it.n=(it.n||0)+1; it.err=String(r.error||"Dòng đã đổi — tải lại"); save(); paint(); try{ loadTerritoryAll(true); }catch(_){} setTimeout(pump,50); return; }
   if(r && r.ok===false){ return fail(it, String(r.error||"Lỗi máy chủ"), !TRANSIENT.test(String(r.error||""))); }
   Q=Q.filter(function(x){ return x.id!==it.id; });
   var row=realRow(it.row);
@@ -22772,6 +22775,7 @@ function done(it, r){
       if(S.taskRow===it.tmp) S.taskRow=row;
       if(S.task && S.task._row===it.tmp) S.task._row=row;
     }
+    if(it.kind==="data" && r && +r.row>0 && r.no){ if(it.patch) it.patch.no=r.no; Q.forEach(function(x){ if(realRow(x.row)===+r.row && x.body && !x.body._no){ x.body._no=r.no; if(x.body.data) x.body.data._no=r.no; } }); }   /* ⭐ v31.6 — số No thật */
     if(it.kind==="photo"){
       if(it.blob) bdel(it.blob);
       var th=THUMB[it.id]; delete THUMB[it.id];
@@ -24259,6 +24263,296 @@ try{
     if(TESTFLOW_CFG.steps) TESTFLOW_CFG.steps.splice(4,0,{t:["Đơn hàng: loại + chứng từ","Order: type + document"],m:["orderDoc"]},{t:["Vai Quản lý ▸ duyệt đơn hàng","Manager ▸ approve the order"],m:["orderDecide@mgr","orderDecide@dir"]},{t:["Đào tạo khách hàng (T&E, Dental)","Customer training (T&E, Dental)"],m:["rhCustTrain"]});
   }
 }catch(e){}
+})();
+</script>
+<style id="v316b-css">
+/* ⭐ v31.6 — chip hàng đợi Công việc khác */
+#oqc{position:fixed;left:14px;bottom:14px;z-index:9000;display:none;align-items:center;gap:7px;padding:7px 12px;border-radius:999px;background:#fff;border:1px solid var(--c-line,#E6EAEF);font:600 12px/1.2 Aptos,system-ui,sans-serif;color:#003047;cursor:pointer}
+#oqc.on{display:flex}
+#oqc.err{border-color:#E5A3A3;color:#B42318;background:#FFF5F5}
+#oqc i{width:8px;height:8px;border-radius:50%;background:#3A5CAA;animation:oqp 1.2s infinite}
+#oqc.err i{background:#D92D20;animation:none}
+@keyframes oqp{50%{opacity:.35}}
+@media (max-width:720px){#oqc{bottom:76px}}
+</style>
+<script id="v316b-js">
+/* ════════════════════════════════════════════════════════════════════════════════════════
+   ⭐ v31.6 (13/10/2026) — ĐI ĐỊA BÀN & CÔNG VIỆC KHÁC: THẤY NGAY, GHI ĐÚNG DÒNG
+   ① Task đi địa bàn (tab 6. WEEKLY REPORT): mọi lệnh sửa / ảnh / xoá ảnh / xoá task tự gắn _no (cột No) + _acc / _pic / _start của bản
+      trong máy ⇒ backend (wkResolve_) tìm lại đúng dòng khi có dòng khác bị xoá / chèn phía trên; không thấy ⇒ báo "Dòng đã đổi — tải lại"
+      thay vì ghi / xoá nhầm (sự cố 13/10: 6 task có ảnh nhưng trống Start date ⇒ app không hiện). Backend luôn điền Start date.
+   ② Công việc khác (Dental / Surgical / Eyeless — sheet ALL TASK, ATS_ON()): thêm / sửa / xoá hiện NGAY trên màn hình, ghi sheet ở nền
+      theo hàng đợi lưu trên máy (localStorage mmh_crm_oq_<nhóm>): tuần tự, cùng rid khi gửi lại (backend chống trùng), mất mạng / chậm ⇒
+      thử lại 2–60 s mãi; lỗi thật ⇒ chip đỏ (Thử lại / Bỏ). Mỗi lệnh gửi kèm tên việc (expect / parentName) ⇒ số No lệch vẫn đúng việc.
+      Thêm việc luôn có Ngày bắt đầu (mặc định hôm nay) + Hạn (mặc định = ngày bắt đầu). Dữ liệu tải lại từ sheet được phủ lại thao tác
+      chưa ghi xong ⇒ việc vừa thêm không biến mất. Nhóm Thái giữ cách cũ.
+   ════════════════════════════════════════════════════════════════════════════════════════ */
+(function(){
+"use strict";
+function T(vi,en){ try{ return TX(vi,en); }catch(_){ return vi; } }
+function today(){ try{ return todayISO(); }catch(_){ return new Date().toISOString().slice(0,10); } }
+function rid(){ return "oq"+Date.now().toString(36)+Math.random().toString(36).slice(2,8); }
+function nm(s){ return String(s||"").normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/đ/gi,"d").toLowerCase().replace(/\s+/g," ").trim(); }
+
+/* ═════════ ① đi địa bàn: nhận dạng dòng ═════════ */
+function wkRec(row){
+  row=+row; if(!(row>0)) return null;
+  var hit=null, pick=function(rows){ (rows||[]).some(function(r){ if(r && +r._row===row){ hit=r; return true; } return false; }); };
+  try{ if(S.task && +S.task._row===row) hit=S.task; }catch(_){}
+  try{ if(!hit && S.cache && S.cache.weekly) pick(S.cache.weekly.rows); }catch(_){}
+  try{ if(!hit && typeof TSTORE!=="undefined" && TSTORE.weekly) pick(TSTORE.weekly.rows); }catch(_){}
+  return hit;
+}
+function hint(o, rec){
+  if(!o || !rec) return;
+  if(!o._no && rec.no!=null && String(rec.no)!=="") o._no=String(rec.no).replace(/\.0+$/,"");
+  if(!o._acc && rec.account) o._acc=String(rec.account);
+  if(!o._pic && rec.pic) o._pic=String(rec.pic);
+  if(!o._start && rec.start) o._start=String(rec.start).slice(0,10);
+}
+var _ap=apiPost;
+apiPost=function(body){
+  try{
+    if(body){
+      var a=body.action;
+      if(a==="saveWeekly" && body.data && typeof body.data==="object" && +body.data._row>0) hint(body.data, wkRec(body.data._row));
+      else if((a==="deleteRow" && body.tab==="weekly") || a==="deletePhoto" || (a==="uploadPhoto" && +body.row>0)) hint(body, wkRec(body.row||body.rowIndex));
+    }
+  }catch(_){}
+  return _ap.apply(this, arguments);
+};
+
+/* ═════════ ② Công việc khác: hàng đợi ghi tức thì ═════════ */
+var ACT={ addKey:1, addSub:1, updateKey:1, updateSub:1, updateProgress:1, updateStatus:1, deleteKey:1, deleteSub:1 };
+var TRANS=/__HUB_TIMEOUT__|__HUB_BLOCKED__|timeout|Failed to fetch|NetworkError|Load failed|network|bận|busy|thử lại sau|Lock|Service invoked|too many|quá tải|Internal error|502|503|504/i;
+function on(){ try{ return !!(window.ATS_ON && ATS_ON()); }catch(_){ return false; } }
+function lsk(){ var t="x"; try{ t=curTeamKey(); }catch(_){} return "mmh_crm_oq_"+t+(window.__CRM_TF?"_tf":"")+(window.__CRM_TEST?"_test":""); }
+var Q=[], KEY="", RUN=false, TMR=0, LAST={ at:0, keys:null };
+function load(){ var k=lsk(); if(k===KEY) return; KEY=k; try{ Q=JSON.parse(localStorage.getItem(k)||"[]")||[]; }catch(_){ Q=[]; } }
+function save(){ try{ if(Q.length) localStorage.setItem(KEY, JSON.stringify(Q)); else localStorage.removeItem(KEY); }catch(_){} paint(); }
+function keys(){ S.other=S.other||{ keys:[], at:0 }; return S.other.keys||(S.other.keys=[]); }
+function isKeyObj(o){ return !!(o && o.subs); }
+function nameOf(o){ return o ? (isKeyObj(o) ? (o.keyTask||"") : (o.subTask||o.name||"")) : ""; }
+function srvName(o){ return o ? (o._sn!=null ? o._sn : nameOf(o)) : ""; }
+function stamp(list){ (list||[]).forEach(function(k){ if(k && !k._oq){ if(k._sn==null) k._sn=nameOf(k); (k.subs||[]).forEach(function(s){ if(s && !s._oq && s._sn==null) s._sn=nameOf(s); }); } }); }   /* chỉ đánh dấu bản mới từ sheet — giữ tên gốc khi đã sửa tên trên máy */
+/* tìm việc trong bộ nhớ: theo No (đang hiện) */
+function byNo(no){
+  no=String(no==null?"":no); var f=null, par=null;
+  keys().forEach(function(k){ if(f) return; if(String(k.no)===no){ f=k; return; } (k.subs||[]).forEach(function(s){ if(!f && String(s.no)===no){ f=s; par=k; } }); });
+  return f ? { o:f, par:par } : null;
+}
+/* tìm theo đích của lệnh: {oq} (việc chưa ghi) hoặc {no, name, sub} */
+function find(t){
+  if(!t) return null;
+  var out=null, want=t.name!=null ? nm(t.name) : null;
+  keys().forEach(function(k){
+    if(out && out.exact) return;
+    var test=function(o, par){
+      if(t.oq){ if(o._oq===t.oq) out={ o:o, par:par, exact:true }; return; }
+      if(!!t.sub !== !isKeyObj(o)) return;
+      if(want!=null && want!=="" && nm(srvName(o))!==want && nm(nameOf(o))!==want) return;
+      if(String(o.no)===String(t.no)) out={ o:o, par:par, exact:true };
+      else if(!out && want) out={ o:o, par:par };
+    };
+    test(k, null); (k.subs||[]).forEach(function(s){ test(s, k); });
+  });
+  return out;
+}
+function setF(o, b, key){
+  ["status","start","planned","revised","result","pic"].forEach(function(f){ if(b[f]!==undefined && !((f==="start"||f==="planned") && !b[f])) o[f]=b[f]; });
+  if(b.progress!==undefined && b.progress!=="") o.progress=(+b.progress||0)/100;
+  if(key){ if(b.type!==undefined && b.type!=="") o.type=b.type; if(b.keyTask) o.keyTask=b.keyTask; }
+  else if(b.name){ o.subTask=b.name; o.name=b.name; }
+}
+function apply(op){
+  var b=op.body, a=op.a;
+  if(a==="addKey"){
+    if(find({ oq:op.id })) return;
+    var k={ no:"t"+op.id, keyTask:b.keyTask, type:b.type||"", pic:b.pic, status:b.status||"To Do", progress:(+b.progress||0)/100,
+            start:b.start, planned:b.planned, revised:"", result:b.result||"", subs:[], _oq:op.id, _tmp:true, _pend:true };
+    try{ k.fy=S.fy; }catch(_){}
+    keys().unshift(k); return;
+  }
+  if(a==="addSub"){
+    if(find({ oq:op.id })) return;
+    var p=find(op.par); if(!p || !isKeyObj(p.o)) return;
+    p.o.subs=p.o.subs||[];
+    p.o.subs.push({ no:"t"+op.id, subTask:b.name, name:b.name, parentNo:p.o.no, pic:b.pic, status:b.status||"To Do", progress:(+b.progress||0)/100,
+                    start:b.start, planned:b.planned, revised:"", result:b.result||"", type:p.o.type, _oq:op.id, _tmp:true, _pend:true });
+    return;
+  }
+  var h=find(op.tgt); if(!h) return;
+  if(/^delete/.test(a)){
+    if(h.par) h.par.subs=(h.par.subs||[]).filter(function(x){ return x!==h.o; });
+    else S.other.keys=keys().filter(function(x){ return x!==h.o; });
+    return;
+  }
+  setF(h.o, b, isKeyObj(h.o)); h.o._pend=true;
+}
+function overlay(){ if(!Q.length) return; Q.forEach(function(op){ try{ apply(op); }catch(_){} }); }
+function persist(){ try{ kvSet(OTHER_KEY, S.other); }catch(_){} }
+function repaint(){
+  try{
+    if(S.tab!=="weekly") return;
+    if(S.wkTab==="cal" && typeof renderCal==="function") renderCal();
+    else if(S.wkTab==="other" && typeof renderOther==="function") renderOther();
+  }catch(_){}
+}
+/* thay dữ liệu bằng bản chính thức từ sheet (kèm lịch công tác TFT) rồi phủ lại lệnh chưa ghi */
+function adopt(list){
+  if(!Array.isArray(list)) return;
+  stamp(list);
+  S.other=S.other||{}; S.other.keys=list; S.other.at=Date.now();
+  try{ if(window.TFT && TFT.merge) TFT.merge(); }catch(_){}
+  overlay(); persist();
+}
+function hubCall(b){
+  var flat={}; Object.keys(b).forEach(function(k){ var v=b[k]; if(v===undefined) return; flat[k]=(v!==null && typeof v==="object") ? JSON.stringify(v) : v; });
+  try{ flat.pic=flat.pic||S.user.pic; flat.actor=flat.actor||S.user.pic; }catch(_){}
+  flat._ts=Date.now();
+  return hubJsonp(flat, 60000);
+}
+function ready(op){
+  if(op.tgt && op.tgt.oq) return false;          /* việc đích chưa ghi xong */
+  if(op.par && op.par.oq) return false;
+  return !op.err;
+}
+function sched(ms){ clearTimeout(TMR); TMR=setTimeout(pump, ms); }
+function pump(){
+  load();
+  if(RUN || !Q.length){ paint(); return; }
+  try{ if(!S.user || !S.user.pic) return sched(3000); }catch(_){ return sched(3000); }
+  if(navigator.onLine===false) return sched(5000);
+  var op=Q[0];
+  if(!ready(op)){ paint(); return; }
+  if(op.wait && Date.now()<op.wait) return sched(op.wait-Date.now()+30);
+  RUN=true; paint();
+  var b=Object.assign({}, op.body);
+  if(op.tgt && !op.tgt.oq){ b.no=op.tgt.no; b.expect=op.tgt.name||""; }
+  if(op.par && !op.par.oq){ b.parentNo=op.par.no; b.parentName=op.par.name||""; }
+  hubCall(b).then(function(r){ RUN=false; result(op, r); }, function(e){ RUN=false; result(op, { ok:false, error:String((e&&e.message)||e||"") , _net:true }); });
+}
+function result(op, r){
+  var msg=String((r&&r.error)||"");
+  if(r && r.ok!==false){
+    Q=Q.filter(function(x){ return x!==op; });
+    /* việc vừa thêm: lệnh sau trỏ tới nó ⇒ đổi sang No thật + tên */
+    if(/^add/.test(op.a)){
+      var real=String(r.no||""), name=op.a==="addKey" ? op.body.keyTask : op.body.name;
+      Q.forEach(function(x){
+        if(x.tgt && x.tgt.oq===op.id) x.tgt={ no:real, name:name, sub:op.a==="addSub" };
+        if(x.par && x.par.oq===op.id) x.par={ no:real, name:name, sub:false };
+      });
+    }
+    /* đổi tên: lệnh sau đang trỏ tên cũ ⇒ tên mới */
+    var nn=op.a==="updateKey" ? op.body.keyTask : op.a==="updateSub" ? op.body.name : "";
+    if(nn && op.tgt && nm(nn)!==nm(op.tgt.name)){
+      var old=nm(op.tgt.name);
+      Q.forEach(function(x){
+        if(x.tgt && !x.tgt.oq && nm(x.tgt.name)===old && !!x.tgt.sub===!!op.tgt.sub) x.tgt.name=nn;
+        if(!op.tgt.sub && x.par && !x.par.oq && nm(x.par.name)===old) x.par.name=nn;
+      });
+    }
+    save();
+    if(r && Array.isArray(r.keyTasks)){ LAST={ at:Date.now(), keys:r.keyTasks }; adopt(r.keyTasks); }
+    else { overlay(); persist(); }
+    repaint();
+    return sched(60);
+  }
+  if(r && r.stale){
+    Q=Q.filter(function(x){ return x!==op && !(x.tgt && x.tgt.oq===op.id) && !(x.par && x.par.oq===op.id); }); save();
+    toast(T("⚠️ Việc đã thay đổi trên sheet ALL TASK (người khác vừa sửa / xoá) — đã tải lại, kiểm tra rồi sửa lại nếu cần.","⚠️ The task changed on the ALL TASK sheet — reloaded, please check and edit again if needed."),"warn",7000);
+    try{ loadOther(true).then(repaint).catch(function(){}); }catch(_){}
+    return sched(60);
+  }
+  if(r && r._net || TRANS.test(msg)){
+    op.n=(op.n||0)+1; op.wait=Date.now()+Math.min(60000, 2000*Math.pow(2, Math.min(op.n-1, 5))); op.last=msg; save();
+    return sched(op.wait-Date.now()+30);
+  }
+  op.f=(op.f||0)+1; op.last=msg;
+  if(op.f>=3){ op.err=msg||T("Lỗi máy chủ","Server error"); save(); toast(T("⚠️ Công việc khác chưa lưu được: ","⚠️ Other task not saved: ")+op.err,"err",7000); return; }
+  op.wait=Date.now()+3000*op.f; save(); sched(3030*op.f);
+}
+function label(op){
+  var b=op.body, n=b.keyTask||b.name||(op.tgt&&op.tgt.name)||"";
+  var verb={ addKey:T("Thêm","Add"), addSub:T("Thêm","Add"), deleteKey:T("Xoá","Delete"), deleteSub:T("Xoá","Delete") }[op.a] || T("Sửa","Edit");
+  return verb+" “"+String(n).slice(0,60)+"”";
+}
+function paint(){
+  var c=document.getElementById("oqc");
+  if(!c){ if(!document.body) return; c=document.createElement("div"); c.id="oqc"; c.innerHTML="<i></i><span></span>"; c.onclick=panel; document.body.appendChild(c); }
+  var bad=Q.filter(function(x){ return x.err; }).length;
+  c.className=Q.length ? ("on"+(bad?" err":"")) : "";
+  c.querySelector("span").textContent = bad
+    ? T(bad+" việc chưa lưu được — bấm để xử lý", bad+" task(s) not saved — tap to fix")
+    : T("Đang lưu "+Q.length+" công việc vào sheet…","Saving "+Q.length+" task(s) to the sheet…");
+}
+function panel(){
+  var bad=Q.filter(function(x){ return x.err; });
+  if(!bad.length){ toast(T("Đang ghi "+Q.length+" thao tác vào sheet ALL TASK — có thể tiếp tục làm việc.","Writing "+Q.length+" change(s) to the ALL TASK sheet — you can keep working."),"ok",3500); sched(50); return; }
+  var op=bad[0];
+  if(confirm(label(op)+"\n\n"+T("Lỗi: ","Error: ")+op.err+"\n\n"+T("OK = Thử lại · Huỷ = chọn Bỏ","OK = Retry · Cancel = choose Discard"))){ op.err=""; op.f=0; op.wait=0; save(); sched(50); return; }
+  if(confirm(T("Bỏ thao tác này (không ghi vào sheet)?","Discard this change (not written to the sheet)?"))){
+    Q=Q.filter(function(x){ return x!==op && !(x.tgt && x.tgt.oq===op.id) && !(x.par && x.par.oq===op.id); }); save();
+    try{ loadOther(true).then(repaint).catch(function(){}); }catch(_){}
+    sched(50);
+  }
+}
+/* lệnh ghi từ mọi màn hình (Bảng Công việc khác, lịch, Ghi nhanh…) đi qua đây */
+var _hp=hubPost;
+hubPost=function(body){
+  if(!on() || !body || !ACT[body.action]) return _hp.apply(this, arguments);
+  load();
+  var b=Object.assign({}, body), a=b.action, op={ id:rid(), a:a, body:b, at:Date.now(), n:0 };
+  b.rid=b.rid || op.id;
+  try{ b.pic=b.pic || S.user.pic; b.actor=b.actor || S.user.pic; }catch(_){}
+  if(/^add/.test(a)){ if(!b.start) b.start=today(); if(!b.planned) b.planned=b.start; }
+  else { if("start" in b && !b.start) delete b.start; if("planned" in b && !b.planned) delete b.planned; }
+  if(a==="addSub"){
+    var p=byNo(b.parentNo), po=p && p.o;
+    op.par = po && po._oq ? { oq:po._oq } : { no:String(b.parentNo), name:srvName(po), sub:false };
+  } else if(a!=="addKey"){
+    var h=byNo(b.no), o=h && h.o;
+    op.tgt = o && o._oq ? { oq:o._oq } : { no:String(b.no), name:srvName(o), sub: o ? !isKeyObj(o) : /Sub$/.test(a) };
+    if(o){ b.expectPic=o.pic||""; if(a==="updateProgress"||a==="updateStatus"){ /* backend tự nhận key / sub */ } }
+    /* xoá việc chưa kịp ghi ⇒ bỏ luôn lệnh thêm (nếu chưa gửi) */
+    if(/^delete/.test(a) && op.tgt.oq){
+      var add=Q.filter(function(x){ return x.id===op.tgt.oq; })[0];
+      if(add && !(RUN && Q[0]===add)){
+        var dead=op.tgt.oq;
+        Q=Q.filter(function(x){ return x.id!==dead && !(x.tgt && x.tgt.oq===dead) && !(x.par && x.par.oq===dead); });
+        apply(op); persist(); save(); repaint();
+        return Promise.resolve({ ok:true, queued:true, message:T("Đã xoá","Deleted") });
+      }
+    }
+  }
+  Q.push(op); save();
+  try{ apply(op); persist(); }catch(_){}
+  setTimeout(repaint, 0);
+  sched(30);
+  return Promise.resolve({ ok:true, queued:true, no:"t"+op.id,
+    message:/^delete/.test(a) ? T("✓ Đã xoá — đang cập nhật sheet ALL TASK","✓ Deleted — updating the ALL TASK sheet") : T("✓ Đã lưu — đang ghi vào sheet ALL TASK","✓ Saved — writing to the ALL TASK sheet") });
+};
+/* tải lại từ sheet: đánh dấu tên gốc + phủ lại lệnh chưa ghi; bản tải về cũ hơn kết quả ghi gần nhất ⇒ dùng kết quả ghi */
+if(typeof loadOther==="function"){
+  var _lo=loadOther;
+  loadOther=function(force){
+    var t0=Date.now(), p=_lo.apply(this, arguments);
+    return Promise.resolve(p).then(function(o){
+      try{
+        if(on()){
+          load();
+          if(force && LAST.keys && LAST.at>t0) adopt(LAST.keys);
+          else if(S.other && S.other.keys){ stamp(S.other.keys); if(Q.length){ overlay(); persist(); } }
+        }
+      }catch(_){}
+      return S.other || o;
+    });
+  };
+}
+window.OQ={ q:function(){ return Q; }, pump:function(){ sched(10); }, on:on, overlay:overlay };
+window.addEventListener("online", function(){ sched(500); });
+setTimeout(function(){ load(); try{ if(S.other && S.other.keys) stamp(S.other.keys); }catch(_){} paint(); if(Q.length) sched(1500); }, 2500);
 })();
 </script>
 <script src="testflow/testflow.js?v=1.0"></script>
