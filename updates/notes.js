@@ -7,6 +7,17 @@
 function E(u){ u.en={ title:u.title, items:u.items.map(function(i){ return { title:i.title, text:i.text }; }) }; return u; }
 window.MMH_UPDATES = [
   E({
+    id:"2026-10-13-v31.5", version:"v31.5", date:"2026-10-13",
+    title:"Admin TEST mode: try every function with real saves and see where the data goes",
+    summary:"For the Admin only. The CRM runs as a user named <b>TEST</b>: tasks, photos, customers, orders, reports, trips and new accounts are <b>really saved</b> under the name TEST, every e-mail goes only to the Admin, and a <b>Data flow</b> panel shows which file, tab and row each save went to. Nobody else sees TEST data and it is never counted in KPI.",
+    items:[
+      {type:"new", icon:"🧪", title:"Start TEST mode", text:"Click <b>TEST mode</b> on the top bar (phone: <b>More ▸ Tools</b>) ▸ pick the team whose CRM file receives the data ▸ pick a role: <b>Sales TEST</b>, <b>Manager</b> or <b>Director</b> ▸ <b>Start</b>. Photos are saved as <b>TEST_&lt;date&gt;_&lt;account&gt;_01.jpg</b>.", img:"updates/v31.5/test-mode-pick.jpg"},
+      {type:"new", icon:"➜", title:"Data flow panel", text:"Click the yellow <b>TEST</b> button (bottom-left). Each save shows ① the action → ② the backend → ③ the file ▸ tab ▸ row (with a link) → ④ who the e-mail would normally go to — it is sent only to the Admin with <b>[TEST]</b> in the subject. A checklist ticks off each function tested.", img:"updates/v31.5/test-mode-flow.jpg"},
+      {type:"new", icon:"✔", title:"Play the Director or the Manager", text:"Propose a trip as Sales TEST, switch to <b>Director</b> ▸ <b>Approve trips</b> ▸ approve it; submit a new account, switch to <b>Manager</b> ▸ approve it. Only TEST records can be approved — real ones still need the real Director / manager.", img:"updates/v31.5/test-mode-phone.jpg"},
+      {type:"imp", icon:"🧹", title:"Delete test data", text:"In the Data flow panel click <b>Delete test data</b>: rows with PIC TEST, TEST trip proposals and their folders, and TEST_… photos / files are removed from the CRM files. Real data is never touched. <b>Exit TEST mode</b> returns to your own account. (The old <b>View as a sales person</b> mode, which saves nothing, is still in the same dialog.)"}
+    ]
+  }),
+  E({
     id:"2026-10-12-v31.4", version:"v31.4", date:"2026-10-12",
     title:"Monthly report: everything you type or dictate is saved to the sheet",
     summary:"Fixed: in a monthly task, text entered with <b>Speak</b> (voice) was shown on screen but not sent to the sheet, and closing the panel without saving lost the text without warning.",

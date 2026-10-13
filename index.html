@@ -3979,7 +3979,7 @@ function buildNav(){
     if(t.grp!==lastGrp){ h+='<div class="grp">'+t.grp+'</div>'; lastGrp=t.grp; }
     h+='<button class="nvi" data-t="'+t.id+'" onclick="go(\''+t.id+'\')"><span class="ic">'+t.ic+'</span><span class="lb">'+t.lb+'</span></button>';
   });
-  h+='<div style="flex:1"></div><div style="padding:10px;font-size:10.5px;color:var(--mute);line-height:1.5">MMH CRM v31.4<br>'+
+  h+='<div style="flex:1"></div><div style="padding:10px;font-size:10.5px;color:var(--mute);line-height:1.5">MMH CRM v31.5<br>'+
      (isMgmt()?'<a href="'+DRIVE_FOLDER+'" target="_blank">📁 Folder ảnh Drive</a>':"")+'</div>';
   $("side").innerHTML=h;
   /* ⭐ v4.5 — thanh dưới trượt ngang, đủ mọi mục, bỏ nút "Thêm" */
@@ -19527,6 +19527,18 @@ function grant(pic){
   return true;
 }
 (function(){ var u=AUTH.user(); if(!u) return;
+  /* ⭐ v31.5 — Chế độ TEST (testflow/testflow.js): Admin dùng CRM như người dùng "TEST" của nhóm đã chọn — ghi THẬT, email chỉ về Admin */
+  var tf=null; try{ tf=JSON.parse(localStorage.getItem("mmh_test_crm")||"null"); }catch(_){}
+  if(tf && tf.on && u.admin){
+    var tk=TEAMS[tf.scope]?tf.scope:"dental", gl={ dental:"Dental Sales", surgical:"Surgical Sales", eyeless:"Eyeless Sales", thai:"Thailand Surgical Sales" }[tk];
+    var th=tk==="thai", rl=tf.role||"sales";
+    ROLES.TEST={ grp:rl==="dir"?"Management":gl, ini:"TE", team:tk, email:u.email||"", test:true,
+      title:rl==="dir"?(th?"Director (TEST)":"Giám đốc (TEST)"):rl==="mgr"?(th?"Team Leader (TEST)":"Team Leader (TEST)"):(th?"Sales PIC (TEST)":"Sales PIC (TEST)") };
+    window.__CRM_TF=tf;
+    try{ localStorage.removeItem(LS_MGMT); }catch(_){}
+    grant("TEST"); try{ localStorage.setItem(LS_TEAM, tk); }catch(_){}
+    return;
+  }
   /* ⭐ v30.6 — Admin đang ở Chế độ thử ⇒ vào tài khoản sales đã chọn (CRMTEST) */
   var tm=null; try{ tm=JSON.parse(localStorage.getItem("mmh_crm_test")||"null"); }catch(_){}
   if(tm && u.admin && ROLES[tm.pic]){ window.__CRM_TEST=tm; grant(tm.pic); return; }
@@ -19673,7 +19685,7 @@ function nudge(on){
   setTimeout(function(){
     var t=AUTH.tk(); if(!t) return;
     AUTH.call("rhAuthMe",{ tk:t }).then(function(d){
-      if(d && d.ok && d.user){ var p=AUTH.role(d.user.pic); if(p && p!==S.user.pic && !window.__CRM_TEST){ try{ if(sessionStorage.getItem("mmh_au_fix")) return; sessionStorage.setItem("mmh_au_fix","1"); }catch(_){} enterAs(p); } return; }
+      if(d && d.ok && d.user){ var p=AUTH.role(d.user.pic); if(p && p!==S.user.pic && !window.__CRM_TEST && !window.__CRM_TF){ try{ if(sessionStorage.getItem("mmh_au_fix")) return; sessionStorage.setItem("mmh_au_fix","1"); }catch(_){} enterAs(p); } return; }
       if(d && d.code==="AUTH"){ AUTH.clear(); toast((d.error||"Phiên đăng nhập hết hiệu lực.")+" Vui lòng xác thực lại email.","warn",6000); nudge(true); }
     }).catch(function(){});
   }, 4000);
@@ -20381,6 +20393,8 @@ function seDownload(){
     var a=document.createElement("a"), nm=(H.NAME||SS.pic).replace(/\s+/g,"_")+"-Setting_Expectation-Term_"+SS.fy+"_"+SS.q+".docx";
     a.href=URL.createObjectURL(blob); a.download=nm; document.body.appendChild(a); a.click(); setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 2000);
     b.disabled=false; b.textContent=t0; toast("📄 Đã tạo "+nm); lsS("mmh_se_done:"+SS.pic+":FY"+SS.fy+SS.q, Date.now());
+    try{ if(window.TESTFLOW && TESTFLOW.on()) TESTFLOW.add({ action:"seWord", title:["Tự đánh giá quý (Setting Expectation)","Quarterly self-evaluation (Setting Expectation)"], bk:{ key:"local", name:"—" }, st:"ok",
+      body:{ pic:SS.pic, term:"FY"+SS.fy+" "+SS.q, file:nm }, res:{ ok:true, name:nm }, tab:["File Word tải về máy — không gửi backend","Word file downloaded — nothing sent to a backend"], next:[["KPI quý tự điền từ file MMH KPI FY68 (backend kpi ▸ rhKpi)","Quarter KPI filled from MMH KPI FY68 (kpi ▸ rhKpi)"],["Phần tự đánh giá lưu nháp trên máy","Self-evaluation draft kept on this device"]] }); }catch(_){}
   }).catch(function(e){ b.disabled=false; b.textContent=t0; toast("⚠️ "+e.message); });
 }
 window.SE={ open:function(pic, fy, q){ seOpen(pic, fy, q); } };
@@ -20685,7 +20699,7 @@ window.QS2={ open:qsOpen };
 </script>
 
 <!-- ⭐ v30.3 — THÔNG BÁO CẬP NHẬT (chép từ Report Hub): dữ liệu updates/notes.js · tự hiện 7 ngày · nút "Có gì mới" trên thanh trên cùng -->
-<script src="updates/notes.js?v=31.4"></script>
+<script src="updates/notes.js?v=31.5"></script>
 <style id="upd-css">
 #upd,#upd-zoom{--t-pri:var(--blue);--t-pri2:var(--blue-d);--t-ink:var(--navy);--t-soft:var(--pale);--t-line:var(--lb2);--t-bg:#F6F8FA;--mmh-blue:var(--blue);--mmh-navy:var(--navy)}
 
@@ -22610,7 +22624,7 @@ body.tm-on #app{padding-top:30px}
    · Mọi lệnh ghi khác vẫn có rid + tự gửi lại khi chập mạng (như v29.2). */
 (function(){
 "use strict";
-var TSFX=window.__CRM_TEST?"_test":"", LS="mmh_crm_wq"+TSFX, LT="mmh_crm_tmp"+TSFX, Q=[], RUN=false, TMP={}, QON=0, MEM={}, THUMB={};
+var TSFX=window.__CRM_TEST?"_test":window.__CRM_TF?"_tf":"", LS="mmh_crm_wq"+TSFX, LT="mmh_crm_tmp"+TSFX, Q=[], RUN=false, TMP={}, QON=0, MEM={}, THUMB={};
 function lsJ(k,d){ try{ return JSON.parse(localStorage.getItem(k)||"null")||d; }catch(_){ return d; } }
 function save(){ try{ localStorage.setItem(LS, JSON.stringify(Q)); }catch(_){} try{ localStorage.setItem(LT, JSON.stringify(TMP)); }catch(_){} }
 Q=lsJ(LS,[]); TMP=lsJ(LT,{});
@@ -22868,11 +22882,12 @@ window.CRMTEST={
 };
 /* lối vào: Admin — menu Thêm (điện thoại) + nút trên thanh trên cùng (máy tính) */
 function entry(){
-  var x=u(); if(!x || !x.admin || TM) return;
+  var x=u(); if(!x || !x.admin || TM || window.__CRM_TF) return;
   var h=document.querySelector("#app header");
   if(h && !document.getElementById("tmBtn")){
-    var b=document.createElement("button"); b.className="tb2"; b.id="tmBtn"; b.title="Chế độ thử: dùng CRM như một bạn sales, không lưu dữ liệu";
-    b.innerHTML='<span>Chế độ thử</span>'; b.onclick=CRMTEST.pick;
+    /* ⭐ v31.5 — mở hộp chọn Chế độ TEST (ghi thật dưới tên TEST, testflow.js); "Xem như một bạn sales (không lưu)" là lựa chọn phụ trong hộp */
+    var b=document.createElement("button"); b.className="tb2"; b.id="tmBtn"; b.title=(typeof isTH==="function"&&isTH())?"TEST mode: try every function as user TEST (real saves, e-mails to the Admin only)":"Chế độ TEST: thử mọi chức năng dưới tên TEST (ghi thật, email chỉ về Admin)";
+    b.innerHTML='<span>'+((typeof isTH==="function"&&isTH())?"TEST mode":"Chế độ TEST")+'</span>'; b.onclick=function(){ if(window.TESTFLOW) TESTFLOW.pick(); else CRMTEST.pick(); };
     var us=document.getElementById("btnUser"); if(us) h.insertBefore(b, us); else h.appendChild(b);
   }
 }
@@ -22880,8 +22895,9 @@ var mo=window.V30 && V30.more;
 if(mo) V30.more=function(){ var r=mo.apply(this,arguments);
   try{ var x=u(); if(x && x.admin){ var g=null; [].forEach.call(document.querySelectorAll("#v30-more .gt"),function(t){ if(/Tiện ích/.test(t.textContent)) g=t.nextElementSibling; });
     if(g && !g.querySelector("[data-tm]")){ var b=document.createElement("button"); b.setAttribute("data-tm","1");
-      b.innerHTML=(typeof V30_ICON==="function"?V30_ICON("check"):"")+'<span>'+(TM?"Thoát chế độ thử":"Chế độ thử")+'</span>';
-      b.onclick=function(){ document.getElementById("v30-more").classList.remove("show"); if(TM) CRMTEST.stop(); else CRMTEST.pick(); }; g.appendChild(b); } } }catch(_){}
+      var tf=!!window.__CRM_TF, th=(typeof isTH==="function"&&isTH());
+      b.innerHTML=(typeof V30_ICON==="function"?V30_ICON("check"):"")+'<span>'+(TM?"Thoát chế độ thử":tf?(th?"TEST mode · data flow":"Chế độ TEST · Luồng dữ liệu"):(th?"TEST mode":"Chế độ TEST"))+'</span>';
+      b.onclick=function(){ document.getElementById("v30-more").classList.remove("show"); if(TM) CRMTEST.stop(); else if(window.TESTFLOW) (tf?TESTFLOW.open():TESTFLOW.pick()); else CRMTEST.pick(); }; g.appendChild(b); } } }catch(_){}
   return r; };
 (function wait(){ var a=document.getElementById("app"); if(a && a.classList.contains("on")) entry(); else setTimeout(wait, 1200); })();
 if(!TM) return;
@@ -23021,7 +23037,7 @@ function legacy(keys){
 var M={ busy:false };
 function migrate(force){
   if(!on() || M.busy || !window.AUTH || !AUTH.tk || !AUTH.tk()) return;
-  if(window.__CRM_TEST) return;                                  /* chế độ thử của Admin: không chuyển dữ liệu thật */
+  if(window.__CRM_TEST || window.__CRM_TF) return;              /* chế độ thử / chế độ TEST của Admin: không chuyển dữ liệu thật */
   var lk="mmh_at_mig_"+curTeamKey(), last=0; try{ last=+localStorage.getItem(lk)||0; }catch(_){}
   if(!force && Date.now()-last<600000) return;
   M.busy=true; try{ localStorage.setItem(lk, String(Date.now())); }catch(_){}
@@ -23164,7 +23180,10 @@ function esc(s){ return String(s==null?"":s).replace(/[&<>"']/g,function(c){ ret
 function L(vi,en){ try{ return (C.lang && C.lang()==="en") ? en : vi; }catch(_){ return vi; } }
 function me(){ try{ return window.AUTH && AUTH.user && AUTH.user(); }catch(_){ return null; } }
 function tk(){ try{ return (window.AUTH && AUTH.tk && AUTH.tk()) || ""; }catch(_){ return ""; } }
-function isDir(u){ return !!u && (u.level==="director" || u.local==="nt.ha"); }
+function isDir(u){ return !!u && (u.level==="director" || u.local==="nt.ha" || (window.__TF_TESTDIR===true && !!u.admin)); }
+/* chế độ TEST (testflow.js): Admin đóng vai Giám đốc ⇒ chỉ chọn được đề xuất của TEST */
+function tst(x){ return /^TEST(\b|_)/.test(String(x&&x.pic||"")); }
+function pickable(x){ var u=me(); return !!T.dir && (!(window.__TF_TESTDIR===true) || (u && (u.level==="director" || u.local==="nt.ha")) || tst(x)); }
 function can(){ var u=me(); return !!u && (isDir(u) || u.admin); }
 function dmy(iso){ var m=/^(\d{4})-(\d{2})-(\d{2})/.exec(iso||""); return m?m[3]+"/"+m[2]+"/"+m[1]:""; }
 function money(n){ if(n && isNaN(Number(n))) return String(n); return n?String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g,"."):""; }
@@ -23197,8 +23216,8 @@ function load(){
 function card(x){
   var on=!!T.sel[x.row], ap=/sent/i.test(x.status)?L("Đã gửi email xin duyệt","Request emailed"):L("Chưa duyệt","Not yet");
   return '<div class="tfa-it'+(on?" on":"")+'" data-r="'+x.row+'">'
-    +'<input type="checkbox" data-ck="'+x.row+'"'+(on?" checked":"")+(T.dir?"":" disabled")+'>'
-    +'<div class="tfa-t">'+esc(x.pic)+' · '+esc(x.dest||"—")+'<small>'+dmy(x.start)+' → '+dmy(x.finish)+' · '+x.days+L(' ngày · dòng ',' days · row ')+x.row+'</small> <span class="tfa-st">'+ap+'</span></div>'
+    +'<input type="checkbox" data-ck="'+x.row+'"'+(on?" checked":"")+(pickable(x)?"":" disabled")+'>'
+    +'<div class="tfa-t">'+(tst(x)?'<span class="tfa-st" style="background:#1E3A4F;color:#FFE100;margin-right:6px">TEST</span>':'')+esc(x.pic)+' · '+esc(x.dest||"—")+'<small>'+dmy(x.start)+' → '+dmy(x.finish)+' · '+x.days+L(' ngày · dòng ',' days · row ')+x.row+'</small> <span class="tfa-st">'+ap+'</span></div>'
     +'<div class="tfa-g">'
       +'<div><span>'+L('Mục đích','Purpose')+'</span><b>'+esc(x.purpose||"—")+'</b></div>'
       +(x.expect?'<div><span>'+L('Kết quả mong đợi','Expected result')+'</span><b>'+esc(x.expect)+'</b></div>':"")
@@ -23206,7 +23225,7 @@ function card(x){
       +'<div><span>'+L('Chi phí dự kiến','Estimated cost')+'</span><b>'+esc(x.estCost||"—")+(x.total?"\n"+L("Tổng: ","Total: ")+money(x.total):"")+'</b></div>'
       +'<div><span>'+L('Đi cùng · Thiết bị','Co-traveler · Equipment')+'</span><b>'+esc(x.co||"No")+' · '+esc(x.equip||"N/A")+'</b></div>'
     +'</div>'
-    +(T.dir?'<div class="tfa-c"><input data-cm="'+x.row+'" placeholder="'+esc(L("Ghi chú / lý do (bắt buộc nếu từ chối)","Note / reason (required to reject)"))+'" value="'+esc((T.cm||{})[x.row]||"")+'"></div>':"")
+    +(pickable(x)?'<div class="tfa-c"><input data-cm=""'+x.row+'" placeholder="'+esc(L("Ghi chú / lý do (bắt buộc nếu từ chối)","Note / reason (required to reject)"))+'" value="'+esc((T.cm||{})[x.row]||"")+'"></div>':"")
     +'</div>';
 }
 function paint(msg){
@@ -23216,13 +23235,13 @@ function paint(msg){
   else if(!T.items.length) list.innerHTML='<div class="tfa-msg">'+L('Không còn đề xuất công tác nào chờ duyệt.','No business trip proposals are waiting.')+'</div>';
   else list.innerHTML=T.items.map(card).join("");
   ov.querySelector(".tfa-cnt").textContent=T.items.length?(T.items.length+L(" đề xuất chờ duyệt"," waiting")+(n?L(" · đã chọn "," · selected ")+n:"")):"";
-  var all=ov.querySelector("#tfa-all"); all.checked=T.items.length>0 && n===T.items.length; all.disabled=!T.dir||!T.items.length;
+  var pk=T.items.filter(pickable), all=ov.querySelector("#tfa-all"); all.checked=pk.length>0 && n===pk.length; all.disabled=!T.dir||!pk.length;
   ov.querySelectorAll(".tfa-act").forEach(function(b){ b.disabled=!T.dir||!n||T.busy; });
   ov.querySelector(".tfa-ok").textContent=L("Duyệt","Approve")+(n?" ("+n+")":"");
   ov.querySelector(".tfa-no").textContent=L("Từ chối","Reject")+(n?" ("+n+")":"");
   list.querySelectorAll("[data-ck]").forEach(function(c){ c.onchange=function(){ var r=c.getAttribute("data-ck"); if(c.checked) T.sel[r]=1; else delete T.sel[r]; paint(); }; });
   list.querySelectorAll("[data-cm]").forEach(function(i){ i.oninput=function(){ (T.cm=T.cm||{})[i.getAttribute("data-cm")]=i.value; }; i.onclick=function(e){ e.stopPropagation(); }; });
-  list.querySelectorAll(".tfa-it").forEach(function(d){ d.onclick=function(e){ if(!T.dir||e.target.closest("input")) return; var c=d.querySelector("[data-ck]"); c.checked=!c.checked; c.onchange(); }; });
+  list.querySelectorAll(".tfa-it").forEach(function(d){ d.onclick=function(e){ if(!T.dir||e.target.closest("input")) return; var c=d.querySelector("[data-ck]"); if(c.disabled) return; c.checked=!c.checked; c.onchange(); }; });
 }
 function close(){ var ov=document.getElementById("tfa-ov"); if(ov) ov.remove(); }
 function open(){
@@ -23231,6 +23250,7 @@ function open(){
   var ov=document.createElement("div"); ov.id="tfa-ov";
   ov.innerHTML='<div class="tfa-box" role="dialog" aria-label="'+L("Duyệt đề xuất công tác","Approve business trips")+'">'
     +'<div class="tfa-hd"><h3>'+L("Duyệt đề xuất công tác","Approve business trips")+'</h3><button class="x" title="Đóng">×</button></div>'
+    +(window.__TF_TESTDIR===true?'<div class="tfa-note" style="background:#FFF6D6;border-color:#E8C95A;color:#5A4500">'+L('Chế độ TEST — bạn đang đóng vai Giám đốc: chỉ duyệt được đề xuất của <b>TEST</b>. Đề xuất thật vẫn cần Giám đốc thật duyệt. Email duyệt chỉ gửi về Admin.','TEST mode — you are acting as the Director: only <b>TEST</b> proposals can be approved. Real proposals still need the real Director. Approval e-mails go to the Admin only.')+'</div>':"")
     +(isDir(me())?"":'<div class="tfa-note">'+L('Chỉ Giám đốc được duyệt — bạn đang xem ở chế độ chỉ đọc.','Only the Director can approve — you are viewing read-only.')+'</div>')
     +'<div class="tfa-bar"><label><input type="checkbox" id="tfa-all"> '+L('Chọn tất cả','Select all')+'</label><span class="tfa-cnt"></span><span style="flex:1"></span><a class="tfa-file" target="_blank" rel="noopener" style="color:var(--t-pri,#3A5CAA);font-weight:600;text-decoration:none">'+L('Mở file Business Trip ↗','Open Business Trip file ↗')+'</a></div>'
     +'<div class="tfa-list"></div>'
@@ -23240,7 +23260,7 @@ function open(){
   ov.addEventListener("click",function(e){ if(e.target===ov) close(); });
   ov.querySelector(".x").onclick=close;
   ov.querySelector(".tfa-file").href=T.file||"https://docs.google.com/spreadsheets/d/15dAQYOG1aJRX-jByVmRFeSFOIPRtdVW7wDvwC_nxJUA/edit";
-  ov.querySelector("#tfa-all").onchange=function(){ var c=this.checked; T.sel={}; if(c) T.items.forEach(function(x){ T.sel[x.row]=1; }); paint(); };
+  ov.querySelector("#tfa-all").onchange=function(){ var c=this.checked; T.sel={}; if(c) T.items.filter(pickable).forEach(function(x){ T.sel[x.row]=1; }); paint(); };
   ov.querySelector(".tfa-ok").onclick=function(){ decide("approve"); };
   ov.querySelector(".tfa-no").onclick=function(){ decide("reject"); };
   T.dir=isDir(me());
@@ -23321,6 +23341,7 @@ window.TOUR_CFG={ app:"crm",
 ["UPD","DL"].forEach(function(k){ var m=window[k]; if(!m || typeof m.open!=="function") return; var o=m.open;
   m.open=function(manual){ if(window.__tourOn && manual!==true){ var me=this, ar=arguments; (window.__tourQ=window.__tourQ||[]).push(function(){ o.apply(me, ar); }); return; } return o.apply(this, arguments); }; });
 window.__tourClean=function(){
+  try{ var pk=document.getElementById("tf-pk"); if(pk) pk.remove(); if(window.TESTFLOW) TESTFLOW.close(); }catch(_){}
   try{ if(typeof closeModal==="function") closeModal(); }catch(_){}
   try{ var t=document.getElementById("tfa-ov"); if(t) t.remove(); }catch(_){}
   ["upd","dl","kpn"].forEach(function(id){ var e=document.getElementById(id); if(e) e.classList.remove("show"); });
@@ -23544,7 +23565,70 @@ window.__tourClean=function(){
   }catch(_){}
 })();
 </script>
+<script>
+/* ⭐ v31.5 — CHẾ ĐỘ TEST CỦA ADMIN · LUỒNG DỮ LIỆU (testflow/testflow.js — GIỐNG HỆT MMH-Report, backend MMH_TestMode.gs ở kho mmh-backend).
+   Admin ▸ nút "Chế độ TEST" (thanh trên cùng) / Thêm ▸ Tiện ích ⇒ chọn nhóm + vai (Sales TEST · Quản lý · Giám đốc) ⇒ CRM chạy như người dùng "TEST"
+   (ROLES.TEST tạo ở khối đăng nhập, __CRM_TF). Mọi lệnh ghi THẬT vào file CRM của nhóm (tên TEST, ảnh TEST_…), email chỉ về Admin [TEST],
+   người khác không thấy, không tính KPI. Mỗi lần lưu hiện 1 thẻ trong bảng Luồng dữ liệu (nút vàng góc trái dưới). "Xem như một bạn sales (không lưu)"
+   = Chế độ thử cũ (CRMTEST v30.6) — lựa chọn phụ trong hộp chọn. Lệnh ghi mới ⇒ thêm nhãn vào labels (chữ [vi, en]). */
+window.TESTFLOW_CFG={ app:"crm", key:"mmh_test_crm", name:["MMH CRM","MMH CRM"],
+  lang:function(){ try{ return (window.I18N&&I18N.on)||isTH()?"en":"vi"; }catch(_){ return "vi"; } },
+  admin:function(){ var u=window.AUTH&&AUTH.user&&AUTH.user(); return !!(u&&u.admin); },
+  email:function(){ var u=window.AUTH&&AUTH.user&&AUTH.user(); return String(u&&u.email||"").replace(/@mani\.inc$/i,"@manimedicalhanoi.com"); },
+  tk:function(){ try{ return AUTH.tk()||""; }catch(_){ return ""; } },
+  scopeLabel:["Nhóm (file CRM ghi vào)","Team (CRM file to write to)"],
+  scopes:[{k:"dental",label:"Dental"},{k:"surgical",label:"Surgical"},{k:"eyeless",label:"Eyeless"},{k:"thai",label:"Thailand Surgical"}],
+  roles:[
+    {k:"sales",label:["Sales TEST","Sales TEST"],sub:["Đi địa bàn · ảnh · khách hàng · đơn hàng · báo cáo · công tác · mở mới","Field visits · customers · reports · trips · new accounts"]},
+    {k:"mgr",label:["Quản lý (Team Leader)","Manager (Team Leader)"],sub:["Xem cả nhóm · xác nhận Mở mới của TEST","Whole team · approve TEST new accounts"]},
+    {k:"dir",label:["Giám đốc","Director"],sub:["Duyệt đề xuất công tác của TEST","Approve TEST business trips"]}],
+  labels:{
+    saveWeekly:{t:["Lưu task đi địa bàn","Save field task"],tab:"WEEKLY",next:[["Lịch công việc, Báo cáo tuần, Họp tuần đọc dòng này","Calendar, weekly report and weekly meeting read this row"]]},
+    uploadPhoto:{ext:1,t:["Chụp / gửi ảnh đi địa bàn","Field photo"],tab:["Drive ▸ folder ảnh · link ghi vào cột Photo của task","Drive photo folder · link in the task's Photo column"],next:[["Tên ảnh: TEST_<ngày>_<khách hàng>_01.jpg","File name: TEST_<date>_<account>_01.jpg"]]},
+    deletePhoto:{t:["Xoá ảnh","Delete photo"],tab:"WEEKLY"},
+    saveCustomer:{t:["Lưu khách hàng","Save customer"],tab:"CUSTOMER",next:[["Danh sách khách hàng · Account 360","Customer list · Account 360"]]},
+    saveCBC:{t:["Lưu người liên hệ (CBC)","Save contact (CBC)"],tab:"CBC"},
+    saveCustomerCbc:{t:["Lưu khách hàng + người liên hệ","Save customer + contact"],tab:"CUSTOMER · CBC"},
+    saveOrder:{t:["Lưu đơn hàng (Dental sale)","Save order"],tab:"SALES ORDER",next:[["KPI doanh số / đơn hàng: TEST không được cộng","Sales KPI: TEST is not counted"]]},
+    saveOrders:{t:["Lưu đơn hàng (Dental sale)","Save order"],tab:"SALES ORDER",next:[["KPI doanh số / đơn hàng: TEST không được cộng","Sales KPI: TEST is not counted"]]},
+    saveMonthly:{t:["Lưu hạng mục báo cáo tháng","Save monthly report item"],tab:"MONTHLY"},
+    savePresentation:{t:["Lưu buổi giới thiệu sản phẩm","Save presentation"],tab:"PRESENTATION"},
+    saveADP:{t:["Lưu ADP","Save ADP"],tab:"ADP"},
+    deleteRow:{t:["Xoá dòng","Delete row"]}, deleteAccount:{t:["Xoá khách hàng","Delete account"],tab:"CUSTOMER · CBC"},
+    weeklyReport:{ext:1,t:["Gửi báo cáo tuần","Send weekly report"],tab:["PDF lưu vào folder Báo cáo tuần (Drive)","PDF saved to the weekly report folder"],next:[["Bản thật gửi nhóm + quản lý; chế độ TEST chỉ gửi Admin","Real report goes to the team + managers; TEST mode: Admin only"]]},
+    monthlyReport:{ext:1,t:["Gửi báo cáo tháng","Send monthly report"],tab:["PDF báo cáo tháng","Monthly report PDF"]},
+    tripPropose2:{ext:1,t:["Đề xuất công tác","Business trip proposal"],tab:["File Business Trip ▸ MMH Travel report · nhật ký tab Business Trip Log","Business Trip file ▸ MMH Travel report · log tab Business Trip Log"],next:[["Hiện ở Duyệt công tác — đổi vai Giám đốc để duyệt","Shows in Approve trips — switch to the Director role to approve"],["Lịch công việc: thẻ công tác \"chờ duyệt\"","Calendar: trip card \"waiting\""]]},
+    tfDecide:{ext:1,t:["Giám đốc duyệt / từ chối công tác","Director decides the trip"],tab:["File Business Trip ▸ cột Approval · folder công tác (Drive)","Business Trip file ▸ Approval column · trip folder"],next:[["Lịch công tác + báo cáo công tác dùng trạng thái mới","Trip calendar + trip report use the new status"]]},
+    naSave:{t:["Lưu case Mở mới / SKU mới","Save new account / SKU case"],tab:"16. NEW ACCOUNT & SKU"},
+    naUpload:{ext:1,t:["Tải chứng từ Mở mới","Upload new-account evidence"],tab:["Drive ▸ folder chứng từ Mở mới (tháng)","Drive ▸ evidence folder (month)"],next:[["Tên file: TEST_<ngày>_<account>_<SKU>","File name: TEST_<date>_<account>_<SKU>"]]},
+    naDelFile:{t:["Xoá chứng từ","Delete evidence"]}, naDelete:{t:["Xoá case Mở mới","Delete case"],tab:"16. NEW ACCOUNT & SKU"},
+    naSubmit:{t:["Gửi xin xác nhận Mở mới","Submit new account for approval"],tab:"16. NEW ACCOUNT & SKU",next:[["Quản lý thấy ở mục Duyệt — đổi vai Quản lý để xác nhận","The manager sees it under Review — switch to the Manager role"]]},
+    naDecide:{t:["Quản lý xác nhận / trả lại / từ chối Mở mới","Manager decides the new account"],tab:"16. NEW ACCOUNT & SKU",next:[["KPI Mở mới: TEST không được cộng","New-account KPI: TEST is not counted"]]},
+    addKey:{t:["Công việc khác: thêm việc","Other tasks: add"],tab:"ALL TASK"}, addSub:{t:["Công việc khác: thêm việc con","Other tasks: add sub-task"],tab:"ALL TASK"},
+    updateKey:{t:["Công việc khác: sửa","Other tasks: edit"],tab:"ALL TASK"}, updateSub:{t:["Công việc khác: sửa","Other tasks: edit"],tab:"ALL TASK"},
+    updateProgress:{t:["Công việc khác: cập nhật tiến độ","Other tasks: progress"],tab:"ALL TASK"}, updateStatus:{t:["Công việc khác: đổi trạng thái","Other tasks: status"],tab:"ALL TASK"},
+    deleteKey:{t:["Công việc khác: xoá","Other tasks: delete"],tab:"ALL TASK"}, deleteSub:{t:["Công việc khác: xoá","Other tasks: delete"],tab:"ALL TASK"},
+    rhKpiMailSend:{ext:1,t:["Gửi email báo cáo KPI tháng","Send the monthly KPI report"],tab:["Không ghi Sheet — số liệu đọc từ file MMH KPI FY68","No sheet write — figures read from MMH KPI FY68"]},
+    krSend:{ext:1,t:["Gửi email báo cáo KPI tháng","Send the monthly KPI report"],tab:["Không ghi Sheet — số liệu đọc từ file MMH KPI FY68","No sheet write — figures read from MMH KPI FY68"]},
+    saveKpiTarget:{t:["Lưu mục tiêu KPI","Save KPI target"],tab:"KPI"}, kpiSync:{t:["Đồng bộ KPI","KPI sync"],tab:"KPI"}
+  },
+  steps:[
+    {t:["Thêm task đi địa bàn","Add a field task"],m:["saveWeekly"]}, {t:["Chụp ảnh (lưu thật TEST_…)","Take a photo (saved as TEST_…)"],m:["uploadPhoto"]},
+    {t:["Thêm / sửa khách hàng","Add / edit a customer"],m:["saveCustomer","saveCustomerCbc","saveCBC"]}, {t:["Đơn hàng (Dental)","Order (Dental)"],m:["saveOrder","saveOrders"]},
+    {t:["Đề xuất công tác","Business trip proposal"],m:["tripPropose2"]}, {t:["Vai Giám đốc ▸ duyệt công tác","Director ▸ approve the trip"],m:["tfDecide@dir"]},
+    {t:["Gửi báo cáo tuần","Send the weekly report"],m:["weeklyReport"]}, {t:["Gửi báo cáo tháng","Send the monthly report"],m:["monthlyReport"]},
+    {t:["Gửi báo cáo KPI tháng","Send the monthly KPI report"],m:["rhKpiMailSend","krSend"]}, {t:["Tự đánh giá quý (file Word)","Quarterly self-evaluation (Word)"],m:["seWord"]}, {t:["Mở mới: gửi xin xác nhận","New account: submit"],m:["naSubmit"]},
+    {t:["Vai Quản lý ▸ xác nhận Mở mới","Manager ▸ approve the new account"],m:["naDecide@mgr","naDecide@dir"]}, {t:["Công việc khác","Other tasks"],m:["addKey","addSub","updateSub","updateProgress"]}],
+  clean:function(){ var cur=curTeamKey(); return ["dental","surgical","eyeless","thai"].sort(function(a,b){ return (a===cur?-1:0)-(b===cur?-1:0); }).map(function(k){ return { url:TEAMS[k].url, name:"CRM "+TEAMS[k].label }; }); },
+  afterClean:function(){ try{ if(typeof terrRefresh==="function") terrRefresh(); }catch(_){} },
+  mount:function(){ return true; },      /* lối vào do khối Chế độ thử tạo: #tmBtn (máy tính) · Thêm ▸ Tiện ích (điện thoại) */
+  extra:{ label:["Xem như một bạn sales (không lưu)","View as a sales person (no saving)"], sub:["Chỉ muốn xem CRM như một bạn sales, không ghi gì?","Only want to look around as a sales person, saving nothing?"], run:function(){ CRMTEST.pick(); } },
+  stop:function(){ try{ localStorage.removeItem(LS_PIC); localStorage.removeItem(LS_MGMT); }catch(_){} },
+  fab:{ bottom:"16px", bottomMobile:"84px", z:"830" }       /* dưới hộp thoại #drw / #ov (840+) */
+};
+</script>
+<script src="testflow/testflow.js?v=1.0"></script>
 <script src="tour/tour.js?v=1.1"></script>
-<script src="tour/tours.js?v=31.1"></script>
+<script src="tour/tours.js?v=31.5"></script>
 </body>
 </html>

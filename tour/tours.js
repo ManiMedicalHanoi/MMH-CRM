@@ -115,6 +115,17 @@ TOUR.add([
     { el:function(){ return par("[onclick=\"setDashG('all')\"]"); }, t:V("Nhóm chỉ số","Metric groups"), x:V("Tổng quan · Khách hàng · Đi địa bàn · Kinh doanh · ADP.","Overview · Customers · Field visits · Sales · ADP.") },
     { el:"#clogCard", t:V("Cập nhật dữ liệu khách hàng","Customer data updates"), x:V("Account nào vừa được cập nhật hoặc thêm mới.","Which accounts were updated or added.") }
    ] },
+ { id:"testmode", v:1, d:"2026-10-13", g:V("Quản trị","Admin"), ic:"gear", t:V("Chế độ TEST · Luồng dữ liệu","TEST mode · Data flow"), x:V("Admin thử mọi chức năng dưới tên TEST, ghi thật, xem dữ liệu đi đâu.","The Admin tries every function as TEST with real saves and sees where the data goes."),
+   when:function(){ var u=me(); return !!u && u.admin && !!window.TESTFLOW; },
+   steps:[
+    { el:function(){ return TOUR.find("#tmBtn") || TOUR.find("nav.mob button:last-of-type"); }, when:function(){ return !TESTFLOW.on(); }, t:V("Nút Chế độ TEST","TEST mode button"), x:V("<i>(Điện thoại: <b>Thêm ▸ Tiện ích ▸ Chế độ TEST</b>.)</i> Chỉ Admin thấy nút này.","<i>(Phone: <b>More ▸ Tools ▸ TEST mode</b>.)</i> Only the Admin sees it.") },
+    { el:"#tf-pk .tf-scopes", do:function(){ try{ TESTFLOW.pick(); }catch(_){} }, wait:500, when:function(){ return !TESTFLOW.on(); }, t:V("Chọn nhóm","Pick the team"), x:V("File CRM của nhóm nào sẽ nhận dữ liệu TEST (Dental, Surgical, Eyeless, Thailand).","Which team's CRM file receives the TEST data.") },
+    { el:"#tf-pk .tf-roles", when:function(){ return !TESTFLOW.on(); }, t:V("Chọn vai","Pick the role"), x:V("<b>Sales TEST</b> ghi việc, ảnh, báo cáo, công tác, mở mới · <b>Quản lý</b> xác nhận Mở mới · <b>Giám đốc</b> duyệt công tác — chỉ hồ sơ TEST.","<b>Sales TEST</b> logs visits, photos, reports, trips, new accounts · <b>Manager</b> approves new accounts · <b>Director</b> approves trips — TEST records only.") },
+    { el:"#tf-pk [data-go]", when:function(){ return !TESTFLOW.on(); }, t:V("Bắt đầu","Start"), x:V("Dữ liệu lưu thật (tên TEST, ảnh TEST_…), email chỉ về Admin, người khác không thấy, không tính KPI.","Real saves (name TEST, photos TEST_…), e-mails to the Admin only, hidden from everyone else, not counted in KPI.") },
+    { el:"#tf-fab", when:function(){ return TESTFLOW.on(); }, t:V("Nút TEST","TEST button"), x:V("Góc trái dưới: vai đang dùng + số thao tác. Bấm để mở bảng Luồng dữ liệu.","Bottom-left: current role + number of actions. Click for the Data flow panel.") },
+    { el:"#tf-pn .tf-roles", do:function(){ try{ TESTFLOW.open(); }catch(_){} }, wait:400, when:function(){ return TESTFLOW.on(); }, t:V("Đổi vai","Switch role"), x:V("Đổi sang Giám đốc để duyệt công tác của TEST, sang Quản lý để xác nhận Mở mới.","Switch to Director to approve TEST trips, to Manager to approve new accounts.") },
+    { el:"#tf-pn .tf-tl", when:function(){ return TESTFLOW.on(); }, t:V("Luồng dữ liệu","Data flow"), x:V("Mỗi lần lưu: ① thao tác → ② backend → ③ file ▸ tab ▸ dòng → ④ email lẽ ra gửi tới ai. <b>Xoá dữ liệu test</b> dọn sạch khi xong.","Each save: ① action → ② backend → ③ file ▸ tab ▸ row → ④ who the e-mail would go to. <b>Delete test data</b> cleans up.") }
+   ] },
  { id:"theme", v:2, d:"2026-10-11", g:V("Cá nhân hoá","Personalise"), ic:"gear", t:V("Màu giao diện","Colour theme"), x:V("Chọn tông màu bạn thích.","Pick the colour theme you like."),
    steps:[
     { el:more("#thBtn"), t:V("Màu giao diện","Colour theme"), x:V("10 tông màu, lưu trên máy này.","10 themes, saved on this device.") },
