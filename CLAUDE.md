@@ -100,3 +100,9 @@ Kiến trúc & quy ước giống MMH Report Hub (repo `ManiMedicalHanoi/MMH-Rep
   Bảng **Luồng dữ liệu** (nút vàng `#tf-fab`, `TESTFLOW.open()`): mỗi lệnh ghi = thao tác → backend → file ▸ tab ▸ dòng → email lẽ ra gửi; nhật ký `mmh_testflow_log` dùng chung 2 app.
   Vai Giám đốc: `window.__TF_TESTDIR` ⇒ TFA chỉ chọn được đề xuất TEST. "Xoá dữ liệu test" = `tmClean` ở 4 backend CRM. Lệnh ghi mới ⇒ thêm nhãn `[vi,en]` vào
   `TESTFLOW_CFG.labels` (+ `steps`). Chế độ thử cũ (CRMTEST, không lưu) = lựa chọn phụ "Xem như một bạn sales" trong hộp chọn. Mock: trả `_tm:{mails:[…]}`.
+- **v31.6 (13/10/2026, khối `v316-js` + `v316b-js`, backend CRM v10.12)**: tỷ giá cố định 26.700 (bỏ nút Tỷ giá); visit chỉ tính KPI khi có ảnh; Thuyết trình bắt buộc Actual > 0 + mẫu Event review 5 dòng
+  (`tplMissing` = `presTplMissing_` backend); Đơn hàng: Order Type 1/2/3 + chứng từ (`orderDoc`), duyệt `oaOpen` (`orderPending` / `orderDecide`, người duyệt Tuyen · Director · Admin), C5 chỉ đơn đã duyệt;
+  Dental: tab **Đào tạo khách hàng (T&E)** (`teView` / `teForm`, Training Hub `rhCustTrain`). `v316b-js`: (1) `apiPost` tự gắn `_no` / `_acc` / `_pic` / `_start` cho saveWeekly (sửa) /
+  deleteRow weekly / deletePhoto / uploadPhoto ⇒ backend `wkResolve_` tìm đúng dòng, `stale` ⇒ báo tải lại; (2) **Công việc khác ghi tức thì** (`ATS_ON()`): bọc `hubPost` ⇒ hàng đợi `OQ`
+  (`localStorage.mmh_crm_oq_<nhóm>`), cập nhật màn hình trước, gửi tuần tự cùng `rid`, kèm `expect` / `parentName` (tên việc gốc `_sn`) vì số No của ALL TASK đánh lại; việc chưa ghi có No tạm `t…`
+  (`_oq`); `loadOther` phủ lại lệnh chưa ghi; chip `#oqc`. Nhóm Thái giữ cách cũ. Ảnh phát hành chức năng chỉ của nhóm VN: giao diện tiếng Việt, dữ liệu giả.
