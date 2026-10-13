@@ -23627,6 +23627,640 @@ window.TESTFLOW_CFG={ app:"crm", key:"mmh_test_crm", name:["MMH CRM","MMH CRM"],
   fab:{ bottom:"16px", bottomMobile:"84px", z:"830" }       /* dưới hộp thoại #drw / #ov (840+) */
 };
 </script>
+<style id="v316-css">
+/* ⭐ v31.6 — đào tạo khách hàng T&E · đơn hàng có loại + duyệt · mẫu Event review · ghi chú visit có ảnh */
+.v316-note{margin:6px 0 0;font-size:11.5px;color:#5B6B7D;display:flex;align-items:center;gap:6px}
+.v316-note i{display:inline-block;width:6px;height:6px;border-radius:50%;background:#3A5CAA;flex:none}
+.v316-banner{border:1px solid #E6EAEF;background:#F7FAFE;border-radius:12px;padding:9px 12px;margin:0 0 12px;font-size:12.5px;color:#34465A;line-height:1.5}
+.v316-err{display:none;margin-top:8px;border:1px solid #F2C4C1;background:#FFF5F4;color:#A82F2C;border-radius:10px;padding:8px 11px;font-size:12.5px;line-height:1.5}
+.v316-err.on{display:block}
+.v316-seg{display:inline-flex;border:1px solid #E6EAEF;border-radius:10px;overflow:hidden;background:#fff;margin:0 0 12px;flex-wrap:wrap}
+.v316-seg button{border:0;background:#fff;padding:8px 14px;font:inherit;font-size:13px;color:#41566F;cursor:pointer;border-right:1px solid #E6EAEF}
+.v316-seg button:last-child{border-right:0}
+.v316-seg button.on{background:#EEF3FB;color:#003047;font-weight:700;box-shadow:inset 0 -2px 0 #3A5CAA}
+.te-list{display:grid;gap:10px}
+.te-card{border:1px solid #E6EAEF;border-radius:12px;background:#fff;padding:11px 13px;cursor:pointer}
+.te-card:hover{border-color:#C3CDD8}
+.te-card .t1{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.te-card .t1 b{font-size:14px;color:#003047}
+.te-card .m{font-size:12px;color:#5B6B7D;margin-top:4px;display:flex;gap:6px;flex-wrap:wrap}
+.te-card .d{font-size:12px;color:#41566F;margin-top:6px;white-space:pre-wrap;max-height:4.6em;overflow:hidden}
+.v316-chip{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px;border:1px solid #E6EAEF;background:#F5F7FA;color:#41566F;white-space:nowrap}
+.v316-chip.wait{background:#FFF6E0;border-color:#F0D58A;color:#7A5A00}
+.v316-chip.ok{background:#E8F6EE;border-color:#A9DCBE;color:#1E7B46}
+.v316-chip.no{background:#FDECEB;border-color:#F2C4C1;color:#A82F2C}
+.v316-chip.plan{background:#EEF3FB;border-color:#C9D6EE;color:#2D4A8A}
+.v316-chip.type{background:#fff;color:#5B6B7D;font-weight:600}
+.te-sum{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin:0 0 12px}
+.te-sum .it{border:1px solid #E6EAEF;border-radius:12px;background:#fff;padding:9px 12px}
+.te-sum .it small{display:block;font-size:11px;color:#8A97A6}
+.te-sum .it b{font-size:18px;color:#003047}
+.te-aud{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0}
+.te-aud span{display:inline-flex;align-items:center;gap:5px;border:1px solid #C9D6EE;background:#F3F7FD;border-radius:999px;padding:3px 6px 3px 10px;font-size:12px}
+.te-aud span button{border:0;background:none;cursor:pointer;color:#8A97A6;font-size:13px;padding:0 2px}
+.te-pick{position:relative}
+.te-pick .dd{position:absolute;left:0;right:0;top:100%;z-index:30;background:#fff;border:1px solid #C3CDD8;border-radius:10px;max-height:240px;overflow:auto;box-shadow:0 8px 22px rgba(0,48,71,.12);display:none}
+.te-pick .dd.on{display:block}
+.te-pick .dd div{padding:7px 10px;font-size:12.5px;cursor:pointer;border-bottom:1px solid #F0F3F6}
+.te-pick .dd div:hover,.te-pick .dd div.hi{background:#F0F5FB}
+.te-pick .dd div small{color:#8A97A6;margin-left:6px}
+.ox-box{border:1px solid #E6EAEF;border-radius:12px;padding:10px 12px;margin:10px 0;background:#FBFCFE}
+.ox-box .ct{font-weight:700;color:#003047;font-size:13px;margin-bottom:6px;display:flex;align-items:center;gap:8px}
+.ox-docs{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.ox-docs span{display:inline-flex;align-items:center;gap:5px;border:1px solid #E6EAEF;background:#fff;border-radius:8px;padding:4px 8px;font-size:12px;max-width:100%}
+.ox-docs span a{color:#3A5CAA;text-decoration:none;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:240px}
+.ox-docs span button{border:0;background:none;cursor:pointer;color:#8A97A6}
+.ox-warn{font-size:12px;color:#7A5A00;background:#FFF9EA;border:1px solid #F0D58A;border-radius:8px;padding:6px 9px;margin-top:6px;display:none}
+.ox-warn.on{display:block}
+.oa-grp{border:1px solid #E6EAEF;border-radius:12px;margin:0 0 12px;overflow:hidden;background:#fff}
+.oa-gh{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:9px 12px;background:#F3F7FD;border-bottom:1px solid #E6EAEF}
+.oa-gh b{color:#003047}
+.oa-row{padding:9px 12px;border-top:1px solid #F0F3F6;display:grid;grid-template-columns:1fr auto;gap:8px;align-items:start}
+.oa-row:first-of-type{border-top:0}
+.oa-row .meta{font-size:12px;color:#5B6B7D;margin-top:3px}
+.oa-row .w{font-size:11.5px;color:#A82F2C;margin-top:3px}
+.oa-row .acts{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+.oa-rj{grid-column:1/-1;display:none;gap:6px}
+.oa-rj.on{display:flex}
+.oa-rj input{flex:1}
+@media(max-width:720px){ .oa-row{grid-template-columns:1fr} .oa-row .acts{justify-content:flex-start} .v316-seg button{padding:7px 10px;font-size:12.5px} }
+</style>
+<script id="v316-js">
+/* ════════════════════════════════════════════════════════════════════════════════════════
+   ⭐ v31.6 (13/10/2026) — backend mmh-backend crm-dental / surgical / eyeless v10.11 (Mã.gs) + Training Hub rhCustTrain
+   ① Tỷ giá cố định 26.700 VND/USD: bỏ nút / hộp 💱 Tỷ giá (k8RateBtn / k8RateModal còn lại dạng rỗng), C5 = đơn đã duyệt ÷ 26.700.
+   ② Lượt viếng thăm chỉ tính khi CÓ ẢNH (kpiVisitOk = rule tab 9: Visiting · status ≠ trống / Not Started / Cancel · ngày ≤ hôm nay ·
+      không phải dòng TBD · có ảnh — nhóm không chụp ảnh (Thái) bỏ điều kiện ảnh), Dashboard + dải số trang Cập nhật dùng chung.
+   ③ Thuyết trình: Event review theo MẪU CỐ ĐỊNH 5 dòng (VN / EN) + Actual participant > 0 — thiếu ⇒ báo lỗi ngay trong form, không lưu.
+   ④ Dental: "Đào tạo khách hàng (T&E)" trong trang Thuyết trình — lưu ở Training Master qua Training Hub (action rhCustTrain op=list|save|delete).
+   ⑤ Đơn hàng: Order Type (1 trúng thầu · 2 Account mở mới · 3 tư vấn), trị giá trúng thầu + tháng KQTT, chứng từ (orderDoc → Drive),
+      nhãn Chờ duyệt / Đã duyệt / Từ chối; người duyệt (Tuyen · Director · Admin) có bảng "Duyệt đơn hàng" (orderPending / orderDecide).
+   ════════════════════════════════════════════════════════════════════════════════════════ */
+(function(){
+"use strict";
+var RATE=26700, CUTOFF="202610", TRN_KEY="mmh-rh-training-2026";
+var TYPES=["1. Đơn từ trúng thầu","2. Đơn từ Account mở mới","3. Đơn từ tư vấn (khách lẻ)"];
+var TYPES_EN=["1. Tender award order","2. New-account order","3. Consulting / retail order"];
+var TPL_VI=["Số lượng tham dự thực tế","Tóm tắt hoạt động","Phản hồi khách hàng","Doanh số","Hành động tiếp theo"];
+var TPL_EN=["Actual attendees","Activity summary","Customer feedback","Sales","Next actions"];
+function L(vi,en){ return TX(vi,en); }
+function nk(s){ return String(s||"").normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/đ/g,"d").replace(/Đ/g,"D").toLowerCase(); }
+function nn(s){ return nk(s).replace(/[^a-z0-9]/g,""); }
+function tplText(){ return (isTH()?TPL_EN:TPL_VI).map(function(l){ return "-"+l+": "; }).join("\n"); }
+window.V316_TPL_VI=TPL_VI; window.V316_TPL_EN=TPL_EN;
+
+/* ───── mẫu Event review: cùng logic với backend presTplMissing_ ───── */
+function tplMissing(review){
+  var txt=String(review||""), low=txt.split("").map(function(c){ var x=nk(c); return x?x.charAt(0):" "; }).join(""), best=null;
+  [TPL_VI,TPL_EN].forEach(function(labs){
+    var pos=labs.map(function(l){ var re=new RegExp("(^|\\n)\\s*-?\\s*"+nk(l).replace(/[.*+?^${}()|[\]\\]/g,"\\$&")+"\\s*:","i"), m=re.exec(low); return m?{i:m.index+m[0].length,s:m.index}:null; });
+    var miss=[];
+    labs.forEach(function(l,k){
+      if(!pos[k]){ miss.push(l); return; }
+      var end=txt.length; pos.forEach(function(q,j){ if(j!==k&&q&&q.s>=pos[k].i&&q.s<end) end=q.s; });
+      if(!txt.slice(pos[k].i,end).replace(/[\s\-–—.:]+/g,"")) miss.push(l);
+    });
+    if(!best||miss.length<best.length) best=miss;
+  });
+  return best||TPL_VI.slice();
+}
+window.v316TplMissing=tplMissing;
+/* ghi số người tham dự vào dòng đầu của mẫu */
+function tplSetAttendees(text,num){
+  var re=/^(\s*-?\s*(?:Số lượng tham dự thực tế|Actual attendees)\s*:)[^\n]*/m;
+  if(re.test(text)) return text.replace(re,function(_,a){ return a+" "+(num||""); });
+  return text;
+}
+function tplEnsure(ta,num){
+  if(!ta) return;
+  var cur=String(ta.value||"").trim();
+  if(!cur){ ta.value=tplText(); }
+  if(num!=null && String(num)!=="") ta.value=tplSetAttendees(ta.value,num);
+}
+
+/* ═════════ ① TỶ GIÁ CỐ ĐỊNH ═════════ */
+window.k8RateBtn=function(){ return ""; };
+window.k8RateModal=function(){ toast(L("Tỷ giá cố định 26.700 VND/USD — không còn cài tỷ giá.","Fixed rate 26,700 VND/USD."),"",4000); };
+window.k8RateSave=function(){ window.k8RateModal(); };
+window.k8CanRate=function(){ return false; };
+
+/* ═════════ ⑤ C5: chỉ đơn đã duyệt (cùng rule backend ordSuppList_) ═════════ */
+function oType(v){ var m=/^\s*([123])/.exec(String(v==null?"":v)); return m?m[1]:""; }
+function oAppr(v){ var s=nk(v); return /da duyet|approved/.test(s)?"ok":/tu choi|reject/.test(s)?"no":s?"wait":""; }
+function oDocs(v){ var out=[]; String(v==null?"":v).split(/\r?\n/).forEach(function(line){ var m=/(https?:\/\/\S+)/.exec(line); if(!m) return; out.push({ name:line.replace(m[1],"").replace(/[|·\s]+$/,"").replace(/^\s*[|·]\s*/,"").trim()||"file", url:m[1] }); }); return out; }
+function oFyEnd(ym){ ym=String(ym||""); if(!/^\d{6}$/.test(ym)) return ""; var y=+ym.slice(0,4), m=+ym.slice(4,6); return String(m>=9?y+1:y)+"08"; }
+function oNeed(o){ var ym=k8Ym(o); return !!oType(o.otype)||(ym&&ym>=CUTOFF); }
+window.v316OrdNeed=oNeed; window.v316OrdAppr=oAppr; window.v316OrdType=oType;
+function naOpenMap(){
+  var m={}; ((S.na&&S.na.rows)||[]).forEach(function(c){ if(c.status!=="Approved"||!c.month) return; var k=nn(c.account); if(k&&(!m[k]||c.month<m[k])) m[k]=String(c.month); var cc=nn(c.code); if(cc&&(!m["#"+cc]||c.month<m["#"+cc])) m["#"+cc]=String(c.month); });
+  return m;
+}
+function suppList(orders){
+  var out=[], seen={}, open=null;
+  (orders||[]).forEach(function(o){
+    var ym=k8Ym(o), t=oType(o.otype), st=oAppr(o.appr);
+    if(!t && ym<CUTOFF){ out.push({ pic:o.pic, ym:ym, vnd:n(o.amount) }); return; }
+    if(st!=="ok") return;
+    if(t==="1"){
+      var key=nn(o.orderNo||("r"+o._row))+"|"+nn(o.pic); if(seen[key]) return; seen[key]=1;
+      var tv=0; orders.forEach(function(x){ if(nn(x.orderNo||("r"+x._row))+"|"+nn(x.pic)===key) tv=Math.max(tv,n(x.tender)); });
+      out.push({ pic:o.pic, ym:String(o.kqtt||"").replace(/\D/g,"").slice(0,6)||ym, vnd:tv }); return;
+    }
+    if(t==="2"){ open=open||naOpenMap(); var om=open[nn(o.name)]||open["#"+nn(o.code)]||ym, lim=oFyEnd(om); if(lim && ym>lim) return; }
+    out.push({ pic:o.pic, ym:ym, vnd:n(o.amount) });
+  });
+  return out;
+}
+window.v316SuppList=suppList;
+var _k8Live=window.k8Live;
+window.k8Live=function(pic,key){
+  if(key!=="supp_amt") return _k8Live.apply(this,arguments);
+  var ms=k8Months(), idx={}, out=ms.map(function(){ return 0; }); ms.forEach(function(m,i){ idx[m]=i; });
+  var lp=noAcc(pic).trim();
+  suppList(k8OrderRows()).forEach(function(c){
+    if(String(c.pic||"").split(/[,;\/&+]+/).map(function(x){ return noAcc(x).trim(); }).indexOf(lp)<0) return;
+    var i=idx[c.ym]; if(i==null) return; out[i]+=c.vnd/RATE;
+  });
+  return out;
+};
+
+/* ═════════ ② LƯỢT VIẾNG THĂM HỢP LỆ (rule KPI tab 9) ═════════ */
+window.kpiVisitOk=function(w){
+  if(!w || String(w.typeAction||"")!=="Visiting") return false;
+  if(isTbdAcc(w.account) || /^tbd$/i.test(String(w.type||"").trim())) return false;
+  var st=String(w.status||"").trim(); if(!st || /^not started/i.test(st) || /^cancel/i.test(st)) return false;
+  var d=String(w.start||"").slice(0,10); if(!d || d>todayISO()) return false;
+  if(!noPhoto() && !hasPhoto(w)) return false;
+  return true;
+};
+function visitNote(){ return noPhoto()?L("Chỉ tính lượt Visiting đã đi (không tính Not Started / Cancel / dòng kế hoạch)","Only Visiting rows already done count (not Not Started / Cancel / plan rows)"):L("Chỉ tính lượt viếng thăm có ảnh","Only visits with a photo count"); }
+window.v316VisitNote=visitNote;
+function addVisitNotes(){
+  try{
+    [].forEach.call(document.querySelectorAll("#main .kpi .lb"),function(lb){
+      var t=String(lb.textContent||"").trim();
+      if(!/^(Lượt viếng thăm|Customer visits|Visits)$/i.test(t)) return;
+      var box=lb.parentNode; if(box.querySelector(".v316-note")) return;
+      var d=document.createElement("div"); d.className="v316-note"; d.innerHTML="<i></i><span>"+esc(visitNote())+"</span>"; box.appendChild(d);
+    });
+  }catch(e){}
+}
+var _rd=window.renderDash;
+if(typeof _rd==="function") window.renderDash=function(){ var r=_rd.apply(this,arguments); addVisitNotes(); return r; };
+var _rk=window.renderKPI;
+if(typeof _rk==="function") window.renderKPI=function(){
+  var r=_rk.apply(this,arguments);
+  try{
+    var pg=document.querySelector("#main .pg"), ph=pg&&pg.querySelector(".ph");
+    if(pg && ph && !$("v316-kpinote")){
+      var b=document.createElement("div"); b.id="v316-kpinote"; b.className="v316-banner";
+      b.innerHTML="<b>"+esc(L("Quy tắc KPI","KPI rules"))+"</b> · "+esc(visitNote())+
+        (noOrder()?"":" · "+esc(L("C5 = đơn hàng ĐÃ DUYỆT ÷ tỷ giá cố định 26.700 VND/USD","C5 = APPROVED orders ÷ fixed rate 26,700 VND/USD")))+
+        " · "+esc(L("Buổi thuyết trình chỉ tính khi có Actual participant và Event review đủ mẫu","Presentations count only with Actual participant and a complete Event review"))+
+        (curTeamKey()==="dental"?" · "+esc(L("C10 (đào tạo khách hàng T&E) lấy từ Training Master","C10 (customer training T&E) comes from the Training Master")):"");
+      ph.parentNode.insertBefore(b, ph.nextSibling);
+    }
+  }catch(e){}
+  return r;
+};
+
+/* ═════════ ③ THUYẾT TRÌNH: MẪU EVENT REVIEW CỐ ĐỊNH + ACTUAL PARTICIPANT BẮT BUỘC ═════════ */
+try{ EVENT_TPL=TPL_VI.map(function(l){ return "-"+l+": "; }).join("\n"); }catch(e){}
+window.presInsertTpl=function(){
+  var ta=$("p_review"); if(!ta) return;
+  var cur=String(ta.value||"").trim();
+  if(cur && !tplMissing(cur).length) return toast(L("Event review đã đủ mẫu","The Event review is already complete"),"ok");
+  if(cur && /(Số lượng tham dự thực tế|Actual attendees)\s*:/i.test(cur)) return toast(L("Ô này đã có khung — điền nội dung sau dấu hai chấm","The template is already there — fill in after each colon"),"warn");
+  ta.value=tplText()+(cur?"\n\n"+L("— Nội dung cũ —","— Previous text —")+"\n"+cur:"");
+  ta.value=tplSetAttendees(ta.value,($("p_actual")||{}).value||"");
+  try{ ta.focus(); ta.setSelectionRange(0,0); ta.scrollTop=0; }catch(e){}
+};
+function presErr(msg){ var e=$("p_err"); if(!e) return; e.innerHTML=msg||""; e.classList.toggle("on",!!msg); }
+var _fp=window.formPresent;
+window.formPresent=function(r){
+  _fp.apply(this,arguments);
+  try{
+    var ta=$("p_review"), ac=$("p_actual");
+    if(ta){
+      ta.setAttribute("placeholder",tplText());
+      tplEnsure(ta,ac?ac.value:"");
+      var lab=ta.parentNode.querySelector("label"); if(lab && !lab.querySelector(".rq")) lab.innerHTML=esc(L("Event review","Event review"))+' <span class="rq">*</span> <small style="font-weight:400;color:#8A97A6">'+esc(L("theo mẫu — điền đủ cả 5 dòng","fixed template — fill in all 5 lines"))+'</small>';
+      var btn=ta.parentNode.querySelector("button[onclick^='presInsertTpl']"); if(btn){ btn.id="p_tplbtn"; btn.textContent="📋 "+L("Chèn mẫu","Insert template"); }
+      if(!$("p_err")){ var er=document.createElement("div"); er.id="p_err"; er.className="v316-err"; ta.parentNode.appendChild(er); }
+      ta.addEventListener("input",function(){ if($("p_err")&&$("p_err").classList.contains("on")) presErr(""); });
+    }
+    if(ac){
+      var al=ac.parentNode.querySelector("label"); if(al && !al.querySelector(".rq")) al.innerHTML="Actual participant <span class=\"rq\">*</span>";
+      ac.addEventListener("input",function(){ if(ta) ta.value=tplSetAttendees(ta.value,ac.value); });
+    }
+  }catch(e){}
+};
+var _sp=window.savePresent;
+window.savePresent=function(){
+  var ac=$("p_actual"), ta=$("p_review"), errs=[];
+  if(!(n(ac&&ac.value)>0)) errs.push(L("<b>Actual participant</b> bắt buộc và phải lớn hơn 0.","<b>Actual participant</b> is required and must be greater than 0."));
+  var miss=tplMissing(ta&&ta.value);
+  if(miss.length) errs.push(L("Event review phải theo mẫu và điền đủ — còn thiếu: ","The Event review must follow the template and be complete — missing: ")+"<b>"+miss.map(esc).join(" · ")+"</b>");
+  if(errs.length){ presErr(errs.join("<br>")); try{ (ac&&!(n(ac.value)>0)?ac:ta).focus(); }catch(e){} return; }
+  presErr("");
+  return _sp.apply(this,arguments);
+};
+
+/* ═════════ ④ ĐÀO TẠO KHÁCH HÀNG (T&E) — Dental · lưu Training Master qua Training Hub ═════════ */
+var TE={ rows:null, loading:false, err:"", at:0, aud:[], edit:null };
+window.TE=TE;
+function teOn(){ try{ return curTeamKey()==="dental"; }catch(e){ return false; } }
+window.v316TeOn=teOn;
+function rhCT(op,params){
+  params=params||{};
+  var q=Object.assign({ action:"rhCustTrain", op:op, rhKey:TRN_KEY, actor:(S.user&&S.user.pic)||"", team:curTeamKey() }, params);
+  Object.keys(q).forEach(function(k){ if(q[k]!==null && typeof q[k]==="object") q[k]=JSON.stringify(q[k]); });
+  var base=window.TRAINING_HUB_API;
+  if(!base) return Promise.reject(new Error("Training Hub?"));
+  var qs=Object.keys(q).map(function(k){ return encodeURIComponent(k)+"="+encodeURIComponent(q[k]==null?"":q[k]); }).join("&");
+  if((base+"?"+qs).length>6800){
+    var fd=new URLSearchParams(); fd.set("action","rhCustTrain");
+    var pl=Object.assign({},q); try{ pl.tk=(window.AUTH&&AUTH.tk())||""; }catch(e){}
+    fd.set("payload",JSON.stringify(pl));
+    return fetch(base,{ method:"POST", body:fd, redirect:"follow", credentials:"omit" }).then(function(r){ return r.text(); }).then(function(t){
+      var j=JSON.parse(String(t).replace(/^[^{]*/,"").replace(/\)?;?\s*$/,"")); if(j && j.ok===false) throw new Error(j.error||"Lỗi"); return j; });
+  }
+  return new Promise(function(res,rej){
+    var cb="__te_"+Date.now()+"_"+Math.floor(Math.random()*1e5), sc=document.createElement("script");
+    var t=setTimeout(function(){ done(); rej(new Error(L("Training Hub phản hồi chậm — thử lại.","Training Hub is slow — try again."))); },45000);
+    function done(){ clearTimeout(t); try{ delete window[cb]; }catch(_){ window[cb]=undefined; } if(sc.parentNode) sc.parentNode.removeChild(sc); }
+    window[cb]=function(d){ done(); if(d && d.ok===false) rej(new Error(d.error||"Lỗi")); else res(d||{}); };
+    sc.onerror=function(){ done(); rej(new Error(L("Không kết nối được Training Hub.","Cannot reach the Training Hub."))); };
+    sc.src=base+"?"+qs+"&callback="+cb;
+    document.body.appendChild(sc);
+  });
+}
+window.v316RhCT=rhCT;
+function teScopePic(){ return isMgrView()?(S.teFiltPic||""):((S.user&&S.user.pic)||""); }
+function teLoad(force){
+  if(TE.loading) return;
+  if(!force && TE.rows && Date.now()-TE.at<120000) return;
+  TE.loading=true; TE.err="";
+  rhCT("list",{ pic:isMgrView()?"":((S.user&&S.user.pic)||"") }).then(function(j){
+    TE.loading=false; TE.rows=(j&&j.items)||[]; TE.at=Date.now();
+    if(S.tab==="present" && S.presTab==="te") renderPresent();
+  }).catch(function(e){ TE.loading=false; TE.err=e.message; if(TE.rows==null) TE.rows=[]; if(S.tab==="present" && S.presTab==="te") renderPresent(); });
+}
+window.teLoad=teLoad;
+function stCls(s){ s=String(s||""); return /^compl/i.test(s)?"ok":/^cancel/i.test(s)?"no":"plan"; }
+function stLb(s){ s=String(s||"Plan"); return /^compl/i.test(s)?L("Đã hoàn thành","Completed"):/^cancel/i.test(s)?L("Huỷ","Cancelled"):L("Kế hoạch","Plan"); }
+function teRowsVisible(){
+  var p=teScopePic(), fy=S.fy, ms=fyMonths(fy);
+  return (TE.rows||[]).filter(function(x){
+    if(p && !picMatch(x.pic||"",p)) return false;
+    var ym=ymOf(x.date); return !ym || ms.indexOf(ym)>=0;
+  }).sort(function(a,b){ return String(b.date||"").localeCompare(String(a.date||"")); });
+}
+function teView(){
+  if(TE.rows==null){ teLoad(); return '<div class="card pad">'+skRows(4,true)+'</div>'; }
+  var rows=teRowsVisible(), done=rows.filter(function(x){ return /^compl/i.test(x.status||""); });
+  var ppl=done.reduce(function(s,x){ return s+n(x.actual); },0), plan=rows.filter(function(x){ return !/^(compl|cancel)/i.test(x.status||""); }).length;
+  var picBar=isMgrView()?'<div class="chipbar" style="margin-bottom:10px"><div class="chip'+(S.teFiltPic?"":" on")+'" onclick="S.teFiltPic=\'\';renderPresent()">'+esc(L("Toàn nhóm","Whole team"))+'</div>'+
+    (S.master.pic||[]).map(function(p){ return '<div class="chip'+(S.teFiltPic===p?" on":"")+'" onclick="S.teFiltPic=\''+esc(p)+'\';renderPresent()">'+esc(p)+'</div>'; }).join("")+'</div>':"";
+  return '<div class="v316-banner">'+esc(L("Buổi đào tạo khách hàng (T&E) lưu ở Training Master. Chỉ buổi ĐÃ HOÀN THÀNH có số người tham dự thực tế > 0 và review đủ mẫu mới được tính KPI C10-03 / C10-04 / C10-05.",
+      "Customer training (T&E) sessions are stored in the Training Master. Only COMPLETED sessions with actual attendees > 0 and a complete review count for C10-03 / 04 / 05."))+'</div>'+
+    picBar+
+    '<div class="te-sum"><div class="it"><small>'+esc(L("Buổi trong FY","Sessions in FY"))+'</small><b>'+rows.length+'</b></div>'+
+      '<div class="it"><small>'+esc(L("Đã hoàn thành (tính KPI)","Completed (KPI)"))+'</small><b>'+done.length+'</b></div>'+
+      '<div class="it"><small>'+esc(L("Kế hoạch","Planned"))+'</small><b>'+plan+'</b></div>'+
+      '<div class="it"><small>'+esc(L("Người tham dự","Attendees"))+'</small><b>'+fmtN(ppl)+'</b></div></div>'+
+    (TE.err?'<div class="v316-err on">'+esc(L("Chưa đọc được Training Hub: ","Training Hub error: ")+TE.err)+' <button class="btn sm" onclick="teLoad(true)">↻ '+esc(L("Thử lại","Retry"))+'</button></div>':"")+
+    (rows.length?'<div class="te-list" id="te-list">'+rows.map(function(x){
+      var k=reg(x);
+      return '<div class="te-card" onclick="teForm(\''+k+'\')"><div class="t1"><b>'+esc(x.topic||L("(chưa có chủ đề)","(no topic)"))+'</b><span class="v316-chip '+stCls(x.status)+'">'+esc(stLb(x.status))+'</span>'+
+        '<span class="v316-chip type">'+fmtN(x.actual||0)+'/'+fmtN(x.target||0)+' '+esc(L("người","people"))+'</span></div>'+
+        '<div class="m"><span>'+esc(fmtVN(x.date))+'</span><span>·</span><span>'+esc(x.pic||"")+'</span>'+(x.product?'<span>·</span><span>'+esc(x.product)+'</span>':"")+(x.place?'<span>·</span><span>'+esc(x.place)+'</span>':"")+
+        ((x.audience||[]).length?'<span>·</span><span>'+(x.audience||[]).length+' '+esc(L("khách hàng","customers"))+'</span>':"")+(x.folder?'<span>·</span><a href="'+esc(x.folder)+'" target="_blank" onclick="event.stopPropagation()">📁 folder</a>':"")+'</div>'+
+        (x.review?'<div class="d">'+esc(String(x.review).slice(0,260))+'</div>':"")+'</div>';
+    }).join("")+'</div>'
+    :'<div class="card pad"><div class="empty"><div class="e">🎓</div><p>'+esc(L("Chưa có buổi đào tạo khách hàng nào trong FY này","No customer training session in this FY yet"))+'</p></div></div>');
+}
+/* chọn khách hàng tham dự: danh mục 1. CUSTOMER CODE của nhóm · gõ tên ngoài danh sách cũng được */
+function teAudDraw(){
+  var el=$("te_audList"); if(!el) return;
+  el.innerHTML=TE.aud.map(function(a,i){ return '<span title="'+esc([a.code,a.workplace].filter(String).join(" · "))+'">'+esc(a.name)+(a.workplace?' <small style="color:#8A97A6">'+esc(a.workplace)+'</small>':'')+'<button type="button" onclick="teAudRm('+i+')">✕</button></span>'; }).join("")||
+    '<small style="color:#8A97A6">'+esc(L("Chưa chọn khách hàng nào","No customer selected yet"))+'</small>';
+  var c=$("te_audN"); if(c) c.textContent=TE.aud.length;
+}
+window.teAudRm=function(i){ TE.aud.splice(i,1); teAudDraw(); };
+function teAudAdd(a){ if(!a||!String(a.name||"").trim()) return; if(TE.aud.some(function(x){ return nn(x.name)===nn(a.name) && String(x.code||"")===String(a.code||""); })) return; TE.aud.push({ code:a.code||"", name:String(a.name).trim(), workplace:a.workplace||"" }); teAudDraw(); }
+function teAudWire(){
+  var inp=$("te_audQ"), dd=$("te_audDD"); if(!inp||!dd) return;
+  function paint(){
+    var q=nk(inp.value).trim(), list=(S.custIndex||[]).filter(function(c){ return !q || nk(c.name+" "+c.code+" "+c.province).indexOf(q)>=0; }).slice(0,40);
+    var h=list.map(function(c,i){ return '<div data-i="'+i+'">'+esc(c.name)+'<small>'+esc([c.type,c.province].filter(String).join(" · "))+'</small></div>'; }).join("");
+    if(q) h+='<div data-free="1">＋ '+esc(L("Thêm \"","Add \"")+inp.value.trim()+'"')+'<small>'+esc(L("ngoài danh sách","not in the list"))+'</small></div>';
+    dd.innerHTML=h||'<div style="color:#8A97A6;cursor:default">'+esc(L("Đang nạp danh mục khách hàng…","Loading customers…"))+'</div>';
+    dd.classList.add("on"); dd._list=list;
+  }
+  inp.addEventListener("focus",paint); inp.addEventListener("input",paint);
+  inp.addEventListener("keydown",function(e){ if(e.key==="Enter"){ e.preventDefault(); var l=dd._list||[]; if(l.length===1) teAudAdd({ code:l[0].code, name:l[0].name, workplace:[l[0].type,l[0].province].filter(String).join(" · ") }); else if(inp.value.trim()) teAudAdd({ name:inp.value.trim() }); inp.value=""; paint(); } });
+  dd.addEventListener("mousedown",function(e){
+    var d=e.target.closest("div[data-i],div[data-free]"); if(!d) return; e.preventDefault();
+    if(d.getAttribute("data-free")) teAudAdd({ name:inp.value.trim() });
+    else { var c=(dd._list||[])[+d.getAttribute("data-i")]; if(c) teAudAdd({ code:c.code, name:c.name, workplace:[c.type,c.province].filter(String).join(" · ") }); }
+    inp.value=""; paint();
+  });
+  inp.addEventListener("blur",function(){ setTimeout(function(){ dd.classList.remove("on"); },150); });
+  if(!(S.custIndex||[]).length) loadCustomerIndex().then(function(){ if(document.activeElement===inp) paint(); });
+}
+function teErr(msg){ var e=$("te_err"); if(!e) return; e.innerHTML=msg||""; e.classList.toggle("on",!!msg); }
+window.teForm=function(k){
+  var x=(k&&REG[k])?Object.assign({},REG[k]):{};
+  TE.edit=x; TE.aud=(x.audience||[]).map(function(a){ return { code:a.code||"", name:a.name||"", workplace:a.workplace||"" }; });
+  var isNew=!x.sid, st=x.status||"Plan", me=(S.user&&S.user.pic)||"";
+  var picSel=isMgrView()?'<select class="inp" id="te_pic">'+opts(S.master.pic,x.pic||me)+'</select>':'<input class="inp piclock" id="te_pic" value="'+esc(x.pic||me)+'" readonly>';
+  var h='<div class="row">'+
+      '<div class="fld"><label>'+esc(L("Ngày","Date"))+' <span class="rq">*</span></label><input class="inp" type="date" id="te_date" value="'+esc(x.date||todayISO())+'"></div>'+
+      '<div class="fld"><label>PIC</label>'+picSel+'</div>'+
+      '<div class="fld"><label>'+esc(L("Trạng thái","Status"))+'</label><select class="inp" id="te_status">'+[["Plan",L("Kế hoạch","Plan")],["Completed",L("Đã hoàn thành","Completed")],["Cancel",L("Huỷ","Cancelled")]].map(function(o){ return '<option value="'+o[0]+'"'+(st===o[0]?" selected":"")+'>'+esc(o[1])+'</option>'; }).join("")+'</select></div>'+
+    '</div>'+
+    '<div class="fld"><label>'+esc(L("Chủ đề đào tạo","Training topic"))+' <span class="rq">*</span></label><input class="inp" id="te_topic" value="'+esc(x.topic||"")+'" placeholder="'+esc(L("VD: Kỹ thuật tạo hình ống tuỷ với JIZAI","E.g. Root canal shaping with JIZAI"))+'"></div>'+
+    '<div class="row">'+
+      '<div class="fld"><label>'+esc(L("Sản phẩm","Product"))+'</label><input class="inp" id="te_product" value="'+esc(x.product||"")+'" placeholder="JIZAI · Composite · Bur…"></div>'+
+      '<div class="fld"><label>'+esc(L("Địa điểm","Place"))+'</label><input class="inp" id="te_place" value="'+esc(x.place||"")+'"></div>'+
+      '<div class="fld"><label>Target participant</label><input class="inp num" id="te_target" inputmode="numeric" value="'+esc(x.target||"")+'" oninput="numOnly(this)"></div>'+
+      '<div class="fld"><label>Actual participant <span class="rq" id="te_actRq">*</span></label><input class="inp num" id="te_actual" inputmode="numeric" value="'+esc(x.actual||"")+'" oninput="numOnly(this)"></div>'+
+    '</div>'+
+    '<div class="fld"><label>'+esc(L("Khách hàng tham dự","Customers attending"))+' (<span id="te_audN">0</span>)</label>'+
+      '<div class="te-aud" id="te_audList"></div>'+
+      '<div class="te-pick"><input class="inp" id="te_audQ" autocomplete="off" placeholder="'+esc(L("Gõ để tìm trong danh mục khách hàng · Enter để thêm tên ngoài danh sách","Type to search the customer list · Enter adds a name not in the list"))+'"><div class="dd" id="te_audDD"></div></div></div>'+
+    '<div class="fld"><label>Review <span class="rq">*</span> <small style="font-weight:400;color:#8A97A6">'+esc(L("theo mẫu — bắt buộc đủ 5 dòng khi Đã hoàn thành","fixed template — all 5 lines required when Completed"))+'</small></label>'+
+      '<div style="display:flex;gap:7px;margin-bottom:7px;flex-wrap:wrap"><button class="mini" type="button" id="te_tplbtn" onclick="teTpl()">📋 '+esc(L("Chèn mẫu","Insert template"))+'</button>'+
+      '<button class="mini" type="button" onclick="toggleVoice(\'te_review\',this)">🎤 '+esc(L("Nói","Speak"))+'</button></div>'+
+      '<textarea class="inp" id="te_review" style="min-height:150px" placeholder="'+phAttr(tplText())+'">'+esc(x.review||"")+'</textarea>'+
+      '<div class="v316-err" id="te_err"></div></div>'+
+    (x.folder?'<div class="hint">📁 <a href="'+esc(x.folder)+'" target="_blank">'+esc(L("Folder buổi đào tạo (Drive)","Session folder (Drive)"))+'</a></div>':"");
+  openModal(isNew?L("Thêm buổi đào tạo khách hàng (T&E)","New customer training (T&E)"):L("Buổi đào tạo khách hàng (T&E)","Customer training (T&E)"), h,
+    (!isNew?'<button class="btn dg" onclick="teDel()">🗑 '+esc(L("Xoá","Delete"))+'</button>':"")+
+    '<button class="btn" onclick="closeModal()">'+esc(L("Huỷ","Cancel"))+'</button><button class="btn pri" id="te_save" onclick="teSave()">'+esc(L("Lưu vào Training Master","Save to the Training Master"))+'</button>', true);
+  tplEnsure($("te_review"), $("te_actual").value);
+  $("te_actual").addEventListener("input",function(){ var ta=$("te_review"); if(ta) ta.value=tplSetAttendees(ta.value,this.value); });
+  teAudDraw(); teAudWire();
+  S.modalRewire=function(){ teAudDraw(); teAudWire(); };
+};
+window.teTpl=function(){ var ta=$("te_review"); if(!ta) return; if(!String(ta.value||"").trim()){ ta.value=tplText(); } else if(!/(Số lượng tham dự thực tế|Actual attendees)\s*:/i.test(ta.value)){ ta.value=tplText()+"\n\n"+ta.value; } ta.value=tplSetAttendees(ta.value,$("te_actual").value); ta.focus(); };
+window.teSave=function(){
+  var x=TE.edit||{}, d={ sid:x.sid||"", team:curTeamKey(), pic:($("te_pic")||{}).value||((S.user&&S.user.pic)||""), date:$("te_date").value, topic:$("te_topic").value.trim(),
+    product:$("te_product").value.trim(), place:$("te_place").value.trim(), target:n($("te_target").value)||"", actual:n($("te_actual").value)||"",
+    review:$("te_review").value, status:$("te_status").value, audience:TE.aud.slice() };
+  var errs=[];
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(d.date)) errs.push(L("Chọn <b>Ngày</b>.","Pick the <b>Date</b>."));
+  if(!d.topic) errs.push(L("Nhập <b>Chủ đề đào tạo</b>.","Enter the <b>Training topic</b>."));
+  if(d.status==="Completed"){
+    if(!(n(d.actual)>0)) errs.push(L("Đã hoàn thành ⇒ <b>Actual participant</b> bắt buộc và phải lớn hơn 0.","Completed ⇒ <b>Actual participant</b> is required and must be greater than 0."));
+    var miss=tplMissing(d.review); if(miss.length) errs.push(L("Đã hoàn thành ⇒ review phải theo mẫu và điền đủ — còn thiếu: ","Completed ⇒ the review must follow the template — missing: ")+"<b>"+miss.map(esc).join(" · ")+"</b>");
+    if(d.date>todayISO()) errs.push(L("Buổi chưa diễn ra (ngày trong tương lai) không thể Đã hoàn thành.","A future session cannot be Completed."));
+  }
+  if(errs.length) return teErr(errs.join("<br>"));
+  teErr("");
+  var b=$("te_save"); if(b){ b.disabled=true; b.textContent=L("Đang lưu…","Saving…"); }
+  rhCT("save",{ data:d }).then(function(j){
+    d.sid=j.sid||d.sid; if(j.folder) d.folder=j.folder; if(j.row) d.row=j.row;
+    TE.rows=(TE.rows||[]).filter(function(r){ return !(d.sid && r.sid===d.sid); }); TE.rows.unshift(d); TE.at=Date.now();
+    closeAllModals(); toast(L("✓ Đã lưu buổi đào tạo vào Training Master","✓ Saved to the Training Master"),"ok",3500);
+    if(S.tab==="present") renderPresent();
+  }).catch(function(e){ if(b){ b.disabled=false; b.textContent=L("Lưu vào Training Master","Save to the Training Master"); } teErr(esc(e.message)); });
+};
+window.teDel=function(){
+  var x=TE.edit||{}; if(!x.sid) return;
+  if(!confirm(L("Xoá buổi đào tạo này khỏi Training Master?","Delete this session from the Training Master?"))) return;
+  rhCT("delete",{ sid:x.sid }).then(function(){ TE.rows=(TE.rows||[]).filter(function(r){ return r.sid!==x.sid; }); closeAllModals(); toast(L("Đã xoá","Deleted"),"ok"); if(S.tab==="present") renderPresent(); })
+    .catch(function(e){ teErr(esc(e.message)); });
+};
+/* trang Thuyết trình (Dental): 2 tab — Thuyết trình sản phẩm · Đào tạo khách hàng (T&E) */
+var _rp=window.renderPresent;
+window.renderPresent=function(){
+  if(!teOn()){ S.presTab="pres"; return _rp.apply(this,arguments); }
+  var t=S.presTab||"pres";
+  var seg='<div class="v316-seg" id="te-tabs"><button class="'+(t==="pres"?"on":"")+'" onclick="S.presTab=\'pres\';renderPresent()">🎤 '+esc(L("Thuyết trình sản phẩm","Product presentations"))+'</button>'+
+    '<button id="te-tab" class="'+(t==="te"?"on":"")+'" onclick="S.presTab=\'te\';renderPresent()">🎓 '+esc(L("Đào tạo khách hàng (T&E)","Customer training (T&E)"))+'</button></div>';
+  if(t!=="te"){
+    _rp.apply(this,arguments);
+    var pg=document.querySelector("#main .pg"); if(pg){ var w=document.createElement("div"); w.innerHTML=seg; pg.insertBefore(w.firstChild,pg.firstChild); }
+    return;
+  }
+  teLoad();
+  $("main").innerHTML='<div class="pg">'+seg+'<div class="ph"><div><h2>'+esc(L("Đào tạo khách hàng (T&E) ","Customer training (T&E) "))+esc(S.fy)+'</h2><p>'+esc(L("Lưu ở Training Master · tính KPI C10","Saved in the Training Master · counts for C10"))+'</p></div>'+
+    '<div class="sp"></div><button class="btn sm" onclick="teLoad(true)">⟳</button> <button class="btn pri sm" id="te-add" onclick="teForm(null)">＋ '+esc(L("Thêm buổi đào tạo","New session"))+'</button></div>'+teView()+'</div>';
+};
+/* nhãn menu cho Dental */
+try{ TABS.forEach(function(t){ if(t.id==="present"){ var lb0=t.lb, ml0=t.mlb; Object.defineProperty(t,"lb",{ configurable:true, get:function(){ return teOn()?"Thuyết trình · Đào tạo KH":lb0; } }); Object.defineProperty(t,"mlb",{ configurable:true, get:function(){ return teOn()?"T.trình · T&E":ml0; } }); } }); }catch(e){}
+
+/* ═════════ ⑤ ĐƠN HÀNG: LOẠI ĐƠN · CHỨNG TỪ · DUYỆT ═════════ */
+var OX={ otype:"", tender:"", kqtt:"", docs:[], up:0 };
+function typeLb(i){ return isTH()?TYPES_EN[i]:TYPES[i]; }
+function typeShort(t){ return t==="1"?L("Trúng thầu","Tender"):t==="2"?L("Account mở mới","New account"):t==="3"?L("Tư vấn","Consulting"):""; }
+function apprChip(o){
+  if(!oNeed(o)) return '<span class="v316-chip type" title="'+esc(L("Đơn trước 10/2026 — tính KPI như trước","Order before 10/2026 — counted as before"))+'">'+esc(L("Đơn cũ","Legacy"))+'</span>';
+  var st=oAppr(o.appr)||"wait", t=oType(o.otype);
+  return (t?'<span class="v316-chip type">'+esc(typeShort(t))+'</span>':'<span class="v316-chip no">'+esc(L("Chưa chọn loại","No type"))+'</span>')+
+    '<span class="v316-chip '+st+'" title="'+esc([o.apprBy,o.apprAt,o.apprNote].filter(String).join(" · "))+'">'+esc(st==="ok"?L("Đã duyệt","Approved"):st==="no"?L("Từ chối","Rejected"):L("Chờ duyệt","Pending"))+'</span>'+
+    (!oDocs(o.docs).length?'<span class="v316-chip wait">'+esc(L("Thiếu chứng từ","No document"))+'</span>':'');
+}
+window.v316ApprChip=apprChip;
+function oxDraw(){
+  var t=OX.otype, w=$("ox_wrap"); if(!w) return;
+  $("ox_tender_f").style.display=t==="1"?"":"none"; $("ox_kqtt_f").style.display=t==="1"?"":"none";
+  var hint=t==="1"?L("Cần chứng từ <b>kết quả trúng thầu (KQTT)</b>. KPI C5 tính <b>Trị giá trúng thầu</b> 1 lần ở <b>Tháng KQTT</b>.","Attach the <b>tender award (KQTT)</b>. C5 counts the <b>tender value</b> once, in the <b>award month</b>."):
+    t==="2"?L("Cần <b>phiếu bán hàng &amp; xuất kho của NPP</b>. Tính mọi tháng tới hết FY mở account; account phải là case <b>Approved</b> ở Mở mới & SKU mới.","Attach the distributor's <b>sales &amp; delivery slip</b>. Counted every month until the end of the opening FY; the account must be an <b>Approved</b> new-account case."):
+    t==="3"?L("Cần <b>phiếu bán hàng &amp; xuất kho của NPP</b>.","Attach the distributor's <b>sales &amp; delivery slip</b>."):L("Chọn loại đơn — từ 10/2026 đơn phải có loại và được quản lý duyệt mới tính KPI C5.","Pick the order type — from 10/2026 orders need a type and manager approval to count for C5.");
+  $("ox_hint").innerHTML=hint;
+  var dl=$("ox_docs");
+  dl.innerHTML=OX.docs.map(function(d,i){ return '<span>📄 <a href="'+esc(d.url)+'" target="_blank">'+esc(d.name)+'</a><button type="button" onclick="oxRm('+i+')">✕</button></span>'; }).join("")+(OX.up?'<span>⏳ '+esc(L("Đang tải lên ","Uploading "))+OX.up+'</span>':'');
+  var warn=[];
+  if(t==="2"){ var acc=($("o_accName")||{}).value||"", m=naOpenMap(); if(acc && !m[nn(acc)]) warn.push(L("Account này chưa có case Approved ở Mở mới & SKU mới — quản lý có thể không duyệt.","This account has no Approved new-account case — the manager may reject it.")); }
+  if(t && !OX.docs.length && !OX.up) warn.push(L("Chưa có chứng từ — vẫn lưu được, nhưng quản lý chỉ duyệt khi đã có chứng từ.","No document yet — you can save, but the manager can approve only once a document is attached."));
+  var wb=$("ox_warn"); wb.innerHTML=warn.map(esc).join("<br>"); wb.classList.toggle("on",!!warn.length);
+}
+window.oxRm=function(i){ OX.docs.splice(i,1); oxDraw(); };
+window.oxType=function(v){ OX.otype=oType(v); oxDraw(); };
+window.oxFiles=function(inp){
+  var files=[].slice.call(inp.files||[]); inp.value="";
+  files.forEach(function(file){
+    if(!/^image\/|pdf/i.test(file.type)) return toast(L("Chỉ nhận ảnh hoặc PDF: ","Images or PDF only: ")+file.name,"warn");
+    if(file.size>15*1024*1024) return toast(L("File quá 15 MB: ","File over 15 MB: ")+file.name,"warn");
+    OX.up++; oxDraw();
+    naShrink(file).then(function(b){
+      return postBody({ action:"orderDoc", b64:b.b64, mime:b.mime, name:b.name, kind:OX.otype==="1"?"kqtt":"npp", orderNo:($("o_orderNo")||{}).value||"",
+        account:($("o_accName")||{}).value||"", owner:($("o_pic")||{}).value||((S.user&&S.user.pic)||""), month:($("o_month")||{}).value||"" });
+    }).then(function(j){
+      OX.up--; if(!j||!j.file) throw new Error(L("Tải lên chưa được — thử lại.","Upload failed — retry."));
+      OX.docs.push({ name:j.file.name, url:j.file.url }); oxDraw();
+    }).catch(function(e){ OX.up=Math.max(0,OX.up-1); oxDraw(); toast(e.message,"err",5000); });
+  });
+};
+var _fo=window.formOrder;
+window.formOrder=function(o){
+  _fo.apply(this,arguments);
+  try{
+    var ctx=(S.editing&&S.editing.ctx)||o||{};
+    OX={ otype:oType(ctx.otype), tender:ctx.tender||"", kqtt:String(ctx.kqtt||"").replace(/\D/g,"").slice(0,6), docs:oDocs(ctx.docs), up:0 };
+    var note=$("o_note"); if(!note) return;
+    var fld=note.closest(".fld")||note.parentNode, box=document.createElement("div"); box.className="ox-box"; box.id="ox_wrap";
+    var st=oNeed(Object.assign({},ctx,{ month:($("o_month")||{}).value }))?apprChip(ctx):"";
+    box.innerHTML='<div class="ct">🧾 '+esc(L("Loại đơn & chứng từ (tính KPI C5)","Order type & documents (C5 KPI)"))+(ctx._row?' <span style="font-weight:400">'+st+'</span>':'')+'</div>'+
+      '<div class="row"><div class="fld" style="flex:2"><label>Order Type <span class="rq">*</span></label><select class="inp" id="ox_type" onchange="oxType(this.value)"><option value="">— '+esc(L("chọn loại đơn","pick the order type"))+' —</option>'+
+        TYPES.map(function(t,i){ return '<option value="'+esc(t)+'"'+(OX.otype===String(i+1)?" selected":"")+'>'+esc(typeLb(i))+'</option>'; }).join("")+'</select></div>'+
+      '<div class="fld" id="ox_tender_f"><label>'+esc(L("Trị giá trúng thầu (VND)","Tender value (VND)"))+' <span class="rq">*</span></label><input class="inp num" id="ox_tender" inputmode="numeric" value="'+esc(OX.tender||"")+'" oninput="numOnly(this)"></div>'+
+      '<div class="fld" id="ox_kqtt_f"><label>'+esc(L("Tháng KQTT","Award month"))+' <span class="rq">*</span></label><input class="inp" type="month" id="ox_kqtt" value="'+(OX.kqtt?OX.kqtt.slice(0,4)+"-"+OX.kqtt.slice(4,6):"")+'"></div></div>'+
+      '<div class="hint" id="ox_hint"></div>'+
+      '<div style="margin-top:8px"><label class="btn sm" style="cursor:pointer">📎 '+esc(L("Tải chứng từ (ảnh / PDF)","Upload document (image / PDF)"))+'<input type="file" id="ox_file" accept="image/*,application/pdf" multiple style="display:none" onchange="oxFiles(this)"></label></div>'+
+      '<div class="ox-docs" id="ox_docs"></div><div class="ox-warn" id="ox_warn"></div><div class="v316-err" id="ox_err"></div>';
+    fld.parentNode.insertBefore(box,fld);
+    oxDraw();
+    var acc=$("o_accName"); if(acc) acc.addEventListener("change",oxDraw);
+  }catch(e){}
+};
+function oxErr(m){ var e=$("ox_err"); if(e){ e.innerHTML=m||""; e.classList.toggle("on",!!m); if(m) try{ e.scrollIntoView({block:"nearest"}); }catch(_){} } }
+var _so=window.saveOrder, PENDX=null;
+window.saveOrder=function(){
+  if(!$("ox_type")) return _so.apply(this,arguments);
+  var mon=($("o_month")||{}).value||"", t=oType($("ox_type").value), tender=n(($("ox_tender")||{}).value), kq=String(($("ox_kqtt")||{}).value||"").replace(/\D/g,"").slice(0,6), errs=[];
+  var need=t || mon>=CUTOFF;
+  if(need && !t) errs.push(L("Chọn <b>Order Type</b> (từ 10/2026 bắt buộc).","Pick the <b>Order Type</b> (required from 10/2026)."));
+  if(t==="1"){ if(!(tender>0)) errs.push(L("Nhập <b>Trị giá trúng thầu</b>.","Enter the <b>tender value</b>.")); if(!/^\d{6}$/.test(kq)) errs.push(L("Chọn <b>Tháng KQTT</b>.","Pick the <b>award month</b>.")); }
+  if(OX.up) errs.push(L("Chứng từ đang tải lên — đợi vài giây rồi bấm Lưu.","A document is still uploading — wait a few seconds."));
+  if(errs.length) return oxErr(errs.join("<br>"));
+  oxErr("");
+  PENDX=need?{ otype:t?TYPES[+t-1]:"", tender:t==="1"?tender:"", kqtt:t==="1"?kq:"", docs:OX.docs.map(function(d){ return d.name+" | "+d.url; }).join("\n") }:null;
+  try{ return _so.apply(this,arguments); } finally { PENDX=null; }
+};
+var _ob=window.obAddOrders;
+window.obAddOrders=function(rows,label){
+  if(PENDX){
+    var x=PENDX;
+    rows.forEach(function(r){ Object.assign(r,x,{ appr:"Chờ duyệt" }); if(r._row) try{ patchLocal("order", r._row, r); }catch(e){} });
+  }
+  return _ob.apply(this,arguments);
+};
+/* quyền duyệt (máy chủ quyết định lại): Tuyen · Director · Admin · chế độ TEST vai Quản lý / Giám đốc */
+function ordIsAp(){
+  if(S.ordAp && S.ordAp.approver!=null) return !!S.ordAp.approver;
+  var u=null; try{ u=AUTH.user(); }catch(e){}
+  if(window.__CRM_TF) return /^(mgr|dir)$/.test(window.__CRM_TF.role||"");
+  return (u && u.admin) || ["tuyen","nguyen ha","giang"].indexOf(nk((S.user&&S.user.pic)||"").trim())>=0;
+}
+window.v316OrdIsAp=ordIsAp;
+function ordApLoad(){
+  if(noOrder() || S._oaLd) return;
+  S._oaLd=apiGet("orderPending",{ _ts:Date.now() }).then(function(j){ S._oaLd=null; S.ordAp=j; if(S.tab==="order") paintApBtn(); if($("oa-body")) oaPaint(); })
+    .catch(function(e){ S._oaLd=null; S.ordAp=S.ordAp||{ err:e.message }; if($("oa-body")) oaPaint(); });
+}
+window.ordApLoad=ordApLoad;
+function paintApBtn(){
+  var b=$("oa-btn"); if(!b) return;
+  var c=(S.ordAp&&S.ordAp.pending)||0; b.querySelector("b").textContent=c?String(c):""; b.querySelector("b").style.display=c?"":"none";
+}
+var _pgo=window.pgOrder;
+window.pgOrder=function(){ var r=_pgo.apply(this,arguments); ordApLoad(); return r; };
+var _ro=window.renderOrder;
+window.renderOrder=function(){
+  var r=_ro.apply(this,arguments);
+  try{
+    var pg=document.querySelector("#main .pg"); if(!pg) return r;
+    /* nút Duyệt đơn hàng */
+    var ph=pg.querySelector(".ph");
+    if(ph && ordIsAp() && !$("oa-btn")){
+      var b=document.createElement("button"); b.className="btn sm"; b.id="oa-btn"; b.style.marginRight="8px";
+      b.innerHTML="✔ "+esc(L("Duyệt đơn hàng","Approve orders"))+' <b style="display:none;background:#C0504D;color:#fff;border-radius:999px;padding:0 6px;font-size:11px;margin-left:4px"></b>';
+      b.onclick=function(){ oaOpen(); };
+      var nb=ph.querySelector(".btn.pri"); if(nb) ph.insertBefore(b,nb); else ph.appendChild(b);
+      paintApBtn();
+    }
+    var nt=pg.querySelector(".k8-note"); if(nt) nt.textContent=L("C5 = tổng giá trị đơn ĐÃ DUYỆT của sales ÷ tỷ giá cố định 26.700 VND/USD (Order Type 1: trị giá trúng thầu ở tháng KQTT · 2: đơn Account mở mới tới hết FY mở · 3: đơn tư vấn; đơn trước 10/2026 tính như cũ). C6 / C7 = số lượng Composite / JIZAI của đơn qua NPP phụ trách.",
+      "C5 = APPROVED orders ÷ fixed rate 26,700 VND/USD (type 1: tender value in the award month · 2: new-account orders until the end of the opening FY · 3: consulting orders; orders before 10/2026 as before). C6 / C7 = Composite / JIZAI quantity via the PIC's distributor.");
+    /* nhãn trạng thái duyệt trên từng đơn (thẻ) */
+    var rows=((S.cache.order||{}).rows||[]);
+    var byRow={}; rows.forEach(function(o){ byRow[o._row]=o; });
+    [].forEach.call(pg.querySelectorAll(".od-card"),function(card){
+      if(card.querySelector(".v316-st")) return;
+      var ln=card.querySelector(".od-line[onclick]"); var o=null;
+      if(ln){ var m=/rOrder\('([^']+)'\)/.exec(ln.getAttribute("onclick")||""); if(m && REG[m[1]]) o=REG[m[1]]; }
+      if(!o) return;
+      var tags=card.querySelector(".od-tags"); if(!tags) return;
+      var sp=document.createElement("span"); sp.className="v316-st"; sp.style.cssText="display:inline-flex;gap:4px;flex-wrap:wrap;background:none;border:0;padding:0"; sp.innerHTML=apprChip(o);
+      tags.appendChild(sp);
+    });
+    [].forEach.call(pg.querySelectorAll("table.tb tbody tr[onclick^='rOrder']"),function(tr){
+      if(tr.querySelector(".v316-st")) return; var m=/rOrder\('([^']+)'\)/.exec(tr.getAttribute("onclick")||""); var o=m&&REG[m[1]]; if(!o) return;
+      var td=tr.children[1]; if(td){ var s=document.createElement("div"); s.className="v316-st"; s.style.cssText="display:flex;gap:3px;flex-wrap:wrap;margin-top:3px"; s.innerHTML=apprChip(o); td.appendChild(s); }
+    });
+  }catch(e){}
+  return r;
+};
+/* ── bảng Duyệt đơn hàng ── */
+function oaOpen(){
+  openModal(L("Duyệt đơn hàng","Approve orders"),'<div id="oa-body"><div class="hint">'+esc(L("Đang tải danh sách…","Loading…"))+'</div></div>','<button class="btn" onclick="closeModal()">'+esc(L("Đóng","Close"))+'</button>',true);
+  S.ordAp=S.ordAp||null; ordApLoad(); if(S.ordAp) oaPaint();
+}
+window.oaOpen=oaOpen;
+function oaPaint(){
+  var el=$("oa-body"); if(!el) return; var j=S.ordAp||{};
+  if(j.err){ el.innerHTML='<div class="v316-err on">'+esc(j.err)+'</div>'; return; }
+  var G=j.groups||[];
+  var head='<div class="v316-banner">'+esc(L("Đơn từ 10/2026 cần loại đơn + chứng từ và được duyệt mới tính KPI C5 (tỷ giá cố định 26.700). Từ chối phải ghi lý do; email kết quả tự gửi tới sales.","Orders from 10/2026 need a type, a document and approval to count for C5 (fixed rate 26,700). A rejection needs a reason; the result is e-mailed to the sales PIC."))+
+    (j.testOnly?'<br><b>'+esc(L("Chế độ TEST — chỉ duyệt được đơn của TEST.","TEST mode — only TEST orders can be approved."))+'</b>':"")+'</div>';
+  if(!G.length){ el.innerHTML=head+'<div class="card pad"><div class="empty"><div class="e">✔</div><p>'+esc(L("Không có đơn hàng nào đang chờ duyệt","No order is waiting for approval"))+'</p></div></div>'; return; }
+  el.innerHTML=head+G.map(function(g,gi){
+    var pend=g.orders.filter(function(o){ return o.appr==="wait"; }), can=pend.filter(function(o){ return o.canDecide; });
+    var tot=pend.reduce(function(s,o){ return s+n(o.kpi); },0);
+    return '<div class="oa-grp"><div class="oa-gh"><b>'+esc(g.pic)+'</b><span class="v316-chip type">'+esc(mLb(g.month))+'</span><span class="v316-chip wait">'+pend.length+' '+esc(L("đơn chờ","pending"))+'</span>'+
+      '<span style="font-size:12px;color:#5B6B7D">'+fmtVND(tot)+' ≈ $'+Math.round(tot/RATE).toLocaleString("en-US")+'</span><span style="flex:1"></span>'+
+      (can.length>1?'<button class="btn sm pri" onclick="oaDecideAll('+gi+')">✔ '+esc(L("Duyệt tất cả của ","Approve all of "))+esc(g.pic)+'</button>':'')+'</div>'+
+      g.orders.map(function(o,oi){
+        var t=oType(o.otype), id="oa_"+gi+"_"+oi;
+        return '<div class="oa-row"><div><b>'+esc(o.account||"—")+'</b> <span style="color:#8A97A6;font-size:12px">'+esc(o.orderNo||"")+(o.day?' · '+esc(fmtVN(o.day)):'')+'</span> '+
+            (t?'<span class="v316-chip type">'+esc(typeShort(t))+'</span>':'')+' <span class="v316-chip '+(o.appr||"wait")+'">'+esc(o.appr==="ok"?L("Đã duyệt","Approved"):o.appr==="no"?L("Từ chối","Rejected"):L("Chờ duyệt","Pending"))+'</span>'+
+            '<div class="meta">'+esc(L("Tính KPI: ","KPI value: "))+'<b>'+fmtVND(o.kpi)+'</b> '+esc(L("· tháng ","· month "))+esc(mLb(o.kpiMonth||o.month))+(t==="1"?' · '+esc(L("trị giá trúng thầu","tender value")):' · '+o.lines.length+' '+esc(L("dòng sản phẩm","lines")))+'</div>'+
+            '<div class="ox-docs">'+(o.docs||[]).map(function(d){ return '<span>📄 <a href="'+esc(d.url)+'" target="_blank">'+esc(d.name)+'</a></span>'; }).join("")+'</div>'+
+            ((o.warn||[]).length?'<div class="w">⚠ '+esc(o.warn.join(" · "))+'</div>':'')+(o.naWarn?'<div class="w" style="color:#7A5A00">⚠ '+esc(o.naWarn)+'</div>':'')+(o.apprNote?'<div class="meta">💬 '+esc(o.apprNote)+'</div>':'')+'</div>'+
+          '<div class="acts">'+(o.canDecide?'<button class="btn sm pri" '+(o.ready?'':'disabled title="'+esc((o.warn||[]).join(" · "))+'"')+' onclick="oaDecide(['+gi+','+oi+'],\'approve\')">✔ '+esc(L("Duyệt","Approve"))+'</button><button class="btn sm dg" onclick="oaRj(\''+id+'\')">✕ '+esc(L("Từ chối","Reject"))+'</button>':'')+'</div>'+
+          '<div class="oa-rj" id="'+id+'"><input class="inp" id="'+id+'_t" placeholder="'+esc(L("Lý do từ chối (bắt buộc)","Reason (required)"))+'"><button class="btn sm dg" onclick="oaDecide(['+gi+','+oi+'],\'reject\')">'+esc(L("Xác nhận từ chối","Confirm rejection"))+'</button></div></div>';
+      }).join("")+'</div>';
+  }).join("");
+}
+window.oaRj=function(id){ var e=$(id); if(e){ e.classList.toggle("on"); var t=$(id+"_t"); if(t) t.focus(); } };
+function oaSend(body){
+  return apiPost(Object.assign({ action:"orderDecide" },body)).then(function(j){
+    toast(j.message||"OK",j.failed?"warn":"ok",5000);
+    if(j.failed) (j.results||[]).filter(function(x){ return !x.ok; }).forEach(function(x){ toast((x.orderNo||x.account||"")+": "+x.error,"err",7000); });
+    S.ordAp=null; ordApLoad();
+    fetchTab("order",{}).then(function(rows){ S.cache.order={rows:rows||[]}; if(S.tab==="order") renderOrder(); }).catch(function(){});
+    try{ kpiPushSoon(3000); }catch(e){}
+  }).catch(function(e){ toast(e.message,"err",6000); });
+}
+window.oaDecide=function(ix,dec){
+  var g=((S.ordAp||{}).groups||[])[ix[0]], o=g&&g.orders[ix[1]]; if(!o) return;
+  var cm=""; if(dec==="reject"){ cm=String(($("oa_"+ix[0]+"_"+ix[1]+"_t")||{}).value||"").trim(); if(cm.length<3) return toast(L("Ghi lý do từ chối","Enter a reason"),"warn"); }
+  oaSend({ keys:[o.key], decision:dec, comment:cm });
+};
+window.oaDecideAll=function(gi){
+  var g=((S.ordAp||{}).groups||[])[gi]; if(!g) return;
+  var keys=g.orders.filter(function(o){ return o.appr==="wait" && o.canDecide && o.ready; }).map(function(o){ return o.key; });
+  if(!keys.length) return toast(L("Chưa có đơn nào đủ điều kiện duyệt","No order is ready to approve"),"warn");
+  if(!confirm(L("Duyệt "+keys.length+" đơn của "+g.pic+" tháng "+mLb(g.month)+"?","Approve "+keys.length+" orders of "+g.pic+" for "+mLb(g.month)+"?"))) return;
+  oaSend({ keys:keys, decision:"approve", comment:"" });
+};
+
+/* ═════════ chế độ TEST: nhãn luồng dữ liệu cho lệnh ghi mới ═════════ */
+try{
+  var LB=window.TESTFLOW_CFG && TESTFLOW_CFG.labels;
+  if(LB){
+    LB.orderDoc={ ext:1, t:["Tải chứng từ đơn hàng","Upload order document"], tab:["Drive ▸ folder chứng từ Mở mới ▸ Sales Order docs (tháng)","Drive ▸ new-account folder ▸ Sales Order docs (month)"], next:[["Tên file: TEST_<Order No.>_<account>_KQTT|PhieuNPP_…","File name: TEST_<Order No.>_<account>_KQTT|PhieuNPP_…"]] };
+    LB.orderDecide={ t:["Quản lý duyệt / từ chối đơn hàng","Manager decides the order"], tab:"3. SALE ORDER ▸ Duyệt · Người duyệt · Ngày duyệt · Ghi chú duyệt", next:[["KPI C5: đơn TEST không được cộng","C5 KPI: TEST orders are not counted"],["Email kết quả tới sales (chế độ TEST: chỉ Admin)","Result e-mail to the sales PIC (TEST: Admin only)"]] };
+    LB.rhCustTrain={ ext:1, t:["Đào tạo khách hàng (T&E) — lưu / xoá","Customer training (T&E) — save / delete"], tab:["Training Master ▸ buổi đào tạo khách hàng (Training Hub)","Training Master ▸ customer training sessions (Training Hub)"], next:[["KPI C10-03 / 04 / 05 (Dental) đếm buổi Completed — TEST không được cộng","C10-03 / 04 / 05 (Dental) count Completed sessions — TEST is not counted"]] };
+    if(LB.savePresentation) LB.savePresentation.next=[["Chỉ lưu khi có Actual participant > 0 và Event review đủ mẫu 5 dòng","Saved only with Actual participant > 0 and a complete 5-line Event review"]];
+    if(TESTFLOW_CFG.steps) TESTFLOW_CFG.steps.splice(4,0,{t:["Đơn hàng: loại + chứng từ","Order: type + document"],m:["orderDoc"]},{t:["Vai Quản lý ▸ duyệt đơn hàng","Manager ▸ approve the order"],m:["orderDecide@mgr","orderDecide@dir"]},{t:["Đào tạo khách hàng (T&E, Dental)","Customer training (T&E, Dental)"],m:["rhCustTrain"]});
+  }
+}catch(e){}
+})();
+</script>
 <script src="testflow/testflow.js?v=1.0"></script>
 <script src="tour/tour.js?v=1.1"></script>
 <script src="tour/tours.js?v=31.5"></script>
