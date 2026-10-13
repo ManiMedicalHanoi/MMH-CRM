@@ -7,6 +7,14 @@
 function E(u){ u.en={ title:u.title, items:u.items.map(function(i){ return { title:i.title, text:i.text }; }) }; return u; }
 window.MMH_UPDATES = [
   E({
+    id:"2026-10-13-v31.7", version:"v31.7", date:"2026-10-13",
+    title:"Dental orders: the distributor is filled in by PIC",
+    summary:"When a Dental sales order is created, the <b>Partner</b> (distributor) now follows the sales PIC automatically: Viet → Nam Dung, Vinh → S.P.I, Phuong chooses Meci or Viet Thai.",
+    items:[
+      {type:"imp", icon:"🏷", title:"Distributor filled in by PIC", text:"Open <b>Sales order ▸ New order</b> ▸ the <b>Partner</b> box is filled in from the PIC (Viet → Nam Dung, Vinh → S.P.I, both locked). For Phuong it becomes a short list: <b>Meci</b> or <b>Viet Thai</b>. Partner type is set to Distributor. Choosing another account changes the PIC and the distributor follows.", img:"updates/v31.7/npp-by-pic.jpg"}
+    ]
+  }),
+  E({
     id:"2026-10-13-v31.6", version:"v31.6", date:"2026-10-13",
     title:"Instant other tasks, reliable field-visit dates, order approval and customer training (T&E)",
     summary:"Other tasks now appear the moment you save and are written to the ALL TASK sheet in the background. Field-visit tasks always keep their start date and photos land on the right task. Sales orders get an <b>Order Type</b> and a manager approval; Dental can log <b>customer training (T&E)</b>. The exchange rate is fixed at <b>26,700 VND/USD</b>.",

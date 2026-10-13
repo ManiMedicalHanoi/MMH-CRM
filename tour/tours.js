@@ -77,13 +77,15 @@ TOUR.add([
     { el:"#custPicBar", t:V("Theo PIC","By PIC"), x:V("Xem account của từng người.","See each person's accounts.") },
     { el:"[onclick=\"formCustomer(null)\"]", t:V("Account mới","New account"), x:V("Thêm khách hàng mới vào danh mục.","Add a new customer.") }
    ] },
- { id:"order", v:2, d:"2026-10-13", g:V("Khách hàng & bán hàng","Customers & sales"), ic:"report", t:V("Đơn hàng","Sales orders"), x:V("Ghi và tra cứu đơn hàng theo tháng.","Record and look up orders by month."),
+ { id:"order", v:3, d:"2026-10-13", g:V("Khách hàng & bán hàng","Customers & sales"), ic:"report", t:V("Đơn hàng","Sales orders"), x:V("Ghi và tra cứu đơn hàng theo tháng.","Record and look up orders by month."),
    when:function(){ try{ return !noOrder(); }catch(_){ return true; } },
    steps:[
     { el:"[onclick=\"formOrder(null)\"]", do:pg("order"), wait:600, t:V("Đơn hàng mới","New order"), x:V("Ghi đơn: account, sản phẩm, số lượng, giá.","Record account, products, quantity and price.") },
     { el:"#ord_q", t:V("Tìm đơn","Find an order"), x:V("Tìm theo account, mã, sản phẩm, NPP.","Search by account, code, product or distributor.") },
     { el:function(){ return par("[onclick^=\"S.filt.month=''\"]"); }, t:V("Theo tháng","By month"), x:V("Chọn tháng hoặc cả FY.","Pick a month or the whole FY.") },
-    { el:"#oa-btn", when:function(){ try{ return !!(window.v316OrdIsAp && v316OrdIsAp()); }catch(_){ return false; } }, t:V("Duyệt đơn hàng","Approve orders"),
+    { el:function(){ return TOUR.find("#o_partnerSel") || TOUR.find("#o_partner"); }, do:function(){ try{ formOrder(null); }catch(_){} }, wait:500, when:function(){ try{ return curTeamKey()==="dental"; }catch(_){ return false; } },
+      t:V("Nhà phân phối tự điền","Distributor filled in"), x:V("Theo PIC: Viet → Nam Dũng · Vinh → S.P.I · Phuong chọn Meci hoặc Việt Thái.","By PIC: Viet → Nam Dung · Vinh → S.P.I · Phuong picks Meci or Viet Thai.") },
+    { el:"#oa-btn", do:function(){ try{ closeModal(); }catch(_){} }, wait:300, when:function(){ try{ return !!(window.v316OrdIsAp && v316OrdIsAp()); }catch(_){ return false; } }, t:V("Duyệt đơn hàng","Approve orders"),
       x:V("Đơn từ 10/2026 cần Order Type + chứng từ và được duyệt mới tính KPI C5. Duyệt từng đơn hoặc cả tháng của một sales.","Orders from 10/2026 need an order type + documents and approval before they count for C5. Approve one by one or a whole month per sales PIC.") }
    ] },
  { id:"te", v:1, d:"2026-10-13", g:V("Khách hàng & bán hàng","Customers & sales"), ic:"people", t:V("Đào tạo khách hàng (T&E)","Customer training (T&E)"), x:V("Ghi buổi đào tạo khách hàng — lưu Training Master, tính KPI C10.","Log customer training sessions — saved to the Training Master, counted for C10."),
@@ -123,16 +125,12 @@ TOUR.add([
     { el:function(){ return par("[onclick=\"setDashG('all')\"]"); }, t:V("Nhóm chỉ số","Metric groups"), x:V("Tổng quan · Khách hàng · Đi địa bàn · Kinh doanh · ADP.","Overview · Customers · Field visits · Sales · ADP.") },
     { el:"#clogCard", t:V("Cập nhật dữ liệu khách hàng","Customer data updates"), x:V("Account nào vừa được cập nhật hoặc thêm mới.","Which accounts were updated or added.") }
    ] },
- { id:"testmode", v:1, d:"2026-10-13", g:V("Quản trị","Admin"), ic:"gear", t:V("Chế độ TEST · Luồng dữ liệu","TEST mode · Data flow"), x:V("Admin thử mọi chức năng dưới tên TEST, ghi thật, xem dữ liệu đi đâu.","The Admin tries every function as TEST with real saves and sees where the data goes."),
-   when:function(){ var u=me(); return !!u && u.admin && !!window.TESTFLOW; },
+ { id:"testmode", v:2, d:"2026-10-13", g:V("Quản trị","Admin"), ic:"gear", t:V("TEST","TEST"), x:V("Admin dùng thử mọi chức năng với vai bất kỳ trên dữ liệu TEST riêng.","The Admin tries every function in any role on separate TEST data."),
+   when:function(){ try{ return !!window.SBX && (SBX.on || (function(){ var o=JSON.parse(localStorage.getItem("mmh_tk")||"null"); return !!(o&&o.user&&o.user.admin); })()); }catch(_){ return false; } },
    steps:[
-    { el:function(){ return TOUR.find("#tmBtn") || TOUR.find("nav.mob button:last-of-type"); }, when:function(){ return !TESTFLOW.on(); }, t:V("Nút Chế độ TEST","TEST mode button"), x:V("<i>(Điện thoại: <b>Thêm ▸ Tiện ích ▸ Chế độ TEST</b>.)</i> Chỉ Admin thấy nút này.","<i>(Phone: <b>More ▸ Tools ▸ TEST mode</b>.)</i> Only the Admin sees it.") },
-    { el:"#tf-pk .tf-scopes", do:function(){ try{ TESTFLOW.pick(); }catch(_){} }, wait:500, when:function(){ return !TESTFLOW.on(); }, t:V("Chọn nhóm","Pick the team"), x:V("File CRM của nhóm nào sẽ nhận dữ liệu TEST (Dental, Surgical, Eyeless, Thailand).","Which team's CRM file receives the TEST data.") },
-    { el:"#tf-pk .tf-roles", when:function(){ return !TESTFLOW.on(); }, t:V("Chọn vai","Pick the role"), x:V("<b>Sales TEST</b> ghi việc, ảnh, báo cáo, công tác, mở mới · <b>Quản lý</b> xác nhận Mở mới · <b>Giám đốc</b> duyệt công tác — chỉ hồ sơ TEST.","<b>Sales TEST</b> logs visits, photos, reports, trips, new accounts · <b>Manager</b> approves new accounts · <b>Director</b> approves trips — TEST records only.") },
-    { el:"#tf-pk [data-go]", when:function(){ return !TESTFLOW.on(); }, t:V("Bắt đầu","Start"), x:V("Dữ liệu lưu thật (tên TEST, ảnh TEST_…), email chỉ về Admin, người khác không thấy, không tính KPI.","Real saves (name TEST, photos TEST_…), e-mails to the Admin only, hidden from everyone else, not counted in KPI.") },
-    { el:"#tf-fab", when:function(){ return TESTFLOW.on(); }, t:V("Nút TEST","TEST button"), x:V("Góc trái dưới: vai đang dùng + số thao tác. Bấm để mở bảng Luồng dữ liệu.","Bottom-left: current role + number of actions. Click for the Data flow panel.") },
-    { el:"#tf-pn .tf-roles", do:function(){ try{ TESTFLOW.open(); }catch(_){} }, wait:400, when:function(){ return TESTFLOW.on(); }, t:V("Đổi vai","Switch role"), x:V("Đổi sang Giám đốc để duyệt công tác của TEST, sang Quản lý để xác nhận Mở mới.","Switch to Director to approve TEST trips, to Manager to approve new accounts.") },
-    { el:"#tf-pn .tf-tl", when:function(){ return TESTFLOW.on(); }, t:V("Luồng dữ liệu","Data flow"), x:V("Mỗi lần lưu: ① thao tác → ② backend → ③ file ▸ tab ▸ dòng → ④ email lẽ ra gửi tới ai. <b>Xoá dữ liệu test</b> dọn sạch khi xong.","Each save: ① action → ② backend → ③ file ▸ tab ▸ row → ④ who the e-mail would go to. <b>Delete test data</b> cleans up.") }
+    { el:function(){ return TOUR.find("#sbx-chip") || TOUR.find("#tmBtn") || TOUR.find("nav.mob button:last-of-type"); }, t:V("Nút TEST","TEST button"), x:V("<i>(Điện thoại: <b>Thêm ▸ Tiện ích ▸ TEST</b>.)</i>","<i>(Phone: <b>More ▸ Tools ▸ TEST</b>.)</i>") },
+    { el:".sbx-teams", do:function(){ try{ SBX.pick(); }catch(_){} }, wait:500, t:V("Chọn nhóm","Pick the team"), x:V("Dental · Surgical · Eyeless.","Dental · Surgical · Eyeless.") },
+    { el:".sbx-people", t:V("Chọn người","Pick the person"), x:V("Bấm tên để dùng app như người đó: sales, trưởng nhóm, HOD, Giám đốc.","Click a name to use the app as that person: sales, team leader, HOD, Director.") }
    ] },
  { id:"theme", v:2, d:"2026-10-11", g:V("Cá nhân hoá","Personalise"), ic:"gear", t:V("Màu giao diện","Colour theme"), x:V("Chọn tông màu bạn thích.","Pick the colour theme you like."),
    steps:[
