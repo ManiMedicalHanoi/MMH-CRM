@@ -94,3 +94,9 @@ Kiến trúc & quy ước giống MMH Report Hub (repo `ManiMedicalHanoi/MMH-Rep
 - **Báo cáo tháng (v31.4, khối `v314-js`)**: khung sửa hạng mục tháng (`openMonthly`) lưu bằng `mnDomDiff()` — so từng ô trên màn hình với bản đang có
   (không chỉ dựa `S.dirty`, vì 🎤 Nói trước đây không gọi `markDirtyM` ⇒ nội dung nói không được gửi). `toggleVoice` phát sự kiện `input`.
   Đóng khung khi còn nội dung chưa lưu ⇒ hỏi Lưu / Bỏ (`closeDrw(true)` = đóng không hỏi). Chặn bấm Lưu 2 lần (`S._mnSaving`).
+- **Chế độ TEST của Admin (v31.5, `testflow/testflow.js` GIỐNG HỆT MMH-Report, backend `MMH_TestMode.gs` ở mmh-backend)**: Admin ▸ `#tmBtn` / Thêm ▸ Tiện ích ⇒
+  chọn nhóm + vai (Sales TEST · Quản lý · Giám đốc) ⇒ `localStorage.mmh_test_crm`, khối đăng nhập tạo `ROLES.TEST` + `window.__CRM_TF` (hàng đợi `_tf` riêng).
+  Mọi lệnh tới Apps Script gắn `tm=1&tmAs=<vai>` + `tk` ⇒ GHI THẬT dưới tên TEST, email chỉ về Admin `[TEST]`, người khác không thấy, không tính KPI.
+  Bảng **Luồng dữ liệu** (nút vàng `#tf-fab`, `TESTFLOW.open()`): mỗi lệnh ghi = thao tác → backend → file ▸ tab ▸ dòng → email lẽ ra gửi; nhật ký `mmh_testflow_log` dùng chung 2 app.
+  Vai Giám đốc: `window.__TF_TESTDIR` ⇒ TFA chỉ chọn được đề xuất TEST. "Xoá dữ liệu test" = `tmClean` ở 4 backend CRM. Lệnh ghi mới ⇒ thêm nhãn `[vi,en]` vào
+  `TESTFLOW_CFG.labels` (+ `steps`). Chế độ thử cũ (CRMTEST, không lưu) = lựa chọn phụ "Xem như một bạn sales" trong hộp chọn. Mock: trả `_tm:{mails:[…]}`.
