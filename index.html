@@ -24594,12 +24594,13 @@ setTimeout(function(){ load(); try{ if(S.other && S.other.keys) stamp(S.other.ke
 .sbx-people button{display:flex;flex-direction:column;align-items:flex-start;gap:2px;text-align:left;border:1px solid #E6EAEF;background:#fff;border-radius:12px;padding:9px 12px;cursor:pointer;font-family:Aptos,"Segoe UI",sans-serif}
 .sbx-people button b{font-size:14px;color:#003047}.sbx-people button span{font-size:11.5px;color:#6B7B8C}
 .sbx-people button.on{border-color:#E8C95A;background:#FFFBEA}
-#sbx-wait{position:fixed;inset:0;z-index:10090;background:rgba(255,255,255,.92);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:14px;font:600 15px Aptos,"Segoe UI",sans-serif;color:#003047}
+#sbx-wait{position:fixed;inset:0;z-index:10090;background:#fff;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:14px;font:600 15px Aptos,"Segoe UI",sans-serif;color:#003047}
 #sbx-wait i{width:34px;height:34px;border-radius:50%;border:3px solid #CFE2F3;border-top-color:#3A5CAA;animation:sbxr 1s linear infinite}
 #sbx-wait small{font-weight:500;color:#6B7B8C;font-size:12.5px}
 #sbx-wait small{max-width:min(560px,90vw);text-align:center;line-height:1.5}
 #sbx-wait.err{color:#7A2E2A}
 #sbx-wait .sbx-wb{display:flex;gap:10px;margin:4px 0 0}
+#sbx-wait .sbx-q{margin-top:6px;background:none;border:0;color:#3A5CAA;font:500 12.5px Aptos,"Segoe UI",sans-serif;cursor:pointer;text-decoration:underline}
 @keyframes sbxr{to{transform:rotate(360deg)}}
 </style>
 <script id="sbx-js">
@@ -24695,7 +24696,8 @@ function chip(){
 function wait(on, msg){
   var el=document.getElementById("sbx-wait");
   if(!on){ if(el) el.remove(); return; }
-  if(!el){ el=document.createElement("div"); el.id="sbx-wait"; el.innerHTML='<i></i><div>Đang chuẩn bị dữ liệu TEST…</div><small></small>'; document.body.appendChild(el); }
+  if(!el){ el=document.createElement("div"); el.id="sbx-wait"; el.innerHTML='<i></i><div>Đang chuẩn bị dữ liệu TEST…</div><small></small><button type="button" class="sbx-q">Thoát TEST — dùng app bình thường, lát quay lại</button>'; document.body.appendChild(el);
+    el.querySelector(".sbx-q").onclick=stop; }
   if(msg!=null) el.querySelector("small").textContent=msg;
 }
 /* 13/10/2026 — dựng lỗi ⇒ không treo màn chờ: hiện lỗi ngắn gọn + Dựng lại / Thoát TEST (trước đây chỉ quay mãi) */
@@ -24711,9 +24713,10 @@ function poll(url, t0){
   call(url,"tmInfo").then(function(j){
     if(j && j.ready){ wait(false); location.reload(); return; }
     if(j && j.state==="error"){ failed(url, j.log); return; }
-    if(Date.now()-t0>16*60000){ failed(url, "Quá 16 phút chưa xong — bấm Dựng lại."); return; }
-    var s=Math.round((Date.now()-t0)/1000);
-    wait(true, (s<60?s+" giây":Math.floor(s/60)+" phút "+(s%60)+" giây")+" · lần đầu mất khoảng 1–3 phút");
+    /* backend v1.2 dựng theo bước, tự chạy tiếp khi 1 lượt bị Google dừng ⇒ chỉ báo lỗi khi backend báo (hoặc quá 45 phút) */
+    if(Date.now()-t0>45*60000){ failed(url, "Quá 45 phút chưa xong — bấm Dựng lại."); return; }
+    var s=Math.round((Date.now()-t0)/1000), tm=(s<60?s+" giây":Math.floor(s/60)+" phút "+(s%60)+" giây");
+    wait(true, (j&&j.stepNo?"Bước "+j.stepNo+"/"+j.steps+(j.stepName?" · "+j.stepName:"")+" · ":"")+tm+" · chỉ làm 1 lần cho mỗi nhóm (khoảng 3–10 phút). Đóng trang cũng được, máy chủ vẫn chạy tiếp.");
     setTimeout(function(){ poll(url, t0); }, 4000);
   }).catch(function(){ setTimeout(function(){ poll(url, t0); }, 6000); });
 }

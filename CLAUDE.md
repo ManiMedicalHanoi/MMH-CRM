@@ -117,3 +117,5 @@ Kiến trúc & quy ước giống MMH Report Hub (repo `ManiMedicalHanoi/MMH-Rep
 - **v31.8 (13/10/2026)**: bỏ Duyệt công tác trên app (`TFA_CFG={off:true}`, cùng Report Hub v17.9) — chỉ còn Đề xuất công tác. Hộp cát TEST: dựng lỗi ⇒ màn chờ hiện
   lý do + **Dựng lại** (`tmReset`) / **Thoát TEST** (`failed()` trong `sbx-js`), quá 16 phút cũng báo; backend `MMH_CrmSandbox.gs` v1.1 chuyển quy tắc xác thực của file TEST
   sang "cảnh báo" (lỗi cũ: ô D5 = PIC của tab MMH Travel report từ chối tên sales ⇒ cả lượt dựng hỏng).
+- **Màn chờ hộp cát TEST (15/10/2026, backend `MMH_CrmSandbox.gs` v1.2)**: `#sbx-wait` nền trắng đặc (không lộ màn lỗi phía sau), hiện "Bước x/12 · tên bước" từ `tmInfo`,
+  nút "Thoát TEST" ngay khi chờ; chỉ báo lỗi khi backend báo `state:error` hoặc quá 45 phút (backend tự chạy tiếp khi 1 lượt bị Google dừng).
