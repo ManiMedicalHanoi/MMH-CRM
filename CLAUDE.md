@@ -122,4 +122,7 @@ Kiến trúc & quy ước giống MMH Report Hub (repo `ManiMedicalHanoi/MMH-Rep
 - **v32.0 (15/10/2026, khối `v320-ord-css` + `v320-ord`, backend `orderRequest`)**: thẻ đơn Chờ duyệt có hàng `.v320-acts` — sales (chủ đơn / Admin) ▸ **Gửi xác nhận** (email thư thường tới Tuyen, ảnh chứng từ nhúng;
   đã gửi ⇒ hiện dấu thời gian + Gửi lại), người duyệt (`canDecide` từ `orderPending`) ▸ **Xác nhận / Không xác nhận** ngay trên thẻ. Người duyệt không phải sales (`v320ApOnly`: Tuyen, Nguyen Ha — không có `team`, không Admin)
   ⇒ ẩn "Đơn hàng mới", `formOrder(null)` bị chặn. Link email `#oa` ⇒ trang Đơn hàng + `oaOpen()`.
+- **v32.1 (15/10/2026, cùng khối `v320-ord`)**: người duyệt thấy đơn thiếu chứng từ / chưa chọn loại ⇒ KHÔNG hiện nút Xác nhận mờ, chỉ **Trả lại bổ sung** (backend `orderDecide decision=return`: vẫn Chờ duyệt,
+  Ghi chú duyệt "Cần bổ sung: …", email sales) + Không xác nhận. Thông báo: chấm số đỏ `.v321-nb` ở menu Đơn hàng (`cnt()`: chờ mình duyệt · bị trả lại · thiếu chứng từ · chưa gửi),
+  dải `.v321-ban` đầu trang Đơn hàng, nhắc 1 lần / phiên (`sessionStorage`) sau đăng nhập; làm mới 10 phút / lần.
 
