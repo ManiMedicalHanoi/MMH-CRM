@@ -119,3 +119,7 @@ Kiến trúc & quy ước giống MMH Report Hub (repo `ManiMedicalHanoi/MMH-Rep
   sang "cảnh báo" (lỗi cũ: ô D5 = PIC của tab MMH Travel report từ chối tên sales ⇒ cả lượt dựng hỏng).
 - **Màn chờ hộp cát TEST (15/10/2026, backend `MMH_CrmSandbox.gs` v1.2)**: `#sbx-wait` nền trắng đặc (không lộ màn lỗi phía sau), hiện "Bước x/12 · tên bước" từ `tmInfo`,
   nút "Thoát TEST" ngay khi chờ; chỉ báo lỗi khi backend báo `state:error` hoặc quá 45 phút (backend tự chạy tiếp khi 1 lượt bị Google dừng).
+- **v32.0 (15/10/2026, khối `v320-ord-css` + `v320-ord`, backend `orderRequest`)**: thẻ đơn Chờ duyệt có hàng `.v320-acts` — sales (chủ đơn / Admin) ▸ **Gửi xác nhận** (email thư thường tới Tuyen, ảnh chứng từ nhúng;
+  đã gửi ⇒ hiện dấu thời gian + Gửi lại), người duyệt (`canDecide` từ `orderPending`) ▸ **Xác nhận / Không xác nhận** ngay trên thẻ. Người duyệt không phải sales (`v320ApOnly`: Tuyen, Nguyen Ha — không có `team`, không Admin)
+  ⇒ ẩn "Đơn hàng mới", `formOrder(null)` bị chặn. Link email `#oa` ⇒ trang Đơn hàng + `oaOpen()`.
+

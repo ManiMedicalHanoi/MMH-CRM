@@ -7,6 +7,16 @@
 function E(u){ u.en={ title:u.title, items:u.items.map(function(i){ return { title:i.title, text:i.text }; }) }; return u; }
 window.MMH_UPDATES = [
   E({
+    id:"2026-10-15-v32.0", version:"v32.0", date:"2026-10-15",
+    title:"Orders: send for approval and approve right on the order card",
+    summary:"Pending orders now have a <b>Send for approval</b> button for the sales PIC and <b>Approve</b> / <b>Reject</b> buttons for the approver. The e-mails are plain, formal letters with the documents shown in the message.",
+    items:[
+      { type:"new", icon:"✉", title:"Send for approval", text:"Orders ▸ an order marked <b>Pending</b> ▸ click <b>Send for approval</b> ⇒ the approver (Tuyen) gets an e-mail with the order details and the document images in the message. The card then shows when it was sent; you can send it again.", img:"updates/v32.0/send.jpg" },
+      { type:"new", icon:"✔", title:"Approve on the card", text:"Approvers see <b>Approve</b> / <b>Reject</b> on each pending order card (a rejection needs a reason). The result is e-mailed to the sales PIC. Approvers no longer see the New order button.", img:"updates/v32.0/approve.jpg" },
+      { type:"imp", icon:"📄", title:"Plain approval e-mails", text:"New-account and order e-mails are now simple letters: \"Dear chị Tuyên,\" · the details line by line · document images inside the e-mail · CRM link · signature." }
+    ]
+  }),
+  E({
     id:"2026-10-13-v31.9", version:"v31.9", date:"2026-10-13",
     title:"English text fixes in the visit form and photo block",
     summary:"The field-visit form, the account picker and the photo block no longer show Vietnamese text in English mode.",
