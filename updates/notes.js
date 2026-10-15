@@ -7,6 +7,15 @@
 function E(u){ u.en={ title:u.title, items:u.items.map(function(i){ return { title:i.title, text:i.text }; }) }; return u; }
 window.MMH_UPDATES = [
   E({
+    id:"2026-10-15-v32.1", version:"v32.1", date:"2026-10-15",
+    title:"Orders: ask for changes, and order notices",
+    summary:"Approvers can now send an incomplete order back with <b>Ask for changes</b> instead of facing a greyed-out Approve button. A red number next to <b>Orders</b> and a notice at the top of the page show what needs attention.",
+    items:[
+      { type:"new", icon:"↩", title:"Ask for changes", text:"Orders ▸ a pending order missing its type or documents ▸ the approver clicks <b>Ask for changes</b> and writes what is missing ⇒ the sales PIC gets an e-mail, the card shows \"Changes needed\"; after fixing it the PIC clicks <b>Send again</b>.", img:"updates/v32.1/approve.jpg" },
+      { type:"new", icon:"🔔", title:"Order notices", text:"A red number next to <b>Orders</b> in the menu and a notice at the top of the Orders page: orders waiting for your approval, returned orders, orders missing documents or not sent yet. Approvers also get a short reminder after signing in.", img:"updates/v32.1/notice.jpg" }
+    ]
+  }),
+  E({
     id:"2026-10-15-v32.0", version:"v32.0", date:"2026-10-15",
     title:"Orders: send for approval and approve right on the order card",
     summary:"Pending orders now have a <b>Send for approval</b> button for the sales PIC and <b>Approve</b> / <b>Reject</b> buttons for the approver. The e-mails are plain, formal letters with the documents shown in the message.",
