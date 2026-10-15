@@ -70,14 +70,17 @@ TOUR.add([
     { el:"#custPicBar", t:V("Theo PIC","By PIC"), x:V("Xem account của từng người.","See each person's accounts.") },
     { el:"[onclick=\"formCustomer(null)\"]", t:V("Account mới","New account"), x:V("Thêm khách hàng mới vào danh mục.","Add a new customer.") }
    ] },
- { id:"order", v:3, d:"2026-10-13", g:V("Khách hàng & bán hàng","Customers & sales"), ic:"report", t:V("Đơn hàng","Sales orders"), x:V("Ghi và tra cứu đơn hàng theo tháng.","Record and look up orders by month."),
+ { id:"order", v:4, d:"2026-10-15", g:V("Khách hàng & bán hàng","Customers & sales"), ic:"report", t:V("Đơn hàng","Sales orders"), x:V("Ghi và tra cứu đơn hàng theo tháng.","Record and look up orders by month."),
    when:function(){ try{ return !noOrder(); }catch(_){ return true; } },
    steps:[
-    { el:"[onclick=\"formOrder(null)\"]", do:pg("order"), wait:600, t:V("Đơn hàng mới","New order"), x:V("Ghi đơn: account, sản phẩm, số lượng, giá.","Record account, products, quantity and price.") },
+    { el:"#ord_q", do:pg("order"), wait:600, when:function(){ try{ return !!(window.v320ApOnly && v320ApOnly()); }catch(_){ return false; } }, t:V("Đơn hàng của sales","Sales orders"), x:V("Người duyệt không tạo đơn — sales tạo đơn rồi gửi xác nhận cho bạn.","Approvers do not create orders — sales create them and send them to you.") },
+    { el:"[onclick=\"formOrder(null)\"]", do:pg("order"), wait:600, when:function(){ try{ return !(window.v320ApOnly && v320ApOnly()); }catch(_){ return true; } }, t:V("Đơn hàng mới","New order"), x:V("Ghi đơn: account, sản phẩm, số lượng, giá.","Record account, products, quantity and price.") },
     { el:"#ord_q", t:V("Tìm đơn","Find an order"), x:V("Tìm theo account, mã, sản phẩm, NPP.","Search by account, code, product or distributor.") },
     { el:function(){ return par("[onclick^=\"S.filt.month=''\"]"); }, t:V("Theo tháng","By month"), x:V("Chọn tháng hoặc cả FY.","Pick a month or the whole FY.") },
     { el:function(){ return TOUR.find("#o_partnerSel") || TOUR.find("#o_partner"); }, do:function(){ try{ formOrder(null); }catch(_){} }, wait:500, when:function(){ try{ return curTeamKey()==="dental"; }catch(_){ return false; } },
       t:V("Nhà phân phối tự điền","Distributor filled in"), x:V("Theo PIC: Viet → Nam Dũng · Vinh → S.P.I · Phuong chọn Meci hoặc Việt Thái.","By PIC: Viet → Nam Dung · Vinh → S.P.I · Phuong picks Meci or Viet Thai.") },
+    { el:function(){ return TOUR.find(".v320-acts"); }, do:function(){ try{ closeModal(); }catch(_){} }, wait:300, when:function(){ return !!document.querySelector(".v320-acts"); }, t:V("Gửi xác nhận · Xác nhận","Send for approval · Approve"),
+      x:V("Đơn Chờ duyệt: sales bấm <b>Gửi xác nhận</b> ⇒ email tới chị Tuyên kèm chứng từ. Người duyệt bấm <b>Xác nhận</b> / <b>Không xác nhận</b> ngay trên thẻ đơn.","Pending orders: sales click <b>Send for approval</b> ⇒ the approver gets an e-mail with the documents. The approver clicks <b>Approve</b> / <b>Reject</b> right on the order card.") },
     { el:"#oa-btn", do:function(){ try{ closeModal(); }catch(_){} }, wait:300, when:function(){ try{ return !!(window.v316OrdIsAp && v316OrdIsAp()); }catch(_){ return false; } }, t:V("Duyệt đơn hàng","Approve orders"),
       x:V("Đơn từ 10/2026 cần Order Type + chứng từ và được duyệt mới tính KPI C5. Duyệt từng đơn hoặc cả tháng của một sales.","Orders from 10/2026 need an order type + documents and approval before they count for C5. Approve one by one or a whole month per sales PIC.") }
    ] },

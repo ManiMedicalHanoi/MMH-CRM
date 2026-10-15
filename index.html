@@ -3994,7 +3994,7 @@ function buildNav(){
     if(t.grp!==lastGrp){ h+='<div class="grp">'+t.grp+'</div>'; lastGrp=t.grp; }
     h+='<button class="nvi" data-t="'+t.id+'" onclick="go(\''+t.id+'\')"><span class="ic">'+t.ic+'</span><span class="lb">'+t.lb+'</span></button>';
   });
-  h+='<div style="flex:1"></div><div style="padding:10px;font-size:10.5px;color:var(--mute);line-height:1.5">MMH CRM v31.9<br>'+
+  h+='<div style="flex:1"></div><div style="padding:10px;font-size:10.5px;color:var(--mute);line-height:1.5">MMH CRM v32.0<br>'+
      (isMgmt()?'<a href="'+DRIVE_FOLDER+'" target="_blank">📁 Folder ảnh Drive</a>':"")+'</div>';
   $("side").innerHTML=h;
   /* ⭐ v4.5 — thanh dưới trượt ngang, đủ mọi mục, bỏ nút "Thêm" */
@@ -20721,7 +20721,7 @@ window.QS2={ open:qsOpen };
 </script>
 
 <!-- ⭐ v30.3 — THÔNG BÁO CẬP NHẬT (chép từ Report Hub): dữ liệu updates/notes.js · tự hiện 7 ngày · nút "Có gì mới" trên thanh trên cùng -->
-<script src="updates/notes.js?v=31.9"></script>
+<script src="updates/notes.js?v=32.0"></script>
 <style id="upd-css">
 #upd,#upd-zoom{--t-pri:var(--blue);--t-pri2:var(--blue-d);--t-ink:var(--navy);--t-soft:var(--pale);--t-line:var(--lb2);--t-bg:#F6F8FA;--mmh-blue:var(--blue);--mmh-navy:var(--navy)}
 
@@ -24843,6 +24843,95 @@ window.V317NPP={ list:list, apply:apply };
   RULES_EN.unshift([/^📷 Chụp đè ảnh mới$/, "📷 Retake photo"]);
   RULES_EN.unshift([/^Ảnh nén ≤1600px, tự lưu kèm toạ độ GPS và địa chỉ nơi chụp\.?$/, "Photo compressed to ≤1600px, saved with GPS coordinates and the address where it was taken."]); RULES_EN.unshift([/^Chụp đè ảnh mới$/, "Retake photo"]);
 } }catch(_){} })();
+</script>
+<style id="v320-ord-css">
+.v320-acts{display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:8px 14px;border-top:1px solid var(--line,#E6EAEF);background:#FBFCFE;font-size:12.5px;color:#5B6B7D}
+.v320-acts .sp{flex:1}
+.v320-acts .w{color:#8A5A00}
+</style>
+<script id="v320-ord">
+/* ═════════ v32.0 (15/10/2026) — ĐƠN HÀNG: sales GỬI XÁC NHẬN · người duyệt DUYỆT ngay trên thẻ đơn (backend orderRequest / orderDecide) ═════════
+   · Thẻ đơn "Chờ duyệt": sales (chủ đơn) ▸ nút "Gửi xác nhận" ⇒ email thư thường tới người duyệt của nhóm (chị Tuyên), Cc sales; đã gửi ⇒ hiện "Đã gửi xác nhận … · Gửi lại".
+     Người duyệt (Tuyen · Director · Admin, không phải đơn của mình) ▸ nút "Xác nhận" / "Không xác nhận" (ghi lý do).
+   · Người duyệt không phải sales (Tuyen, Nguyen Ha) ⇒ không tạo đơn mới (ẩn nút, formOrder(null) chặn).
+   · Link email #oa ⇒ mở trang Đơn hàng + bảng Duyệt đơn hàng. */
+(function(){
+"use strict";
+function L(v,e){ try{ return (window.I18N&&I18N.on)?e:v; }catch(_){ return v; } }
+function me(){ return String((S.user&&S.user.pic)||""); }
+function isAdm(){ try{ var u=AUTH.user(); return !!(u&&u.admin); }catch(_){ return false; } }
+function apOnly(){                     /* người duyệt không phải sales của nhóm */
+  try{ if(isAdm()) return false; var r=ROLES[me()]||{}; return !r.team && typeof window.v316OrdIsAp==="function" && window.v316OrdIsAp(); }catch(_){ return false; }
+}
+window.v320ApOnly=apOnly;
+var _fo=window.formOrder;
+window.formOrder=formOrder=function(o){
+  if(!o && apOnly()) return toast(L("Người duyệt không tạo đơn hàng — đơn do sales tạo rồi gửi xác nhận.","Approvers do not create orders — sales create them and send for approval."),"warn",5000);
+  return _fo.apply(this,arguments);
+};
+function grpOf(row){
+  var G=((S.ordAp||{}).groups)||[];
+  for(var i=0;i<G.length;i++) for(var j=0;j<G[i].orders.length;j++){ var o=G[i].orders[j]; if((o.rows||[]).indexOf(row)>=0) return { gi:i, oi:j, o:o }; }
+  return null;
+}
+function after(j){
+  toast(j.message||"OK",j.failed?"warn":"ok",5000);
+  S.ordAp=null; try{ window.ordApLoad(); }catch(_){}
+  try{ fetchTab("order",{}).then(function(rows){ S.cache.order={rows:rows||[]}; if(S.tab==="order") renderOrder(); }); }catch(_){}
+}
+window.v320Req=function(row){
+  var g=grpOf(row); if(!g) return;
+  if(!g.o.ready) return toast(L("Đơn chưa đủ điều kiện: ","Order not ready: ")+(g.o.warn||[]).join(" · "),"warn",6000);
+  var b=document.querySelector('[data-v320="'+row+'"]'); if(b){ b.disabled=true; b.textContent=L("Đang gửi…","Sending…"); }
+  apiPost({ action:"orderRequest", keys:[g.o.key] }).then(function(j){ if(j&&j.ok===false) throw new Error(j.error||"Lỗi"); after(j); })
+    .catch(function(e){ toast(e.message,"err",7000); if(b){ b.disabled=false; b.textContent=L("Gửi xác nhận","Send for approval"); } });
+};
+window.v320Dec=function(row,dec){
+  var g=grpOf(row); if(!g) return; var cm="";
+  if(dec==="reject"){ cm=String(prompt(L("Lý do không xác nhận (bắt buộc):","Reason (required):"))||"").trim(); if(cm.length<3) return toast(L("Cần ghi lý do","A reason is required"),"warn"); }
+  else if(!g.o.ready) return toast(L("Chưa đủ điều kiện: ","Not ready: ")+(g.o.warn||[]).join(" · "),"warn",6000);
+  apiPost({ action:"orderDecide", keys:[g.o.key], decision:dec, comment:cm }).then(function(j){ if(j&&j.ok===false) throw new Error(j.error||"Lỗi"); after(j); try{ kpiPushSoon(3000); }catch(_){} })
+    .catch(function(e){ toast(e.message,"err",7000); });
+};
+function esc2(s){ return String(s==null?"":s).replace(/[&<>"]/g,function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]; }); }
+function deco(){
+  var pg=document.querySelector("#main .pg"); if(!pg || S.tab!=="order") return;
+  if(apOnly()) [].forEach.call(pg.querySelectorAll('button[onclick^="formOrder(null)"]'),function(b){ b.style.display="none"; });
+  if(!S.ordAp) return;
+  [].forEach.call(pg.querySelectorAll(".od-card"),function(card){
+    if(card.querySelector(".v320-acts")) return;
+    var ln=card.querySelector(".od-line[onclick]"); if(!ln) return;
+    var m=/rOrder\('([^']+)'\)/.exec(ln.getAttribute("onclick")||""), o=m&&REG[m[1]]; if(!o) return;
+    var g=grpOf(o._row); if(!g || g.o.appr!=="wait") return;
+    var x=g.o, mine=String(x.pic).toLowerCase()===me().toLowerCase(), h="";
+    var sent=/^Đã gửi xác nhận/.test(String(x.apprNote||""));
+    if(x.canDecide){
+      h='<span>'+esc2(L("Đơn đang chờ bạn xác nhận","Waiting for your approval"))+'</span><span class="sp"></span>'+
+        '<button class="btn sm pri" '+(x.ready?'':'disabled title="'+esc2((x.warn||[]).join(" · "))+'"')+' onclick="event.stopPropagation();v320Dec('+o._row+',\'approve\')">'+esc2(L("Xác nhận","Approve"))+'</button>'+
+        '<button class="btn sm dg" onclick="event.stopPropagation();v320Dec('+o._row+',\'reject\')">'+esc2(L("Không xác nhận","Reject"))+'</button>';
+    } else if(mine || isAdm()){
+      h=(sent?'<span>'+esc2(x.apprNote)+'</span>':(x.ready?'<span>'+esc2(L("Chưa gửi xác nhận","Not sent for approval yet"))+'</span>':'<span class="w">'+esc2(L("Thiếu: ","Missing: ")+(x.warn||[]).join(" · "))+'</span>'))+
+        '<span class="sp"></span><button class="btn sm '+(sent?'':'pri')+'" data-v320="'+o._row+'" '+(x.ready?'':'disabled')+' onclick="event.stopPropagation();v320Req('+o._row+')">'+esc2(sent?L("Gửi lại","Send again"):L("Gửi xác nhận","Send for approval"))+'</button>';
+    }
+    if(!h) return;
+    var d=document.createElement("div"); d.className="v320-acts"; d.innerHTML=h; card.appendChild(d);
+  });
+}
+var _ro=window.renderOrder;
+window.renderOrder=renderOrder=function(){
+  var r=_ro.apply(this,arguments);
+  try{ deco(); if(!S.ordAp){ var n=0; (function w(){ if(S.ordAp){ deco(); return; } if(++n<40 && S.tab==="order") setTimeout(w,500); })(); } }catch(_){}
+  return r;
+};
+/* link email #oa ⇒ trang Đơn hàng + bảng duyệt */
+(function(){
+  if(!/#oa\b/.test(location.hash||"")) return;
+  var n=0; (function w(){
+    if(window.S && S.user && typeof go==="function"){ try{ history.replaceState(null,"",location.pathname+location.search); }catch(_){} go("order"); setTimeout(function(){ try{ if(window.v316OrdIsAp && v316OrdIsAp()) oaOpen(); }catch(_){} },900); return; }
+    if(++n<60) setTimeout(w,1000);
+  })();
+})();
+})();
 </script>
 </body>
 </html>
