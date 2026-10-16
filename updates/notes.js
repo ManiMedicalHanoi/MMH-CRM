@@ -7,6 +7,14 @@
 function E(u){ u.en={ title:u.title, items:u.items.map(function(i){ return { title:i.title, text:i.text }; }) }; return u; }
 window.MMH_UPDATES = [
   E({
+    id:"2026-10-16-v32.4", version:"v32.4", date:"2026-10-16",
+    title:"New account with the same name as an existing one",
+    summary:"Clinics often share a name. Creating a new account with a name that already exists is no longer blocked — you choose to use the existing account or create a new one.",
+    items:[
+      { type:"fix", icon:"＋", title:"Same name, new account", text:"New account ▸ the name already exists ⇒ the form lists the accounts with that name (code · type · province · PIC). Click <b>Use this account</b>, or <b>Create new account</b> — the new account gets its own code from area + province + type.", img:"updates/v32.4/account.jpg" }
+    ]
+  }),
+  E({
     id:"2026-10-16-v32.3", version:"v32.3", date:"2026-10-16",
     title:"Simpler menu, Dashboard and KPI page · account details with ADP on the right",
     summary:"The menu now has 5 groups. The Dashboard shows only sales (this month vs. cumulative) and customers, and the KPI page shows plain KPI tables per PIC. Order cards show fewer notes, and each account shows its ADP targets and status on the right.",
