@@ -141,3 +141,5 @@ Kiến trúc & quy ước giống MMH Report Hub (repo `ManiMedicalHanoi/MMH-Rep
   Màu % theo file KPI (`tone`). ④ Đơn hàng: ghi chú duyệt ⇒ nhãn ngắn `.v323-st` (title = đầy đủ), ẩn chip loại đơn; "Trả lại bổ sung" ⇒ **"Yêu cầu chỉnh sửa"** (EN "Request changes") ở mọi nơi.
   ⑤ Chi tiết địa bàn (`renderAcc`): cột `#a3Side` chuyển sang PHẢI, đầu cột = khối **Mục tiêu & tình trạng ADP** (`v323AdpBlock`: nhóm A–D, target/actual %, Objective, Key action, review quý gần nhất);
   điện thoại hiện khối này đầu tab Dòng thời gian. Người dùng yêu cầu: tối giản, hạn chế biểu tượng, không diễn giải dài.
+- **v32.4 (16/10/2026, khối `v324-css` + `v324-js`)**: Thêm địa bàn mới trùng TÊN địa bàn cũ không còn bị chặn / tự dùng lại (tên phòng khám trùng là bình thường, mã KH khác nhờ miền + tỉnh + loại):
+  `saveNewAccount` bọc ⇒ khung `#v324-dup` liệt kê địa bàn cùng tên (ưu tiên cùng loại + tỉnh) ▸ **Dùng địa bàn này** (`v324Use`) hoặc **Tạo địa bàn mới** (`v324New`, gọi hàm gốc bỏ qua bước trùng tên).

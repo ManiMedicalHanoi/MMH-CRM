@@ -3994,7 +3994,7 @@ function buildNav(){
     if(t.grp!==lastGrp){ h+='<div class="grp">'+t.grp+'</div>'; lastGrp=t.grp; }
     h+='<button class="nvi" data-t="'+t.id+'" onclick="go(\''+t.id+'\')"><span class="ic">'+t.ic+'</span><span class="lb">'+t.lb+'</span></button>';
   });
-  h+='<div style="flex:1"></div><div style="padding:10px;font-size:10.5px;color:var(--mute);line-height:1.5">MMH CRM v32.3<br>'+
+  h+='<div style="flex:1"></div><div style="padding:10px;font-size:10.5px;color:var(--mute);line-height:1.5">MMH CRM v32.4<br>'+
      (isMgmt()?'<a href="'+DRIVE_FOLDER+'" target="_blank">📁 Folder ảnh Drive</a>':"")+'</div>';
   $("side").innerHTML=h;
   /* ⭐ v4.5 — thanh dưới trượt ngang, đủ mọi mục, bỏ nút "Thêm" */
@@ -20721,7 +20721,7 @@ window.QS2={ open:qsOpen };
 </script>
 
 <!-- ⭐ v30.3 — THÔNG BÁO CẬP NHẬT (chép từ Report Hub): dữ liệu updates/notes.js · tự hiện 7 ngày · nút "Có gì mới" trên thanh trên cùng -->
-<script src="updates/notes.js?v=32.3"></script>
+<script src="updates/notes.js?v=32.4"></script>
 <style id="upd-css">
 #upd,#upd-zoom{--t-pri:var(--blue);--t-pri2:var(--blue-d);--t-ink:var(--navy);--t-soft:var(--pale);--t-line:var(--lb2);--t-bg:#F6F8FA;--mmh-blue:var(--blue);--mmh-navy:var(--navy)}
 
@@ -24831,7 +24831,7 @@ window.V317NPP={ list:list, apply:apply };
 </script>
 <script src="testflow/testflow.js?v=1.0"></script>
 <script src="tour/tour.js?v=1.1"></script>
-<script src="tour/tours.js?v=32.3"></script>
+<script src="tour/tours.js?v=32.4"></script>
 <script id="v319-i18n">
 /* v31.9 — bổ sung bản dịch EN (nhóm Thái): ô chọn account "N kết quả" */
 (function(){ try{ if(typeof RULES_EN!=="undefined" && RULES_EN.unshift){
@@ -25858,5 +25858,59 @@ window.renderAcc=renderAcc=function(){
 </script>
 
 
+<style id="v324-css">
+#v324-dup{border:1px solid #E6EAEF;border-radius:10px;padding:10px 12px;margin:0 0 12px;background:#fff;font-size:12.5px}
+#v324-dup .h{font-weight:600;color:var(--t-ink,#003047);margin-bottom:6px}
+#v324-dup .it{display:flex;align-items:center;gap:8px;padding:6px 0;border-top:1px solid #F0F2F5}
+#v324-dup .it .tx{flex:1;min-width:0;color:var(--sub,#5B6B7D)}
+#v324-dup .it .tx b{color:var(--ink,#1F2A37);font-weight:600}
+#v324-dup .ft{display:flex;justify-content:flex-end;padding-top:8px;border-top:1px solid #F0F2F5}
+</style>
+<script id="v324-js">
+/* v32.4 — Địa bàn mới trùng TÊN với địa bàn cũ: tên phòng khám trùng là bình thường (khác tỉnh / loại / PIC ⇒ mã khác).
+   Không chặn nữa: hiện các địa bàn cùng tên ⇒ chọn "Dùng địa bàn này" hoặc "Tạo địa bàn mới". */
+(function(){
+  var orig=window.saveNewAccount;
+  if(typeof orig!=="function") return;
+  function same(){
+    var nm=(($("na_name")||{}).value||"").trim();
+    return nm ? (S.custIndex||[]).filter(function(c){ return c && c.name && accKeyOf(c.name)===accKeyOf(nm); }) : [];
+  }
+  function panel(L){
+    var old=$("v324-dup"); if(old) old.remove();
+    var h='<div class="h">'+TX("Đã có "+L.length+" địa bàn cùng tên","Found "+L.length+" account(s) with the same name")+'</div>';
+    L.slice(0,6).forEach(function(c,i){
+      h+='<div class="it"><div class="tx"><b>'+esc(c.code||"—")+'</b> · '+esc([c.type,c.province,c.area].filter(String).join(" · "))+
+         (c.pic?' · PIC '+esc(c.pic):'')+'</div>'+
+         '<button class="btn sm" onclick="v324Use('+i+')">'+TX("Dùng địa bàn này","Use this account")+'</button></div>';
+    });
+    h+='<div class="ft"><button class="btn pri sm" onclick="v324New()">'+TX("Tạo địa bàn mới","Create new account")+'</button></div>';
+    var d=document.createElement("div"); d.id="v324-dup"; d.innerHTML=h;
+    var f=$("na_name"); f=f&&f.closest(".fld");
+    if(f) f.parentNode.insertBefore(d,f.nextSibling);
+    S._v324L=L;
+    ["na_name","na_type","na_province"].forEach(function(id){ var e=$(id); if(e) e.addEventListener(id==="na_name"?"input":"change",function(){ var x=$("v324-dup"); if(x) x.remove(); },{once:true}); });
+    try{ d.scrollIntoView({block:"nearest",behavior:"smooth"}); }catch(e){}
+  }
+  window.v324Use=function(i){
+    var c=(S._v324L||[])[i]; if(!c) return;
+    closeModal2();
+    var f0=S._naDone; S._naDone=null;
+    if(f0) f0(c,null);
+  };
+  window.v324New=function(){
+    var L=S.custIndex; S.custIndex=[];          /* bỏ qua bước "trùng tên ⇒ dùng lại" của hàm gốc */
+    try{ orig(); } finally{ if(S.custIndex.length) L=S.custIndex.concat(L||[]); S.custIndex=L; }
+  };
+  window.saveNewAccount=function(){
+    var name=(($("na_name")||{}).value||"").trim(), type=($("na_type")||{}).value||"", prov=($("na_province")||{}).value||"";
+    if(!name||!type||!prov) return orig();
+    var L=same();
+    if(!L.length) return orig();
+    var ex=L.filter(function(c){ return c.type===type && c.province===prov; });
+    panel(ex.length?ex.concat(L.filter(function(c){ return ex.indexOf(c)<0; })):L);
+  };
+})();
+</script>
 </body>
 </html>
