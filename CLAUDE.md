@@ -126,3 +126,10 @@ Kiến trúc & quy ước giống MMH Report Hub (repo `ManiMedicalHanoi/MMH-Rep
   Ghi chú duyệt "Cần bổ sung: …", email sales) + Không xác nhận. Thông báo: chấm số đỏ `.v321-nb` ở menu Đơn hàng (`cnt()`: chờ mình duyệt · bị trả lại · thiếu chứng từ · chưa gửi),
   dải `.v321-ban` đầu trang Đơn hàng, nhắc 1 lần / phiên (`sessionStorage`) sau đăng nhập; làm mới 10 phút / lần.
 
+- **v32.2 (16/10/2026, khối `v322-css` + `v322-js` đặt NGAY TRƯỚC `v320-ord-css` để v32.0 bọc tiếp; backend CRM v10.14)**: ① trang Đơn hàng viết lại (`renderOrder` = `v322RenderOrder`):
+  bỏ khối KPI đơn hàng; thẻ Số đơn · Số khách (không trùng) · Số tiền tháng · Lũy kế FY (bỏ đơn Từ chối) + Nhóm sản phẩm; danh sách cây tháng ▸ đơn ▸ dòng sản phẩm như "Tiến độ công việc"
+  của Report Hub (dải ngày đánh dấu ngày đặt). Mỗi đơn vẫn là `.od-card` có `.od-line[onclick=rOrder]` + `.od-tags` ⇒ nhãn duyệt / nút v32.0 gắn được. ② Đơn MỚI cần **lịch sử chăm sóc**:
+  hoạt động Completed (Visiting / Telephone / Message…) cùng account trên Báo cáo tuần trong 30 ngày trước ngày đặt (`v322CareOf`, khung `#v322-care` trong form; backend `ordCareCheck_`
+  code NOCARE). Đơn mới ⇒ backend email Giám đốc (`ordNewMail_`). ③ Visiting Completed cần Task Result + Customer feedback + Next action (`v322VisitMiss`, backend `wkApplyRule_`).
+  ④ KPI viếng thăm = Visiting · **Completed** · có ảnh · ngày ≤ hôm nay · không TBD (`kpiVisitOk`, Dashboard `dashBuild` bọc lại; tab 9 công thức thêm `"Complete*"`, vá 1 lần `k68VisitPatch_`).
+  ⑤ Thuyết trình: thẻ gọn + dải nhắc buổi chưa đủ báo cáo (chưa tính KPI); form Event review = 5 khung riêng (`#v322-ps`) + đồng hồ độ chi tiết, ghép lại đúng mẫu `-Nhãn: nội dung`.

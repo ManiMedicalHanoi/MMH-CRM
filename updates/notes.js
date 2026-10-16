@@ -7,6 +7,18 @@
 function E(u){ u.en={ title:u.title, items:u.items.map(function(i){ return { title:i.title, text:i.text }; }) }; return u; }
 window.MMH_UPDATES = [
   E({
+    id:"2026-10-16-v32.2", version:"v32.2", date:"2026-10-16",
+    title:"Orders: new layout and customer-care check · visit KPI fixed · product presentations",
+    summary:"The Orders page is simpler: key numbers on top and a month ▸ order ▸ product list like the Report Hub timeline. A new order needs a recent customer-care activity and e-mails the Director. Visit counts now match the KPI sheet, and presentation reports are easier to complete.",
+    items:[
+      { type:"imp", icon:"🧾", title:"New Orders page", text:"Orders ▸ the order KPI block is gone. On top: number of orders, unique customers, amount this month and FY to date, and value by product group. Below, a list by month ▸ order (click the arrow to see product lines); the dot colour shows approval and the day strip marks the order day.", img:"updates/v32.2/orders.jpg" },
+      { type:"new", icon:"🤝", title:"Care history before a new order", text:"New order ▸ pick the account ⇒ the form shows the latest care activity. With no <b>Completed</b> Visiting / Telephone / Message… in the 30 days before the order date, the order cannot be saved — click <b>Log a care activity</b> first. Each new order e-mails the Director.", img:"updates/v32.2/care.jpg" },
+      { type:"fix", icon:"📍", title:"Visit count = KPI sheet", text:"Dashboard ▸ Customer visits now counts only <b>Completed</b> Visiting rows with a photo — the same rule as the KPI sheet (before, every Visiting row was counted). A visit can be set to Completed only when the result, customer feedback and next action (follow-up) are filled in.", img:"updates/v32.2/visits.jpg" },
+      { type:"imp", icon:"🎤", title:"Product presentations", text:"Presentations ▸ cleaner cards with the 5 report sections, tiles for sessions counted for KPI, and a reminder for past sessions with an incomplete report. Click <b>Complete the report</b> to fill it in.", img:"updates/v32.2/pres.jpg" },
+      { type:"imp", icon:"✍", title:"5 report sections", text:"Open a presentation ⇒ the Event review is now 5 separate boxes (attendees, activity summary, customer feedback, sales, next actions) with a detail meter; a box that is too short shows <b>Add more detail</b>. Only complete reports count for KPI.", img:"updates/v32.2/presform.jpg" }
+    ]
+  }),
+  E({
     id:"2026-10-15-v32.1", version:"v32.1", date:"2026-10-15",
     title:"Orders: ask for changes, and order notices",
     summary:"Approvers can now send an incomplete order back with <b>Ask for changes</b> instead of facing a greyed-out Approve button. A red number next to <b>Orders</b> and a notice at the top of the page show what needs attention.",
