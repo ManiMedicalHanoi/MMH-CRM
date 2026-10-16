@@ -7,6 +7,18 @@
 function E(u){ u.en={ title:u.title, items:u.items.map(function(i){ return { title:i.title, text:i.text }; }) }; return u; }
 window.MMH_UPDATES = [
   E({
+    id:"2026-10-16-v32.3", version:"v32.3", date:"2026-10-16",
+    title:"Simpler menu, Dashboard and KPI page · account details with ADP on the right",
+    summary:"The menu now has 5 groups. The Dashboard shows only sales (this month vs. cumulative) and customers, and the KPI page shows plain KPI tables per PIC. Order cards show fewer notes, and each account shows its ADP targets and status on the right.",
+    items:[
+      { type:"imp", icon:"☰", title:"Menu in 5 groups", text:"Overview (Dashboard · KPIs & Targets) · Customers (Customer List · Key Stakeholders) · Activities & Plans (Activity Log · Daily Tasks · Order Entry · Presentations · Monthly Tasks · ADP) · Sales Result (New Accounts & SKUs · Orders) · Tools & Reports (Weekly Meetings · Field Photos · Submit Report).", img:"updates/v32.3/menu.jpg" },
+      { type:"imp", icon:"📊", title:"Dashboard: sales + customers", text:"Totals on top: customers, contacts, visits, orders, order value. <b>Sales</b>: this month on the left, cumulative on the right — pick a month (managers also a PIC). <b>Customers</b>: new accounts, coverage, accounts without care for 30+ days, top customers and who to visit next.", img:"updates/v32.3/dash.jpg" },
+      { type:"imp", icon:"🎯", title:"KPI per PIC", text:"KPIs & Targets ▸ one table per PIC: weight, target, actual, % and the overall score, by month, quarter or FY to date. The long explanations are gone.", img:"updates/v32.3/kpi.jpg" },
+      { type:"imp", icon:"🧾", title:"Orders: fewer notes", text:"Order Entry ▸ approval notes become short labels (hover to read the full note) and the repeated order-type label is hidden. \"Ask for changes\" is now called <b>Request changes</b>. Sales Result ▸ Orders shows the totals and a month table.", img:"updates/v32.3/orders.jpg" },
+      { type:"imp", icon:"⭐", title:"Account details: ADP on the right", text:"Click an account ⇒ the right column shows <b>ADP targets & status</b> first (group A–D, target / actual, objective, key action, latest quarterly status), then overview, contacts and account info.", img:"updates/v32.3/account.jpg" }
+    ]
+  }),
+  E({
     id:"2026-10-16-v32.2", version:"v32.2", date:"2026-10-16",
     title:"Orders: new layout and customer-care check · visit KPI fixed · product presentations",
     summary:"The Orders page is simpler: key numbers on top and a month ▸ order ▸ product list like the Report Hub timeline. A new order needs a recent customer-care activity and e-mails the Director. Visit counts now match the KPI sheet, and presentation reports are easier to complete.",

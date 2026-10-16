@@ -133,3 +133,11 @@ Kiến trúc & quy ước giống MMH Report Hub (repo `ManiMedicalHanoi/MMH-Rep
   code NOCARE). Đơn mới ⇒ backend email Giám đốc (`ordNewMail_`). ③ Visiting Completed cần Task Result + Customer feedback + Next action (`v322VisitMiss`, backend `wkApplyRule_`).
   ④ KPI viếng thăm = Visiting · **Completed** · có ảnh · ngày ≤ hôm nay · không TBD (`kpiVisitOk`, Dashboard `dashBuild` bọc lại; tab 9 công thức thêm `"Complete*"`, vá 1 lần `k68VisitPatch_`).
   ⑤ Thuyết trình: thẻ gọn + dải nhắc buổi chưa đủ báo cáo (chưa tính KPI); form Event review = 5 khung riêng (`#v322-ps`) + đồng hồ độ chi tiết, ghép lại đúng mẫu `-Nhãn: nội dung`.
+- **v32.3 (16/10/2026, khối `v323-css` + `v323-js` + `v323b-js` cuối file)**: ① menu 5 nhóm (`TABS` sắp lại, nhãn VN/EN qua getter): Tổng quan · Khách hàng (`cust` = **Địa bàn**,
+  `stake` = **Khách hàng**) · Cập nhật công việc (mục ảo `visit` / `other` = weekly + `S.wkTab`, `order` = **Cập nhật đơn hàng**, present, monthly, adp) · Kết quả bán hàng (newacc, mục ảo
+  `orderres` = order + `S.ordMode="res"` chỉ thống kê) · Công cụ & Báo cáo. `weekly` vẫn có (thanh dưới điện thoại, `go("weekly")`) nhưng ẩn ở menu bên; `v323Mark()` tô mục đang mở.
+  ② `renderDash` viết lại: Tổng (khách hàng · CBC · lượt viếng thăm · đơn · giá trị) + Doanh số 2 khung Tháng / Lũy kế (chọn tháng `#d3-mon`, PIC) + Khách hàng (4 số + 2 danh sách) — không biểu đồ,
+  không "Cập nhật dữ liệu khách hàng". ③ `renderKPI` viết lại: mỗi PIC 1 bảng (Mã · KPI `k3Name` · Trọng số · Target · Actual · %, điểm), kỳ Tháng / Quý / Lũy kế; không còn khối KPI Report Hub (`kmMount`).
+  Màu % theo file KPI (`tone`). ④ Đơn hàng: ghi chú duyệt ⇒ nhãn ngắn `.v323-st` (title = đầy đủ), ẩn chip loại đơn; "Trả lại bổ sung" ⇒ **"Yêu cầu chỉnh sửa"** (EN "Request changes") ở mọi nơi.
+  ⑤ Chi tiết địa bàn (`renderAcc`): cột `#a3Side` chuyển sang PHẢI, đầu cột = khối **Mục tiêu & tình trạng ADP** (`v323AdpBlock`: nhóm A–D, target/actual %, Objective, Key action, review quý gần nhất);
+  điện thoại hiện khối này đầu tab Dòng thời gian. Người dùng yêu cầu: tối giản, hạn chế biểu tượng, không diễn giải dài.

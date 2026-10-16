@@ -3994,7 +3994,7 @@ function buildNav(){
     if(t.grp!==lastGrp){ h+='<div class="grp">'+t.grp+'</div>'; lastGrp=t.grp; }
     h+='<button class="nvi" data-t="'+t.id+'" onclick="go(\''+t.id+'\')"><span class="ic">'+t.ic+'</span><span class="lb">'+t.lb+'</span></button>';
   });
-  h+='<div style="flex:1"></div><div style="padding:10px;font-size:10.5px;color:var(--mute);line-height:1.5">MMH CRM v32.2<br>'+
+  h+='<div style="flex:1"></div><div style="padding:10px;font-size:10.5px;color:var(--mute);line-height:1.5">MMH CRM v32.3<br>'+
      (isMgmt()?'<a href="'+DRIVE_FOLDER+'" target="_blank">📁 Folder ảnh Drive</a>':"")+'</div>';
   $("side").innerHTML=h;
   /* ⭐ v4.5 — thanh dưới trượt ngang, đủ mọi mục, bỏ nút "Thêm" */
@@ -20721,7 +20721,7 @@ window.QS2={ open:qsOpen };
 </script>
 
 <!-- ⭐ v30.3 — THÔNG BÁO CẬP NHẬT (chép từ Report Hub): dữ liệu updates/notes.js · tự hiện 7 ngày · nút "Có gì mới" trên thanh trên cùng -->
-<script src="updates/notes.js?v=32.2"></script>
+<script src="updates/notes.js?v=32.3"></script>
 <style id="upd-css">
 #upd,#upd-zoom{--t-pri:var(--blue);--t-pri2:var(--blue-d);--t-ink:var(--navy);--t-soft:var(--pale);--t-line:var(--lb2);--t-bg:#F6F8FA;--mmh-blue:var(--blue);--mmh-navy:var(--navy)}
 
@@ -22421,8 +22421,8 @@ try{
    Người dùng (08/10/2026): bộ lọc chiếm gần hết màn hình; quản lý cần xem ngay thông tin sales đề xuất / gửi lại + bằng chứng rồi xác nhận.
    · Trang: thẻ KPI nhỏ theo PIC (C1-01…C1-05, C2-03) · 1 dòng lọc (trạng thái dạng tab + chọn PIC / tháng) · danh sách gọn.
    · Chi tiết / duyệt: các bước (Nháp → Chờ duyệt → Xác nhận), thông tin, KIỂM TRA 4 ĐIỀU KIỆN KPI (sheet 4. Rule) tự đối chiếu,
-     xem chứng từ cỡ lớn ngay trong khung (ảnh / PDF) + dải ảnh nhỏ, quyết định: Xác nhận (tính KPI) · Trả lại bổ sung (giữ chứng từ) · Từ chối.
-   · "Trả lại bổ sung" (backend naDecide decision=return): case về Nháp kèm nhận xét, PIC sửa rồi gửi lại.
+     xem chứng từ cỡ lớn ngay trong khung (ảnh / PDF) + dải ảnh nhỏ, quyết định: Xác nhận (tính KPI) · Yêu cầu chỉnh sửa (giữ chứng từ) · Từ chối.
+   · "Yêu cầu chỉnh sửa" (backend naDecide decision=return): case về Nháp kèm nhận xét, PIC sửa rồi gửi lại.
    · Quy định theo file MMH KPI FY68 (4. Rule · 5. Member KPI Monthly): bảng KPI mở mới từng nhóm / PIC. */
 (function(){
 if(typeof naPaint!=="function") return;
@@ -22484,9 +22484,9 @@ naPaint=window.naPaint=function(){
   var monSel='<select onchange="naSetF(\'month\',this.value)"><option value="">'+T("Cả năm FY","Whole FY")+'</option>'+ms.map(function(m){ return '<option value="'+m+'"'+(mk(f.month)===mk(m)?" selected":"")+'>'+T("Tháng ","")+mLb(m)+(mc[mk(m)]?' ('+mc[mk(m)]+')':'')+'</option>'; }).join("")+'</select>';
   var tool='<div class="na9-tool"><div class="na9-tabs">'+tabs.map(function(x){ return '<button type="button" class="'+(st===x[0]?"on ":"")+(x[3]||"")+'" onclick="naSetF(\'st\',\''+x[0]+'\')">'+x[1]+'<b>'+(x[2]||0)+'</b></button>'; }).join("")+'</div>'+picSel+monSel+'</div>';
   var nP=mine().length;
-  var alert=(nP && st!=="review")?'<div class="na9-alert" onclick="naApprovals()"><div><b>'+nP+T(" case đang chờ bạn xác nhận"," case(s) waiting for your approval")+'</b><br><span>'+T("Xem thông tin sales gửi và bằng chứng ngay trên màn hình, rồi Xác nhận / Trả lại bổ sung / Từ chối.","See what the sales rep sent and the evidence on screen, then Approve / Return for changes / Reject.")+'</span></div><button class="btn pri sm">'+T("Duyệt ngay","Review now")+'</button></div>':"";
+  var alert=(nP && st!=="review")?'<div class="na9-alert" onclick="naApprovals()"><div><b>'+nP+T(" case đang chờ bạn xác nhận"," case(s) waiting for your approval")+'</b><br><span>'+T("Xem thông tin sales gửi và bằng chứng ngay trên màn hình, rồi Xác nhận / Yêu cầu chỉnh sửa / Từ chối.","See what the sales rep sent and the evidence on screen, then Approve / Return for changes / Reject.")+'</span></div><button class="btn pri sm">'+T("Duyệt ngay","Review now")+'</button></div>':"";
   var my=all.filter(function(c){ return c.pic===S.user.pic && isRet(c); }).length;
-  if(my && !mgr) alert+='<div class="na9-alert" onclick="naSetF(\'st\',\'Returned\')"><div><b>'+my+T(" case quản lý trả lại cần bổ sung"," case(s) returned to you for changes")+'</b><br><span>'+T("Mở case, bổ sung theo nhận xét rồi gửi lại.","Open the case, complete it as requested and send it again.")+'</span></div></div>';
+  if(my && !mgr) alert+='<div class="na9-alert" onclick="naSetF(\'st\',\'Returned\')"><div><b>'+my+T(" case quản lý yêu cầu chỉnh sửa"," case(s) returned to you for changes")+'</b><br><span>'+T("Mở case, bổ sung theo nhận xét rồi gửi lại.","Open the case, complete it as requested and send it again.")+'</span></div></div>';
   var list=rows.length?'<div class="na9-list">'+rows.map(naCardHtml).join("")+'</div>'
     :'<div class="na9-empty">'+(st==="review"?T("Không còn case nào chờ bạn xác nhận.","Nothing is waiting for your approval."):T("Chưa có case nào. Bấm “＋ Thêm case” để ghi nhận khách hàng / đại lý mới hoặc SKU mới.","No case yet. Press “＋ Add a case” to record a new account or a new SKU."))+'</div>';
   $("main").innerHTML='<div class="pg">'+head+alert+(kp?'<div class="na9-kpis">'+kp+'</div>':"")+tool+list+'</div>';
@@ -22551,8 +22551,8 @@ naView=window.naView=function(id,fromFab){
   if(c.log) info+='<div class="na9-log">'+esc(c.log)+'</div>';
   var dec="";
   if(c.canDecide){
-    dec='<div class="na9-dec"><h4>'+T("Quyết định của quản lý","Manager decision")+'</h4><p>'+T("Xác nhận ⇒ case được tính KPI tháng ","Approve ⇒ the case counts for KPI in ")+'<b>'+esc(mLb(c.month))+'</b>'+T(", email báo PIC, Director, kế toán. Trả lại bổ sung ⇒ giữ bằng chứng, PIC sửa rồi gửi lại. Từ chối ⇒ xoá bằng chứng."," and the PIC, Director and accounting are e-mailed. Return for changes ⇒ evidence kept, the PIC completes and resends. Reject ⇒ evidence deleted.")+'</p>'+
-      '<textarea class="inp" id="naCm" placeholder="'+T("Nhận xét — bắt buộc khi Trả lại / Từ chối (cần bổ sung gì, vì sao)…","Comment — required to return or reject (what is missing, why)…")+'"></textarea>'+
+    dec='<div class="na9-dec"><h4>'+T("Quyết định của quản lý","Manager decision")+'</h4><p>'+T("Xác nhận ⇒ case được tính KPI tháng ","Approve ⇒ the case counts for KPI in ")+'<b>'+esc(mLb(c.month))+'</b>'+T(", email báo PIC, Director, kế toán. Yêu cầu chỉnh sửa ⇒ giữ bằng chứng, PIC sửa rồi gửi lại. Từ chối ⇒ xoá bằng chứng."," and the PIC, Director and accounting are e-mailed. Return for changes ⇒ evidence kept, the PIC completes and resends. Reject ⇒ evidence deleted.")+'</p>'+
+      '<textarea class="inp" id="naCm" placeholder="'+T("Nhận xét — bắt buộc khi Yêu cầu chỉnh sửa / Từ chối (cần bổ sung gì, vì sao)…","Comment — required to return or reject (what is missing, why)…")+'"></textarea>'+
       '</div>';
   }
   var right='<div><div style="display:flex;align-items:center;margin-bottom:6px;font-size:13px;font-weight:600;color:#1F3347">'+T("Bằng chứng","Evidence")+' ('+(c.files||[]).length+')<span style="flex:1"></span>'+(c.folder?'<a class="btn sm" href="'+esc(c.folder)+'" target="_blank" rel="noopener">Drive ↗</a>':'')+'</div><div id="na9V">'+viewer(c)+'</div>'+dec+'</div>';
@@ -22563,7 +22563,7 @@ naView=window.naView=function(id,fromFab){
     (own&&c.status!=="Approved"&&c.canEdit?'<button class="btn dg" onclick="naDel(\''+esc(c.id)+'\')">'+T("Xoá","Delete")+'</button>':'')+
     (c.canEdit?'<button class="btn" onclick="naForm(naGet(\''+esc(c.id)+'\'))">✎ '+(c.status==="Rejected"?T("Mở lại & sửa","Reopen & edit"):T("Sửa","Edit"))+'</button>':'')+
     (own&&c.status==="Draft"?'<button class="btn pri" onclick="naSubmit(\''+esc(c.id)+'\')">'+(isRet(c)?T("Gửi lại xin xác nhận","Send for approval again"):T("Gửi xin xác nhận","Send for approval"))+'</button>':'')+
-    (c.canDecide?'<button class="btn na9-bno" onclick="naDecide(\''+esc(c.id)+'\',\'reject\')">✕ '+T("Từ chối","Reject")+'</button><button class="btn na9-bret" onclick="naDecide(\''+esc(c.id)+'\',\'return\')">↩ '+T("Trả lại bổ sung","Return for changes")+'</button><button class="btn na9-bok" onclick="naDecide(\''+esc(c.id)+'\',\'approve\')">✓ '+T("Xác nhận","Approve")+'</button>'
+    (c.canDecide?'<button class="btn na9-bno" onclick="naDecide(\''+esc(c.id)+'\',\'reject\')">✕ '+T("Từ chối","Reject")+'</button><button class="btn na9-bret" onclick="naDecide(\''+esc(c.id)+'\',\'return\')">↩ '+T("Yêu cầu chỉnh sửa","Return for changes")+'</button><button class="btn na9-bok" onclick="naDecide(\''+esc(c.id)+'\',\'approve\')">✓ '+T("Xác nhận","Approve")+'</button>'
       :'<button class="btn" onclick="closeAllModals()">'+T("Đóng","Close")+'</button>');
   closeAllModals();
   openModal(naTypeLb(c.type)+" · "+c.account,body,foot,true);
@@ -22572,18 +22572,18 @@ naDecide=window.naDecide=function(id,dec){
   var cm=String(($("naCm")||{}).value||"").trim(), c=naGet(id);
   if((dec==="reject"||dec==="return") && cm.length<5){ toast(dec==="return"?T("Ghi rõ cần bổ sung gì (ít nhất 5 ký tự)","Say what needs to be added (5+ characters)"):T("Từ chối cần ghi rõ lý do (ít nhất 5 ký tự)","A rejection needs a reason (5+ characters)"),"warn",5000); var el=$("naCm"); if(el){ el.focus(); el.style.borderColor="#C0504D"; } return; }
   var q=dec==="approve"?T("Xác nhận case mở mới của "+c.pic+" — "+c.account+"? Case sẽ được tính KPI.","Approve the case of "+c.pic+" — "+c.account+"? It will count for KPI.")
-    :dec==="return"?T("Trả lại case cho "+c.pic+" bổ sung? Bằng chứng được giữ nguyên.","Return the case to "+c.pic+" for changes? The evidence is kept.")
+    :dec==="return"?T("Yêu cầu "+c.pic+" chỉnh sửa case? Bằng chứng được giữ nguyên.","Return the case to "+c.pic+" for changes? The evidence is kept.")
     :T("Từ chối case này? Toàn bộ chứng từ sẽ bị xoá khỏi Drive và email báo kết quả sẽ được gửi.","Reject this case? All evidence files will be deleted and the result e-mailed.");
   if(!confirm(q)) return;
   busy(true,T("Đang ghi kết quả và gửi email…","Saving and e-mailing…"));
   apiPost({ action:"naDecide", id:id, decision:dec, comment:cm, rid:uid28() }).then(function(j){
     busy(false);
-    if(dec==="return" && j && j.rec && j.rec.status!=="Draft"){ toast(T("Máy chủ CRM chưa có chức năng Trả lại bổ sung — đang cập nhật, thử lại sau ít phút.","The CRM server does not support Return yet — please try again in a few minutes."),"warn",7000); return; }
+    if(dec==="return" && j && j.rec && j.rec.status!=="Draft"){ toast(T("Máy chủ CRM chưa có chức năng Yêu cầu chỉnh sửa — đang cập nhật, thử lại sau ít phút.","The CRM server does not support Return yet — please try again in a few minutes."),"warn",7000); return; }
     naMerge(j.rec); toast(j.message||"OK","ok",5200);
     S.na.pending=naPendingList().length; naFab(); S.kpi=null; kpiPushSoon(1000);
     var next=naPendingList()[0];
     if(next) naView(next.id,true); else { closeAllModals(); if(S.tab==="newacc") naPaint(); }
-  }).catch(function(e){ busy(false); toast(/decision\?/.test(e.message)?T("Máy chủ CRM chưa có chức năng Trả lại bổ sung — thử lại sau ít phút.","The CRM server does not support Return yet — try again in a few minutes."):e.message,"err",7000); });
+  }).catch(function(e){ busy(false); toast(/decision\?/.test(e.message)?T("Máy chủ CRM chưa có chức năng Yêu cầu chỉnh sửa — thử lại sau ít phút.","The CRM server does not support Return yet — try again in a few minutes."):e.message,"err",7000); });
 };
 
 /* ── quy định (theo file MMH KPI FY68) ── */
@@ -22604,7 +22604,7 @@ naRulesHtml=window.naRulesHtml=function(){
       '<li>'+T("Thông tin <b>đơn hàng đầu tiên</b> bán qua nhà phân phối (PO / hoá đơn / phiếu xuất).","Details of the <b>first order</b> sold through the distributor (PO / invoice / delivery note).")+'</li></ul>'+
     '<h4>3. '+T("Các bước trên CRM","Steps in the CRM")+'</h4><ul>'+
       '<li>'+T("<b>Sales</b>: ＋ Thêm case → chọn khách hàng mới / SKU mới → account, NPP, đơn đầu tiên → kéo thả bằng chứng, gắn loại từng file → <b>Lưu &amp; gửi xin xác nhận</b>.","<b>Sales</b>: ＋ Add a case → new account / new SKU → account, distributor, first order → drop the evidence and tag each file → <b>Save &amp; send for approval</b>.")+'</li>'+
-      '<li>'+T("<b>Quản lý trực tiếp / Director</b>: nhận email, hoặc mở tab Mở mới ▸ <b>Cần tôi duyệt</b> → xem thông tin, 4 điều kiện và bằng chứng → <b>Xác nhận</b> · <b>Trả lại bổ sung</b> · <b>Từ chối</b>.","<b>Line manager / Director</b>: open the e-mail or New accounts ▸ <b>To review</b> → check the information, the 4 conditions and the evidence → <b>Approve</b> · <b>Return for changes</b> · <b>Reject</b>.")+'</li>'+
+      '<li>'+T("<b>Quản lý trực tiếp / Director</b>: nhận email, hoặc mở tab Mở mới ▸ <b>Cần tôi duyệt</b> → xem thông tin, 4 điều kiện và bằng chứng → <b>Xác nhận</b> · <b>Yêu cầu chỉnh sửa</b> · <b>Từ chối</b>.","<b>Line manager / Director</b>: open the e-mail or New accounts ▸ <b>To review</b> → check the information, the 4 conditions and the evidence → <b>Approve</b> · <b>Return for changes</b> · <b>Reject</b>.")+'</li>'+
       '<li>'+T("Case <b>Đã xác nhận</b> tự cộng vào KPI mở mới của PIC (tab KPI cập nhật trong ít phút).","<b>Approved</b> cases are added to the PIC's new-account KPI automatically (KPI tab updates within minutes).")+'</li></ul></div>';
 };
 })();
@@ -24831,7 +24831,7 @@ window.V317NPP={ list:list, apply:apply };
 </script>
 <script src="testflow/testflow.js?v=1.0"></script>
 <script src="tour/tour.js?v=1.1"></script>
-<script src="tour/tours.js?v=32.2"></script>
+<script src="tour/tours.js?v=32.3"></script>
 <script id="v319-i18n">
 /* v31.9 — bổ sung bản dịch EN (nhóm Thái): ô chọn account "N kết quả" */
 (function(){ try{ if(typeof RULES_EN!=="undefined" && RULES_EN.unshift){
@@ -25219,7 +25219,21 @@ function render(){
             }).join("")+'</div></div>';
         }).join(""));
     }).join("")+'</div>';
-  $("main").innerHTML='<div class="pg">'+head+kp+ptH+bar+tree+'</div>';
+  if(S.ordMode==="res"){
+    /* ⭐ v32.3 — Kết quả bán hàng ▸ Đơn hàng: chỉ thống kê + bảng theo tháng */
+    var mt={}; mine.filter(live).forEach(function(o){ var m=k8Ym(o); if(months.indexOf(m)<0) return; var x=mt[m]||(mt[m]={ o:{}, c:{}, v:0, ok:0 }); x.o[(o._rid||"")+"|"+String(o.orderNo||"")+"|"+nk(o.name)+"|"+String(o.day||m)]=1; x.c[nk(o.name)]=1; x.v+=n(o.amount); if(apSt(o)==="ok") x.ok+=n(o.amount); });
+    var ck=0, mtH='<table class="v323-mt" id="v323-mt"><thead><tr><th>'+e2(L("Tháng","Month"))+'</th><th class="num">'+e2(L("Số đơn","Orders"))+'</th><th class="num">'+e2(L("Số khách","Customers"))+'</th><th class="num">'+e2(L("Giá trị","Amount"))+'</th><th class="num">'+e2(L("Đã duyệt","Approved"))+'</th><th class="num">'+e2(L("Lũy kế","Cumulative"))+'</th></tr></thead><tbody>'+
+      months.map(function(m){ var x=mt[m]; if(!x && m>ymOf(todayISO())) return ""; x=x||{ o:{}, c:{}, v:0, ok:0 }; ck+=x.v;
+        return '<tr><td>'+e2(monLbl("T"+parseInt(m.slice(4),10))+"/"+m.slice(0,4))+'</td><td class="num">'+fmtN(Object.keys(x.o).length)+'</td><td class="num">'+fmtN(Object.keys(x.c).length)+'</td><td class="num"><b>'+fmtVND(x.v)+'</b></td><td class="num">'+fmtVND(x.ok)+'</td><td class="num">'+fmtVND(ck)+'</td></tr>'; }).join("")+'</tbody></table>';
+    var headR='<div class="ph"><div><h2>'+e2(L("Đơn hàng ","Orders "))+e2(S.fy)+'</h2><p>'+(pic?e2(L("Sales: ","PIC: "))+'<b>'+e2(pic)+'</b>':e2(L("Toàn nhóm","Whole team")))+'</p></div><div class="sp"></div><button class="btn sm" onclick="go(\'order\')">'+e2(L("Cập nhật đơn hàng","Order entry"))+'</button></div>';
+    var barR='<div class="v322-bar">'+(isMgrView()?'<select class="inp" onchange="S.filt.pic=this.value;renderOrder()"><option value="">'+e2(L("Toàn nhóm","Whole team"))+'</option>'+(S.master.pic||[]).map(function(p){ return '<option'+(pic===p?" selected":"")+'>'+e2(p)+'</option>'; }).join("")+'</select>':'')+
+      '<select class="inp" id="v322-mon" onchange="S.filt.month=this.value;renderOrder()"><option value="">'+e2(L("Cả ","Whole "))+e2(S.fy)+'</option>'+months.map(function(m){ return '<option value="'+m+'"'+(selM===m?" selected":"")+'>'+e2(monLbl("T"+parseInt(m.slice(4),10))+"/"+m.slice(0,4))+'</option>'; }).join("")+'</select></div>';
+    $("main").innerHTML='<div class="pg v323-res">'+headR+barR+kp+ptH+mtH+'</div>';
+    try{ k8Badge(); }catch(e){}
+    return;
+  }
+  head=head.replace(e2(L("Đơn hàng ","Orders "))+e2(S.fy),e2(L("Cập nhật đơn hàng","Order entry")));
+  $("main").innerHTML='<div class="pg">'+head+bar+tree+'</div>';
   /* nhãn duyệt (v31.6) + nút Duyệt đơn hàng */
   try{
     var pg=document.querySelector("#main .pg");
@@ -25404,10 +25418,10 @@ function deco(){
     var note=String(x.apprNote||""), sent=/^Đã gửi xác nhận/.test(note), ret=/^Cần bổ sung/.test(note);
     var B=function(dec,cls,lb){ return '<button class="btn sm '+cls+'" onclick="event.stopPropagation();v320Dec('+o._row+',\''+dec+'\')">'+esc2(lb)+'</button>'; };
     if(x.canDecide){
-      /* v32.1 — thiếu chứng từ / chưa chọn loại: không hiện nút Xác nhận mờ, thay bằng Trả lại bổ sung */
+      /* v32.1 — thiếu chứng từ / chưa chọn loại: không hiện nút Xác nhận mờ, thay bằng Yêu cầu chỉnh sửa */
       h=(ret?'<span class="w">'+esc2(note)+'</span>':x.ready?'<span>'+esc2(sent?note:L("Đơn đang chờ bạn xác nhận","Waiting for your approval"))+'</span>':
           '<span class="w">'+esc2(L("Sales chưa bổ sung: ","Missing: ")+(x.warn||[]).join(" · "))+'</span>')+'<span class="sp"></span>'+
-        (x.ready?B("approve","pri",L("Xác nhận","Approve")):'')+B("return",x.ready?"":"pri",L("Trả lại bổ sung","Ask for changes"))+B("reject","dg",L("Không xác nhận","Reject"));
+        (x.ready?B("approve","pri",L("Xác nhận","Approve")):'')+B("return",x.ready?"":"pri",L("Yêu cầu chỉnh sửa","Request changes"))+B("reject","dg",L("Không xác nhận","Reject"));
     } else if(mine || isAdm()){
       h=(ret?'<span class="w">'+esc2(note)+'</span>':sent?'<span>'+esc2(note)+'</span>':(x.ready?'<span>'+esc2(L("Chưa gửi xác nhận","Not sent for approval yet"))+'</span>':'<span class="w">'+esc2(L("Thiếu: ","Missing: ")+(x.warn||[]).join(" · "))+'</span>'))+
         '<span class="sp"></span><button class="btn sm '+(sent&&!ret?'':'pri')+'" data-v320="'+o._row+'" '+(x.ready?'':'disabled title="'+esc2(L("Sửa đơn: bấm vào dòng sản phẩm","Edit the order: click a product line"))+'"')+' onclick="event.stopPropagation();v320Req('+o._row+')">'+esc2(ret?L("Gửi xác nhận lại","Send again"):sent?L("Gửi lại","Send again"):L("Gửi xác nhận","Send for approval"))+'</button>';
@@ -25441,7 +25455,7 @@ function banner(){
   var old=pg.querySelector(".v321-ban"); if(old) old.remove();
   var c=cnt(), t=[];
   if(c.dec) t.push(L("<b>"+c.dec+"</b> đơn chờ bạn xác nhận","<b>"+c.dec+"</b> order(s) waiting for your approval"));
-  if(c.ret) t.push(L("<b>"+c.ret+"</b> đơn được trả lại cần bổ sung","<b>"+c.ret+"</b> order(s) returned for changes"));
+  if(c.ret) t.push(L("<b>"+c.ret+"</b> đơn cần chỉnh sửa","<b>"+c.ret+"</b> order(s) returned for changes"));
   if(c.miss) t.push(L("<b>"+c.miss+"</b> đơn thiếu chứng từ / chưa chọn loại","<b>"+c.miss+"</b> order(s) missing type / documents"));
   if(c.unsent) t.push(L("<b>"+c.unsent+"</b> đơn chưa gửi xác nhận","<b>"+c.unsent+"</b> order(s) not sent for approval"));
   if(!t.length) return;
@@ -25468,7 +25482,7 @@ window.renderOrder=renderOrder=function(){
           var c=cnt(), key="mmh_v321_told_"+me(), told=false;
           try{ told=sessionStorage.getItem(key)==="1"; }catch(_){}
           if(!told && (c.dec||c.ret)){
-            toast(c.dec?L("Có "+c.dec+" đơn hàng chờ bạn xác nhận — vào Đơn hàng","There are "+c.dec+" order(s) waiting for your approval"):L(c.ret+" đơn hàng được trả lại cần bổ sung — vào Đơn hàng",c.ret+" order(s) returned for changes"),"warn",7000);
+            toast(c.dec?L("Có "+c.dec+" đơn hàng chờ bạn xác nhận — vào Đơn hàng","There are "+c.dec+" order(s) waiting for your approval"):L(c.ret+" đơn hàng cần chỉnh sửa — vào Đơn hàng",c.ret+" order(s) returned for changes"),"warn",7000);
             try{ sessionStorage.setItem(key,"1"); }catch(_){}
           }
           setInterval(function(){ if(S.tab!=="order"){ S.ordAp=null; try{ window.ordApLoad(); }catch(_){} setTimeout(paintAll,4000); } }, 10*60000);
@@ -25491,5 +25505,358 @@ window.renderOrder=renderOrder=function(){
 })();
 })();
 </script>
+<style id="v323-css">
+/* ⭐ v32.3 — menu 5 nhóm · Dashboard gọn (Doanh số + Khách hàng) · KPI theo PIC · đơn hàng bớt chú thích */
+#side .nvi[data-t="weekly"]{display:none}
+.d3-bar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:0 0 14px}
+.d3-bar .inp{height:34px;width:auto;min-width:150px;flex:none}
+.d3-bar .sp{flex:1}
+.d3-tot{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;margin:0 0 16px}
+.d3-tot .it{background:#fff;border:1px solid #E6EAEF;border-radius:12px;padding:11px 14px;min-width:0}
+.d3-tot .it small{display:block;font-size:11.5px;color:#5B6B7D;font-weight:600}
+.d3-tot .it b{display:block;font-size:22px;color:#003047;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.d3-tot .it span{display:block;font-size:11.5px;color:#8A97A6;margin-top:2px}
+.d3-h{display:flex;align-items:baseline;gap:8px;margin:4px 0 10px}
+.d3-h h3{margin:0;font-size:15px;color:#003047}
+.d3-h span{font-size:12px;color:#8A97A6}
+.d3-two{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:0 0 18px}
+.d3-card{background:#fff;border:1px solid #E6EAEF;border-radius:12px;padding:12px 14px;min-width:0}
+.d3-card h4{margin:0 0 8px;font-size:13px;color:#003047;display:flex;gap:8px;align-items:baseline}
+.d3-card h4 small{font-weight:400;color:#8A97A6;font-size:12px}
+.d3-row{display:grid;grid-template-columns:minmax(0,1fr) auto 56px;gap:10px;align-items:center;padding:7px 0;border-top:1px solid #F0F3F6;font-size:13px}
+.d3-row:first-of-type{border-top:0}
+.d3-row .nm{color:#34465A;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.d3-row .vl{text-align:right;color:#003047;font-weight:700;white-space:nowrap}
+.d3-row .vl small{font-weight:400;color:#8A97A6}
+.d3-row .pc{text-align:right;font-weight:800}
+.d3-row .br{grid-column:1/-1;height:4px;border-radius:3px;background:#EEF2F6;overflow:hidden;margin-top:-2px}
+.d3-row .br i{display:block;height:100%}
+.d3-kp{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:0 0 12px}
+.d3-kp .it{background:#fff;border:1px solid #E6EAEF;border-radius:12px;padding:10px 13px}
+.d3-kp .it small{display:block;font-size:11.5px;color:#5B6B7D;font-weight:600}
+.d3-kp .it b{display:block;font-size:20px;color:#003047;margin-top:2px}
+.d3-kp .it span{font-size:11.5px;color:#8A97A6}
+.d3-li{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;padding:7px 0;border-top:1px solid #F0F3F6;font-size:13px;cursor:pointer}
+.d3-li:first-of-type{border-top:0}
+.d3-li b{display:block;color:#003047;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.d3-li small{color:#8A97A6}
+.d3-li .r{text-align:right;color:#003047;font-weight:700;white-space:nowrap}
+.d3-li .r.warn{color:#A8641C}
+.d3-empty{font-size:12.5px;color:#8A97A6;padding:6px 0}
+/* KPI */
+.k3-pic{background:#fff;border:1px solid #E6EAEF;border-radius:12px;margin:0 0 14px;overflow:hidden}
+.k3-ph{display:flex;align-items:center;gap:10px;padding:10px 14px;background:#F7FAFE;border-bottom:1px solid #E6EAEF}
+.k3-ph b{color:#003047;font-size:14px}
+.k3-ph span{color:#8A97A6;font-size:12px}
+.k3-ph .sp{flex:1}
+.k3-ph .sc{font-size:18px;font-weight:800}
+.k3-tb{width:100%;border-collapse:collapse;font-size:13px}
+.k3-tb th{text-align:left;font-size:11px;font-weight:700;color:#5B6B7D;text-transform:uppercase;letter-spacing:.03em;padding:7px 12px;border-bottom:1px solid #E6EAEF;background:#fff}
+.k3-tb td{padding:7px 12px;border-top:1px solid #F0F3F6;vertical-align:middle}
+.k3-tb .num{text-align:right;white-space:nowrap}
+.k3-tb .cd{color:#8A97A6;font-size:11.5px;white-space:nowrap}
+.k3-tb .pc{font-weight:800}
+.t-low{color:#8A97A6}.t-mid{color:#3A5CAA}.t-ok{color:#B7860B}.t-top{color:#1E7B46}
+.b-low{background:#C3CDD8}.b-mid{background:#3A5CAA}.b-ok{background:#D9A520}.b-top{background:#2E8B57}
+/* đơn hàng: bớt chú thích lặp */
+.v322-row .v316-chip.type{display:none}
+.v322-row .v320-acts{border-top:0;background:none;padding:0 12px 8px;justify-content:flex-end}
+.v322-row .v320-acts .sp{display:none}
+.v322-row .v320-acts>span:first-child{flex-basis:auto!important}
+.v322-row .v320-acts{margin-top:-6px}
+.v323-st{display:inline-flex;align-items:center;font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px;border:1px solid #E6EAEF;background:#F5F7FA;color:#5B6B7D;cursor:help}
+.v323-st.warn{background:#FFF6E0;border-color:#F0D58A;color:#7A5A00}
+.v323-mt{width:100%;border-collapse:collapse;font-size:13px;background:#fff;border:1px solid #E6EAEF;border-radius:12px;overflow:hidden}
+.v323-mt th{text-align:left;font-size:11px;font-weight:700;color:#5B6B7D;text-transform:uppercase;padding:8px 12px;background:#F7FAFE;border-bottom:1px solid #E6EAEF}
+.v323-mt td{padding:8px 12px;border-top:1px solid #F0F3F6}
+.v323-mt .num{text-align:right}
+@media(max-width:900px){ .d3-tot{grid-template-columns:repeat(3,minmax(0,1fr))} .d3-two{grid-template-columns:1fr} .d3-kp{grid-template-columns:repeat(2,minmax(0,1fr))} }
+@media(max-width:720px){ .d3-tot{grid-template-columns:repeat(2,minmax(0,1fr))} .k3-tb .w,.k3-tb .cd{display:none} }
+
+/* chi tiết địa bàn: cột thông tin bên PHẢI, Mục tiêu & tình trạng ADP lên đầu */
+@media (min-width:1024px){
+  #drw.acc360 .pn{grid-template-columns:minmax(0,1fr) 340px}
+  #drw.acc360 #a3Side{grid-column:2;border-right:0;border-left:1px solid var(--line);background:#FBFCFE}
+  #drw.acc360 .drw-tabs{grid-column:1}
+  #drw.acc360 .drw-b{grid-column:1}
+}
+.a3-adp{border:1px solid #E6EAEF;border-radius:12px;background:#fff;padding:11px 12px;margin-bottom:16px}
+.a3-adp .hd{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.a3-adp .hd b{font-size:13px;color:#003047}
+.a3-adp .hd .sp{flex:1}
+.a3-adp .hd button{border:1px solid #E6EAEF;background:#fff;border-radius:8px;font:600 11.5px/1 inherit;padding:5px 9px;cursor:pointer;color:#3A5CAA}
+.a3-adp .grp{display:inline-block;font-size:11.5px;font-weight:700;border-radius:999px;padding:2px 9px;margin-bottom:8px}
+.a3-adp .tg{display:flex;align-items:baseline;gap:6px;font-size:12px;color:#5B6B7D}
+.a3-adp .tg b{font-size:17px;color:#003047}
+.a3-adp .bar{height:6px;border-radius:4px;background:#EEF2F6;overflow:hidden;margin:6px 0 8px}
+.a3-adp .bar i{display:block;height:100%}
+.a3-adp dl{margin:0;display:grid;gap:6px}
+.a3-adp dt{font-size:10.5px;font-weight:800;color:#8A97A6;text-transform:uppercase;letter-spacing:.4px}
+.a3-adp dd{margin:0;font-size:12.5px;color:#34465A;line-height:1.45;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;white-space:pre-wrap}
+.a3-adp .no{font-size:12.5px;color:#8A97A6}
+@media (max-width:1023px){ #drwBody > .a3-adp{margin:0 0 12px} }
+</style>
+<script id="v323-js">
+/* ════════════════════════════════════════════════════════════════════════════════════════
+   ⭐ v32.3 (16/10/2026) — người dùng yêu cầu: menu theo 5 nhóm, Dashboard tối giản, KPI chỉ số liệu theo PIC, đơn hàng bớt chú thích
+   ① Menu: Tổng quan (Dashboard · KPI & Mục tiêu) · Khách hàng (Địa bàn · Khách hàng) · Cập nhật công việc (Đi địa bàn · Công việc khác ·
+      Cập nhật đơn hàng · Thuyết trình · Đào tạo KH · Công việc trong tháng · ADP) · Kết quả bán hàng (Mở mới & SKU mới · Đơn hàng) ·
+      Công cụ & Báo cáo (Họp tuần · Ảnh đi địa bàn · Gửi báo cáo). Tên tiếng Anh cho nhóm Thái. Mục ảo: visit / other (= weekly + tab),
+      orderres (= order, S.ordMode "res" — chỉ thống kê); "weekly" vẫn còn (thanh dưới điện thoại, go("weekly")) nhưng ẩn ở menu bên.
+   ② Dashboard (renderDash viết lại): Tổng (khách hàng · CBC · lượt viếng thăm · đơn hàng · giá trị) — Doanh số: 2 khung Tháng / Lũy kế,
+      chọn tháng + PIC — Khách hàng: 4 số + 2 danh sách ngắn. Bỏ biểu đồ, hoạt động gần đây, "Cập nhật dữ liệu khách hàng".
+   ③ KPI (renderKPI viết lại): mỗi PIC 1 bảng Mã · KPI · Trọng số · Target · Actual · % · Điểm theo Tháng / Quý / Lũy kế. Bỏ các đoạn diễn giải.
+   ④ Đơn hàng: ghi chú duyệt dài ⇒ nhãn ngắn (rê chuột xem đủ), ẩn nhãn loại đơn lặp; "Trả lại bổ sung" ⇒ "Yêu cầu chỉnh sửa".
+   ════════════════════════════════════════════════════════════════════════════════════════ */
+(function(){
+"use strict";
+function L(vi,en){ return TX(vi,en); }
+function e2(s){ return esc(s==null?"":String(s)); }
+function nk(s){ return String(s||"").normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/đ/g,"d").replace(/Đ/g,"D").toLowerCase().replace(/\s+/g," ").trim(); }
+function iso(v){ var s=String(v==null?"":v).slice(0,10); return /^\d{4}-\d{2}-\d{2}$/.test(s)?s:""; }
+var I=window.V30_ICON||function(){ return ""; };
+
+/* ═════════ ① MENU 5 NHÓM ═════════ */
+var G1=function(){ return L("Tổng quan","Overview"); }, G2=function(){ return L("Khách hàng","Customers"); }, G3=function(){ return L("Cập nhật công việc","Activities & Plans"); },
+    G4=function(){ return L("Kết quả bán hàng","Sales Result"); }, G5=function(){ return L("Công cụ & Báo cáo","Tools & Reports"); };
+var BY={}; TABS.forEach(function(t){ BY[t.id]=t; });
+function def(t,o){ Object.keys(o).forEach(function(k){ Object.defineProperty(t,k,{ configurable:true, enumerable:true, get:o[k] }); }); return t; }
+if(BY.dash) def(BY.dash,{ grp:G1, lb:function(){ return "Dashboard"; } });
+if(BY.kpi) def(BY.kpi,{ grp:G1, lb:function(){ return L("KPI & Mục tiêu","KPIs & Targets"); }, mlb:function(){ return "KPI"; } });
+if(BY.cust) def(BY.cust,{ grp:G2, lb:function(){ return L("Địa bàn","Customer List"); }, mlb:function(){ return L("Địa bàn","Customers"); } });
+if(BY.stake) def(BY.stake,{ grp:G2, lb:function(){ return L("Khách hàng","Key Stakeholders"); }, mlb:function(){ return L("Khách hàng","Stakeholders"); } });
+if(BY.weekly) def(BY.weekly,{ grp:G3 });
+var VISIT={ id:"visit", ic:"📍", mob:0 }, OTHER={ id:"other", ic:"🧩", mob:0 }, ORES={ id:"orderres", ic:"🧾", mob:0 };
+def(VISIT,{ grp:G3, lb:function(){ return L("Đi địa bàn","Activity Log"); }, mlb:function(){ return L("Đi địa bàn","Activity Log"); } });
+def(OTHER,{ grp:G3, lb:function(){ return L("Công việc khác","Daily Tasks"); }, mlb:function(){ return L("Việc khác","Daily Tasks"); } });
+if(BY.order) def(BY.order,{ grp:G3, lb:function(){ return L("Cập nhật đơn hàng","Order Entry"); }, mlb:function(){ return L("Nhập đơn","Order Entry"); } });
+if(BY.present) def(BY.present,{ grp:G3 });
+if(BY.event) def(BY.event,{ grp:G3 });
+if(BY.monthly) def(BY.monthly,{ grp:G3, lb:function(){ return L("Công việc trong tháng","Monthly Tasks"); } });
+if(BY.adp) def(BY.adp,{ grp:G3, lb:function(){ return L("ADP Key account","Account Development Plan"); } });
+if(BY.newacc) def(BY.newacc,{ grp:G4 });
+def(ORES,{ grp:G4, lb:function(){ return L("Đơn hàng","Orders"); }, mlb:function(){ return L("Đơn hàng","Orders"); } });
+["meet","photos","report"].forEach(function(id){ if(BY[id]) def(BY[id],{ grp:G5 }); });
+if(BY.photos) def(BY.photos,{ lb:function(){ return L("Ảnh đi địa bàn","Field Photos"); } });
+if(BY.meet) def(BY.meet,{ lb:function(){ return L("Họp tuần","Weekly Meetings"); } });
+if(BY.report) def(BY.report,{ lb:function(){ return L("Gửi báo cáo","Submit Report"); } });
+var ORDER=["dash","kpi","cust","stake","weekly","visit","other","order","present","event","monthly","adp","newacc","orderres","meet","photos","report"];
+var X={ visit:VISIT, other:OTHER, orderres:ORES }, list=ORDER.map(function(id){ return BY[id]||X[id]; }).filter(Boolean);
+TABS.forEach(function(t){ if(list.indexOf(t)<0) list.push(t); });
+TABS.splice.apply(TABS,[0,TABS.length].concat(list));
+var _nt=window.navTabs;
+window.navTabs=navTabs=function(){
+  var r=_nt.apply(this,arguments), on={}; r.forEach(function(t){ on[t.id]=1; });
+  return r.filter(function(t){ return t.id!=="orderres" || on.order; });
+};
+var ICK={ visit:"pin", other:"list", orderres:"chart", order:"receipt" };
+function mark(){
+  var cur=S.tab==="weekly"?(S.wkTab==="other"?"other":"visit"):S.tab==="order"?(S.ordMode==="res"?"orderres":"order"):S.tab;
+  document.querySelectorAll("#side .nvi[data-t]").forEach(function(el){ el.classList.toggle("on", el.getAttribute("data-t")===cur); });
+}
+window.v323Mark=mark;
+var _bn=window.buildNav;
+window.buildNav=buildNav=function(){
+  var r=_bn.apply(this,arguments);
+  try{ document.querySelectorAll("#side .nvi[data-t]").forEach(function(b){ var k=ICK[b.getAttribute("data-t")]; var ic=b.querySelector(".ic"); if(k&&ic) ic.innerHTML=I(k); }); mark(); }catch(e){}
+  return r;
+};
+var _go=window.go;
+window.go=go=function(tab){
+  if(tab==="visit"||tab==="other"){ S.wkTab=tab==="other"?"other":"terr"; try{ localStorage.setItem("mmh_wktab",S.wkTab); }catch(_){} tab="weekly"; }
+  else if(tab==="orderres"){ S.ordMode="res"; tab="order"; }
+  else if(tab==="order") S.ordMode="upd";
+  var r=_go.call(this,tab); mark(); return r;
+};
+var _sw=window.setWkTab;
+if(typeof _sw==="function") window.setWkTab=setWkTab=function(){ var r=_sw.apply(this,arguments); mark(); return r; };
+try{ if(S.user) buildNav(); }catch(e){}
+
+/* tiêu đề trang theo tên mới */
+function retitle(){
+  var h=document.querySelector("#main .pg .ph h2"); if(!h) return;
+  var t=String(h.textContent||"").trim();
+  if(S.tab==="cust" && /^(Khách hàng|Customers)\b/.test(t)) h.firstChild.nodeValue=t.replace(/^(Khách hàng|Customers)/,L("Địa bàn","Customer List"));
+  if(S.tab==="stake" && /^(Key stakeholder|Key Stakeholder)/i.test(t)) h.firstChild.nodeValue=t.replace(/^Key stakeholders?/i,L("Khách hàng","Key Stakeholders"));
+}
+new MutationObserver(function(){ clearTimeout(retitle.t); retitle.t=setTimeout(function(){ try{ retitle(); }catch(_){} },60); }).observe(document.getElementById("main")||document.body,{ childList:true, subtree:false });
+
+/* ═════════ màu theo file KPI ═════════ */
+function tone(p){ return p==null?"low":p>1.2?"top":p>=1?"ok":p>=0.9?"mid":"low"; }
+function pc(p){ return p==null?"—":Math.round(p*100)+"%"; }
+
+/* ═════════ ② DASHBOARD ═════════ */
+S.d3=S.d3||{ m:"" };
+window.d3Set=function(k,v){ if(k==="pic") S.filt.pic=v; else S.d3[k]=v; renderDash(); };
+function keepPic(p,pic){ if(!pic) return true; return String(p||"").toLowerCase().indexOf(pic.toLowerCase())>=0; }
+function ordKey(o){ return String(o.orderNo||"")+"|"+nk(o.name)+"|"+String(o.day||k8Ym(o)); }
+function rejected(o){ try{ return window.v316OrdNeed(o) && window.v316OrdAppr(o.appr)==="no"; }catch(e){ return false; } }
+function lastTouch(){
+  var m={}; terrRows().forEach(function(w){ if(!/complet/i.test(String(w.status||""))) return; var d=iso(w.start); if(!d||d>todayISO()) return; var k=nk(parseAcc(w.account).name); if(k && (!m[k]||d>m[k])) m[k]=d; });
+  return m;
+}
+function daysBetween(a,b){ return Math.round((new Date(b+"T00:00:00")-new Date(a+"T00:00:00"))/864e5); }
+window.renderDash=renderDash=function(){
+  var ms=fyMonths(S.fy), cur=ymOf(todayISO()), m=S.d3.m&&ms.indexOf(S.d3.m)>=0?S.d3.m:(ms.indexOf(cur)>=0?cur:ms[ms.length-1]);
+  var mi=ms.indexOf(m), upto=ms.slice(0,mi+1), pic=isMgrView()?(S.filt.pic||""):((S.user&&S.user.pic)||"");
+  if(!S.kpi||S.kpi._fy!==S.fy) k8Ensure().then(dashRepaint).catch(function(){});
+  try{ if(S.na && !S.na.rows && !S.na.err && !S.na._ld) naLoad(false).then(dashRepaint).catch(function(){}); }catch(_){}
+  var src=dashSrc(), miss=dashMissing();
+  var cust=(src.cust||[]).filter(function(c){ return keepPic(c.pic,pic); });
+  var codes={}, names={}; cust.forEach(function(c){ codes[String(c.code||"")]=1; names[nk(c.name)]=1; });
+  var cbc=(src.cbc||[]).filter(function(b){ return !pic || codes[String(b.code||b.accCode||"")] || names[nk(parseAcc(b.account||b.accName||"").name)]; });
+  var vis=(src.weekly||[]).filter(function(w){ var ym=String(w.month||"").replace(/\D/g,"").slice(0,6)||ymOf(iso(w.start)); return keepPic(w.pic,pic) && upto.indexOf(ym)>=0 && window.kpiVisitOk(w); });
+  var ords=noOrder()?[]:(src.order||[]).filter(function(o){ return keepPic(o.pic,pic) && upto.indexOf(k8Ym(o))>=0 && !rejected(o); });
+  var oset={}, oval=0, byAcc={}; ords.forEach(function(o){ oset[ordKey(o)]=1; oval+=n(o.amount); var k=String(o.name||o.code||"—"); byAcc[k]=(byAcc[k]||0)+n(o.amount); });
+  var mLbl=monLbl("T"+parseInt(m.slice(4),10))+"/"+m.slice(0,4), cumLbl=L("Lũy kế "+S.fy+" đến T"+parseInt(m.slice(4),10),S.fy+" to date · M"+parseInt(m.slice(4),10));
+  var bar='<div class="d3-bar">'+
+    (isMgrView()?'<select class="inp" onchange="d3Set(\'pic\',this.value)"><option value="">'+e2(L("Toàn nhóm","Whole team"))+'</option>'+(S.master.pic||[]).map(function(p){ return '<option'+(pic===p?" selected":"")+'>'+e2(p)+'</option>'; }).join("")+'</select>':'')+
+    '<select class="inp" id="d3-mon" onchange="d3Set(\'m\',this.value)">'+ms.map(function(x){ return '<option value="'+x+'"'+(x===m?" selected":"")+'>'+e2(L("Tháng ","Month ")+monLbl("T"+parseInt(x.slice(4),10))+"/"+x.slice(0,4))+'</option>'; }).join("")+'</select>'+
+    '<span class="sp"></span>'+(miss.length?'<span class="hint">'+e2(L("Đang nạp ","Loading ")+miss.join(", ")+"…")+'</span>':'<button class="btn sm" onclick="refreshDash()">'+e2(L("Đồng bộ","Refresh"))+'</button>')+'</div>';
+  var tile=function(lb,v,sub){ return '<div class="it"><small>'+e2(lb)+'</small><b>'+v+'</b><span>'+e2(sub||"")+'</span></div>'; };
+  var tot='<div class="d3-tot" id="d3-tot">'+tile(L("Khách hàng","Customers"),fmtN(cust.length),L("account trong danh mục","accounts"))+
+    tile(L("Người liên hệ (CBC)","Contacts (CBC)"),fmtN(cbc.length),"")+
+    tile(L("Lượt viếng thăm","Visits"),fmtN(vis.length),L("Completed · có ảnh · ","Completed · photo · ")+S.fy)+
+    (noOrder()?'':tile(L("Đơn hàng","Orders"),fmtN(Object.keys(oset).length),cumLbl)+tile(L("Giá trị đơn hàng","Order value"),fmtVND(oval),cumLbl))+'</div>';
+  /* doanh số: 2 khung tháng / lũy kế */
+  var groups=[], gi={};
+  k8Pics().forEach(function(p){ if(pic && p.pic!==pic) return; (p.rows||[]).forEach(function(r){ if(!/^(turnover|supp_|newacct)/.test(r.key)) return;
+    var k=k8Label(r)+"|"+k8Unit(r); if(gi[k]==null){ gi[k]=groups.length; groups.push({ lb:k8Label(r), unit:k8Unit(r), list:[] }); } groups[gi[k]].list.push({ pic:p.pic, r:r }); }); });
+  var rank=function(g){ return /NPP|Distributor/.test(g.lb)?0:/Composite sales|Doanh số Composite/.test(g.lb)?1:/JIZAI sales|Doanh số JIZAI/.test(g.lb)?2:/C5/.test(g.lb)?3:/C6/.test(g.lb)?4:/C7/.test(g.lb)?5:6; };
+  groups.sort(function(a,b){ return rank(a)-rank(b); });
+  function side(cum){
+    var rows=groups.map(function(g){
+      var s=k8Series(g.list,true), ix=cum?upto.map(function(x){ return ms.indexOf(x); }):[mi];
+      var t=ix.reduce(function(a,i){ return a+n(s.t[i]); },0), a=ix.reduce(function(a,i){ return a+n(s.a[i]); },0), any=ix.some(function(i){ return s.has[i]; });
+      var p=t?a/t:(any&&a>0?1:null), tn=tone(p);
+      return '<div class="d3-row"><span class="nm" title="'+e2(g.lb)+'">'+e2(g.lb)+'</span><span class="vl">'+(any?k8Fmt(a,g.unit):'—')+' <small>/ '+k8Fmt(t,g.unit)+(g.unit&&g.unit!=="USD"?" "+e2(g.unit):"")+'</small></span><span class="pc t-'+tn+'">'+(any?pc(p):'—')+'</span>'+
+        '<span class="br"><i class="b-'+tn+'" style="width:'+Math.max(0,Math.min(100,Math.round((p||0)*100/1.3)))+'%"></i></span></div>';
+    }).join("");
+    if(!noOrder()){
+      var ov=(src.order||[]).filter(function(o){ return keepPic(o.pic,pic) && !rejected(o) && (cum?upto.indexOf(k8Ym(o))>=0:k8Ym(o)===m); }).reduce(function(a,o){ return a+n(o.amount); },0);
+      rows+='<div class="d3-row"><span class="nm">'+e2(L("Giá trị đơn hàng (CRM)","Order value (CRM)"))+'</span><span class="vl">'+fmtVND(ov)+'</span><span class="pc"></span></div>';
+    }
+    return '<div class="d3-card"><h4>'+e2(cum?L("Lũy kế","Cumulative"):L("Tháng này","This month"))+' <small>'+e2(cum?cumLbl:mLbl)+(pic?" · "+pic:"")+'</small></h4>'+
+      (groups.length||!noOrder()?rows:'<div class="d3-empty">'+e2(L("Đang nạp chỉ tiêu…","Loading targets…"))+'</div>')+'</div>';
+  }
+  var sales='<div class="d3-h"><h3>'+e2(L("Doanh số","Sales"))+'</h3><span>'+e2(L("thực tế / mục tiêu · màu theo file KPI","actual / target · KPI file colours"))+'</span></div><div class="d3-two" id="d3-sales">'+side(false)+side(true)+'</div>';
+  /* khách hàng */
+  var lt=lastTouch(), today=todayISO(), fyStart=ms[0].slice(0,4)+"-"+ms[0].slice(4,6)+"-01";
+  var touched=cust.filter(function(c){ var d=lt[nk(c.name)]; return d && d>=fyStart; }).length;
+  var stale=cust.map(function(c){ var d=lt[nk(c.name)]; return { c:c, d:d||"", g:d?daysBetween(d,today):9999 }; }).filter(function(x){ return x.g>30; });
+  var newAcc=0; try{ ((S.na&&S.na.rows)||[]).forEach(function(c){ if(c.status==="Approved" && keepPic(c.pic,pic) && upto.indexOf(String(c.month))>=0) newAcc++; }); }catch(_){}
+  var buyers=Object.keys(byAcc).length;
+  var top=Object.keys(byAcc).sort(function(a,b){ return byAcc[b]-byAcc[a]; }).slice(0,5);
+  stale.sort(function(a,b){ return b.g-a.g; });
+  var custH='<div class="d3-h"><h3>'+e2(L("Khách hàng","Customers"))+'</h3><span>'+e2(cumLbl)+'</span></div>'+
+    '<div class="d3-kp" id="d3-cust">'+
+      '<div class="it"><small>'+e2(L("Account / SKU mở mới","New accounts / SKU"))+'</small><b>'+fmtN(newAcc)+'</b><span>'+e2(L("đã xác nhận","approved"))+'</span></div>'+
+      '<div class="it"><small>'+e2(L("Độ phủ","Coverage"))+'</small><b>'+(cust.length?Math.round(touched/cust.length*100):0)+'%</b><span>'+fmtN(touched)+'/'+fmtN(cust.length)+' '+e2(L("account đã chăm sóc","accounts cared for"))+'</span></div>'+
+      '<div class="it"><small>'+e2(L("Chưa chăm sóc > 30 ngày","No care > 30 days"))+'</small><b>'+fmtN(stale.length)+'</b><span>'+e2(L("account","accounts"))+'</span></div>'+
+      (noOrder()?'':'<div class="it"><small>'+e2(L("Khách có đơn","Customers ordering"))+'</small><b>'+fmtN(buyers)+'</b><span>'+e2(L("account","accounts"))+'</span></div>')+'</div>'+
+    '<div class="d3-two">'+
+      (noOrder()?'':'<div class="d3-card"><h4>'+e2(L("Khách hàng giá trị đơn cao nhất","Top customers by order value"))+'</h4>'+(top.length?top.map(function(k){ return '<div class="d3-li"><span><b>'+e2(k)+'</b></span><span class="r">'+fmtVND(byAcc[k])+'</span></div>'; }).join(""):'<div class="d3-empty">'+e2(L("Chưa có đơn","No orders yet"))+'</div>')+'</div>')+
+      '<div class="d3-card"><h4>'+e2(L("Cần chăm sóc lại","Needs a visit / call"))+' <small>'+e2(L("lâu nhất chưa có hoạt động Completed","longest without a completed activity"))+'</small></h4>'+
+        (stale.length?stale.slice(0,5).map(function(x){ return '<div class="d3-li" onclick="openCust&&openCust(\''+e2(x.c.code)+'\')"><span><b>'+e2(x.c.name)+'</b><small>'+e2([x.c.type,x.c.province,x.c.pic].filter(String).join(" · "))+'</small></span><span class="r warn">'+(x.d?L(x.g+" ngày",x.g+" days"):L("chưa có","never"))+'</span></div>'; }).join(""):'<div class="d3-empty">'+e2(L("Mọi account đều được chăm sóc trong 30 ngày","Every account was cared for in the last 30 days"))+'</div>')+'</div></div>';
+  $("main").innerHTML='<div class="pg"><div class="ph"><div><h2>'+e2(L("Tổng quan ","Overview "))+e2(S.fy)+'</h2><p>'+e2(pic?pic:L("Toàn nhóm ","Whole team ")+curTeam().label)+'</p></div></div>'+bar+tot+sales+custH+'</div>';
+};
+
+/* ═════════ ③ KPI THEO PIC ═════════ */
+S.k3=S.k3||{ mode:"M", m:"" };
+function k3Name(r){
+  var k=String(r.key||"");
+  if(/^(turnover|supp_|newacct)/.test(k)) return k8Label(r);
+  var M={ visit_dealer:["Viếng thăm Dealer","Visits · Dealers"], visit_other:["Viếng thăm NPP / khách cuối","Visits · Distributors / end customers"], visit_all:["Viếng thăm khách hàng","Customer visits"],
+    event_trn:["Đào tạo khách hàng (T&E)","Customer training (T&E)"], event_mmh:["Thuyết trình / demo sản phẩm","Product presentations / demos"], event_mmh_team:["Thuyết trình / demo (cả nhóm)","Presentations (team)"],
+    event_kol_team:["Sự kiện KOL & triển lãm","KOL events & exhibitions"] };
+  if(M[k]) return L(M[k][0],M[k][1]);
+  return String(r.name||"").split(" · ").slice(0,2).join(" · ");
+}
+window.k3Set=function(k,v){ S.k3[k]=v; renderKPI(); };
+window.renderKPI=renderKPI=function(){
+  var ms=k8Months(), cur=ymOf(todayISO()), m=S.k3.m&&ms.indexOf(S.k3.m)>=0?S.k3.m:(ms.indexOf(cur)>=0?cur:ms[ms.length-1]), mi=ms.indexOf(m), mode=S.k3.mode||"M";
+  var ix=mode==="M"?[mi]:mode==="Q"?[0,1,2].map(function(k){ return Math.floor(mi/3)*3+k; }).filter(function(i){ return i<=mi; }):ms.map(function(x,i){ return i; }).filter(function(i){ return i<=mi; });
+  var pic=isMgrView()?(S.k3.pic||""):((S.user&&S.user.pic)||"");
+  var head='<div class="ph"><div><h2>'+e2(L("KPI & Mục tiêu ","KPIs & Targets "))+e2(S.fy)+'</h2><p>'+e2(mode==="M"?L("Tháng ","Month ")+mLb(m):mode==="Q"?L("Quý ","Quarter ")+(Math.floor(mi/3)+1)+L(" (lũy kế đến "," (to ")+mLb(m)+")":L("Lũy kế FY đến ","FY to ")+mLb(m))+'</p></div><div class="sp"></div>'+
+    (typeof KR!=="undefined"?'<button class="btn sm" onclick="KR.open()">'+e2(L("Báo cáo KPI tháng","Monthly KPI report"))+'</button> ':'')+(typeof SE!=="undefined"?'<button class="btn sm" onclick="SE.open()">Setting Expectation</button> ':'')+
+    '<button class="btn sm" onclick="k8Ensure(true).then(renderKPI)">'+e2(L("Đọc lại","Reload"))+'</button></div>';
+  var bar='<div class="d3-bar"><div class="v316-seg" style="margin:0">'+[["M",L("Tháng","Month")],["Q",L("Quý","Quarter")],["FY",L("Lũy kế FY","FY to date")]].map(function(x){ return '<button class="'+(mode===x[0]?"on":"")+'" onclick="k3Set(\'mode\',\''+x[0]+'\')">'+e2(x[1])+'</button>'; }).join("")+'</div>'+
+    '<select class="inp" id="k3-mon" onchange="k3Set(\'m\',this.value)">'+ms.map(function(x){ return '<option value="'+x+'"'+(x===m?" selected":"")+'>'+e2(mLb(x))+'</option>'; }).join("")+'</select>'+
+    (isMgrView()?'<select class="inp" onchange="k3Set(\'pic\',this.value)"><option value="">'+e2(L("Mọi PIC","All PICs"))+'</option>'+k8Pics().map(function(p){ return '<option'+(pic===p.pic?" selected":"")+'>'+e2(p.pic)+'</option>'; }).join("")+'</select>':'')+'</div>';
+  if(!S.kpi||S.kpi._fy!==S.fy){ $("main").innerHTML='<div class="pg">'+head+'<div class="card pad"><div class="hint">'+e2(L("Đang nạp KPI…","Loading KPI…"))+'</div></div></div>'; k8Ensure().then(function(){ if(S.tab==="kpi") renderKPI(); }).catch(function(){}); return; }
+  try{ k8ApplyLive(S.kpi); }catch(_){}
+  var pics=k8Pics().filter(function(p){ return !pic || p.pic===pic; });
+  var body=pics.map(function(p){
+    var sw=0, sp=0;
+    var rows=(p.rows||[]).map(function(r){
+      var t=ix.reduce(function(a,i){ return a+n((r.t||[])[i]); },0), has=ix.some(function(i){ var v=(r.a||[])[i]; return v!=null&&v!==""; }), a=ix.reduce(function(a,i){ return a+n((r.a||[])[i]); },0);
+      var tSet=ix.every(function(i){ var v=(r.t||[])[i]; return v!==""&&v!=null; });
+      var p2=t?a/t:(tSet&&t===0?1:null); if(!has && t) p2=null;
+      var w=n(r.w); if(w && p2!=null){ sw+=w; sp+=Math.min(p2,1.3)*w; } else if(w && t) sw+=w;
+      var u=k8Unit(r), nm=k3Name(r);
+      return '<tr title="'+e2(r.code+" · "+r.name)+'"><td class="cd">'+e2(r.code)+'</td><td>'+e2(nm)+'</td><td class="num w">'+(w?Math.round(w*100)+"%":"—")+'</td><td class="num">'+k8Fmt(t,u)+'</td><td class="num">'+(has?k8Fmt(a,u):'—')+'</td><td class="num pc t-'+tone(p2)+'">'+pc(p2)+'</td></tr>';
+    }).join("");
+    var score=sw?sp/sw:null;
+    return '<div class="k3-pic"><div class="k3-ph"><b>'+e2(p.pic)+'</b><span>'+e2(p.role||"")+'</span><span class="sp"></span><span>'+e2(L("Điểm","Score"))+'</span><span class="sc t-'+tone(score)+'">'+pc(score)+'</span></div>'+
+      '<table class="k3-tb"><thead><tr><th class="cd">'+e2(L("Mã","Code"))+'</th><th>KPI</th><th class="num w">'+e2(L("Trọng số","Weight"))+'</th><th class="num">Target</th><th class="num">Actual</th><th class="num">%</th></tr></thead><tbody>'+rows+'</tbody></table></div>';
+  }).join("")||'<div class="card pad"><div class="hint">'+e2(L("Chưa có KPI cho lựa chọn này.","No KPI for this selection."))+'</div></div>';
+  $("main").innerHTML='<div class="pg" id="k3">'+head+bar+body+'</div>';
+};
+
+/* ═════════ ④ ĐƠN HÀNG: bớt chú thích ═════════ */
+var SHORT=[[/^Đã gửi xác nhận/,L("Đã gửi","Sent"),""],[/^Cần bổ sung/,L("Cần chỉnh sửa","Changes needed"),"warn"]];
+function tidy(){
+  if(S.tab!=="order") return;
+  document.querySelectorAll(".v322-row .v320-acts").forEach(function(a){
+    if(a.dataset.v323) return; a.dataset.v323=1;
+    var s=a.querySelector("span:first-child"); if(!s) return;
+    var t=String(s.textContent||"").trim(), hit=SHORT.filter(function(x){ return x[0].test(t); })[0];
+    if(hit){ s.className="v323-st "+hit[2]; s.title=t; s.textContent=hit[1]; } else { s.style.display="none"; }
+  });
+}
+new MutationObserver(function(){ clearTimeout(tidy.t); tidy.t=setTimeout(function(){ try{ tidy(); }catch(_){} },50); }).observe(document.getElementById("main")||document.body,{ childList:true, subtree:true });
+})();
+</script>
+<script id="v323b-js">
+/* ═════════ ⑤ CHI TIẾT ĐỊA BÀN: Mục tiêu & tình trạng ADP (bên phải, nhìn thấy ngay) ═════════ */
+(function(){
+function L(vi,en){ return TX(vi,en); }
+function e2(s){ return esc(s==null?"":String(s)); }
+function adpOf(j){
+  var list=(j&&j.adp)||[]; if(!list.length) return null;
+  return list.filter(function(a){ return String(a.fy||"")===String(S.fy); })[0]||list.slice().sort(function(a,b){ return String(b.fy||"").localeCompare(String(a.fy||"")); })[0];
+}
+function lastReview(a){ var q=["rQ4","rQ3","rQ2","rQ1"]; for(var i=0;i<q.length;i++){ var v=String(a[q[i]]||"").trim(); if(v) return { q:"Q"+(4-i), t:v }; } return null; }
+function block(j){
+  if(isTH()) return "";
+  var c=j.customer||{}, a=adpOf(j), k=reg(mkAcc(c));
+  if(!a) return '<div class="a3-adp"><div class="hd"><b>'+e2(L("Mục tiêu & tình trạng (ADP)","Targets & status (ADP)"))+'</b><span class="sp"></span><button onclick="rADPFor(\''+k+'\')">＋ '+e2(L("Thêm ADP","Add ADP"))+'</button></div><div class="no">'+e2(L("Chưa có ADP ","No ADP for ")+S.fy)+'</div></div>';
+  var g=(window.ABCD_GROUPS||[]).filter(function(x){ return x.k===String(a.abcd||"").trim().charAt(0).toUpperCase(); })[0];
+  var tg=adpParseTarget(a.targetAmt), act=n(a.actualAmt)||ADP_MONTH_FIELDS.reduce(function(s,x){ return s+n(a[x[0]]); },0), p=tg.amt?act/tg.amt:null;
+  var col=p==null?"#C3CDD8":p>1.2?"#2E8B57":p>=1?"#D9A520":p>=0.9?"#3A5CAA":"#C3CDD8", rv=lastReview(a);
+  var row=function(lb,v){ return String(v||"").trim()?'<div><dt>'+e2(lb)+'</dt><dd title="'+e2(v)+'">'+e2(v)+'</dd></div>':''; };
+  return '<div class="a3-adp" id="a3-adp"><div class="hd"><b>'+e2(L("Mục tiêu & tình trạng","Targets & status"))+' · ADP '+e2(a.fy||"")+'</b><span class="sp"></span><button onclick=\'formADP('+JSON.stringify(a).replace(/'/g,"&#39;")+')\'>'+e2(L("Sửa","Edit"))+'</button></div>'+
+    (g?'<span class="grp" style="background:'+g.bg+';color:'+g.c+'">'+e2(g.lb)+'</span>':(a.abcd?'<span class="grp" style="background:#F5F7FA;color:#41566F">'+e2(a.abcd)+'</span>':''))+
+    '<div class="tg"><b>'+fmtVND(act)+'</b><span>/ '+fmtVND(tg.amt)+(tg.ptype?' · '+e2(tg.ptype):'')+'</span><span style="margin-left:auto;font-weight:800;color:'+col+'">'+(p==null?'—':Math.round(p*100)+'%')+'</span></div>'+
+    '<div class="bar"><i style="width:'+Math.max(0,Math.min(100,Math.round((p||0)*100)))+'%;background:'+col+'"></i></div>'+
+    '<dl>'+row(L("Mục tiêu","Objective"),a.objective)+row(L("Hành động chính","Key action"),a.keyAction)+(rv?row(L("Tình trạng ","Status ")+rv.q,rv.t):row(L("Tình trạng","Status"),a.caseInfo))+'</dl></div>';
+}
+window.v323AdpBlock=block;
+var _ra=window.renderAcc;
+window.renderAcc=renderAcc=function(){
+  var r=_ra.apply(this,arguments);
+  try{
+    var j=S.acc; if(!j||!j.ok||!j.customer) return r;
+    var h=block(j), side=$("a3Side");
+    if(side && h) side.insertAdjacentHTML("afterbegin",h);
+    var b=$("drwBody"), tab=(S.drw&&S.drw.tab)||"tl";
+    if(b && h && tab==="tl" && window.matchMedia && !window.matchMedia("(min-width:1024px)").matches) b.insertAdjacentHTML("afterbegin",h);
+  }catch(e){}
+  return r;
+};
+})();
+</script>
+
+
 </body>
 </html>

@@ -16,9 +16,9 @@ function more(sel){ return function(){ return TOUR.find(sel) || TOUR.find("nav.m
 function calTools(){ try{ if(window.CAL && !CAL.mt && TOUR.find(".cal-dots3")){ CAL.mt=true; renderCal(); } }catch(_){} }
 function V(vi,en){ return { vi:vi, en:en }; }
 TOUR.add([
- { id:"start", v:2, d:"2026-10-11", g:V("Bắt đầu","Getting started"), ic:"start", t:V("Làm quen MMH CRM","Tour of MMH CRM"), x:V("Các khu vực chính và chỗ tìm mọi chức năng.","The main areas and where to find every feature."),
+ { id:"start", v:3, d:"2026-10-16", g:V("Bắt đầu","Getting started"), ic:"start", t:V("Làm quen MMH CRM","Tour of MMH CRM"), x:V("Các khu vực chính và chỗ tìm mọi chức năng.","The main areas and where to find every feature."),
    steps:[
-    { el:more("#side"), do:wk("cal"), zoom:false, t:V("Menu chức năng","Feature menu"), x:V("<i>(Điện thoại: nút <b>Thêm</b> ở thanh dưới.)</i> ","<i>(Phone: the <b>More</b> button in the bottom bar.)</i> Mọi chức năng ở cột trái: Dashboard, KPI, Khách hàng, Cập nhật, Mở mới, Đơn hàng, Họp tuần, Gửi báo cáo…","Every feature is in the left menu: Dashboard, KPI, Customers, Updates, New accounts, Orders, Weekly meeting, Send report…") },
+    { el:more("#side"), do:wk("cal"), zoom:false, t:V("Menu chức năng","Feature menu"), x:V("<i>(Điện thoại: nút <b>Thêm</b> ở thanh dưới.)</i> Menu chia 5 nhóm: <b>Tổng quan</b> · <b>Khách hàng</b> (Địa bàn, Khách hàng) · <b>Cập nhật công việc</b> (Đi địa bàn, Công việc khác, Cập nhật đơn hàng, Thuyết trình) · <b>Kết quả bán hàng</b> · <b>Công cụ & Báo cáo</b>.","<i>(Phone: the <b>More</b> button in the bottom bar.)</i> The menu has 5 groups: <b>Overview</b> · <b>Customers</b> · <b>Activities & Plans</b> · <b>Sales Result</b> · <b>Tools & Reports</b>.") },
     { el:"#mcBtn", t:V("MMH Calendar","MMH Calendar"), x:V("Lịch chung của công ty: công tác, đào tạo, sự kiện.","The company calendar: trips, trainings, events.") },
     { el:"#qsBtn", t:V("Tìm nhanh","Quick search"), x:V("Bấm hoặc nhấn <b>Ctrl + K</b> để tìm khách hàng, việc, đơn hàng.","Click or press <b>Ctrl + K</b> to find customers, tasks, orders.") },
     { el:more("#fySel"), t:V("Năm tài chính","Fiscal year"), x:V("Chọn FY cần xem (FY bắt đầu từ tháng 9).","Pick the fiscal year to view (FY starts in September).") },
@@ -64,32 +64,35 @@ TOUR.add([
     { el:"#tp-sched", t:V("Lịch trình","Schedule"), x:V("Ghi theo ngày.","Write it day by day.") },
     { el:"#tp-send", t:V("Gửi đề xuất","Send"), x:V("Email <b>Business Trip Approval Request</b> gửi Giám đốc, CC trưởng phòng và bạn. Ghi nhật ký ở tab Business Trip Log của file CRM nhóm.","A <b>Business Trip Approval Request</b> email goes to the Director, CC your head of department and you.") }
    ] },
- { id:"cust", v:1, d:"2026-10-11", g:V("Khách hàng & bán hàng","Customers & sales"), ic:"people", t:V("Khách hàng","Customers"), x:V("Tìm, lọc và thêm account.","Find, filter and add accounts."),
+ { id:"cust", v:2, d:"2026-10-16", g:V("Khách hàng & bán hàng","Customers & sales"), ic:"people", t:V("Địa bàn","Customer List"), x:V("Tìm, lọc và thêm account.","Find, filter and add accounts."),
    steps:[
-    { el:"#cq", do:pg("cust"), wait:600, t:V("Tìm khách hàng","Find a customer"), x:V("Gõ tên, mã, tỉnh, PIC — không cần dấu.","Type a name, code, province or PIC.") },
+    { el:"#cq", do:pg("cust"), wait:600, t:V("Tìm địa bàn","Find an account"), x:V("Gõ tên, mã, tỉnh, PIC — không cần dấu.","Type a name, code, province or PIC.") },
     { el:"#custChips", t:V("Lọc nhanh","Quick filters"), x:V("Chưa gặp trong FY, đã gặp, sắp theo doanh số.","Not visited this FY, visited, sort by sales.") },
     { el:"#custPicBar", t:V("Theo PIC","By PIC"), x:V("Xem account của từng người.","See each person's accounts.") },
-    { el:"[onclick=\"formCustomer(null)\"]", t:V("Account mới","New account"), x:V("Thêm khách hàng mới vào danh mục.","Add a new customer.") }
+    { el:"[onclick=\"formCustomer(null)\"]", t:V("Account mới","New account"), x:V("Thêm khách hàng mới vào danh mục.","Add a new customer.") },
+    { el:function(){ return TOUR.find("#a3-adp")||TOUR.find("#a3Side")||TOUR.find("#drwBody"); }, do:function(){ try{ var c=(S.custIndex||[])[0]; if(c) openCust(c.code); }catch(_){} }, wait:1200, when:function(){ try{ return !isTH() && (S.custIndex||[]).length>0; }catch(_){ return false; } },
+      t:V("Chi tiết địa bàn","Account details"), x:V("Bấm 1 địa bàn ⇒ bên phải hiện ngay <b>Mục tiêu & tình trạng ADP</b> (nhóm A–D, target / actual, mục tiêu, hành động chính, tình trạng quý gần nhất), rồi tổng quan, người liên hệ, thông tin account.","Click an account ⇒ the right column shows <b>ADP targets & status</b> first, then overview, contacts and account info.") }
    ] },
- { id:"order", v:6, d:"2026-10-16", g:V("Khách hàng & bán hàng","Customers & sales"), ic:"report", t:V("Đơn hàng","Sales orders"), x:V("Ghi và tra cứu đơn hàng theo tháng.","Record and look up orders by month."),
+ { id:"order", v:7, d:"2026-10-16", g:V("Khách hàng & bán hàng","Customers & sales"), ic:"report", t:V("Đơn hàng","Sales orders"), x:V("Ghi và tra cứu đơn hàng theo tháng.","Record and look up orders by month."),
    when:function(){ try{ return !noOrder(); }catch(_){ return true; } },
    steps:[
     { el:"#ord_q", do:pg("order"), wait:600, when:function(){ try{ return !!(window.v320ApOnly && v320ApOnly()); }catch(_){ return false; } }, t:V("Đơn hàng của sales","Sales orders"), x:V("Người duyệt không tạo đơn — sales tạo đơn rồi gửi xác nhận cho bạn.","Approvers do not create orders — sales create them and send them to you.") },
     { el:"[onclick=\"formOrder(null)\"]", do:pg("order"), wait:600, when:function(){ try{ return !(window.v320ApOnly && v320ApOnly()); }catch(_){ return true; } }, t:V("Đơn hàng mới","New order"), x:V("Ghi đơn: account, sản phẩm, số lượng, giá.","Record account, products, quantity and price.") },
     { el:"#ord_q", t:V("Tìm đơn","Find an order"), x:V("Tìm theo account, mã, sản phẩm, NPP.","Search by account, code, product or distributor.") },
     { el:"#v322-mon", t:V("Theo tháng","By month"), x:V("Chọn tháng hoặc cả FY.","Pick a month or the whole FY.") },
-    { el:"#v322-kp", t:V("Thống kê đơn hàng","Order summary"), x:V("Số đơn, số khách (không trùng), số tiền trong tháng và lũy kế FY (không tính đơn bị từ chối).","Orders, unique customers, amount this month and FY to date (rejected orders excluded).") },
+    { el:"#v322-kp", do:function(){ try{ go("orderres"); }catch(_){} }, wait:700, t:V("Kết quả bán hàng ▸ Đơn hàng","Sales Result ▸ Orders"), x:V("Số đơn, số khách (không trùng), số tiền tháng và lũy kế FY (không tính đơn bị từ chối).","Orders, unique customers, amount this month and FY to date (rejected orders excluded).") },
     { el:"#v322-pg", t:V("Nhóm sản phẩm","Product groups"), x:V("Giá trị đơn theo nhóm sản phẩm.","Order value by product group.") },
-    { el:function(){ return TOUR.find("#v322-tr"); }, when:function(){ return !!document.querySelector("#v322-tr"); }, t:V("Danh sách theo tháng","List by month"), x:V("Như Tiến độ công việc: tháng ▸ đơn ▸ dòng sản phẩm. Bấm mũi tên để mở dòng sản phẩm, chấm màu = trạng thái duyệt, dải ngày đánh dấu ngày đặt.","Like the task timeline: month ▸ order ▸ product lines. Click the arrow to open the lines; the dot colour shows approval, the day strip marks the order day.") },
+    { el:"#v323-mt", t:V("Theo tháng","By month"), x:V("Số đơn, số khách, giá trị, đã duyệt và lũy kế từng tháng.","Orders, customers, amount, approved and cumulative per month.") },
+    { el:function(){ return TOUR.find("#v322-tr"); }, do:function(){ try{ go("order"); }catch(_){} }, wait:700, when:function(){ return !!document.querySelector("#v322-tr"); }, t:V("Danh sách theo tháng","List by month"), x:V("Như Tiến độ công việc: tháng ▸ đơn ▸ dòng sản phẩm. Bấm mũi tên để mở dòng sản phẩm, chấm màu = trạng thái duyệt, dải ngày đánh dấu ngày đặt.","Like the task timeline: month ▸ order ▸ product lines. Click the arrow to open the lines; the dot colour shows approval, the day strip marks the order day.") },
     { el:function(){ return TOUR.find("#o_partnerSel") || TOUR.find("#o_partner"); }, do:function(){ try{ formOrder(null); }catch(_){} }, wait:500, when:function(){ try{ return curTeamKey()==="dental"; }catch(_){ return false; } },
       t:V("Nhà phân phối tự điền","Distributor filled in"), x:V("Theo PIC: Viet → Nam Dũng · Vinh → S.P.I · Phuong chọn Meci hoặc Việt Thái.","By PIC: Viet → Nam Dung · Vinh → S.P.I · Phuong picks Meci or Viet Thai.") },
     { el:"#v322-care", do:function(){ try{ if(!document.querySelector("#o_accName")) formOrder(null); }catch(_){} }, wait:500, when:function(){ try{ return !(window.v320ApOnly && v320ApOnly()); }catch(_){ return true; } },
       t:V("Lịch sử chăm sóc","Customer care history"), x:V("Đơn mới chỉ tạo được khi khách đã có hoạt động chăm sóc <b>Completed</b> (Visiting, Telephone, Message…) trong 30 ngày trước ngày đặt. Chưa có ⇒ bấm <b>Ghi hoạt động chăm sóc</b>. Lưu đơn mới ⇒ email thông báo tới Giám đốc.","A new order needs a <b>Completed</b> care activity (Visiting, Telephone, Message…) in the 30 days before the order date. None yet ⇒ click <b>Log a care activity</b>. A new order e-mails the Director.") },
     { el:function(){ return TOUR.find(".v321-ban"); }, do:function(){ try{ closeModal(); }catch(_){} }, wait:300, when:function(){ return !!document.querySelector(".v321-ban"); }, t:V("Thông báo đơn hàng","Order notices"),
-      x:V("Số đơn chờ bạn xác nhận, đơn bị trả lại, đơn thiếu chứng từ hoặc chưa gửi. Số đỏ cạnh menu <b>Đơn hàng</b> cũng báo như vậy.","Orders waiting for your approval, returned, missing documents or not sent yet. The red number next to <b>Orders</b> in the menu shows the same.") },
+      x:V("Số đơn chờ bạn xác nhận, đơn cần chỉnh sửa, đơn thiếu chứng từ hoặc chưa gửi. Số đỏ cạnh menu <b>Đơn hàng</b> cũng báo như vậy.","Orders waiting for your approval, returned, missing documents or not sent yet. The red number next to <b>Orders</b> in the menu shows the same.") },
     { el:function(){ return TOUR.find(".v320-acts"); }, do:function(){ try{ closeModal(); }catch(_){} }, wait:300, when:function(){ return !!document.querySelector(".v320-acts"); }, t:V("Gửi xác nhận · Xác nhận","Send for approval · Approve"),
-      x:V("Đơn Chờ duyệt: sales bấm <b>Gửi xác nhận</b> ⇒ email tới chị Tuyên kèm chứng từ. Người duyệt bấm <b>Xác nhận</b>, <b>Trả lại bổ sung</b> (khi thiếu chứng từ) hoặc <b>Không xác nhận</b> ngay trên thẻ đơn.","Pending orders: sales click <b>Send for approval</b> ⇒ the approver gets an e-mail with the documents. The approver clicks <b>Approve</b> / <b>Reject</b> right on the order card.") },
-    { el:"#oa-btn", do:function(){ try{ closeModal(); }catch(_){} }, wait:300, when:function(){ try{ return !!(window.v316OrdIsAp && v316OrdIsAp()); }catch(_){ return false; } }, t:V("Duyệt đơn hàng","Approve orders"),
+      x:V("Đơn Chờ duyệt: sales bấm <b>Gửi xác nhận</b> ⇒ email tới chị Tuyên kèm chứng từ. Người duyệt bấm <b>Xác nhận</b>, <b>Yêu cầu chỉnh sửa</b> (khi thiếu chứng từ) hoặc <b>Không xác nhận</b> ngay trên thẻ đơn.","Pending orders: sales click <b>Send for approval</b> ⇒ the approver gets an e-mail with the documents. The approver clicks <b>Approve</b> / <b>Reject</b> right on the order card.") },
+    { el:"#oa-btn", do:function(){ try{ closeModal(); }catch(_){} try{ if(S.ordMode==="res"||S.tab!=="order") go("order"); }catch(_){} }, wait:600, when:function(){ try{ return !!(window.v316OrdIsAp && v316OrdIsAp()); }catch(_){ return false; } }, t:V("Duyệt đơn hàng","Approve orders"),
       x:V("Đơn từ 10/2026 cần Order Type + chứng từ và được duyệt mới tính KPI C5. Duyệt từng đơn hoặc cả tháng của một sales.","Orders from 10/2026 need an order type + documents and approval before they count for C5. Approve one by one or a whole month per sales PIC.") }
    ] },
  { id:"pres", v:1, d:"2026-10-16", g:V("Khách hàng & bán hàng","Customers & sales"), ic:"people", t:V("Thuyết trình sản phẩm","Product presentations"), x:V("Ghi buổi giới thiệu sản phẩm và báo cáo đủ 5 mục để được tính KPI.","Log product presentations and complete the 5-section report so they count for KPI."),
@@ -117,10 +120,10 @@ TOUR.add([
     { el:"[onclick=\"sendReport('team')\"]", t:V("Gửi chính thức","Send officially"), x:V("Gửi tới team và quản lý theo danh sách cố định.","Send to your team and managers.") },
     { el:"[onclick=\"sendReport('download')\"]", t:V("Tải PDF","Download PDF"), x:V("Tải file PDF về máy.","Download the PDF.") }
    ] },
- { id:"kpi", v:1, d:"2026-10-11", g:V("Báo cáo & KPI","Reports & KPI"), ic:"kpi", t:V("KPI & Mục tiêu","KPI & targets"), x:V("Xem KPI tháng / quý / năm, báo cáo KPI, Setting Expectation.","Monthly / quarterly / yearly KPI, KPI report, Setting Expectation."),
+ { id:"kpi", v:2, d:"2026-10-16", g:V("Báo cáo & KPI","Reports & KPI"), ic:"kpi", t:V("KPI & Mục tiêu","KPI & targets"), x:V("Số liệu KPI theo từng PIC.","KPI figures per PIC."),
    steps:[
-    { el:"#kp-m", do:pg("kpi"), wait:900, t:V("Chọn kỳ","Pick a period"), x:V("Tháng, Quý hoặc Năm FY.","Month, quarter or FY.") },
-    { el:"#kp-person", t:V("Người đang xem","Person"), x:V("Màu %: xám &lt; 90% · xanh 90–100% · vàng 100–120% · xanh lá &gt; 120%.","Colours: grey &lt; 90% · blue 90–100% · yellow 100–120% · green &gt; 120%.") },
+    { el:"#k3-mon", do:pg("kpi"), wait:900, t:V("Chọn kỳ","Pick a period"), x:V("Tháng, Quý hoặc Lũy kế FY + tháng.","Month, quarter or FY to date + month.") },
+    { el:function(){ return TOUR.find(".k3-pic")||TOUR.find("#k3 .card"); }, t:V("KPI theo PIC","KPI per PIC"), x:V("Mỗi PIC 1 bảng: trọng số, target, actual, %. Màu %: xám &lt; 90% · xanh 90–100% · vàng 100–120% · xanh lá &gt; 120%.","One table per PIC: weight, target, actual, %. Colours: grey &lt; 90% · blue 90–100% · yellow 100–120% · green &gt; 120%.") },
     { el:"[onclick=\"KR.open()\"]", t:V("Báo cáo KPI tháng","Monthly KPI report"), x:V("Hạn ngày 02 hằng tháng, 16:00.","Due on the 2nd of each month, 16:00.") },
     { el:"[onclick=\"SE.open()\"]", t:V("Setting Expectation","Setting Expectation"), x:V("Tự đánh giá quý, tải file Word.","Quarterly self-review, download the Word file.") }
    ] },
@@ -130,12 +133,12 @@ TOUR.add([
     { el:"#mtSteps2", t:V("4 mục họp","4 parts"), x:V("Forecast NPP · Quan hệ KH &amp; thị trường · Tình hình thầu · Thông tin khác.","Distributor forecast · Customers &amp; market · Tenders · Other.") },
     { el:"[onclick=\"mtSave()\"]", t:V("Lưu biên bản","Save notes"), x:V("Lưu, xem lịch sử, gửi email tuần.","Save, see history, send the weekly email.") }
    ] },
- { id:"dash", v:2, d:"2026-10-16", g:V("Báo cáo & KPI","Reports & KPI"), ic:"kpi", t:V("Dashboard","Dashboard"), x:V("Tổng quan khách hàng, đi địa bàn, kinh doanh.","Overview of customers, field visits and sales."),
+ { id:"dash", v:3, d:"2026-10-16", g:V("Báo cáo & KPI","Reports & KPI"), ic:"kpi", t:V("Dashboard","Dashboard"), x:V("Doanh số và khách hàng — gọn trên 1 trang.","Sales and customers on one page."),
    steps:[
-    { el:function(){ return par("[onclick=\"setDashR('FY')\"]"); }, do:pg("dash"), wait:700, t:V("Khoảng thời gian","Period"), x:V("Cả FY, từng quý hoặc từng tháng.","Whole FY, a quarter or a month.") },
-    { el:function(){ return par("[onclick=\"setDashG('all')\"]"); }, t:V("Nhóm chỉ số","Metric groups"), x:V("Tổng quan · Khách hàng · Đi địa bàn · Kinh doanh · ADP.","Overview · Customers · Field visits · Sales · ADP.") },
-    { el:function(){ var k=[].filter.call(document.querySelectorAll("#main .kpi"),function(x){ return /Lượt viếng thăm|Customer visits|Visits/i.test(x.textContent); })[0]; return k||null; }, t:V("Lượt viếng thăm","Customer visits"), x:V("Chỉ đếm lượt Visiting đã <b>Completed</b> và có ảnh — đúng cách tính trên sheet KPI.","Counts only <b>Completed</b> Visiting rows with a photo — the same rule as the KPI sheet.") },
-    { el:"#clogCard", t:V("Cập nhật dữ liệu khách hàng","Customer data updates"), x:V("Account nào vừa được cập nhật hoặc thêm mới.","Which accounts were updated or added.") }
+    { el:"#d3-mon", do:pg("dash"), wait:700, t:V("Chọn tháng","Pick a month"), x:V("Chọn tháng (quản lý chọn thêm PIC) — mọi số bên dưới đổi theo.","Pick a month (managers can also pick a PIC) — every figure below follows.") },
+    { el:"#d3-tot", t:V("Tổng","Totals"), x:V("Khách hàng · Người liên hệ (CBC) · Lượt viếng thăm (Completed, có ảnh) · Đơn hàng · Giá trị đơn.","Customers · Contacts · Visits (Completed, with photo) · Orders · Order value.") },
+    { el:"#d3-sales", t:V("Doanh số","Sales"), x:V("Bên trái: tháng đang chọn · bên phải: lũy kế FY. Thực tế / mục tiêu và % theo màu của file KPI.","Left: the selected month · right: FY to date. Actual / target and % in the KPI file colours.") },
+    { el:"#d3-cust", t:V("Khách hàng","Customers"), x:V("Mở mới, độ phủ, account chưa chăm sóc quá 30 ngày, khách có đơn — kèm danh sách khách giá trị cao và khách cần chăm sóc lại.","New accounts, coverage, accounts without care for 30+ days, customers ordering — plus top customers and who to visit next.") }
    ] },
  { id:"testmode", v:2, d:"2026-10-13", g:V("Quản trị","Admin"), ic:"gear", t:V("TEST","TEST"), x:V("Admin dùng thử mọi chức năng với vai bất kỳ trên dữ liệu TEST riêng.","The Admin tries every function in any role on separate TEST data."),
    when:function(){ try{ return !!window.SBX && (SBX.on || (function(){ var o=JSON.parse(localStorage.getItem("mmh_tk")||"null"); return !!(o&&o.user&&o.user.admin); })()); }catch(_){ return false; } },
