@@ -143,3 +143,8 @@ Kiến trúc & quy ước giống MMH Report Hub (repo `ManiMedicalHanoi/MMH-Rep
   điện thoại hiện khối này đầu tab Dòng thời gian. Người dùng yêu cầu: tối giản, hạn chế biểu tượng, không diễn giải dài.
 - **v32.4 (16/10/2026, khối `v324-css` + `v324-js`)**: Thêm địa bàn mới trùng TÊN địa bàn cũ không còn bị chặn / tự dùng lại (tên phòng khám trùng là bình thường, mã KH khác nhờ miền + tỉnh + loại):
   `saveNewAccount` bọc ⇒ khung `#v324-dup` liệt kê địa bàn cùng tên (ưu tiên cùng loại + tỉnh) ▸ **Dùng địa bàn này** (`v324Use`) hoặc **Tạo địa bàn mới** (`v324New`, gọi hàm gốc bỏ qua bước trùng tên).
+- **v32.5 (16/10/2026, khối `v325-css` + `v325-js` + `v325m-css` + `v325m-js`, backend `MMH_SalesTasks.gs` v1.2)**: ① Công việc khác (VN, `ATS_ON()`, không phải Management / Admin / Director / HOD — `FXK.on()`):
+  chỉ 3 Key task cố định / tháng "Báo cáo và kế hoạch · Trực fanpage và tư vấn · Tuyển sinh sự kiện Tmm.yyyy" (FY68 09/2026 → 08/2027). `formOtherKey("")` / `calAddOther` / `calNewKey` ⇒ `fxOpen(iso)` (chỉ 3 key của tháng đó;
+  chưa có ⇒ `addKey` rồi mở form sub), sửa key ⇒ tên khoá, không thêm sub vào key khác. Nhóm Thái giữ nguyên. ② Họp tuần 4 mục (`MT_STEPS`): Tổng quan (#mtNpp + KPI tháng `#mt5Kpi`) · Khách hàng (`#mt2Body`,
+  ghi chú `custNote`) · Hoạt động & Kế hoạch (`#mt3Tabs`: đi địa bàn · công việc khác · thuyết trình · công tác · ADP, `visitNote`) · Kết quả bán hàng (`#mt4Tabs`: SKU · đơn hàng, `salesNote` + `other`). Bỏ thầu
+  (`mtTdLoad` / `mtPaintTd` rỗng). Snapshot `v:2` thêm `kpi` / `adp` / `other`; `mtRecHtml` (email / PDF / lịch sử) theo 4 mục, biên bản cũ (v1) giữ bố cục cũ; bảng tổng quan email bỏ cột thầu.

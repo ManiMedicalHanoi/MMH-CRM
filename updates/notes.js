@@ -7,6 +7,16 @@
 function E(u){ u.en={ title:u.title, items:u.items.map(function(i){ return { title:i.title, text:i.text }; }) }; return u; }
 window.MMH_UPDATES = [
   E({
+    id:"2026-10-16-v32.5", version:"v32.5", date:"2026-10-16",
+    title:"Other tasks: 3 fixed monthly key tasks · weekly meeting in 4 parts",
+    summary:"Sales now log other tasks under 3 fixed key tasks of the month. The weekly meeting follows the new 4-part frame with automatic figures — the tender part is gone and ADP is added.",
+    items:[
+      { type:"imp", icon:"☰", title:"3 fixed key tasks per month", text:"Other tasks ▸ <b>+ Key Task</b> (or a day in the calendar) ⇒ pick <b>Reports &amp; plans</b>, <b>Fanpage &amp; consulting</b> or <b>Event enrolment</b> of that month only, then write the sub-task. Sales can no longer type their own key task names (managers keep the old way).", img:"updates/v32.5/other.jpg" },
+      { type:"imp", icon:"🗂", title:"Weekly meeting: 4 parts", text:"Weekly meeting ▸ 1. Overview (distributor sales + the PIC's KPIs this month) · 2. Customers · 3. Activities &amp; Plans · 4. Sales Result. Figures are read automatically; meeting notes on the right. The tender part is removed.", img:"updates/v32.5/meet.jpg" },
+      { type:"new", icon:"⭐", title:"ADP in the meeting", text:"Part 3 ▸ tab <b>ADP</b> shows each key account: group, actual / target, objective, key action and latest status. The weekly email and PDF follow the same 4 parts.", img:"updates/v32.5/meet_adp.jpg" }
+    ]
+  }),
+  E({
     id:"2026-10-16-v32.4", version:"v32.4", date:"2026-10-16",
     title:"New account with the same name as an existing one",
     summary:"Clinics often share a name. Creating a new account with a name that already exists is no longer blocked — you choose to use the existing account or create a new one.",

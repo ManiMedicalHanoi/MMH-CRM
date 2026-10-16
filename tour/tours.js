@@ -46,12 +46,12 @@ TOUR.add([
     { el:"#nt_phSect", when:function(){ try{ return !noPhoto(); }catch(_){ return true; } }, t:V("Ảnh đi địa bàn","Field photo"), x:V("Chụp ảnh tại chỗ. Ảnh gửi ở nền sau khi chữ đã lưu — mất sóng cũng không mất, có mạng tự gửi.","Take a photo on site. It uploads in the background after the text is saved, even with weak signal.") },
     { el:"[onclick=\"submitNewTask()\"]", t:V("Lưu","Save"), x:V("Bấm lưu: khung đóng ngay, dữ liệu ghi vào Google Sheet ở nền.","Click save: the form closes at once and the data is written to Google Sheet in the background.") }
    ] },
- { id:"other", v:1, d:"2026-10-11", g:V("Lịch & công việc","Calendar & tasks"), ic:"task", t:V("Công việc khác","Other tasks"), x:V("Việc chung không phải đi địa bàn: họp, thầu, sự kiện…","Tasks that are not field visits: meetings, tenders, events…"),
+ { id:"other", v:2, d:"2026-10-16", g:V("Lịch & công việc","Calendar & tasks"), ic:"task", t:V("Công việc khác","Other tasks"), x:V("Việc chung không phải đi địa bàn, ghi vào 3 Key task cố định của tháng.","Tasks that are not field visits, under this month's 3 fixed key tasks."),
    steps:[
     { el:"[onclick=\"setWkTab('other')\"]", do:wk("other"), t:V("Tab Công việc khác","Other tasks tab"), x:V("Lưu ở sheet <b>ALL TASK</b> trong file CRM của nhóm.","Saved in the <b>ALL TASK</b> sheet of your team's CRM file.") },
     { el:function(){ return par("[onclick=\"vSetMode('week')\"]"); }, t:V("Khoảng thời gian","Period"), x:V("Xem theo Ngày, Tuần, Tháng, Quý, cả FY hoặc khoảng ngày.","View by day, week, month, quarter, FY or a date range.") },
     { el:"#ot_q", t:V("Tìm và lọc","Search and filter"), x:V("Tìm trong key task, đầu việc, kết quả; lọc theo tiến độ.","Search key tasks, sub-tasks and results; filter by progress.") },
-    { el:"[onclick=\"formOtherKey('')\"]", t:V("Thêm Key Task","Add a key task"), x:V("Tạo đầu việc chính, sau đó thêm sub-task bên trong.","Create the main task, then add sub-tasks inside it.") }
+    { el:"[onclick=\"formOtherKey('')\"]", t:V("Thêm việc","Add a task"), x:V("Sales chọn 1 trong 3 Key task của tháng: <b>Báo cáo và kế hoạch</b> · <b>Trực fanpage và tư vấn</b> · <b>Tuyển sinh sự kiện</b>, rồi ghi đầu việc bên trong.","Sales pick one of this month's 3 key tasks: <b>Reports &amp; plans</b> · <b>Fanpage &amp; consulting</b> · <b>Event enrolment</b>, then add the sub-task inside it.") }
    ] },
  { id:"trip", v:1, d:"2026-10-11", g:V("Công tác","Business trips"), ic:"trip", t:V("Đề xuất công tác","Propose a business trip"), x:V("Điền đề xuất, email xin duyệt gửi Giám đốc.","Fill in the proposal; the approval email goes to the Director."),
    when:function(){ try{ return !noTrip(); }catch(_){ return true; } },
@@ -127,10 +127,11 @@ TOUR.add([
     { el:"[onclick=\"KR.open()\"]", t:V("Báo cáo KPI tháng","Monthly KPI report"), x:V("Hạn ngày 02 hằng tháng, 16:00.","Due on the 2nd of each month, 16:00.") },
     { el:"[onclick=\"SE.open()\"]", t:V("Setting Expectation","Setting Expectation"), x:V("Tự đánh giá quý, tải file Word.","Quarterly self-review, download the Word file.") }
    ] },
- { id:"meet", v:1, d:"2026-10-11", g:V("Báo cáo & KPI","Reports & KPI"), ic:"people", t:V("Họp tuần","Weekly meeting"), x:V("Biên bản họp theo 4 mục, so sánh tuần trước.","Meeting notes in 4 parts, compared with last week."),
+ { id:"meet", v:2, d:"2026-10-16", g:V("Báo cáo & KPI","Reports & KPI"), ic:"people", t:V("Họp tuần","Weekly meeting"), x:V("Biên bản họp theo 4 mục, số liệu tự động, so sánh tuần trước.","Meeting notes in 4 parts with automatic figures, compared with last week."),
    steps:[
     { el:"#mtTabs", do:pg("meet"), wait:800, t:V("Từng người","Each person"), x:V("Chọn từng thành viên để ghi.","Pick each team member.") },
-    { el:"#mtSteps2", t:V("4 mục họp","4 parts"), x:V("Forecast NPP · Quan hệ KH &amp; thị trường · Tình hình thầu · Thông tin khác.","Distributor forecast · Customers &amp; market · Tenders · Other.") },
+    { el:"#mtSteps2", t:V("4 mục họp","4 parts"), x:V("Tổng quan (doanh số · KPI) · Khách hàng · Hoạt động &amp; Kế hoạch (đi địa bàn, công việc khác, thuyết trình, ADP) · Kết quả bán hàng (mở mới &amp; SKU, đơn hàng).","Overview (sales · KPIs) · Customers · Activities &amp; Plans (visits, tasks, presentations, ADP) · Sales Result (new accounts &amp; SKUs, orders).") },
+    { el:"#mt3Tabs", do:function(){ try{ mtGoStep(3); }catch(_){} }, wait:400, t:V("Số liệu tự động","Automatic figures"), x:V("Mỗi mục tự lấy số liệu từ CRM; bên phải là ô ghi chú họp.","Each part reads its figures from the CRM; meeting notes on the right.") },
     { el:"[onclick=\"mtSave()\"]", t:V("Lưu biên bản","Save notes"), x:V("Lưu, xem lịch sử, gửi email tuần.","Save, see history, send the weekly email.") }
    ] },
  { id:"dash", v:3, d:"2026-10-16", g:V("Báo cáo & KPI","Reports & KPI"), ic:"kpi", t:V("Dashboard","Dashboard"), x:V("Doanh số và khách hàng — gọn trên 1 trang.","Sales and customers on one page."),
