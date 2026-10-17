@@ -7,6 +7,13 @@
 function E(u){ u.en={ title:u.title, items:u.items.map(function(i){ return { title:i.title, text:i.text }; }) }; return u; }
 window.MMH_UPDATES = [
   E({
+    id:"2026-10-17-v33.1", version:"v33.1", date:"2026-10-17",
+    title:"To do: weekly reports not sent",
+    summary:"The To do box on the Dashboard now also shows who has not sent last week's weekly report.",
+    items:[
+      { type:"new", icon:"📧", title:"Last week's weekly report", text:"Open <b>Dashboard</b>: the <b>To do</b> box shows the PICs who have not sent last week's report yet (for a PIC: your own report). Click it to open <b>Submit Report</b>. Checking starts with the week of 19–25 Oct.", img:"updates/v33.1/dash_todo.jpg" }
+    ] }),
+  E({
     id:"2026-10-17-v33.0", version:"v33.0", date:"2026-10-17",
     title:"To-do box and PIC ranking on the Dashboard · simpler navigation",
     summary:"The Dashboard shows what is waiting for you, compares PICs and has more charts. Field visits, the phone bottom bar, the visit form and report sending are simpler. \"CRM order\" is now just \"Order\", and Monthly Tasks is now Monthly Plan.",
