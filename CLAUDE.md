@@ -157,3 +157,8 @@ Kiến trúc & quy ước giống MMH Report Hub (repo `ManiMedicalHanoi/MMH-Rep
   lần sau đi thẳng đường vòng, lỗi thì thử lại trực tiếp. Mock: `open({toBlock:true})` (turnover 403) + action `rhTurnover`.
 - **v32.8 (17/10/2026, khối `v328-css` + `v328-js`)**: chứng từ đơn hàng dán ẢNH CHỤP MÀN HÌNH — `formOrder` bọc ⇒ khung `#v328-drop` (kéo thả · **Dán ảnh** `v328Paste('ox')` = `navigator.clipboard.read` cho điện thoại ·
   Chọn file = input `#ox_file` cũ); Ctrl+V khi form đơn mở ⇒ `oxFiles` (đường tải `orderDoc` cũ), ảnh dán đặt tên `ChupManHinh_yyyyMMdd_HHmmss_<số thứ tự>.png` (dán nhiều tấm liên tiếp cho chứng từ dài, khung đếm "đã có n file"). Mở mới: nút "Dán ảnh chụp màn hình" `#v328-na` dưới `#naDrop` (`naWireDrop` bọc).
+- **v32.9 (17/10/2026, sửa khối `v322-js` + khối mới `v329-css` / `v329-js`)**: ① Đơn hàng = 1 trang (bỏ chế độ `S.ordMode="res"`, mục ảo `orderres` gỡ khỏi `TABS`; `order` chuyển sang nhóm Kết quả bán hàng, nhãn "Đơn hàng";
+  `go("orderres")` ⇒ `order`): số liệu + nhóm sản phẩm (`.v329-top`) trên, danh sách dưới; cột Ngày đặt thay dải chấm ngày; "x sản phẩm" thay "x dòng"; bấm 1 đơn ⇒ `v329Open(k)` màn hình Chi tiết đơn hàng
+  (`window.__ordG` = nhóm dòng theo đơn, nút Sửa đơn = `rOrder`). Dòng sản phẩm `.v322-lines` vẫn có trong DOM (ẩn) để v32.0 tìm đơn. ② `renderDash` 2 tab (`S.d3.tab`, `localStorage.mmh_d4_tab`, `#d4-tabs`):
+  Doanh số (cột theo tháng `vbars` thực tế + vạch mục tiêu, KPI doanh số mỗi dòng theo mục tiêu riêng `hbars(...,self)`, nhóm sản phẩm, khách giá trị cao) · Khách hàng (viếng thăm theo tháng, khách theo loại,
+  độ phủ theo PIC, cần chăm sóc lại). SVG một màu `--t-pri` + vạch xám, `<title>` để rê chuột. ③ Backend: sửa #ERROR! KPI viếng thăm tab 9 (`k68VisFix_`, K68_VIS_VER 1017).
