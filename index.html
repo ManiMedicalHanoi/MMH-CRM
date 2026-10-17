@@ -3994,7 +3994,7 @@ function buildNav(){
     if(t.grp!==lastGrp){ h+='<div class="grp">'+t.grp+'</div>'; lastGrp=t.grp; }
     h+='<button class="nvi" data-t="'+t.id+'" onclick="go(\''+t.id+'\')"><span class="ic">'+t.ic+'</span><span class="lb">'+t.lb+'</span></button>';
   });
-  h+='<div style="flex:1"></div><div style="padding:10px;font-size:10.5px;color:var(--mute);line-height:1.5">MMH CRM v32.6<br>'+
+  h+='<div style="flex:1"></div><div style="padding:10px;font-size:10.5px;color:var(--mute);line-height:1.5">MMH CRM v32.7<br>'+
      (isMgmt()?'<a href="'+DRIVE_FOLDER+'" target="_blank">📁 Folder ảnh Drive</a>':"")+'</div>';
   $("side").innerHTML=h;
   /* ⭐ v4.5 — thanh dưới trượt ngang, đủ mọi mục, bỏ nút "Thêm" */
@@ -20721,7 +20721,7 @@ window.QS2={ open:qsOpen };
 </script>
 
 <!-- ⭐ v30.3 — THÔNG BÁO CẬP NHẬT (chép từ Report Hub): dữ liệu updates/notes.js · tự hiện 7 ngày · nút "Có gì mới" trên thanh trên cùng -->
-<script src="updates/notes.js?v=32.6"></script>
+<script src="updates/notes.js?v=32.7"></script>
 <style id="upd-css">
 #upd,#upd-zoom{--t-pri:var(--blue);--t-pri2:var(--blue-d);--t-ink:var(--navy);--t-soft:var(--pale);--t-line:var(--lb2);--t-bg:#F6F8FA;--mmh-blue:var(--blue);--mmh-navy:var(--navy)}
 
@@ -24831,7 +24831,7 @@ window.V317NPP={ list:list, apply:apply };
 </script>
 <script src="testflow/testflow.js?v=1.0"></script>
 <script src="tour/tour.js?v=1.1"></script>
-<script src="tour/tours.js?v=32.6"></script>
+<script src="tour/tours.js?v=32.7"></script>
 <script id="v319-i18n">
 /* v31.9 — bổ sung bản dịch EN (nhóm Thái): ô chọn account "N kết quả" */
 (function(){ try{ if(typeof RULES_EN!=="undefined" && RULES_EN.unshift){
@@ -26334,6 +26334,41 @@ mtOverviewHtml=function(p){
     return dv.innerHTML;
   }catch(_){ return h; }
 };
+})();
+</script>
+<script id="v327-js">
+/* v32.7 (17/10/2026) — "Không đọc được file Turnover": web app Turnover chỉ cho người trong domain ⇒ trình duyệt đăng nhập Gmail khác /
+   nhiều tài khoản / Safari chặn cookie bị chặn. Đọc trực tiếp lỗi ⇒ tự đọc qua Training Hub (action rhTurnover, backend HUB v3.32: kiểm rhKey + phiên email,
+   gọi web app Turnover bằng quyền của chủ Training Hub). Máy đã phải đi đường vòng ⇒ nhớ 12 giờ, lần sau đi thẳng đường vòng (lỗi thì thử lại trực tiếp). */
+(function(){
+  if(typeof turnoverJsonp!=="function") return;
+  var K="mmh_to_via", _tj=turnoverJsonp;
+  function viaOn(){ try{ return +localStorage.getItem(K)>Date.now(); }catch(_){ return false; } }
+  function viaSet(on){ try{ if(on) localStorage.setItem(K,String(Date.now()+12*3600e3)); else localStorage.removeItem(K); }catch(_){} }
+  function hub(params,ms){
+    var base=window.TRAINING_HUB_API; if(!base) return Promise.reject(new Error("Training Hub?"));
+    var q={ action:"rhTurnover", op:params.action||"getTurnoverData", rhKey:(typeof TRN_KEY!=="undefined"?TRN_KEY:""), actor:(S.user&&S.user.pic)||"" };
+    ["fy","seg","fresh","n","_ts"].forEach(function(k){ if(params[k]!=null && params[k]!=="") q[k]=params[k]; });
+    return new Promise(function(res,rej){
+      var cb="__mmhtoh_"+Date.now()+"_"+Math.floor(Math.random()*1e5), sc=document.createElement("script");
+      var t=setTimeout(function(){ done(); rej(new Error(TX("Quá thời gian chờ khi đọc file Turnover","Timed out reading the Turnover file"))); },(ms||45000)+15000);
+      function done(){ clearTimeout(t); try{ delete window[cb]; }catch(_){ window[cb]=undefined; } if(sc.parentNode) sc.parentNode.removeChild(sc); }
+      window[cb]=function(d){ done(); res(d); };
+      sc.onerror=function(){ done(); rej(new Error(TX("Không đọc được file Turnover (cả trực tiếp và qua Training Hub) — thử lại sau.","Cannot read the Turnover file (directly or via the Training Hub) — try again later."))); };
+      sc.src=base+"?"+Object.keys(q).map(function(k){ return encodeURIComponent(k)+"="+encodeURIComponent(q[k]); }).join("&")+"&callback="+cb;
+      document.body.appendChild(sc);
+    });
+  }
+  window.turnoverJsonp=turnoverJsonp=function(params,ms){
+    params=params||{};
+    var p1=Object.assign({},params), p2=Object.assign({},params);
+    if(viaOn()) return hub(p1,ms).then(function(j){ if(j && j.ok===false && /phiên|đăng nhập|khoá kết nối/i.test(String(j.error||""))) throw new Error(j.error); return j; })
+      .catch(function(){ return _tj(p2,ms).then(function(j){ viaSet(false); return j; }); });
+    return _tj(p1,ms).catch(function(e){
+      if(/Quá thời gian/.test(String(e&&e.message))) throw e;
+      return hub(p2,ms).then(function(j){ if(j && j.ok!==false) viaSet(true); return j; });
+    });
+  };
 })();
 </script>
 </body>

@@ -152,3 +152,6 @@ Kiến trúc & quy ước giống MMH Report Hub (repo `ManiMedicalHanoi/MMH-Rep
   tên tiếng Anh `Reports & Plans · Fanpage & Consulting · Event Enrolment · Training & Research · Others MM/yyyy`. Mỗi key có mô tả ngắn (`BASE[i].d`) trong `fxOpen` + gợi ý đầu việc (`ex`, placeholder + `.fx-hint`
   ở form đầu việc). ② Họp tuần: ghi chú RIÊNG từng tab (`NOTE`: visitNote · otherNote · presNote · tripNote · adpNote · skuNote · ordNote; Thái không có tab đơn ⇒ salesNote), khung `#mt3Note` / `#mt4Note`
   đổi theo tab (`paintNote`, chỉ vẽ lại khi đổi tab — không vẽ lại lúc đang gõ), chấm `.mt5-nd` = tab đã ghi; email / PDF in ghi chú dưới từng phần.
+- **v32.7 (17/10/2026, khối `v327-js`)**: web app Turnover chỉ cho người trong domain ⇒ máy đăng nhập Gmail khác / nhiều tài khoản / Safari báo "Không đọc được file Turnover". `turnoverJsonp` bọc:
+  lỗi trực tiếp (trừ hết giờ) ⇒ đọc qua Training Hub `rhTurnover` (HUB v3.32, `RH_Turnover.gs`: rhKey + phiên `tk`, UrlFetch bằng quyền chủ Training Hub); thành công ⇒ nhớ 12 giờ (`localStorage.mmh_to_via`),
+  lần sau đi thẳng đường vòng, lỗi thì thử lại trực tiếp. Mock: `open({toBlock:true})` (turnover 403) + action `rhTurnover`.

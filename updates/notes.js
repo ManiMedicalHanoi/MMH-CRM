@@ -7,6 +7,14 @@
 function E(u){ u.en={ title:u.title, items:u.items.map(function(i){ return { title:i.title, text:i.text }; }) }; return u; }
 window.MMH_UPDATES = [
   E({
+    id:"2026-10-17-v32.7", version:"v32.7", date:"2026-10-17",
+    title:"Distributor sales load again in the weekly meeting",
+    summary:"Some computers showed \"Cannot read the Turnover file\" (e.g. Chrome signed in to another Gmail account). The CRM now reads the Turnover file through the Training Hub automatically.",
+    items:[
+      { type:"fix", icon:"↻", title:"Turnover file always readable", text:"Weekly meeting ▸ 1. Overview ▸ Distributor sales: if reading the Turnover file directly fails, the CRM reads it through the Training Hub with your company login — the figures appear as usual, nothing to do.", img:"updates/v32.7/turnover.jpg" }
+    ]
+  }),
+  E({
     id:"2026-10-17-v32.6", version:"v32.6", date:"2026-10-17",
     title:"Other tasks: Training & Research, Thailand list, short descriptions · separate meeting notes",
     summary:"A 4th fixed key task, Training & Research, is added for Dental, Surgical and Eyeless. Thailand now uses the same list in English plus Others. Each key task shows a short description. The weekly meeting has separate notes for each part.",
