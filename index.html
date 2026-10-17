@@ -3994,7 +3994,7 @@ function buildNav(){
     if(t.grp!==lastGrp){ h+='<div class="grp">'+t.grp+'</div>'; lastGrp=t.grp; }
     h+='<button class="nvi" data-t="'+t.id+'" onclick="go(\''+t.id+'\')"><span class="ic">'+t.ic+'</span><span class="lb">'+t.lb+'</span></button>';
   });
-  h+='<div style="flex:1"></div><div style="padding:10px;font-size:10.5px;color:var(--mute);line-height:1.5">MMH CRM v33.0<br>'+
+  h+='<div style="flex:1"></div><div style="padding:10px;font-size:10.5px;color:var(--mute);line-height:1.5">MMH CRM v33.1<br>'+
      (isMgmt()?'<a href="'+DRIVE_FOLDER+'" target="_blank">📁 Folder ảnh Drive</a>':"")+'</div>';
   $("side").innerHTML=h;
   /* ⭐ v4.5 — thanh dưới trượt ngang, đủ mọi mục, bỏ nút "Thêm" */
@@ -20717,7 +20717,7 @@ window.QS2={ open:qsOpen };
 </script>
 
 <!-- ⭐ v30.3 — THÔNG BÁO CẬP NHẬT (chép từ Report Hub): dữ liệu updates/notes.js · tự hiện 7 ngày · nút "Có gì mới" trên thanh trên cùng -->
-<script src="updates/notes.js?v=33.0"></script>
+<script src="updates/notes.js?v=33.1"></script>
 <style id="upd-css">
 #upd,#upd-zoom{--t-pri:var(--blue);--t-pri2:var(--blue-d);--t-ink:var(--navy);--t-soft:var(--pale);--t-line:var(--lb2);--t-bg:#F6F8FA;--mmh-blue:var(--blue);--mmh-navy:var(--navy)}
 
@@ -22930,7 +22930,7 @@ var bar=document.createElement("div"); bar.id="tm-bar";
 bar.innerHTML='<span>CHẾ ĐỘ THỬ · đang dùng như <b>'+esc(TM.pic)+'</b> · không lưu dữ liệu · email chỉ gửi về '+esc(adminEmail())+'</span><button type="button" onclick="CRMTEST.pick()">Đổi người</button><button type="button" onclick="CRMTEST.stop()">Thoát</button>';
 document.body.appendChild(bar);
 var READ={ tfPending:1, tfLog:1, tfTrips:1, weekly:1, bundle:1, version:1, list:1, multi:1, visitFeed:1, customerIndex:1, kpi:1, krData:1, productCodes:1, photoMeta:1, custLog:1, activity:1,
-  mtList:1, mtGet:1, mtTenders:1, mtPrices:1, naList:1, naPending:1, weekly:1, boot:1, monthly:1, myTasks:1, sheets:1, tripMaster:1, tripMaster2:1, tripInfo:1, tripSync:1,
+  mtList:1, mtGet:1, mtTenders:1, mtPrices:1, naList:1, naPending:1, rpStatus:1, weekly:1, boot:1, monthly:1, myTasks:1, sheets:1, tripMaster:1, tripMaster2:1, tripInfo:1, tripSync:1,
   getTurnoverData:1, getNppDetail:1, customers:1, ping:1, rhKpi:1, rhKpiMail:1, rhKpiMailPreview:1, rhAuthMe:1, rhAuthStart:1, rhAuthVerify:1,
   rhSessions:1, rhMeta:1, rhMaterials:1, rhDirectory:1, rhAssignList:1, rhMyChecks:1, refStatus:1, mmList:1, mmGet:1, string:1, version2:1, kpiApiMembers:1, kpiApiMember:1, rhKpiTotal:1, photoB64:1, account360:1 };
 var MAIL={ weeklyReport:1, monthlyReport:1 };
@@ -24613,7 +24613,7 @@ setTimeout(function(){ load(); try{ if(S.other && S.other.keys) stamp(S.other.ke
 (function(){
 "use strict";
 var KEY="mmh_sbx_crm", SB=window.__CRM_SB||null, GAS=/^https:\/\/script\.google\.com\//;
-var READ=/^(weekly|boot|bundle|version|list|multi|visitFeed|customerIndex|customerDetail|account360|kpi|krData|productCodes|photoMeta|photoB64|custLog|activity|mt(List|Get|Tenders|Prices)|na(List|Pending|Get)|monthly|myTasks|sheets|trip(Master2?|Info|Sync)|tf(Pending|Log|Trips)|getTurnoverData|getNppDetail|customers|ping|sheetInfo|rh(Kpi|KpiMail|KpiMailPreview|AuthMe|AuthStart|AuthVerify|Sessions|Meta|Materials|Directory|AssignList|MyChecks|KpiTotal|CoachReview)|refStatus|mm(List|Get)|kpiApiMembers?|orderPending|tmInfo|string|version2|events|list)$/;
+var READ=/^(rpStatus|weekly|boot|bundle|version|list|multi|visitFeed|customerIndex|customerDetail|account360|kpi|krData|productCodes|photoMeta|photoB64|custLog|activity|mt(List|Get|Tenders|Prices)|na(List|Pending|Get)|monthly|myTasks|sheets|trip(Master2?|Info|Sync)|tf(Pending|Log|Trips)|getTurnoverData|getNppDetail|customers|ping|sheetInfo|rh(Kpi|KpiMail|KpiMailPreview|AuthMe|AuthStart|AuthVerify|Sessions|Meta|Materials|Directory|AssignList|MyChecks|KpiTotal|CoachReview)|refStatus|mm(List|Get)|kpiApiMembers?|orderPending|tmInfo|string|version2|events|list)$/;
 function au0(){ try{ var o=JSON.parse(localStorage.getItem("mmh_tk")||"null"); return o&&o.user||null; }catch(_){ return null; } }
 function isAdmin(){ var u=au0(); return !!(u&&u.admin); }
 function esc2(s){ return String(s==null?"":s).replace(/[&<>"]/g,function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]; }); }
@@ -24827,7 +24827,7 @@ window.V317NPP={ list:list, apply:apply };
 </script>
 <script src="testflow/testflow.js?v=1.0"></script>
 <script src="tour/tour.js?v=1.1"></script>
-<script src="tour/tours.js?v=33.0"></script>
+<script src="tour/tours.js?v=33.1"></script>
 <script id="v319-i18n">
 /* v31.9 — bổ sung bản dịch EN (nhóm Thái): ô chọn account "N kết quả" */
 (function(){ try{ if(typeof RULES_EN!=="undefined" && RULES_EN.unshift){
@@ -26817,9 +26817,33 @@ function todo(){
     if(pr) it.push({ n:pr, t:L("buổi thuyết trình chưa đủ báo cáo","presentation(s) without a complete report"), go:"present" }); }catch(_){}
   try{ var od=(terrRows()||[]).filter(function(w){ var d=iso(w.start); return d && d<today && d>=d30 && (mgr||picMatch(w.pic||"",me)) && !/complet|cancel|stop|dừng|huỷ|hủy/i.test(String(w.status||"")) && !/^tbd/i.test(String(parseAcc(w.account).name||"")); }).length;
     if(od) it.push({ n:od, t:L("lượt đi địa bàn đã qua ngày chưa cập nhật kết quả","past visit(s) without a result"), go:"visit" }); }catch(_){}
+  try{ var rp=rpMiss(mgr,me); if(rp) it.push(rp); }catch(_){}
   if(!it.length) return "";
   return '<div class="v33-todo" id="v33-todo"><h4>'+e2(L("Cần xử lý","To do"))+'</h4><div class="ls">'+it.map(function(x){ return '<div class="it'+(x.w?" w":"")+'" onclick="go(\''+x.go+'\')"><b>'+x.n+'</b><span>'+e2(x.t)+'</span><i>›</i></div>'; }).join("")+'</div></div>';
 }
+/* — v33.1: báo cáo tuần trước chưa gửi (backend rpStatus, CRM v10.15) — */
+S._rpSt=S._rpSt||null;
+function rpLoad(){
+  if(S._rpLd || (S._rpSt && Date.now()-S._rpSt.at<10*60000)) return;
+  try{ if(typeof isTH==="function" && isTH()) return; }catch(_){}
+  S._rpLd=1;
+  apiGet("rpStatus",{ _ts:Date.now() }).then(function(j){ S._rpLd=0; S._rpSt={ at:Date.now(), ok:!!(j&&j.ok&&j.sent&&j.since), sent:(j&&j.sent)||{}, since:String((j&&j.since)||"") }; if(S.tab==="dash") renderDash(); })
+    .catch(function(){ S._rpLd=0; S._rpSt={ at:Date.now(), ok:false, sent:{} }; });
+}
+function rpMiss(mgr,me){
+  rpLoad(); var st=S._rpSt; if(!st||!st.ok) return null;
+  var wk=addDays(mondayOf(todayISO()),-7), we=addDays(wk,6);
+  /* chỉ xét tuần bắt đầu SAU ngày backend bắt đầu ghi nhận (tránh báo nhầm tuần cũ) */
+  if(!st.since || wk<addDays(mondayOf(st.since),7)) return null;
+  var who=mgr?(S.master.pic||[]).slice():[me];
+  var sent=st.sent||{}, keys=Object.keys(sent);
+  var miss=who.filter(function(p){ if(!p) return false; var k=keys.filter(function(x){ return x.toLowerCase()===String(p).toLowerCase(); })[0]; return !(k && String(sent[k].from||"")>=wk); });
+  if(!miss.length) return null;
+  var rng=fmtVN(wk).slice(0,5)+"–"+fmtVN(we).slice(0,5);
+  return mgr ? { n:miss.length, t:L("PIC chưa gửi báo cáo tuần "+rng+": ","PIC(s) without the "+rng+" weekly report: ")+miss.join(", "), go:"report", w:1 }
+             : { n:1, t:L("Bạn chưa gửi báo cáo tuần "+rng,"Your "+rng+" weekly report is not sent yet"), go:"report", w:1 };
+}
+window.v33RpMiss=rpMiss;
 /* — bảng so sánh PIC: doanh số — */
 function picList(){
   var s={}, out=[]; k8Pics().forEach(function(p){ if(!s[p.pic]){ s[p.pic]=1; out.push(p.pic); } });
