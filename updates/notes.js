@@ -7,6 +7,16 @@
 function E(u){ u.en={ title:u.title, items:u.items.map(function(i){ return { title:i.title, text:i.text }; }) }; return u; }
 window.MMH_UPDATES = [
   E({
+    id:"2026-10-17-v32.6", version:"v32.6", date:"2026-10-17",
+    title:"Other tasks: Training & Research, Thailand list, short descriptions · separate meeting notes",
+    summary:"A 4th fixed key task, Training & Research, is added for Dental, Surgical and Eyeless. Thailand now uses the same list in English plus Others. Each key task shows a short description. The weekly meeting has separate notes for each part.",
+    items:[
+      { type:"new", icon:"☰", title:"Training & Research + descriptions", text:"Other tasks ▸ <b>+ Key Task</b> ⇒ 4 key tasks of the month, each with a short description: Reports &amp; plans · Fanpage &amp; consulting · Event enrolment · <b>Training &amp; Research</b> (products, competitors, market information). The sub-task form shows an example.", img:"updates/v32.6/other.jpg" },
+      { type:"imp", icon:"🌏", title:"Thailand: fixed key tasks in English", text:"Thailand team ▸ Other tasks ▸ pick Reports &amp; Plans · Fanpage &amp; Consulting · Event Enrolment · Training &amp; Research · <b>Others</b> of the month. Other key task names can no longer be typed.", img:"updates/v32.6/other_th.jpg" },
+      { type:"imp", icon:"📝", title:"Separate meeting notes", text:"Weekly meeting ▸ parts 3 and 4 ▸ each tab (Activity log, Daily tasks, Presentations, Business trips, ADP, New accounts &amp; SKUs, Orders) has its own notes on the right; a dot marks tabs with notes. The weekly email and PDF show each note under its part.", img:"updates/v32.6/meet_notes.jpg" }
+    ]
+  }),
+  E({
     id:"2026-10-16-v32.5", version:"v32.5", date:"2026-10-16",
     title:"Other tasks: 3 fixed monthly key tasks · weekly meeting in 4 parts",
     summary:"Sales now log other tasks under 3 fixed key tasks of the month. The weekly meeting follows the new 4-part frame with automatic figures — the tender part is gone and ADP is added.",

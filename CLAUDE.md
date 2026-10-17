@@ -148,3 +148,7 @@ Kiến trúc & quy ước giống MMH Report Hub (repo `ManiMedicalHanoi/MMH-Rep
   chưa có ⇒ `addKey` rồi mở form sub), sửa key ⇒ tên khoá, không thêm sub vào key khác. Nhóm Thái giữ nguyên. ② Họp tuần 4 mục (`MT_STEPS`): Tổng quan (#mtNpp + KPI tháng `#mt5Kpi`) · Khách hàng (`#mt2Body`,
   ghi chú `custNote`) · Hoạt động & Kế hoạch (`#mt3Tabs`: đi địa bàn · công việc khác · thuyết trình · công tác · ADP, `visitNote`) · Kết quả bán hàng (`#mt4Tabs`: SKU · đơn hàng, `salesNote` + `other`). Bỏ thầu
   (`mtTdLoad` / `mtPaintTd` rỗng). Snapshot `v:2` thêm `kpi` / `adp` / `other`; `mtRecHtml` (email / PDF / lịch sử) theo 4 mục, biên bản cũ (v1) giữ bố cục cũ; bảng tổng quan email bỏ cột thầu.
+- **v32.6 (17/10/2026, sửa khối `v325-js` / `v325m-js`, backend `MMH_SalesTasks.gs` v1.3 + crm-thai)**: ① Key task cố định thứ 4 **Đào tạo và nghiên cứu**; nhóm Thái (`isTH() && ownTasks()`) dùng cùng bộ chọn,
+  tên tiếng Anh `Reports & Plans · Fanpage & Consulting · Event Enrolment · Training & Research · Others MM/yyyy`. Mỗi key có mô tả ngắn (`BASE[i].d`) trong `fxOpen` + gợi ý đầu việc (`ex`, placeholder + `.fx-hint`
+  ở form đầu việc). ② Họp tuần: ghi chú RIÊNG từng tab (`NOTE`: visitNote · otherNote · presNote · tripNote · adpNote · skuNote · ordNote; Thái không có tab đơn ⇒ salesNote), khung `#mt3Note` / `#mt4Note`
+  đổi theo tab (`paintNote`, chỉ vẽ lại khi đổi tab — không vẽ lại lúc đang gõ), chấm `.mt5-nd` = tab đã ghi; email / PDF in ghi chú dưới từng phần.
