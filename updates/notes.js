@@ -7,6 +7,18 @@
 function E(u){ u.en={ title:u.title, items:u.items.map(function(i){ return { title:i.title, text:i.text }; }) }; return u; }
 window.MMH_UPDATES = [
   E({
+    id:"2026-10-17-v32.9", version:"v32.9", date:"2026-10-17",
+    title:"Dashboard with charts in 2 tabs · one Orders page with order details",
+    summary:"The Dashboard now has two tabs, Sales and Customers, with monthly charts. Orders is one page: figures on top, the list below, and a click on an order opens its details. Customer-visit KPIs on the KPI sheet are fixed.",
+    items:[
+      { type:"imp", icon:"📊", title:"Dashboard ▸ Sales", text:"Dashboard ▸ <b>Sales</b>: distributor sales by month (bars, line = target), CRM order value by month, each sales KPI against its own target (this month and to date), product groups and top customers. Hover a bar for the numbers.", img:"updates/v32.9/dash_sales.jpg" },
+      { type:"imp", icon:"👥", title:"Dashboard ▸ Customers", text:"Dashboard ▸ <b>Customers</b>: visits by month, customers by type (cared for / total), coverage by PIC and the accounts to revisit.", img:"updates/v32.9/dash_cust.jpg" },
+      { type:"imp", icon:"🧾", title:"One Orders page", text:"Menu ▸ Sales Result ▸ <b>Orders</b> (Order Entry and Orders are merged): figures and product groups on top, orders by month below with the number of <b>products</b> and the order date (the day strip is gone).", img:"updates/v32.9/orders.jpg" },
+      { type:"new", icon:"🔎", title:"Order details", text:"Click an order ⇒ a details screen: account, distributor, order type, approval status and note, every product with quantity and price, documents. <b>Edit order</b> opens the form.", img:"updates/v32.9/order_detail.jpg" },
+      { type:"fix", icon:"✓", title:"Visit KPIs on the KPI sheet", text:"The customer-visit KPI cells (C3) on sheet 9. TARGET &amp; KPI showed #ERROR! after the \"Completed only\" rule was added. They are repaired automatically the next time the CRM is opened.", img:"" }
+    ]
+  }),
+  E({
     id:"2026-10-17-v32.8", version:"v32.8", date:"2026-10-17",
     title:"Order documents: paste a screenshot",
     summary:"No need to save a file first: take a screenshot of the invoice / delivery note and paste it straight into the order.",
