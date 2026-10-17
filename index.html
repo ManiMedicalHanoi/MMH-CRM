@@ -3994,7 +3994,7 @@ function buildNav(){
     if(t.grp!==lastGrp){ h+='<div class="grp">'+t.grp+'</div>'; lastGrp=t.grp; }
     h+='<button class="nvi" data-t="'+t.id+'" onclick="go(\''+t.id+'\')"><span class="ic">'+t.ic+'</span><span class="lb">'+t.lb+'</span></button>';
   });
-  h+='<div style="flex:1"></div><div style="padding:10px;font-size:10.5px;color:var(--mute);line-height:1.5">MMH CRM v32.7<br>'+
+  h+='<div style="flex:1"></div><div style="padding:10px;font-size:10.5px;color:var(--mute);line-height:1.5">MMH CRM v32.8<br>'+
      (isMgmt()?'<a href="'+DRIVE_FOLDER+'" target="_blank">📁 Folder ảnh Drive</a>':"")+'</div>';
   $("side").innerHTML=h;
   /* ⭐ v4.5 — thanh dưới trượt ngang, đủ mọi mục, bỏ nút "Thêm" */
@@ -20721,7 +20721,7 @@ window.QS2={ open:qsOpen };
 </script>
 
 <!-- ⭐ v30.3 — THÔNG BÁO CẬP NHẬT (chép từ Report Hub): dữ liệu updates/notes.js · tự hiện 7 ngày · nút "Có gì mới" trên thanh trên cùng -->
-<script src="updates/notes.js?v=32.7"></script>
+<script src="updates/notes.js?v=32.8"></script>
 <style id="upd-css">
 #upd,#upd-zoom{--t-pri:var(--blue);--t-pri2:var(--blue-d);--t-ink:var(--navy);--t-soft:var(--pale);--t-line:var(--lb2);--t-bg:#F6F8FA;--mmh-blue:var(--blue);--mmh-navy:var(--navy)}
 
@@ -24831,7 +24831,7 @@ window.V317NPP={ list:list, apply:apply };
 </script>
 <script src="testflow/testflow.js?v=1.0"></script>
 <script src="tour/tour.js?v=1.1"></script>
-<script src="tour/tours.js?v=32.7"></script>
+<script src="tour/tours.js?v=32.8"></script>
 <script id="v319-i18n">
 /* v31.9 — bổ sung bản dịch EN (nhóm Thái): ô chọn account "N kết quả" */
 (function(){ try{ if(typeof RULES_EN!=="undefined" && RULES_EN.unshift){
@@ -26369,6 +26369,83 @@ mtOverviewHtml=function(p){
       return hub(p2,ms).then(function(j){ if(j && j.ok!==false) viaSet(true); return j; });
     });
   };
+})();
+</script>
+<style id="v328-css">
+.v328-drop{border:1.5px dashed var(--fld-line,#C3CDD8);border-radius:10px;padding:12px;margin-top:8px;background:#fff;text-align:center;transition:background .15s,border-color .15s}
+.v328-drop.hov{border-color:var(--t-pri,#3A5CAA);background:var(--t-soft,#F0F7FF)}
+.v328-drop b{display:block;font-size:13px;color:var(--t-ink,#003047);font-weight:600}
+.v328-drop small{display:block;font-size:12px;color:var(--sub,#5B6B7D);margin:3px 0 9px;line-height:1.45}
+.v328-drop .acts{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+.v328-na{display:flex;justify-content:center;margin-top:8px}
+</style>
+<script id="v328-js">
+/* v32.8 (17/10/2026) — chứng từ đơn hàng: dán ẢNH CHỤP MÀN HÌNH (người dùng yêu cầu: "cut màn rồi paste qua luôn").
+   · Máy tính: chụp màn hình (Win+Shift+S / ⌘+Ctrl+Shift+4) ⇒ Ctrl+V khi form đơn hàng đang mở; kéo thả ảnh / PDF vào khung.
+   · Điện thoại: nút "Dán ảnh" (navigator.clipboard.read — iPhone hiện bong bóng "Dán", Android hỏi quyền) hoặc chọn ảnh chụp màn hình trong thư viện.
+   · Ảnh dán đặt tên ChupManHinh_yyyyMMdd_HHmmss.png; đi đúng đường tải lên cũ (oxFiles ⇒ orderDoc, nén bằng naShrink).
+   · Mở mới & SKU mới (đã có Ctrl+V / kéo thả) thêm nút "Dán ảnh" cho điện thoại. */
+(function(){
+  function L(vi,en){ return TX(vi,en); }
+  function stamp(){ var d=new Date(), z=function(x){ return ("0"+x).slice(-2); }; return d.getFullYear()+z(d.getMonth()+1)+z(d.getDate())+"_"+z(d.getHours())+z(d.getMinutes())+z(d.getSeconds()); }
+  var seq=0;   /* đếm cả phiên ⇒ dán nhiều tấm liên tiếp không trùng tên (chứng từ dài: 2–4 ảnh) */
+  function shotName(t){ seq++; return L("ChupManHinh_","Screenshot_")+stamp()+"_"+seq+"."+(String(t||"image/png").split("/")[1]||"png").replace("jpeg","jpg"); }
+  function named(f){
+    if(f && /^image\//.test(f.type) && (!f.name || /^image\.(png|jpe?g|gif|webp)$/i.test(f.name))){ try{ return new File([f], shotName(f.type), { type:f.type }); }catch(_){ return f; } }
+    return f;
+  }
+  function feedOrder(list){ var a=[].map.call(list||[],named); if(a.length && window.oxFiles) window.oxFiles({ files:a, value:"" }); return a.length; }
+  function feedNa(list){ var a=[].map.call(list||[],named); if(a.length && window.naAddFiles) naAddFiles(a); return a.length; }
+  window.v328Paste=function(target){
+    var cb=navigator.clipboard;
+    if(!cb || !cb.read) return toast(L("Trình duyệt chưa cho đọc ảnh trong bộ nhớ tạm — máy tính bấm Ctrl+V; điện thoại bấm Chọn ảnh rồi chọn ảnh chụp màn hình.","This browser can't read images from the clipboard — press Ctrl+V on a computer; on a phone tap Choose file and pick the screenshot."),"warn",7000);
+    cb.read().then(function(items){
+      var ps=[];
+      items.forEach(function(it){ var t=(it.types||[]).filter(function(x){ return /^image\//.test(x); })[0]; if(t) ps.push(it.getType(t).then(function(b){ return new File([b], shotName(t), { type:t }); })); });
+      return Promise.all(ps);
+    }).then(function(files){
+      if(!files.length) return toast(L("Bộ nhớ tạm chưa có ảnh — chụp màn hình (hoặc Sao chép ảnh) rồi bấm Dán ảnh.","No image in the clipboard — take a screenshot (or copy an image), then tap Paste image."),"warn",6000);
+      var n=target==="na"?feedNa(files):feedOrder(files);
+      toast(L("Đã dán "+n+" ảnh — đang tải lên","Pasted "+n+" image(s) — uploading"),"ok");
+    }).catch(function(){ toast(L("Chưa đọc được ảnh — cho phép Dán khi trình duyệt hỏi, hoặc dùng Ctrl+V / chọn ảnh chụp màn hình trong thư viện.","Couldn't read the image — allow Paste when asked, or use Ctrl+V / pick the screenshot from your photos."),"warn",7000); });
+  };
+  /* Ctrl+V khi form đơn hàng đang mở (form Mở mới có bộ dán riêng) */
+  document.addEventListener("paste",function(e){
+    if(!$("ox_wrap")) return;
+    try{ if(window.naWzOpen && naWzOpen()) return; }catch(_){}
+    var fs=(e.clipboardData&&e.clipboardData.files)||[]; if(!fs.length) return;
+    e.preventDefault(); var n=feedOrder(fs);
+    if(n) toast(L("Đã dán "+n+" ảnh — đang tải lên","Pasted "+n+" image(s) — uploading"),"ok");
+  });
+  function decorate(){
+    var inp=$("ox_file"); if(!inp || inp._v328) return; inp._v328=1;
+    var lab=inp.closest("label"), holder=lab&&lab.parentNode; if(!holder) return;
+    var z=document.createElement("div"); z.className="v328-drop"; z.id="v328-drop";
+    z.innerHTML='<b>'+esc(L("Chứng từ: ảnh chụp màn hình, ảnh hoặc PDF","Documents: screenshot, photo or PDF"))+'</b>'+
+      '<small>'+esc(L("Máy tính: chụp màn hình rồi bấm Ctrl+V, hoặc kéo thả file vào đây · Điện thoại: bấm Dán ảnh, hoặc Chọn file ▸ ảnh chụp màn hình. Chứng từ dài: chụp từng phần rồi dán lần lượt — mỗi lần dán thêm 1 ảnh.","Computer: take a screenshot and press Ctrl+V, or drop files here · Phone: tap Paste image, or Choose file ▸ your screenshot. Long document: capture it part by part and paste each one — every paste adds an image."))+'</small>'+
+      '<div class="acts"><button type="button" class="btn sm pri" onclick="v328Paste(\'ox\')">'+esc(L("Dán ảnh","Paste image"))+'</button></div>';
+    holder.parentNode.insertBefore(z,holder);
+    var cnt=function(){ var t=z.querySelector('b'); if(t) t.textContent=L('Chứng từ: ảnh chụp màn hình, ảnh hoặc PDF','Documents: screenshot, photo or PDF')+(function(){ var n=dl?dl.querySelectorAll('a').length:0; return n?' · '+L('đã có '+n+' file','attached: '+n):''; })(); };
+    var dl=$('ox_docs'); if(dl) new MutationObserver(cnt).observe(dl,{childList:true});
+    [].slice.call(lab.childNodes).forEach(function(n){ if(n.nodeType===3) n.nodeValue=""; });
+    lab.insertBefore(document.createTextNode(L("Chọn file","Choose file")), inp);
+    z.querySelector(".acts").appendChild(lab); holder.remove();
+    ["dragenter","dragover"].forEach(function(ev){ z.addEventListener(ev,function(e){ e.preventDefault(); z.classList.add("hov"); }); });
+    ["dragleave","drop"].forEach(function(ev){ z.addEventListener(ev,function(e){ e.preventDefault(); z.classList.remove("hov"); }); });
+    z.addEventListener("drop",function(e){ feedOrder(e.dataTransfer&&e.dataTransfer.files); });
+  }
+  var _fo=window.formOrder;
+  if(typeof _fo==="function") window.formOrder=function(){ var r=_fo.apply(this,arguments); try{ decorate(); }catch(_){} return r; };
+  /* Mở mới & SKU mới: nút Dán ảnh dưới khung kéo thả */
+  if(typeof naWireDrop==="function"){
+    var _nw=naWireDrop;
+    naWireDrop=window.naWireDrop=function(){
+      var r=_nw.apply(this,arguments);
+      try{ var d=$("naDrop"); if(d && !$("v328-na")){ var b=document.createElement("div"); b.className="v328-na"; b.id="v328-na";
+        b.innerHTML='<button type="button" class="btn sm" onclick="event.stopPropagation();v328Paste(\'na\')">'+esc(L("Dán ảnh chụp màn hình","Paste screenshot"))+'</button>'; d.parentNode.insertBefore(b,d.nextSibling); } }catch(_){}
+      return r;
+    };
+  }
 })();
 </script>
 </body>

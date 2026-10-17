@@ -155,3 +155,5 @@ Kiến trúc & quy ước giống MMH Report Hub (repo `ManiMedicalHanoi/MMH-Rep
 - **v32.7 (17/10/2026, khối `v327-js`)**: web app Turnover chỉ cho người trong domain ⇒ máy đăng nhập Gmail khác / nhiều tài khoản / Safari báo "Không đọc được file Turnover". `turnoverJsonp` bọc:
   lỗi trực tiếp (trừ hết giờ) ⇒ đọc qua Training Hub `rhTurnover` (HUB v3.32, `RH_Turnover.gs`: rhKey + phiên `tk`, UrlFetch bằng quyền chủ Training Hub); thành công ⇒ nhớ 12 giờ (`localStorage.mmh_to_via`),
   lần sau đi thẳng đường vòng, lỗi thì thử lại trực tiếp. Mock: `open({toBlock:true})` (turnover 403) + action `rhTurnover`.
+- **v32.8 (17/10/2026, khối `v328-css` + `v328-js`)**: chứng từ đơn hàng dán ẢNH CHỤP MÀN HÌNH — `formOrder` bọc ⇒ khung `#v328-drop` (kéo thả · **Dán ảnh** `v328Paste('ox')` = `navigator.clipboard.read` cho điện thoại ·
+  Chọn file = input `#ox_file` cũ); Ctrl+V khi form đơn mở ⇒ `oxFiles` (đường tải `orderDoc` cũ), ảnh dán đặt tên `ChupManHinh_yyyyMMdd_HHmmss_<số thứ tự>.png` (dán nhiều tấm liên tiếp cho chứng từ dài, khung đếm "đã có n file"). Mở mới: nút "Dán ảnh chụp màn hình" `#v328-na` dưới `#naDrop` (`naWireDrop` bọc).

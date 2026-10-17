@@ -7,6 +7,15 @@
 function E(u){ u.en={ title:u.title, items:u.items.map(function(i){ return { title:i.title, text:i.text }; }) }; return u; }
 window.MMH_UPDATES = [
   E({
+    id:"2026-10-17-v32.8", version:"v32.8", date:"2026-10-17",
+    title:"Order documents: paste a screenshot",
+    summary:"No need to save a file first: take a screenshot of the invoice / delivery note and paste it straight into the order.",
+    items:[
+      { type:"new", icon:"⧉", title:"Paste screenshots (computer)", text:"New / edit order ▸ Documents ▸ take a screenshot (Win+Shift+S or ⌘+Ctrl+Shift+4) and press <b>Ctrl+V</b> — the image uploads at once. Long document? Capture it part by part and paste each one: every paste adds another image (2, 3, 4… per order). You can also drop files into the box.", img:"updates/v32.8/paste.jpg" },
+      { type:"new", icon:"📱", title:"Paste image (phone)", text:"On a phone tap <b>Paste image</b> after taking or copying a screenshot (allow Paste when asked), or <b>Choose file</b> ▸ the screenshot in your photos. New accounts &amp; SKUs also has a <b>Paste screenshot</b> button.", img:"updates/v32.8/paste_phone.jpg" }
+    ]
+  }),
+  E({
     id:"2026-10-17-v32.7", version:"v32.7", date:"2026-10-17",
     title:"Distributor sales load again in the weekly meeting",
     summary:"Some computers showed \"Cannot read the Turnover file\" (e.g. Chrome signed in to another Gmail account). The CRM now reads the Turnover file through the Training Hub automatically.",
