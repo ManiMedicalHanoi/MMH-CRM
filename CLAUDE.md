@@ -162,3 +162,10 @@ Kiến trúc & quy ước giống MMH Report Hub (repo `ManiMedicalHanoi/MMH-Rep
   (`window.__ordG` = nhóm dòng theo đơn, nút Sửa đơn = `rOrder`). Dòng sản phẩm `.v322-lines` vẫn có trong DOM (ẩn) để v32.0 tìm đơn. ② `renderDash` 2 tab (`S.d3.tab`, `localStorage.mmh_d4_tab`, `#d4-tabs`):
   Doanh số (cột theo tháng `vbars` thực tế + vạch mục tiêu, KPI doanh số mỗi dòng theo mục tiêu riêng `hbars(...,self)`, nhóm sản phẩm, khách giá trị cao) · Khách hàng (viếng thăm theo tháng, khách theo loại,
   độ phủ theo PIC, cần chăm sóc lại). SVG một màu `--t-pri` + vạch xám, `<title>` để rê chuột. ③ Backend: sửa #ERROR! KPI viếng thăm tab 9 (`k68VisFix_`, K68_VIS_VER 1017).
+- **v33.0 (17/10/2026, khối `v330-css` + `v330-js`, review vai Quản lý / PIC)**: ① Đi địa bàn / Công việc khác: máy tính ẩn thanh 3 tab con (`.wk-tabs.v33-hide`), `wkTabBar` thêm tiêu đề + `#v33-wkseg`
+  Danh sách · Lịch (`S._v33wk` = danh sách gần nhất); điện thoại giữ 3 tab, nhãn "Đi địa bàn". Chữ "Thông tin địa bàn" ⇒ "Đi địa bàn" mọi nơi. ② `formWeekly` / `ntTbdSync` bọc: chọn account ⇒ tự điền
+  Type task / Sales Process / Product group theo lượt gần nhất của account (không có ⇒ lần nhập trước `localStorage.mmh_nt_last`). ③ Dashboard (`renderDash` bọc): khung **Cần xử lý** `#v33-todo`
+  (đơn `v321Count`, Mở mới `canDecide` / `naIsRet`, thuyết trình chưa đủ báo cáo, lượt đi địa bàn quá ngày chưa xong ≤ 30 ngày), bảng **So sánh theo PIC** `#v33-pic` (quản lý, toàn nhóm), `#v33-omix` đơn theo
+  trạng thái / loại, `#v33-act` hoạt động theo loại + phản hồi, `#v33-picc` độ phủ theo PIC. ④ Thanh dưới điện thoại: Lịch · Địa bàn · Hôm nay · **Đơn hàng** · Thêm (`fourth` ưu tiên order); Họp tuần ẩn `#fab`
+  (`body.v33-meet`); `#btnTeam` ẩn (chọn nhóm chỉ ở menu bên / Thêm ▸ Nhóm đang xem); `#updBtn` ẩn trên điện thoại. ⑤ "Đơn hàng CRM" ⇒ "Đơn hàng"; "Công việc trong tháng" ⇒ **"Kế hoạch tháng"** (EN Monthly Plan).
+  Gửi báo cáo gom 1 chỗ: nút KPI / Kế hoạch tháng / Ctrl+K ⇒ `S.rpKind=…; go("report")`. Nhắc đơn hàng / thuyết trình 1 lần / ngày (localStorage). Câu lỗi kỹ thuật (Code.gs, Deploy) ⇒ câu thường. `.empty>.e` ẩn (emoji màn trống), chip NPP Họp tuần bỏ emoji.

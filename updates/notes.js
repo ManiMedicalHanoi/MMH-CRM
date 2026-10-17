@@ -7,6 +7,20 @@
 function E(u){ u.en={ title:u.title, items:u.items.map(function(i){ return { title:i.title, text:i.text }; }) }; return u; }
 window.MMH_UPDATES = [
   E({
+    id:"2026-10-17-v33.0", version:"v33.0", date:"2026-10-17",
+    title:"To-do box and PIC ranking on the Dashboard · simpler navigation",
+    summary:"The Dashboard shows what is waiting for you, compares PICs and has more charts. Field visits, the phone bottom bar, the visit form and report sending are simpler. \"CRM order\" is now just \"Order\", and Monthly Tasks is now Monthly Plan.",
+    items:[
+      { type:"new", icon:"✅", title:"Dashboard ▸ To do", text:"Open <b>Dashboard</b>: the <b>To do</b> box lists orders to approve or fix, new-account cases, presentations without a full report and past visits without a result. Click a line to open that page.", img:"updates/v33.0/dash_todo.jpg" },
+      { type:"new", icon:"🏆", title:"Comparison by PIC", text:"Managers: <b>Dashboard ▸ Sales</b> ranks every PIC by distributor sales % (month and to date), with visits, orders, order value and new accounts side by side.", img:"updates/v33.0/pic_rank.jpg" },
+      { type:"new", icon:"📊", title:"Orders by status and by type", text:"<b>Dashboard ▸ Sales</b> also shows how many orders are approved, waiting, need changes or were rejected, and how many orders there are of each order type.", img:"updates/v33.0/order_mix.jpg" },
+      { type:"new", icon:"🤝", title:"Activities and customer feedback", text:"<b>Dashboard ▸ Customers</b> adds completed activities by type (visit, call, message…) and customer feedback. Managers also get a coverage table by PIC.", img:"updates/v33.0/cust_act.jpg" },
+      { type:"imp", icon:"📍", title:"Field visits: one name, List · Calendar", text:"The visit list is called <b>Field visits</b> everywhere. On a computer the extra tab row is gone: open it from the menu and switch <b>List · Calendar</b> at the top right.", img:"updates/v33.0/visit_head.jpg" },
+      { type:"imp", icon:"⚡", title:"Visit form fills itself", text:"<b>＋ ▸ Field visit</b>: after you pick the account, task type, sales process and product group are filled from your last visit to that account. Just check and save.", img:"updates/v33.0/visit_form_m.jpg" },
+      { type:"imp", icon:"📱", title:"Phone: Orders in the bottom bar", text:"Bottom bar: <b>Calendar · Accounts · Today · Orders · More</b> (New accounts moved to More). In Weekly meeting the ＋ button no longer covers <b>Save minutes</b>. The team is switched only in the side menu or <b>More ▸ Team</b>.", img:"updates/v33.0/mobile_bar.jpg" },
+      { type:"imp", icon:"✏️", title:"Clearer names and messages", text:"\"CRM order value\" is now <b>Order value</b>; <b>Monthly Tasks</b> is now <b>Monthly Plan</b> (same function). All reports are sent from <b>Submit Report</b> — the KPI and Monthly Plan pages link there. Reminder pop-ups show once a day; technical error texts are replaced by plain messages." }
+    ] }),
+  E({
     id:"2026-10-17-v32.9", version:"v32.9", date:"2026-10-17",
     title:"Dashboard with charts in 2 tabs · one Orders page with order details",
     summary:"The Dashboard now has two tabs, Sales and Customers, with monthly charts. Orders is one page: figures on top, the list below, and a click on an order opens its details. Customer-visit KPIs on the KPI sheet are fixed.",
