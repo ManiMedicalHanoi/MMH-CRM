@@ -7,6 +7,13 @@
 function E(u){ u.en={ title:u.title, items:u.items.map(function(i){ return { title:i.title, text:i.text }; }) }; return u; }
 window.MMH_UPDATES = [
   E({
+    id:"2026-10-22-v33.2", version:"v33.2", date:"2026-10-22",
+    title:"New order e-mail goes to the HOD",
+    summary:"When a sales person saves a new order, the notification e-mail now goes to the HOD (Head of Sales & Marketing) instead of the Director.",
+    items:[
+      { type:"fix", icon:"📧", title:"New order notification", text:"Open <b>Orders</b> ▸ <b>New order</b> and save: CRM e-mails the <b>HOD</b> (Head of Sales & Marketing) — the person who approves orders — instead of the Director. The note under the form shows who receives it.", img:"updates/v33.2/order_mail.jpg" }
+    ] }),
+  E({
     id:"2026-10-17-v33.1", version:"v33.1", date:"2026-10-17",
     title:"To do: weekly reports not sent",
     summary:"The To do box on the Dashboard now also shows who has not sent last week's weekly report.",
