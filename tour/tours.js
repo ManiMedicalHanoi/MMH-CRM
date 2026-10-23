@@ -151,6 +151,13 @@ TOUR.add([
     { el:".sbx-teams", do:function(){ try{ SBX.pick(); }catch(_){} }, wait:500, t:V("Chọn nhóm","Pick the team"), x:V("Dental · Surgical · Eyeless.","Dental · Surgical · Eyeless.") },
     { el:".sbx-people", t:V("Chọn người","Pick the person"), x:V("Bấm tên để dùng app như người đó: sales, trưởng nhóm, HOD, Giám đốc.","Click a name to use the app as that person: sales, team leader, HOD, Director.") }
    ] },
+ { id:"rpstat", v:1, d:"2026-10-23", g:V("Quản trị","Admin"), ic:"doc", t:V("Thống kê gửi báo cáo","Report statistics"), x:V("Ai gửi báo cáo tuần, KPI tháng, tự đánh giá quý đúng hạn / muộn — xuất Excel.","Who sent weekly, monthly KPI and quarterly reports on time — Excel export."),
+   when:function(){ return !!(window.RPSTAT && RPSTAT.can()) && !(window.matchMedia && matchMedia("(max-width:720px)").matches); },
+   steps:[
+    { el:"#rps-btn", t:V("Thống kê báo cáo","Report stats"), x:V("Admin, Director, HOD hoặc người được cấp quyền.","Admin, Director, HOD or granted users.") },
+    { el:"#rps-ov .rps-row", do:function(){ try{ RPSTAT.open(); }catch(_){} }, wait:800, t:V("Chọn tháng","Pick the months"), x:V("Mỗi PIC · kỳ lấy <b>email gần nhất</b>: báo cáo tuần trước 24:00 ngày làm việc cuối của tuần (lịch VN / Thái Lan), KPI tháng trước 16:00 ngày 02.","Latest e-mail per PIC · period: weekly before 24:00 on the last working day (VN / Thailand calendar), KPI before 16:00 on day 02.") },
+    { el:"#rps-xls", t:V("Xuất Excel","Export Excel"), x:V("Theo tháng, theo quý, chi tiết, lịch làm việc.","By month, by quarter, details, work calendar.") }
+   ] },
  { id:"theme", v:2, d:"2026-10-11", g:V("Cá nhân hoá","Personalise"), ic:"gear", t:V("Màu giao diện","Colour theme"), x:V("Chọn tông màu bạn thích.","Pick the colour theme you like."),
    steps:[
     { el:more("#thBtn"), t:V("Màu giao diện","Colour theme"), x:V("10 tông màu, lưu trên máy này.","10 themes, saved on this device.") },

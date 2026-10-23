@@ -7,6 +7,15 @@
 function E(u){ u.en={ title:u.title, items:u.items.map(function(i){ return { title:i.title, text:i.text }; }) }; return u; }
 window.MMH_UPDATES = [
   E({
+    id:"2026-10-23-v33.3", version:"v33.3", date:"2026-10-23",
+    title:"Report statistics (on time / late) · e-mail the quarterly self-evaluation",
+    summary:"Every weekly report, monthly KPI report and quarterly self-evaluation e-mail is logged and compared with its deadline using the <b>MMH Vietnam / Thailand work calendar</b>. Admin, Director and HOD can export the statistics per PIC to Excel.",
+    items:[
+      { type:"new", icon:"▥", title:"Report statistics (Excel)", text:"Top bar ▸ <b>Report stats</b> ▸ choose the months ▸ <b>Export Excel</b>. The latest e-mail per PIC and period counts: weekly report before 24:00 on the last working day of the week (working Saturdays and holidays included), monthly KPI before 16:00 on day 02, quarterly self-evaluation before 17:00 on day 09 of the next quarter.", img:"updates/v33.3/v333stat.jpg" },
+      { type:"new", icon:"✉", title:"E-mail the quarterly self-evaluation", text:"KPI ▸ <b>Setting Expectation</b> ▸ fill in ▸ <b>Send e-mail</b> ⇒ the Word file is attached and recipients are pre-filled from your manager ▸ <b>Send</b> (or <b>Test to me</b>). Only e-mails sent this way count as submitted." }
+    ]
+  }),
+  E({
     id:"2026-10-22-v33.2", version:"v33.2", date:"2026-10-22",
     title:"New order e-mail goes to the HOD",
     summary:"When a sales person saves a new order, the notification e-mail now goes to the HOD (Head of Sales & Marketing) instead of the Director.",
