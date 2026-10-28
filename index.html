@@ -3994,7 +3994,7 @@ function buildNav(){
     if(t.grp!==lastGrp){ h+='<div class="grp">'+t.grp+'</div>'; lastGrp=t.grp; }
     h+='<button class="nvi" data-t="'+t.id+'" onclick="go(\''+t.id+'\')"><span class="ic">'+t.ic+'</span><span class="lb">'+t.lb+'</span></button>';
   });
-  h+='<div style="flex:1"></div><div style="padding:10px;font-size:10.5px;color:var(--mute);line-height:1.5">MMH CRM v33.3<br>'+
+  h+='<div style="flex:1"></div><div style="padding:10px;font-size:10.5px;color:var(--mute);line-height:1.5">MMH CRM v33.4<br>'+
      (isMgmt()?'<a href="'+DRIVE_FOLDER+'" target="_blank">📁 Folder ảnh Drive</a>':"")+'</div>';
   $("side").innerHTML=h;
   /* ⭐ v4.5 — thanh dưới trượt ngang, đủ mọi mục, bỏ nút "Thêm" */
@@ -20720,7 +20720,7 @@ window.QS2={ open:qsOpen };
 </script>
 
 <!-- ⭐ v30.3 — THÔNG BÁO CẬP NHẬT (chép từ Report Hub): dữ liệu updates/notes.js · tự hiện 7 ngày · nút "Có gì mới" trên thanh trên cùng -->
-<script src="updates/notes.js?v=33.3"></script>
+<script src="updates/notes.js?v=33.4"></script>
 <style id="upd-css">
 #upd,#upd-zoom{--t-pri:var(--blue);--t-pri2:var(--blue-d);--t-ink:var(--navy);--t-soft:var(--pale);--t-line:var(--lb2);--t-bg:#F6F8FA;--mmh-blue:var(--blue);--mmh-navy:var(--navy)}
 
@@ -24836,7 +24836,7 @@ window.RPSTAT_CFG={ lang:function(){ return (window.I18N && I18N.on) ? "en" : "v
 <script src="rpstat/rpstat.js?v=1.0"></script>
 <script src="testflow/testflow.js?v=1.0"></script>
 <script src="tour/tour.js?v=1.1"></script>
-<script src="tour/tours.js?v=33.3"></script>
+<script src="tour/tours.js?v=33.4"></script>
 <script id="v319-i18n">
 /* v31.9 — bổ sung bản dịch EN (nhóm Thái): ô chọn account "N kết quả" */
 (function(){ try{ if(typeof RULES_EN!=="undefined" && RULES_EN.unshift){
@@ -26932,6 +26932,138 @@ window.renderDash=renderDash=function(){
     }
   }catch(e){ try{ console.warn(e); }catch(_){} }
   return r;
+};
+})();
+</script>
+<script id="v334-js">
+/* ════════════════════════════════════════════════════════════════════════════════════════
+   ⭐ v33.4 (28/10/2026) — ĐƠN NHIỀU SẢN PHẨM (backend CRM v10.17, mmh-backend crm-dental / surgical / eyeless)
+   Lỗi: đơn lưu khi chưa có Order No. (nextOrderNo() trả "" khi trong máy chưa có đơn nào có số) ⇒ máy chủ coi MỖI DÒNG là 1 đơn
+   ⇒ Gửi xác nhận / duyệt / KPI C5 chỉ lấy dòng đầu; Sửa đơn chỉ mở 1 dòng, không thêm / bớt được sản phẩm.
+   · Sửa đơn = mở CẢ ĐƠN (mọi dòng cùng Order No. + account + ngày đặt — như danh sách đơn), thêm / bớt dòng sản phẩm.
+     Lưu ⇒ saveOrders: dòng cũ giữ _row, dòng mới _row 0, dòng bỏ = { _row, _del, _no, _nm } (máy chủ kiểm đúng dòng + quyền).
+   · Đơn chưa có số ⇒ máy chủ tự cấp Order No. cho cả đơn (ô Order No. ghi "Tự cấp khi lưu").
+   ════════════════════════════════════════════════════════════════════════════════════════ */
+(function(){
+"use strict";
+function L(vi,en){ return TX(vi,en); }
+function nk(s){ return String(s||"").normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/đ/g,"d").replace(/Đ/g,"D").toLowerCase().replace(/\s+/g," ").trim(); }
+/* khoá đơn = như danh sách Đơn hàng (v32.2): Order No. + account + ngày đặt */
+function okey(o){ return String(o.orderNo||"")+"|"+nk(o.name)+"|"+String(o.day||k8Ym(o)); }
+function pool(){
+  var seen={}, out=[];
+  [((S.cache.order||{}).rows)||[], tGet("order")||[], (S.acc&&S.acc.orders)||[], (S.detail&&S.detail.orders)||[]].forEach(function(l){
+    l.forEach(function(r){ if(r && r._row && !r._pend && !seen[r._row]){ seen[r._row]=1; out.push(r); } }); });
+  return out;
+}
+function siblings(o){
+  if(!o || !o._row) return [];
+  var k=okey(o), L2=pool().filter(function(r){ return okey(r)===k; });
+  if(!L2.some(function(r){ return r._row===o._row; })) L2.push(o);
+  return L2.sort(function(a,b){ return a._row-b._row; });
+}
+window.v334Lines=siblings;
+function nonEmpty(p){ return String(p.ptype||"").trim()||String(p.detail||"").trim()||(p.details&&p.details.length)||n(p.qty)||n(p.price); }
+
+/* ① SỬA ĐƠN = CẢ ĐƠN */
+var _fo=window.formOrder;
+window.formOrder=formOrder=function(o){
+  if(typeof o==="number"){ var r0=pool().filter(function(x){ return x._row===o; })[0]; o=r0||{_row:o}; }
+  var lines=(o && o._row)?siblings(o):[];
+  var multi=lines.length>0;
+  if(multi){
+    /* chứng từ / loại đơn có thể nằm ở dòng khác của đơn ⇒ gộp vào dòng mở form (khung Loại đơn & chứng từ đọc từ đây) */
+    var docs=[], seen={};
+    lines.forEach(function(x){ String(x.docs||"").split(/\r?\n/).forEach(function(t){ t=String(t).trim(); var m=/(https?:\/\/\S+)/.exec(t); if(t && m && !seen[m[1]]){ seen[m[1]]=1; docs.push(t); } }); });
+    var pick=function(f){ var v=o[f]; if(v) return v; lines.some(function(x){ return (v=x[f]); }); return v||""; };
+    o=Object.assign({},lines[0],o,{ docs:docs.join("\n"), otype:pick("otype"), tender:pick("tender"), kqtt:pick("kqtt"), _row:lines[0]._row });
+  }
+  var r=_fo.call(this,o);
+  try{
+    var ono=$("o_orderNo");
+    if(ono && !ono.value){ ono.placeholder=L("Tự cấp khi lưu","Assigned on save"); var h=ono.parentNode.querySelector(".hint"); if(h) h.textContent=L("Hệ thống tự cấp số khi lưu — cả đơn dùng 1 số","The system assigns one number for the whole order on save"); }
+    if(!multi || !S.editing || S.editing.tab!=="order") return r;
+    S.editing.row=lines[0]._row;
+    S.editing.lines=lines.map(function(x){ return x._row; });
+    S.editing.orig={}; lines.forEach(function(x){ S.editing.orig[x._row]={ no:String(x.orderNo||""), nm:x.name||"" }; });
+    S.editing.del=[];
+    S.ordProds=lines.map(function(x){ return { _row:x._row, ptype:x.ptype||"", detail:x.detail||"", details:pcSplit(x.detail), price:x.price||"", qty:x.qty||"" }; });
+    var w=$("o_prodWrap");
+    if(w){
+      var hint=w.parentNode.querySelector(".hint");
+      var b=document.createElement("button"); b.className="btn sm"; b.type="button"; b.style.marginTop="8px"; b.id="v334-add";
+      b.textContent="＋ "+L("Thêm sản phẩm","Add product"); b.onclick=function(){ ordAddProd(); };
+      if(hint && /Mỗi dòng trong sheet|Each row/.test(hint.textContent)) hint.parentNode.replaceChild(b,hint); else w.parentNode.appendChild(b);
+      var nt=document.createElement("div"); nt.className="hint"; nt.id="v334-note"; nt.style.marginTop="6px";
+      nt.textContent=L("Đơn gồm "+lines.length+" dòng sản phẩm — sửa, thêm hoặc bỏ dòng rồi bấm Lưu. Đơn đã duyệt mà sửa thì cả đơn quay về Chờ duyệt.",
+        "This order has "+lines.length+" product line(s) — edit, add or remove lines, then Save. Editing an approved order sends the whole order back to Pending.");
+      b.parentNode.insertBefore(nt,b.nextSibling);
+    }
+    var mt=$("mTitle"); if(mt && /Sửa đơn hàng|Edit order/.test(mt.textContent||"")) mt.textContent=L("Sửa đơn hàng","Edit order")+(o.orderNo?" "+o.orderNo:"")+" · "+lines.length+" "+L("sản phẩm","products");
+    if(ono && !String(o.orderNo||"").trim()){ var h2=ono.parentNode.querySelector(".hint"); if(h2) h2.textContent=ono.value?L("Đơn chưa có số — lưu sẽ ghi số này cho cả đơn","No number yet — saving gives the whole order this number"):L("Đơn chưa có số — hệ thống cấp số khi lưu","No number yet — assigned on save"); }
+    ordDraw();
+  }catch(e){ try{ console.warn(e); }catch(_){} }
+  return r;
+};
+/* bỏ dòng: nhớ dòng đã có trên sheet để xoá khi lưu */
+var _dp=window.ordDelProd;
+window.ordDelProd=ordDelProd=function(i){
+  try{ var p=ordProds()[i]; if(p && p._row && ordProds().length>1 && S.editing && S.editing.del && S.editing.del.indexOf(p._row)<0) S.editing.del.push(p._row); }catch(e){}
+  return _dp.apply(this,arguments);
+};
+/* Xoá đơn (đang sửa cả đơn) ⇒ xoá mọi dòng, từ dưới lên để số dòng không lệch */
+var _do=window.delOrder;
+window.delOrder=delOrder=function(row){
+  var ln=(S.editing&&S.editing.tab==="order"&&S.editing.lines)||[];
+  if(ln.length<2) return _do.apply(this,arguments);
+  if(!confirm(L("Xoá cả đơn hàng này ("+ln.length+" dòng sản phẩm) khỏi sheet Sale Order? Thao tác không hoàn tác được.","Delete this whole order ("+ln.length+" lines) from the Sale Order sheet? This cannot be undone."))) return;
+  var rows=ln.slice().sort(function(a,b){ return b-a; }), done=0;
+  busy(true,L("Đang xoá đơn hàng…","Deleting the order…"));
+  (function next(){
+    if(!rows.length){ busy(false); closeAllModals(); toast(L("Đã xoá đơn hàng ("+done+" dòng)","Order deleted ("+done+" lines)"),"ok"); afterWrite("order",0,null); setTimeout(syncOrderTasks,600); return; }
+    var r=rows.shift();
+    apiPost({ action:"deleteRow", tab:"order", row:r }).then(function(){ done++; patchLocal("order",r,null,true); next(); })
+      .catch(function(e){ busy(false); toast(e.message,"err",6000); afterWrite("order",0,null); });
+  })();
+};
+/* ② LƯU: gắn đúng số dòng cho từng dòng sản phẩm + dòng bị bỏ */
+var BATCH={};
+var _ob=window.obAddOrders;
+window.obAddOrders=obAddOrders=function(rows,label){
+  var ed=S.editing;
+  if(!ed || ed.tab!=="order" || !ed.lines || !rows || !rows.length) return _ob.apply(this,arguments);
+  var all=ordProds(), list=all.filter(nonEmpty);
+  if(list.length!==rows.length) return _ob.apply(this,arguments);
+  var id="e"+Date.now().toString(36), orig=ed.orig||{};
+  rows.forEach(function(d,k){ d._row=list[k]._row||0; d._ed=id; });
+  /* dòng bị bỏ = bấm ✕ hoặc xoá trống cả dòng */
+  var del=(ed.del||[]).slice();
+  all.forEach(function(p){ if(p._row && !nonEmpty(p) && del.indexOf(p._row)<0) del.push(p._row); });
+  del=del.filter(function(r){ return !rows.some(function(d){ return d._row===r; }); });
+  del.forEach(function(r){ var og=orig[r]||{}; rows.push({ _row:r, _del:1, _no:og.no||"", _nm:og.nm||"", name:og.nm||"", _ed:id }); });
+  BATCH[id]={ old:(ed.lines||[]).slice(), done:false };
+  /* màn hình: dòng bỏ biến mất, dòng sửa cập nhật ngay */
+  del.forEach(function(r){ try{ patchLocal("order",r,null,true); }catch(e){} });
+  rows.forEach(function(d){ if(d._row && !d._del) try{ patchLocal("order",d._row,d); }catch(e){} });
+  return _ob.call(this,rows,label);
+};
+/* dòng đánh dấu bỏ không bao giờ được vá vào dữ liệu trên máy */
+var _pl=window.patchLocal;
+window.patchLocal=patchLocal=function(tab,row,data,isDel){
+  if(tab==="order" && data && data._del) return;
+  return _pl.apply(this,arguments);
+};
+/* ghi xong (số dòng có thể đã dời vì xoá dòng phía trên) ⇒ bỏ các dòng cũ của đơn trên máy, thêm lại theo số dòng mới, rồi tải lại tab */
+var _aw=window.afterWrite;
+window.afterWrite=afterWrite=function(tab,row,data,isDel){
+  if(tab==="order" && data && data._ed && BATCH[data._ed]){
+    var b=BATCH[data._ed];
+    if(!b.done){ b.done=true; b.old.forEach(function(r){ try{ _pl.call(window,"order",r,null,true); }catch(e){} }); }
+    if(data._del) return _aw.call(this,tab,0,null);
+    var d=Object.assign({},data); delete d._ed;
+    return _aw.call(this,tab,row,d,isDel);
+  }
+  return _aw.apply(this,arguments);
 };
 })();
 </script>
