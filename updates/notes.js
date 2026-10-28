@@ -7,6 +7,17 @@
 function E(u){ u.en={ title:u.title, items:u.items.map(function(i){ return { title:i.title, text:i.text }; }) }; return u; }
 window.MMH_UPDATES = [
   E({
+    id:"2026-10-28-v33.5", version:"v33.5", date:"2026-10-28",
+    title:"Approve orders: flip through orders with their documents · approve several at once · e-mail link opens the order",
+    summary:"Approvers get a new <b>Approve orders</b> screen: check one order at a time with its documents, or tick several orders and approve them together. Every button now answers at once. The link in the approval e-mail opens that order directly — no sign-in code needed on the phone.",
+    items:[
+      { type:"new", icon:"📄", title:"One order at a time", text:"<b>Orders</b> ▸ <b>Approve orders</b> ▸ <b>One by one</b>: order details, product lines and the documents side by side. Flip with ‹ › (arrow keys, or swipe on a phone). <b>Approve</b> ⇒ the next order opens; <b>Request changes</b> / <b>Reject</b> ⇒ type the reason in the box below.", img:"updates/v33.5/one.jpg" },
+      { type:"new", icon:"☑", title:"Approve several orders at once", text:"<b>Approve orders</b> ▸ <b>List</b>: tick the orders (or the top box for every ready order) ▸ <b>Approve n orders</b>. Click a row to see its details and documents. Filter by sales PIC at the top.", img:"updates/v33.5/list.jpg" },
+      { type:"fix", icon:"✔", title:"Approve buttons always respond", text:"Before, Approve sometimes seemed to do nothing (a greyed button for an incomplete order, or a reason box that phone e-mail apps do not show). Now the button shows <b>Sending…</b>, then the result on the order; an incomplete order tells you what is missing and opens <b>Request changes</b>.", img:"updates/v33.5/mobile.jpg" },
+      { type:"fix", icon:"✉", title:"E-mail link opens the order", text:"Click the link in the <b>order approval request</b> e-mail: CRM opens that order in the approval screen. On a phone e-mail app you are signed in by the link (only the approver's copy has it, valid 7 days); if it has expired, sign in with your e-mail code and the order still opens.", img:"" }
+    ]
+  }),
+  E({
     id:"2026-10-28-v33.4", version:"v33.4", date:"2026-10-28",
     title:"Orders with several products: the whole order counts · edit the whole order",
     summary:"An order with several product lines is now sent for approval, approved and counted for KPI C5 as <b>one order with every line</b> (before, only the first line was counted). <b>Edit order</b> opens all lines, so you can add or remove products.",

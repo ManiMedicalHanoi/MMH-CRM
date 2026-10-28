@@ -3994,7 +3994,7 @@ function buildNav(){
     if(t.grp!==lastGrp){ h+='<div class="grp">'+t.grp+'</div>'; lastGrp=t.grp; }
     h+='<button class="nvi" data-t="'+t.id+'" onclick="go(\''+t.id+'\')"><span class="ic">'+t.ic+'</span><span class="lb">'+t.lb+'</span></button>';
   });
-  h+='<div style="flex:1"></div><div style="padding:10px;font-size:10.5px;color:var(--mute);line-height:1.5">MMH CRM v33.4<br>'+
+  h+='<div style="flex:1"></div><div style="padding:10px;font-size:10.5px;color:var(--mute);line-height:1.5">MMH CRM v33.5<br>'+
      (isMgmt()?'<a href="'+DRIVE_FOLDER+'" target="_blank">📁 Folder ảnh Drive</a>':"")+'</div>';
   $("side").innerHTML=h;
   /* ⭐ v4.5 — thanh dưới trượt ngang, đủ mọi mục, bỏ nút "Thêm" */
@@ -19641,6 +19641,7 @@ function form(host, opt){
   return { stop:function(){ clearInterval(st.timer); } };
 }
 AUTH.form=form;
+AUTH.grant=grant;            /* v33.5 — link đăng nhập trong email duyệt đơn (khối v335-js) */
 function enterAs(pic){ grant(pic); setTimeout(function(){ location.reload(); }, 250); }
 
 /* 4. màn đăng nhập: chưa có phiên ⇒ ô email; "Dùng mật khẩu như trước" ⇒ cách cũ (đến hết GRACE) */
@@ -20720,7 +20721,7 @@ window.QS2={ open:qsOpen };
 </script>
 
 <!-- ⭐ v30.3 — THÔNG BÁO CẬP NHẬT (chép từ Report Hub): dữ liệu updates/notes.js · tự hiện 7 ngày · nút "Có gì mới" trên thanh trên cùng -->
-<script src="updates/notes.js?v=33.4"></script>
+<script src="updates/notes.js?v=33.5"></script>
 <style id="upd-css">
 #upd,#upd-zoom{--t-pri:var(--blue);--t-pri2:var(--blue-d);--t-ink:var(--navy);--t-soft:var(--pale);--t-line:var(--lb2);--t-bg:#F6F8FA;--mmh-blue:var(--blue);--mmh-navy:var(--navy)}
 
@@ -25520,14 +25521,7 @@ window.renderOrder=renderOrder=function(){
     if(++n<60) setTimeout(w,1500);
   })();
 })();
-/* link email #oa ⇒ trang Đơn hàng + bảng duyệt */
-(function(){
-  if(!/#oa\b/.test(location.hash||"")) return;
-  var n=0; (function w(){
-    if(window.S && S.user && typeof go==="function"){ try{ history.replaceState(null,"",location.pathname+location.search); }catch(_){} go("order"); setTimeout(function(){ try{ if(window.v316OrdIsAp && v316OrdIsAp()) oaOpen(); }catch(_){} },900); return; }
-    if(++n<60) setTimeout(w,1000);
-  })();
-})();
+/* link email #oa ⇒ v33.5: xử lý ở khối v335-js (mở đúng đơn trong màn Duyệt đơn hàng, link đăng nhập) */
 })();
 </script>
 <style id="v323-css">
@@ -27065,6 +27059,426 @@ window.afterWrite=afterWrite=function(tab,row,data,isDel){
   }
   return _aw.apply(this,arguments);
 };
+})();
+</script>
+<style id="v335-css">
+/* ⭐ v33.5 — màn Duyệt đơn hàng: lật từng đơn (xem chứng từ) · danh sách chọn nhiều đơn duyệt 1 lần */
+#oav{position:fixed;inset:0;z-index:9400;background:rgba(0,30,50,.28);display:none;justify-content:center;align-items:stretch;font-family:Aptos,"Segoe UI",system-ui,sans-serif}
+#oav.on{display:flex}
+body.oav-on #toast{z-index:9660}
+#oav .ob{background:#fff;width:min(1200px,100%);margin:20px;border:1px solid #E6EAEF;border-radius:14px;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 10px 30px rgba(0,30,50,.12)}
+#oav .oh{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:12px 16px;border-bottom:1px solid #E6EAEF}
+#oav .oh h3{margin:0;font-size:16px;font-weight:700;color:var(--t-ink,#003047)}
+#oav .oh .sp{flex:1}
+#oav .seg{display:inline-flex;border:1px solid var(--fld-line,#C3CDD8);border-radius:9px;overflow:hidden}
+#oav .seg button{border:0;background:#fff;padding:6px 12px;font:600 12.5px Aptos,system-ui,sans-serif;color:#41566F;cursor:pointer}
+#oav .seg button.on{background:var(--t-soft,#F0F7FF);color:var(--t-pri,#3A5CAA)}
+#oav .seg button+button{border-left:1px solid var(--fld-line,#C3CDD8)}
+#oav select{height:32px;border:1px solid var(--fld-line,#C3CDD8);border-radius:8px;padding:0 8px;font:13px Aptos,system-ui,sans-serif;background:#fff;color:#1F3347}
+#oav .x{border:0;background:none;font-size:20px;line-height:1;color:#5B6B7D;cursor:pointer;padding:4px 6px}
+#oav .bd{flex:1;overflow:auto;padding:16px}
+#oav .ft{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:10px 16px;border-top:1px solid #E6EAEF;background:#FBFCFE}
+#oav .ft .sp{flex:1}
+#oav .nav{display:flex;align-items:center;gap:6px;font-size:13px;color:#41566F}
+#oav .nav b{min-width:56px;text-align:center}
+#oav .pg2{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:18px}
+#oav .acc{font-size:19px;font-weight:700;color:var(--t-ink,#003047);margin:0 0 6px}
+#oav .chips{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 12px}
+#oav .chip{display:inline-block;padding:2px 9px;border-radius:999px;border:1px solid #E6EAEF;background:#F7F9FB;font-size:12px;color:#41566F}
+#oav .chip.w{background:#FFF8E6;border-color:#F1D48A;color:#7A5A00}
+#oav .chip.ok{background:#EAF6EE;border-color:#A9D7B5;color:#1E6B35}
+#oav .chip.no{background:#FDEEEE;border-color:#EBB4B4;color:#9B2C2C}
+#oav .kv{display:grid;grid-template-columns:120px 1fr;gap:6px 10px;font-size:13.5px;margin:0 0 14px}
+#oav .kv span{color:#5B6B7D}
+#oav .kv b{color:#1F3347;font-weight:600}
+#oav table{width:100%;border-collapse:collapse;font-size:13px}
+#oav th{text-align:left;background:var(--t-soft,#F0F7FF);color:var(--t-ink,#003047);font-weight:600;padding:7px 8px;border-bottom:1px solid #E6EAEF}
+#oav td{padding:7px 8px;border-bottom:1px solid #EEF1F4;vertical-align:top}
+#oav td.n,#oav th.n{text-align:right;white-space:nowrap}
+#oav .msg{padding:9px 12px;border-radius:10px;font-size:13px;margin:0 0 10px;border:1px solid #E6EAEF;background:#F7F9FB;color:#41566F}
+#oav .msg.w{border-color:#F1D48A;background:#FFFBEB;color:#5B4300}
+#oav .msg.ok{border-color:#A9D7B5;background:#EAF6EE;color:#1E6B35}
+#oav .msg.no{border-color:#EBB4B4;background:#FDEEEE;color:#9B2C2C}
+#oav .docs h4{margin:0 0 8px;font-size:13px;color:var(--t-ink,#003047)}
+#oav .doc{border:1px solid #E6EAEF;border-radius:10px;margin:0 0 12px;overflow:hidden}
+#oav .doc .dh{display:flex;gap:8px;align-items:center;padding:7px 10px;font-size:12.5px;border-bottom:1px solid #EEF1F4;background:#FBFCFE}
+#oav .doc .dh .sp{flex:1}
+#oav .doc .dh a{color:var(--t-pri,#3A5CAA);font-weight:600;text-decoration:none}
+#oav .doc img{display:block;max-width:100%;margin:0 auto;cursor:zoom-in;background:#F7F9FB}
+#oav .doc iframe{display:block;width:100%;height:560px;border:0}
+#oav .doc .nopv{padding:22px;text-align:center;font-size:13px;color:#5B6B7D}
+#oav .nodoc{padding:28px;border:1px dashed #C3CDD8;border-radius:10px;text-align:center;color:#7A5A00;background:#FFFBEB;font-size:13px}
+#oav .why{display:none;gap:8px;align-items:flex-start;flex-wrap:wrap;width:100%}
+#oav .why.on{display:flex}
+#oav .why textarea{flex:1;min-width:220px;min-height:54px;border:1px solid var(--fld-line,#C3CDD8);border-radius:8px;padding:7px 9px;font:13px Aptos,system-ui,sans-serif;resize:vertical}
+#oav .why textarea:focus{outline:none;border-color:var(--t-pri,#3A5CAA);box-shadow:0 0 0 3px rgba(58,92,170,.12)}
+#oav .lst tr{cursor:pointer}
+#oav .lst tr:hover td{background:#FAFCFF}
+#oav .lst tr.sel td{background:var(--t-soft,#F0F7FF)}
+#oav .lst input[type=checkbox]{width:17px;height:17px;cursor:pointer}
+#oav .lst .mis{color:#7A5A00;font-size:12px}
+#oav .lst .st{font-size:12px;font-weight:600}
+#oav .empty2{padding:50px 10px;text-align:center;color:#5B6B7D;font-size:14px}
+#oav .sending{opacity:.6;pointer-events:none}
+#oav-zoom{position:fixed;inset:0;z-index:9600;background:rgba(0,0,0,.82);display:none;align-items:center;justify-content:center;cursor:zoom-out}
+#oav-zoom.on{display:flex}
+#oav-zoom img{max-width:96vw;max-height:94vh}
+#oav-lk{position:fixed;inset:0;z-index:9700;background:#fff;display:flex;align-items:center;justify-content:center;font:15px Aptos,"Segoe UI",system-ui,sans-serif;color:#1F3347}
+#oav-lk div{text-align:center;padding:20px}
+#oav-lk i{display:block;width:26px;height:26px;margin:0 auto 12px;border:3px solid #CFE2F3;border-top-color:#3A5CAA;border-radius:50%;animation:oavsp 1s linear infinite}
+@keyframes oavsp{to{transform:rotate(360deg)}}
+@media (max-width:820px){
+  #oav .ob{margin:0;border-radius:0;border:0}
+  #oav .pg2{grid-template-columns:1fr}
+  #oav .bd{padding:12px}
+  #oav .doc iframe{height:440px}
+  #oav .lst .hm{display:none}
+  #oav .ft .btn{flex:1 1 auto}
+}
+</style>
+<script id="v335-js">
+/* ═════════ v33.5 (28/10/2026) — DUYỆT ĐƠN HÀNG ═════════
+   ① oaOpen(key?) = màn #oav thay bảng duyệt cũ: "Từng đơn" (lật ‹ ›, phím ← →, vuốt trên điện thoại; thông tin + dòng sản phẩm + chứng từ xem ngay)
+      và "Danh sách" (tick nhiều đơn ⇒ Xác nhận / Không xác nhận 1 lần). Bấm là có phản hồi ngay (nút "Đang gửi…", trạng thái từng đơn, lỗi + Thử lại);
+      không dùng prompt / confirm (trình duyệt trong app email trên điện thoại không hiện các hộp này ⇒ trước đây bấm không thấy gì).
+      Đơn chưa đủ điều kiện: nút Xác nhận vẫn bấm được ⇒ báo thiếu gì + mở ô Yêu cầu chỉnh sửa (không còn nút mờ bấm không phản ứng).
+   ② Link email: #oa=<key đơn>[&lk=<vé đăng nhập>] (backend CRM v10.18 orderRequest). Chưa đăng nhập + có vé ⇒ Training Hub rhAuthLink đổi vé lấy phiên
+      (vé chỉ gửi riêng cho người duyệt, hạn 7 ngày) ⇒ vào thẳng đơn đó. Vé hỏng / hết hạn ⇒ màn đăng nhập như thường, đăng nhập xong vẫn mở đúng đơn. */
+(function(){
+"use strict";
+function L(v,e){ try{ return (window.I18N&&I18N.on)?e:v; }catch(_){ return v; } }
+function E(s){ return String(s==null?"":s).replace(/[&<>"']/g,function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]; }); }
+function $i(id){ return document.getElementById(id); }
+var RATE=26700;
+function vnd(v){ try{ return fmtVND(+v||0); }catch(_){ return Math.round(+v||0).toLocaleString("vi-VN")+" ₫"; } }
+function usd(v){ return "$"+Math.round((+v||0)/RATE).toLocaleString("en-US"); }
+function day(v){ try{ return fmtVN(v); }catch(_){ return String(v||""); } }
+function mon(m){ m=String(m||""); return /^\d{6}$/.test(m)?m.slice(4)+"/"+m.slice(0,4):m; }
+function tyLb(t){ var m=/^\s*([123])/.exec(String(t||"")); if(!m) return ""; return [L("Trúng thầu","Tender"),L("Account mở mới","New account"),L("Tư vấn (khách lẻ)","Consulting")][+m[1]-1]; }
+function fid(u){ var m=/[-\w]{25,}/.exec(String(u||"")); return m?m[0]:""; }
+function isImg(d){ return /\.(png|jpe?g|gif|webp|heic|bmp)\s*$/i.test(String(d.name||"")) || /^ChupManHinh/i.test(String(d.name||"")); }
+
+/* ── trạng thái màn ── */
+var V={ mode:"one", i:0, pic:"", items:[], st:{}, sel:{}, why:"", open:false };
+try{ V.mode=localStorage.getItem("mmh_oav_mode")==="list"?"list":"one"; }catch(_){}
+function pending(){
+  var G=((S.ordAp||{}).groups)||[], out=[];
+  G.forEach(function(g){ (g.orders||[]).forEach(function(o){ if(o.appr==="wait" && o.canDecide) out.push(o); }); });
+  out.sort(function(a,b){ return String(a.day||a.month).localeCompare(String(b.day||b.month)) || String(a.pic).localeCompare(String(b.pic)); });
+  return out;
+}
+/* giữ nguyên thứ tự + các đơn vừa xử lý trên màn (dữ liệu mới từ máy chủ chỉ cập nhật / thêm) */
+function merge(){
+  var P=pending(), by={}; P.forEach(function(o){ by[o.key]=o; });
+  V.items=V.items.map(function(o){ return by[o.key]||o; });
+  var have={}; V.items.forEach(function(o){ have[o.key]=1; });
+  P.forEach(function(o){ if(!have[o.key]) V.items.push(o); });
+}
+function shown(){ return V.items.filter(function(o){ return !V.pic || o.pic===V.pic; }); }
+function stOf(o){ return V.st[o.key]||null; }
+function done(o){ var s=stOf(o); return !!(s && /^(ok|no|ret)$/.test(s.st)); }
+function nextOpen(from){ var A=shown(); for(var k=1;k<=A.length;k++){ var j=(from+k)%A.length; if(!done(A[j]) && !(stOf(A[j])&&stOf(A[j]).st==="run")) return j; } return -1; }
+
+/* ── khung ── */
+function shell(){
+  var ov=$i("oav"); if(ov) return ov;
+  ov=document.createElement("div"); ov.id="oav"; ov.setAttribute("role","dialog"); ov.setAttribute("aria-modal","true");
+  ov.innerHTML='<div class="ob"><div class="oh"><h3>'+E(L("Duyệt đơn hàng","Approve orders"))+'</h3>'+
+    '<div class="seg" id="oav-seg"><button type="button" data-m="one">'+E(L("Từng đơn","One by one"))+'</button><button type="button" data-m="list">'+E(L("Danh sách","List"))+'</button></div>'+
+    '<select id="oav-pic" aria-label="PIC"></select><span class="sp"></span><span id="oav-cnt" style="font-size:12.5px;color:#5B6B7D"></span>'+
+    '<button type="button" class="x" id="oav-x" aria-label="'+E(L("Đóng","Close"))+'">✕</button></div>'+
+    '<div class="bd" id="oav-bd"></div><div class="ft" id="oav-ft"></div></div>';
+  document.body.appendChild(ov);
+  ov.querySelector("#oav-x").onclick=close;
+  [].forEach.call(ov.querySelectorAll("#oav-seg button"),function(b){ b.onclick=function(){ V.mode=b.getAttribute("data-m"); try{ localStorage.setItem("mmh_oav_mode",V.mode); }catch(_){} V.why=""; paint(); }; });
+  ov.querySelector("#oav-pic").onchange=function(){ V.pic=this.value; V.i=0; V.why=""; paint(); };
+  /* vuốt trái / phải trên điện thoại (chế độ Từng đơn) */
+  var sx=0, sy=0;
+  ov.addEventListener("touchstart",function(e){ var t=e.touches[0]; sx=t.clientX; sy=t.clientY; },{passive:true});
+  ov.addEventListener("touchend",function(e){
+    if(V.mode!=="one" || e.target.closest("textarea,iframe,select")) return;
+    var t=e.changedTouches[0], dx=t.clientX-sx, dy=t.clientY-sy;
+    if(Math.abs(dx)>70 && Math.abs(dx)>Math.abs(dy)*1.5) go1(dx<0?1:-1);
+  },{passive:true});
+  var z=document.createElement("div"); z.id="oav-zoom"; z.onclick=function(){ z.classList.remove("on"); }; document.body.appendChild(z);
+  return ov;
+}
+function open(key){
+  shell().classList.add("on"); V.open=true; V.why=""; document.body.classList.add("oav-on");
+  if(!S.ordAp || S.ordAp.err){ S.ordAp=null; try{ window.ordApLoad(); }catch(_){} }
+  merge();
+  if(key){ var A=shown(), j=-1; A.forEach(function(o,k){ if(o.key===key) j=k; }); if(j<0 && V.pic){ V.pic=""; A=shown(); A.forEach(function(o,k){ if(o.key===key) j=k; }); } if(j>=0){ V.i=j; V.mode="one"; } else V.want=key; }
+  paint(); wait();
+}
+/* chờ danh sách từ máy chủ (mở ngay, dữ liệu về thì vẽ lại) */
+function wait(){
+  var n=0; (function w(){ if(!V.open) return;
+    if(S.ordAp){ var before=V.items.length; merge();
+      if(V.want){ var A=shown(), j=-1; A.forEach(function(o,k){ if(o.key===V.want) j=k; }); if(j>=0){ V.i=j; V.mode="one"; } else if(!S.ordAp.err) toast(L("Đơn này đã được xử lý hoặc không còn chờ bạn duyệt.","This order has already been handled or is not waiting for you."),"warn",6000); V.want=""; }
+      paint(); return; }
+    if(++n<60) setTimeout(w,500); else paint(); })();
+}
+function close(){ var ov=$i("oav"); if(ov) ov.classList.remove("on"); document.body.classList.remove("oav-on"); var z=$i("oav-zoom"); if(z) z.classList.remove("on"); V.open=false; V.why=""; }
+window.oavClose=close;
+
+/* ── vẽ ── */
+function paint(){
+  var ov=$i("oav"); if(!ov || !V.open) return;
+  var cmEl=$i("oav-cm"); if(cmEl && V.why && cmEl.value) V.whyPre=cmEl.value;   /* vẽ lại khi dữ liệu về: giữ chữ đang gõ */
+  [].forEach.call(ov.querySelectorAll("#oav-seg button"),function(b){ b.classList.toggle("on",b.getAttribute("data-m")===V.mode); });
+  var pics={}; V.items.forEach(function(o){ pics[o.pic]=(pics[o.pic]||0)+(done(o)?0:1); });
+  var sel=ov.querySelector("#oav-pic");
+  sel.innerHTML='<option value="">'+E(L("Tất cả sales","All sales"))+'</option>'+Object.keys(pics).sort().map(function(p){ return '<option value="'+E(p)+'"'+(p===V.pic?" selected":"")+'>'+E(p)+(pics[p]?" ("+pics[p]+")":"")+'</option>'; }).join("");
+  var left=V.items.filter(function(o){ return !done(o); }).length;
+  ov.querySelector("#oav-cnt").textContent=V.items.length?L(left+" đơn chờ duyệt",left+" pending"):"";
+  var bd=ov.querySelector("#oav-bd"), ft=ov.querySelector("#oav-ft");
+  var j=S.ordAp||{};
+  if(!V.items.length){
+    ft.innerHTML='<span class="sp"></span><button class="btn" onclick="oavClose()">'+E(L("Đóng","Close"))+'</button>';
+    if(!S.ordAp){ bd.innerHTML='<div class="empty2">'+E(L("Đang tải danh sách đơn chờ duyệt…","Loading orders waiting for approval…"))+'</div>'; return; }
+    if(j.err){ bd.innerHTML='<div class="msg no">'+E(j.err)+'</div><button class="btn" onclick="S.ordAp=null;ordApLoad();oaOpen()">'+E(L("Thử lại","Try again"))+'</button>'; return; }
+    bd.innerHTML='<div class="empty2">'+E(L("Không có đơn hàng nào chờ bạn duyệt.","No order is waiting for your approval."))+'</div>'; return;
+  }
+  if(V.mode==="list") return paintList(bd,ft);
+  paintOne(bd,ft);
+}
+function chipSt(o){
+  var s=stOf(o), nt=String(o.apprNote||"");
+  if(s && s.st==="run") return '<span class="chip">'+E(L("Đang gửi…","Sending…"))+'</span>';
+  if(s && s.st==="ok") return '<span class="chip ok">'+E(L("Đã xác nhận","Approved"))+'</span>';
+  if(s && s.st==="no") return '<span class="chip no">'+E(L("Không xác nhận","Rejected"))+'</span>';
+  if(s && s.st==="ret") return '<span class="chip w">'+E(L("Đã yêu cầu chỉnh sửa","Changes requested"))+'</span>';
+  if(s && s.st==="err") return '<span class="chip no">'+E(L("Lỗi — thử lại","Error — retry"))+'</span>';
+  if(/^Cần bổ sung/.test(nt)) return '<span class="chip w">'+E(L("Chờ sales chỉnh sửa","Waiting for changes"))+'</span>';
+  if(!o.ready) return '<span class="chip w">'+E(L("Thiếu thông tin","Incomplete"))+'</span>';
+  return '<span class="chip">'+E(L("Chờ duyệt","Pending"))+'</span>';
+}
+function paintOne(bd,ft){
+  var A=shown(); if(!A.length){ V.pic=""; A=shown(); }
+  if(V.i>=A.length) V.i=A.length-1; if(V.i<0) V.i=0;
+  var o=A[V.i], s=stOf(o), t=tyLb(o.otype), nt=String(o.apprNote||"");
+  var h='<div class="pg2"><div>';
+  h+='<div class="acc">'+E(o.account||"—")+'</div><div class="chips">'+chipSt(o)+(t?'<span class="chip">'+E(t)+'</span>':'')+'<span class="chip">'+E(o.pic)+'</span></div>';
+  if(s && s.st==="err") h+='<div class="msg no">'+E(s.msg||"Lỗi")+'</div>';
+  else if(s && s.st==="ok") h+='<div class="msg ok">'+E(L("Đã xác nhận — email kết quả gửi tới ","Approved — result e-mailed to ")+o.pic+".")+'</div>';
+  else if(s && s.st==="no") h+='<div class="msg no">'+E(L("Đã không xác nhận: ","Rejected: ")+(s.cm||""))+'</div>';
+  else if(s && s.st==="ret") h+='<div class="msg w">'+E(L("Đã yêu cầu chỉnh sửa: ","Changes requested: ")+(s.cm||""))+'</div>';
+  if((o.warn||[]).length) h+='<div class="msg w"><b>'+E(L("Chưa đủ điều kiện xác nhận: ","Not ready to approve: "))+'</b>'+E(o.warn.join(" · "))+'</div>';
+  if(o.naWarn) h+='<div class="msg w">'+E(o.naWarn)+'</div>';
+  if(nt && !s) h+='<div class="msg">'+E(nt)+'</div>';
+  h+='<div class="kv"><span>'+E(L("Số đơn","Order No."))+'</span><b>'+E(o.orderNo||"—")+'</b>'+
+     '<span>'+E(L("Ngày đặt","Order date"))+'</span><b>'+E(o.day?day(o.day):mon(o.month))+'</b>'+
+     (o.partner?'<span>'+E(L("Nhà phân phối","Distributor"))+'</span><b>'+E(String(o.partner).split("/")[0])+'</b>':'')+
+     '<span>'+E(L("Loại đơn","Order type"))+'</span><b>'+E(o.otype||L("Chưa chọn","Not chosen"))+'</b>'+
+     (String(o.otype||"").trim().charAt(0)==="1"?'<span>'+E(L("Tháng KQTT","Award month"))+'</span><b>'+E(mon(o.kqtt)||"—")+'</b>':'')+
+     '<span>'+E(L("Tính KPI C5","KPI C5 value"))+'</span><b>'+E(vnd(o.kpi))+' ≈ '+usd(o.kpi)+' · '+E(mon(o.kpiMonth||o.month))+'</b></div>';
+  var lines=o.lines||[];
+  h+='<table><thead><tr><th>'+E(L("Sản phẩm","Product"))+'</th><th class="n">'+E(L("SL","Qty"))+'</th><th class="n">'+E(L("Thành tiền","Amount"))+'</th></tr></thead><tbody>'+
+     lines.map(function(l){ return '<tr><td><b>'+E(l.ptype||"—")+'</b>'+(l.detail?'<div style="color:#5B6B7D;font-size:12px">'+E(String(l.detail).replace(/\n/g,", "))+'</div>':'')+'</td><td class="n">'+E(l.qty)+'</td><td class="n">'+E(vnd(l.amount))+'</td></tr>'; }).join("")+
+     '<tr><td><b>'+E(L("Tổng","Total"))+'</b></td><td></td><td class="n"><b>'+E(vnd(o.amount))+'</b></td></tr></tbody></table>';
+  h+='</div><div class="docs"><h4>'+E(L("Chứng từ","Documents"))+' ('+(o.docs||[]).length+')</h4>';
+  if(!(o.docs||[]).length) h+='<div class="nodoc">'+E(L("Đơn chưa có chứng từ — chọn Yêu cầu chỉnh sửa để sales bổ sung.","No document attached — use Request changes."))+'</div>';
+  (o.docs||[]).forEach(function(d,k){
+    var id=fid(d.url), img=isImg(d);
+    h+='<div class="doc"><div class="dh"><span>'+E(d.name||"file")+'</span><span class="sp"></span>'+
+       (!img&&id?'<a href="#" onclick="return oavPdf(this,\''+id+'\')">'+E(L("Xem đủ trang","View all pages"))+'</a>':'')+
+       '<a href="'+E(d.url)+'" target="_blank" rel="noopener">'+E(L("Mở file","Open"))+' ↗</a></div>'+
+       (id?'<img alt="" loading="lazy" src="https://drive.google.com/thumbnail?id='+id+'&sz=w1600" onclick="oavZoom(this)" onerror="oavNoPv(this)">':'<div class="nopv">'+E(L("Không xem trước được — bấm Mở file.","No preview — click Open."))+'</div>')+'</div>';
+  });
+  h+='</div></div>';
+  bd.innerHTML=h; bd.scrollTop=0;
+  var busy=s&&s.st==="run", fin=done(o);
+  var f='<div class="nav"><button class="btn sm" id="oav-prev" '+(V.i<=0?"disabled":"")+' onclick="oavGo(-1)">‹ '+E(L("Trước","Prev"))+'</button><b>'+(V.i+1)+' / '+A.length+'</b><button class="btn sm" id="oav-next" '+(V.i>=A.length-1?"disabled":"")+' onclick="oavGo(1)">'+E(L("Sau","Next"))+' ›</button></div><span class="sp"></span>';
+  if(!fin) f+='<button class="btn sm" '+(busy?"disabled":"")+' onclick="oavWhy(\'return\')">'+E(L("Yêu cầu chỉnh sửa","Request changes"))+'</button>'+
+          '<button class="btn sm dg" '+(busy?"disabled":"")+' onclick="oavWhy(\'reject\')">'+E(L("Không xác nhận","Reject"))+'</button>'+
+          '<button class="btn sm pri" id="oav-ok" '+(busy?"disabled":"")+' onclick="oavOk()">'+E(busy?L("Đang gửi…","Sending…"):L("Xác nhận","Approve"))+'</button>';
+  f+=whyBox();
+  ft.innerHTML=f; wireWhy();
+}
+function whyBox(){
+  if(!V.why) return '<div class="why" id="oav-why"></div>';
+  var rj=V.why==="reject";
+  return '<div class="why on" id="oav-why"><textarea id="oav-cm" placeholder="'+E(rj?L("Lý do không xác nhận (bắt buộc)","Reason for rejecting (required)"):L("Sales cần chỉnh sửa / bổ sung gì? (bắt buộc)","What should the sales PIC change or add? (required)"))+'"></textarea>'+
+    '<button class="btn sm" onclick="oavWhy(\'\')">'+E(L("Huỷ","Cancel"))+'</button><button class="btn sm '+(rj?"dg":"pri")+'" onclick="oavSendWhy()">'+E(rj?L("Gửi: Không xác nhận","Send rejection"):L("Gửi yêu cầu chỉnh sửa","Send request"))+'</button></div>';
+}
+function wireWhy(){ var t=$i("oav-cm"); if(!t) return; if(V.whyPre){ t.value=V.whyPre; V.whyPre=""; } setTimeout(function(){ try{ t.focus(); }catch(_){} },30); }
+function paintList(bd,ft){
+  var A=shown();
+  var nSel=0, tot=0; A.forEach(function(o){ if(V.sel[o.key] && !done(o)){ nSel++; tot+=+o.kpi||0; } });
+  var ready=A.filter(function(o){ return o.ready && !done(o); });
+  var all=ready.length && ready.every(function(o){ return V.sel[o.key]; });
+  var h='<table class="lst"><thead><tr><th style="width:30px"><input type="checkbox" id="oav-all" '+(all?"checked":"")+' '+(ready.length?"":"disabled")+' title="'+E(L("Chọn mọi đơn đủ điều kiện","Select every ready order"))+'"></th>'+
+    '<th>'+E(L("Khách hàng","Account"))+'</th><th class="hm">PIC</th><th class="hm">'+E(L("Ngày đặt","Date"))+'</th><th class="hm">'+E(L("Loại","Type"))+'</th><th class="n">'+E(L("Tính KPI","KPI value"))+'</th><th class="hm">'+E(L("Chứng từ","Docs"))+'</th><th>'+E(L("Tình trạng","Status"))+'</th></tr></thead><tbody>';
+  A.forEach(function(o,k){
+    var dn=done(o), can=o.ready && !dn && !(stOf(o)&&stOf(o).st==="run");
+    h+='<tr data-k="'+k+'" class="'+(V.sel[o.key]&&!dn?"sel":"")+'"><td><input type="checkbox" data-key="'+E(o.key)+'" '+(V.sel[o.key]&&!dn?"checked":"")+' '+(can?"":"disabled")+' title="'+E(can?"":(o.warn||[]).join(" · "))+'"></td>'+
+      '<td><b>'+E(o.account||"—")+'</b><div style="color:#8A97A6;font-size:12px">'+E(o.orderNo||"")+' · '+(o.lines||[]).length+' '+E(L("sản phẩm","products"))+'</div></td>'+
+      '<td class="hm">'+E(o.pic)+'</td><td class="hm">'+E(o.day?day(o.day):mon(o.month))+'</td><td class="hm">'+E(tyLb(o.otype)||"—")+'</td>'+
+      '<td class="n">'+E(vnd(o.kpi))+'</td><td class="hm">'+(o.docs||[]).length+'</td>'+
+      '<td>'+chipSt(o)+((o.warn||[]).length&&!dn?'<div class="mis">'+E(o.warn.join(" · "))+'</div>':'')+'</td></tr>';
+  });
+  bd.innerHTML=h+'</tbody></table>';
+  bd.querySelector("#oav-all").onchange=function(){ var on=this.checked; ready.forEach(function(o){ if(on) V.sel[o.key]=1; else delete V.sel[o.key]; }); paint(); };
+  [].forEach.call(bd.querySelectorAll("tbody tr"),function(tr){
+    tr.onclick=function(e){
+      var cb=e.target.closest("input[type=checkbox]");
+      if(cb){ var key=cb.getAttribute("data-key"); if(cb.checked) V.sel[key]=1; else delete V.sel[key]; paint(); return; }
+      V.i=+tr.getAttribute("data-k"); V.mode="one"; V.why=""; paint();
+    };
+  });
+  var f='<span style="font-size:13px;color:#41566F">'+(nSel?E(L("Đã chọn "+nSel+" đơn · ","Selected "+nSel+" · "))+'<b>'+E(vnd(tot))+'</b>':E(L("Tick các đơn để xác nhận cùng lúc. Bấm vào một dòng để xem chi tiết và chứng từ.","Tick orders to approve them together. Click a row to see details and documents.")))+'</span><span class="sp"></span>'+
+    '<button class="btn sm dg" '+(nSel?"":"disabled")+' onclick="oavWhy(\'reject\')">'+E(L("Không xác nhận","Reject"))+(nSel?" ("+nSel+")":"")+'</button>'+
+    '<button class="btn sm pri" '+(nSel?"":"disabled")+' onclick="oavOkSel()">'+E(L("Xác nhận","Approve"))+(nSel?" "+nSel+" "+E(L("đơn","orders")):"")+'</button>'+whyBox();
+  ft.innerHTML=f; wireWhy();
+}
+
+/* ── thao tác ── */
+function go1(d){ var A=shown(); var n=V.i+d; if(n<0||n>=A.length) return; V.i=n; V.why=""; paint(); }
+window.oavGo=go1;
+window.oavZoom=function(im){ var z=$i("oav-zoom"); if(!z) return; z.innerHTML='<img alt="" src="'+im.src+'">'; z.classList.add("on"); };
+window.oavNoPv=function(im){ var d=document.createElement("div"); d.className="nopv"; d.textContent=L("Không xem trước được (cần đăng nhập Google công ty) — bấm Mở file.","No preview (sign in to your company Google account) — click Open."); im.replaceWith(d); };
+window.oavPdf=function(a,id){ var box=a.closest(".doc"); if(!box) return false; var im=box.querySelector("img,.nopv,iframe"); var f=document.createElement("iframe"); f.src="https://drive.google.com/file/d/"+id+"/preview"; f.setAttribute("allow","autoplay"); if(im) im.replaceWith(f); else box.appendChild(f); a.remove(); return false; };
+window.oavWhy=function(k){
+  V.why=k||"";
+  if(k==="return"){ var o=shown()[V.i]; if(o && (o.warn||[]).length) V.whyPre=L("Bổ sung: ","Please add: ")+o.warn.join(", "); }
+  paint();
+};
+window.oavOk=function(){
+  var o=shown()[V.i]; if(!o) return;
+  if(!o.ready){ toast(L("Chưa xác nhận được: ","Cannot approve yet: ")+(o.warn||[]).join(" · ")+L(" — gửi Yêu cầu chỉnh sửa cho sales."," — send a change request."),"warn",6000); window.oavWhy("return"); return; }
+  send([o],"approve","");
+};
+window.oavOkSel=function(){
+  var L2=shown().filter(function(o){ return V.sel[o.key] && o.ready && !done(o); });
+  if(!L2.length) return toast(L("Chưa chọn đơn nào đủ điều kiện","No ready order selected"),"warn");
+  send(L2,"approve","");
+};
+window.oavSendWhy=function(){
+  var cm=String(($i("oav-cm")||{}).value||"").trim();
+  if(cm.length<3){ toast(V.why==="reject"?L("Ghi lý do không xác nhận","Enter a reason"):L("Ghi rõ sales cần chỉnh sửa gì","Say what needs to change"),"warn"); var t=$i("oav-cm"); if(t) t.focus(); return; }
+  var list=V.mode==="list" ? shown().filter(function(o){ return V.sel[o.key] && !done(o); }) : [shown()[V.i]];
+  list=list.filter(Boolean); if(!list.length) return;
+  send(list,V.why,cm);
+};
+function send(list,dec,cm){
+  var keys=list.map(function(o){ return o.key; }), one=V.mode==="one";
+  list.forEach(function(o){ V.st[o.key]={ st:"run" }; delete V.sel[o.key]; });
+  V.why=""; paint();
+  if(one && dec==="approve"){ /* lật sang đơn tiếp theo ngay, không chờ máy chủ */
+    var nx=nextOpen(V.i); if(nx>=0) setTimeout(function(){ var s0=V.st[list[0].key]; if(V.open && V.mode==="one" && !(s0 && s0.st==="err")){ V.i=nx; paint(); } },450);
+  }
+  var tag={ approve:"ok", reject:"no", "return":"ret" }[dec];
+  apiPost({ action:"orderDecide", keys:keys, decision:dec, comment:cm }).then(function(j){
+    if(j && j.ok===false && !(j.results||[]).length) throw new Error(j.error||"Lỗi");
+    var R={}; (j&&j.results||[]).forEach(function(r){ R[r.key]=r; });
+    var bad=0;
+    list.forEach(function(o){
+      var r=R[o.key];
+      if(j && j.softTimeout && !r){ V.st[o.key]={ st:tag, cm:cm, soft:1 }; return; }
+      if(r && r.ok){ V.st[o.key]={ st:r.already?({ok:"ok",no:"no"}[r.already]||tag):tag, cm:cm }; return; }
+      bad++; V.st[o.key]={ st:"err", msg:(r&&r.error)||(j&&j.error)||L("Máy chủ không xử lý đơn này","Not processed") };
+    });
+    var okN=list.length-bad;
+    if(okN) toast((dec==="approve"?L("Đã xác nhận ","Approved "):dec==="reject"?L("Đã không xác nhận ","Rejected "):L("Đã yêu cầu chỉnh sửa ","Change request sent: "))+okN+L(" đơn"," order(s)")+(bad?L(" · "+bad+" đơn lỗi"," · "+bad+" failed"):""),bad?"warn":"ok",5000);
+    else toast(L("Chưa xử lý được — xem lỗi trên đơn.","Not processed — see the error on the order."),"err",6000);
+    if(bad && one && list.length===1 && V.open && V.mode==="one"){ var A=shown(); A.forEach(function(x,k){ if(x.key===list[0].key) V.i=k; }); }   /* lỗi ⇒ quay lại đúng đơn */
+    paint(); refresh();
+    if(okN && dec!=="return") try{ kpiPushSoon(3000); }catch(_){}
+  }).catch(function(e){
+    list.forEach(function(o){ V.st[o.key]={ st:"err", msg:(e&&e.message)||String(e) }; });
+    toast((e&&e.message)||L("Lỗi kết nối","Connection error"),"err",7000); paint();
+  });
+}
+var _rT=0;
+function refresh(){
+  clearTimeout(_rT);
+  _rT=setTimeout(function(){
+    S.ordAp=null; try{ window.ordApLoad(); }catch(_){}
+    try{ fetchTab("order",{}).then(function(rows){ S.cache.order={rows:rows||[]}; if(S.tab==="order" && typeof renderOrder==="function") renderOrder(); }).catch(function(){}); }catch(_){}
+  },800);
+}
+/* phím tắt: ← → lật đơn · Esc đóng */
+document.addEventListener("keydown",function(e){
+  if(!V.open) return; var tg=e.target||{}, typing=/^(TEXTAREA|INPUT|SELECT)$/.test(tg.tagName||"");
+  if(e.key==="Escape"){ var z=$i("oav-zoom"); if(z && z.classList.contains("on")){ z.classList.remove("on"); return; } if(V.why){ V.why=""; paint(); return; } if(!typing) close(); return; }
+  if(typing || V.mode!=="one") return;
+  if(e.key==="ArrowRight"){ e.preventDefault(); go1(1); } else if(e.key==="ArrowLeft"){ e.preventDefault(); go1(-1); }
+});
+
+/* thay bảng duyệt cũ ở mọi nơi (nút Duyệt đơn hàng, dải thông báo, Cần xử lý, link email) */
+window.oaOpen=oaOpen=function(key){ return open(typeof key==="string"?key:""); };
+var _cl=window.__tourClean;
+window.__tourClean=function(){ try{ close(); }catch(_){} if(typeof _cl==="function") return _cl.apply(this,arguments); };
+/* nút Duyệt đơn hàng do khối v31.6 tạo gọi hàm cũ trong phạm vi riêng ⇒ gắn lại */
+var _ro=window.renderOrder;
+window.renderOrder=renderOrder=function(){
+  var r=_ro.apply(this,arguments);
+  try{ var b=$i("oa-btn"); if(b) b.onclick=function(){ open(""); }; }catch(_){}
+  if(V.open) try{ merge(); paint(); }catch(_){}
+  return r;
+};
+/* danh sách chờ duyệt mới về ⇒ vẽ lại màn đang mở */
+var _ld=window.ordApLoad;
+if(typeof _ld==="function") window.ordApLoad=function(){
+  var r=_ld.apply(this,arguments);
+  var n=0; (function w(){ if(!V.open) return; if(S.ordAp){ merge(); paint(); return; } if(++n<60) setTimeout(w,500); })();
+  return r;
+};
+
+/* nút trên thẻ đơn (khối v32.0): Xác nhận gửi ngay + báo "Đang gửi…"; Không xác nhận / Yêu cầu chỉnh sửa ⇒ mở đúng đơn với ô ghi lý do (thay prompt) */
+function byRow(row){ var G=((S.ordAp||{}).groups)||[], f=null; G.forEach(function(g){ (g.orders||[]).forEach(function(o){ if(!f && (o.rows||[]).indexOf(+row)>=0) f=o; }); }); return f; }
+window.v320Dec=function(row,dec){
+  var o=byRow(row);
+  if(!o){ toast(L("Đang tải danh sách chờ duyệt — thử lại sau vài giây.","Loading the approval list — try again in a few seconds."),"warn",5000); S.ordAp=null; try{ window.ordApLoad(); }catch(_){} return; }
+  if(dec==="approve" && o.ready && !done(o)){
+    var b=null; try{ b=(window.event&&window.event.target)?window.event.target.closest("button"):null; }catch(_){}
+    if(b){ b.disabled=true; b.textContent=L("Đang gửi…","Sending…"); }
+    merge(); if(!V.items.some(function(x){ return x.key===o.key; })) V.items.push(o);
+    send([o],"approve",""); return;
+  }
+  open(o.key); window.oavWhy(dec==="approve"?"return":dec);
+};
+
+/* ── link email: #oa[=<key>][&lk=<vé>] ── */
+function hashArgs(){
+  var h=String(location.hash||"").replace(/^#/,""); if(!/^oa(=|&|$)/.test(h)) return null;
+  var o={}; h.split("&").forEach(function(p){ var i=p.indexOf("="), k=i<0?p:p.slice(0,i), v=i<0?"":p.slice(i+1); try{ v=decodeURIComponent(v); }catch(_){} o[k]=v; });
+  return o;
+}
+function setHash(key){ try{ history.replaceState(null,"",location.pathname+location.search+(key!=null?"#oa"+(key?"="+encodeURIComponent(key):""):"")); }catch(_){} }
+var H=hashArgs();
+if(H){
+  var key=H.oa||"";
+  if(H.lk){
+    if(window.AUTH && AUTH.tk()) setHash(key);                     /* đã đăng nhập ⇒ bỏ vé, dùng phiên đang có */
+    else {
+      try{ var t=JSON.parse(atob(H.lk.split(".")[0].replace(/-/g,"+").replace(/_/g,"/"))); if(t && t.e && !localStorage.getItem("mmh_last_email")) localStorage.setItem("mmh_last_email", t.e+"@manimedicalhanoi.com"); }catch(_){}
+      var lk=H.lk, cover=document.createElement("div"); cover.id="oav-lk";
+      cover.innerHTML='<div><i></i>'+E(L("Đang mở đơn hàng cần duyệt…","Opening the order to approve…"))+'</div>';
+      (document.body||document.documentElement).appendChild(cover);
+      setHash(key);
+      AUTH.call("rhAuthLink",{ lk:lk },30000).then(function(d){
+        var pic=d && d.ok && d.token && d.user ? AUTH.role(d.user.pic) : "";
+        if(pic){ AUTH.save(d); try{ AUTH.grant(pic); }catch(_){} location.reload(); return; }
+        throw new Error((d&&d.error)||L("Link đăng nhập không còn hiệu lực.","The sign-in link is no longer valid."));
+      }).catch(function(e){
+        cover.remove();
+        setTimeout(function(){ try{ toast((e&&e.message||"")+" "+L("Đăng nhập bằng email — xong sẽ mở đúng đơn này.","Sign in with your e-mail — the order opens afterwards."),"warn",9000); }catch(_){} },300);
+      });
+      H.wait=1;
+    }
+  }
+  /* có phiên (hoặc vừa đăng nhập bằng mã) ⇒ trang Đơn hàng + mở đúng đơn */
+  var n=0; (function w(){
+    if(window.S && S.user && typeof go==="function" && document.getElementById("app") && document.getElementById("app").classList.contains("on")){
+      setHash(null);
+      try{ go("order"); }catch(_){}
+      setTimeout(function(){ try{ if(window.v316OrdIsAp && v316OrdIsAp()) open(key); else if(key) toast(L("Đơn hàng này chờ người duyệt xác nhận.","This order is waiting for the approver."),"warn",5000); }catch(_){} },700);
+      return;
+    }
+    if(++n<600) setTimeout(w,1000);   /* chờ tới 10 phút (người dùng đang đăng nhập bằng mã) */
+  })();
+}
 })();
 </script>
 </body>
