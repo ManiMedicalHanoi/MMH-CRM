@@ -7,6 +7,15 @@
 function E(u){ u.en={ title:u.title, items:u.items.map(function(i){ return { title:i.title, text:i.text }; }) }; return u; }
 window.MMH_UPDATES = [
   E({
+    id:"2026-10-28-v33.7", version:"v33.7", date:"2026-10-28",
+    title:"Request changes on many orders at once · sales see the note on each order",
+    summary:"Approvers write a change request on each order, then send them all with one click. Each sales PIC gets one e-mail listing every order with its note, and CRM shows the orders to fix as soon as they sign in.",
+    items:[
+      { type:"imp", icon:"✎", title:"Collect notes, send once", text:"<b>Approve orders</b> ▸ <b>Request changes</b> ▸ write the note ▸ <b>Save note</b>: the order is marked <b>Request not sent</b> and the next order opens. In <b>List</b> you can tick several orders and give them one note. When done, click <b>Send change requests</b> in the yellow bar — one e-mail per sales PIC with the note under each order.", img:"updates/v33.7/drafts.jpg" },
+      { type:"new", icon:"!", title:"Sales: orders to fix", text:"After signing in, sales PICs with new change requests see <b>Orders to fix</b>: the approver's note on each order, <b>Edit order</b> and <b>Send for approval again</b>. It also opens from <b>Orders</b> ▸ <b>View notes</b> and from the link in the e-mail.", img:"updates/v33.7/sales.jpg" }
+    ]
+  }),
+  E({
     id:"2026-10-28-v33.6", version:"v33.6", date:"2026-10-28",
     title:"Split orders joined again · visit date changes stick · training attendees from your customer list",
     summary:"Orders that were split into several cards after adding documents are one order again. A changed visit date no longer jumps back. Customer training (T&E) attendees are picked from the PIC's own customer list.",
