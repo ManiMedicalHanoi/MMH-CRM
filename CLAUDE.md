@@ -178,3 +178,8 @@ Kiến trúc & quy ước giống MMH Report Hub (repo `ManiMedicalHanoi/MMH-Rep
   (máy chủ nay gom dòng không số theo account + ngày + PIC + tháng và tự cấp Order No.). **Sửa đơn = cả đơn**: `formOrder` bọc ⇒ `v334Lines(o)` (cùng Order No. + account + ngày như danh sách v32.2) ⇒ `S.ordProds` mọi dòng
   (mỗi dòng giữ `_row`), nút `#v334-add` Thêm sản phẩm; ✕ ⇒ `S.editing.del`. `obAddOrders` bọc gắn `_row` đúng từng dòng + dòng bỏ `{_row,_del,_no,_nm}` (`_ed` = mã lô); `afterWrite` bọc: lô có `_ed` ⇒ bỏ dòng cũ trên máy rồi
   thêm theo số dòng mới (xoá dòng làm số dòng dời) + tải lại tab; `patchLocal` bỏ qua dòng `_del`. Xoá đơn khi sửa cả đơn ⇒ `deleteRow` từng dòng từ dưới lên.
+- **v33.5 (28/10/2026, khối `v335-css` + `v335-js`, backend CRM v10.18 + Training Hub v3.34)**: `oaOpen(key?)` = màn **Duyệt đơn hàng** `#oav` (thay bảng duyệt cũ `oa-body`): **Từng đơn** (lật ‹ ›, phím ← →, vuốt;
+  thông tin + dòng sản phẩm + chứng từ xem ngay bằng ảnh thu nhỏ Drive / "Xem đủ trang" iframe preview; Xác nhận ⇒ tự sang đơn kế) và **Danh sách** (tick nhiều đơn đủ điều kiện ⇒ Xác nhận / Không xác nhận 1 lần), lọc PIC,
+  trạng thái từng đơn trên máy (`V.st`). KHÔNG dùng `prompt` / `confirm` (trình duyệt trong app email điện thoại không hiện ⇒ lỗi "bấm không thấy gì"); `v320Dec` trên thẻ đơn cũng chuyển sang cách này.
+  Link email `#oa=<key>&lk=<vé>`: chưa có phiên ⇒ Training Hub `rhAuthLink` đổi vé lấy phiên (`AUTH.grant` mở ra cho khối này) rồi tải lại; vé hỏng ⇒ màn đăng nhập, đăng nhập xong vẫn mở đúng đơn (chờ ≤ 10 phút).
+  Handler `#oa` cũ trong `v320-ord` đã gỡ.
