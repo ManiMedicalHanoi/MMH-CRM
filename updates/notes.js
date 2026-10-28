@@ -7,6 +7,16 @@
 function E(u){ u.en={ title:u.title, items:u.items.map(function(i){ return { title:i.title, text:i.text }; }) }; return u; }
 window.MMH_UPDATES = [
   E({
+    id:"2026-10-28-v33.6", version:"v33.6", date:"2026-10-28",
+    title:"Split orders joined again · visit date changes stick · training attendees from your customer list",
+    summary:"Orders that were split into several cards after adding documents are one order again. A changed visit date no longer jumps back. Customer training (T&E) attendees are picked from the PIC's own customer list.",
+    items:[
+      { type:"fix", icon:"🧾", title:"Split orders joined again", text:"After documents were added to one line, the other lines of the same order showed as separate orders without type or documents. Lines of the same account, order date and PIC now share one Order No., order type and documents automatically. Open <b>Orders</b>: each order shows as one card again." },
+      { type:"fix", icon:"📅", title:"Changed visit date stays", text:"Open a field visit ▸ change <b>Date</b> ▸ <b>Save</b>: the visit moves to the new day and stays there, even while the change is still being sent or when the sheet's row numbers have changed." },
+      { type:"imp", icon:"🎓", title:"Training attendees from your customer list", text:"<b>Presentations ▸ Customer training (T&E)</b> ▸ <b>Customers attending</b>: type a name and pick from the PIC's own contacts and accounts only. Sessions are saved to the Training Master and count for the training KPI.", img:"updates/v33.6/te_aud.jpg" }
+    ]
+  }),
+  E({
     id:"2026-10-28-v33.5", version:"v33.5", date:"2026-10-28",
     title:"Approve orders: flip through orders with their documents · approve several at once · e-mail link opens the order",
     summary:"Approvers get a new <b>Approve orders</b> screen: check one order at a time with its documents, or tick several orders and approve them together. Every button now answers at once. The link in the approval e-mail opens that order directly — no sign-in code needed on the phone.",

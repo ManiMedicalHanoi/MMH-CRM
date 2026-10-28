@@ -108,11 +108,11 @@ TOUR.add([
     { el:"#v322-ps", do:function(){ try{ formPresent(null); }catch(_){} }, wait:600, t:V("5 khung báo cáo","5 report sections"), x:V("Điền từng khung: số người tham dự (tự lấy), tóm tắt hoạt động, phản hồi khách hàng, doanh số, hành động tiếp theo.","Fill each section: attendees (automatic), activity summary, customer feedback, sales, next actions.") },
     { el:"#v322-meter", t:V("Độ chi tiết","Detail meter"), x:V("Mục quá ngắn hiện <b>Ghi chi tiết hơn</b> — ghi cụ thể ai, sản phẩm gì, số lượng, khi nào.","Sections that are too short show <b>Add more detail</b> — say who, which product, how many, when.") }
    ] },
- { id:"te", v:1, d:"2026-10-13", g:V("Khách hàng & bán hàng","Customers & sales"), ic:"people", t:V("Đào tạo khách hàng (T&E)","Customer training (T&E)"), x:V("Ghi buổi đào tạo khách hàng — lưu Training Master, tính KPI C10.","Log customer training sessions — saved to the Training Master, counted for C10."),
+ { id:"te", v:2, d:"2026-10-28", g:V("Khách hàng & bán hàng","Customers & sales"), ic:"people", t:V("Đào tạo khách hàng (T&E)","Customer training (T&E)"), x:V("Ghi buổi đào tạo khách hàng — lưu Training Master, tính KPI C10.","Log customer training sessions — saved to the Training Master, counted for C10."),
    when:function(){ try{ return !!(window.v316TeOn && v316TeOn()); }catch(_){ return false; } },
    steps:[
     { el:"#te-tab", do:function(){ try{ go("present"); S.presTab="te"; renderPresent(); }catch(_){} }, wait:700, t:V("Tab Đào tạo khách hàng","Customer training tab"), x:V("Trong trang Thuyết trình · Đào tạo KH.","Inside the Presentation · Customer training page.") },
-    { el:"#te-add", t:V("Thêm buổi đào tạo","New session"), x:V("Ngày, chủ đề, sản phẩm, khách tham dự (chọn từ danh mục khách hàng). Hoàn thành cần Actual > 0 và review đủ 5 dòng mẫu.","Date, topic, product and attendees (picked from the customer list). Completed needs Actual > 0 and the 5-line review.") }
+    { el:"#te-add", t:V("Thêm buổi đào tạo","New session"), x:V("Ngày, chủ đề, sản phẩm, khách tham dự — chỉ chọn trong danh sách khách hàng của PIC buổi đào tạo (bác sĩ / người liên hệ, địa bàn). Lưu vào Training Master, tính KPI đào tạo C10. Hoàn thành cần Actual > 0 và review đủ 5 dòng mẫu.","Date, topic, product and attendees — picked only from the session PIC's customer list (contacts, accounts). Saved to the Training Master, counted for training KPI C10. Completed needs Actual > 0 and the 5-line review.") }
    ] },
  { id:"newacc", v:1, d:"2026-10-11", g:V("Khách hàng & bán hàng","Customers & sales"), ic:"kpi", t:V("Mở mới & SKU mới","New accounts & SKUs"), x:V("Ghi case mở mới để tính KPI, quản lý duyệt.","Log new-account cases for KPI; managers approve."),
    steps:[
