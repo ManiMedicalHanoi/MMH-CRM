@@ -7,6 +7,15 @@
 function E(u){ u.en={ title:u.title, items:u.items.map(function(i){ return { title:i.title, text:i.text }; }) }; return u; }
 window.MMH_UPDATES = [
   E({
+    id:"2026-10-28-v33.4", version:"v33.4", date:"2026-10-28",
+    title:"Orders with several products: the whole order counts · edit the whole order",
+    summary:"An order with several product lines is now sent for approval, approved and counted for KPI C5 as <b>one order with every line</b> (before, only the first line was counted). <b>Edit order</b> opens all lines, so you can add or remove products.",
+    items:[
+      { type:"fix", icon:"🧾", title:"Whole order sent and counted", text:"Orders saved without an Order No. were split into one order per line, so <b>Send for approval</b>, approval and KPI C5 took only the first product. Now every line of the order is included and each order gets one Order No. automatically. Open <b>Orders</b> and send the order again if it showed only one product." },
+      { type:"imp", icon:"✏️", title:"Edit the whole order", text:"<b>Orders</b> ▸ click an order ▸ <b>Edit order</b>: every product line is shown. Change a line, <b>＋ Add product</b> or remove a line (✕), then <b>Save</b>. Editing an approved order sends the whole order back to Pending.", img:"updates/v33.4/order_edit.jpg" }
+    ]
+  }),
+  E({
     id:"2026-10-23-v33.3", version:"v33.3", date:"2026-10-23",
     title:"Report statistics (on time / late) · e-mail the quarterly self-evaluation",
     summary:"Every weekly report, monthly KPI report and quarterly self-evaluation e-mail is logged and compared with its deadline using the <b>MMH Vietnam / Thailand work calendar</b>. Admin, Director and HOD can export the statistics per PIC to Excel.",
