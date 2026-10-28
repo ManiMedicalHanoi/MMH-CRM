@@ -3994,7 +3994,7 @@ function buildNav(){
     if(t.grp!==lastGrp){ h+='<div class="grp">'+t.grp+'</div>'; lastGrp=t.grp; }
     h+='<button class="nvi" data-t="'+t.id+'" onclick="go(\''+t.id+'\')"><span class="ic">'+t.ic+'</span><span class="lb">'+t.lb+'</span></button>';
   });
-  h+='<div style="flex:1"></div><div style="padding:10px;font-size:10.5px;color:var(--mute);line-height:1.5">MMH CRM v33.5<br>'+
+  h+='<div style="flex:1"></div><div style="padding:10px;font-size:10.5px;color:var(--mute);line-height:1.5">MMH CRM v33.6<br>'+
      (isMgmt()?'<a href="'+DRIVE_FOLDER+'" target="_blank">📁 Folder ảnh Drive</a>':"")+'</div>';
   $("side").innerHTML=h;
   /* ⭐ v4.5 — thanh dưới trượt ngang, đủ mọi mục, bỏ nút "Thêm" */
@@ -20721,7 +20721,7 @@ window.QS2={ open:qsOpen };
 </script>
 
 <!-- ⭐ v30.3 — THÔNG BÁO CẬP NHẬT (chép từ Report Hub): dữ liệu updates/notes.js · tự hiện 7 ngày · nút "Có gì mới" trên thanh trên cùng -->
-<script src="updates/notes.js?v=33.5"></script>
+<script src="updates/notes.js?v=33.6"></script>
 <style id="upd-css">
 #upd,#upd-zoom{--t-pri:var(--blue);--t-pri2:var(--blue-d);--t-ink:var(--navy);--t-soft:var(--pale);--t-line:var(--lb2);--t-bg:#F6F8FA;--mmh-blue:var(--blue);--mmh-navy:var(--navy)}
 
@@ -24837,7 +24837,7 @@ window.RPSTAT_CFG={ lang:function(){ return (window.I18N && I18N.on) ? "en" : "v
 <script src="rpstat/rpstat.js?v=1.0"></script>
 <script src="testflow/testflow.js?v=1.0"></script>
 <script src="tour/tour.js?v=1.1"></script>
-<script src="tour/tours.js?v=33.4"></script>
+<script src="tour/tours.js?v=33.6"></script>
 <script id="v319-i18n">
 /* v31.9 — bổ sung bản dịch EN (nhóm Thái): ô chọn account "N kết quả" */
 (function(){ try{ if(typeof RULES_EN!=="undefined" && RULES_EN.unshift){
@@ -25164,7 +25164,7 @@ function render(){
   /* gom theo đơn */
   var G=[], gi={};
   rows.forEach(function(o){
-    var k=(o._rid||"")+"|"+String(o.orderNo||"")+"|"+nk(o.name)+"|"+String(o.day||k8Ym(o));
+    var k=(o._rid||"")+"|"+(window.v336OrdNo?v336OrdNo(o):String(o.orderNo||""))+"|"+nk(o.name)+"|"+String(o.day||k8Ym(o));
     if(gi[k]==null){ gi[k]=G.length; G.push({ k:k, o:o, lines:[], amt:0 }); }
     var g=G[gi[k]]; g.lines.push(o); g.amt+=n(o.amount);
   });
@@ -25173,7 +25173,7 @@ function render(){
   /* thống kê (bỏ đơn bị từ chối) */
   var live=function(o){ return apSt(o)!=="no"; };
   var inM=function(o,m){ return k8Ym(o)===m; };
-  var grpOf=function(list){ var s={}, c={}; list.forEach(function(o){ var k=(o._rid||"")+"|"+String(o.orderNo||"")+"|"+nk(o.name)+"|"+String(o.day||k8Ym(o)); s[k]=1; c[nk(o.name)]=1; }); return { ord:Object.keys(s).length, cust:Object.keys(c).filter(String).length }; };
+  var grpOf=function(list){ var s={}, c={}; list.forEach(function(o){ var k=(o._rid||"")+"|"+(window.v336OrdNo?v336OrdNo(o):String(o.orderNo||""))+"|"+nk(o.name)+"|"+String(o.day||k8Ym(o)); s[k]=1; c[nk(o.name)]=1; }); return { ord:Object.keys(s).length, cust:Object.keys(c).filter(String).length }; };
   var scope=mine.filter(live).filter(function(o){ return !q || rows.indexOf(o)>=0; });
   var mList=scope.filter(function(o){ return inM(o,focus); });
   var upTo=months.slice(0,months.indexOf(focus)+1), cum=scope.filter(function(o){ return upTo.indexOf(k8Ym(o))>=0; });
@@ -25708,7 +25708,7 @@ function pc(p){ return p==null?"—":Math.round(p*100)+"%"; }
 S.d3=S.d3||{ m:"" };
 window.d3Set=function(k,v){ if(k==="pic") S.filt.pic=v; else S.d3[k]=v; renderDash(); };
 function keepPic(p,pic){ if(!pic) return true; return String(p||"").toLowerCase().indexOf(pic.toLowerCase())>=0; }
-function ordKey(o){ return String(o.orderNo||"")+"|"+nk(o.name)+"|"+String(o.day||k8Ym(o)); }
+function ordKey(o){ return (window.v336OrdNo?v336OrdNo(o):String(o.orderNo||""))+"|"+nk(o.name)+"|"+String(o.day||k8Ym(o)); }
 function rejected(o){ try{ return window.v316OrdNeed(o) && window.v316OrdAppr(o.appr)==="no"; }catch(e){ return false; } }
 function lastTouch(){
   var m={}; terrRows().forEach(function(w){ if(!/complet/i.test(String(w.status||""))) return; var d=iso(w.start); if(!d||d>todayISO()) return; var k=nk(parseAcc(w.account).name); if(k && (!m[k]||d>m[k])) m[k]=d; });
@@ -26557,7 +26557,7 @@ window.d4Tab=function(t){ S.d3.tab=t; try{ localStorage.setItem("mmh_d4_tab",t);
 function tone(p){ return p==null?"low":p>1.2?"top":p>=1?"ok":p>=0.9?"mid":"low"; }
 function pc(p){ return p==null?"—":Math.round(p*100)+"%"; }
 function keepPic(p,pic){ if(!pic) return true; return String(p||"").toLowerCase().indexOf(pic.toLowerCase())>=0; }
-function ordKey(o){ return String(o.orderNo||"")+"|"+nk(o.name)+"|"+String(o.day||k8Ym(o)); }
+function ordKey(o){ return (window.v336OrdNo?v336OrdNo(o):String(o.orderNo||""))+"|"+nk(o.name)+"|"+String(o.day||k8Ym(o)); }
 function rejected(o){ try{ return window.v316OrdNeed(o) && window.v316OrdAppr(o.appr)==="no"; }catch(e){ return false; } }
 function daysBetween(a,b){ return Math.round((new Date(b+"T00:00:00")-new Date(a+"T00:00:00"))/864e5); }
 function mShort(m){ return parseInt(String(m).slice(4),10); }
@@ -26787,7 +26787,7 @@ window.go=go=function(){ var r=_go.apply(this,arguments); try{ document.body.cla
 function tone(p){ return p==null?"low":p>1.2?"top":p>=1?"ok":p>=0.9?"mid":"low"; }
 function pc(p){ return p==null?"—":Math.round(p*100)+"%"; }
 function keepPic(p,pic){ if(!pic) return true; return String(p||"").toLowerCase().indexOf(pic.toLowerCase())>=0; }
-function ordKey(o){ return String(o.orderNo||"")+"|"+nk(o.name)+"|"+String(o.day||k8Ym(o)); }
+function ordKey(o){ return (window.v336OrdNo?v336OrdNo(o):String(o.orderNo||""))+"|"+nk(o.name)+"|"+String(o.day||k8Ym(o)); }
 function oAp(o){ try{ return window.v316OrdAppr(o.appr); }catch(e){ return ""; } }
 function rejected(o){ try{ return window.v316OrdNeed(o) && oAp(o)==="no"; }catch(e){ return false; } }
 function wYm(w){ return String(w.month||"").replace(/\D/g,"").slice(0,6)||ymOf(iso(w.start)); }
@@ -26943,7 +26943,7 @@ window.renderDash=renderDash=function(){
 function L(vi,en){ return TX(vi,en); }
 function nk(s){ return String(s||"").normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/đ/g,"d").replace(/Đ/g,"D").toLowerCase().replace(/\s+/g," ").trim(); }
 /* khoá đơn = như danh sách Đơn hàng (v32.2): Order No. + account + ngày đặt */
-function okey(o){ return String(o.orderNo||"")+"|"+nk(o.name)+"|"+String(o.day||k8Ym(o)); }
+function okey(o){ return (window.v336OrdNo?v336OrdNo(o):String(o.orderNo||""))+"|"+nk(o.name)+"|"+String(o.day||k8Ym(o)); }
 function pool(){
   var seen={}, out=[];
   [((S.cache.order||{}).rows)||[], tGet("order")||[], (S.acc&&S.acc.orders)||[], (S.detail&&S.detail.orders)||[]].forEach(function(l){
@@ -27479,6 +27479,118 @@ if(H){
     if(++n<600) setTimeout(w,1000);   /* chờ tới 10 phút (người dùng đang đăng nhập bằng mã) */
   })();
 }
+})();
+</script>
+<script id="v336-js">
+/* ════════════════════════════════════════════════════════════════════════════════════════
+   ⭐ v33.6 (28/10/2026) — backend CRM v10.19
+   ① Đơn bị tách sau khi cập nhật chứng từ (app cũ sửa 1 dòng ⇒ chỉ dòng đó có Order No.): dòng KHÔNG số cùng account + ngày đặt + PIC
+      với dòng ĐÃ có số (chỉ 1 số) ⇒ hiện chung 1 đơn (v336OrdNo, dùng ở danh sách v32.2 + Sửa cả đơn v33.4). Máy chủ cũng tự điền số (ordNoHeal_, v10.19).
+   ② Đổi ngày task đi địa bàn: lệnh lưu còn chờ trong hàng đợi (WQ) ⇒ dữ liệu tải lại từ Sheet không đè thay đổi chưa gửi (trước đây task
+      nhảy về ngày cũ, lệnh lỗi ⇒ nằm luôn ở ngày cũ). Máy chủ nhận đúng dòng theo account + PIC + ngày cũ khi số No đã đổi.
+   ③ Đào tạo khách hàng (T&E, lưu Training Master): Khách hàng tham dự CHỈ chọn trong danh sách khách hàng của PIC buổi đào tạo
+      (người liên hệ ở Khách hàng + địa bàn của PIC đó), không gõ tên ngoài danh sách.
+   ════════════════════════════════════════════════════════════════════════════════════════ */
+(function(){
+"use strict";
+function L(vi,en){ return TX(vi,en); }
+function nk(s){ return String(s||"").normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/đ/g,"d").replace(/Đ/g,"D").toLowerCase().replace(/\s+/g," ").trim(); }
+
+/* ═════════ ① số đơn hiệu lực ═════════ */
+var NM={ src:null, len:-1, map:{} };
+function k2(o){ return nk(o.name)+"|"+String(o.day||"").slice(0,10)+"|"+nk(o.pic); }
+function noMap(){
+  var src=((S.cache.order||{}).rows)||[];
+  if(NM.src===src && NM.len===src.length) return NM.map;
+  var m={}; src.concat(tGet("order")||[]).forEach(function(r){ var no=String(r.orderNo||"").trim(); if(!no || !r.name) return; var k=k2(r); if(m[k]===undefined) m[k]=no; else if(m[k]!==no) m[k]=null; });
+  NM={ src:src, len:src.length, map:m }; return m;
+}
+window.v336OrdNo=function(o){
+  var no=String((o&&o.orderNo)||"").trim(); if(no || !o || o._pend) return no;
+  var v=noMap()[k2(o)]; return v||"";
+};
+
+/* ═════════ ② đi địa bàn: thay đổi chưa gửi không bị dữ liệu tải lại đè ═════════ */
+function overlay(){
+  try{
+    if(!window.WQ || !S.cache || !S.cache.weekly || !S.cache.weekly.rows) return false;
+    var rows=S.cache.weekly.rows, ch=false;
+    WQ.pending("weekly").forEach(function(it){
+      if(it.kind!=="data" || !it.patch || it.err) return;
+      var row=WQ.realRow(it.row); if(!row) return;
+      var r=null; for(var i=0;i<rows.length;i++) if(rows[i]._row===row){ r=rows[i]; break; }
+      var diff=!r || Object.keys(it.patch).some(function(k){ return !/^_/.test(k) && String(r[k]==null?"":r[k])!==String(it.patch[k]==null?"":it.patch[k]); });
+      if(diff){ patchRows(rows,row,it.patch,false); ch=true; }
+    });
+    if(ch){ _lvMap=null; }
+    return ch;
+  }catch(e){ return false; }
+}
+window.v336Overlay=overlay;
+var _lt=window.loadTerritoryAll;
+window.loadTerritoryAll=loadTerritoryAll=function(){
+  var p=_lt.apply(this,arguments);
+  return (p && p.then) ? p.then(function(r){ if(overlay()) try{ repaintTab(); }catch(_){} return r; }) : p;
+};
+setInterval(function(){ try{ if(window.WQ && WQ.pending("weekly").length && overlay()) repaintTab(); }catch(_){} }, 4000);
+
+/* ═════════ ③ T&E: khách hàng tham dự theo danh sách khách hàng của PIC ═════════ */
+function tePic(){ return String((($("te_pic")||{}).value)||((S.user&&S.user.pic)||"")).trim(); }
+function picOk(p,pic){ if(!pic) return true; var k=nk(pic); return String(p||"").split(/[,;\/&]+/).some(function(x){ return nk(x)===k; }); }
+function pool(){
+  var pic=tePic(), acc={}, out=[], seen={};
+  (S.custIndex||[]).forEach(function(c){ if(c && picOk(c.pic,pic)) acc[String(c.code||"")+"|"+nk(c.name)]=c; });
+  var accBy=function(code,name){ var k=String(code||"")+"|"+nk(name); if(acc[k]) return acc[k]; for(var x in acc){ if(acc[x].code && String(acc[x].code)===String(code||"")) return acc[x]; } return null; };
+  (S.cbcRows||[]).forEach(function(c){
+    var nm=String(c.contact||"").trim(); if(!nm) return;
+    var a=accBy(c.code,c.name), p=c.pic||(a&&a.pic)||"";
+    if(!(a || (c.pic && picOk(c.pic,pic)))) return;
+    var key="c|"+nk(nm)+"|"+nk(c.name); if(seen[key]) return; seen[key]=1;
+    out.push({ code:c.cbcCode||c.code||"", name:nm, workplace:c.name||"", sub:[c.jobTitle,c.name].filter(function(v){ return String(v||"").trim(); }).join(" · "), kind:"c" });
+  });
+  Object.keys(acc).forEach(function(k){ var c=acc[k]; out.push({ code:c.code||"", name:c.name||"", workplace:[c.type,c.province].filter(String).join(" · "), sub:L("Địa bàn","Account")+" · "+[c.type,c.province].filter(String).join(" · "), kind:"a" }); });
+  return out;
+}
+window.v336TePool=pool;
+function draw(){
+  var el=$("te_audList"); if(!el) return;
+  el.innerHTML=TE.aud.map(function(a,i){ return '<span title="'+esc([a.code,a.workplace].filter(String).join(" · "))+'">'+esc(a.name)+(a.workplace?' <small style="color:#8A97A6">'+esc(a.workplace)+'</small>':'')+'<button type="button" onclick="teAudRm('+i+')">✕</button></span>'; }).join("")||
+    '<small style="color:#8A97A6">'+esc(L("Chưa chọn khách hàng nào","No customer selected yet"))+'</small>';
+  var c=$("te_audN"); if(c) c.textContent=TE.aud.length;
+}
+function add(a){
+  if(!a || !String(a.name||"").trim()) return;
+  if(TE.aud.some(function(x){ return nk(x.name)===nk(a.name) && nk(x.workplace)===nk(a.workplace); })) return;
+  TE.aud.push({ code:a.code||"", name:String(a.name).trim(), workplace:a.workplace||"" }); draw();
+}
+function wire(){
+  var inp0=$("te_audQ"), dd0=$("te_audDD"); if(!inp0 || !dd0) return;
+  var inp=inp0.cloneNode(true), dd=dd0.cloneNode(false); inp0.parentNode.replaceChild(inp,inp0); dd0.parentNode.replaceChild(dd,dd0);
+  inp.placeholder=L("Gõ tên bác sĩ / người liên hệ / địa bàn trong danh sách khách hàng của PIC","Type a doctor / contact / account from the PIC's customer list");
+  var hint=$("v336-te-hint");
+  if(!hint){ hint=document.createElement("div"); hint.id="v336-te-hint"; hint.className="hint"; inp.parentNode.parentNode.appendChild(hint); }
+  hint.textContent=L("Chỉ chọn trong danh sách khách hàng của PIC "+tePic()+" (Khách hàng + Địa bàn). Chưa có ⇒ thêm khách hàng trên CRM trước.","Only customers of PIC "+tePic()+" (contacts + accounts). Not listed ⇒ add the customer in the CRM first.");
+  function paint(){
+    var q=nk(inp.value), all=pool();
+    var list=all.filter(function(c){ return !q || nk(c.name+" "+c.sub+" "+c.code).indexOf(q)>=0; }).slice(0,40);
+    var h=list.map(function(c,i){ return '<div data-i="'+i+'">'+esc(c.name)+'<small>'+esc(c.sub||"")+'</small></div>'; }).join("");
+    if(!h) h='<div style="color:#8A97A6;cursor:default">'+esc(!all.length&&(S._cbcLoading||!(S.custIndex||[]).length)?L("Đang nạp danh sách khách hàng…","Loading customers…"):L("Không có trong danh sách khách hàng của "+tePic(),"Not in "+tePic()+"'s customer list"))+'</div>';
+    dd.innerHTML=h; dd.classList.add("on"); dd._list=list;
+  }
+  inp.addEventListener("focus",paint); inp.addEventListener("input",paint);
+  inp.addEventListener("keydown",function(e){ if(e.key==="Enter"){ e.preventDefault(); var l=dd._list||[]; if(l.length===1){ add(l[0]); inp.value=""; } paint(); } });
+  dd.addEventListener("mousedown",function(e){ var d=e.target.closest("div[data-i]"); if(!d) return; e.preventDefault(); var c=(dd._list||[])[+d.getAttribute("data-i")]; if(c) add(c); inp.value=""; paint(); });
+  inp.addEventListener("blur",function(){ setTimeout(function(){ dd.classList.remove("on"); },150); });
+  var ps=$("te_pic"); if(ps && !ps._v336){ ps._v336=1; ps.addEventListener("change",function(){ hint.textContent=L("Chỉ chọn trong danh sách khách hàng của PIC "+tePic()+" (Khách hàng + Địa bàn). Chưa có ⇒ thêm khách hàng trên CRM trước.","Only customers of PIC "+tePic()+" (contacts + accounts). Not listed ⇒ add the customer in the CRM first."); }); }
+  try{ ensureCbc(); }catch(_){}
+  if(!(S.custIndex||[]).length) try{ loadCustomerIndex().then(function(){ if(document.activeElement===inp) paint(); }); }catch(_){}
+}
+var _tf=window.teForm;
+window.teForm=function(k){
+  var r=_tf.apply(this,arguments);
+  try{ draw(); wire(); S.modalRewire=function(){ draw(); wire(); }; }catch(e){ try{ console.warn(e); }catch(_){} }
+  return r;
+};
 })();
 </script>
 </body>

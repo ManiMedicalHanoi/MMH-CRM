@@ -183,3 +183,7 @@ Kiến trúc & quy ước giống MMH Report Hub (repo `ManiMedicalHanoi/MMH-Rep
   trạng thái từng đơn trên máy (`V.st`). KHÔNG dùng `prompt` / `confirm` (trình duyệt trong app email điện thoại không hiện ⇒ lỗi "bấm không thấy gì"); `v320Dec` trên thẻ đơn cũng chuyển sang cách này.
   Link email `#oa=<key>&lk=<vé>`: chưa có phiên ⇒ Training Hub `rhAuthLink` đổi vé lấy phiên (`AUTH.grant` mở ra cho khối này) rồi tải lại; vé hỏng ⇒ màn đăng nhập, đăng nhập xong vẫn mở đúng đơn (chờ ≤ 10 phút).
   Handler `#oa` cũ trong `v320-ord` đã gỡ.
+- **v33.6 (28/10/2026, khối `v336-js`, backend CRM v10.19)**: ① đơn bị tách sau khi cập nhật chứng từ (app cũ sửa 1 dòng ⇒ chỉ dòng đó có Order No.) — `v336OrdNo(o)`: dòng không số cùng account + ngày + PIC
+  với dòng có số (chỉ 1 số) ⇒ dùng số đó trong MỌI khoá nhóm đơn (`ordKey` v32.3 / v32.9 / v33.0, danh sách v32.2 `render`, `okey` v33.4); backend `ordNoHeal_` điền số + loại đơn / chứng từ thật trên sheet.
+  ② đổi ngày đi địa bàn bị quay lại: `loadTerritoryAll` bọc ⇒ phủ lại lệnh `WQ` chưa gửi (không phủ lệnh lỗi) + 4 giây / lần; backend `wkResolve_` nhận dòng theo account + PIC + ngày cũ khi số No lệch.
+  ③ T&E (`teForm` bọc): Khách hàng tham dự chỉ chọn trong danh sách của PIC buổi (`S.cbcRows` người liên hệ + `S.custIndex` địa bàn, `v336TePool`), không còn gõ tên ngoài danh sách.
