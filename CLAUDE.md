@@ -187,3 +187,7 @@ Kiến trúc & quy ước giống MMH Report Hub (repo `ManiMedicalHanoi/MMH-Rep
   với dòng có số (chỉ 1 số) ⇒ dùng số đó trong MỌI khoá nhóm đơn (`ordKey` v32.3 / v32.9 / v33.0, danh sách v32.2 `render`, `okey` v33.4); backend `ordNoHeal_` điền số + loại đơn / chứng từ thật trên sheet.
   ② đổi ngày đi địa bàn bị quay lại: `loadTerritoryAll` bọc ⇒ phủ lại lệnh `WQ` chưa gửi (không phủ lệnh lỗi) + 4 giây / lần; backend `wkResolve_` nhận dòng theo account + PIC + ngày cũ khi số No lệch.
   ③ T&E (`teForm` bọc): Khách hàng tham dự chỉ chọn trong danh sách của PIC buổi (`S.cbcRows` người liên hệ + `S.custIndex` địa bàn, `v336TePool`), không còn gõ tên ngoài danh sách.
+- **v33.7 (28/10/2026, sửa khối `v335-js` + khối mới `v337-css` / `v337-js`, backend CRM v10.20)**: Yêu cầu chỉnh sửa = **NHÁP trên máy** (`D`, `localStorage.mmh_oav_draft_<pic>`, nhận xét riêng từng đơn;
+  danh sách tick nhiều đơn ⇒ 1 nhận xét chung, cho chọn cả đơn chưa đủ điều kiện) ⇒ dải vàng `#oav-dr` "n đơn có nhận xét chưa gửi" ▸ **Gửi yêu cầu chỉnh sửa** = 1 lệnh `orderDecide decision=return` + `notes {key:nhận xét}`
+  (mỗi sales 1 email, link `#ox`). Nháp của đơn không còn chờ duyệt tự bỏ. Phía sales: `oxOpen()` = hộp `#oxv` "Đơn hàng cần chỉnh sửa" (đơn của mình có Ghi chú duyệt "Cần bổ sung: …", tách nhận xét / người / giờ) ▸ Sửa đơn (`formOrder`) · Gửi xác nhận lại (`v320Req`);
+  tự mở 1 lần khi có yêu cầu mới (`mmh_ox_seen_<pic>` = chữ ký nhận xét, chờ `#upd` / `#dl` / `#kpn` / hộp thoại đóng 3 nhịp liền), nút "Xem nhận xét" `.v337-b` trên dải `.v321-ban`, link email `#ox`.
