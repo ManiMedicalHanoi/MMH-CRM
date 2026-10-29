@@ -3994,7 +3994,7 @@ function buildNav(){
     if(t.grp!==lastGrp){ h+='<div class="grp">'+t.grp+'</div>'; lastGrp=t.grp; }
     h+='<button class="nvi" data-t="'+t.id+'" onclick="go(\''+t.id+'\')"><span class="ic">'+t.ic+'</span><span class="lb">'+t.lb+'</span></button>';
   });
-  h+='<div style="flex:1"></div><div style="padding:10px;font-size:10.5px;color:var(--mute);line-height:1.5">MMH CRM v33.7<br>'+
+  h+='<div style="flex:1"></div><div style="padding:10px;font-size:10.5px;color:var(--mute);line-height:1.5">MMH CRM v33.8<br>'+
      (isMgmt()?'<a href="'+DRIVE_FOLDER+'" target="_blank">📁 Folder ảnh Drive</a>':"")+'</div>';
   $("side").innerHTML=h;
   /* ⭐ v4.5 — thanh dưới trượt ngang, đủ mọi mục, bỏ nút "Thêm" */
@@ -20721,7 +20721,7 @@ window.QS2={ open:qsOpen };
 </script>
 
 <!-- ⭐ v30.3 — THÔNG BÁO CẬP NHẬT (chép từ Report Hub): dữ liệu updates/notes.js · tự hiện 7 ngày · nút "Có gì mới" trên thanh trên cùng -->
-<script src="updates/notes.js?v=33.7"></script>
+<script src="updates/notes.js?v=33.8"></script>
 <style id="upd-css">
 #upd,#upd-zoom{--t-pri:var(--blue);--t-pri2:var(--blue-d);--t-ink:var(--navy);--t-soft:var(--pale);--t-line:var(--lb2);--t-bg:#F6F8FA;--mmh-blue:var(--blue);--mmh-navy:var(--navy)}
 
@@ -27776,5 +27776,430 @@ var _cl=window.__tourClean;
 window.__tourClean=function(){ try{ close(); }catch(_){} if(typeof _cl==="function") return _cl.apply(this,arguments); };
 })();
 </script>
+<style id="v338-css">
+#mrw .mrw-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+#mrw .mrw-sec{border:1px solid #E6EAEF;border-radius:10px;padding:10px 12px;margin-bottom:10px;background:#fff}
+#mrw .mrw-sec h4{margin:0 0 6px;font-size:13px;color:var(--t-ink,#003047)}
+#mrw .mrw-auto{font-size:12px;color:var(--mute,#5B6B7B);line-height:1.55}
+#mrw .mrw-auto b{color:var(--t-ink,#003047)}
+#mrw .mrw-st{display:inline-block;font-size:11px;padding:1px 7px;border-radius:9px;margin-left:6px;vertical-align:1px}
+#mrw .mrw-st.ok{background:#E8F5EE;color:#1E7A48}
+#mrw .mrw-st.part{background:#FFF6E0;color:#8A5A00}
+#mrw .mrw-st.no{background:#F3F4F6;color:#5B6B7B}
+#mrw textarea{width:100%;min-height:58px;margin-top:6px}
+#mrw label.mrw-lb{display:block;font-size:12px;font-weight:600;margin-top:8px;color:var(--t-ink,#003047)}
+@media(max-width:720px){#mrw .mrw-grid{grid-template-columns:1fr}}
+</style>
+<script id="v338-js">
+/* ═══════════ v33.8 (29/10/2026) — BÁO CÁO THÁNG SALE GỬI NHÀ PHÂN PHỐI (file Word, mẫu "BÁO CÁO HOẠT ĐỘNG SALE MMH") ═══════════
+   Dental + Surgical. Trang Gửi báo cáo ▸ Báo cáo tháng ▸ "Báo cáo Word" (#mrw-btn) và Kế hoạch tháng ▸ cùng nút.
+   Số liệu tự lấy (không gõ lại):
+     1.1 Doanh số NPP (file Turnover: Actual / Forecast vs Budget Mani, tháng + lũy kế FY) · Jizai (SL) / Composite (USD) ở Turnover
+         + đơn hàng CRM theo nhóm sản phẩm (Jizai / Composite riêng cho Dental)
+     1.2 Đại lý mới = case Mở mới Approved (16. NEW ACCOUNT & SKU) + đơn loại 2 · Thầu = đơn loại 1 + bảng thầu (mtTenders)
+         · Bán trực tiếp = đơn của Hospital / University / Clinic
+     1.3 Phản hồi = cột Customer feedback + kết quả lượt đi địa bàn, lý do dừng, mục "Phản hồi khách hàng" của buổi thuyết trình
+     Phần 2 = kế hoạch tháng sau: thuyết trình / đào tạo đã lên lịch, case mở mới đang làm, Forecast Turnover, lượt đi địa bàn đã lên lịch
+         (theo nhóm khách, tỉnh), thầu đang theo, Key task "Tuyển sinh sự kiện" (Công việc khác) + chữ PLAN của Kế hoạch tháng.
+   Mục CRM chưa có chỗ ghi (yếu tố thị trường / đối thủ, sản phẩm lỗi, doanh số dự kiến, số đại lý dự kiến mở, kế hoạch thầu) ⇒ ô nhập
+   trong hộp tạo file, lưu nháp trên máy (localStorage mmh_mrw_<nhóm>_<PIC>_<tháng>). File tạo trên máy bằng JSZip, không gửi backend. */
+(function(){
+var TEAMS_OK={dental:1,surgical:1};
+function on(){ try{ return !!TEAMS_OK[curTeamKey()]; }catch(_){ return false; } }
+function x(s){ return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g,""); }
+function nk(s){ return noAcc(String(s||"")).toLowerCase().replace(/\s+/g," ").trim(); }
+function ymAny(v){
+  if(v instanceof Date && !isNaN(v)) return v.getFullYear()+("0"+(v.getMonth()+1)).slice(-2);
+  var s=String(v==null?"":v).trim(), m;
+  if((m=/^(\d{4})-(\d{2})/.exec(s))) return m[1]+m[2];
+  if((m=/^(\d{1,2})\/(\d{1,2})\/(\d{4})/.exec(s))) return m[3]+("0"+m[2]).slice(-2);
+  if((m=/^(\d{6})$/.exec(s.replace(/\D/g,"")))&&/^\d{4}\D?\d{2}$/.test(s)) return m[1];
+  return "";
+}
+function oYm(o){ try{ return k8Ym(o); }catch(_){ return ymAny(o.day)||ymAny(o.month); } }
+function lbM(ym){ return parseInt(String(ym).slice(4),10)+"/"+String(ym).slice(0,4); }
+function vnd(v){ return Math.round(n(v)).toLocaleString("vi-VN"); }
+function usd(v){ return Math.round(n(v)).toLocaleString("en-US"); }
+function pct(a,b){ return b?Math.round(a/b*100)+"%":"—"; }
+function pm(p,pic){ return !pic || String(p||"").toLowerCase().indexOf(String(pic).toLowerCase())>=0; }
+function rej(o){ return /tu choi|reject/.test(nk(o.appr)); }
+function otype(o){ var m=/^\s*([123])/.exec(String(o.otype||"")); return m?m[1]:""; }
+function acc(t){ var s=nk(t);
+  if(/distrib|npp|nha phan phoi/.test(s)) return "dist"; if(/dealer|dai ly/.test(s)) return "dealer";
+  if(/hospital|benh vien/.test(s)) return "hosp"; if(/univers|truong|school/.test(s)) return "uni";
+  if(/clinic|phong kham/.test(s)) return "clinic"; return "other"; }
+var ACC_LB={dist:"Nhà phân phối",dealer:"Đại lý",hosp:"Bệnh viện",uni:"Trường đại học",clinic:"Phòng khám",other:"Khác"};
+function short(s,k){ s=String(s||"").replace(/\s+/g," ").trim(); return s.length>k?s.slice(0,k-1)+"…":s; }
+function draftKey(team,pic,mon){ return "mmh_mrw_"+team+"_"+(pic||"ALL").replace(/\s+/g,"")+"_"+mon; }
+function dGet(k){ try{ return JSON.parse(localStorage.getItem(k)||"{}")||{}; }catch(_){ return {}; } }
+function dSet(k,o){ try{ localStorage.setItem(k,JSON.stringify(o)); }catch(_){} }
+
+/* ───────── ô nhập tay (mục CRM chưa có chỗ ghi) ───────── */
+var MAN=[
+  ["market","1.3","Yếu tố thị trường","Cạnh tranh / đối thủ, thay đổi nhu cầu khách hàng, đấu thầu bệnh viện chậm / trễ…"],
+  ["prodfb","1.3","Yếu tố sản phẩm — bổ sung","Phản hồi khách hàng về sản phẩm (ngoài phần app tự lấy)"],
+  ["defect","1.3","Sản phẩm lỗi / hỏng","Mã sản phẩm, số lượng, khách hàng, tình trạng xử lý — để trống nếu không có"],
+  ["nNew","2.1","Số đại lý dự kiến mở mới","VD: 2 đại lý (Hải Phòng, Nam Định)"],
+  ["dealerRev","2.1","Doanh số dự kiến từ hỗ trợ đại lý","App đã ghi Forecast Turnover tháng sau — ghi thêm nếu cần"],
+  ["privRev","2.2","Doanh số dự kiến kênh tư nhân (online / offline)","Bệnh viện / trường / phòng khám"],
+  ["tender","2.3","Kế hoạch thầu","Gói nộp mới, ủy quyền, dự kiến trúng / thua"],
+  ["mkt","2.4","Hoạt động MKT","Workshop / seminar tham gia tuyển sinh (ngoài phần app tự lấy)"]
+];
+
+/* ───────── nạp dữ liệu ───────── */
+function soft(p){ return Promise.resolve().then(function(){ return p(); }).catch(function(e){ return { _err:(e&&e.message)||String(e) }; }); }
+function loadAll(){
+  var tab=function(t){ return function(){ var h=tGet(t); return h?h:fetchTab(t); }; };
+  return Promise.all([
+    soft(tab("order")), soft(tab("present")), soft(tab("monthly")),
+    soft(function(){ var r=terrRows(); return r.length?r:loadTerritoryAll(true); }),
+    soft(function(){ return naLoad().then(function(){ return S.na.rows||[]; }); }),
+    soft(function(){ return loadTurnover(); }),
+    soft(function(){ return apiGet("mtTenders",{_ts:Date.now()}).then(function(j){ if(!j||j.ok===false) throw new Error((j&&j.error)||"không đọc được"); return j.list||[]; }); }),
+    soft(function(){ return loadOther().then(function(o){ return (o&&o.keys)||[]; }); })
+  ]).then(function(a){
+    var arr=function(v){ return Array.isArray(v)?v:[]; };
+    return { order:arr(a[0]), present:arr(a[1]), monthly:arr(a[2]), weekly:arr(a[3]), na:arr(a[4]),
+             turnover:(a[5]&&!a[5]._err)?a[5]:null, toErr:a[5]&&a[5]._err, tenders:arr(a[6]), keys:arr(a[7]),
+             errs:a.map(function(v,i){ return v&&v._err?["Đơn hàng","Thuyết trình","Kế hoạch tháng","Đi địa bàn","Mở mới","Turnover","Thầu","Công việc khác"][i]+": "+v._err:""; }).filter(String) };
+  });
+}
+
+/* ───────── tính số liệu ───────── */
+function calc(D,team,pic,mon){
+  var nmon=nextMonthStr(mon), months=fyMonths(fyOfMonth(mon)), upTo=months.slice(0,months.indexOf(mon)+1);
+  var R={ team:team, pic:pic, mon:mon, nmon:nmon, fy:fyOfMonth(mon) };
+  /* đơn hàng */
+  var ord=D.order.filter(function(o){ return pm(o.pic,pic) && !rej(o); });
+  var oM=ord.filter(function(o){ return oYm(o)===mon; }), oC=ord.filter(function(o){ return upTo.indexOf(oYm(o))>=0; });
+  var sum=function(L){ return L.reduce(function(s,o){ return s+n(o.amount); },0); };
+  var key=function(o){ return (window.v336OrdNo?v336OrdNo(o):String(o.orderNo||""))+"|"+nk(o.name)+"|"+String(o.day||oYm(o)); };
+  var cnt=function(L){ var a={},c={}; L.forEach(function(o){ a[key(o)]=1; if(o.name) c[nk(o.name)]=1; }); return { o:Object.keys(a).length, c:Object.keys(c).length }; };
+  R.oM=oM; R.ordM=sum(oM); R.ordC=sum(oC); R.cntM=cnt(oM);
+  var pg={}; var ptOf=function(o){ return String(o.ptype||"").split(/[,\n]/)[0].trim()||"Khác"; };
+  oM.forEach(function(o){ var t=ptOf(o); pg[t]=pg[t]||{q:0,a:0,c:0}; pg[t].q+=n(o.qty); pg[t].a+=n(o.amount); });
+  oC.forEach(function(o){ var t=ptOf(o); pg[t]=pg[t]||{q:0,a:0,c:0}; pg[t].c+=n(o.amount); });
+  R.pg=Object.keys(pg).map(function(k){ return [k,pg[k]]; }).sort(function(a,b){ return b[1].a-a[1].a||b[1].c-a[1].c; });
+  var hit=function(re){ var L=oM.filter(function(o){ return re.test(nk([o.ptype,o.detail].join(" "))); }); return { q:L.reduce(function(s,o){ return s+n(o.qty); },0), a:sum(L), n:cnt(L).o }; };
+  R.jz=hit(/jizai/); R.cp=hit(/composite/);
+  var byT={}; oM.forEach(function(o){ var k=otype(o)||"0"; byT[k]=(byT[k]||[]).concat([o]); }); R.byT=byT;
+  var byA={}; oM.forEach(function(o){ var k=acc(o.type); byA[k]=(byA[k]||[]).concat([o]); }); R.byA=byA;
+  R.sum=sum; R.cnt=cnt; R.key=key;
+  /* Turnover (NPP) */
+  R.to=null;
+  if(D.turnover && !(curTeam()||{}).noTurnover){
+    var keep=S.turnover; S.turnover=D.turnover;
+    try{
+      var gM=turnoverByDistributor([mon],pic||""), gC=turnoverByDistributor(upTo,pic||""), gN=turnoverByDistributor([nmon],pic||"");
+      var cards=(PRODUCT_CARDS[productGroup()]||[]).slice();
+      if(team==="dental" && !cards.some(function(c){ return c.src==="composite"; })) cards.push({ label:"Composite", src:"composite", prod:"", unit:"usd" });
+      var prod=cards.map(function(c){ return { c:c, m:productStat(c,[mon],pic||""), cu:productStat(c,upTo,pic||""), nx:productStat(c,[nmon],pic||"") }; });
+      var closed=!!(MT.npp && MT.npp.closed && MT.npp.closed[mon]) || mon<ymOf(todayISO());
+      R.to={ m:gM, c:gC, n:gN, prod:prod, closed:closed };
+    }catch(e){ R.toErr=e.message; }
+    S.turnover=keep;
+  } else R.toErr=D.toErr||"";
+  /* mở mới */
+  var na=D.na.filter(function(r){ return pm(r.pic,pic); });
+  var st=function(r){ return nk(r.status); };
+  R.naOk=na.filter(function(r){ return /approved/.test(st(r)) && ymAny(r.month||r.orderDate)===mon; });
+  R.naOpen=na.filter(function(r){ return /draft|pending/.test(st(r)); });
+  /* thầu */
+  var td=D.tenders.filter(function(t){ return pm(t.pic,pic) && !String(t.deleted||"").trim(); });
+  R.tdRes=td.filter(function(t){ return ymAny(t.kqtt)===mon; });
+  R.tdOpen=td.filter(function(t){ return !String(t.won||"").trim() && (!ymAny(t.kqtt) || ymAny(t.kqtt)>=mon); });
+  /* đi địa bàn */
+  var wk=D.weekly.filter(function(w){ return pm(w.pic,pic); });
+  var wM=wk.filter(function(w){ return ymAny(w.start)===mon; }), wN=wk.filter(function(w){ return ymAny(w.start)===nmon; });
+  var done=function(w){ return /complet/.test(nk(w.status)); };
+  R.visM=wM.filter(function(w){ return /visit/.test(nk(w.typeAction)) && done(w); });
+  var fb={}; wM.forEach(function(w){ var f=String(w.feedback||"").trim(); if(f) fb[f]=(fb[f]||0)+1; });
+  R.fb=Object.keys(fb).map(function(k){ return [k,fb[k]]; }).sort(function(a,b){ return b[1]-a[1]; });
+  R.fbNote=wM.filter(function(w){ return done(w) && String(w.result||"").trim().length>25; })
+    .sort(function(a,b){ return String(b.start).localeCompare(String(a.start)); }).slice(0,10);
+  R.stop=wM.filter(function(w){ return String(w.stopReason||"").trim(); });
+  R.wN=wN; R.wM=wM;
+  var prov=function(L){ var p={}; L.forEach(function(w){ var k=String(w.province||"").trim(); if(k) p[k]=(p[k]||0)+1; }); return Object.keys(p).sort(function(a,b){ return p[b]-p[a]; }).map(function(k){ return k+" ("+p[k]+")"; }); };
+  R.prov=prov; R.chanW=function(L,ch){ return L.filter(function(w){ var a=acc(w.type); return ch==="dealer"?(a==="dealer"||a==="dist"):(a==="hosp"||a==="uni"||a==="clinic"); }); };
+  R.trainN=wN.filter(function(w){ return /train|dao tao|present|thuyet trinh|gioi thieu/.test(nk([w.typeAction,w.typeTask].join(" "))); });
+  /* thuyết trình */
+  var pr=D.present.filter(function(p){ return pm(p.pic,pic); });
+  R.prM=pr.filter(function(p){ return ymAny(p.day)===mon || (!ymAny(p.day) && ymAny(p.month)===mon); });
+  R.prN=pr.filter(function(p){ return ymAny(p.day)===nmon || (!ymAny(p.day) && ymAny(p.month)===nmon); });
+  R.prFb=R.prM.map(function(p){ var m=/-?\s*(Phản hồi khách hàng|Customer feedback)\s*:\s*([\s\S]*?)(?=\n\s*-\s*[^\n:]{3,40}:|$)/i.exec(String(p.review||"")); return m&&m[2].trim()?{ p:p, t:m[2].trim() }:null; }).filter(Boolean);
+  /* Kế hoạch tháng (chữ PLAN / RESULT) */
+  var mn=D.monthly.filter(function(r){ return pm(r.pic,pic); });
+  var kOf=function(r){ var t=mnTplFor(r.typeTask); return t?t.key:""; };
+  R.mnTxt=function(ym,keys,field){ return mn.filter(function(r){ return String(r.period)===ym && keys.indexOf(kOf(r))>=0 && String(r[field]||"").trim(); })
+    .map(function(r){ return { pic:r.pic, type:r.typeTask, t:String(r[field]).trim() }; }); };
+  /* Tuyển sinh sự kiện (Công việc khác) */
+  var tag=function(ym){ return "t"+ym.slice(4)+"."+ym.slice(0,4); };
+  R.ev=function(ym){ var out=[]; D.keys.forEach(function(k){ var nm=nk(k.keyTask); if(!/tuyen sinh su kien|event enrol/.test(nm) || nm.indexOf(tag(ym))<0) return;
+      (k.subs||[]).forEach(function(s){ if(pm(s.pic||k.pic,pic)) out.push({ pic:s.pic||k.pic, t:s.subTask, r:s.result, d:s.start }); }); });
+    return out; };
+  return R;
+}
+
+/* ───────── dựng file Word ───────── */
+var NAVY="003047", BLUE="3A5CAA", LINE="D5DDE6", SOFT="EEF4FB", MUTE="5B6B7B";
+function run(t,o){ o=o||{};
+  var pr=(o.b?"<w:b/><w:bCs/>":"")+(o.i?"<w:i/>":"")+(o.c?'<w:color w:val="'+o.c+'"/>':"")+(o.sz?'<w:sz w:val="'+o.sz+'"/><w:szCs w:val="'+o.sz+'"/>':"");
+  return String(t==null?"":t).split("\n").map(function(line,i){ return (i?"<w:r><w:br/></w:r>":"")+'<w:r>'+(pr?"<w:rPr>"+pr+"</w:rPr>":"")+'<w:t xml:space="preserve">'+x(line)+'</w:t></w:r>'; }).join("");
+}
+function P(runs,o){ o=o||{};
+  var pp=(o.st?'<w:pStyle w:val="'+o.st+'"/>':"")+(o.keep?"<w:keepNext/>":"")+
+    '<w:spacing w:before="'+(o.bf||0)+'" w:after="'+(o.af==null?80:o.af)+'"/>'+
+    (o.ind?'<w:ind w:left="'+o.ind+'"'+(o.hang?' w:hanging="'+o.hang+'"':"")+'/>':"")+(o.al?'<w:jc w:val="'+o.al+'"/>':"");
+  return "<w:p><w:pPr>"+pp+"</w:pPr>"+(Array.isArray(runs)?runs.join(""):/^<w:r[ >]/.test(runs)?runs:run(runs,o.r))+"</w:p>";
+}
+function H1(t){ return P(t,{st:"Heading1",keep:1}); }
+function H2(t){ return P(t,{st:"Heading2",keep:1}); }
+function H3(t){ return P(t,{st:"Heading3",keep:1}); }
+function B(runs,lvl){ var ind=lvl?720:360; return P([run(lvl?"–\t":"•\t")].concat(typeof runs==="string"?[run(runs)]:runs),{ind:ind+220,hang:220,af:50}); }
+function NOTE(t){ return P(t,{r:{i:1,c:MUTE,sz:19},af:60}); }
+function KV(k,v){ return B([run(k+": ",{b:1}),run(v)]); }
+function TBL(head,rows,w,o){ o=o||{};
+  var tot=w.reduce(function(a,b){ return a+b; },0);
+  var cell=function(t,i,hd,last){
+    var num=o.num&&o.num.indexOf(i)>=0;
+    return '<w:tc><w:tcPr><w:tcW w:w="'+w[i]+'" w:type="dxa"/>'+(hd?'<w:shd w:val="clear" w:color="auto" w:fill="'+SOFT+'"/>':last&&o.total?'<w:shd w:val="clear" w:color="auto" w:fill="F7F9FB"/>':"")+
+      '<w:tcMar><w:top w:w="50" w:type="dxa"/><w:bottom w:w="50" w:type="dxa"/></w:tcMar><w:vAlign w:val="center"/></w:tcPr>'+
+      P(run(t,{b:hd||(last&&o.total),c:hd?NAVY:null,sz:19}),{af:0,al:num?"right":null})+"</w:tc>";
+  };
+  var tr=function(r,hd,last){ return "<w:tr>"+(hd?'<w:trPr><w:tblHeader/></w:trPr>':"")+r.map(function(c,i){ return cell(c,i,hd,last); }).join("")+"</w:tr>"; };
+  var bd='<w:top w:val="single" w:sz="4" w:color="'+LINE+'"/><w:left w:val="single" w:sz="4" w:color="'+LINE+'"/><w:bottom w:val="single" w:sz="4" w:color="'+LINE+'"/><w:right w:val="single" w:sz="4" w:color="'+LINE+'"/><w:insideH w:val="single" w:sz="4" w:color="'+LINE+'"/><w:insideV w:val="single" w:sz="4" w:color="'+LINE+'"/>';
+  return '<w:tbl><w:tblPr><w:tblW w:w="'+tot+'" w:type="dxa"/><w:tblBorders>'+bd+'</w:tblBorders><w:tblLayout w:type="fixed"/><w:tblCellMar><w:left w:w="90" w:type="dxa"/><w:right w:w="90" w:type="dxa"/></w:tblCellMar></w:tblPr><w:tblGrid>'+
+    w.map(function(v){ return '<w:gridCol w:w="'+v+'"/>'; }).join("")+'</w:tblGrid>'+tr(head,true)+rows.map(function(r,i){ return tr(r,false,i===rows.length-1); }).join("")+"</w:tbl>"+P("",{af:60});
+}
+function txtBlock(list,label){ if(!list.length) return []; var o=[NOTE(label)];
+  list.forEach(function(it){ o.push(P([run((it.pic?it.pic+" · ":"")+(it.type||"")+":",{b:1,sz:20})],{af:20,ind:360,keep:1}));
+    String(it.t).split(/\r?\n/).filter(function(l){ return l.trim(); }).forEach(function(l){ o.push(P(run(l.trim(),{sz:20}),{ind:540,af:20})); }); });
+  o.push(P("",{af:40})); return o; }
+function manual(M,k){ var v=String(M[k]||"").trim(); return v?String(v).split(/\r?\n/).filter(function(l){ return l.trim(); }).map(function(l){ return B(l.trim().replace(/^[-•+]\s*/,"")); }):[B([run("(chưa cập nhật)",{i:1,c:MUTE})])]; }
+
+function bodyXml(R,M,who,by){
+  var o=[], mL=lbM(R.mon), nL=lbM(R.nmon), dental=R.team==="dental";
+  var teamLb={dental:"Dental",surgical:"Surgical"}[R.team]||R.team;
+  o.push(P(run("BÁO CÁO HOẠT ĐỘNG SALE MMH",{b:1,sz:32,c:NAVY}),{al:"center",af:40}));
+  o.push(P(run("THỰC HIỆN THÁNG "+mL+" & KẾ HOẠCH THÁNG "+nL,{b:1,sz:24,c:BLUE}),{al:"center",af:200}));
+  o.push(TBL(["Mục","Nội dung"],[["Nhóm","MMH "+teamLb+" Sales Team"],["PIC",who],["Người lập",by],["Kỳ báo cáo","Tháng "+mL+" ("+R.fy+") · kế hoạch tháng "+nL],["Ngày lập",fmtVN(todayISO())],
+    ["Nguồn số liệu","MMH CRM (đơn hàng, đi địa bàn, mở mới, thuyết trình, kế hoạch tháng, thầu) · File MMH Turnover (doanh số NPP)"]],[2600,6426]));
+
+  /* ═════ PHẦN 1 ═════ */
+  o.push(H1("PHẦN 1: KẾT QUẢ THỰC HIỆN THÁNG "+mL));
+  o.push(H2("1.1. Kết quả tổng quan"));
+  o.push(H3("a) Doanh số bán hàng"));
+  if(R.to && R.to.m.list.length){
+    var tm=R.to.m, tc=R.to.c;
+    o.push(B([run("Doanh số NPP tháng "+mL+" ("+(R.to.closed?"Actual":"Forecast — tháng chưa chốt")+"): ",{b:1}),run(usd(tm.actual)+" USD · đạt "+pct(tm.actual,tm.budget)+" Budget Mani ("+usd(tm.budget)+" USD)")]));
+    o.push(B([run("Lũy kế "+R.fy+" đến tháng "+mL+": ",{b:1}),run(usd(tc.actual)+" USD · đạt "+pct(tc.actual,tc.budget)+" Budget Mani ("+usd(tc.budget)+" USD)")]));
+    var cm={}; tc.list.forEach(function(d){ cm[d.name]=d; });
+    o.push(TBL(["Nhà phân phối","PIC","Tháng (USD)","Budget tháng","% tháng","Lũy kế FY (USD)","% lũy kế"],
+      tm.list.map(function(d){ var c=cm[d.name]||{actual:0,budget:0}; return [d.name,d.pic||"—",usd(d.actual),usd(d.budget),pct(d.actual,d.budget),usd(c.actual),pct(c.actual,c.budget)]; })
+        .concat([["Tổng","",usd(tm.actual),usd(tm.budget),pct(tm.actual,tm.budget),usd(tc.actual),pct(tc.actual,tc.budget)]]),
+      [2000,1000,1200,1200,900,1600,1126],{num:[2,3,4,5,6],total:1}));
+  } else o.push(B([run("Doanh số NPP: ",{b:1}),run(R.toErr?"chưa đọc được file Turnover ("+short(R.toErr,120)+")":"file Turnover chưa có số tháng này",{i:1,c:MUTE})]));
+  o.push(B([run("Đơn hàng sales ghi nhận trên CRM: ",{b:1}),run(vnd(R.ordM)+" VND · "+R.cntM.o+" đơn · "+R.cntM.c+" khách hàng (lũy kế "+R.fy+": "+vnd(R.ordC)+" VND, không tính đơn bị từ chối)")]));
+  if(R.pg.length) o.push(TBL(["Nhóm sản phẩm","Số lượng tháng","Doanh số tháng (VND)","Lũy kế FY (VND)"],
+      R.pg.slice(0,12).map(function(p){ return [p[0],p[1].q?vnd(p[1].q):"—",vnd(p[1].a),vnd(p[1].c)]; }),[3400,1700,2000,1926],{num:[1,2,3]}));
+  var hasCards=R.to && R.to.prod.some(function(p){ return (p.m&&(p.m.actual||p.m.budget))||(p.cu&&(p.cu.actual||p.cu.budget)); });
+  o.push(H3(dental?"b) Số lượng và doanh số Jizai / Composite":"b) Sản phẩm trọng tâm"));
+  if(hasCards) o.push(TBL(["Sản phẩm","Đơn vị","Tháng "+mL,"Budget tháng","% tháng","Lũy kế FY","% lũy kế"],
+      R.to.prod.filter(function(p){ return (p.m&&(p.m.actual||p.m.budget))||(p.cu&&(p.cu.actual||p.cu.budget)); }).map(function(p){ var q=p.c.unit==="qty", f=q?vnd:usd, m=p.m||{actual:0,budget:0}, c=p.cu||{actual:0,budget:0};
+        return [p.c.label.replace(/^Doanh số (hàng )?/,""),q?"Số lượng":"USD",f(m.actual),f(m.budget),pct(m.actual,m.budget),f(c.actual),pct(c.actual,c.budget)]; }),
+      [2000,1000,1300,1300,900,1500,1026],{num:[2,3,4,5,6]}));
+  if(dental){
+    o.push(KV("Đơn hàng CRM có Jizai",R.jz.n?(vnd(R.jz.q)+" sản phẩm · "+vnd(R.jz.a)+" VND ("+R.jz.n+" đơn)"):"không có đơn trong tháng"));
+    o.push(KV("Đơn hàng CRM có Composite",R.cp.n?(vnd(R.cp.q)+" sản phẩm · "+vnd(R.cp.a)+" VND ("+R.cp.n+" đơn)"):"không có đơn trong tháng"));
+  }
+  o.push.apply(o,txtBlock(R.mnTxt(R.mon,["turnover"],"result"),"Sales ghi trong Kế hoạch tháng (Management-Turnover):"));
+
+  o.push(H2("1.2. Chi tiết theo kênh / khu vực"));
+  o.push(H3("a) Doanh số từ đại lý mới"));
+  var t2=R.byT["2"]||[];
+  o.push(KV("Account mở mới được xác nhận trong tháng",R.naOk.length+" case"));
+  if(R.naOk.length) o.push(TBL(["Account","Loại","Tỉnh","NPP","Sản phẩm","PIC"],R.naOk.map(function(r){ return [r.account||"—",r.accType||"",r.province||"",r.npp||"",short(r.sku||r.ptype,60),r.pic||""]; }),[2300,1100,1100,1400,2000,1126]));
+  o.push(KV("Đơn từ account mở mới (loại 2)",t2.length?(vnd(R.sum(t2))+" VND · "+R.cnt(t2).o+" đơn · "+R.cnt(t2).c+" khách hàng"):"không có"));
+  o.push.apply(o,txtBlock(R.mnTxt(R.mon,["distributor","dealer"],"result"),"Sales ghi trong Kế hoạch tháng (kênh NPP / đại lý):"));
+  o.push(H3("b) Doanh số đến từ thầu"));
+  var t1=R.byT["1"]||[];
+  var tdv={}; t1.forEach(function(o2){ tdv[R.key(o2)]=Math.max(tdv[R.key(o2)]||0,n(o2.tender)); });
+  o.push(KV("Đơn từ trúng thầu (loại 1) trong tháng",t1.length?(R.cnt(t1).o+" đơn · trị giá trúng thầu "+vnd(Object.keys(tdv).reduce(function(s2,k){ return s2+tdv[k]; },0))+" VND · đơn hàng "+vnd(R.sum(t1))+" VND"):"không có"));
+  if(R.tdRes.length) o.push(TBL(["Gói thầu / Bệnh viện","Sản phẩm","Giá trị (VND)","Trạng thái","Kết quả"],R.tdRes.map(function(t){ return [t.hosp||t.account||t.id,short(t.prod||t.detail,50),vnd(t.value),t.status||"",t.won||""]; }),[2600,2000,1500,1500,1426],{num:[2]}));
+  else o.push(KV("Kết quả thầu trong tháng (bảng thầu CRM)","chưa có gói nào có kết quả tháng này"));
+  o.push(H3("c) Doanh số bán trực tiếp bệnh viện / trường học / phòng khám"));
+  var dir=["hosp","uni","clinic"].map(function(k){ var L=R.byA[k]||[]; return [ACC_LB[k],String(R.cnt(L).o),String(R.cnt(L).c),vnd(R.sum(L))]; });
+  o.push(TBL(["Nhóm khách hàng","Số đơn","Số khách","Doanh số (VND)"],dir,[3400,1600,1600,2426],{num:[1,2,3]}));
+  var top=[].concat(R.byA.hosp||[],R.byA.uni||[],R.byA.clinic||[]), tg={};
+  top.forEach(function(o2){ var k=o2.name||"—"; tg[k]=(tg[k]||0)+n(o2.amount); });
+  var tk=Object.keys(tg).sort(function(a,b){ return tg[b]-tg[a]; }).slice(0,5);
+  if(tk.length) o.push(NOTE("Khách hàng doanh số cao nhất: "+tk.map(function(k){ return k+" ("+vnd(tg[k])+")"; }).join(" · ")));
+  o.push.apply(o,txtBlock(R.mnTxt(R.mon,["hospital","university","clinic"],"result"),"Sales ghi trong Kế hoạch tháng (bệnh viện / trường / phòng khám):"));
+
+  o.push(H2("1.3. Phản hồi thị trường"));
+  o.push(H3("a) Yếu tố thị trường"));
+  o.push.apply(o,manual(M,"market"));
+  if(R.stop.length){ o.push(NOTE("Account dừng theo đuổi trong tháng:")); R.stop.slice(0,8).forEach(function(w){ o.push(B([run((w.account||"—")+": ",{b:1}),run(short(w.stopReason,220))],1)); }); }
+  o.push(H3("b) Yếu tố sản phẩm — phản hồi khách hàng"));
+  o.push(KV("Lượt viếng thăm hoàn thành",R.visM.length+" lượt"+(R.prov(R.visM).length?" · "+R.prov(R.visM).slice(0,6).join(", "):"")));
+  if(R.fb.length) o.push(TBL(["Phản hồi khách hàng (CRM)","Số lượt"],R.fb.slice(0,10).map(function(f){ return [f[0],String(f[1])]; }),[7000,2026],{num:[1]}));
+  if(R.prFb.length){ o.push(NOTE("Từ báo cáo buổi giới thiệu sản phẩm:")); R.prFb.slice(0,6).forEach(function(f){ o.push(B([run((f.p.account||"—")+": ",{b:1}),run(short(f.t,260))],1)); }); }
+  if(R.fbNote.length){ o.push(NOTE("Ghi nhận nổi bật khi đi địa bàn:")); R.fbNote.slice(0,6).forEach(function(w){ o.push(B([run((w.account||"—")+(w.feedback?" ("+w.feedback+")":"")+": ",{b:1}),run(short(w.result,240))],1)); }); }
+  if(String(M.prodfb||"").trim()) o.push.apply(o,manual(M,"prodfb"));
+  o.push(H3("c) Tình trạng sản phẩm lỗi / hỏng"));
+  o.push.apply(o,String(M.defect||"").trim()?manual(M,"defect"):[B("Không ghi nhận sản phẩm lỗi / hỏng trong tháng.")]);
+
+  /* ═════ PHẦN 2 ═════ */
+  o.push(H1("PHẦN 2: KẾ HOẠCH HOẠT ĐỘNG SALE THÁNG "+nL));
+  var dW=R.chanW(R.wN,"dealer"), pW=R.chanW(R.wN,"priv"), dWm=R.chanW(R.wM,"dealer"), pWm=R.chanW(R.wM,"priv");
+  o.push(H2("2.1. Kênh đại lý"));
+  o.push(H3("Đào tạo / giới thiệu sản phẩm"));
+  if(R.prN.length) R.prN.forEach(function(p){ o.push(B([run((p.account||"—")+": ",{b:1}),run([p.day?fmtVN(String(p.day).slice(0,10)):"",p.province||"",p.target?"dự kiến "+p.target+" người":""].filter(String).join(" · "))])); });
+  if(R.trainN.length) R.trainN.slice(0,8).forEach(function(w){ o.push(B([run((w.account||"—")+": ",{b:1}),run([w.start?fmtVN(String(w.start).slice(0,10)):"",w.typeAction||"",short(w.plan,140)].filter(String).join(" · "))])); });
+  if(!R.prN.length && !R.trainN.length) o.push(B([run("Chưa có buổi thuyết trình / đào tạo nào được lên lịch tháng "+nL+" trên CRM.",{i:1,c:MUTE})]));
+  o.push(H3("Mở mới đại lý"));
+  o.push.apply(o,manual(M,"nNew"));
+  if(R.naOpen.length) R.naOpen.slice(0,8).forEach(function(r){ o.push(B([run((r.account||"—")+": ",{b:1}),run([r.accType,r.province,r.npp,"đang làm hồ sơ ("+r.status+")"].filter(String).join(" · "))],1)); });
+  o.push(H3("Doanh số dự kiến từ việc hỗ trợ đại lý bán hàng"));
+  if(R.to && R.to.n.list.length){ var tn=R.to.n;
+    o.push(B([run("Forecast NPP tháng "+nL+" (file Turnover): ",{b:1}),run(usd(tn.actual)+" USD · "+pct(tn.actual,tn.budget)+" Budget Mani ("+usd(tn.budget)+" USD)")]));
+    tn.list.forEach(function(d){ o.push(B(d.name+": "+usd(d.actual)+" USD ("+pct(d.actual,d.budget)+" budget)",1)); });
+    (R.to.prod||[]).forEach(function(p){ if(p.nx && (p.nx.actual||p.nx.budget)) o.push(B(p.c.label.replace(/^Doanh số (hàng )?/,"")+": "+(p.c.unit==="qty"?vnd(p.nx.actual)+" sản phẩm":usd(p.nx.actual)+" USD")+" ("+pct(p.nx.actual,p.nx.budget)+" budget)",1)); });
+  }
+  if(String(M.dealerRev||"").trim()||!(R.to && R.to.n.list.length)) o.push.apply(o,manual(M,"dealerRev"));
+  o.push(H3("Hoạt động đi thị trường của sale"));
+  o.push(KV("Lượt làm việc với NPP / đại lý đã lên lịch",dW.length+" lượt"+(R.prov(dW).length?" · tỉnh tập trung: "+R.prov(dW).slice(0,6).join(", "):"")+" (tháng "+mL+": "+dWm.length+" lượt)"));
+  o.push.apply(o,txtBlock(R.mnTxt(R.nmon,["distributor","dealer"],"plan"),"Kế hoạch sales ghi trong Kế hoạch tháng "+nL+":"));
+
+  o.push(H2("2.2. Kênh tư nhân (bệnh viện / trường đại học / phòng khám)"));
+  o.push(H3("Doanh số dự kiến từ việc tiếp cận khách hàng online và offline"));
+  o.push.apply(o,manual(M,"privRev"));
+  o.push(H3("Hoạt động đi thị trường của sale"));
+  o.push(KV("Lượt viếng thăm bệnh viện / trường / phòng khám đã lên lịch",pW.length+" lượt"+(R.prov(pW).length?" · tỉnh tập trung: "+R.prov(pW).slice(0,6).join(", "):"")+" (tháng "+mL+": "+pWm.length+" lượt)"));
+  var pk={}; pW.forEach(function(w){ if(w.account) pk[w.account]=1; });
+  if(Object.keys(pk).length) o.push(NOTE("Khách hàng sẽ làm việc: "+Object.keys(pk).slice(0,15).join(" · ")));
+  o.push.apply(o,txtBlock(R.mnTxt(R.nmon,["hospital","university","clinic"],"plan"),"Kế hoạch sales ghi trong Kế hoạch tháng "+nL+":"));
+
+  o.push(H2("2.3. Kênh thầu"));
+  o.push(H3("Kế hoạch thầu dự kiến: nộp mới, ủy quyền, trúng / thua"));
+  if(R.tdOpen.length) o.push(TBL(["Gói thầu / Bệnh viện","Sản phẩm","Giá trị (VND)","Trạng thái","Tháng KQTT"],R.tdOpen.slice(0,15).map(function(t){ return [t.hosp||t.account||t.id,short(t.prod||t.detail,50),vnd(t.value),t.status||"",t.kqtt||""]; }),[2600,2000,1500,1500,1426],{num:[2]}));
+  o.push.apply(o,manual(M,"tender"));
+
+  o.push(H2("2.4. Hoạt động MKT"));
+  o.push(H3("Tham gia tuyển sinh cho các sự kiện: workshop / seminar"));
+  var evN=R.ev(R.nmon), evM=R.ev(R.mon);
+  if(evM.length){ o.push(NOTE("Đã làm tháng "+mL+":")); evM.slice(0,8).forEach(function(e){ o.push(B([run(short(e.t,120),{b:1}),run(e.r?" — "+short(e.r,180):"")],1)); }); }
+  if(evN.length){ o.push(NOTE("Kế hoạch tháng "+nL+":")); evN.slice(0,8).forEach(function(e){ o.push(B([run(short(e.t,120),{b:1}),run(e.d?" · "+fmtVN(String(e.d).slice(0,10)):"")],1)); }); }
+  o.push.apply(o,txtBlock(R.mnTxt(R.nmon,["event"],"plan"),"Kế hoạch sales ghi trong Kế hoạch tháng "+nL+" (Marketing-Event):"));
+  if(String(M.mkt||"").trim()||(!evN.length && !evM.length)) o.push.apply(o,manual(M,"mkt"));
+
+  o.push(P("",{af:240}));
+  o.push(TBL(["Người lập báo cáo","Xác nhận của quản lý"],[["\n\n\n"+by,"\n\n\n"]],[4513,4513]));
+  return o.join("");
+}
+
+function docx(body,title){
+  var NS='xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"';
+  var doc='<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:document '+NS+'><w:body>'+body+
+    '<w:sectPr><w:footerReference w:type="default" r:id="rId3"/><w:pgSz w:w="11906" w:h="16838"/><w:pgMar w:top="1134" w:right="1134" w:bottom="1134" w:left="1440" w:header="567" w:footer="567" w:gutter="0"/></w:sectPr></w:body></w:document>';
+  var font='<w:rFonts w:ascii="Aptos" w:hAnsi="Aptos" w:cs="Aptos" w:eastAsia="Aptos"/>';
+  var hs=function(id,nm,sz,c,bf,af,line){ return '<w:style w:type="paragraph" w:styleId="'+id+'"><w:name w:val="'+nm+'"/><w:basedOn w:val="Normal"/><w:next w:val="Normal"/><w:qFormat/><w:pPr><w:keepNext/><w:spacing w:before="'+bf+'" w:after="'+af+'"/>'+
+    (line?'<w:pBdr><w:bottom w:val="single" w:sz="6" w:space="2" w:color="'+LINE+'"/></w:pBdr>':"")+'<w:outlineLvl w:val="'+(+id.slice(-1)-1)+'"/></w:pPr><w:rPr><w:b/><w:bCs/><w:color w:val="'+c+'"/><w:sz w:val="'+sz+'"/><w:szCs w:val="'+sz+'"/></w:rPr></w:style>'; };
+  var sty='<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:styles '+NS+'><w:docDefaults><w:rPrDefault><w:rPr>'+font+'<w:sz w:val="21"/><w:szCs w:val="21"/><w:lang w:val="vi-VN"/></w:rPr></w:rPrDefault><w:pPrDefault><w:pPr><w:spacing w:after="80" w:line="264" w:lineRule="auto"/></w:pPr></w:pPrDefault></w:docDefaults>'+
+    '<w:style w:type="paragraph" w:default="1" w:styleId="Normal"><w:name w:val="Normal"/><w:qFormat/></w:style>'+
+    hs("Heading1","heading 1",26,NAVY,320,120,1)+hs("Heading2","heading 2",23,BLUE,220,80,0)+hs("Heading3","heading 3",21,NAVY,140,60,0)+
+    '<w:style w:type="paragraph" w:styleId="Footer"><w:name w:val="footer"/><w:basedOn w:val="Normal"/><w:rPr><w:color w:val="'+MUTE+'"/><w:sz w:val="16"/></w:rPr></w:style></w:styles>';
+  var foot='<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:ftr '+NS+'><w:p><w:pPr><w:pStyle w:val="Footer"/><w:tabs><w:tab w:val="right" w:pos="9300"/></w:tabs></w:pPr>'+run(title)+'<w:r><w:tab/><w:t xml:space="preserve">Trang </w:t></w:r><w:r><w:fldChar w:fldCharType="begin"/></w:r><w:r><w:instrText xml:space="preserve"> PAGE </w:instrText></w:r><w:r><w:fldChar w:fldCharType="separate"/></w:r><w:r><w:t>1</w:t></w:r><w:r><w:fldChar w:fldCharType="end"/></w:r></w:p></w:ftr>';
+  return loadZip().then(function(JSZip){
+    var z=new JSZip();
+    z.file("[Content_Types].xml",'<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/><Override PartName="/word/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.styles+xml"/><Override PartName="/word/settings.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.settings+xml"/><Override PartName="/word/footer1.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.footer+xml"/><Override PartName="/docProps/core.xml" ContentType="application/vnd.openxmlformats-package.core-properties+xml"/></Types>');
+    z.file("_rels/.rels",'<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/><Relationship Id="rId2" Type="http://schemas.openxmlformats.org/package/2006/relationships/metadata/core-properties" Target="docProps/core.xml"/></Relationships>');
+    z.file("word/_rels/document.xml.rels",'<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/><Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/settings" Target="settings.xml"/><Relationship Id="rId3" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/footer" Target="footer1.xml"/></Relationships>');
+    z.file("word/document.xml",doc); z.file("word/styles.xml",sty); z.file("word/footer1.xml",foot);
+    z.file("word/settings.xml",'<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:settings '+NS+'><w:updateFields w:val="false"/><w:defaultTabStop w:val="720"/></w:settings>');
+    z.file("docProps/core.xml",'<?xml version="1.0" encoding="UTF-8" standalone="yes"?><cp:coreProperties xmlns:cp="http://schemas.openxmlformats.org/package/2006/metadata/core-properties" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><dc:title>'+x(title)+'</dc:title><dc:creator>MMH CRM</dc:creator><dcterms:created xsi:type="dcterms:W3CDTF">'+new Date().toISOString().replace(/\.\d+Z$/,"Z")+'</dcterms:created></cp:coreProperties>');
+    return z.generateAsync({ type:"blob", mimeType:"application/vnd.openxmlformats-officedocument.wordprocessingml.document" });
+  });
+}
+function loadZip(){
+  if(window.JSZip) return Promise.resolve(window.JSZip);
+  return new Promise(function(res,rej){ var s=document.createElement("script"); s.src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js";
+    s.onload=function(){ if(window.JSZip) res(window.JSZip); else rej(new Error("Không tải được thư viện tạo file Word — kiểm tra mạng rồi thử lại.")); }; s.onerror=function(){ rej(new Error("Không tải được thư viện tạo file Word — kiểm tra mạng rồi thử lại.")); }; document.head.appendChild(s); });
+}
+
+/* ───────── hộp tạo file ───────── */
+var ST={};
+function picsOk(){ try{ return isMgrView(); }catch(_){ return false; } }
+function curDraft(){ return draftKey(curTeamKey(),ST.pic,ST.mon); }
+function readForm(){ var d={}; MAN.forEach(function(m){ var e=$("mrw-"+m[0]); if(e) d[m[0]]=e.value; }); return d; }
+function saveForm(){ if(ST.mon) dSet(curDraft(),readForm()); }
+function paint(){
+  var box=$("mrw"); if(!box) return;
+  var D=dGet(curDraft()), mL=lbM(ST.mon), nL=lbM(nextMonthStr(ST.mon));
+  var sec=function(id,t,st,auto){ return '<div class="mrw-sec"><h4>'+esc(id+" · "+t)+'<span class="mrw-st '+st+'">'+({ok:"Tự động",part:"Tự động + bổ sung",no:"Sales nhập"})[st]+'</span></h4><div class="mrw-auto">'+auto+'</div>'+
+    MAN.filter(function(m){ return m[1]===id; }).map(function(m){ return '<label class="mrw-lb" for="mrw-'+m[0]+'">'+esc(m[2])+'</label><textarea class="inp" id="mrw-'+m[0]+'" placeholder="'+esc(m[3])+'" oninput="MRW.save()">'+esc(D[m[0]]||"")+'</textarea>'; }).join("")+'</div>'; };
+  box.innerHTML=
+    '<div class="mrw-grid" style="margin-bottom:10px">'+
+      '<div><span class="te-lb">Tháng báo cáo</span><select class="inp" id="mrw-mon" onchange="MRW.set(\'mon\',this.value)">'+fyMonths(S.fy).map(function(m){ return '<option value="'+m+'"'+(m===ST.mon?" selected":"")+'>Tháng '+lbM(m)+'</option>'; }).join("")+'</select></div>'+
+      '<div><span class="te-lb">PIC</span>'+(picsOk()?'<select class="inp" id="mrw-pic" onchange="MRW.set(\'pic\',this.value)"><option value="">Toàn nhóm '+esc(curTeam().label)+'</option>'+(S.master.pic||[]).map(function(p){ return '<option'+(p===ST.pic?" selected":"")+'>'+esc(p)+'</option>'; }).join("")+'</select>'
+        :'<input class="inp piclock" value="'+esc(ST.pic)+'" readonly>')+'</div></div>'+
+    '<div class="hint" style="margin-bottom:10px">Báo cáo theo mẫu <b>Báo cáo hoạt động Sale MMH</b>: thực hiện tháng '+esc(mL)+' & kế hoạch tháng '+esc(nL)+'. Số liệu lấy thẳng từ CRM và file Turnover; chỉ cần ghi thêm các ô bên dưới (lưu nháp trên máy này).</div>'+
+    sec("1.1","Kết quả tổng quan","ok","Doanh số NPP (Turnover) tháng + lũy kế · đơn hàng CRM theo nhóm sản phẩm · "+(curTeamKey()==="dental"?"<b>Jizai</b> (số lượng) / <b>Composite</b>":"sản phẩm trọng tâm")+".")+
+    sec("1.2","Chi tiết theo kênh","ok","Case Mở mới đã xác nhận + đơn loại 2 · đơn trúng thầu (loại 1) + bảng thầu · đơn của bệnh viện / trường / phòng khám.")+
+    sec("1.3","Phản hồi thị trường","part","Tự lấy: cột <b>Customer feedback</b> + kết quả đi địa bàn, lý do dừng, mục <b>Phản hồi khách hàng</b> của buổi thuyết trình.")+
+    sec("2.1","Kênh đại lý","part","Tự lấy: buổi thuyết trình / đào tạo đã lên lịch tháng "+esc(nL)+", case Mở mới đang làm, <b>Forecast</b> NPP tháng sau, lượt đi NPP / đại lý đã lên lịch, PLAN trong Kế hoạch tháng.")+
+    sec("2.2","Kênh tư nhân","part","Tự lấy: lượt đi bệnh viện / trường / phòng khám đã lên lịch (tỉnh tập trung), PLAN trong Kế hoạch tháng.")+
+    sec("2.3","Kênh thầu","part","Tự lấy: gói thầu đang theo (bảng thầu CRM).")+
+    sec("2.4","Hoạt động MKT","part","Tự lấy: đầu việc trong Key task <b>Tuyển sinh sự kiện</b> (Công việc khác) + PLAN Marketing-Event.");
+}
+window.MRW={
+  on:on,
+  open:function(mon){
+    if(!on()) return toast("Báo cáo Word chỉ áp dụng cho nhóm Dental và Surgical.","warn",4500);
+    var ms=fyMonths(S.fy), now=ymOf(todayISO());
+    ST.mon=mon||S.rpMonth||S.mnMonth||now; if(ms.indexOf(ST.mon)<0) ST.mon=ms.indexOf(now)>=0?now:ms[0];
+    ST.pic=picsOk()?(S.rpPic||S.mnPic||""):(S.user&&S.user.pic||"");
+    openModal("Báo cáo tháng (Word)",'<div id="mrw"></div>','<button class="btn gho" onclick="MRW.save();closeModal()">Đóng</button><div style="flex:1"></div><button class="btn pri" id="mrw-go" onclick="MRW.make()">Tạo file Word</button>',true);
+    paint();
+  },
+  set:function(k,v){ saveForm(); ST[k]=v; paint(); },
+  save:function(){ saveForm(); },
+  make:function(){
+    saveForm();
+    var b=$("mrw-go"), t0=b?b.textContent:"", M=readForm(), team=curTeamKey(), pic=ST.pic, mon=ST.mon;
+    if(b){ b.disabled=true; b.textContent="Đang lấy số liệu…"; }
+    loadAll().then(function(D){
+      if(b) b.textContent="Đang tạo file…";
+      var R=calc(D,team,pic,mon), who=pic||("Toàn nhóm"+((S.master.pic||[]).length?" ("+S.master.pic.join(", ")+")":"")), by=(S.user&&S.user.pic)||who;
+      var title="Báo cáo hoạt động Sale MMH "+curTeam().label+" · "+(pic||"Toàn nhóm")+" · T"+lbM(mon);
+      MRW.last={ R:R, M:M, errs:D.errs };
+      return docx(bodyXml(R,M,who,by),title).then(function(blob){
+        var nm="MMH_"+curTeam().label+"_Bao_cao_thang_"+mon+"_"+(pic||"Team").replace(/\s+/g,"")+".docx";
+        MRW.blob=blob; MRW.name=nm;
+        var a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download=nm; document.body.appendChild(a); a.click();
+        setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); },2000);
+        if(b){ b.disabled=false; b.textContent=t0; }
+        toast("Đã tạo "+nm+(D.errs.length?" — thiếu: "+D.errs.join(" · "):""),D.errs.length?"warn":"ok",D.errs.length?8000:4500);
+      });
+    }).catch(function(e){ if(b){ b.disabled=false; b.textContent=t0; } toast(e.message,"err",6000); });
+  }
+};
+/* nút ở trang Gửi báo cáo (Báo cáo tháng) và Kế hoạch tháng */
+function btn(){ var e=document.createElement("button"); e.className="btn"; e.id="mrw-btn"; e.textContent="Báo cáo Word"; e.title="Báo cáo hoạt động Sale MMH (file Word): thực hiện tháng & kế hoạch tháng sau"; e.onclick=function(){ MRW.open(); }; return e; }
+var _rr=window.renderReport;
+if(typeof _rr==="function") window.renderReport=renderReport=function(){
+  var r=_rr.apply(this,arguments);
+  try{ if(on() && S.rpKind==="month" && !$("mrw-btn")){ var d=document.querySelector("#main [onclick=\"sendReport('download')\"]"); if(d) d.parentNode.insertBefore(btn(),d.nextSibling); } }catch(_){}
+  return r;
+};
+var _rm=window.renderMonthly;
+if(typeof _rm==="function") window.renderMonthly=renderMonthly=function(){
+  var r=_rm.apply(this,arguments);
+  try{ if(on() && S.mnTab!=="cmp" && !$("mrw-btn")){ var d=document.querySelector("#main .ph [onclick^=\"S.rpKind='month'\"]"); if(d){ var e=btn(); e.classList.add("sm"); d.parentNode.insertBefore(e,d.nextSibling); } } }catch(_){}
+  return r;
+};
+})();
+</script>
+
 </body>
 </html>

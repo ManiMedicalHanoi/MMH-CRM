@@ -121,12 +121,13 @@ TOUR.add([
     { el:"[onclick=\"naForm(null)\"]", do:pg("newacc"), wait:700, t:V("Thêm case","Add a case"), x:V("Ghi khách mới / SKU mới kèm chứng từ. App tự đối chiếu 4 điều kiện.","Log the new customer or SKU with evidence. The app checks the 4 conditions.") },
     { el:"[onclick=\"naRules()\"]", t:V("Quy định KPI","KPI rules"), x:V("Xem cách tính KPI mở mới.","See how the new-account KPI is calculated.") }
    ] },
- { id:"report", v:2, d:"2026-10-17", g:V("Báo cáo & KPI","Reports & KPI"), ic:"mail", t:V("Gửi báo cáo","Send a report"), x:V("Mọi báo cáo gửi ở một chỗ: tuần / tháng / KPI bằng email kèm PDF.","Every report in one place: weekly, monthly or KPI by email with PDF."),
+ { id:"report", v:3, d:"2026-10-29", g:V("Báo cáo & KPI","Reports & KPI"), ic:"mail", t:V("Gửi báo cáo","Send a report"), x:V("Mọi báo cáo gửi ở một chỗ: tuần / tháng / KPI bằng email kèm PDF.","Every report in one place: weekly, monthly or KPI by email with PDF."),
    steps:[
     { el:function(){ return par("[onclick^=\"S.rpKind='week'\"]"); }, do:pg("report"), wait:600, t:V("Loại báo cáo","Report type"), x:V("Chọn báo cáo tuần, tháng hoặc KPI. Báo cáo tách riêng phần đi địa bàn và công việc khác.","Pick weekly, monthly or KPI. Field visits and other tasks are listed separately.") },
     { el:"[onclick=\"sendReport('self')\"]", t:V("Gửi thử cho tôi","Send me a test"), x:V("Gửi bản thử về email của bạn để xem trước.","Send a test copy to yourself first.") },
     { el:"[onclick=\"sendReport('team')\"]", t:V("Gửi chính thức","Send officially"), x:V("Gửi tới team và quản lý theo danh sách cố định.","Send to your team and managers.") },
-    { el:"[onclick=\"sendReport('download')\"]", t:V("Tải PDF","Download PDF"), x:V("Tải file PDF về máy.","Download the PDF.") }
+    { el:"[onclick=\"sendReport('download')\"]", t:V("Tải PDF","Download PDF"), x:V("Tải file PDF về máy.","Download the PDF.") },
+    { el:"#mrw-btn", when:function(){ return !!(window.MRW && MRW.on()); }, do:function(){ try{ S.rpKind="month"; go("report"); }catch(_){} }, wait:600, t:V("Báo cáo Word (tháng)","Monthly Word report"), x:V("Báo cáo hoạt động Sale theo mẫu chính thức: số liệu tháng và kế hoạch tháng sau tự lấy từ CRM + file Turnover, chỉ ghi thêm vài ô (thị trường, sản phẩm lỗi, dự kiến) rồi tải file Word.","The formal sales activity report: this month's figures and next month's plan come from CRM and the Turnover file; add a few notes, then download the Word file.") }
    ] },
  { id:"kpi", v:3, d:"2026-10-17", g:V("Báo cáo & KPI","Reports & KPI"), ic:"kpi", t:V("KPI & Mục tiêu","KPI & targets"), x:V("Số liệu KPI theo từng PIC.","KPI figures per PIC."),
    steps:[

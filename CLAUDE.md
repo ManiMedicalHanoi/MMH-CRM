@@ -191,3 +191,10 @@ Kiến trúc & quy ước giống MMH Report Hub (repo `ManiMedicalHanoi/MMH-Rep
   danh sách tick nhiều đơn ⇒ 1 nhận xét chung, cho chọn cả đơn chưa đủ điều kiện) ⇒ dải vàng `#oav-dr` "n đơn có nhận xét chưa gửi" ▸ **Gửi yêu cầu chỉnh sửa** = 1 lệnh `orderDecide decision=return` + `notes {key:nhận xét}`
   (mỗi sales 1 email, link `#ox`). Nháp của đơn không còn chờ duyệt tự bỏ. Phía sales: `oxOpen()` = hộp `#oxv` "Đơn hàng cần chỉnh sửa" (đơn của mình có Ghi chú duyệt "Cần bổ sung: …", tách nhận xét / người / giờ) ▸ Sửa đơn (`formOrder`) · Gửi xác nhận lại (`v320Req`);
   tự mở 1 lần khi có yêu cầu mới (`mmh_ox_seen_<pic>` = chữ ký nhận xét, chờ `#upd` / `#dl` / `#kpn` / hộp thoại đóng 3 nhịp liền), nút "Xem nhận xét" `.v337-b` trên dải `.v321-ban`, link email `#ox`.
+- **v33.8 (29/10/2026, khối `v338-css` + `v338-js`) — Báo cáo tháng Word (`MRW`, chỉ Dental / Surgical)**: theo mẫu "Báo cáo hoạt động Sale MMH" (thực hiện tháng + kế hoạch tháng sau) của chị Tuyên.
+  Nút `#mrw-btn` ở Gửi báo cáo ▸ Báo cáo tháng (sau Tải PDF) và Kế hoạch tháng ⇒ `MRW.open()` (chọn tháng / PIC; quản lý chọn được toàn nhóm). Số liệu tự lấy trên máy (`loadAll`): Turnover
+  (`turnoverByDistributor` / `productStat`: NPP tháng + lũy kế + Forecast tháng sau, Jizai SL / Composite / thẻ sản phẩm Surgical), đơn hàng (nhóm SP, loại 1/2/3, theo loại khách, bỏ đơn từ chối), `naList`
+  (case Approved trong tháng, Draft / Pending = đang làm), `mtTenders` (gọi thẳng — `mtTdLoad` đã rỗng từ v32.5), đi địa bàn (`Customer feedback`, kết quả, lý do dừng, lượt đã lên lịch tháng sau theo kênh + tỉnh),
+  thuyết trình (mục "Phản hồi khách hàng" của Event review, buổi tháng sau), PLAN / RESULT Kế hoạch tháng theo `mnTplFor`, Key task "Tuyển sinh sự kiện Tmm.yyyy" (Công việc khác).
+  Mục CRM chưa có chỗ ghi (yếu tố thị trường, sản phẩm lỗi, số đại lý dự kiến mở, doanh số dự kiến, kế hoạch thầu, MKT) = ô nhập `MAN`, nháp `localStorage.mmh_mrw_<nhóm>_<PIC>_<tháng>`.
+  File .docx dựng từ đầu bằng JSZip (A4, Aptos, tiêu đề navy) — không gửi backend. Test: Playwright + mock (`list` / `visitFeed` / `naList` / `mtTenders` / `weekly` / `getTurnoverData`).

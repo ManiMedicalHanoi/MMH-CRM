@@ -7,6 +7,15 @@
 function E(u){ u.en={ title:u.title, items:u.items.map(function(i){ return { title:i.title, text:i.text }; }) }; return u; }
 window.MMH_UPDATES = [
   E({
+    id:"2026-10-29-v33.8", version:"v33.8", date:"2026-10-29",
+    title:"Monthly sales report in Word, filled from CRM (Dental · Surgical)",
+    summary:"The formal \"MMH Sales Activity Report\" (this month's results + next month's plan) is now built from CRM and the Turnover file. Add a few notes and download the Word file.",
+    items:[
+      { type:"new", icon:"W", title:"Word report button", text:"<b>Send report</b> ▸ <b>Monthly report</b> ▸ <b>Word report</b> (also on <b>Monthly Plan</b>). Pick the month and the PIC (managers: whole team), write the few items CRM has no field for — market factors, defective products, expected sales, tender plan — then click <b>Create Word file</b>. Notes are kept as a draft on this device.", img:"updates/v33.8/word.jpg" },
+      { type:"new", icon:"#", title:"Figures filled in for you", text:"Distributor turnover vs budget (month + FY to date), Jizai / Composite, orders by product group, new accounts, tender orders, hospital / university / clinic sales, customer feedback from visits and presentations, next month's scheduled visits, trainings, open new-account cases, tenders and event enrolment tasks.", img:"updates/v33.8/doc.jpg" }
+    ]
+  }),
+  E({
     id:"2026-10-28-v33.7", version:"v33.7", date:"2026-10-28",
     title:"Request changes on many orders at once · sales see the note on each order",
     summary:"Approvers write a change request on each order, then send them all with one click. Each sales PIC gets one e-mail listing every order with its note, and CRM shows the orders to fix as soon as they sign in.",
