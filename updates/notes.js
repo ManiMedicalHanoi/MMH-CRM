@@ -7,6 +7,14 @@
 function E(u){ u.en={ title:u.title, items:u.items.map(function(i){ return { title:i.title, text:i.text }; }) }; return u; }
 window.MMH_UPDATES = [
   E({
+    id:"2026-10-29-v34.0", version:"v34.0", date:"2026-10-29",
+    title:"Composite / JIZAI quantity KPI counts approved orders only",
+    summary:"The quantity KPIs \"Composite qty supported\" and \"JIZAI qty supported\" now follow the same rule as \"Supported sales\": only orders that are Approved are counted.",
+    items:[
+      { type:"imp", icon:"✓", title:"Only approved orders count", text:"An order line adds its Composite / JIZAI quantity to your KPI once the order is <b>Approved</b>. Pending, returned or rejected orders are not counted. Orders before 10/2026 without an order type count as before. The month is still the order month." }
+    ]
+  }),
+  E({
     id:"2026-10-29-v33.9", version:"v33.9", date:"2026-10-29",
     title:"Monthly Word report: edit everything before you download",
     summary:"The monthly sales report now opens as an editable draft. Change any text or table cell, add or delete lines, tables and sections, then create the Word file. Available to every Dental and Surgical PIC.",

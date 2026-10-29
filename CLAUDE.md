@@ -202,3 +202,5 @@ Kiến trúc & quy ước giống MMH Report Hub (repo `ManiMedicalHanoi/MMH-Rep
   `b` = dòng gạch đầu `lb` đậm + `t`, `ph` = ô sales cần ghi; `t` = bảng `head/rows/w/num/total`) ⇒ trình soạn `#mrw-ed` trong hộp: sửa chữ / ô bảng (contenteditable), `+ Thêm` (dòng · đoạn · bảng · tiêu đề · mục),
   `×` (tiêu đề ⇒ xoá cả mục tới tiêu đề cùng cấp), ↑ ↓, Hoàn tác (`ST.undo`, 40 bước), **Lấy lại số liệu** (`build(true)`). Nháp `localStorage.mmh_mrw_doc_<nhóm>_<PIC>_<tháng>`; Tạo file Word = `xmlOf(items)`
   (dòng trống bỏ qua, tiêu đề nhỏ không còn nội dung ⇒ "(chưa cập nhật)", bảng chữ ký giữ cuối). API test: `MRW.items()` / `MRW.f` / `MRW.c` / `MRW.add` / `MRW.del` / `MRW.radd`.
+- **v34.0 (29/10/2026, khối `v340-js`, backend CRM v10.21)**: số lượng Composite / JIZAI hỗ trợ (C6 / C7) chỉ cộng đơn **Đã duyệt**, giống C5 — `k8Live` bọc: supp_comp / supp_jizai lọc `k8OrderRows` theo
+  `v316OrdNeed` + `v316OrdAppr` (đơn cũ không loại trước 10/2026 tính như cũ; tháng vẫn là tháng đặt). Ghi chú `.k8-note` đổi chữ theo đó.

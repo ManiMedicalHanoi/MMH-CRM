@@ -3994,7 +3994,7 @@ function buildNav(){
     if(t.grp!==lastGrp){ h+='<div class="grp">'+t.grp+'</div>'; lastGrp=t.grp; }
     h+='<button class="nvi" data-t="'+t.id+'" onclick="go(\''+t.id+'\')"><span class="ic">'+t.ic+'</span><span class="lb">'+t.lb+'</span></button>';
   });
-  h+='<div style="flex:1"></div><div style="padding:10px;font-size:10.5px;color:var(--mute);line-height:1.5">MMH CRM v33.9<br>'+
+  h+='<div style="flex:1"></div><div style="padding:10px;font-size:10.5px;color:var(--mute);line-height:1.5">MMH CRM v34.0<br>'+
      (isMgmt()?'<a href="'+DRIVE_FOLDER+'" target="_blank">📁 Folder ảnh Drive</a>':"")+'</div>';
   $("side").innerHTML=h;
   /* ⭐ v4.5 — thanh dưới trượt ngang, đủ mọi mục, bỏ nút "Thêm" */
@@ -20721,7 +20721,7 @@ window.QS2={ open:qsOpen };
 </script>
 
 <!-- ⭐ v30.3 — THÔNG BÁO CẬP NHẬT (chép từ Report Hub): dữ liệu updates/notes.js · tự hiện 7 ngày · nút "Có gì mới" trên thanh trên cùng -->
-<script src="updates/notes.js?v=33.9"></script>
+<script src="updates/notes.js?v=34.0"></script>
 <style id="upd-css">
 #upd,#upd-zoom{--t-pri:var(--blue);--t-pri2:var(--blue-d);--t-ink:var(--navy);--t-soft:var(--pale);--t-line:var(--lb2);--t-bg:#F6F8FA;--mmh-blue:var(--blue);--mmh-navy:var(--navy)}
 
@@ -24202,8 +24202,8 @@ window.renderOrder=function(){
       var nb=ph.querySelector(".btn.pri"); if(nb) ph.insertBefore(b,nb); else ph.appendChild(b);
       paintApBtn();
     }
-    var nt=pg.querySelector(".k8-note"); if(nt) nt.textContent=L("C5 = tổng giá trị đơn ĐÃ DUYỆT của sales ÷ tỷ giá cố định 26.700 VND/USD (Order Type 1: trị giá trúng thầu ở tháng KQTT · 2: đơn Account mở mới tới hết FY mở · 3: đơn tư vấn; đơn trước 10/2026 tính như cũ). C6 / C7 = số lượng Composite / JIZAI của đơn qua NPP phụ trách.",
-      "C5 = APPROVED orders ÷ fixed rate 26,700 VND/USD (type 1: tender value in the award month · 2: new-account orders until the end of the opening FY · 3: consulting orders; orders before 10/2026 as before). C6 / C7 = Composite / JIZAI quantity via the PIC's distributor.");
+    var nt=pg.querySelector(".k8-note"); if(nt) nt.textContent=L("C5 = tổng giá trị đơn ĐÃ DUYỆT của sales ÷ tỷ giá cố định 26.700 VND/USD (Order Type 1: trị giá trúng thầu ở tháng KQTT · 2: đơn Account mở mới tới hết FY mở · 3: đơn tư vấn; đơn trước 10/2026 tính như cũ). C6 / C7 = số lượng Composite / JIZAI của đơn ĐÃ DUYỆT qua NPP phụ trách (đơn trước 10/2026 tính như cũ).",
+      "C5 = APPROVED orders ÷ fixed rate 26,700 VND/USD (type 1: tender value in the award month · 2: new-account orders until the end of the opening FY · 3: consulting orders; orders before 10/2026 as before). C6 / C7 = Composite / JIZAI quantity of APPROVED orders via the PIC's distributor (orders before 10/2026 as before).");
     /* nhãn trạng thái duyệt trên từng đơn (thẻ) */
     var rows=((S.cache.order||{}).rows||[]);
     var byRow={}; rows.forEach(function(o){ byRow[o._row]=o; });
@@ -28333,5 +28333,19 @@ if(typeof _rm==="function") window.renderMonthly=renderMonthly=function(){
 })();
 </script>
 
+<script id="v340-js">
+/* ⭐ v34.0 (29/10/2026, backend CRM v10.21) — Số lượng Composite / JIZAI hỗ trợ (C6 / C7) chỉ cộng đơn ĐÃ DUYỆT, giống Doanh số hỗ trợ (C5).
+   Đơn cần duyệt = có Order Type hoặc tháng ≥ 10/2026 (v316OrdNeed); đơn cũ không loại trước 10/2026 tính như trước. Tháng tính vẫn là tháng đặt hàng. */
+(function(){
+"use strict";
+var _k8Live=window.k8Live;
+window.k8Live=function(pic,key){
+  if(key!=="supp_comp" && key!=="supp_jizai") return _k8Live.apply(this,arguments);
+  var keep=window.k8OrderRows;
+  window.k8OrderRows=function(){ return keep().filter(function(o){ return !window.v316OrdNeed(o) || window.v316OrdAppr(o.appr)==="ok"; }); };
+  try{ return _k8Live.apply(this,arguments); } finally { window.k8OrderRows=keep; }
+};
+})();
+</script>
 </body>
 </html>
