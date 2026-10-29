@@ -3994,7 +3994,7 @@ function buildNav(){
     if(t.grp!==lastGrp){ h+='<div class="grp">'+t.grp+'</div>'; lastGrp=t.grp; }
     h+='<button class="nvi" data-t="'+t.id+'" onclick="go(\''+t.id+'\')"><span class="ic">'+t.ic+'</span><span class="lb">'+t.lb+'</span></button>';
   });
-  h+='<div style="flex:1"></div><div style="padding:10px;font-size:10.5px;color:var(--mute);line-height:1.5">MMH CRM v33.8<br>'+
+  h+='<div style="flex:1"></div><div style="padding:10px;font-size:10.5px;color:var(--mute);line-height:1.5">MMH CRM v33.9<br>'+
      (isMgmt()?'<a href="'+DRIVE_FOLDER+'" target="_blank">📁 Folder ảnh Drive</a>':"")+'</div>';
   $("side").innerHTML=h;
   /* ⭐ v4.5 — thanh dưới trượt ngang, đủ mọi mục, bỏ nút "Thêm" */
@@ -20721,7 +20721,7 @@ window.QS2={ open:qsOpen };
 </script>
 
 <!-- ⭐ v30.3 — THÔNG BÁO CẬP NHẬT (chép từ Report Hub): dữ liệu updates/notes.js · tự hiện 7 ngày · nút "Có gì mới" trên thanh trên cùng -->
-<script src="updates/notes.js?v=33.8"></script>
+<script src="updates/notes.js?v=33.9"></script>
 <style id="upd-css">
 #upd,#upd-zoom{--t-pri:var(--blue);--t-pri2:var(--blue-d);--t-ink:var(--navy);--t-soft:var(--pale);--t-line:var(--lb2);--t-bg:#F6F8FA;--mmh-blue:var(--blue);--mmh-navy:var(--navy)}
 
@@ -27777,18 +27777,42 @@ window.__tourClean=function(){ try{ close(); }catch(_){} if(typeof _cl==="functi
 })();
 </script>
 <style id="v338-css">
-#mrw .mrw-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-#mrw .mrw-sec{border:1px solid #E6EAEF;border-radius:10px;padding:10px 12px;margin-bottom:10px;background:#fff}
-#mrw .mrw-sec h4{margin:0 0 6px;font-size:13px;color:var(--t-ink,#003047)}
-#mrw .mrw-auto{font-size:12px;color:var(--mute,#5B6B7B);line-height:1.55}
-#mrw .mrw-auto b{color:var(--t-ink,#003047)}
-#mrw .mrw-st{display:inline-block;font-size:11px;padding:1px 7px;border-radius:9px;margin-left:6px;vertical-align:1px}
-#mrw .mrw-st.ok{background:#E8F5EE;color:#1E7A48}
-#mrw .mrw-st.part{background:#FFF6E0;color:#8A5A00}
-#mrw .mrw-st.no{background:#F3F4F6;color:#5B6B7B}
-#mrw textarea{width:100%;min-height:58px;margin-top:6px}
-#mrw label.mrw-lb{display:block;font-size:12px;font-weight:600;margin-top:8px;color:var(--t-ink,#003047)}
-@media(max-width:720px){#mrw .mrw-grid{grid-template-columns:1fr}}
+#mrw .mrw-top{display:grid;grid-template-columns:1fr 1fr auto;gap:10px;align-items:end;margin-bottom:8px}
+#mrw .mrw-acts{display:flex;gap:6px}
+#mrw .mrw-hint{margin-bottom:10px}
+#mrw #mrw-stamp{color:var(--mute,#5B6B7B)}
+#mrw .mrw-wait{padding:30px;text-align:center;color:var(--mute,#5B6B7B)}
+#mrw-ed{border:1px solid #E6EAEF;border-radius:10px;padding:10px 12px;background:#fff}
+#mrw .mrw-it{display:flex;gap:8px;align-items:flex-start;padding:3px 4px;border-radius:8px}
+#mrw .mrw-it:hover,#mrw .mrw-it:focus-within{background:var(--t-bg,#F7F9FB)}
+#mrw .mrw-bd{flex:1;min-width:0}
+#mrw .mrw-tl{display:flex;gap:3px;align-items:center;opacity:.35;flex:none;padding-top:4px}
+#mrw .mrw-it:hover .mrw-tl,#mrw .mrw-it:focus-within .mrw-tl{opacity:1}
+#mrw .mrw-ib{border:1px solid #E6EAEF;background:#fff;border-radius:6px;width:24px;height:24px;line-height:20px;padding:0;cursor:pointer;color:var(--t-ink,#003047);font-size:13px}
+#mrw .mrw-ib.mrw-del:hover{border-color:#D9A3A3;color:#A82F2C}
+#mrw select.mrw-add{height:24px;font-size:12px;border:1px solid #E6EAEF;border-radius:6px;background:#fff;padding:0 4px;color:var(--t-ink,#003047)}
+#mrw .mrw-ta{width:100%;min-height:30px;resize:vertical;font-size:13px;line-height:1.45;padding:5px 8px}
+#mrw input.mrw-title{font-size:17px;font-weight:700;text-align:center;color:var(--t-ink,#003047)}
+#mrw input.mrw-sub{font-size:14px;font-weight:700;text-align:center;color:var(--t-pri,#3A5CAA)}
+#mrw input.mrw-h1{font-size:15px;font-weight:700;color:var(--t-ink,#003047);margin-top:10px}
+#mrw input.mrw-h2{font-size:14px;font-weight:700;color:var(--t-pri,#3A5CAA);margin-top:6px}
+#mrw input.mrw-h3{font-size:13px;font-weight:700;color:var(--t-ink,#003047)}
+#mrw .mrw-row{display:flex;gap:6px;align-items:flex-start;padding-left:10px}
+#mrw .mrw-row .mrw-ta{flex:1;min-width:0}
+#mrw .mrw-row.l1{padding-left:34px}
+#mrw .mrw-dot{padding-top:6px;color:var(--t-ink,#003047)}
+#mrw input.mrw-lbi{font-weight:600;font-size:13px;max-width:280px;margin-bottom:3px}
+#mrw .mrw-row input.mrw-lbi{flex:0 1 auto;max-width:48%;margin:0}
+#mrw .mrw-note{font-style:italic;color:var(--mute,#5B6B7B)}
+#mrw .mrw-tw{overflow-x:auto;margin:2px 0 4px}
+#mrw .mrw-tb{border-collapse:collapse;width:100%;font-size:12.5px}
+#mrw .mrw-tb th,#mrw .mrw-tb td{border:1px solid #E6EAEF;padding:4px 6px;min-width:40px;outline:none}
+#mrw .mrw-tb th{background:var(--t-soft,#F0F7FF);color:var(--t-ink,#003047);text-align:left}
+#mrw .mrw-tb td.nm{text-align:right}
+#mrw .mrw-tb [contenteditable]:focus{box-shadow:inset 0 0 0 2px var(--t-pri,#3A5CAA)}
+#mrw .mrw-tb .mrw-x{border:none;background:none;width:28px;padding:2px}
+#mrw .mrw-end{padding:10px 4px 2px}
+@media(max-width:720px){#mrw .mrw-top{grid-template-columns:1fr 1fr}#mrw .mrw-acts{grid-column:1/-1}#mrw .mrw-it{flex-direction:column;gap:2px;align-items:stretch}#mrw .mrw-bd{width:100%}#mrw .mrw-row .mrw-ta{flex:1 1 100%}#mrw .mrw-tl{opacity:1;align-self:flex-end}#mrw .mrw-row,#mrw .mrw-row.l1{padding-left:0;flex-wrap:wrap}#mrw .mrw-row input.mrw-lbi{flex:1 1 100%}}
 </style>
 <script id="v338-js">
 /* ═══════════ v33.8 (29/10/2026) — BÁO CÁO THÁNG SALE GỬI NHÀ PHÂN PHỐI (file Word, mẫu "BÁO CÁO HOẠT ĐỘNG SALE MMH") ═══════════
@@ -27971,131 +27995,178 @@ function TBL(head,rows,w,o){ o=o||{};
   return '<w:tbl><w:tblPr><w:tblW w:w="'+tot+'" w:type="dxa"/><w:tblBorders>'+bd+'</w:tblBorders><w:tblLayout w:type="fixed"/><w:tblCellMar><w:left w:w="90" w:type="dxa"/><w:right w:w="90" w:type="dxa"/></w:tblCellMar></w:tblPr><w:tblGrid>'+
     w.map(function(v){ return '<w:gridCol w:w="'+v+'"/>'; }).join("")+'</w:tblGrid>'+tr(head,true)+rows.map(function(r,i){ return tr(r,false,i===rows.length-1); }).join("")+"</w:tbl>"+P("",{af:60});
 }
-function txtBlock(list,label){ if(!list.length) return []; var o=[NOTE(label)];
-  list.forEach(function(it){ o.push(P([run((it.pic?it.pic+" · ":"")+(it.type||"")+":",{b:1,sz:20})],{af:20,ind:360,keep:1}));
-    String(it.t).split(/\r?\n/).filter(function(l){ return l.trim(); }).forEach(function(l){ o.push(P(run(l.trim(),{sz:20}),{ind:540,af:20})); }); });
-  o.push(P("",{af:40})); return o; }
-function manual(M,k){ var v=String(M[k]||"").trim(); return v?String(v).split(/\r?\n/).filter(function(l){ return l.trim(); }).map(function(l){ return B(l.trim().replace(/^[-•+]\s*/,"")); }):[B([run("(chưa cập nhật)",{i:1,c:MUTE})])]; }
-
-function bodyXml(R,M,who,by){
+/* ───────── v33.9 — BẢN NHÁP CHỈNH SỬA ĐƯỢC: số liệu tự lấy ⇒ danh sách mục (model) ⇒ sales sửa / thêm / xoá ⇒ file Word ─────────
+   Mục: {k:"title"|"sub"|"h1"|"h2"|"h3", t} · {k:"b", lb, t, lvl, ph} dòng gạch đầu · {k:"n", t} ghi chú nghiêng · {k:"p", lb, t} đoạn nhiều dòng ·
+   {k:"t", head, rows, w, num, total} bảng. Nháp lưu localStorage mmh_mrw_doc_<nhóm>_<PIC>_<tháng> (mỗi lần sửa). */
+function mrun(t,o){ o=o||{}; return { r:1, t:String(t==null?"":t), b:!!o.b, i:!!o.i, sz:o.sz||0 }; }
+function mP(x,o){
+  if(x && x.r){ if(x.sz>=30) return { k:"title", t:x.t }; if(x.sz>=24) return { k:"sub", t:x.t }; return { k:"n", t:x.t }; }
+  return null;                                  /* dòng trống giãn cách */
+}
+function mH1(t){ return { k:"h1", t:t }; }
+function mH2(t){ return { k:"h2", t:t }; }
+function mH3(t){ return { k:"h3", t:t }; }
+function mB(runs,lvl){
+  if(typeof runs==="string") return { k:"b", lvl:lvl?1:0, lb:"", t:runs };
+  var lb="", rest=[];
+  runs.forEach(function(r,i){ if(i===0 && r.b && runs.length>1) lb=r.t; else rest.push(r.t); });
+  return { k:"b", lvl:lvl?1:0, lb:lb, t:rest.join("") };
+}
+function mKV(k,v){ return { k:"b", lvl:0, lb:k+": ", t:String(v) }; }
+function mNOTE(t){ return { k:"n", t:t }; }
+function mTBL(head,rows,w,o){ o=o||{}; return { k:"t", head:head.slice(), rows:rows.map(function(r){ return r.map(String); }), w:w.slice(), num:(o.num||[]).slice(), total:!!o.total }; }
+function mtxt(list,label){ if(!list.length) return []; var o=[mNOTE(label)];
+  list.forEach(function(it){ o.push({ k:"p", lb:(it.pic?it.pic+" · ":"")+(it.type||"")+":", t:String(it.t).split(/\r?\n/).filter(function(l){ return l.trim(); }).map(function(l){ return l.trim(); }).join("\n") }); });
+  return o; }
+function mman(M,k){
+  var v=String(M[k]||"").trim(), ph=(MAN.filter(function(m){ return m[0]===k; })[0]||[])[3]||"";
+  if(!v) return [{ k:"b", lvl:0, lb:"", t:"", ph:ph }];
+  return v.split(/\r?\n/).filter(function(l){ return l.trim(); }).map(function(l){ return { k:"b", lvl:0, lb:"", t:l.trim().replace(/^[-•+]\s*/,"") }; });
+}
+/* model ⇒ XML Word */
+function xmlOf(items){
+  var o=[], pend=false, lastHead=null;
+  var flush=function(){ if(pend) o.push(B([run("(chưa cập nhật)",{i:1,c:MUTE})])); pend=false; };
+  items.forEach(function(it){
+    if(/^h[123]$/.test(it.k)){ flush(); o.push({h1:H1,h2:H2,h3:H3}[it.k](it.t)); pend=(it.k==="h3"); return; }
+    if(it.k==="title"){ o.push(P(run(it.t,{b:1,sz:32,c:NAVY}),{al:"center",af:40})); return; }
+    if(it.k==="sub"){ o.push(P(run(it.t,{b:1,sz:24,c:BLUE}),{al:"center",af:200})); return; }
+    if(it.k==="b"){ if(!String(it.t||"").trim() && !String(it.lb||"").trim()) return;
+      o.push(it.lb?B([run(it.lb,{b:1}),run(it.t)],it.lvl):B(it.t,it.lvl)); pend=false; return; }
+    if(it.k==="n"){ if(!String(it.t||"").trim()) return; o.push(NOTE(it.t)); return; }
+    if(it.k==="p"){ if(!String(it.t||"").trim() && !String(it.lb||"").trim()) return;
+      if(it.lb) o.push(P([run(it.lb,{b:1,sz:20})],{af:20,ind:360,keep:1}));
+      String(it.t||"").split(/\r?\n/).filter(function(l){ return l.trim(); }).forEach(function(l){ o.push(P(run(l.trim(),{sz:20}),{ind:540,af:20})); });
+      o.push(P("",{af:40})); pend=false; return; }
+    if(it.k==="t"){ if(!it.rows.length) return;
+      var sign=it.head[0]==="Người lập báo cáo";
+      if(sign){ flush(); o.push(P("",{af:240})); }
+      var w=it.w.slice(); while(w.length<it.head.length) w.push(1200); w=w.slice(0,it.head.length);
+      var tot=w.reduce(function(a,b){ return a+b; },0), k=9026/tot; w=w.map(function(v){ return Math.round(v*k); });
+      o.push(TBL(it.head,it.rows.map(function(r){ var x=r.slice(0,it.head.length); while(x.length<it.head.length) x.push(""); return x; }),w,{num:it.num,total:it.total})); pend=false; }
+  });
+  flush();
+  return o.join("");
+}
+function buildModel(R,M,who,by){
   var o=[], mL=lbM(R.mon), nL=lbM(R.nmon), dental=R.team==="dental";
   var teamLb={dental:"Dental",surgical:"Surgical"}[R.team]||R.team;
-  o.push(P(run("BÁO CÁO HOẠT ĐỘNG SALE MMH",{b:1,sz:32,c:NAVY}),{al:"center",af:40}));
-  o.push(P(run("THỰC HIỆN THÁNG "+mL+" & KẾ HOẠCH THÁNG "+nL,{b:1,sz:24,c:BLUE}),{al:"center",af:200}));
-  o.push(TBL(["Mục","Nội dung"],[["Nhóm","MMH "+teamLb+" Sales Team"],["PIC",who],["Người lập",by],["Kỳ báo cáo","Tháng "+mL+" ("+R.fy+") · kế hoạch tháng "+nL],["Ngày lập",fmtVN(todayISO())],
+  o.push(mP(mrun("BÁO CÁO HOẠT ĐỘNG SALE MMH",{b:1,sz:32,c:NAVY}),{al:"center",af:40}));
+  o.push(mP(mrun("THỰC HIỆN THÁNG "+mL+" & KẾ HOẠCH THÁNG "+nL,{b:1,sz:24,c:BLUE}),{al:"center",af:200}));
+  o.push(mTBL(["Mục","Nội dung"],[["Nhóm","MMH "+teamLb+" Sales Team"],["PIC",who],["Người lập",by],["Kỳ báo cáo","Tháng "+mL+" ("+R.fy+") · kế hoạch tháng "+nL],["Ngày lập",fmtVN(todayISO())],
     ["Nguồn số liệu","MMH CRM (đơn hàng, đi địa bàn, mở mới, thuyết trình, kế hoạch tháng, thầu) · File MMH Turnover (doanh số NPP)"]],[2600,6426]));
 
   /* ═════ PHẦN 1 ═════ */
-  o.push(H1("PHẦN 1: KẾT QUẢ THỰC HIỆN THÁNG "+mL));
-  o.push(H2("1.1. Kết quả tổng quan"));
-  o.push(H3("a) Doanh số bán hàng"));
+  o.push(mH1("PHẦN 1: KẾT QUẢ THỰC HIỆN THÁNG "+mL));
+  o.push(mH2("1.1. Kết quả tổng quan"));
+  o.push(mH3("a) Doanh số bán hàng"));
   if(R.to && R.to.m.list.length){
     var tm=R.to.m, tc=R.to.c;
-    o.push(B([run("Doanh số NPP tháng "+mL+" ("+(R.to.closed?"Actual":"Forecast — tháng chưa chốt")+"): ",{b:1}),run(usd(tm.actual)+" USD · đạt "+pct(tm.actual,tm.budget)+" Budget Mani ("+usd(tm.budget)+" USD)")]));
-    o.push(B([run("Lũy kế "+R.fy+" đến tháng "+mL+": ",{b:1}),run(usd(tc.actual)+" USD · đạt "+pct(tc.actual,tc.budget)+" Budget Mani ("+usd(tc.budget)+" USD)")]));
+    o.push(mB([mrun("Doanh số NPP tháng "+mL+" ("+(R.to.closed?"Actual":"Forecast — tháng chưa chốt")+"): ",{b:1}),mrun(usd(tm.actual)+" USD · đạt "+pct(tm.actual,tm.budget)+" Budget Mani ("+usd(tm.budget)+" USD)")]));
+    o.push(mB([mrun("Lũy kế "+R.fy+" đến tháng "+mL+": ",{b:1}),mrun(usd(tc.actual)+" USD · đạt "+pct(tc.actual,tc.budget)+" Budget Mani ("+usd(tc.budget)+" USD)")]));
     var cm={}; tc.list.forEach(function(d){ cm[d.name]=d; });
-    o.push(TBL(["Nhà phân phối","PIC","Tháng (USD)","Budget tháng","% tháng","Lũy kế FY (USD)","% lũy kế"],
+    o.push(mTBL(["Nhà phân phối","PIC","Tháng (USD)","Budget tháng","% tháng","Lũy kế FY (USD)","% lũy kế"],
       tm.list.map(function(d){ var c=cm[d.name]||{actual:0,budget:0}; return [d.name,d.pic||"—",usd(d.actual),usd(d.budget),pct(d.actual,d.budget),usd(c.actual),pct(c.actual,c.budget)]; })
         .concat([["Tổng","",usd(tm.actual),usd(tm.budget),pct(tm.actual,tm.budget),usd(tc.actual),pct(tc.actual,tc.budget)]]),
       [2000,1000,1200,1200,900,1600,1126],{num:[2,3,4,5,6],total:1}));
-  } else o.push(B([run("Doanh số NPP: ",{b:1}),run(R.toErr?"chưa đọc được file Turnover ("+short(R.toErr,120)+")":"file Turnover chưa có số tháng này",{i:1,c:MUTE})]));
-  o.push(B([run("Đơn hàng sales ghi nhận trên CRM: ",{b:1}),run(vnd(R.ordM)+" VND · "+R.cntM.o+" đơn · "+R.cntM.c+" khách hàng (lũy kế "+R.fy+": "+vnd(R.ordC)+" VND, không tính đơn bị từ chối)")]));
-  if(R.pg.length) o.push(TBL(["Nhóm sản phẩm","Số lượng tháng","Doanh số tháng (VND)","Lũy kế FY (VND)"],
+  } else o.push(mB([mrun("Doanh số NPP: ",{b:1}),mrun(R.toErr?"chưa đọc được file Turnover ("+short(R.toErr,120)+")":"file Turnover chưa có số tháng này",{i:1,c:MUTE})]));
+  o.push(mB([mrun("Đơn hàng sales ghi nhận trên CRM: ",{b:1}),mrun(vnd(R.ordM)+" VND · "+R.cntM.o+" đơn · "+R.cntM.c+" khách hàng (lũy kế "+R.fy+": "+vnd(R.ordC)+" VND, không tính đơn bị từ chối)")]));
+  if(R.pg.length) o.push(mTBL(["Nhóm sản phẩm","Số lượng tháng","Doanh số tháng (VND)","Lũy kế FY (VND)"],
       R.pg.slice(0,12).map(function(p){ return [p[0],p[1].q?vnd(p[1].q):"—",vnd(p[1].a),vnd(p[1].c)]; }),[3400,1700,2000,1926],{num:[1,2,3]}));
   var hasCards=R.to && R.to.prod.some(function(p){ return (p.m&&(p.m.actual||p.m.budget))||(p.cu&&(p.cu.actual||p.cu.budget)); });
-  o.push(H3(dental?"b) Số lượng và doanh số Jizai / Composite":"b) Sản phẩm trọng tâm"));
-  if(hasCards) o.push(TBL(["Sản phẩm","Đơn vị","Tháng "+mL,"Budget tháng","% tháng","Lũy kế FY","% lũy kế"],
+  o.push(mH3(dental?"b) Số lượng và doanh số Jizai / Composite":"b) Sản phẩm trọng tâm"));
+  if(hasCards) o.push(mTBL(["Sản phẩm","Đơn vị","Tháng "+mL,"Budget tháng","% tháng","Lũy kế FY","% lũy kế"],
       R.to.prod.filter(function(p){ return (p.m&&(p.m.actual||p.m.budget))||(p.cu&&(p.cu.actual||p.cu.budget)); }).map(function(p){ var q=p.c.unit==="qty", f=q?vnd:usd, m=p.m||{actual:0,budget:0}, c=p.cu||{actual:0,budget:0};
         return [p.c.label.replace(/^Doanh số (hàng )?/,""),q?"Số lượng":"USD",f(m.actual),f(m.budget),pct(m.actual,m.budget),f(c.actual),pct(c.actual,c.budget)]; }),
       [2000,1000,1300,1300,900,1500,1026],{num:[2,3,4,5,6]}));
   if(dental){
-    o.push(KV("Đơn hàng CRM có Jizai",R.jz.n?(vnd(R.jz.q)+" sản phẩm · "+vnd(R.jz.a)+" VND ("+R.jz.n+" đơn)"):"không có đơn trong tháng"));
-    o.push(KV("Đơn hàng CRM có Composite",R.cp.n?(vnd(R.cp.q)+" sản phẩm · "+vnd(R.cp.a)+" VND ("+R.cp.n+" đơn)"):"không có đơn trong tháng"));
+    o.push(mKV("Đơn hàng CRM có Jizai",R.jz.n?(vnd(R.jz.q)+" sản phẩm · "+vnd(R.jz.a)+" VND ("+R.jz.n+" đơn)"):"không có đơn trong tháng"));
+    o.push(mKV("Đơn hàng CRM có Composite",R.cp.n?(vnd(R.cp.q)+" sản phẩm · "+vnd(R.cp.a)+" VND ("+R.cp.n+" đơn)"):"không có đơn trong tháng"));
   }
-  o.push.apply(o,txtBlock(R.mnTxt(R.mon,["turnover"],"result"),"Sales ghi trong Kế hoạch tháng (Management-Turnover):"));
+  o.push.apply(o,mtxt(R.mnTxt(R.mon,["turnover"],"result"),"Sales ghi trong Kế hoạch tháng (Management-Turnover):"));
 
-  o.push(H2("1.2. Chi tiết theo kênh / khu vực"));
-  o.push(H3("a) Doanh số từ đại lý mới"));
+  o.push(mH2("1.2. Chi tiết theo kênh / khu vực"));
+  o.push(mH3("a) Doanh số từ đại lý mới"));
   var t2=R.byT["2"]||[];
-  o.push(KV("Account mở mới được xác nhận trong tháng",R.naOk.length+" case"));
-  if(R.naOk.length) o.push(TBL(["Account","Loại","Tỉnh","NPP","Sản phẩm","PIC"],R.naOk.map(function(r){ return [r.account||"—",r.accType||"",r.province||"",r.npp||"",short(r.sku||r.ptype,60),r.pic||""]; }),[2300,1100,1100,1400,2000,1126]));
-  o.push(KV("Đơn từ account mở mới (loại 2)",t2.length?(vnd(R.sum(t2))+" VND · "+R.cnt(t2).o+" đơn · "+R.cnt(t2).c+" khách hàng"):"không có"));
-  o.push.apply(o,txtBlock(R.mnTxt(R.mon,["distributor","dealer"],"result"),"Sales ghi trong Kế hoạch tháng (kênh NPP / đại lý):"));
-  o.push(H3("b) Doanh số đến từ thầu"));
+  o.push(mKV("Account mở mới được xác nhận trong tháng",R.naOk.length+" case"));
+  if(R.naOk.length) o.push(mTBL(["Account","Loại","Tỉnh","NPP","Sản phẩm","PIC"],R.naOk.map(function(r){ return [r.account||"—",r.accType||"",r.province||"",r.npp||"",short(r.sku||r.ptype,60),r.pic||""]; }),[2300,1100,1100,1400,2000,1126]));
+  o.push(mKV("Đơn từ account mở mới (loại 2)",t2.length?(vnd(R.sum(t2))+" VND · "+R.cnt(t2).o+" đơn · "+R.cnt(t2).c+" khách hàng"):"không có"));
+  o.push.apply(o,mtxt(R.mnTxt(R.mon,["distributor","dealer"],"result"),"Sales ghi trong Kế hoạch tháng (kênh NPP / đại lý):"));
+  o.push(mH3("b) Doanh số đến từ thầu"));
   var t1=R.byT["1"]||[];
   var tdv={}; t1.forEach(function(o2){ tdv[R.key(o2)]=Math.max(tdv[R.key(o2)]||0,n(o2.tender)); });
-  o.push(KV("Đơn từ trúng thầu (loại 1) trong tháng",t1.length?(R.cnt(t1).o+" đơn · trị giá trúng thầu "+vnd(Object.keys(tdv).reduce(function(s2,k){ return s2+tdv[k]; },0))+" VND · đơn hàng "+vnd(R.sum(t1))+" VND"):"không có"));
-  if(R.tdRes.length) o.push(TBL(["Gói thầu / Bệnh viện","Sản phẩm","Giá trị (VND)","Trạng thái","Kết quả"],R.tdRes.map(function(t){ return [t.hosp||t.account||t.id,short(t.prod||t.detail,50),vnd(t.value),t.status||"",t.won||""]; }),[2600,2000,1500,1500,1426],{num:[2]}));
-  else o.push(KV("Kết quả thầu trong tháng (bảng thầu CRM)","chưa có gói nào có kết quả tháng này"));
-  o.push(H3("c) Doanh số bán trực tiếp bệnh viện / trường học / phòng khám"));
+  o.push(mKV("Đơn từ trúng thầu (loại 1) trong tháng",t1.length?(R.cnt(t1).o+" đơn · trị giá trúng thầu "+vnd(Object.keys(tdv).reduce(function(s2,k){ return s2+tdv[k]; },0))+" VND · đơn hàng "+vnd(R.sum(t1))+" VND"):"không có"));
+  if(R.tdRes.length) o.push(mTBL(["Gói thầu / Bệnh viện","Sản phẩm","Giá trị (VND)","Trạng thái","Kết quả"],R.tdRes.map(function(t){ return [t.hosp||t.account||t.id,short(t.prod||t.detail,50),vnd(t.value),t.status||"",t.won||""]; }),[2600,2000,1500,1500,1426],{num:[2]}));
+  else o.push(mKV("Kết quả thầu trong tháng (bảng thầu CRM)","chưa có gói nào có kết quả tháng này"));
+  o.push(mH3("c) Doanh số bán trực tiếp bệnh viện / trường học / phòng khám"));
   var dir=["hosp","uni","clinic"].map(function(k){ var L=R.byA[k]||[]; return [ACC_LB[k],String(R.cnt(L).o),String(R.cnt(L).c),vnd(R.sum(L))]; });
-  o.push(TBL(["Nhóm khách hàng","Số đơn","Số khách","Doanh số (VND)"],dir,[3400,1600,1600,2426],{num:[1,2,3]}));
+  o.push(mTBL(["Nhóm khách hàng","Số đơn","Số khách","Doanh số (VND)"],dir,[3400,1600,1600,2426],{num:[1,2,3]}));
   var top=[].concat(R.byA.hosp||[],R.byA.uni||[],R.byA.clinic||[]), tg={};
   top.forEach(function(o2){ var k=o2.name||"—"; tg[k]=(tg[k]||0)+n(o2.amount); });
   var tk=Object.keys(tg).sort(function(a,b){ return tg[b]-tg[a]; }).slice(0,5);
-  if(tk.length) o.push(NOTE("Khách hàng doanh số cao nhất: "+tk.map(function(k){ return k+" ("+vnd(tg[k])+")"; }).join(" · ")));
-  o.push.apply(o,txtBlock(R.mnTxt(R.mon,["hospital","university","clinic"],"result"),"Sales ghi trong Kế hoạch tháng (bệnh viện / trường / phòng khám):"));
+  if(tk.length) o.push(mNOTE("Khách hàng doanh số cao nhất: "+tk.map(function(k){ return k+" ("+vnd(tg[k])+")"; }).join(" · ")));
+  o.push.apply(o,mtxt(R.mnTxt(R.mon,["hospital","university","clinic"],"result"),"Sales ghi trong Kế hoạch tháng (bệnh viện / trường / phòng khám):"));
 
-  o.push(H2("1.3. Phản hồi thị trường"));
-  o.push(H3("a) Yếu tố thị trường"));
-  o.push.apply(o,manual(M,"market"));
-  if(R.stop.length){ o.push(NOTE("Account dừng theo đuổi trong tháng:")); R.stop.slice(0,8).forEach(function(w){ o.push(B([run((w.account||"—")+": ",{b:1}),run(short(w.stopReason,220))],1)); }); }
-  o.push(H3("b) Yếu tố sản phẩm — phản hồi khách hàng"));
-  o.push(KV("Lượt viếng thăm hoàn thành",R.visM.length+" lượt"+(R.prov(R.visM).length?" · "+R.prov(R.visM).slice(0,6).join(", "):"")));
-  if(R.fb.length) o.push(TBL(["Phản hồi khách hàng (CRM)","Số lượt"],R.fb.slice(0,10).map(function(f){ return [f[0],String(f[1])]; }),[7000,2026],{num:[1]}));
-  if(R.prFb.length){ o.push(NOTE("Từ báo cáo buổi giới thiệu sản phẩm:")); R.prFb.slice(0,6).forEach(function(f){ o.push(B([run((f.p.account||"—")+": ",{b:1}),run(short(f.t,260))],1)); }); }
-  if(R.fbNote.length){ o.push(NOTE("Ghi nhận nổi bật khi đi địa bàn:")); R.fbNote.slice(0,6).forEach(function(w){ o.push(B([run((w.account||"—")+(w.feedback?" ("+w.feedback+")":"")+": ",{b:1}),run(short(w.result,240))],1)); }); }
-  if(String(M.prodfb||"").trim()) o.push.apply(o,manual(M,"prodfb"));
-  o.push(H3("c) Tình trạng sản phẩm lỗi / hỏng"));
-  o.push.apply(o,String(M.defect||"").trim()?manual(M,"defect"):[B("Không ghi nhận sản phẩm lỗi / hỏng trong tháng.")]);
+  o.push(mH2("1.3. Phản hồi thị trường"));
+  o.push(mH3("a) Yếu tố thị trường"));
+  o.push.apply(o,mman(M,"market"));
+  if(R.stop.length){ o.push(mNOTE("Account dừng theo đuổi trong tháng:")); R.stop.slice(0,8).forEach(function(w){ o.push(mB([mrun((w.account||"—")+": ",{b:1}),mrun(short(w.stopReason,220))],1)); }); }
+  o.push(mH3("b) Yếu tố sản phẩm — phản hồi khách hàng"));
+  o.push(mKV("Lượt viếng thăm hoàn thành",R.visM.length+" lượt"+(R.prov(R.visM).length?" · "+R.prov(R.visM).slice(0,6).join(", "):"")));
+  if(R.fb.length) o.push(mTBL(["Phản hồi khách hàng (CRM)","Số lượt"],R.fb.slice(0,10).map(function(f){ return [f[0],String(f[1])]; }),[7000,2026],{num:[1]}));
+  if(R.prFb.length){ o.push(mNOTE("Từ báo cáo buổi giới thiệu sản phẩm:")); R.prFb.slice(0,6).forEach(function(f){ o.push(mB([mrun((f.p.account||"—")+": ",{b:1}),mrun(short(f.t,260))],1)); }); }
+  if(R.fbNote.length){ o.push(mNOTE("Ghi nhận nổi bật khi đi địa bàn:")); R.fbNote.slice(0,6).forEach(function(w){ o.push(mB([mrun((w.account||"—")+(w.feedback?" ("+w.feedback+")":"")+": ",{b:1}),mrun(short(w.result,240))],1)); }); }
+  if(String(M.prodfb||"").trim()) o.push.apply(o,mman(M,"prodfb"));
+  o.push(mH3("c) Tình trạng sản phẩm lỗi / hỏng"));
+  o.push.apply(o,String(M.defect||"").trim()?mman(M,"defect"):[mB("Không ghi nhận sản phẩm lỗi / hỏng trong tháng.")]);
 
   /* ═════ PHẦN 2 ═════ */
-  o.push(H1("PHẦN 2: KẾ HOẠCH HOẠT ĐỘNG SALE THÁNG "+nL));
+  o.push(mH1("PHẦN 2: KẾ HOẠCH HOẠT ĐỘNG SALE THÁNG "+nL));
   var dW=R.chanW(R.wN,"dealer"), pW=R.chanW(R.wN,"priv"), dWm=R.chanW(R.wM,"dealer"), pWm=R.chanW(R.wM,"priv");
-  o.push(H2("2.1. Kênh đại lý"));
-  o.push(H3("Đào tạo / giới thiệu sản phẩm"));
-  if(R.prN.length) R.prN.forEach(function(p){ o.push(B([run((p.account||"—")+": ",{b:1}),run([p.day?fmtVN(String(p.day).slice(0,10)):"",p.province||"",p.target?"dự kiến "+p.target+" người":""].filter(String).join(" · "))])); });
-  if(R.trainN.length) R.trainN.slice(0,8).forEach(function(w){ o.push(B([run((w.account||"—")+": ",{b:1}),run([w.start?fmtVN(String(w.start).slice(0,10)):"",w.typeAction||"",short(w.plan,140)].filter(String).join(" · "))])); });
-  if(!R.prN.length && !R.trainN.length) o.push(B([run("Chưa có buổi thuyết trình / đào tạo nào được lên lịch tháng "+nL+" trên CRM.",{i:1,c:MUTE})]));
-  o.push(H3("Mở mới đại lý"));
-  o.push.apply(o,manual(M,"nNew"));
-  if(R.naOpen.length) R.naOpen.slice(0,8).forEach(function(r){ o.push(B([run((r.account||"—")+": ",{b:1}),run([r.accType,r.province,r.npp,"đang làm hồ sơ ("+r.status+")"].filter(String).join(" · "))],1)); });
-  o.push(H3("Doanh số dự kiến từ việc hỗ trợ đại lý bán hàng"));
+  o.push(mH2("2.1. Kênh đại lý"));
+  o.push(mH3("Đào tạo / giới thiệu sản phẩm"));
+  if(R.prN.length) R.prN.forEach(function(p){ o.push(mB([mrun((p.account||"—")+": ",{b:1}),mrun([p.day?fmtVN(String(p.day).slice(0,10)):"",p.province||"",p.target?"dự kiến "+p.target+" người":""].filter(String).join(" · "))])); });
+  if(R.trainN.length) R.trainN.slice(0,8).forEach(function(w){ o.push(mB([mrun((w.account||"—")+": ",{b:1}),mrun([w.start?fmtVN(String(w.start).slice(0,10)):"",w.typeAction||"",short(w.plan,140)].filter(String).join(" · "))])); });
+  if(!R.prN.length && !R.trainN.length) o.push(mB([mrun("Chưa có buổi thuyết trình / đào tạo nào được lên lịch tháng "+nL+" trên CRM.",{i:1,c:MUTE})]));
+  o.push(mH3("Mở mới đại lý"));
+  o.push.apply(o,mman(M,"nNew"));
+  if(R.naOpen.length) R.naOpen.slice(0,8).forEach(function(r){ o.push(mB([mrun((r.account||"—")+": ",{b:1}),mrun([r.accType,r.province,r.npp,"đang làm hồ sơ ("+r.status+")"].filter(String).join(" · "))],1)); });
+  o.push(mH3("Doanh số dự kiến từ việc hỗ trợ đại lý bán hàng"));
   if(R.to && R.to.n.list.length){ var tn=R.to.n;
-    o.push(B([run("Forecast NPP tháng "+nL+" (file Turnover): ",{b:1}),run(usd(tn.actual)+" USD · "+pct(tn.actual,tn.budget)+" Budget Mani ("+usd(tn.budget)+" USD)")]));
-    tn.list.forEach(function(d){ o.push(B(d.name+": "+usd(d.actual)+" USD ("+pct(d.actual,d.budget)+" budget)",1)); });
-    (R.to.prod||[]).forEach(function(p){ if(p.nx && (p.nx.actual||p.nx.budget)) o.push(B(p.c.label.replace(/^Doanh số (hàng )?/,"")+": "+(p.c.unit==="qty"?vnd(p.nx.actual)+" sản phẩm":usd(p.nx.actual)+" USD")+" ("+pct(p.nx.actual,p.nx.budget)+" budget)",1)); });
+    o.push(mB([mrun("Forecast NPP tháng "+nL+" (file Turnover): ",{b:1}),mrun(usd(tn.actual)+" USD · "+pct(tn.actual,tn.budget)+" Budget Mani ("+usd(tn.budget)+" USD)")]));
+    tn.list.forEach(function(d){ o.push(mB(d.name+": "+usd(d.actual)+" USD ("+pct(d.actual,d.budget)+" budget)",1)); });
+    (R.to.prod||[]).forEach(function(p){ if(p.nx && (p.nx.actual||p.nx.budget)) o.push(mB(p.c.label.replace(/^Doanh số (hàng )?/,"")+": "+(p.c.unit==="qty"?vnd(p.nx.actual)+" sản phẩm":usd(p.nx.actual)+" USD")+" ("+pct(p.nx.actual,p.nx.budget)+" budget)",1)); });
   }
-  if(String(M.dealerRev||"").trim()||!(R.to && R.to.n.list.length)) o.push.apply(o,manual(M,"dealerRev"));
-  o.push(H3("Hoạt động đi thị trường của sale"));
-  o.push(KV("Lượt làm việc với NPP / đại lý đã lên lịch",dW.length+" lượt"+(R.prov(dW).length?" · tỉnh tập trung: "+R.prov(dW).slice(0,6).join(", "):"")+" (tháng "+mL+": "+dWm.length+" lượt)"));
-  o.push.apply(o,txtBlock(R.mnTxt(R.nmon,["distributor","dealer"],"plan"),"Kế hoạch sales ghi trong Kế hoạch tháng "+nL+":"));
+  if(String(M.dealerRev||"").trim()||!(R.to && R.to.n.list.length)) o.push.apply(o,mman(M,"dealerRev"));
+  o.push(mH3("Hoạt động đi thị trường của sale"));
+  o.push(mKV("Lượt làm việc với NPP / đại lý đã lên lịch",dW.length+" lượt"+(R.prov(dW).length?" · tỉnh tập trung: "+R.prov(dW).slice(0,6).join(", "):"")+" (tháng "+mL+": "+dWm.length+" lượt)"));
+  o.push.apply(o,mtxt(R.mnTxt(R.nmon,["distributor","dealer"],"plan"),"Kế hoạch sales ghi trong Kế hoạch tháng "+nL+":"));
 
-  o.push(H2("2.2. Kênh tư nhân (bệnh viện / trường đại học / phòng khám)"));
-  o.push(H3("Doanh số dự kiến từ việc tiếp cận khách hàng online và offline"));
-  o.push.apply(o,manual(M,"privRev"));
-  o.push(H3("Hoạt động đi thị trường của sale"));
-  o.push(KV("Lượt viếng thăm bệnh viện / trường / phòng khám đã lên lịch",pW.length+" lượt"+(R.prov(pW).length?" · tỉnh tập trung: "+R.prov(pW).slice(0,6).join(", "):"")+" (tháng "+mL+": "+pWm.length+" lượt)"));
+  o.push(mH2("2.2. Kênh tư nhân (bệnh viện / trường đại học / phòng khám)"));
+  o.push(mH3("Doanh số dự kiến từ việc tiếp cận khách hàng online và offline"));
+  o.push.apply(o,mman(M,"privRev"));
+  o.push(mH3("Hoạt động đi thị trường của sale"));
+  o.push(mKV("Lượt viếng thăm bệnh viện / trường / phòng khám đã lên lịch",pW.length+" lượt"+(R.prov(pW).length?" · tỉnh tập trung: "+R.prov(pW).slice(0,6).join(", "):"")+" (tháng "+mL+": "+pWm.length+" lượt)"));
   var pk={}; pW.forEach(function(w){ if(w.account) pk[w.account]=1; });
-  if(Object.keys(pk).length) o.push(NOTE("Khách hàng sẽ làm việc: "+Object.keys(pk).slice(0,15).join(" · ")));
-  o.push.apply(o,txtBlock(R.mnTxt(R.nmon,["hospital","university","clinic"],"plan"),"Kế hoạch sales ghi trong Kế hoạch tháng "+nL+":"));
+  if(Object.keys(pk).length) o.push(mNOTE("Khách hàng sẽ làm việc: "+Object.keys(pk).slice(0,15).join(" · ")));
+  o.push.apply(o,mtxt(R.mnTxt(R.nmon,["hospital","university","clinic"],"plan"),"Kế hoạch sales ghi trong Kế hoạch tháng "+nL+":"));
 
-  o.push(H2("2.3. Kênh thầu"));
-  o.push(H3("Kế hoạch thầu dự kiến: nộp mới, ủy quyền, trúng / thua"));
-  if(R.tdOpen.length) o.push(TBL(["Gói thầu / Bệnh viện","Sản phẩm","Giá trị (VND)","Trạng thái","Tháng KQTT"],R.tdOpen.slice(0,15).map(function(t){ return [t.hosp||t.account||t.id,short(t.prod||t.detail,50),vnd(t.value),t.status||"",t.kqtt||""]; }),[2600,2000,1500,1500,1426],{num:[2]}));
-  o.push.apply(o,manual(M,"tender"));
+  o.push(mH2("2.3. Kênh thầu"));
+  o.push(mH3("Kế hoạch thầu dự kiến: nộp mới, ủy quyền, trúng / thua"));
+  if(R.tdOpen.length) o.push(mTBL(["Gói thầu / Bệnh viện","Sản phẩm","Giá trị (VND)","Trạng thái","Tháng KQTT"],R.tdOpen.slice(0,15).map(function(t){ return [t.hosp||t.account||t.id,short(t.prod||t.detail,50),vnd(t.value),t.status||"",t.kqtt||""]; }),[2600,2000,1500,1500,1426],{num:[2]}));
+  o.push.apply(o,mman(M,"tender"));
 
-  o.push(H2("2.4. Hoạt động MKT"));
-  o.push(H3("Tham gia tuyển sinh cho các sự kiện: workshop / seminar"));
+  o.push(mH2("2.4. Hoạt động MKT"));
+  o.push(mH3("Tham gia tuyển sinh cho các sự kiện: workshop / seminar"));
   var evN=R.ev(R.nmon), evM=R.ev(R.mon);
-  if(evM.length){ o.push(NOTE("Đã làm tháng "+mL+":")); evM.slice(0,8).forEach(function(e){ o.push(B([run(short(e.t,120),{b:1}),run(e.r?" — "+short(e.r,180):"")],1)); }); }
-  if(evN.length){ o.push(NOTE("Kế hoạch tháng "+nL+":")); evN.slice(0,8).forEach(function(e){ o.push(B([run(short(e.t,120),{b:1}),run(e.d?" · "+fmtVN(String(e.d).slice(0,10)):"")],1)); }); }
-  o.push.apply(o,txtBlock(R.mnTxt(R.nmon,["event"],"plan"),"Kế hoạch sales ghi trong Kế hoạch tháng "+nL+" (Marketing-Event):"));
-  if(String(M.mkt||"").trim()||(!evN.length && !evM.length)) o.push.apply(o,manual(M,"mkt"));
+  if(evM.length){ o.push(mNOTE("Đã làm tháng "+mL+":")); evM.slice(0,8).forEach(function(e){ o.push(mB([mrun(short(e.t,120),{b:1}),mrun(e.r?" — "+short(e.r,180):"")],1)); }); }
+  if(evN.length){ o.push(mNOTE("Kế hoạch tháng "+nL+":")); evN.slice(0,8).forEach(function(e){ o.push(mB([mrun(short(e.t,120),{b:1}),mrun(e.d?" · "+fmtVN(String(e.d).slice(0,10)):"")],1)); }); }
+  o.push.apply(o,mtxt(R.mnTxt(R.nmon,["event"],"plan"),"Kế hoạch sales ghi trong Kế hoạch tháng "+nL+" (Marketing-Event):"));
+  if(String(M.mkt||"").trim()||(!evN.length && !evM.length)) o.push.apply(o,mman(M,"mkt"));
 
-  o.push(P("",{af:240}));
-  o.push(TBL(["Người lập báo cáo","Xác nhận của quản lý"],[["\n\n\n"+by,"\n\n\n"]],[4513,4513]));
-  return o.join("");
+  o.push(mP("",{af:240}));
+  o.push(mTBL(["Người lập báo cáo","Xác nhận của quản lý"],[["\n\n\n"+by,"\n\n\n"]],[4513,4513]));
+  return o.filter(Boolean);
 }
 
 function docx(body,title){
@@ -28127,30 +28198,78 @@ function loadZip(){
     s.onload=function(){ if(window.JSZip) res(window.JSZip); else rej(new Error("Không tải được thư viện tạo file Word — kiểm tra mạng rồi thử lại.")); }; s.onerror=function(){ rej(new Error("Không tải được thư viện tạo file Word — kiểm tra mạng rồi thử lại.")); }; document.head.appendChild(s); });
 }
 
-/* ───────── hộp tạo file ───────── */
-var ST={};
+/* ───────── hộp soạn báo cáo (v33.9: sửa / thêm / xoá mọi mục trước khi tạo file) ───────── */
+var ST={ items:null, undo:[] };
 function picsOk(){ try{ return isMgrView(); }catch(_){ return false; } }
 function curDraft(){ return draftKey(curTeamKey(),ST.pic,ST.mon); }
-function readForm(){ var d={}; MAN.forEach(function(m){ var e=$("mrw-"+m[0]); if(e) d[m[0]]=e.value; }); return d; }
-function saveForm(){ if(ST.mon) dSet(curDraft(),readForm()); }
-function paint(){
-  var box=$("mrw"); if(!box) return;
-  var D=dGet(curDraft()), mL=lbM(ST.mon), nL=lbM(nextMonthStr(ST.mon));
-  var sec=function(id,t,st,auto){ return '<div class="mrw-sec"><h4>'+esc(id+" · "+t)+'<span class="mrw-st '+st+'">'+({ok:"Tự động",part:"Tự động + bổ sung",no:"Sales nhập"})[st]+'</span></h4><div class="mrw-auto">'+auto+'</div>'+
-    MAN.filter(function(m){ return m[1]===id; }).map(function(m){ return '<label class="mrw-lb" for="mrw-'+m[0]+'">'+esc(m[2])+'</label><textarea class="inp" id="mrw-'+m[0]+'" placeholder="'+esc(m[3])+'" oninput="MRW.save()">'+esc(D[m[0]]||"")+'</textarea>'; }).join("")+'</div>'; };
-  box.innerHTML=
-    '<div class="mrw-grid" style="margin-bottom:10px">'+
-      '<div><span class="te-lb">Tháng báo cáo</span><select class="inp" id="mrw-mon" onchange="MRW.set(\'mon\',this.value)">'+fyMonths(S.fy).map(function(m){ return '<option value="'+m+'"'+(m===ST.mon?" selected":"")+'>Tháng '+lbM(m)+'</option>'; }).join("")+'</select></div>'+
-      '<div><span class="te-lb">PIC</span>'+(picsOk()?'<select class="inp" id="mrw-pic" onchange="MRW.set(\'pic\',this.value)"><option value="">Toàn nhóm '+esc(curTeam().label)+'</option>'+(S.master.pic||[]).map(function(p){ return '<option'+(p===ST.pic?" selected":"")+'>'+esc(p)+'</option>'; }).join("")+'</select>'
-        :'<input class="inp piclock" value="'+esc(ST.pic)+'" readonly>')+'</div></div>'+
-    '<div class="hint" style="margin-bottom:10px">Báo cáo theo mẫu <b>Báo cáo hoạt động Sale MMH</b>: thực hiện tháng '+esc(mL)+' & kế hoạch tháng '+esc(nL)+'. Số liệu lấy thẳng từ CRM và file Turnover; chỉ cần ghi thêm các ô bên dưới (lưu nháp trên máy này).</div>'+
-    sec("1.1","Kết quả tổng quan","ok","Doanh số NPP (Turnover) tháng + lũy kế · đơn hàng CRM theo nhóm sản phẩm · "+(curTeamKey()==="dental"?"<b>Jizai</b> (số lượng) / <b>Composite</b>":"sản phẩm trọng tâm")+".")+
-    sec("1.2","Chi tiết theo kênh","ok","Case Mở mới đã xác nhận + đơn loại 2 · đơn trúng thầu (loại 1) + bảng thầu · đơn của bệnh viện / trường / phòng khám.")+
-    sec("1.3","Phản hồi thị trường","part","Tự lấy: cột <b>Customer feedback</b> + kết quả đi địa bàn, lý do dừng, mục <b>Phản hồi khách hàng</b> của buổi thuyết trình.")+
-    sec("2.1","Kênh đại lý","part","Tự lấy: buổi thuyết trình / đào tạo đã lên lịch tháng "+esc(nL)+", case Mở mới đang làm, <b>Forecast</b> NPP tháng sau, lượt đi NPP / đại lý đã lên lịch, PLAN trong Kế hoạch tháng.")+
-    sec("2.2","Kênh tư nhân","part","Tự lấy: lượt đi bệnh viện / trường / phòng khám đã lên lịch (tỉnh tập trung), PLAN trong Kế hoạch tháng.")+
-    sec("2.3","Kênh thầu","part","Tự lấy: gói thầu đang theo (bảng thầu CRM).")+
-    sec("2.4","Hoạt động MKT","part","Tự lấy: đầu việc trong Key task <b>Tuyển sinh sự kiện</b> (Công việc khác) + PLAN Marketing-Event.");
+function docKey(){ return "mmh_mrw_doc_"+curTeamKey()+"_"+(ST.pic||"ALL").replace(/\s+/g,"")+"_"+ST.mon; }
+var _sv;
+function saveDoc(){ clearTimeout(_sv); _sv=setTimeout(function(){ if(ST.items){ ST.at=Date.now(); dSet(docKey(),{ items:ST.items, at:ST.at, auto:ST.auto||0 }); stamp(); } },400); }
+function stamp(){ var e=$("mrw-stamp"); if(!e) return; e.textContent=ST.items?("Bản nháp lưu trên máy này lúc "+new Date(ST.at||Date.now()).toLocaleTimeString("vi-VN",{hour:"2-digit",minute:"2-digit"})+(ST.auto?" · số liệu lấy lúc "+new Date(ST.auto).toLocaleString("vi-VN",{hour:"2-digit",minute:"2-digit",day:"2-digit",month:"2-digit"}):"")):""; }
+function snap(){ ST._typing=0; ST.undo.push(JSON.stringify(ST.items)); if(ST.undo.length>40) ST.undo.shift(); }
+function who(){ return ST.pic||("Toàn nhóm"+((S.master.pic||[]).length?" ("+S.master.pic.join(", ")+")":"")); }
+function by(){ return (S.user&&S.user.pic)||who(); }
+function lvlOf(k){ return k==="h1"?1:k==="h2"?2:k==="h3"?3:9; }
+function ta(v,ph,on,cls){ var r=Math.max(1,String(v||"").split("\n").length); return '<textarea class="inp mrw-ta'+(cls?" "+cls:"")+'" rows="'+r+'" placeholder="'+esc(ph||"")+'" oninput="'+on+';MRW.grow(this)">'+esc(v||"")+'</textarea>'; }
+function itHtml(it,i){
+  var tools='<div class="mrw-tl"><button class="mrw-ib" title="Lên" onclick="MRW.mv('+i+',-1)">↑</button><button class="mrw-ib" title="Xuống" onclick="MRW.mv('+i+',1)">↓</button>'+
+    '<select class="mrw-add" title="Thêm bên dưới" onchange="MRW.add('+i+',this.value);this.value=\'\'"><option value="">+ Thêm</option><option value="b">Dòng</option><option value="p">Đoạn văn</option><option value="t">Bảng</option><option value="h3">Tiêu đề nhỏ</option><option value="h2">Mục mới</option></select>'+
+    '<button class="mrw-ib mrw-del" title="'+(/^h/.test(it.k)?"Xoá cả mục (tiêu đề và nội dung bên dưới)":"Xoá")+'" onclick="MRW.del('+i+')">×</button></div>';
+  var body;
+  if(it.k==="title"||it.k==="sub"||/^h[123]$/.test(it.k))
+    body='<input class="inp mrw-'+it.k+'" value="'+esc(it.t)+'" oninput="MRW.f('+i+',\'t\',this.value)">';
+  else if(it.k==="b")
+    body='<div class="mrw-row'+(it.lvl?" l1":"")+'"><span class="mrw-dot">'+(it.lvl?"–":"•")+'</span>'+
+      (it.lb?'<input class="inp mrw-lbi" style="flex-basis:'+Math.min(46,String(it.lb).length+3)+'ch" value="'+esc(it.lb)+'" oninput="MRW.f('+i+',\'lb\',this.value)">':"")+ta(it.t,it.ph||"Nội dung…","MRW.f("+i+",'t',this.value)")+'</div>';
+  else if(it.k==="n")
+    body=ta(it.t,"Ghi chú…","MRW.f("+i+",'t',this.value)","mrw-note");
+  else if(it.k==="p")
+    body='<input class="inp mrw-lbi" value="'+esc(it.lb||"")+'" placeholder="Tiêu đề đoạn (không bắt buộc)" oninput="MRW.f('+i+',\'lb\',this.value)">'+ta(it.t,"Nội dung…","MRW.f("+i+",'t',this.value)");
+  else if(it.k==="t")
+    body='<div class="mrw-tw"><table class="mrw-tb"><thead><tr>'+it.head.map(function(h,c){ return '<th contenteditable="true" oninput="MRW.c('+i+',-1,'+c+',this.innerText)">'+esc(h)+'</th>'; }).join("")+'<th class="mrw-x"></th></tr></thead><tbody>'+
+      it.rows.map(function(r,ri){ return '<tr>'+it.head.map(function(_,c){ return '<td contenteditable="true"'+(it.num.indexOf(c)>=0?' class="nm"':"")+' oninput="MRW.c('+i+','+ri+','+c+',this.innerText)">'+esc(r[c]==null?"":r[c]).replace(/\n/g,"<br>")+'</td>'; }).join("")+
+        '<td class="mrw-x"><button class="mrw-ib mrw-del" title="Xoá dòng" onclick="MRW.rdel('+i+','+ri+')">×</button></td></tr>'; }).join("")+'</tbody></table></div>'+
+      '<button class="btn xs" onclick="MRW.radd('+i+')">+ Thêm dòng</button>';
+  else body="";
+  return '<div class="mrw-it k-'+it.k+'">'+'<div class="mrw-bd">'+body+'</div>'+tools+'</div>';
+}
+function paintEd(){
+  var box=$("mrw-ed"); if(!box) return;
+  if(!ST.items){ box.innerHTML='<div class="mrw-wait"><div class="spin" style="margin:6px auto 10px"></div>Đang lấy số liệu từ CRM và file Turnover…</div>'; return; }
+  var y=box.parentNode?box.closest(".mbody,#mBody"):null, sc=y?y.scrollTop:0;
+  box.innerHTML=ST.items.map(itHtml).join("")+'<div class="mrw-end"><button class="btn sm" onclick="MRW.add('+(ST.items.length-1)+',\'h2\')">+ Thêm mục mới cuối báo cáo</button></div>';
+  if(y) y.scrollTop=sc;
+  var u=$("mrw-undo"); if(u) u.disabled=!ST.undo.length;
+  stamp();
+}
+function head(){
+  return '<div class="mrw-top">'+
+    '<div><span class="te-lb">Tháng báo cáo</span><select class="inp" onchange="MRW.set(\'mon\',this.value)">'+fyMonths(S.fy).map(function(m){ return '<option value="'+m+'"'+(m===ST.mon?" selected":"")+'>Tháng '+lbM(m)+'</option>'; }).join("")+'</select></div>'+
+    '<div><span class="te-lb">PIC</span>'+(picsOk()?'<select class="inp" onchange="MRW.set(\'pic\',this.value)"><option value="">Toàn nhóm '+esc(curTeam().label)+'</option>'+(S.master.pic||[]).map(function(p){ return '<option'+(p===ST.pic?" selected":"")+'>'+esc(p)+'</option>'; }).join("")+'</select>'
+      :'<input class="inp piclock" value="'+esc(ST.pic)+'" readonly>')+'</div>'+
+    '<div class="mrw-acts"><button class="btn sm" id="mrw-undo" onclick="MRW.undo()" disabled>Hoàn tác</button><button class="btn sm" onclick="MRW.refresh()">Lấy lại số liệu</button></div></div>'+
+    '<div class="hint mrw-hint">Số liệu tự lấy từ CRM và file Turnover. Sửa thẳng mọi chữ, ô bảng; <b>+ Thêm</b> để chèn dòng / đoạn / bảng / mục; <b>×</b> để xoá; ↑ ↓ để đổi thứ tự. <span id="mrw-stamp"></span></div>'+
+    '<div id="mrw-ed"></div>';
+}
+function build(force){
+  var k=docKey(), d=force?null:dGet(k);
+  if(d && d.items && d.items.length){ ST.items=d.items; ST.at=d.at; ST.auto=d.auto||0; paintEd(); return Promise.resolve(); }
+  ST.items=null; paintEd();
+  var team=curTeamKey(), pic=ST.pic, mon=ST.mon, key=k;
+  return loadAll().then(function(D){
+    if(docKey()!==key) return;
+    var R=calc(D,team,pic,mon);
+    MRW.last={ R:R, errs:D.errs };
+    ST.items=buildModel(R,dGet(draftKey(team,pic,mon)),who(),by()); ST.auto=Date.now(); ST.undo=ST.undo||[];
+    saveDoc(); paintEd();
+    if(D.errs.length) toast("Chưa đọc được: "+D.errs.join(" · ")+" — các mục đó cần ghi tay.","warn",8000);
+  }).catch(function(e){ var b=$("mrw-ed"); if(b) b.innerHTML='<div class="mrw-wait">'+esc(e.message)+' <button class="btn sm" onclick="MRW.refresh(1)">Thử lại</button></div>'; });
+}
+function blank(k){
+  if(k==="t") return { k:"t", head:["Cột 1","Cột 2","Cột 3"], rows:[["","",""]], w:[3000,3000,3026], num:[], total:false };
+  if(k==="p") return { k:"p", lb:"", t:"" };
+  if(k==="h2"||k==="h3") return { k:k, t:k==="h2"?"Mục mới":"Tiêu đề" };
+  return { k:"b", lvl:0, lb:"", t:"" };
 }
 window.MRW={
   on:on,
@@ -28159,28 +28278,41 @@ window.MRW={
     var ms=fyMonths(S.fy), now=ymOf(todayISO());
     ST.mon=mon||S.rpMonth||S.mnMonth||now; if(ms.indexOf(ST.mon)<0) ST.mon=ms.indexOf(now)>=0?now:ms[0];
     ST.pic=picsOk()?(S.rpPic||S.mnPic||""):(S.user&&S.user.pic||"");
-    openModal("Báo cáo tháng (Word)",'<div id="mrw"></div>','<button class="btn gho" onclick="MRW.save();closeModal()">Đóng</button><div style="flex:1"></div><button class="btn pri" id="mrw-go" onclick="MRW.make()">Tạo file Word</button>',true);
-    paint();
+    ST.undo=[];
+    openModal("Báo cáo tháng (Word)",'<div id="mrw">'+head()+'</div>','<button class="btn gho" onclick="closeModal()">Đóng</button><div style="flex:1"></div><button class="btn pri" id="mrw-go" onclick="MRW.make()">Tạo file Word</button>',true);
+    build(false);
   },
-  set:function(k,v){ saveForm(); ST[k]=v; paint(); },
-  save:function(){ saveForm(); },
+  set:function(k,v){ ST[k]=v; ST.undo=[]; var m=$("mrw"); if(m) m.innerHTML=head(); build(false); },
+  refresh:function(){ if(ST.items) snap(); build(true); },
+  grow:function(el){ el.style.height="auto"; el.style.height=(el.scrollHeight+2)+"px"; },
+  f:function(i,k,v){ var it=ST.items&&ST.items[i]; if(!it) return; if(!ST._typing||ST._ti!==i+k){ snap(); ST._typing=1; ST._ti=i+k; } clearTimeout(ST._tt); ST._tt=setTimeout(function(){ ST._typing=0; var u=$("mrw-undo"); if(u) u.disabled=!ST.undo.length; },1200); it[k]=v; saveDoc(); },
+  c:function(i,r,c,v){ var it=ST.items&&ST.items[i]; if(!it) return; if(!ST._typing||ST._ti!==i+':'+r+':'+c){ snap(); ST._typing=1; ST._ti=i+':'+r+':'+c; } clearTimeout(ST._tt); ST._tt=setTimeout(function(){ ST._typing=0; },1200);
+    v=String(v||"").replace(/\n$/,""); if(r<0) it.head[c]=v; else it.rows[r][c]=v; saveDoc(); },
+  add:function(i,k){ if(!k||!ST.items) return; snap(); var x=blank(k);
+    if(k==="b"){ var p=ST.items[i]; if(p&&p.k==="b") x.lvl=p.lvl; }
+    ST.items.splice(i+1,0,x); saveDoc(); paintEd();
+    setTimeout(function(){ var el=document.querySelectorAll("#mrw-ed .mrw-it")[i+1]; if(el){ var f=el.querySelector("textarea,input,[contenteditable]"); if(f) f.focus(); } },30); },
+  del:function(i){ if(!ST.items) return; snap(); var it=ST.items[i], n=1;
+    if(/^h[123]$/.test(it.k)){ var L=lvlOf(it.k); while(i+n<ST.items.length && lvlOf(ST.items[i+n].k)>L && !(ST.items[i+n].k==="t" && ST.items[i+n].head[0]==="Người lập báo cáo")) n++; }
+    ST.items.splice(i,n); saveDoc(); paintEd();
+    toast(n>1?"Đã xoá mục ("+n+" phần). Bấm Hoàn tác nếu xoá nhầm.":"Đã xoá. Bấm Hoàn tác nếu xoá nhầm.","ok",3500); },
+  mv:function(i,d){ var j=i+d; if(!ST.items||j<0||j>=ST.items.length) return; snap(); var t=ST.items[i]; ST.items[i]=ST.items[j]; ST.items[j]=t; saveDoc(); paintEd(); },
+  radd:function(i){ var it=ST.items[i]; snap(); it.rows.push(it.head.map(function(){ return ""; })); saveDoc(); paintEd(); },
+  rdel:function(i,r){ var it=ST.items[i]; snap(); it.rows.splice(r,1); saveDoc(); paintEd(); },
+  undo:function(){ if(!ST.undo.length) return; ST.items=JSON.parse(ST.undo.pop()); ST._typing=0; saveDoc(); paintEd(); },
+  items:function(){ return ST.items; },
   make:function(){
-    saveForm();
-    var b=$("mrw-go"), t0=b?b.textContent:"", M=readForm(), team=curTeamKey(), pic=ST.pic, mon=ST.mon;
-    if(b){ b.disabled=true; b.textContent="Đang lấy số liệu…"; }
-    loadAll().then(function(D){
-      if(b) b.textContent="Đang tạo file…";
-      var R=calc(D,team,pic,mon), who=pic||("Toàn nhóm"+((S.master.pic||[]).length?" ("+S.master.pic.join(", ")+")":"")), by=(S.user&&S.user.pic)||who;
-      var title="Báo cáo hoạt động Sale MMH "+curTeam().label+" · "+(pic||"Toàn nhóm")+" · T"+lbM(mon);
-      MRW.last={ R:R, M:M, errs:D.errs };
-      return docx(bodyXml(R,M,who,by),title).then(function(blob){
-        var nm="MMH_"+curTeam().label+"_Bao_cao_thang_"+mon+"_"+(pic||"Team").replace(/\s+/g,"")+".docx";
-        MRW.blob=blob; MRW.name=nm;
-        var a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download=nm; document.body.appendChild(a); a.click();
-        setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); },2000);
-        if(b){ b.disabled=false; b.textContent=t0; }
-        toast("Đã tạo "+nm+(D.errs.length?" — thiếu: "+D.errs.join(" · "):""),D.errs.length?"warn":"ok",D.errs.length?8000:4500);
-      });
+    if(!ST.items) return toast("Đang lấy số liệu, đợi một chút rồi bấm lại.","warn");
+    var b=$("mrw-go"), t0=b?b.textContent:"", pic=ST.pic, mon=ST.mon;
+    if(b){ b.disabled=true; b.textContent="Đang tạo file…"; }
+    var title="Báo cáo hoạt động Sale MMH "+curTeam().label+" · "+(pic||"Toàn nhóm")+" · T"+lbM(mon);
+    docx(xmlOf(ST.items),title).then(function(blob){
+      var nm="MMH_"+curTeam().label+"_Bao_cao_thang_"+mon+"_"+(pic||"Team").replace(/\s+/g,"")+".docx";
+      MRW.blob=blob; MRW.name=nm;
+      var a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download=nm; document.body.appendChild(a); a.click();
+      setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); },2000);
+      if(b){ b.disabled=false; b.textContent=t0; }
+      toast("Đã tạo "+nm,"ok",4500);
     }).catch(function(e){ if(b){ b.disabled=false; b.textContent=t0; } toast(e.message,"err",6000); });
   }
 };

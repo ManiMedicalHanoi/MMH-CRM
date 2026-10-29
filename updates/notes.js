@@ -7,6 +7,15 @@
 function E(u){ u.en={ title:u.title, items:u.items.map(function(i){ return { title:i.title, text:i.text }; }) }; return u; }
 window.MMH_UPDATES = [
   E({
+    id:"2026-10-29-v33.9", version:"v33.9", date:"2026-10-29",
+    title:"Monthly Word report: edit everything before you download",
+    summary:"The monthly sales report now opens as an editable draft. Change any text or table cell, add or delete lines, tables and sections, then create the Word file. Available to every Dental and Surgical PIC.",
+    items:[
+      { type:"imp", icon:"✎", title:"Edit the draft", text:"<b>Send report</b> ▸ <b>Monthly report</b> ▸ <b>Word report</b> (or <b>Monthly Plan</b> ▸ <b>Word report</b>). The figures from CRM and the Turnover file appear as a draft: type over any text or table cell, <b>+ Add</b> a line, paragraph, table or section, <b>×</b> to delete (a heading deletes its whole section), ↑ ↓ to reorder, <b>Undo</b> if needed. Then click <b>Create Word file</b>.", img:"updates/v33.9/edit.jpg" },
+      { type:"new", icon:"↻", title:"Draft is kept", text:"Your edits are saved on this device for each month and PIC, so you can come back later. <b>Refresh data</b> rebuilds the draft from the latest CRM figures (Undo brings your edits back).", img:"" }
+    ]
+  }),
+  E({
     id:"2026-10-29-v33.8", version:"v33.8", date:"2026-10-29",
     title:"Monthly sales report in Word, filled from CRM (Dental · Surgical)",
     summary:"The formal \"MMH Sales Activity Report\" (this month's results + next month's plan) is now built from CRM and the Turnover file. Add a few notes and download the Word file.",

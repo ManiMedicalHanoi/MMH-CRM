@@ -198,3 +198,7 @@ Kiến trúc & quy ước giống MMH Report Hub (repo `ManiMedicalHanoi/MMH-Rep
   thuyết trình (mục "Phản hồi khách hàng" của Event review, buổi tháng sau), PLAN / RESULT Kế hoạch tháng theo `mnTplFor`, Key task "Tuyển sinh sự kiện Tmm.yyyy" (Công việc khác).
   Mục CRM chưa có chỗ ghi (yếu tố thị trường, sản phẩm lỗi, số đại lý dự kiến mở, doanh số dự kiến, kế hoạch thầu, MKT) = ô nhập `MAN`, nháp `localStorage.mmh_mrw_<nhóm>_<PIC>_<tháng>`.
   File .docx dựng từ đầu bằng JSZip (A4, Aptos, tiêu đề navy) — không gửi backend. Test: Playwright + mock (`list` / `visitFeed` / `naList` / `mtTenders` / `weekly` / `getTurnoverData`).
+- **v33.9 (29/10/2026, sửa khối `v338-css` / `v338-js`) — Báo cáo Word = BẢN NHÁP sửa được (mọi PIC Dental / Surgical)**: số liệu ⇒ `buildModel` (danh sách mục `{k:title|sub|h1|h2|h3|b|n|p|t}`,
+  `b` = dòng gạch đầu `lb` đậm + `t`, `ph` = ô sales cần ghi; `t` = bảng `head/rows/w/num/total`) ⇒ trình soạn `#mrw-ed` trong hộp: sửa chữ / ô bảng (contenteditable), `+ Thêm` (dòng · đoạn · bảng · tiêu đề · mục),
+  `×` (tiêu đề ⇒ xoá cả mục tới tiêu đề cùng cấp), ↑ ↓, Hoàn tác (`ST.undo`, 40 bước), **Lấy lại số liệu** (`build(true)`). Nháp `localStorage.mmh_mrw_doc_<nhóm>_<PIC>_<tháng>`; Tạo file Word = `xmlOf(items)`
+  (dòng trống bỏ qua, tiêu đề nhỏ không còn nội dung ⇒ "(chưa cập nhật)", bảng chữ ký giữ cuối). API test: `MRW.items()` / `MRW.f` / `MRW.c` / `MRW.add` / `MRW.del` / `MRW.radd`.
