@@ -204,3 +204,11 @@ Kiến trúc & quy ước giống MMH Report Hub (repo `ManiMedicalHanoi/MMH-Rep
   (dòng trống bỏ qua, tiêu đề nhỏ không còn nội dung ⇒ "(chưa cập nhật)", bảng chữ ký giữ cuối). API test: `MRW.items()` / `MRW.f` / `MRW.c` / `MRW.add` / `MRW.del` / `MRW.radd`.
 - **v34.0 (29/10/2026, khối `v340-js`, backend CRM v10.21)**: số lượng Composite / JIZAI hỗ trợ (C6 / C7) chỉ cộng đơn **Đã duyệt**, giống C5 — `k8Live` bọc: supp_comp / supp_jizai lọc `k8OrderRows` theo
   `v316OrdNeed` + `v316OrdAppr` (đơn cũ không loại trước 10/2026 tính như cũ; tháng vẫn là tháng đặt). Ghi chú `.k8-note` đổi chữ theo đó.
+- **v34.1 (30/10/2026) — nhóm Thailand Dental (`thaid`) + T&E cho 2 nhóm Thái**: `TEAMS.thaid` (backend `crm-thai-dental` ở mmh-backend, file "1. Thailand - Dental Action FY68" dựng lại theo bố cục
+  Thailand Surgical; cờ như `thai`: tiếng Anh, không đơn hàng, không ảnh, Công việc khác ở ALL TASK). `isTHk(k)` = thai | thaid, `isTH()` đúng cho cả 2 nhóm ⇒ mọi giao diện / chữ tiếng Anh của nhóm Thái
+  dùng chung. ROLES Yong · Man · Sui (`team:"thaid"`); Dao `teams:["thai","thaid"]` ⇒ `userTeams()` > 1 ⇒ mục "Nhóm đang xem" ở menu bên / Thêm, `grant()` + `teamOfPic()` giữ nhóm Thái đang chọn.
+  Báo cáo nhóm thaid: To Shuhei · Cc Ha + Hoa (backend gửi; app chỉ hiện tên — không đưa email Shuhei / Yong / Man / Sui vào repo). Doanh số NPP thaid: segment Dental + MMG, NPP DDI / Promptdent / VRP (không gán PIC — F4-00 chung). NA: C2-01 Yong (key account).
+  T&E (`teOn()`): Dental VN + thai + thaid (Training Hub `rhCustTrain` nhận team thaid, nhóm Thái ghi tiếng Anh; chỉ Dental VN tính C10). Kiểm tra tour thêm `tools/tour_check.js --thaid`.
+  File Dental Thái KHÔNG đánh số tên sheet (người dùng yêu cầu): khối `v341-js` bỏ số trong chữ hiển thị tên sheet ("sheet 6. CUSTOMER VISITING" ⇒ "sheet CUSTOMER VISITING") khi nhóm thaid
+  (bọc `i18nNode` + `trBlock`), thêm luật `RULES_EN` cho chữ còn sót (Họp tuần, Gửi báo cáo). Nhóm thaid PHẢI full tiếng Anh — kiểm bằng bộ quét chữ Việt (đăng nhập Yong, team thaid).
+  Chưa làm: Thống kê gửi báo cáo (`rpstat/rpstat.js`, dùng chung Report Hub) chưa đọc backend crm-thai-dental.

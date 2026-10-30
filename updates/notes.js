@@ -7,6 +7,17 @@
 function E(u){ u.en={ title:u.title, items:u.items.map(function(i){ return { title:i.title, text:i.text }; }) }; return u; }
 window.MMH_UPDATES = [
   E({
+    id:"2026-10-30-v34.1", version:"v34.1", date:"2026-10-30",
+    title:"Thailand Dental team joins the CRM · customer training (T&E) for both Thailand teams",
+    summary:"Yong, Man and Sui now work in the CRM like the Thailand Surgical team: same screens, English interface, their own data file. Both Thailand teams can log customer training sessions (T&E), and the Dental KPIs FY68 are linked to the KPI file.",
+    items:[
+      { type:"new", icon:"🇹🇭", title:"Thailand Dental CRM", text:"Sign in with your company e-mail (Yong · Man · Sui) ▸ the app opens <b>Thailand Dental CRM</b>. Customers, contacts, visits, monthly reports and ADP come from the file <b>1. Thailand - Dental Action FY68</b>, now in the same layout as Thailand Surgical (sheet names without numbers: CUSTOMER CODE, CUSTOMER VISITING, TARGET & KPI…). The whole app is in English. Weekly / monthly reports go To Shuhei, Cc Ha + Hoa." },
+      { type:"new", icon:"🎓", title:"Customer training (T&E) for both Thailand teams", text:"<b>Presentations · Customer training</b> ▸ tab <b>Customer training (T&E)</b> ▸ <b>New session</b>: date, topic, product, attendees from your customer list and the 5-line review. Saved to the Training Master like Dental Vietnam.", img:"updates/v34.1/te.jpg" },
+      { type:"imp", icon:"⇄", title:"Dao switches between the two teams", text:"Side menu ▸ <b>Current group</b> ▸ <b>Thailand Surgical</b> or <b>Thailand Dental</b>. Dao sees and updates the work of the whole team in both files.", img:"updates/v34.1/team.jpg" },
+      { type:"new", icon:"%", title:"Dental KPIs FY68 linked", text:"<b>KPIs & Targets</b> shows the KPIs of Yong, Man and Sui with targets from the KPI file. Visits with Type action <b>Co-visiting with distributor</b> count for C4-01 (Yong) and C4-03 (Man: days with 5 or more co-visits). New key accounts (DSO, dental university, hospital) approved in <b>New account & SKU</b> count for C2-01." }
+    ]
+  }),
+  E({
     id:"2026-10-29-v34.0", version:"v34.0", date:"2026-10-29",
     title:"Composite / JIZAI quantity KPI counts approved orders only",
     summary:"The quantity KPIs \"Composite qty supported\" and \"JIZAI qty supported\" now follow the same rule as \"Supported sales\": only orders that are Approved are counted.",

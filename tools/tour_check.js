@@ -1,15 +1,15 @@
 /* Kiểm tra bài hướng dẫn (tour/tours.js) của MMH CRM: chạy MỌI bài với backend giả lập, báo bước nào không tìm thấy phần tử.
    Chạy: NODE_PATH=$(npm root -g) node tools/tour_check.js [--thai] [--mobile] [id …]   ·  thoát mã 1 nếu có bước hỏng.
-   --thai: chạy như nhóm Thái (tiếng Anh, không ảnh, không công tác). Mỗi lần sửa chức năng ⇒ sửa tours.js rồi chạy lại. */
+   --thai: chạy như nhóm Thái (tiếng Anh, không ảnh, không công tác) · --thaid: nhóm Thailand Dental (Yong). Mỗi lần sửa chức năng ⇒ sửa tours.js rồi chạy lại. */
 const { chromium } = require("playwright"); const path=require("path");
-const ARGS=process.argv.slice(2), THAI=ARGS.includes("--thai"), ONLY=ARGS.filter(a=>!a.startsWith("--"));
+const ARGS=process.argv.slice(2), THD=ARGS.includes("--thaid"), THAI=THD||ARGS.includes("--thai"), ONLY=ARGS.filter(a=>!a.startsWith("--"));
 const MOB=ARGS.includes("--mobile");   /* --mobile: khung điện thoại 390×844 */
 (async()=>{
   const b=await chromium.launch(); const p=await (await b.newContext(MOB?{viewport:{width:390,height:844},isMobile:true,hasTouch:true}:{viewport:{width:1440,height:900}})).newPage();
   const errs=[]; p.on("pageerror",e=>errs.push(e.message));
-  const pic=THAI?"Dao":"Viet";
+  const pic=THD?"Yong":THAI?"Dao":"Viet";
   await p.addInitScript((pic)=>{ localStorage.setItem("mmh_tk",JSON.stringify({tk:"xxxxxxxxxxxx.sig",exp:Date.now()+864e5,user:{pic:pic,email:"x@manimedicalhanoi.com",local:"x",level:"lead",admin:true}}));
-    localStorage.setItem("mmh_auth_later",new Date().toISOString().slice(0,10)); if(pic==="Dao") localStorage.setItem("mmh_team","thai"); }, pic);
+    localStorage.setItem("mmh_auth_later",new Date().toISOString().slice(0,10)); if(pic==="Dao") localStorage.setItem("mmh_team","thai"); if(pic==="Yong") localStorage.setItem("mmh_team","thaid"); }, pic);
   await p.route(/fonts|cdnjs|drive\.google|googleusercontent/,r=>r.fulfill({body:""}));
   await p.route(/script\.google\.com/, r=>{ const u=new URL(r.request().url()); const a=u.searchParams.get("action"), cb=u.searchParams.get("callback");
     let o={ok:true};

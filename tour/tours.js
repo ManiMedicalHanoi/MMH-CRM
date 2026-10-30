@@ -10,7 +10,7 @@ function par(s){ var e=q(s); return e&&e.parentElement; }
 function wk(t){ return function(){ try{ go("weekly"); }catch(_){} try{ setWkTab(t||"cal"); }catch(_){} }; }
 function pg(p){ return function(){ try{ go(p); }catch(_){} }; }
 function me(){ try{ return window.AUTH && AUTH.user && AUTH.user(); }catch(_){ return null; } }
-function th(){ try{ return curTeamKey()==="thai"; }catch(_){ return false; } }
+function th(){ try{ return /^thaid?$/.test(curTeamKey()); }catch(_){ return false; } }   /* 2 nhóm Thái: thai · thaid */
 /* điện thoại: menu bên / FY / màu / bảng tin nằm trong nút Thêm (thanh dưới); bộ lọc lịch nằm sau nút ⋯ */
 function more(sel){ return function(){ return TOUR.find(sel) || TOUR.find("nav.mob button:last-of-type"); }; }
 function calTools(){ try{ if(window.CAL && !CAL.mt && TOUR.find(".cal-dots3")){ CAL.mt=true; renderCal(); } }catch(_){} }
@@ -25,12 +25,12 @@ TOUR.add([
     { el:more("#updBtn"), t:V("Có gì mới","What's new"), x:V("Xem các bản cập nhật của app. <i>(Điện thoại: <b>Thêm ▸ Có gì mới</b>.)</i>","See the latest app updates. <i>(Phone: <b>More ▸ What's new</b>.)</i>") },
     { el:"#btnUser", t:V("Tài khoản","Account"), x:V("Bấm để xem tài khoản, đổi nhóm (quản lý) hoặc đăng xuất.","Click to see your account, switch team (managers) or sign out.") }
    ] },
- { id:"calendar", v:2, d:"2026-10-11", g:V("Lịch & công việc","Calendar & tasks"), ic:"cal", t:V("Lịch công việc","Work calendar"), x:V("Xem đi địa bàn, việc khác, công tác theo tuần / tháng.","Field visits, other tasks and trips by week or month."),
+ { id:"calendar", v:3, d:"2026-10-30", g:V("Lịch & công việc","Calendar & tasks"), ic:"cal", t:V("Lịch công việc","Work calendar"), x:V("Xem đi địa bàn, việc khác, công tác theo tuần / tháng.","Field visits, other tasks and trips by week or month."),
    steps:[
     { el:function(){ return TOUR.find("select.cal-vs") || par("[onclick=\"calView('week')\"]"); }, do:wk("cal"), t:V("Kiểu xem","View"), x:V("Đổi giữa <b>Tuần</b>, <b>Tháng</b> và <b>Danh sách</b>.","Switch between <b>Week</b>, <b>Month</b> and <b>List</b>.") },
     { el:"[onclick=\"calNav(0)\"]", t:V("Hôm nay","Today"), x:V("Dùng ‹ › để chuyển tuần, bấm <b>Hôm nay</b> để quay về tuần này.","Use ‹ › to move between weeks, <b>Today</b> to come back.") },
     { el:function(){ return par(".cal-chip[onclick=\"calToggle('v')\"]"); }, do:calTools, wait:200, t:V("Lọc loại việc","Filter by type"), x:V("Bật / tắt Đi địa bàn, Việc khác, Công tác, Đào tạo; ẩn việc đã xong.","Show or hide Field visits, Other tasks, Trips, Trainings; hide done tasks.") },
-    { el:function(){ return par(".cal-chip[onclick=\"calSetPics('all')\"]"); }, t:V("Xem của ai","Whose tasks"), x:V("Team Leader và quản lý chọn được cả đội hoặc từng người.","Team leaders and managers can view the whole team or one person.") },
+    { el:function(){ return par(".cal-chip[onclick=\"calSetPics('all')\"]"); }, t:V("Xem của ai","Whose tasks"), x:V("Team Leader và quản lý chọn được cả đội hoặc từng người.","Team leaders and managers can view the whole team or one person."), when:function(){ try{ return isMgrView(); }catch(_){ return true; } } },
     { el:function(){ return TOUR.find(".cal-add") || TOUR.find(".cal-wc.today .cal-wh") || TOUR.find(".cal-wh"); }, t:V("Thêm việc vào ngày","Add a task on a day"), x:V("Bấm <b>＋ Thêm việc</b> dưới một ngày để chọn: đi địa bàn hay việc khác.","Click <b>＋ Add task</b> under a day, then choose field visit or other task.") }
    ] },
  { id:"visit", v:4, d:"2026-10-17", g:V("Lịch & công việc","Calendar & tasks"), ic:"photo", t:V("Ghi nhanh đi địa bàn","Log a field visit"), x:V("Chọn account, ghi kết quả, lưu ngay.","Pick the account, write the result, save instantly."),
@@ -64,11 +64,11 @@ TOUR.add([
     { el:"#tp-sched", t:V("Lịch trình","Schedule"), x:V("Ghi theo ngày.","Write it day by day.") },
     { el:"#tp-send", t:V("Gửi đề xuất","Send"), x:V("Email <b>Business Trip Approval Request</b> gửi Giám đốc, CC trưởng phòng và bạn. Ghi nhật ký ở tab Business Trip Log của file CRM nhóm.","A <b>Business Trip Approval Request</b> email goes to the Director, CC your head of department and you.") }
    ] },
- { id:"cust", v:2, d:"2026-10-16", g:V("Khách hàng & bán hàng","Customers & sales"), ic:"people", t:V("Địa bàn","Customer List"), x:V("Tìm, lọc và thêm account.","Find, filter and add accounts."),
+ { id:"cust", v:3, d:"2026-10-30", g:V("Khách hàng & bán hàng","Customers & sales"), ic:"people", t:V("Địa bàn","Customer List"), x:V("Tìm, lọc và thêm account.","Find, filter and add accounts."),
    steps:[
     { el:"#cq", do:pg("cust"), wait:600, t:V("Tìm địa bàn","Find an account"), x:V("Gõ tên, mã, tỉnh, PIC — không cần dấu.","Type a name, code, province or PIC.") },
     { el:"#custChips", t:V("Lọc nhanh","Quick filters"), x:V("Chưa gặp trong FY, đã gặp, sắp theo doanh số.","Not visited this FY, visited, sort by sales.") },
-    { el:"#custPicBar", t:V("Theo PIC","By PIC"), x:V("Xem account của từng người.","See each person's accounts.") },
+    { el:"#custPicBar", t:V("Theo PIC","By PIC"), x:V("Xem account của từng người.","See each person's accounts."), when:function(){ try{ return isMgrView(); }catch(_){ return true; } } },
     { el:"[onclick=\"formCustomer(null)\"]", t:V("Account mới","New account"), x:V("Thêm khách hàng mới vào danh mục.","Add a new customer.") },
     { el:function(){ return TOUR.find("#a3-adp")||TOUR.find("#a3Side")||TOUR.find("#drwBody"); }, do:function(){ try{ var c=(S.custIndex||[])[0]; if(c) openCust(c.code); }catch(_){} }, wait:1200, when:function(){ try{ return !isTH() && (S.custIndex||[]).length>0; }catch(_){ return false; } },
       t:V("Chi tiết địa bàn","Account details"), x:V("Bấm 1 địa bàn ⇒ bên phải hiện ngay <b>Mục tiêu & tình trạng ADP</b> (nhóm A–D, target / actual, mục tiêu, hành động chính, tình trạng quý gần nhất), rồi tổng quan, người liên hệ, thông tin account.","Click an account ⇒ the right column shows <b>ADP targets & status</b> first, then overview, contacts and account info.") }
@@ -110,11 +110,11 @@ TOUR.add([
     { el:"#v322-ps", do:function(){ try{ formPresent(null); }catch(_){} }, wait:600, t:V("5 khung báo cáo","5 report sections"), x:V("Điền từng khung: số người tham dự (tự lấy), tóm tắt hoạt động, phản hồi khách hàng, doanh số, hành động tiếp theo.","Fill each section: attendees (automatic), activity summary, customer feedback, sales, next actions.") },
     { el:"#v322-meter", t:V("Độ chi tiết","Detail meter"), x:V("Mục quá ngắn hiện <b>Ghi chi tiết hơn</b> — ghi cụ thể ai, sản phẩm gì, số lượng, khi nào.","Sections that are too short show <b>Add more detail</b> — say who, which product, how many, when.") }
    ] },
- { id:"te", v:2, d:"2026-10-28", g:V("Khách hàng & bán hàng","Customers & sales"), ic:"people", t:V("Đào tạo khách hàng (T&E)","Customer training (T&E)"), x:V("Ghi buổi đào tạo khách hàng — lưu Training Master, tính KPI C10.","Log customer training sessions — saved to the Training Master, counted for C10."),
+ { id:"te", v:3, d:"2026-10-30", g:V("Khách hàng & bán hàng","Customers & sales"), ic:"people", t:V("Đào tạo khách hàng (T&E)","Customer training (T&E)"), x:V("Ghi buổi đào tạo khách hàng — lưu Training Master (Dental VN tính KPI C10). Có cho Dental VN và 2 nhóm Thái.","Log customer training sessions — saved to the Training Master (Customer Training). Available for Dental Vietnam and both Thailand teams."),
    when:function(){ try{ return !!(window.v316TeOn && v316TeOn()); }catch(_){ return false; } },
    steps:[
     { el:"#te-tab", do:function(){ try{ go("present"); S.presTab="te"; renderPresent(); }catch(_){} }, wait:700, t:V("Tab Đào tạo khách hàng","Customer training tab"), x:V("Trong trang Thuyết trình · Đào tạo KH.","Inside the Presentation · Customer training page.") },
-    { el:"#te-add", t:V("Thêm buổi đào tạo","New session"), x:V("Ngày, chủ đề, sản phẩm, khách tham dự — chỉ chọn trong danh sách khách hàng của PIC buổi đào tạo (bác sĩ / người liên hệ, địa bàn). Lưu vào Training Master, tính KPI đào tạo C10. Hoàn thành cần Actual > 0 và review đủ 5 dòng mẫu.","Date, topic, product and attendees — picked only from the session PIC's customer list (contacts, accounts). Saved to the Training Master, counted for training KPI C10. Completed needs Actual > 0 and the 5-line review.") }
+    { el:"#te-add", t:V("Thêm buổi đào tạo","New session"), x:V("Ngày, chủ đề, sản phẩm, khách tham dự — chỉ chọn trong danh sách khách hàng của PIC buổi đào tạo (bác sĩ / người liên hệ, địa bàn). Lưu vào Training Master, tính KPI đào tạo C10. Hoàn thành cần Actual > 0 và review đủ 5 dòng mẫu.","Date, topic, product and attendees — picked only from the session PIC's customer list (contacts, accounts). Saved to the Training Master (sheet Training Report, category Customer Training). Completed needs Actual > 0 and the 5-line review.") }
    ] },
  { id:"newacc", v:1, d:"2026-10-11", g:V("Khách hàng & bán hàng","Customers & sales"), ic:"kpi", t:V("Mở mới & SKU mới","New accounts & SKUs"), x:V("Ghi case mở mới để tính KPI, quản lý duyệt.","Log new-account cases for KPI; managers approve."),
    steps:[
