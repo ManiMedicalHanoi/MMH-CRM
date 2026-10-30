@@ -1292,7 +1292,7 @@ function i18nOn(){
     if(S && S.user) return isTH();
     if(thOnly()) return true;
     var saved=localStorage.getItem("mmh_dental_pic");
-    if(saved && ROLES[saved] && ROLES[saved].team==="thai") return true;
+    if(saved && ROLES[saved] && isTHk(ROLES[saved].team)) return true;
     return false;
   }catch(e){ return false; }
 }
@@ -1591,10 +1591,19 @@ var TEAMS = {
     url:"https://script.google.com/macros/s/AKfycbwglPhfcC3y20-lPO8mRC7yapGUyVHSO2Mp3k4fyPJXnraQEu6bbO4dysL0E9MNadwHwg/exec",
     eventSrc:"", taskType:"Sales-Thailand Surgical", crmFile:"FY68_Thailand_Surgical_CRM",
     lang:"en", noOrder:true, noPhoto:true, ownTasks:true, noTrip:true, noTurnover:true
+  },
+  /* ⭐ v34.1 — nhóm Thailand Dental (Yong · Man · Sui): file "1. Thailand - Dental Action FY68" bố cục như Thailand Surgical,
+     backend crm-thai-dental (mmh-backend), giao diện TIẾNG ANH, không Sales order, không chụp ảnh, "Công việc khác" ở sheet ALL TASK */
+  thaid: {
+    key:"thaid", label:"Thailand Dental", short:"Dental · MMG (Thailand)", ic:"🇹🇭",
+    url:"https://script.google.com/macros/s/AKfycbz2QxuRLqmadEoM5bWaXRflzOkX9J44JmxeKHOAQmwVvv-m--iD5CY1LHWty8bZZg74ug/exec",
+    eventSrc:"", taskType:"Sales-Thailand Dental", crmFile:"1. Thailand - Dental Action FY68",
+    lang:"en", noOrder:true, noPhoto:true, ownTasks:true, noTrip:false, noTurnover:false
   }
 };
 /* ⭐ v18 — cờ theo nhóm đang dùng */
-function isTH(){ try{ return curTeamKey()==="thai"; }catch(e){ return false; } }
+function isTHk(k){ return k==="thai"||k==="thaid"; }                 /* ⭐ v34.1 — 2 nhóm Thái: Surgical (thai) · Dental (thaid) */
+function isTH(){ try{ return isTHk(curTeamKey()); }catch(e){ return false; } }
 function noOrder(){ try{ return !!curTeam().noOrder; }catch(e){ return false; } }
 function noPhoto(){ try{ return !!curTeam().noPhoto; }catch(e){ return false; } }
 function ownTasks(){ try{ return !!curTeam().ownTasks; }catch(e){ return false; } }
@@ -1633,7 +1642,8 @@ function switchTeam(k){
 }
 function teamPicker(){
   var cur=curTeamKey();
-  var h='<div class="pick2'+(Object.keys(TEAMS).length>2?" pick3":"")+'">'+Object.keys(TEAMS).map(function(k){
+  var TK=userTeams().length?userTeams():Object.keys(TEAMS);   /* ⭐ v34.1 — người không phải Management chỉ thấy nhóm của mình */
+  var h='<div class="pick2'+(TK.length>2?" pick3":"")+'">'+TK.map(function(k){
     var t=TEAMS[k];
     return '<button class="pick2-c'+(k===cur?" on":"")+'" onclick="switchTeam(\''+k+'\')">'+
       '<div class="ic">'+t.ic+'</div><div class="ti">'+esc(t.label)+(k===cur?' <span class="tag t-g">đang dùng</span>':'')+'</div>'+
@@ -1641,8 +1651,8 @@ function teamPicker(){
       '<div class="sh">File Google Sheet và dữ liệu riêng của nhóm</div></button>';
   }).join("")+'</div>'+
   '<p style="font-size:12px;color:var(--sub);margin-top:14px;line-height:1.6">'+
-    'Mỗi nhóm dùng một file dữ liệu riêng: khách hàng, CBC, đơn hàng, ADP, báo cáo đều tách bạch. '+
-    'Đổi nhóm sẽ tải lại app.</p>';
+    TX('Mỗi nhóm dùng một file dữ liệu riêng: khách hàng, CBC, đơn hàng, ADP, báo cáo đều tách bạch. ','Each team has its own Google Sheet file: customers, contacts, visits and reports are kept apart. ')+
+    TX('Đổi nhóm sẽ tải lại app.','Switching reloads the app.')+'</p>';
   openModal("Chọn nhóm kinh doanh",h,'<button class="btn" onclick="closeModal()">Đóng</button>',true);
 }
 function gasUrl(){ return curTeam().url; }
@@ -2155,8 +2165,8 @@ function boot(){
 function canAuto(saved){
   if(!saved || !ROLES[saved]) return false;
   if(!authOk()) return false;
-  if(ROLES[saved].team==="thai" && !thOk()) return false;          /* ⭐ v18 */
-  if(thOnly() && ROLES[saved].team!=="thai") return false;
+  if(isTHk(ROLES[saved].team) && !thOk()) return false;          /* ⭐ v18 */
+  if(thOnly() && !isTHk(ROLES[saved].team)) return false;
   if(ROLES[saved].grp==="Management" && !mgmtOk()) return false;
   return true;
 }
@@ -2339,15 +2349,20 @@ var ROLES = {
   /* ⭐ v7.2 — Eyeless Sales */
   "Trang":     { grp:"Eyeless Sales",  title:"Eyeless Sales PIC",            email:"marketing.mmh2@manimedicalhanoi.com", ini:"TR", team:"eyeless" },
   /* ⭐ v18 — Thailand Surgical Sales */
-  "Dao":       { grp:"Thailand Surgical Sales", title:"Thailand Surgical Team Leader", email:"manithailand@manimedicalhanoi.com",  ini:"DA", team:"thai" },
-  "Miew":      { grp:"Thailand Surgical Sales", title:"Thailand Surgical Sales PIC", email:"manithailand4@manimedicalhanoi.com", ini:"MI", team:"thai" }
+  "Dao":       { grp:"Thailand Surgical Sales", title:"Thailand Surgical Team Leader", email:"manithailand@manimedicalhanoi.com",  ini:"DA", team:"thai", teams:["thai","thaid"] },
+  "Miew":      { grp:"Thailand Surgical Sales", title:"Thailand Surgical Sales PIC", email:"manithailand4@manimedicalhanoi.com", ini:"MI", team:"thai" },
+  /* ⭐ v34.1 — Thailand Dental Sales (Dao = trưởng nhóm Thái, chuyển được giữa 2 nhóm Thái) · email để trống: repo công khai, đăng nhập bằng phiên email */
+  "Yong":      { grp:"Thailand Dental Sales", title:"Thailand Dental - Commercial Lead", email:"", ini:"YO", team:"thaid" },
+  "Man":       { grp:"Thailand Dental Sales", title:"Thailand Dental - Training & Education Lead", email:"", ini:"MA", team:"thaid" },
+  "Sui":       { grp:"Thailand Dental Sales", title:"Thailand Dental - Marketing Lead", email:"", ini:"SU", team:"thaid" }
 };
 var ROLE_GROUPS = [
   { k:"Management",     ic:"🏛", sub:"Xem toàn bộ dữ liệu · cần mã nội bộ" },
   { k:"Dental Sales",   ic:"🦷", sub:"File dữ liệu Dental · chỉ xem việc của mình" },
   { k:"Surgical Sales", ic:"🔬", sub:"File dữ liệu Surgical · chỉ xem việc của mình" },
   { k:"Eyeless Sales",  ic:"🪡", sub:"File dữ liệu Eyeless · chỉ xem việc của mình" },
-  { k:"Thailand Surgical Sales", ic:"🇹🇭", sub:"Thailand Surgical data file · own tasks only" }
+  { k:"Thailand Surgical Sales", ic:"🇹🇭", sub:"Thailand Surgical data file · own tasks only" },
+  { k:"Thailand Dental Sales", ic:"🇹🇭", sub:"Thailand Dental data file · own tasks only" }
 ];
 /* ⭐ v18 — mật khẩu riêng của nhóm Thái (nhập 1 lần / thiết bị). Nhập "1234" ở màn hình đầu
    ⇒ chỉ thấy nhóm Thailand. Người đã có mật khẩu chung muốn vào tài khoản Thái cũng phải nhập "1234" một lần. */
@@ -2450,7 +2465,8 @@ function resetAuth(){
    chỉ Management mới thấy ⇒ Khang / Viet Ha đăng nhập xong vẫn đọc file Dental
    và không có cách nào tự chuyển. Nay chọn PIC là tự nạp đúng Google Sheet.
    Management không gắn team nên vẫn tự do đổi nhóm như cũ. */
-function teamOfPic(pic){ var r=ROLES[pic]||{}; return TEAMS[r.team]?r.team:""; }
+function teamOfPic(pic){ var r=ROLES[pic]||{}; if(r.teams && r.teams.indexOf(curTeamKey())>=0) return curTeamKey(); return TEAMS[r.team]?r.team:""; }   /* ⭐ v34.1 — Dao: thai / thaid */
+function userTeams(){ try{ var r=ROLES[S.user.pic]||{}; return isMgmt()?Object.keys(TEAMS):(r.teams||[]).filter(function(k){ return TEAMS[k]; }); }catch(e){ return []; } }
 function ensureTeamFor(pic){
   var want=teamOfPic(pic);
   if(!want || want===curTeamKey()) return false;
@@ -2463,7 +2479,7 @@ function ensureTeamFor(pic){
 }
 function pickPic(pic){
   var r=ROLES[pic];
-  if(r && r.team==="thai" && !thOk()) return stepThai(pic);       /* ⭐ v18 */
+  if(r && isTHk(r.team) && !thOk()) return stepThai(pic);       /* ⭐ v18 */
   if(r && r.grp==="Management" && !mgmtOk()) return stepCode(pic);
   if(ensureTeamFor(pic)) return;
   startApp(pic);
@@ -2522,7 +2538,7 @@ function startApp(pic){
   /* chặn cả đường tự đăng nhập lại: thiết bị nhớ PIC Surgical nhưng nhóm đang là
      Dental (bản cũ để lại) thì đổi nhóm rồi nạp lại, không vào app bằng file sai */
   if(ensureTeamFor(pic)) return;
-  if(r.team==="thai" && !thOk()){ $("login").classList.add("on"); return stepThai(pic); }   /* ⭐ v18 */
+  if(isTHk(r.team) && !thOk()){ $("login").classList.add("on"); return stepThai(pic); }   /* ⭐ v18 */
   try{ localStorage.setItem(LS_PIC,pic); }catch(e){}
   var p=(S.picList||[]).filter(function(x){return x.pic===pic;})[0]||{};
   S.user={ pic:pic, grp:r.grp,
@@ -2573,19 +2589,19 @@ window.addEventListener("focus",function(){
 });
 $("fab").onclick=function(){ pickTaskKind(); };
 $("btnHelp").onclick=function(){ openHelp(); };
-$("btnTeam").onclick=function(){ if(isMgmt()) teamPicker(); };
+$("btnTeam").onclick=function(){ if(isMgmt() || userTeams().length>1) teamPicker(); };
 /* vẽ lại nhãn nhóm trên thanh trên cùng — gọi lúc khởi động và mỗi khi đổi nhóm */
 function paintTeamBtn(){
   var t=curTeam(), b=$("btnTeam");
   /* ⭐ v7.1 — sales đã đăng nhập theo PIC nên nhóm là hiển nhiên; chỉ quản lý mới cần đổi nhóm */
-  if(b) b.style.display = isMgmt() ? "" : "none";
+  if(b) b.style.display = (isMgmt() || userTeams().length>1) ? "" : "none";   /* ⭐ v34.1 — Dao: 2 nhóm Thái */
   if(b) b.innerHTML=t.ic+' <b>'+esc(t.label)+'</b> ▾';
   try{
     /* ⭐ v7.2 — header dùng class .bt / .bs (bản cũ tìm nhầm .sub nên luôn hiện "Dental") */
     var bt=document.querySelector(".brand .bt");
     if(bt) bt.textContent=t.label+" CRM";
     var sub=document.querySelector(".brand .bs")||document.querySelector(".brand .sub")||document.querySelector("#brandSub");
-    if(sub) sub.textContent=(t.key==="thai"?"MANI Medical Thailand · ":"MANI Medical Hanoi · ")+t.label+" Sales";
+    if(sub) sub.textContent=(isTHk(t.key)?"MANI Medical Thailand · ":"MANI Medical Hanoi · ")+t.label+" Sales";
     document.title="MMH CRM system · "+t.label;
   }catch(e){}
 }
@@ -3982,9 +3998,9 @@ function navTabs(){ return TABS.filter(function(t){
   return t.gate!=="gallery" || canSeeGallery(); }); }
 function buildNav(){
   var h="",lastGrp="";
-  if(isMgmt()){
+  if(isMgmt() || (typeof userTeams==="function" && userTeams().length>1)){   /* ⭐ v34.1 — Dao: Thailand Surgical · Thailand Dental */
     var ck=curTeamKey();
-    h+='<div class="tmsw"><div class="tl">Nhóm đang xem</div>'+Object.keys(TEAMS).map(function(k){
+    h+='<div class="tmsw"><div class="tl">Nhóm đang xem</div>'+(isMgmt()?Object.keys(TEAMS):userTeams()).map(function(k){
       var tm=TEAMS[k];
       return '<button class="'+(k===ck?"on":"")+'" title="'+esc(tm.short)+'" onclick="'+(k===ck?"":"switchTeam('"+k+"')")+'">'+
         '<span class="ic">'+tm.ic+'</span><b>'+esc(tm.label)+'</b></button>';
@@ -3994,7 +4010,7 @@ function buildNav(){
     if(t.grp!==lastGrp){ h+='<div class="grp">'+t.grp+'</div>'; lastGrp=t.grp; }
     h+='<button class="nvi" data-t="'+t.id+'" onclick="go(\''+t.id+'\')"><span class="ic">'+t.ic+'</span><span class="lb">'+t.lb+'</span></button>';
   });
-  h+='<div style="flex:1"></div><div style="padding:10px;font-size:10.5px;color:var(--mute);line-height:1.5">MMH CRM v34.0<br>'+
+  h+='<div style="flex:1"></div><div style="padding:10px;font-size:10.5px;color:var(--mute);line-height:1.5">MMH CRM v34.1<br>'+
      (isMgmt()?'<a href="'+DRIVE_FOLDER+'" target="_blank">📁 Folder ảnh Drive</a>':"")+'</div>';
   $("side").innerHTML=h;
   /* ⭐ v4.5 — thanh dưới trượt ngang, đủ mọi mục, bỏ nút "Thêm" */
@@ -10884,7 +10900,8 @@ var MAIL_RULE={
   dental  : { team:"Dental Sales Team",   toTeam:true,  fixed:[MAIL_TUYEN,MAIL_HA,MAIL_HR] },
   surgical: { team:"Surgical Sales Team", toTeam:false, fixed:[MAIL_TUYEN,MAIL_HA,MAIL_PROD,MAIL_HR] },
   eyeless : { team:"Eyeless Sales Team",  toTeam:false, fixed:[MAIL_TUYEN,MAIL_HA,MAIL_PROD,MAIL_HR] },
-  thai    : { team:"Thailand Surgical Sales Team", toTeam:false, fixed:[MAIL_HA,MAIL_HR] }
+  thai    : { team:"Thailand Surgical Sales Team", toTeam:false, fixed:[MAIL_HA,MAIL_HR] },
+  thaid   : { team:"Thailand Dental Sales Team", toTeam:false, fixed:["Shuhei (MANI Japan)",MAIL_HA,MAIL_HR] }   /* email nhân sự không đưa vào repo công khai — backend tự gửi đúng địa chỉ */
 };
 function mailRule(){ return MAIL_RULE[curTeamKey()]||MAIL_RULE.dental; }
 function teamMails(){
@@ -16346,6 +16363,7 @@ canEditOther=function(pic){ if(isMgrView()) return true; return picEq(pic, S.use
 /* ── (2) người nhận báo cáo tuần / tháng ── */
 mailTargets=(function(){ var _m=mailTargets; return function(){
   if(!isTH()) return _m.apply(this,arguments);
+  if(curTeamKey()==="thaid") return { to:["Shuhei (MANI Japan)"], cc:[MAIL_HA,MAIL_HR] };   /* ⭐ v34.1 — Dental Thái: To Shuhei · Cc Ha + Hoa (như báo cáo cũ) */
   var who=(S.rpPic||(S.user&&S.user.pic)||"");
   var dao=(ROLES.Dao||{}).email||"manithailand@manimedicalhanoi.com";
   if(picEq(who,"Miew")) return { to:[MAIL_HA], cc:[dao,MAIL_HR] };
@@ -16367,6 +16385,17 @@ try{
   PRODUCT_CARDS.thai=[
     { label:"Manipler",          src:"rows", prod:"Manipler",          unit:"usd" },
     { label:"Ophthalmic knife",  src:"rows", prod:"Ophthalmic knife",  unit:"usd" }
+  ];
+  /* ⭐ v34.1 — Thailand Dental: segment Dental + MMG, 3 NPP Thái (KPI F4-00 chung cả nhóm ⇒ không gán PIC) */
+  TURNOVER_SEG_BY_TEAM.thaid=["Dental","MMG"];
+  DISTRIBUTORS_BY_TEAM.thaid=[
+    { label:"DDI",        pic:"", match:["dentaldesign"], abbr:["ddi"] },
+    { label:"Promptdent", pic:"", match:["prompt"],       abbr:[] },
+    { label:"VRP",        pic:"", match:[],               abbr:["vrp"] }
+  ];
+  PRODUCT_CARDS.thaid=[
+    { label:"Dental file & bur", src:"rows", prod:"Dental file and bur", unit:"usd" },
+    { label:"MMG",               src:"rows", prod:"MMG",                 unit:"usd" }
   ];
 }catch(e){}
 /* đọc đúng FY đang xem (bản trước để file Turnover tự chọn FY hiện tại) */
@@ -16442,7 +16471,7 @@ renderCal=(function(){ var _r=renderCal; return function(){ if(ownTasks() && !no
    ═══════════════════════════════════════════════════════════════════ */
 /* thiết bị đã chọn nhóm Thái ⇒ màn đăng nhập cũng hiện tiếng Anh */
 i18nOn=(function(){ var _o=i18nOn; return function(){
-  try{ if(!(S&&S.user) && localStorage.getItem("mmh_team")==="thai") return true; }catch(e){}
+  try{ if(!(S&&S.user) && isTHk(localStorage.getItem("mmh_team"))) return true; }catch(e){}
   return _o();
 }; })();
 nppScopeLabel=(function(){ var _n=nppScopeLabel; return function(){
@@ -17291,7 +17320,7 @@ function kmMe(){ var me=kmKey(S.user.pic); return kmMembersAll().filter(function
 function kmVisible(){
   var all=kmMembersAll(), me=kmMe();
   if(S.user.role==="manager" && !S.user.lead) return all;
-  if(isTH() && S.user.lead) return all.filter(function(m){ return (/thailand/i.test(m.dept) && /surgical/i.test(m.dept)) || kmKey(m.key)===kmKey(S.user.pic); });
+  if(isTH() && S.user.lead) return all.filter(function(m){ return (/thailand/i.test(m.dept) && (curTeamKey()==="thaid"?/dental/i:/surgical/i).test(m.dept)) || kmKey(m.key)===kmKey(S.user.pic); });
   if(me && /team leader/i.test(me.role) && me.team) return all.filter(function(m){ return kmKey(m.team)===kmKey(me.team); });
   if(me && /^hod$/i.test(me.role)) return all.filter(function(m){ return kmKey(m.dept)===kmKey(me.dept); });
   return me?[me]:[];
@@ -18292,7 +18321,7 @@ var _afterWrite27=afterWrite;
 afterWrite=function(tab){ var k=S.kpi; _afterWrite27.apply(this,arguments); if(tab==="order"&&k) S.kpi=k; };
 
 S.na={ rows:null, cfg:{}, me:{}, pending:0, ver:"", f:{ month:"", pic:"", st:"" }, local:{}, err:"" };
-var NA_NPP_LIST={ dental:["Nam Dũng","SPI","Meci","Việt Thái"], surgical:["Hùng Vĩ","I-Care","MHI","An Tâm"], eyeless:["Hùng Vĩ","I-Care"], thai:["Novatech"] };
+var NA_NPP_LIST={ dental:["Nam Dũng","SPI","Meci","Việt Thái"], surgical:["Hùng Vĩ","I-Care","MHI","An Tâm"], eyeless:["Hùng Vĩ","I-Care"], thai:["Novatech"], thaid:["DDI","Promptdent","VRP"] };
 var NA_NPP_DEF={ Viet:"Nam Dũng", Vinh:"SPI", Phuong:"Meci", "Viet Ha":"Hùng Vĩ", Khang:"I-Care", Miew:"Novatech" };
 var NA_ST_LB={ Draft:["Nháp · chưa gửi email","Draft · not sent"], Pending:["Chờ quản lý xác nhận","Waiting for approval"], Approved:["Đã xác nhận","Approved"], Rejected:["Bị từ chối","Rejected"] };
 var NA_KIND=[["dist","📧 Xác nhận NPP","📧 Distributor confirmation"],["order","🧾 Chứng từ đơn hàng","🧾 Order document"],["tender","🏛 Thông báo trúng thầu","🏛 Tender award"],["other","📎 Khác","📎 Other"]];
@@ -19533,8 +19562,8 @@ function grant(pic){
   var r=ROLES[pic]; if(!r) return false;
   lsS(LS_PIC, pic); lsS(LS_AUTH, "1");
   if(r.grp==="Management") lsS(LS_MGMT, "1");
-  if(r.team==="thai") lsS(LS_TH, "1");
-  if(r.team && TEAMS[r.team]) lsS(LS_TEAM, r.team);
+  if(isTHk(r.team)) lsS(LS_TH, "1");
+  if(r.team && TEAMS[r.team] && !(r.teams && r.teams.indexOf(lsG(LS_TEAM))>=0)) lsS(LS_TEAM, r.team);   /* ⭐ v34.1 — Dao giữ nhóm Thái đang chọn */
   return true;
 }
 (function(){ var u=AUTH.user(); if(!u) return;
@@ -20721,7 +20750,7 @@ window.QS2={ open:qsOpen };
 </script>
 
 <!-- ⭐ v30.3 — THÔNG BÁO CẬP NHẬT (chép từ Report Hub): dữ liệu updates/notes.js · tự hiện 7 ngày · nút "Có gì mới" trên thanh trên cùng -->
-<script src="updates/notes.js?v=34.0"></script>
+<script src="updates/notes.js?v=34.1"></script>
 <style id="upd-css">
 #upd,#upd-zoom{--t-pri:var(--blue);--t-pri2:var(--blue-d);--t-ink:var(--navy);--t-soft:var(--pale);--t-line:var(--lb2);--t-bg:#F6F8FA;--mmh-blue:var(--blue);--mmh-navy:var(--navy)}
 
@@ -21178,8 +21207,8 @@ function moreSheet(){
   links.push({h:"https://manimedicalhanoi.github.io/MMH-Report/",t:"Report Hub"});
   o.innerHTML='<div class="sh"><div class="hd"><b>Chức năng</b><button onclick="document.getElementById(\'v30-more\').classList.remove(\'show\')">✕</button></div>'
     +'<div class="gr">'+tabs.map(function(t){ return btn(TAB_IC[t.id]||"list", t.mlb||t.lb, "go:"+t.id, S.tab===t.id); }).join("")+'</div>'
-    +((typeof isMgmt==="function" && isMgmt())?'<div class="gt">Nhóm đang xem</div><div class="gr">'+Object.keys(TEAMS).map(function(k){ var on=k===curTeamKey();
-        return '<button class="'+(on?"on":"")+'" data-fn="team:'+k+'">'+I(k==="thai"?"globe":"users")+'<span>'+esc(TEAMS[k].label)+'</span></button>'; }).join("")+'</div>':'')
+    +((typeof userTeams==="function" && userTeams().length>1)?'<div class="gt">Nhóm đang xem</div><div class="gr">'+userTeams().map(function(k){ var on=k===curTeamKey();
+        return '<button class="'+(on?"on":"")+'" data-fn="team:'+k+'">'+I(isTHk(k)?"globe":"users")+'<span>'+esc(TEAMS[k].label)+'</span></button>'; }).join("")+'</div>':'')
     +'<div class="gt">Tiện ích</div><div class="gr">'
       +btn("bell","Bảng tin","act")+btn("refresh","Tải lại","reload")+btn("palette","Màu","theme")+btn("help","Hướng dẫn","help")+'</div>'
     +(fy?'<div class="gt">Năm tài chính</div><select id="v30-fy">'+fy.innerHTML+'</select>':'')
@@ -22444,7 +22473,8 @@ var KPI_NA=[
   { team:"dental", code:"C1-03", pic:"Phuong", area:["Nam","South"], what:["Đại lý mới & SKU mới · Dental","New dealers & new SKUs · Dental"] },
   { team:"surgical", code:"C1-04", pic:"Viet Ha", area:["Bắc","North"], what:["Khách hàng mới & SKU mới · Surgical","New accounts & new SKUs · Surgical"] },
   { team:"surgical", code:"C1-05", pic:"Khang", area:["Nam","South"], what:["Khách hàng mới & SKU mới · Surgical","New accounts & new SKUs · Surgical"] },
-  { team:"thai", code:"C2-03", pic:"Miew", area:["Thái Lan","Thailand"], what:["Khách hàng mới & SKU mới · Manipler","New accounts & new SKUs · Manipler"] }
+  { team:"thai", code:"C2-03", pic:"Miew", area:["Thái Lan","Thailand"], what:["Khách hàng mới & SKU mới · Manipler","New accounts & new SKUs · Manipler"] },
+  { team:"thaid", code:"C2-01", pic:"Yong", area:["Thái Lan","Thailand"], what:["Key account mới (DSO · ĐH nha · bệnh viện) · Dental Thái","New key accounts (DSO · dental university · hospital) · Dental Thailand"] }
 ];
 window.NA_KPI_MAP=KPI_NA;
 
@@ -22892,7 +22922,7 @@ window.CRMTEST={
   start:function(pic){
     var r=ROLES[pic]; if(!r) return;
     try{ localStorage.setItem(LK, JSON.stringify({ pic:pic, by:adminEmail(), at:Date.now() }));
-      localStorage.setItem(LS_PIC,pic); localStorage.setItem(LS_AUTH,"1"); if(r.team==="thai") localStorage.setItem(LS_TH,"1"); if(r.team&&TEAMS[r.team]) localStorage.setItem(LS_TEAM,r.team); }catch(_){}
+      localStorage.setItem(LS_PIC,pic); localStorage.setItem(LS_AUTH,"1"); if(isTHk(r.team)) localStorage.setItem(LS_TH,"1"); if(r.team&&TEAMS[r.team]) localStorage.setItem(LS_TEAM,r.team); }catch(_){}
     location.reload();
   },
   stop:function(){ try{ localStorage.removeItem(LK); localStorage.removeItem(LS_PIC); }catch(_){} location.reload(); },
@@ -23898,7 +23928,7 @@ window.savePresent=function(){
 /* ═════════ ④ ĐÀO TẠO KHÁCH HÀNG (T&E) — Dental · lưu Training Master qua Training Hub ═════════ */
 var TE={ rows:null, loading:false, err:"", at:0, aud:[], edit:null };
 window.TE=TE;
-function teOn(){ try{ return curTeamKey()==="dental"; }catch(e){ return false; } }
+function teOn(){ try{ return /^(dental|thai|thaid)$/.test(curTeamKey()); }catch(e){ return false; } }   /* ⭐ v34.1 — T&E cho cả 2 nhóm Thái */
 window.v316TeOn=teOn;
 function rhCT(op,params){
   params=params||{};
@@ -23952,7 +23982,7 @@ function teView(){
   var picBar=isMgrView()?'<div class="chipbar" style="margin-bottom:10px"><div class="chip'+(S.teFiltPic?"":" on")+'" onclick="S.teFiltPic=\'\';renderPresent()">'+esc(L("Toàn nhóm","Whole team"))+'</div>'+
     (S.master.pic||[]).map(function(p){ return '<div class="chip'+(S.teFiltPic===p?" on":"")+'" onclick="S.teFiltPic=\''+esc(p)+'\';renderPresent()">'+esc(p)+'</div>'; }).join("")+'</div>':"";
   return '<div class="v316-banner">'+esc(L("Buổi đào tạo khách hàng (T&E) lưu ở Training Master. Chỉ buổi ĐÃ HOÀN THÀNH có số người tham dự thực tế > 0 và review đủ mẫu mới được tính KPI C10-03 / C10-04 / C10-05.",
-      "Customer training (T&E) sessions are stored in the Training Master. Only COMPLETED sessions with actual attendees > 0 and a complete review count for C10-03 / 04 / 05."))+'</div>'+
+      "Customer training (T&E) sessions are stored in the Training Master. Only COMPLETED sessions with actual attendees > 0 and a complete review count for C10-03 / 04 / 05.").replace(isTH()?/ ?Only COMPLETED[^]*$/:/$^/, isTH()?" A session is COMPLETED when it has actual attendees > 0 and the 5-line review.":""))+'</div>'+
     picBar+
     '<div class="te-sum"><div class="it"><small>'+esc(L("Buổi trong FY","Sessions in FY"))+'</small><b>'+rows.length+'</b></div>'+
       '<div class="it"><small>'+esc(L("Đã hoàn thành (tính KPI)","Completed (KPI)"))+'</small><b>'+done.length+'</b></div>'+
@@ -24075,11 +24105,11 @@ window.renderPresent=function(){
     return;
   }
   teLoad();
-  $("main").innerHTML='<div class="pg">'+seg+'<div class="ph"><div><h2>'+esc(L("Đào tạo khách hàng (T&E) ","Customer training (T&E) "))+esc(S.fy)+'</h2><p>'+esc(L("Lưu ở Training Master · tính KPI C10","Saved in the Training Master · counts for C10"))+'</p></div>'+
+  $("main").innerHTML='<div class="pg">'+seg+'<div class="ph"><div><h2>'+esc(L("Đào tạo khách hàng (T&E) ","Customer training (T&E) "))+esc(S.fy)+'</h2><p>'+esc(isTH()?"Saved in the Training Master (Training Report · Customer Training)":L("Lưu ở Training Master · tính KPI C10","Saved in the Training Master · counts for C10"))+'</p></div>'+
     '<div class="sp"></div><button class="btn sm" onclick="teLoad(true)">⟳</button> <button class="btn pri sm" id="te-add" onclick="teForm(null)">＋ '+esc(L("Thêm buổi đào tạo","New session"))+'</button></div>'+teView()+'</div>';
 };
 /* nhãn menu cho Dental */
-try{ TABS.forEach(function(t){ if(t.id==="present"){ var lb0=t.lb, ml0=t.mlb; Object.defineProperty(t,"lb",{ configurable:true, get:function(){ return teOn()?"Thuyết trình · Đào tạo KH":lb0; } }); Object.defineProperty(t,"mlb",{ configurable:true, get:function(){ return teOn()?"T.trình · T&E":ml0; } }); } }); }catch(e){}
+try{ TABS.forEach(function(t){ if(t.id==="present"){ var lb0=t.lb, ml0=t.mlb; Object.defineProperty(t,"lb",{ configurable:true, get:function(){ return teOn()?(isTH()?"Presentations · Customer training":"Thuyết trình · Đào tạo KH"):lb0; } }); Object.defineProperty(t,"mlb",{ configurable:true, get:function(){ return teOn()?(isTH()?"Presentations · T&E":"T.trình · T&E"):ml0; } }); } }); }catch(e){}
 
 /* ═════════ ⑤ ĐƠN HÀNG: LOẠI ĐƠN · CHỨNG TỪ · DUYỆT ═════════ */
 var OX={ otype:"", tender:"", kqtt:"", docs:[], up:0 };
@@ -24837,7 +24867,7 @@ window.RPSTAT_CFG={ lang:function(){ return (window.I18N && I18N.on) ? "en" : "v
 <script src="rpstat/rpstat.js?v=1.0"></script>
 <script src="testflow/testflow.js?v=1.0"></script>
 <script src="tour/tour.js?v=1.1"></script>
-<script src="tour/tours.js?v=33.6"></script>
+<script src="tour/tours.js?v=34.1"></script>
 <script id="v319-i18n">
 /* v31.9 — bổ sung bản dịch EN (nhóm Thái): ô chọn account "N kết quả" */
 (function(){ try{ if(typeof RULES_EN!=="undefined" && RULES_EN.unshift){
@@ -28345,6 +28375,40 @@ window.k8Live=function(pic,key){
   window.k8OrderRows=function(){ return keep().filter(function(o){ return !window.v316OrdNeed(o) || window.v316OrdAppr(o.appr)==="ok"; }); };
   try{ return _k8Live.apply(this,arguments); } finally { window.k8OrderRows=keep; }
 };
+})();
+</script>
+<script id="v341-js">
+/* ═════════ v34.1 (30/10/2026) — Thailand Dental: tên sheet KHÔNG đánh số (người dùng yêu cầu) ═════════
+   File Dental Thái dùng tên sheet "CUSTOMER VISITING", "TARGET & KPI", "NEW ACCOUNT & SKU"… (backend crm-thai-dental).
+   Chữ trên app (dựng chung với Thailand Surgical: "sheet 6. CUSTOMER VISITING") ⇒ bỏ số khi đang ở nhóm thaid. */
+(function(){
+var RE=/(^|[^0-9])[0-9]{1,2}\. (CUSTOMER CODE|CBC|MONTHLY REPORT|CUSTOMER VISITING|PRODUCT PRESENTATION|ADP|TARGET & KPI|MASTER LIST|CODE MAP|WEEKLY MEETING|TENDER TRACK|TENDER PRICE LOG|NEW ACCOUNT & SKU|OLD KPI)/g;
+function on(){ try{ return curTeamKey()==="thaid"; }catch(e){ return false; } }
+function fix(s){ return String(s).replace(RE,"$1$2"); }
+window.thdSheetName=fix;
+function walk(root){
+  if(!root) return;
+  if(root.nodeType===3){ var v=root.nodeValue; if(/[0-9]\. [A-Z]/.test(v)){ var o=fix(v); if(o!==v) root.nodeValue=o; } return; }
+  if(root.nodeType!==1 && root.nodeType!==9) return;
+  var tw=document.createTreeWalker(root,NodeFilter.SHOW_TEXT,null), n;
+  while((n=tw.nextNode())){ var p=n.parentNode; if(p && /^(SCRIPT|STYLE|TEXTAREA)$/.test(p.nodeName)) continue; var t=n.nodeValue; if(/[0-9]\. [A-Z]/.test(t)){ var o2=fix(t); if(o2!==t) n.nodeValue=o2; } }
+  if(root.querySelectorAll) [].forEach.call(root.querySelectorAll("[title],[placeholder]"),function(e){ ["title","placeholder"].forEach(function(a){ var x=e.getAttribute(a); if(x && /[0-9]\. [A-Z]/.test(x)){ var y=fix(x); if(y!==x) e.setAttribute(a,y); } }); });
+}
+/* chữ còn sót tiếng Việt trên giao diện nhóm Thái (quét 30/10/2026: Họp tuần, Gửi báo cáo) */
+try{ if(typeof RULES_EN!=="undefined" && RULES_EN.unshift){
+  RULES_EN.unshift([/^Không có dòng nào của Tổng (.+) \(segment (.+)\) trong (FY\d+) — NPP chưa có budget \/ forecast trong SUM TURNOVER\.$/,
+    "No row of Total $1 (segment $2) in $3 — the distributors have no budget / forecast in SUM TURNOVER yet."]);
+  RULES_EN.unshift([/^Chưa có budget \/ forecast (FY\d+) trong SUM TURNOVER$/, "No budget / forecast $1 in SUM TURNOVER yet"]);
+  RULES_EN.unshift([/^Không có hoạt động nào trong kỳ (.+)$/, "No activity in the period $1"]);
+  RULES_EN.unshift([/^Tổng (.+)$/, "Total $1"]);
+} }catch(e){}
+try{
+  var _n=i18nNode;
+  i18nNode=window.i18nNode=function(root){ var r=_n.apply(this,arguments); try{ if(on()) walk(root); }catch(e){} return r; };
+  var _b=trBlock;
+  trBlock=window.trBlock=function(str){ var r=_b.apply(this,arguments); try{ if(on() && r!=null) r=fix(r); }catch(e){} return r; };
+  if(on()) walk(document.body);
+}catch(e){}
 })();
 </script>
 </body>
