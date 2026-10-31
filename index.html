@@ -4010,7 +4010,7 @@ function buildNav(){
     if(t.grp!==lastGrp){ h+='<div class="grp">'+t.grp+'</div>'; lastGrp=t.grp; }
     h+='<button class="nvi" data-t="'+t.id+'" onclick="go(\''+t.id+'\')"><span class="ic">'+t.ic+'</span><span class="lb">'+t.lb+'</span></button>';
   });
-  h+='<div style="flex:1"></div><div style="padding:10px;font-size:10.5px;color:var(--mute);line-height:1.5">MMH CRM v34.2<br>'+
+  h+='<div style="flex:1"></div><div style="padding:10px;font-size:10.5px;color:var(--mute);line-height:1.5">MMH CRM v34.3<br>'+
      (isMgmt()?'<a href="'+DRIVE_FOLDER+'" target="_blank">📁 Folder ảnh Drive</a>':"")+'</div>';
   $("side").innerHTML=h;
   /* ⭐ v4.5 — thanh dưới trượt ngang, đủ mọi mục, bỏ nút "Thêm" */
@@ -20750,7 +20750,7 @@ window.QS2={ open:qsOpen };
 </script>
 
 <!-- ⭐ v30.3 — THÔNG BÁO CẬP NHẬT (chép từ Report Hub): dữ liệu updates/notes.js · tự hiện 7 ngày · nút "Có gì mới" trên thanh trên cùng -->
-<script src="updates/notes.js?v=34.2"></script>
+<script src="updates/notes.js?v=34.3"></script>
 <style id="upd-css">
 #upd,#upd-zoom{--t-pri:var(--blue);--t-pri2:var(--blue-d);--t-ink:var(--navy);--t-soft:var(--pale);--t-line:var(--lb2);--t-bg:#F6F8FA;--mmh-blue:var(--blue);--mmh-navy:var(--navy)}
 
@@ -24867,7 +24867,7 @@ window.RPSTAT_CFG={ lang:function(){ return (window.I18N && I18N.on) ? "en" : "v
 <script src="rpstat/rpstat.js?v=1.0"></script>
 <script src="testflow/testflow.js?v=1.0"></script>
 <script src="tour/tour.js?v=1.1"></script>
-<script src="tour/tours.js?v=34.2"></script>
+<script src="tour/tours.js?v=34.3"></script>
 <script id="v319-i18n">
 /* v31.9 — bổ sung bản dịch EN (nhóm Thái): ô chọn account "N kết quả" */
 (function(){ try{ if(typeof RULES_EN!=="undefined" && RULES_EN.unshift){
@@ -28527,5 +28527,393 @@ window.renderOrder=renderOrder=function(){ var r=_ro.apply(this,arguments); try{
 try{ if(window.ADD) ADD["Gửi xác nhận nhiều đơn"]="Send several for approval"; }catch(_){}
 })();
 </script>
+<style id="v343-css">
+button[onclick*="insertResultTpl"]{display:none!important}
+.v343-rs{display:flex;flex-direction:column;gap:9px;margin-top:2px}
+.v343-p .lb{display:flex;align-items:center;gap:8px;font-size:12.5px;font-weight:600;color:var(--t-ink,#003047);margin-bottom:4px}
+.v343-p .lb small{font-weight:400;color:var(--sub,#5B6B7D)}
+.v343-p .lb .sp{flex:1}
+.v343-p .lb .rq{color:var(--dang,#C0392B)}
+.v343-p textarea{width:100%;min-height:54px;resize:vertical;border:1px solid var(--fld-line,#C3CDD8);border-radius:8px;padding:8px 10px;font:inherit;font-size:13px;box-sizing:border-box;background:#fff}
+.v343-p textarea:focus{outline:none;border-color:var(--t-pri,#3A5CAA);box-shadow:0 0 0 3px rgba(58,92,170,.12)}
+.v343-p textarea.bad{border-color:var(--dang,#C0392B);background:#FFF7F6}
+.v343-p .mini{height:24px;padding:0 9px;font-size:11.5px}
+.v343-meet{font-size:12.5px;color:var(--sub,#5B6B7D)}
+.v343-meet b{color:var(--t-ink,#003047)}
+</style>
+<script id="v343-js">
+/* v34.3 (31/10/2026)
+   ① Task Result = 4 ô cố định (bỏ nút "Chèn khung 4 mục" — người dùng yêu cầu): ô gốc #tk-result / #nt_result ẩn, giữ dòng "Người gặp:" và
+      ghép lại "1. Actions Taken: …" … như cũ ⇒ backend / báo cáo không đổi. Completed ⇒ bắt buộc đủ 4 ô (việc cũ chỉ kiểm khi sửa kết quả).
+   ② Người liên lạc ⇒ Key stakeholder (tab 2. CBC): form đơn hàng gõ được tên mới (backend saveOrders tự thêm vào CBC, v10.22);
+      địa bàn trùng tên ▸ "Dùng địa bàn này" vẫn lưu người liên lạc vừa nhập (action cbcEnsure). */
+(function(){
+  var G=RESULT_GUIDE;
+  var HINT=[["Đã làm gì","What you did"],["Tình hình hiện tại của khách","Current situation"],["Khách nói gì, phản hồi ra sao","What the customer said"],["Cơ hội, bước tiếp theo","Opportunities, next step"]];
+  var HRE=/^\s*([1-4])\s*[.)]\s*(Actions Taken|Current Situation|Customer Feedback|Opportunities\s*\/\s*Next Steps)\s*:?[ \t]*/i;
+  function parse(v){
+    var meet=(MEET_RE.exec(String(v||""))||[""])[0], rest=String(v||"").replace(MEET_RE,"");
+    var parts=["","","",""], cur=-1, pre=[];
+    rest.split("\n").forEach(function(line){
+      var m=HRE.exec(line);
+      if(m){ cur=+m[1]-1; var t=line.slice(m[0].length); parts[cur]=parts[cur]?parts[cur]+"\n"+t:t; return; }
+      if(cur<0) pre.push(line); else parts[cur]+= "\n"+line;
+    });
+    var p0=pre.join("\n").trim(); if(p0) parts[0]=parts[0].trim()?p0+"\n"+parts[0]:p0;
+    return { meet:meet.trim(), parts:parts.map(function(x){ return String(x||"").replace(/^\n+|\s+$/g,""); }) };
+  }
+  function compose(meet,parts){
+    var any=parts.some(function(x){ return String(x).trim(); });
+    if(!any) return meet||"";
+    return (meet?meet+"\n":"")+G.map(function(g,i){ return g+(String(parts[i]).trim()?" "+String(parts[i]).trim():""); }).join("\n");
+  }
+  function build(ta){
+    if(!ta || ta.dataset.v343) return;
+    ta.dataset.v343="1"; ta.style.display="none";
+    var id=ta.id, box=document.createElement("div"); box.className="v343-rs"; box.id=id+"-v343";
+    var h='<div class="v343-meet" id="'+id+'-v343m"></div>';
+    G.forEach(function(g,i){
+      h+='<div class="v343-p"><div class="lb">'+esc(g.replace(/:$/,""))+' <span class="rq">*</span><small>'+esc(TX(HINT[i][0],HINT[i][1]))+'</small><span class="sp"></span>'+
+         '<button type="button" class="mini" onclick="toggleVoice(\''+id+'-p'+i+'\',this)">'+TX("Nói","Voice")+'</button></div>'+
+         '<textarea id="'+id+'-p'+i+'" data-i="'+i+'"></textarea></div>';
+    });
+    box.innerHTML=h;
+    ta.parentNode.insertBefore(box,ta.nextSibling);
+    /* nút Nói của ô gốc ⇒ ẩn (đã có nút Nói từng ô) */
+    var vb=document.querySelector('button[onclick*="toggleVoice(\''+id+'\'"]'); if(vb) vb.style.display="none";
+    var self=false;
+    function fill(){
+      var p=parse(ta.value);
+      p.parts.forEach(function(t,i){ var e=$(id+"-p"+i); if(e && document.activeElement!==e) e.value=t; });
+      paintMeet(p.meet);
+    }
+    function paintMeet(m){
+      var el=$(id+"-v343m"); if(!el) return;
+      el.innerHTML=m?esc(m.split(":")[0])+': <b>'+esc(m.slice(m.indexOf(":")+1).trim())+'</b>':"";
+      el.style.display=m?"":"none";
+    }
+    function push(){
+      var parts=[0,1,2,3].map(function(i){ var e=$(id+"-p"+i); return e?e.value:""; });
+      var meet=(MEET_RE.exec(ta.value||"")||[""])[0].trim();
+      var v=compose(meet,parts);
+      if(v===ta.value) return;
+      ta.value=v; self=true;
+      try{ ta.dispatchEvent(new Event("input",{bubbles:true})); }finally{ self=false; }
+      if(id==="tk-result" && typeof markDirty==="function") markDirty("result",v);
+    }
+    box.addEventListener("input",function(e){ if(e.target.tagName==="TEXTAREA"){ e.target.classList.remove("bad"); push(); } });
+    ta.addEventListener("input",function(){ if(!self) fill(); });
+    /* người gặp do picker ghi thẳng vào ô gốc (không phát sự kiện) ⇒ dò nhẹ */
+    var last=ta.value, iv=setInterval(function(){
+      if(!document.body.contains(ta)){ clearInterval(iv); return; }
+      if(ta.value!==last){ last=ta.value; if(!self) fill(); }
+    },400);
+    ta._v343=function(){ last=ta.value; fill(); };
+    fill();
+  }
+  function scan(){ ["tk-result","nt_result"].forEach(function(id){ var t=$(id); if(t) build(t); }); }
+  new MutationObserver(function(){ scan(); }).observe(document.body,{childList:true,subtree:true});
+  scan();
+  var _pp=window.pullPlanToResult;
+  if(typeof _pp==="function") window.pullPlanToResult=pullPlanToResult=function(){ var r=_pp.apply(this,arguments); var t=$("tk-result"); if(t&&t._v343) t._v343(); return r; };
+
+  /* kiểm đủ 4 ô khi Completed */
+  function miss(id){
+    var out=[]; [0,1,2,3].forEach(function(i){ var e=$(id+"-p"+i); if(e && !String(e.value).replace(/[\s\-–—.:]+/g,"")){ out.push(i); e.classList.add("bad"); } });
+    return out;
+  }
+  function warn(id,m){
+    toast(TX("Task Result cần điền đủ 4 mục: ","Task Result needs all 4 parts: ")+m.map(function(i){ return G[i].replace(/^\d\.\s*|:$/g,""); }).join(", "),"warn",6500);
+    var e=$(id+"-p"+m[0]); if(e){ try{ e.scrollIntoView({block:"center",behavior:"smooth"}); e.focus(); }catch(_){} }
+  }
+  function tbd(acc){ try{ return isTbdAcc(acc||"") || /^tbd$/i.test(parseAcc(acc||"").name); }catch(_){ return false; } }
+  var _st=window.saveTask;
+  if(typeof _st==="function") window.saveTask=saveTask=function(){
+    try{
+      var w=S.task||{}, st=curV("tk-status","status");
+      if(/complet/i.test(String(st||"")) && !tbd(w.account) && $("tk-result-p0") && (S.dirty&&("result" in S.dirty) || !/complet/i.test(String(w.status||"")))){
+        var m=miss("tk-result"); if(m.length) return warn("tk-result",m);
+      }
+    }catch(e){}
+    return _st.apply(this,arguments);
+  };
+  var _sn=window.submitNewTask;
+  if(typeof _sn==="function") window.submitNewTask=submitNewTask=function(){
+    try{
+      var st=($("nt_status")||{}).value||"", acc=($("nt_account")||{}).value||($("nt_accName")||{}).value||"";
+      var vis=$("nt_resWrap"); vis=!vis || vis.style.display!=="none";
+      if(vis && /complet/i.test(st) && !tbd(acc) && $("nt_result-p0")){ var m=miss("nt_result"); if(m.length) return warn("nt_result",m); }
+    }catch(e){}
+    return _sn.apply(this,arguments);
+  };
+
+  /* ───── ② người liên lạc ⇒ Key stakeholder ───── */
+  function addCbcLocal(c){
+    if(!c || !c.contact) return;
+    S.cbcRows=S.cbcRows||[];
+    var k=accKeyOf(c.name), nm=accKeyOf(c.contact);
+    if(S.cbcRows.some(function(x){ return (c._row && x._row===c._row) || (accKeyOf(x.name)===k && accKeyOf(x.contact)===nm); })) return;
+    S.cbcRows=S.cbcRows.concat([c]); try{ stakeIdxReset(); }catch(_){} _stCache=null;
+    if(c._row) try{ afterWrite("cbc",c._row,c); }catch(_){}
+  }
+  window.v343AddCbc=addCbcLocal;
+  /* đơn hàng: phản hồi saveOrders có cbc[] (backend v10.22) */
+  var _ap=apiPost;
+  apiPost=function(body){
+    var p=_ap.apply(this,arguments);
+    if(body && body.action==="saveOrders" && p && p.then){
+      p.then(function(r){ try{ (r&&r.cbc||[]).forEach(function(x){ if(x&&x.cbc) addCbcLocal(Object.assign({_row:x.row},x.cbc)); }); }catch(_){} }).catch(function(){});
+    }
+    return p;
+  };
+  /* địa bàn trùng tên ▸ Dùng địa bàn này ⇒ vẫn lưu người liên lạc đã nhập */
+  var _use=window.v324Use;
+  if(typeof _use==="function") window.v324Use=function(i){
+    var c=(S._v324L||[])[i], ct=(($("na_contact")||{}).value||"").trim();
+    if(!c || !ct) return _use.apply(this,arguments);
+    var d={ code:c.code||"", name:c.name||"", contact:ct, phone:(($("na_phone")||{}).value||"").trim(),
+            jobTitle:($("na_job")||{}).value||"", specialize:(($("na_spec")||{}).value||"").trim(), pic:c.pic||S.user.pic,
+            logSource:"App — thêm khi tạo địa bàn" };
+    var f0=S._naDone; S._naDone=null; closeModal2();
+    var loc=Object.assign({_row:0,type:c.type,province:c.province,area:c.area},d); addCbcLocal(loc);
+    if(f0) f0(c,loc);
+    apiPost({ action:"cbcEnsure", cbc:d }).then(function(r){
+      if(r && r.cbc){ S.cbcRows=(S.cbcRows||[]).filter(function(x){ return x!==loc; }); addCbcLocal(Object.assign({_row:r.row},r.cbc)); }
+      toast(r&&r.isNew===false?TX("Người liên lạc đã có trong Key stakeholder","Contact already in Key stakeholders"):TX("Đã thêm "+ct+" vào Key stakeholder","Added "+ct+" to Key stakeholders"),"ok");
+    }).catch(function(e){ toast(TX("Chưa lưu được người liên lạc: ","Contact not saved: ")+(e&&e.message||e),"err",6000); });
+  };
+
+  /* form đơn hàng: Người liên lạc = chọn có sẵn HOẶC gõ tên mới */
+  window.ordDrawCbc=ordDrawCbc=function(sel){
+    var wrap=$("o_cbcWrap"); if(!wrap) return;
+    var acc=(S.editing&&S.editing.ctx&&S.editing.ctx.name)||($("o_accName")?$("o_accName").value:"");
+    if(!acc){ wrap.innerHTML='<input class="inp piclock" value="'+esc(TX("Chọn Account trước","Choose the account first"))+'" readonly>'; return; }
+    if(!S.cbcRows && !S._cbcLoading) reloadCbc(function(){ if($("o_cbcWrap")) ordDrawCbc(($("o_contact")||{}).value||sel); });
+    var list=stakeOf(acc), cur=sel!=null&&sel!==""?sel:(($("o_contact")||{}).value||"");
+    wrap.innerHTML='<input class="inp" id="o_contact" list="o_cbcList" autocomplete="off" value="'+esc(cur)+'" placeholder="'+
+      esc(list.length?TX("Chọn hoặc gõ tên người đặt đơn","Pick or type the orderer"):TX("Gõ tên người đặt đơn","Type the orderer's name"))+'">'+
+      '<datalist id="o_cbcList">'+list.map(function(b){ return '<option value="'+esc(b.contact)+'">'+esc([b.jobTitle,b.phone].filter(String).join(" · "))+'</option>'; }).join("")+'</datalist>';
+    var i=$("o_contact"); i.addEventListener("input",ordPickCbc); i.addEventListener("change",ordPickCbc);
+    ordPickCbc(true);
+  };
+  window.ordPickCbc=ordPickCbc=function(first){
+    var acc=(S.editing&&S.editing.ctx&&S.editing.ctx.name)||"";
+    var v=String(($("o_contact")||{}).value||"").trim();
+    var b=v?stakeOf(acc).filter(function(x){ return accKeyOf(x.contact)===accKeyOf(v); })[0]:null;
+    var jt=$("o_jobTitle"), ph=$("o_phone"), hint=$("o_cbcWrap"); hint=hint&&hint.parentNode&&hint.parentNode.parentNode&&hint.parentNode.parentNode.querySelector(".hint");
+    [jt,ph].forEach(function(e){ if(!e) return; e.readOnly=!!b||!v; e.classList.toggle("piclock",!!b||!v); });
+    if(b){ if(jt) jt.value=b.jobTitle||""; if(ph) ph.value=b.phone||""; }
+    else if(first!==true && !v){ if(jt) jt.value=""; if(ph) ph.value=""; }
+    if(S.editing&&S.editing.ctx) S.editing.ctx.cbcCode=b?(b.cbcCode||""):"";
+    if(hint) hint.innerHTML=b||!v?TX("Chọn người có sẵn hoặc gõ tên mới — người mới tự được lưu vào Key stakeholder của địa bàn","Pick an existing contact or type a new name — new contacts are saved to the account's Key stakeholders")
+      :TX("<b>Người mới</b> — lưu đơn sẽ tự thêm vào Key stakeholder (tab 2. CBC). Điền thêm chức danh, SĐT nếu có.","<b>New contact</b> — saved to Key stakeholders when you save the order. Add job title and phone if known.");
+  };
+  try{ if(window.ADD){ ADD["Task Result cần điền đủ 4 mục: "]="Task Result needs all 4 parts: "; } }catch(_){}
+})();
+</script>
+
+<style id="v343b-css">
+.v343-fin{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:7px;font-size:12.5px;color:var(--sub,#5B6B7D)}
+.v343-fin .ch{border:1px solid #E6EAEF;background:#fff;border-radius:999px;padding:4px 11px;cursor:pointer;font:inherit;font-size:12.5px;color:var(--t-ink,#003047)}
+.v343-fin .ch.on{border-color:var(--t-pri,#3A5CAA);background:var(--t-soft,#F0F7FF);font-weight:600}
+.v343-fin input[type=date]{height:28px;border:1px solid var(--fld-line,#C3CDD8);border-radius:7px;padding:0 6px;font:inherit;font-size:12.5px}
+.v343-care{margin-top:8px;padding:10px;border:1px solid #E6EAEF;border-radius:10px;background:#fff;color:var(--ink,#1F2A37)}
+.v343-care .r{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:8px}
+.v343-care .r>div{flex:1;min-width:140px}
+.v343-care label{display:block;font-size:11.5px;color:var(--sub,#5B6B7D);margin-bottom:3px}
+.v343-care .ft{display:flex;justify-content:flex-end;gap:7px}
+</style>
+<script id="v343b-js">
+/* v34.3 (31/10/2026, tiếp)
+   ③ Đơn hàng: khách chưa có lịch sử chăm sóc ⇒ "Thêm lịch sử chăm sóc" NGAY trong form đơn (ngày · loại · người gặp · nội dung) ⇒ ghi thẳng 1 dòng
+      Completed vào tab 6 (CUSTOMER VISITING / Customer meeting) — không mở form task mới, đơn đang nhập giữ nguyên.
+   ④ Chuyển Completed: chọn ngày kết thúc "Ngày đã chọn" (mặc định) / "Hôm nay" / ngày khác (quá khứ) — gửi finish + finKeep ⇒ backend v10.22 không tự đổi sang hôm nay. */
+(function(){
+  function LL(vi,en){ return TX(vi,en); }
+  function stDone(){ var l=(S.master&&S.master.status)||[]; return l.filter(function(x){ return /complet/i.test(x); })[0]||"Completed"; }
+  function dd(v){ try{ return fmtVN(v); }catch(_){ return v; } }
+  function addDay(iso,n){ var d=new Date(iso+"T00:00:00"); d.setDate(d.getDate()+n); return d.getFullYear()+"-"+("0"+(d.getMonth()+1)).slice(-2)+"-"+("0"+d.getDate()).slice(-2); }
+
+  /* ───── ④ ngày kết thúc khi Completed ─────
+     Lớp v23 cũ: chọn Completed ⇒ ô Ngày nhảy sang hôm nay. Nay: nhớ ngày TRƯỚC khi lớp cũ đổi (bắt sự kiện ở window — chạy trước document),
+     mặc định giữ "Ngày đã chọn"; người dùng bấm "Hôm nay" hoặc chọn ngày khác trong quá khứ. Lưu ⇒ finish = ngày đó + finKeep (backend v10.22). */
+  var FIN={ sel:"", mode:"sel" };
+  try{ dnNote=function(){}; }catch(_){}
+  function cfg(){
+    if($("tk-status") && $("tk-date")) return { st:$("tk-status"), d:$("tk-date"), tk:1 };
+    if($("nt_status") && $("nt_start")) return { st:$("nt_status"), d:$("nt_start"), tk:0 };
+    return null;
+  }
+  function setDate(c,v){
+    if(!v || c.d.value===v) return;
+    c.d.value=v;
+    if(c.tk){ S.dirty=S.dirty||{}; S.dirty.start=v; } else { try{ ntTbdSync(); }catch(_){} }
+  }
+  function apply(){
+    var c=cfg(); if(!c || !dnIsDone(c.st.value) || !FIN.sel) return;
+    var t=todayISO();
+    setDate(c, FIN.mode==="today"?t:FIN.mode==="other"?(FIN.other||FIN.sel):FIN.sel);
+  }
+  function paintFin(){
+    var c=cfg(); if(!c) return;
+    var box=$("v343-fin"), t=todayISO(), sel=FIN.sel;
+    var show=dnIsDone(c.st.value) && sel && sel<t;
+    if(!show){ if(box) box.style.display="none"; return; }
+    if(!box){ box=document.createElement("div"); box.id="v343-fin"; box.className="v343-fin";
+      var host=c.st.closest(".te-g2,.row")||c.st.parentNode; host.parentNode.insertBefore(box,host.nextSibling); }
+    box.style.display="";
+    box.innerHTML='<span>'+LL("Task này kết thúc vào:","This task ended on:")+'</span>'+
+      '<button type="button" class="ch'+(FIN.mode==="sel"?" on":"")+'" data-m="sel">'+LL("Ngày đã chọn","The selected date")+' '+dd(sel)+'</button>'+
+      '<button type="button" class="ch'+(FIN.mode==="today"?" on":"")+'" data-m="today">'+LL("Hôm nay","Today")+' '+dd(t)+'</button>'+
+      '<button type="button" class="ch'+(FIN.mode==="other"?" on":"")+'" data-m="other">'+LL("Ngày khác","Another date")+'</button>'+
+      (FIN.mode==="other"?'<input type="date" id="v343-fin-d" max="'+t+'" value="'+(FIN.other||sel)+'">':'');
+    [].forEach.call(box.querySelectorAll(".ch"),function(b){ b.onclick=function(){ FIN.mode=b.getAttribute("data-m"); if(FIN.mode==="other"&&!FIN.other) FIN.other=sel; apply(); paintFin(); }; });
+    var di=$("v343-fin-d"); if(di) di.onchange=function(){ if(this.value>t) this.value=t; FIN.other=this.value; apply(); };
+  }
+  window.v343Fin=function(){ paintFin(); };
+  /* window (capture) chạy TRƯỚC lớp v23 ở document ⇒ còn thấy ngày người dùng đã chọn */
+  window.addEventListener("change",function(e){
+    var id=e.target&&e.target.id, c=cfg(); if(!c) return;
+    if(id===c.st.id){
+      if(dnIsDone(e.target.value)){ if(!FIN.on){ FIN.sel=String(c.d.value||"").slice(0,10); FIN.mode="sel"; FIN.other=""; } FIN.on=1; }
+      else FIN.on=0;
+      setTimeout(function(){ apply(); paintFin(); },0);
+    } else if(id===c.d.id && !FIN.busy){
+      if(!dnIsDone(c.st.value)) FIN.sel="";
+      else { var v=String(e.target.value||"").slice(0,10); if(v && v<=todayISO()){ FIN.sel=v; FIN.mode="sel"; } setTimeout(paintFin,0); }
+    }
+  },true);
+  new MutationObserver(function(){
+    var c=cfg(), k=c?(c.st.id+"|"+(c.tk&&S.task?S.task._row:"")):"";
+    if(k!==FIN.k){ FIN.k=k; FIN.sel=""; FIN.mode="sel"; FIN.other=""; FIN.on=c&&dnIsDone(c.st.value)?1:0; }
+  }).observe(document.body,{childList:true,subtree:true});
+  function pending(){
+    var c=cfg(); if(!c || !dnIsDone(c.st.value)) return null;
+    var v=String(c.d.value||"").slice(0,10); if(!v || v>todayISO()) return null;
+    if(c.tk && FIN.sel){ S.dirty=S.dirty||{}; S.dirty.start=v; }      /* lớp v23 khi lưu không đổi sang hôm nay nữa */
+    return v;
+  }
+  var _st=window.saveTask;
+  if(typeof _st==="function") window.saveTask=saveTask=function(){ S._v343fin=pending(); try{ return _st.apply(this,arguments); } finally{ S._v343fin=null; } };
+  var _sn=window.submitNewTask;
+  if(typeof _sn==="function") window.submitNewTask=submitNewTask=function(){ S._v343fin=pending(); try{ return _sn.apply(this,arguments); } finally{ S._v343fin=null; } };
+  var _ap=apiPost;
+  apiPost=function(body){
+    if(body && body.action==="saveWeekly" && body.data && S._v343fin){ body.data.finish=S._v343fin; body.data.finKeep=1; }
+    return _ap.apply(this,arguments);
+  };
+
+  /* ───── ③ thêm lịch sử chăm sóc ngay trong form đơn hàng ───── */
+  window.v322CareAdd=function(){
+    var box=$("v322-care"); if(!box) return;
+    var ctx=(S.editing&&S.editing.ctx)||{};
+    if(!ctx.name) return toast(LL("Chọn account trước","Choose the account first"),"warn");
+    var old=$("v343-care"); if(old){ old.remove(); return; }
+    var oday=String(($("o_day")||{}).value||todayISO()).slice(0,10), t=todayISO(), mx=oday<t?oday:t;
+    var types=((S.master&&S.master.typeAction)||["Visiting","Telephone","Message"]).filter(function(x){ return x && !/tbd/i.test(x); });
+    var who=String(($("o_contact")||{}).value||"").trim(), stk=stakeOf(ctx.name);
+    var h='<div class="r"><div><label>'+LL("Ngày chăm sóc","Date")+' *</label><input class="inp" type="date" id="v343c-d" value="'+mx+'" min="'+addDay(oday,-30)+'" max="'+mx+'"></div>'+
+      '<div><label>'+LL("Loại chăm sóc","Type")+' *</label><select class="inp" id="v343c-t">'+opts(types,types.indexOf("Telephone")>=0?"Telephone":types[0])+'</select></div>'+
+      '<div><label>'+LL("Người gặp","Person met")+' *</label><input class="inp" id="v343c-w" list="v343c-wl" value="'+esc(who)+'" autocomplete="off">'+
+        '<datalist id="v343c-wl">'+stk.map(function(b){ return '<option value="'+esc(b.contact)+'">'; }).join("")+'</datalist></div></div>'+
+      '<div class="r"><div style="flex:3"><label>'+LL("Nội dung trao đổi","What was discussed")+'</label><input class="inp" id="v343c-n" placeholder="'+esc(LL("VD: Gọi tư vấn sản phẩm, khách đồng ý đặt hàng","e.g. Product call, customer agreed to order"))+'"></div></div>'+
+      '<div class="r" id="v343c-vx" style="display:none"><div><label>Customer feedback *</label><select class="inp" id="v343c-fb">'+opts((S.master&&S.master.feedback)||[],"","— chọn —")+'</select></div>'+
+        '<div><label>Next action *</label><select class="inp" id="v343c-nx">'+opts(NEXT_ACTIONS,"","— chọn —")+'</select></div></div>'+
+      '<div class="ft"><button type="button" class="btn sm" onclick="var x=$(\'v343-care\');if(x)x.remove()">'+LL("Huỷ","Cancel")+'</button>'+
+      '<button type="button" class="btn pri sm" id="v343c-ok" onclick="v343CareSave()">'+LL("Lưu lịch sử chăm sóc","Save care activity")+'</button></div>';
+    var d=document.createElement("div"); d.id="v343-care"; d.className="v343-care"; d.innerHTML=h;
+    box.parentNode.insertBefore(d,box.nextSibling);
+    var ts=$("v343c-t"); function vx(){ $("v343c-vx").style.display=/^visiting$/i.test(ts.value)?"":"none"; } ts.onchange=vx; vx();
+    try{ d.scrollIntoView({block:"nearest",behavior:"smooth"}); }catch(_){}
+  };
+  window.v343CareSave=function(){
+    var ctx=(S.editing&&S.editing.ctx)||{};
+    var day=($("v343c-d")||{}).value||"", ty=($("v343c-t")||{}).value||"", who=String(($("v343c-w")||{}).value||"").trim(), note=String(($("v343c-n")||{}).value||"").trim();
+    var vis=/^visiting$/i.test(ty), fb=($("v343c-fb")||{}).value||"", nx=($("v343c-nx")||{}).value||"";
+    var miss=[]; if(!day) miss.push(LL("Ngày","Date")); if(!ty) miss.push(LL("Loại","Type")); if(!who) miss.push(LL("Người gặp","Person met"));
+    if(vis){ if(!fb) miss.push("Customer feedback"); if(!nx) miss.push("Next action"); }
+    if(day>todayISO()) miss.push(LL("Ngày không được sau hôm nay","Date cannot be in the future"));
+    if(miss.length) return toast(LL("Cần bổ sung: ","Please fill in: ")+miss.join(", "),"warn",5000);
+    var acc=mkAcc({ name:ctx.name, type:ctx.type, province:ctx.province, area:ctx.area });
+    var meet=(isTH()?"Person met: ":"Người gặp: ")+who;
+    var d={ _row:0, account:acc, start:day, finish:day, finKeep:1, pic:($("o_pic")||{}).value||S.user.pic,
+      typeTask:(typeof typeTaskForAcc==="function"&&typeTaskForAcc(ctx.type))||"Account Management", typeAction:ty,
+      process:"", product:"", plan:"",
+      result:meet+"\n1. Actions Taken: "+(note||ty)+"\n2. Current Situation:\n3. Customer Feedback:"+(fb?" "+fb:"")+"\n4. Opportunities / Next Steps: "+LL("Tạo đơn hàng","Create the order"),
+      status:stDone(), feedback:fb, nextAction:nx, stopReason:"" };
+    var b=$("v343c-ok"); if(b){ b.disabled=true; b.textContent=LL("Đang lưu…","Saving…"); }
+    apiPost({ action:"saveWeekly", data:d }).then(function(r){
+      if(r && r.ok===false) throw new Error(r.error||"Lỗi");
+      afterWrite("weekly", (r&&r.row)||0, d);
+      var x=$("v343-care"); if(x) x.remove();
+      if(!stakeOf(ctx.name).some(function(x){ return accKeyOf(x.contact)===accKeyOf(who); }))
+        apiPost({ action:"cbcEnsure", cbc:{ code:ctx.code||"", name:ctx.name, contact:who, pic:d.pic, logSource:"App — người gặp khi ghi lịch sử chăm sóc" } })
+          .then(function(r2){ if(r2&&r2.cbc&&window.v343AddCbc) v343AddCbc(Object.assign({_row:r2.row},r2.cbc)); }).catch(function(){});
+      toast(LL("Đã ghi lịch sử chăm sóc vào Customer meeting — tiếp tục tạo đơn","Care activity saved — continue the order"),"ok",5000);
+      setTimeout(function(){ var c=$("v322-care"); if(c){ c.className="v322-care ok"; c.style.display=""; c.textContent=LL("Lịch sử chăm sóc: ","Care history: ")+ty+" · "+dd(day)+" · "+d.pic; } },60);
+    }).catch(function(e){ if(b){ b.disabled=false; b.textContent=LL("Lưu lịch sử chăm sóc","Save care activity"); } toast(String(e&&e.message||e),"err",7000); });
+  };
+  /* đổi chữ nút cũ */
+  new MutationObserver(function(){
+    var b=document.querySelector('#v322-care button[onclick="v322CareAdd()"]');
+    if(b && !b._v343){ b._v343=1;
+      var bx=$("v322-care");
+      bx.innerHTML='<b>'+esc(LL("Chưa có lịch sử chăm sóc trong 30 ngày","No customer care in the last 30 days"))+'</b> — '+
+        esc(LL("bấm Thêm lịch sử chăm sóc, chọn ngày + loại chăm sóc ⇒ hệ thống tự ghi vào Customer meeting, rồi lưu đơn.","click Add care history, pick the date and type ⇒ it is saved to Customer meeting, then save the order."))+
+        '<button type="button" class="btn sm" onclick="v322CareAdd()">＋ '+esc(LL("Thêm lịch sử chăm sóc","Add care history"))+'</button>';
+      bx.querySelector("button")._v343=1; }
+  }).observe(document.body,{childList:true,subtree:true});
+})();
+</script>
+
+<script id="v343c-js">
+/* v34.3 (31/10/2026, tiếp) — Đơn hàng: dòng sản phẩm nhập SL TRƯỚC Unit price (trái ⇒ phải); Unit price / Amount hiện dấu chấm nghìn (200.000).
+   Ô giá chỉ là hiển thị — ordSync bỏ dấu chấm trước khi tính / lưu (S.ordProds[i].price luôn là số trơn). */
+(function(){
+  function dot(v){ var s=String(v==null?"":v).replace(/[^\d]/g,""); s=s.replace(/^0+(?=\d)/,""); return s.replace(/\B(?=(\d{3})+(?!\d))/g,"."); }
+  window.v343Dot=dot;
+  window.ordRowHtml=ordRowHtml=function(p,i,single){
+    var nD=(p.details||pcSplit(p.detail)).length, amt=n(p.price)*n(p.qty);
+    return '<div class="oprow">'+
+      '<div class="opc t"><span class="oplb">Product type</span>'+
+        '<select class="inp" id="op_t'+i+'" onchange="ordPtypeChg('+i+')">'+opts(S.master.product,p.ptype,"— chọn —")+'</select></div>'+
+      '<div class="opc d"><span class="oplb">Detail'+(nD>1?(' · '+nD+' mã chung một mức giá'):'')+'</span>'+
+        ordDetailBox(p,i)+'</div>'+
+      '<div class="opc n"><span class="oplb">SL</span>'+
+        '<input class="inp num" id="op_q'+i+'" inputmode="numeric" value="'+esc(p.qty||"")+'" oninput="ordNum(this)"></div>'+
+      '<div class="opc n"><span class="oplb">Unit price</span>'+
+        '<input class="inp num" id="op_u'+i+'" inputmode="numeric" value="'+esc(dot(p.price))+'" oninput="ordNum(this)"></div>'+
+      '<div class="opc n"><span class="oplb">Amount</span>'+
+        '<input class="inp num piclock" id="op_a'+i+'" readonly value="'+(amt?dot(Math.round(amt)):"")+'"></div>'+
+      '<button class="opdel" type="button" title="Bỏ dòng này"'+(single?' disabled':'')+' onclick="ordDelProd('+i+')">✕</button>'+
+    '</div>';
+  };
+  var _sync=window.ordSync;
+  window.ordSync=ordSync=function(){
+    var r=_sync.apply(this,arguments);
+    ordProds().forEach(function(p){ if(p.price!=null && p.price!=="") p.price=String(p.price).replace(/[^\d]/g,""); });
+    return r;
+  };
+  window.ordNum=ordNum=function(el){
+    if(/^op_u/.test(el.id||"")){
+      var raw=String(el.value||""), pos=el.selectionStart==null?raw.length:el.selectionStart;
+      var digitsRight=raw.slice(pos).replace(/[^\d]/g,"").length, v=dot(raw);
+      if(v!==raw){
+        el.value=v;
+        var k=v.length, c=0; while(k>0 && c<digitsRight){ k--; if(/\d/.test(v.charAt(k))) c++; }
+        try{ el.setSelectionRange(k,k); }catch(_){}
+      }
+    } else { var q=String(el.value||"").replace(/[^\d]/g,""); if(q!==el.value) el.value=q; }
+    ordCalc();
+  };
+  var _calc=window.ordCalc;
+  window.ordCalc=ordCalc=function(){
+    var r=_calc.apply(this,arguments);
+    ordProds().forEach(function(p,i){ var a=n(p.price)*n(p.qty), el=$("op_a"+i); if(el) el.value=a?dot(Math.round(a)):""; });
+    return r;
+  };
+})();
+</script>
+
 </body>
 </html>

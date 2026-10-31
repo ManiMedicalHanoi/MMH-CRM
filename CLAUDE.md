@@ -215,3 +215,13 @@ Kiến trúc & quy ước giống MMH Report Hub (repo `ManiMedicalHanoi/MMH-Rep
 - **v34.2 (31/10/2026, khối `v342-css` + `v342-js`)**: sales gửi xác nhận NHIỀU đơn 1 lần — nút "Gửi xác nhận nhiều đơn" (`.v342-b` trong dải `.v321-ban`, `#v342-h` đầu trang khi ≥ 2 đơn đủ điều kiện) ⇒ `v342Open()`
   bảng đơn Chờ duyệt của mình (Admin: mọi đơn) từ `S.ordAp`, chọn từng đơn / Chọn tất cả (chỉ đơn `ready`; mặc định chọn sẵn đơn chưa gửi / "Cần bổ sung") ⇒ `orderRequest keys=[…]` 1 lệnh mỗi PIC
   (backend vốn nhận nhiều đơn: 1 email liệt kê mọi đơn, link `#oa`). Đơn chưa đủ điều kiện hiện mờ + lý do.
+- **v34.3 (31/10/2026, khối `v343-css` + `v343-js`, backend CRM v10.22)**: ① Task Result = **4 ô cố định** (Actions Taken · Current Situation · Customer Feedback · Opportunities / Next Steps, mỗi ô nút Nói) —
+  bỏ nút "Chèn khung 4 mục" (người dùng yêu cầu). Ô gốc `#tk-result` / `#nt_result` ẩn, ô con `<id>-p0..3`, ghép lại đúng định dạng cũ `Người gặp: …\n1. Actions Taken: …` (backend / báo cáo không đổi);
+  picker người gặp ghi thẳng ô gốc ⇒ dò 400 ms. Completed (không TBD) ⇒ bắt buộc đủ 4 ô (`saveTask` chỉ kiểm khi sửa kết quả hoặc mới chuyển Completed — việc cũ không bị chặn).
+  ② Người liên lạc ⇒ **Key stakeholder** (tab 2. CBC): backend `cbcEnsure_` (tìm theo địa bàn + tên bỏ dấu / SĐT, chưa có thì thêm) dùng ở `saveCustomerCbc`, `saveOrders` (trả `cbc[]`) và action `cbcEnsure`.
+  Form đơn hàng: `#o_contact` = ô gõ + datalist (người mới ⇒ mở khoá Chức danh / SĐT); địa bàn trùng tên ▸ `v324Use` vẫn lưu người liên lạc (`cbcEnsure`).
+  ③ Đơn hàng: khách chưa có lịch sử chăm sóc ⇒ nút **Thêm lịch sử chăm sóc** (`v322CareAdd` ghi đè, khung `#v343-care`: ngày ≤ ngày đặt, loại, người gặp, nội dung; Visiting thêm feedback + next action) ⇒ `saveWeekly`
+  1 dòng Completed vào tab 6 ngay (không mở form task, đơn giữ nguyên) + `cbcEnsure` người gặp. ④ Chuyển Completed: lớp v23 cũ đổi ô Ngày sang hôm nay — `v343b-js` bắt `change` ở `window` (chạy trước v23) nhớ ngày cũ,
+  hàng `#v343-fin` "Task này kết thúc vào: Ngày đã chọn (mặc định) · Hôm nay · Ngày khác (≤ hôm nay)" đặt lại ô Ngày; lưu ⇒ `finish` = ngày đó + `finKeep:1` (backend `wkApplyRule_` v10.22 giữ, kẹp [start, hôm nay]). `dnNote` tắt.
+  ⑤ Dòng sản phẩm đơn hàng (`v343c-js`, ghi đè `ordRowHtml` / `ordSync` / `ordNum` / `ordCalc`): thứ tự Product type · **SL** · **Unit price** · Amount; ô giá + Amount hiện dấu chấm nghìn (`v343Dot`),
+  `ordSync` bỏ dấu chấm ⇒ `S.ordProds[i].price` luôn là số trơn (đừng đọc thẳng `#op_u…` mà không bỏ dấu).
