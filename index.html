@@ -4010,7 +4010,7 @@ function buildNav(){
     if(t.grp!==lastGrp){ h+='<div class="grp">'+t.grp+'</div>'; lastGrp=t.grp; }
     h+='<button class="nvi" data-t="'+t.id+'" onclick="go(\''+t.id+'\')"><span class="ic">'+t.ic+'</span><span class="lb">'+t.lb+'</span></button>';
   });
-  h+='<div style="flex:1"></div><div style="padding:10px;font-size:10.5px;color:var(--mute);line-height:1.5">MMH CRM v34.1<br>'+
+  h+='<div style="flex:1"></div><div style="padding:10px;font-size:10.5px;color:var(--mute);line-height:1.5">MMH CRM v34.2<br>'+
      (isMgmt()?'<a href="'+DRIVE_FOLDER+'" target="_blank">📁 Folder ảnh Drive</a>':"")+'</div>';
   $("side").innerHTML=h;
   /* ⭐ v4.5 — thanh dưới trượt ngang, đủ mọi mục, bỏ nút "Thêm" */
@@ -20750,7 +20750,7 @@ window.QS2={ open:qsOpen };
 </script>
 
 <!-- ⭐ v30.3 — THÔNG BÁO CẬP NHẬT (chép từ Report Hub): dữ liệu updates/notes.js · tự hiện 7 ngày · nút "Có gì mới" trên thanh trên cùng -->
-<script src="updates/notes.js?v=34.1"></script>
+<script src="updates/notes.js?v=34.2"></script>
 <style id="upd-css">
 #upd,#upd-zoom{--t-pri:var(--blue);--t-pri2:var(--blue-d);--t-ink:var(--navy);--t-soft:var(--pale);--t-line:var(--lb2);--t-bg:#F6F8FA;--mmh-blue:var(--blue);--mmh-navy:var(--navy)}
 
@@ -24867,7 +24867,7 @@ window.RPSTAT_CFG={ lang:function(){ return (window.I18N && I18N.on) ? "en" : "v
 <script src="rpstat/rpstat.js?v=1.0"></script>
 <script src="testflow/testflow.js?v=1.0"></script>
 <script src="tour/tour.js?v=1.1"></script>
-<script src="tour/tours.js?v=34.1"></script>
+<script src="tour/tours.js?v=34.2"></script>
 <script id="v319-i18n">
 /* v31.9 — bổ sung bản dịch EN (nhóm Thái): ô chọn account "N kết quả" */
 (function(){ try{ if(typeof RULES_EN!=="undefined" && RULES_EN.unshift){
@@ -28409,6 +28409,122 @@ try{
   trBlock=window.trBlock=function(str){ var r=_b.apply(this,arguments); try{ if(on() && r!=null) r=fix(r); }catch(e){} return r; };
   if(on()) walk(document.body);
 }catch(e){}
+})();
+</script>
+<style id="v342-css">
+/* ⭐ v34.2 — sales gửi xác nhận NHIỀU đơn trong 1 lần */
+.osv-bar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:0 0 10px;font-size:13px;color:#41566F}
+.osv-bar label{display:flex;align-items:center;gap:7px;font-weight:600;cursor:pointer}
+.osv-bar .sp{flex:1}
+.osv-tb{width:100%;border-collapse:collapse;font-size:13px}
+.osv-tb th{text-align:left;background:var(--t-soft,#F0F7FF);color:var(--t-ink,#003047);font-weight:600;padding:7px 8px;border-bottom:1px solid #E6EAEF}
+.osv-tb td{padding:7px 8px;border-bottom:1px solid #EEF1F4;vertical-align:top}
+.osv-tb tr.on td{background:#FAFCFF}
+.osv-tb tr.dis td{color:#8A97A6}
+.osv-tb td.n,.osv-tb th.n{text-align:right;white-space:nowrap}
+.osv-tb input[type=checkbox]{width:17px;height:17px;cursor:pointer;accent-color:var(--t-pri,#3A5CAA)}
+.osv-tb .sub{color:#8A97A6;font-size:12px}
+.osv-tb .w{color:#7A5A00;font-size:12px}
+.osv-st{display:inline-block;padding:1px 8px;border-radius:999px;font-size:11.5px;font-weight:600;border:1px solid #E6EAEF;background:#F7F9FB;color:#41566F;white-space:nowrap}
+.osv-st.w{border-color:#F1D48A;background:#FFF8E6;color:#7A5A00}
+.osv-st.r{border-color:#EBB4B4;background:#FDEEEE;color:#9B2C2C}
+@media(max-width:720px){.osv-tb .hm{display:none}}
+</style>
+<script id="v342-js">
+/* ═════════ v34.2 (31/10/2026) — GỬI XÁC NHẬN NHIỀU ĐƠN 1 LẦN (người dùng: đang phải bấm & gửi từng đơn) ═════════
+   · Dải thông báo trang Đơn hàng (.v321-ban) + đầu trang ▸ nút "Gửi xác nhận nhiều đơn" ⇒ bảng mọi đơn Chờ duyệt của mình (Admin: mọi đơn chờ duyệt),
+     ô chọn từng đơn + "Chọn tất cả" (chỉ đơn đủ điều kiện; mặc định chọn sẵn đơn chưa gửi / cần chỉnh sửa) ⇒ 1 lệnh orderRequest keys=[…] mỗi PIC
+     (backend đã nhận nhiều đơn: 1 email liệt kê mọi đơn tới người duyệt, link #oa mở bảng duyệt).
+   · Đơn chưa đủ điều kiện (thiếu loại / chứng từ…) hiện mờ kèm lý do, không chọn được. */
+(function(){
+"use strict";
+function L(v,e){ try{ return (window.I18N&&I18N.on)?e:v; }catch(_){ return v; } }
+function E(s){ return String(s==null?"":s).replace(/[&<>"]/g,function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]; }); }
+function me(){ return String((S.user&&S.user.pic)||"").toLowerCase(); }
+function isAdm(){ try{ var u=AUTH.user(); return !!(u&&u.admin); }catch(_){ return false; } }
+function vnd(v){ try{ return fmtVND(+v||0); }catch(_){ return String(v||0); } }
+function day(v){ try{ return fmtVN(v); }catch(_){ return String(v||""); } }
+var SEL={}, BUSY=false;
+function mine(){
+  var out=[], adm=isAdm();
+  (((S.ordAp||{}).groups)||[]).forEach(function(g){ (g.orders||[]).forEach(function(o){
+    if(o.appr!=="wait") return;
+    if(!adm && String(o.pic||"").toLowerCase()!==me()) return;
+    out.push(o);
+  }); });
+  return out;
+}
+function stOf(o){ var nt=String(o.apprNote||"");
+  if(/^Cần bổ sung/.test(nt)) return { c:"r", t:L("Cần chỉnh sửa","Changes requested"), pre:1 };
+  if(/^Đã gửi xác nhận/.test(nt)) return { c:"", t:L("Đã gửi","Sent")+((/· (\d{2}\/\d{2})/.exec(nt)||[])[1]?" "+(/· (\d{2}\/\d{2})/.exec(nt))[1]:""), pre:0 };
+  return { c:"w", t:L("Chưa gửi","Not sent"), pre:1 };
+}
+function paint(){
+  var A=mine(), ready=A.filter(function(o){ return o.ready; });
+  var all=ready.length && ready.every(function(o){ return SEL[o.key]; });
+  var n=ready.filter(function(o){ return SEL[o.key]; }).length;
+  var h='<div class="osv-bar"><label><input type="checkbox" id="osv-all" '+(all?"checked":"")+' '+(ready.length?"":"disabled")+'> '+E(L("Chọn tất cả đơn đủ điều kiện","Select all ready orders"))+' ('+ready.length+')</label><span class="sp"></span><span id="osv-n">'+E(L("Đã chọn ","Selected "))+'<b>'+n+'</b></span></div>';
+  if(!A.length) h+='<div class="hint">'+E(L("Không có đơn nào đang chờ duyệt.","No order is waiting for approval."))+'</div>';
+  else {
+    h+='<table class="osv-tb"><thead><tr><th style="width:30px"></th><th>'+E(L("Khách hàng","Account"))+'</th>'+(isAdm()?'<th class="hm">PIC</th>':'')+'<th class="hm">'+E(L("Ngày đặt","Date"))+'</th><th class="n hm">'+E(L("Giá trị","Value"))+'</th><th>'+E(L("Tình trạng","Status"))+'</th></tr></thead><tbody>';
+    A.forEach(function(o){
+      var s=stOf(o), ok=!!o.ready, on=ok&&!!SEL[o.key];
+      h+='<tr class="'+(ok?(on?"on":""):"dis")+'"><td><input type="checkbox" data-k="'+E(o.key)+'" '+(on?"checked":"")+' '+(ok?"":"disabled")+'></td>'+
+        '<td><b>'+E(o.account||"—")+'</b><div class="sub">'+E(o.orderNo||"")+((o.lines||[]).length?' · '+(o.lines||[]).length+' '+E(L("sản phẩm","products")):'')+'</div>'+
+        (ok?'':'<div class="w">'+E(L("Chưa đủ điều kiện: ","Not ready: ")+(o.warn||[]).join(" · "))+'</div>')+'</td>'+
+        (isAdm()?'<td class="hm">'+E(o.pic||"")+'</td>':'')+
+        '<td class="hm">'+E(o.day?day(o.day):"")+'</td><td class="n hm">'+E(o.kpi!=null?vnd(o.kpi):"")+'</td>'+
+        '<td><span class="osv-st '+s.c+'">'+E(s.t)+'</span></td></tr>';
+    });
+    h+='</tbody></table>';
+  }
+  var b=document.getElementById("osv-bd"); if(!b) return; b.innerHTML=h;
+  var go=document.getElementById("osv-go"); if(go){ go.disabled=!n||BUSY; go.textContent=BUSY?L("Đang gửi…","Sending…"):L("Gửi xác nhận ","Send for approval ")+(n?"("+n+")":""); }
+  var al=document.getElementById("osv-all"); if(al) al.onchange=function(){ var v=this.checked; ready.forEach(function(o){ if(v) SEL[o.key]=1; else delete SEL[o.key]; }); paint(); };
+  [].forEach.call(b.querySelectorAll("tbody input[data-k]"),function(cb){ cb.onchange=function(){ var k=cb.getAttribute("data-k"); if(cb.checked) SEL[k]=1; else delete SEL[k]; paint(); }; });
+  [].forEach.call(b.querySelectorAll("tbody tr"),function(tr){ tr.addEventListener("click",function(e){ if(e.target.tagName==="INPUT") return; var cb=tr.querySelector("input[data-k]"); if(cb && !cb.disabled){ cb.checked=!cb.checked; cb.onchange(); } }); });
+}
+function open(){
+  if(!S.ordAp){ try{ window.ordApLoad(); }catch(_){} toast(L("Đang tải danh sách đơn…","Loading orders…"),"",2500); var n=0; (function w(){ if(S.ordAp) return open(); if(++n<30) setTimeout(w,400); })(); return; }
+  SEL={}; mine().forEach(function(o){ if(o.ready && stOf(o).pre) SEL[o.key]=1; });
+  openModal(L("Gửi xác nhận nhiều đơn hàng","Send several orders for approval"),'<div class="hint" style="margin-bottom:10px">'+E(L("Chọn các đơn rồi bấm Gửi — người duyệt nhận 1 email liệt kê mọi đơn đã chọn kèm chứng từ.","Pick the orders and press Send — the approver gets one e-mail listing every selected order with its documents."))+'</div><div id="osv-bd"></div>',
+    '<button class="btn" onclick="closeModal()">'+E(L("Đóng","Close"))+'</button><button class="btn pri" id="osv-go" onclick="v342Send()">'+E(L("Gửi xác nhận","Send for approval"))+'</button>', true);
+  paint();
+}
+function send(){
+  if(BUSY) return;
+  var A=mine().filter(function(o){ return o.ready && SEL[o.key]; }); if(!A.length) return;
+  var by={}; A.forEach(function(o){ (by[o.pic]=by[o.pic]||[]).push(o.key); });
+  BUSY=true; paint();
+  var pics=Object.keys(by), okN=0, errs=[];
+  (function next(i){
+    if(i>=pics.length){
+      BUSY=false;
+      if(errs.length) toast(errs.join(" · "),"err",9000);
+      if(okN){ toast(L("Đã gửi xác nhận "+okN+" đơn hàng — người duyệt nhận 1 email.","Sent "+okN+" order(s) for approval — the approver gets one e-mail."),"ok",6000); try{ closeModal(); }catch(_){} }
+      else paint();
+      S.ordAp=null; try{ window.ordApLoad(); }catch(_){}
+      try{ fetchTab("order",{}).then(function(rows){ S.cache.order={rows:rows||[]}; if(S.tab==="order") renderOrder(); }); }catch(_){}
+      return;
+    }
+    var keys=by[pics[i]];
+    apiPost({ action:"orderRequest", keys:keys }).then(function(j){ if(j&&j.ok===false) throw new Error(j.error||"Lỗi"); okN+=keys.length; next(i+1); })
+      .catch(function(e){ errs.push(pics[i]+": "+e.message); next(i+1); });
+  })(0);
+}
+window.v342Open=open; window.v342Send=send;
+/* nút ở dải thông báo + đầu trang Đơn hàng */
+function add(){
+  if(S.tab!=="order" || !S.ordAp) return;
+  var A=mine(); if(A.filter(function(o){ return o.ready; }).length<1) return;
+  var ban=document.querySelector("#main .v321-ban");
+  if(ban && !ban.querySelector(".v342-b")){ var b=document.createElement("button"); b.className="btn sm pri v342-b"; b.textContent=L("Gửi xác nhận nhiều đơn","Send several for approval"); b.onclick=open; ban.appendChild(b); }
+  var ph=document.querySelector("#main .pg .ph"); 
+  if(ph && !ph.querySelector(".v342-h") && A.filter(function(o){ return o.ready; }).length>=2){ var tgt=ph.querySelector("div:last-child")||ph; var c=document.createElement("button"); c.className="btn sm v342-h"; c.id="v342-h"; c.textContent=L("Gửi xác nhận nhiều đơn","Send several for approval"); c.onclick=open; tgt.appendChild(c); }
+}
+var _ro=window.renderOrder;
+window.renderOrder=renderOrder=function(){ var r=_ro.apply(this,arguments); try{ add(); setTimeout(add,1500); setTimeout(add,5000); }catch(_){} return r; };
+try{ if(window.ADD) ADD["Gửi xác nhận nhiều đơn"]="Send several for approval"; }catch(_){}
 })();
 </script>
 </body>

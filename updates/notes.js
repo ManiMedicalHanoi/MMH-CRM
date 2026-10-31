@@ -7,6 +7,13 @@
 function E(u){ u.en={ title:u.title, items:u.items.map(function(i){ return { title:i.title, text:i.text }; }) }; return u; }
 window.MMH_UPDATES = [
   E({
+    id:"2026-10-31-v34.2", version:"v34.2", date:"2026-10-31",
+    title:"Send several orders for approval at once",
+    summary:"Sales no longer have to send orders for approval one by one: tick several orders (or select all) and send them in one go.",
+    items:[
+      { type:"new", icon:"✉", title:"Send several orders at once", text:"Orders ▸ <b>Send several for approval</b> (top of the page or in the yellow notice) ▸ tick the orders or <b>Select all</b> ▸ <b>Send for approval</b>. The approver gets one e-mail listing every selected order with its documents. Orders not sent yet or returned for changes are ticked for you; orders missing documents cannot be ticked until they are fixed.", img:"updates/v34.2/bulk_send.jpg" }
+    ] }),
+  E({
     id:"2026-10-30-v34.1", version:"v34.1", date:"2026-10-30",
     title:"Thailand Dental team joins the CRM · customer training (T&E) for both Thailand teams",
     summary:"Yong, Man and Sui now work in the CRM like the Thailand Surgical team: same screens, English interface, their own data file. Both Thailand teams can log customer training sessions (T&E), and the Dental KPIs FY68 are linked to the KPI file.",
