@@ -212,3 +212,6 @@ Kiến trúc & quy ước giống MMH Report Hub (repo `ManiMedicalHanoi/MMH-Rep
   File Dental Thái KHÔNG đánh số tên sheet (người dùng yêu cầu): khối `v341-js` bỏ số trong chữ hiển thị tên sheet ("sheet 6. CUSTOMER VISITING" ⇒ "sheet CUSTOMER VISITING") khi nhóm thaid
   (bọc `i18nNode` + `trBlock`), thêm luật `RULES_EN` cho chữ còn sót (Họp tuần, Gửi báo cáo). Nhóm thaid PHẢI full tiếng Anh — kiểm bằng bộ quét chữ Việt (đăng nhập Yong, team thaid).
   Chưa làm: Thống kê gửi báo cáo (`rpstat/rpstat.js`, dùng chung Report Hub) chưa đọc backend crm-thai-dental.
+- **v34.2 (31/10/2026, khối `v342-css` + `v342-js`)**: sales gửi xác nhận NHIỀU đơn 1 lần — nút "Gửi xác nhận nhiều đơn" (`.v342-b` trong dải `.v321-ban`, `#v342-h` đầu trang khi ≥ 2 đơn đủ điều kiện) ⇒ `v342Open()`
+  bảng đơn Chờ duyệt của mình (Admin: mọi đơn) từ `S.ordAp`, chọn từng đơn / Chọn tất cả (chỉ đơn `ready`; mặc định chọn sẵn đơn chưa gửi / "Cần bổ sung") ⇒ `orderRequest keys=[…]` 1 lệnh mỗi PIC
+  (backend vốn nhận nhiều đơn: 1 email liệt kê mọi đơn, link `#oa`). Đơn chưa đủ điều kiện hiện mờ + lý do.
