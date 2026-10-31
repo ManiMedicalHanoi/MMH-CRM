@@ -7,6 +7,19 @@
 function E(u){ u.en={ title:u.title, items:u.items.map(function(i){ return { title:i.title, text:i.text }; }) }; return u; }
 window.MMH_UPDATES = [
   E({
+    id:"2026-10-31-v34.3", version:"v34.3", date:"2026-10-31",
+    title:"Task Result in 4 boxes · care history in the order form · finish date · quantity first",
+    summary:"Task Result has 4 fixed boxes. A missing care history can be added right inside the order form. Completing a task no longer jumps the date to today — you choose. New contacts are saved to Key stakeholders automatically.",
+    items:[
+      { type:"imp", icon:"✎", title:"Task Result = 4 boxes", text:"Field visit form ▸ <b>Task Result</b> now shows 4 boxes: Actions Taken · Current Situation · Customer Feedback · Opportunities / Next Steps, each with a <b>Voice</b> button. A <b>Completed</b> task needs all 4 boxes filled before it can be saved.", img:"updates/v34.3/result4.jpg" },
+      { type:"new", icon:"☎", title:"Orderer saved as Key stakeholder", text:"Order form ▸ <b>Contact</b>: pick an existing contact or type a new name (add job title and phone). When you save the order, a new contact is added to the account's Key stakeholders (sheet 2. CBC).", img:"updates/v34.3/orderer.jpg" },
+      { type:"new", icon:"+", title:"Add care history inside the order form", text:"Order form ▸ customer without care history ▸ <b>Add care history</b> ▸ pick the date, care type (Telephone, Message, Visiting…) and person met ▸ <b>Save care activity</b>. A Completed row is added to Customer meeting at once and you continue the order — no new task form.", img:"updates/v34.3/care.jpg" },
+      { type:"imp", icon:"◷", title:"Choose when a task ended", text:"Setting a task to <b>Completed</b> no longer moves its date to today. Pick <b>The selected date</b> (default), <b>Today</b> or <b>Another date</b> in the past; the finish date is saved as you chose.", img:"updates/v34.3/finish.jpg" },
+      { type:"imp", icon:"#", title:"Quantity before unit price", text:"Order form ▸ product line: enter <b>SL</b> (quantity) first, then <b>Unit price</b>. Prices and amounts show thousand separators while you type (200.000 instead of 200000).", img:"updates/v34.3/qty_price.jpg" },
+      { type:"fix", icon:"✓", title:"First contact of a new account is kept", text:"Adding a new account whose name already exists and choosing <b>Use this account</b> used to drop the contact you typed. The contact is now saved to that account's Key stakeholders." }
+    ]
+  }),
+  E({
     id:"2026-10-31-v34.2", version:"v34.2", date:"2026-10-31",
     title:"Send several orders for approval at once",
     summary:"Sales no longer have to send orders for approval one by one: tick several orders (or select all) and send them in one go.",
