@@ -4017,7 +4017,7 @@ function buildNav(){
     if(t.grp!==lastGrp){ h+='<div class="grp">'+t.grp+'</div>'; lastGrp=t.grp; }
     h+='<button class="nvi" data-t="'+t.id+'" onclick="go(\''+t.id+'\')"><span class="ic">'+t.ic+'</span><span class="lb">'+t.lb+'</span></button>';
   });
-  h+='<div style="flex:1"></div><div style="padding:10px;font-size:10.5px;color:var(--mute);line-height:1.5">MMH CRM v34.9<br>'+
+  h+='<div style="flex:1"></div><div style="padding:10px;font-size:10.5px;color:var(--mute);line-height:1.5">MMH CRM v35.0<br>'+
      (isMgmt()?'<a href="'+DRIVE_FOLDER+'" target="_blank">📁 Folder ảnh Drive</a>':"")+'</div>';
   $("side").innerHTML=h;
   /* ⭐ v4.5 — thanh dưới trượt ngang, đủ mọi mục, bỏ nút "Thêm" */
@@ -20761,7 +20761,7 @@ window.QS2={ open:qsOpen };
 </script>
 
 <!-- ⭐ v30.3 — THÔNG BÁO CẬP NHẬT (chép từ Report Hub): dữ liệu updates/notes.js · tự hiện 7 ngày · nút "Có gì mới" trên thanh trên cùng -->
-<script src="updates/notes.js?v=34.9"></script>
+<script src="updates/notes.js?v=35.0"></script>
 <style id="upd-css">
 #upd,#upd-zoom{--t-pri:var(--blue);--t-pri2:var(--blue-d);--t-ink:var(--navy);--t-soft:var(--pale);--t-line:var(--lb2);--t-bg:#F6F8FA;--mmh-blue:var(--blue);--mmh-navy:var(--navy)}
 
@@ -27235,7 +27235,13 @@ function merge(){
   var have={}; V.items.forEach(function(o){ have[o.key]=1; });
   P.forEach(function(o){ if(!have[o.key]) V.items.push(o); });
   if(S.ordAp && !S.ordAp.err){ var ch=0; Object.keys(D).forEach(function(k){ if(!by[k]){ delete D[k]; ch=1; } }); if(ch) dSave(); }
+  /* v35.0 — "Đã yêu cầu chỉnh sửa" chỉ nhớ trên máy: sales đã gửi xác nhận lại (Ghi chú duyệt không còn "Cần bổ sung") hoặc đã sửa đơn ⇒ bỏ, đơn lại chờ duyệt bình thường */
+  if(S.ordAp && !S.ordAp.err) Object.keys(V.st).forEach(function(k){ var x=V.st[k], o=by[k]; if(!x || x.st!=="ret" || !o) return;
+    if(!/^Cần bổ sung/.test(String(o.apprNote||"")) || (x.sig && x.sig!==sig(o))) delete V.st[k]; });
 }
+function sig(o){ return JSON.stringify([+o.amount||0, (o.lines||[]).map(function(l){ return [l.ptype,l.detail,+l.qty||0,+l.amount||0]; }), (o.docs||[]).map(function(d){ return d.url; }), o.otype||"", +o.tender||0, o.kqtt||""]); }
+/* đơn đã có kết quả cuối (xác nhận / không xác nhận) ⇒ hết nút; đơn đã yêu cầu chỉnh sửa vẫn xác nhận được */
+function fin(o){ var x=stOf(o); return !!(x && /^(ok|no)$/.test(x.st)); }
 function shown(){ return V.items.filter(function(o){ return !V.pic || o.pic===V.pic; }); }
 function stOf(o){ return V.st[o.key]||null; }
 /* v33.7 — Yêu cầu chỉnh sửa = NHÁP trên máy (nhận xét riêng từng đơn), bấm "Gửi yêu cầu chỉnh sửa" 1 lần ⇒ backend notes{key:nhận xét}, mỗi sales 1 email */
@@ -27278,6 +27284,8 @@ function open(key){
   merge();
   if(key){ var A=shown(), j=-1; A.forEach(function(o,k){ if(o.key===key) j=k; }); if(j<0 && V.pic){ V.pic=""; A=shown(); A.forEach(function(o,k){ if(o.key===key) j=k; }); } if(j>=0){ V.i=j; V.mode="one"; } else V.want=key; }
   paint(); wait();
+  /* v35.0 — luôn đọc lại danh sách chờ duyệt khi mở (sales vừa sửa / gửi lại đơn ⇒ HOD thấy ngay, không dùng bản cũ trong máy) */
+  try{ if(S.ordAp && !S._oaLd) window.ordApLoad(); var ld=S._oaLd; if(ld && ld.then) ld.then(function(){ if(V.open){ merge(); paint(); } },function(){}); }catch(_){}
 }
 /* chờ danh sách từ máy chủ (mở ngay, dữ liệu về thì vẽ lại) */
 function wait(){
@@ -27369,10 +27377,10 @@ function paintOne(bd,ft){
   });
   h+='</div></div>';
   bd.innerHTML=h; bd.scrollTop=0;
-  var busy=s&&s.st==="run", fin=done(o);
+  var busy=s&&s.st==="run", isFin=fin(o), ret=!!(s&&s.st==="ret");
   var f='<div class="nav"><button class="btn sm" id="oav-prev" '+(V.i<=0?"disabled":"")+' onclick="oavGo(-1)">‹ '+E(L("Trước","Prev"))+'</button><b>'+(V.i+1)+' / '+A.length+'</b><button class="btn sm" id="oav-next" '+(V.i>=A.length-1?"disabled":"")+' onclick="oavGo(1)">'+E(L("Sau","Next"))+' ›</button></div><span class="sp"></span>';
-  if(!fin && isDr(o) && !busy) f+='<button class="btn sm" onclick="oavDrDel()">'+E(L("Bỏ nhận xét","Remove note"))+'</button><button class="btn sm pri" onclick="oavWhy(\'return\')">'+E(L("Sửa nhận xét","Edit note"))+'</button>';
-  else if(!fin) f+='<button class="btn sm" '+(busy?"disabled":"")+' onclick="oavWhy(\'return\')">'+E(L("Yêu cầu chỉnh sửa","Request changes"))+'</button>'+
+  if(!isFin && isDr(o) && !busy) f+='<button class="btn sm" onclick="oavDrDel()">'+E(L("Bỏ nhận xét","Remove note"))+'</button><button class="btn sm pri" onclick="oavWhy(\'return\')">'+E(L("Sửa nhận xét","Edit note"))+'</button>';
+  else if(!isFin) f+='<button class="btn sm" '+(busy?"disabled":"")+' onclick="oavWhy(\'return\')">'+E(ret?L("Yêu cầu chỉnh sửa lại","Request changes again"):L("Yêu cầu chỉnh sửa","Request changes"))+'</button>'+
           '<button class="btn sm dg" '+(busy?"disabled":"")+' onclick="oavWhy(\'reject\')">'+E(L("Không xác nhận","Reject"))+'</button>'+
           '<button class="btn sm pri" id="oav-ok" '+(busy?"disabled":"")+' onclick="oavOk()">'+E(busy?L("Đang gửi…","Sending…"):L("Xác nhận","Approve"))+'</button>';
   f+=whyBox();
@@ -27387,13 +27395,13 @@ function whyBox(){
 function wireWhy(){ var t=$i("oav-cm"); if(!t) return; if(V.whyPre){ t.value=V.whyPre; V.whyPre=""; } setTimeout(function(){ try{ t.focus(); }catch(_){} },30); }
 function paintList(bd,ft){
   var A=shown();
-  var nSel=0, tot=0; A.forEach(function(o){ if(V.sel[o.key] && !done(o)){ nSel++; tot+=+o.kpi||0; } });
-  var ready=A.filter(function(o){ return o.ready && !done(o); });
+  var nSel=0, tot=0; A.forEach(function(o){ if(V.sel[o.key] && !fin(o)){ nSel++; tot+=+o.kpi||0; } });
+  var ready=A.filter(function(o){ return o.ready && !fin(o); });
   var all=ready.length && ready.every(function(o){ return V.sel[o.key]; });
   var h='<table class="lst"><thead><tr><th style="width:30px"><input type="checkbox" id="oav-all" '+(all?"checked":"")+' '+(ready.length?"":"disabled")+' title="'+E(L("Chọn mọi đơn đủ điều kiện","Select every ready order"))+'"></th>'+
     '<th>'+E(L("Khách hàng","Account"))+'</th><th class="hm">PIC</th><th class="hm">'+E(L("Ngày đặt","Date"))+'</th><th class="hm">'+E(L("Loại","Type"))+'</th><th class="n">'+E(L("Tính KPI","KPI value"))+'</th><th class="hm">'+E(L("Chứng từ","Docs"))+'</th><th>'+E(L("Tình trạng","Status"))+'</th></tr></thead><tbody>';
   A.forEach(function(o,k){
-    var dn=done(o), can=!dn && !(stOf(o)&&stOf(o).st==="run");
+    var dn=fin(o), can=!dn && !(stOf(o)&&stOf(o).st==="run");
     h+='<tr data-k="'+k+'" class="'+(V.sel[o.key]&&!dn?"sel":"")+'"><td><input type="checkbox" data-key="'+E(o.key)+'" '+(V.sel[o.key]&&!dn?"checked":"")+' '+(can?"":"disabled")+' title="'+E(can?"":(o.warn||[]).join(" · "))+'"></td>'+
       '<td><b>'+E(o.account||"—")+'</b><div style="color:#8A97A6;font-size:12px">'+E(o.orderNo||"")+' · '+(o.lines||[]).length+' '+E(L("sản phẩm","products"))+'</div></td>'+
       '<td class="hm">'+E(o.pic)+'</td><td class="hm">'+E(o.day?day(o.day):mon(o.month))+'</td><td class="hm">'+E(tyLb(o.otype)||"—")+'</td>'+
@@ -27433,7 +27441,7 @@ window.oavOk=function(){
   send([o],"approve","");
 };
 window.oavOkSel=function(){
-  var all=shown().filter(function(o){ return V.sel[o.key] && !done(o); }), L2=all.filter(function(o){ return o.ready; });
+  var all=shown().filter(function(o){ return V.sel[o.key] && !fin(o); }), L2=all.filter(function(o){ return o.ready; });
   if(!L2.length) return toast(L("Chưa chọn đơn nào đủ điều kiện xác nhận","No ready order selected"),"warn");
   if(all.length>L2.length) toast(L("Bỏ qua "+(all.length-L2.length)+" đơn chưa đủ điều kiện — dùng Yêu cầu chỉnh sửa cho các đơn đó.",(all.length-L2.length)+" incomplete order(s) skipped — use Request changes."),"warn",6000);
   send(L2,"approve","");
@@ -27447,7 +27455,7 @@ window.oavSendDrafts=function(){
 window.oavSendWhy=function(){
   var cm=String(($i("oav-cm")||{}).value||"").trim();
   if(cm.length<3){ toast(V.why==="reject"?L("Ghi lý do không xác nhận","Enter a reason"):L("Ghi rõ sales cần chỉnh sửa gì","Say what needs to change"),"warn"); var t=$i("oav-cm"); if(t) t.focus(); return; }
-  var list=V.mode==="list" ? shown().filter(function(o){ return V.sel[o.key] && !done(o); }) : [shown()[V.i]];
+  var list=V.mode==="list" ? shown().filter(function(o){ return V.sel[o.key] && !fin(o); }) : [shown()[V.i]];
   list=list.filter(Boolean); if(!list.length) return;
   if(V.why==="return"){
     list.forEach(function(o){ D[o.key]={ cm:cm, pic:o.pic, at:Date.now() }; delete V.sel[o.key]; delete V.st[o.key]; }); dSave();
@@ -27475,7 +27483,7 @@ function send(list,dec,cm,notes){
       var r=R[o.key];
       var c2=(notes&&notes[o.key])||cm;
       if(j && j.softTimeout && !r){ V.st[o.key]={ st:tag, cm:c2, soft:1 }; if(notes){ delete D[o.key]; } return; }
-      if(r && r.ok){ V.st[o.key]={ st:r.already?({ok:"ok",no:"no"}[r.already]||tag):tag, cm:c2 }; if(notes){ delete D[o.key]; } return; }
+      if(r && r.ok){ V.st[o.key]={ st:r.already?({ok:"ok",no:"no"}[r.already]||tag):tag, cm:c2, sig:sig(o) }; if(notes){ delete D[o.key]; } return; }
       bad++; V.st[o.key]={ st:"err", msg:(r&&r.error)||(j&&j.error)||L("Máy chủ không xử lý đơn này","Not processed") };
     });
     var okN=list.length-bad; if(notes) dSave();
@@ -27530,7 +27538,7 @@ function byRow(row){ var G=((S.ordAp||{}).groups)||[], f=null; G.forEach(functio
 window.v320Dec=function(row,dec){
   var o=byRow(row);
   if(!o){ toast(L("Đang tải danh sách chờ duyệt — thử lại sau vài giây.","Loading the approval list — try again in a few seconds."),"warn",5000); S.ordAp=null; try{ window.ordApLoad(); }catch(_){} return; }
-  if(dec==="approve" && o.ready && !done(o)){
+  if(dec==="approve" && o.ready && !fin(o)){
     var b=null; try{ b=(window.event&&window.event.target)?window.event.target.closest("button"):null; }catch(_){}
     if(b){ b.disabled=true; b.textContent=L("Đang gửi…","Sending…"); }
     merge(); if(!V.items.some(function(x){ return x.key===o.key; })) V.items.push(o);
