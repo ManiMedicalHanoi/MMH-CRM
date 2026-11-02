@@ -241,3 +241,6 @@ Kiến trúc & quy ước giống MMH Report Hub (repo `ManiMedicalHanoi/MMH-Rep
   khung Thêm lịch sử chăm sóc cho chọn ngày tới hôm nay (mặc định = ngày đặt).
 - **v34.7 (02/11/2026) — Báo cáo KPI tháng (FM01) / quý (FM02) theo quy trình MMHSOP_009 (`kpisop/kpisop.js` GIỐNG HỆT MMH-Report, khối `v347-js` = `KPISOP_CFG`)**: xem CLAUDE.md của MMH-Report (v19.1).
   Gửi báo cáo ▸ KPI / KPI & Mục tiêu ▸ Báo cáo KPI tháng · Báo cáo KPI quý. Nhóm Thái (`isTH()` hoặc team có "thai") ⇒ giao diện + mẫu Word + email tiếng Anh; nhóm VN ⇒ tiếng Việt. Hạn ngày 05, To Trưởng bộ phận + Tổng Giám đốc, CC Kế toán.
+- **v34.8 (02/11/2026, khối `v348-js`)**: file CRM Thailand Dental đổi tên sheet **CUSTOMER VISITING → CUSTOMER TASK**, **ALL TASK → OTHERS TASK** (backend `crm-thai-dental/TH_DentalFix.gs`, xem CLAUDE.md mmh-backend) ⇒
+  chữ trên app nhắc tên sheet đổi theo khi nhóm `thaid` (bọc `i18nNode` / `trBlock` / `thdSheetName`, `window.thdTaskName`). Nhóm Surgical Thái giữ tên cũ. Cùng đợt backend: mã khách "N??" (CODE MAP), dropdown Co-visiting,
+  PRODUCT TEST cột Result link, ADP cột Key account + Profile completed ⇒ KPI C2-02 tự tính.

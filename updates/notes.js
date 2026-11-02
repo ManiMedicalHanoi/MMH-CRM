@@ -7,6 +7,18 @@
 function E(u){ u.en={ title:u.title, items:u.items.map(function(i){ return { title:i.title, text:i.text }; }) }; return u; }
 window.MMH_UPDATES = [
   E({
+    id:"2026-11-02-v34.8", version:"v34.8", date:"2026-11-02",
+    title:"Thailand Dental CRM file: renamed sheets, fixed customer codes, Product test result link, key-account profiling KPI",
+    summary:"Fixes from the review of the <b>Thailand Dental</b> CRM file: sheet names, customer / contact codes, the Co-visiting dropdown, a result link in PRODUCT TEST and an automatic KPI C2-02 from sheet ADP.",
+    items:[
+      { type:"imp", icon:"#", title:"Sheets CUSTOMER TASK and OTHERS TASK", text:"Sheet <b>CUSTOMER VISITING</b> is now <b>CUSTOMER TASK</b> and <b>ALL TASK</b> is now <b>OTHERS TASK</b>. Data and formulas are kept; the app shows the new names." },
+      { type:"fix", icon:"✓", title:"Customer and CBC codes no longer show \"??\"", text:"Codes like <b>N??-OT0157</b> now read correctly (e.g. <b>NCM-UN0157</b> for Chiang Mai · University): the CODE MAP lists were rebuilt and every province / account type in use got a code." },
+      { type:"fix", icon:"✓", title:"Type action Co-visiting with distributor is valid", text:"The red \"invalid\" mark on <b>Co-visiting with distributor</b> is gone: every dropdown now reads the whole MASTER LIST column." },
+      { type:"new", icon:"#", title:"PRODUCT TEST: Result link", text:"Sheet PRODUCT TEST has a new column <b>Result link</b> next to Note — paste the link to the test result." },
+      { type:"new", icon:"#", title:"KPI C2-02 from sheet ADP", text:"Sheet ADP has two new columns: <b>Key account</b> (Yes / No) and <b>Profile completed</b> (date filled automatically when the profile row is complete). KPI <b>C2-02</b> = accounts with a complete profile ÷ customers of the PIC in CUSTOMER CODE, by month." }
+    ]
+  }),
+  E({
     id:"2026-11-02-v34.7", version:"v34.7", date:"2026-11-02",
     title:"Monthly and quarterly KPI reports follow the new KPI procedure MMHSOP_009: official forms, due on day 05",
     summary:"Under the <b>KPI Management Procedure MMHSOP_009</b> (effective 01/10/2026) the Monthly KPI Report (form <b>FM01</b>) and Quarterly KPI Report (form <b>FM02</b>) go to your <b>Department Head and the General Director, CC Accounting</b>, by <b>day 05</b>. The Word file in the official form is attached automatically.",
