@@ -239,3 +239,5 @@ Kiến trúc & quy ước giống MMH Report Hub (repo `ManiMedicalHanoi/MMH-Rep
   Product type + Detail, cùng phạm vi Nhóm sản phẩm: tháng đang chọn / lũy kế đến tháng; bỏ đơn từ chối; "đã duyệt" = `apSt` ok | old), lưới thẻ 3 cột (`.v346-kp`).
   ② KHÔNG có khoá tháng khi thêm đơn; luật duy nhất = lịch sử chăm sóc. Đơn nhập bù (ngày đặt đã qua): lượt Completed từ ngày đặt − 30 **đến hôm nay** đều tính (`v322CareOf` + backend `ordCareOf_`);
   khung Thêm lịch sử chăm sóc cho chọn ngày tới hôm nay (mặc định = ngày đặt).
+- **v34.7 (02/11/2026) — Báo cáo KPI tháng (FM01) / quý (FM02) theo quy trình MMHSOP_009 (`kpisop/kpisop.js` GIỐNG HỆT MMH-Report, khối `v347-js` = `KPISOP_CFG`)**: xem CLAUDE.md của MMH-Report (v19.1).
+  Gửi báo cáo ▸ KPI / KPI & Mục tiêu ▸ Báo cáo KPI tháng · Báo cáo KPI quý. Nhóm Thái (`isTH()` hoặc team có "thai") ⇒ giao diện + mẫu Word + email tiếng Anh; nhóm VN ⇒ tiếng Việt. Hạn ngày 05, To Trưởng bộ phận + Tổng Giám đốc, CC Kế toán.
