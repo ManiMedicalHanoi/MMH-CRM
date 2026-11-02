@@ -4017,7 +4017,7 @@ function buildNav(){
     if(t.grp!==lastGrp){ h+='<div class="grp">'+t.grp+'</div>'; lastGrp=t.grp; }
     h+='<button class="nvi" data-t="'+t.id+'" onclick="go(\''+t.id+'\')"><span class="ic">'+t.ic+'</span><span class="lb">'+t.lb+'</span></button>';
   });
-  h+='<div style="flex:1"></div><div style="padding:10px;font-size:10.5px;color:var(--mute);line-height:1.5">MMH CRM v34.5<br>'+
+  h+='<div style="flex:1"></div><div style="padding:10px;font-size:10.5px;color:var(--mute);line-height:1.5">MMH CRM v34.6<br>'+
      (isMgmt()?'<a href="'+DRIVE_FOLDER+'" target="_blank">📁 Folder ảnh Drive</a>':"")+'</div>';
   $("side").innerHTML=h;
   /* ⭐ v4.5 — thanh dưới trượt ngang, đủ mọi mục, bỏ nút "Thêm" */
@@ -20757,7 +20757,7 @@ window.QS2={ open:qsOpen };
 </script>
 
 <!-- ⭐ v30.3 — THÔNG BÁO CẬP NHẬT (chép từ Report Hub): dữ liệu updates/notes.js · tự hiện 7 ngày · nút "Có gì mới" trên thanh trên cùng -->
-<script src="updates/notes.js?v=34.5"></script>
+<script src="updates/notes.js?v=34.6"></script>
 <style id="upd-css">
 #upd,#upd-zoom{--t-pri:var(--blue);--t-pri2:var(--blue-d);--t-ink:var(--navy);--t-soft:var(--pale);--t-line:var(--lb2);--t-bg:#F6F8FA;--mmh-blue:var(--blue);--mmh-navy:var(--navy)}
 
@@ -24886,7 +24886,7 @@ window.RHN_CFG={ url:window.TRAINING_HUB_API, key:(typeof TRN_KEY!=="undefined"?
 <script src="rhnotify/rhnotify.js?v=1.0"></script>
 <script src="testflow/testflow.js?v=1.0"></script>
 <script src="tour/tour.js?v=1.1"></script>
-<script src="tour/tours.js?v=34.5"></script>
+<script src="tour/tours.js?v=34.6"></script>
 <script id="v319-i18n">
 /* v31.9 — bổ sung bản dịch EN (nhóm Thái): ô chọn account "N kết quả" */
 (function(){ try{ if(typeof RULES_EN!=="undefined" && RULES_EN.unshift){
@@ -25115,7 +25115,7 @@ if(typeof _sn==="function") window.submitNewTask=submitNewTask=function(){
 function careOf(name,day){
   var key=nk(name); if(!key) return null;
   var rows=(typeof terrRows==="function"?terrRows():[])||[]; if(!rows.length) return { unknown:true };
-  var to=iso(day)||todayISO(), from=addD(to,-CARE_DAYS), best=null;
+  var d0=iso(day)||todayISO(), to=d0<todayISO()?todayISO():d0, from=addD(d0,-CARE_DAYS), best=null;   /* v34.6 — đơn nhập bù: lượt chăm sóc đến hôm nay cũng được tính (backend v10.23) */
   rows.forEach(function(w){
     if(nk(parseAcc(w.account).name)!==key) return;
     if(!/complet/i.test(String(w.status||""))) return;
@@ -25232,11 +25232,16 @@ function render(){
   var pt={}, ptT=0; (selM?mList:cum).forEach(function(o){ var t=ptOf(o); pt[t]=(pt[t]||0)+n(o.amount); ptT+=n(o.amount); });
   var ptK=Object.keys(pt).sort(function(a,b){ return pt[b]-pt[a]; });
   var mLbl=monLbl("T"+parseInt(focus.slice(4),10))+"/"+focus.slice(0,4);
-  var kp='<div class="v322-kp" id="v322-kp">'+
+  /* v34.6 — số vỉ JIZAI · số tuýp Composite (cùng phạm vi với Nhóm sản phẩm: tháng đang chọn / lũy kế đến tháng; bỏ đơn bị từ chối) */
+  var qOf=function(re){ var t=0,a=0; (selM?mList:cum).forEach(function(o){ if(!re.test(String(o.ptype||"")+" "+String(o.detail||""))) return; var q=n(o.qty); t+=q; var st=apSt(o); if(st==="ok"||st==="old") a+=q; }); return { t:t, a:a }; };
+  var qJ=qOf(/jizai/i), qC=qOf(/composite/i), qLb=selM?L("tháng ","month ")+mLbl:L("lũy kế đến T","to M")+parseInt(focus.slice(4),10);
+  var kp='<div class="v322-kp v346-kp" id="v322-kp">'+
     '<div class="it"><small>'+e2(L("Số đơn","Orders"))+'</small><b>'+fmtN(cM.ord)+'</b><span>'+e2(selM?L("tháng ","month ")+mLbl:L("cả ","whole ")+S.fy)+'</span></div>'+
     '<div class="it"><small>'+e2(L("Số khách (không trùng)","Customers (unique)"))+'</small><b>'+fmtN(cM.cust)+'</b><span>'+e2(L("account có đơn","accounts ordering"))+'</span></div>'+
     '<div class="it"><small>'+e2(L("Số tiền tháng ","Amount · ")+mLbl)+'</small><b>'+fmtVND(sMon)+'</b><span>'+fmtN(grpOf(mList).ord)+' '+e2(L("đơn","orders"))+'</span></div>'+
-    '<div class="it"><small>'+e2(L("Lũy kế ","Cumulative ")+S.fy+L(" đến T"," to M")+parseInt(focus.slice(4),10))+'</small><b>'+fmtVND(sCum)+'</b><span>'+e2(L("đã duyệt ","approved "))+fmtVND(apOk)+'</span></div></div>';
+    '<div class="it"><small>'+e2(L("Lũy kế ","Cumulative ")+S.fy+L(" đến T"," to M")+parseInt(focus.slice(4),10))+'</small><b>'+fmtVND(sCum)+'</b><span>'+e2(L("đã duyệt ","approved "))+fmtVND(apOk)+'</span></div>'+
+    '<div class="it v346-q"><small>'+e2(L("JIZAI · số vỉ","JIZAI · blisters"))+'</small><b>'+fmtN(qJ.t)+' <em>'+e2(L("vỉ","pcs"))+'</em></b><span>'+e2(qLb+L(" · đã duyệt "," · approved ")+fmtN(qJ.a))+'</span></div>'+
+    '<div class="it v346-q"><small>'+e2(L("Composite · số tuýp","Composite · tubes"))+'</small><b>'+fmtN(qC.t)+' <em>'+e2(L("tuýp","tubes"))+'</em></b><span>'+e2(qLb+L(" · đã duyệt "," · approved ")+fmtN(qC.a))+'</span></div></div>';
   var ptH='<div class="v322-pg" id="v322-pg"><div class="hd">'+e2(L("Nhóm sản phẩm","Product groups"))+' <span>· '+e2(selM?L("tháng ","month ")+mLbl:L("lũy kế đến ","to ")+mLbl)+'</span></div>'+
     (ptK.length?ptK.slice(0,8).map(function(t){ var p=ptT?pt[t]/ptT:0;
       return '<div class="v322-pt"><span class="nm">'+e2(t)+'</span><span class="br"><i style="width:'+Math.max(2,Math.round(p*100))+'%"></i></span><span class="vl">'+fmtVND(pt[t])+'</span><span class="pc">'+Math.round(p*100)+'%</span></div>'; }).join("")
@@ -28828,10 +28833,10 @@ button[onclick*="insertResultTpl"]{display:none!important}
     var ctx=(S.editing&&S.editing.ctx)||{};
     if(!ctx.name) return toast(LL("Chọn account trước","Choose the account first"),"warn");
     var old=$("v343-care"); if(old){ old.remove(); return; }
-    var oday=String(($("o_day")||{}).value||todayISO()).slice(0,10), t=todayISO(), mx=oday<t?oday:t;
+    var oday=String(($("o_day")||{}).value||todayISO()).slice(0,10), t=todayISO(), mx=t;
     var types=((S.master&&S.master.typeAction)||["Visiting","Telephone","Message"]).filter(function(x){ return x && !/tbd/i.test(x); });
     var who=String(($("o_contact")||{}).value||"").trim(), stk=stakeOf(ctx.name);
-    var h='<div class="r"><div><label>'+LL("Ngày chăm sóc","Date")+' *</label><input class="inp" type="date" id="v343c-d" value="'+mx+'" min="'+addDay(oday,-30)+'" max="'+mx+'"></div>'+
+    var h='<div class="r"><div><label>'+LL("Ngày chăm sóc","Date")+' *</label><input class="inp" type="date" id="v343c-d" value="'+(oday<t?oday:t)+'" min="'+addDay(oday,-30)+'" max="'+mx+'"></div>'+
       '<div><label>'+LL("Loại chăm sóc","Type")+' *</label><select class="inp" id="v343c-t">'+opts(types,types.indexOf("Telephone")>=0?"Telephone":types[0])+'</select></div>'+
       '<div><label>'+LL("Người gặp","Person met")+' *</label><input class="inp" id="v343c-w" list="v343c-wl" value="'+esc(who)+'" autocomplete="off">'+
         '<datalist id="v343c-wl">'+stk.map(function(b){ return '<option value="'+esc(b.contact)+'">'; }).join("")+'</datalist></div></div>'+
@@ -28877,7 +28882,7 @@ button[onclick*="insertResultTpl"]{display:none!important}
     var b=document.querySelector('#v322-care button[onclick="v322CareAdd()"]');
     if(b && !b._v343){ b._v343=1;
       var bx=$("v322-care");
-      bx.innerHTML='<b>'+esc(LL("Chưa có lịch sử chăm sóc trong 30 ngày","No customer care in the last 30 days"))+'</b> — '+
+      bx.innerHTML='<b>'+esc(LL("Chưa có lịch sử chăm sóc (từ 30 ngày trước ngày đặt đến nay)","No customer care yet (from 30 days before the order date to today)"))+'</b> — '+
         esc(LL("bấm Thêm lịch sử chăm sóc, chọn ngày + loại chăm sóc ⇒ hệ thống tự ghi vào Customer meeting, rồi lưu đơn.","click Add care history, pick the date and type ⇒ it is saved to Customer meeting, then save the order."))+
         '<button type="button" class="btn sm" onclick="v322CareAdd()">＋ '+esc(LL("Thêm lịch sử chăm sóc","Add care history"))+'</button>';
       bx.querySelector("button")._v343=1; }
@@ -29036,6 +29041,13 @@ html.v344-app #pwaBtn{display:none!important}
   try{ if(window.ADD){ ADD["Cài app"]="Install app"; } }catch(_){}
 })();
 </script>
+
+<style id="v346-css">
+/* v34.6 — trang Đơn hàng: 6 thẻ số liệu (thêm JIZAI · số vỉ, Composite · số tuýp) ⇒ lưới 3 cột */
+.v329-top .v322-kp.v346-kp{grid-template-columns:repeat(3,minmax(0,1fr))}
+.v322-kp .it b em{font-style:normal;font-size:12px;font-weight:600;color:#8A97A6;margin-left:2px}
+@media(max-width:900px){ .v329-top .v322-kp.v346-kp{grid-template-columns:repeat(2,minmax(0,1fr))} }
+</style>
 
 </body>
 </html>
