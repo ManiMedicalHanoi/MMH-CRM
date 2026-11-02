@@ -20,6 +20,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1">
 <meta name="theme-color" content="#FFFFFF">
 <meta name="apple-mobile-web-app-capable" content="yes">
+<!-- ⭐ v34.4 — cài được như ứng dụng (PWA): manifest + biểu tượng + sw.js (giống Training Hub v6.4) -->
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="32x32" href="media/app/favicon-32.png">
+<link rel="apple-touch-icon" href="media/app/apple-touch-icon.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="MMH CRM">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <title>MMH CRM system</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -4010,7 +4017,7 @@ function buildNav(){
     if(t.grp!==lastGrp){ h+='<div class="grp">'+t.grp+'</div>'; lastGrp=t.grp; }
     h+='<button class="nvi" data-t="'+t.id+'" onclick="go(\''+t.id+'\')"><span class="ic">'+t.ic+'</span><span class="lb">'+t.lb+'</span></button>';
   });
-  h+='<div style="flex:1"></div><div style="padding:10px;font-size:10.5px;color:var(--mute);line-height:1.5">MMH CRM v34.3<br>'+
+  h+='<div style="flex:1"></div><div style="padding:10px;font-size:10.5px;color:var(--mute);line-height:1.5">MMH CRM v34.4<br>'+
      (isMgmt()?'<a href="'+DRIVE_FOLDER+'" target="_blank">📁 Folder ảnh Drive</a>':"")+'</div>';
   $("side").innerHTML=h;
   /* ⭐ v4.5 — thanh dưới trượt ngang, đủ mọi mục, bỏ nút "Thêm" */
@@ -20750,7 +20757,7 @@ window.QS2={ open:qsOpen };
 </script>
 
 <!-- ⭐ v30.3 — THÔNG BÁO CẬP NHẬT (chép từ Report Hub): dữ liệu updates/notes.js · tự hiện 7 ngày · nút "Có gì mới" trên thanh trên cùng -->
-<script src="updates/notes.js?v=34.3"></script>
+<script src="updates/notes.js?v=34.4"></script>
 <style id="upd-css">
 #upd,#upd-zoom{--t-pri:var(--blue);--t-pri2:var(--blue-d);--t-ink:var(--navy);--t-soft:var(--pale);--t-line:var(--lb2);--t-bg:#F6F8FA;--mmh-blue:var(--blue);--mmh-navy:var(--navy)}
 
@@ -24867,7 +24874,7 @@ window.RPSTAT_CFG={ lang:function(){ return (window.I18N && I18N.on) ? "en" : "v
 <script src="rpstat/rpstat.js?v=1.0"></script>
 <script src="testflow/testflow.js?v=1.0"></script>
 <script src="tour/tour.js?v=1.1"></script>
-<script src="tour/tours.js?v=34.3"></script>
+<script src="tour/tours.js?v=34.4"></script>
 <script id="v319-i18n">
 /* v31.9 — bổ sung bản dịch EN (nhóm Thái): ô chọn account "N kết quả" */
 (function(){ try{ if(typeof RULES_EN!=="undefined" && RULES_EN.unshift){
@@ -28912,6 +28919,109 @@ button[onclick*="insertResultTpl"]{display:none!important}
     ordProds().forEach(function(p,i){ var a=n(p.price)*n(p.qty), el=$("op_a"+i); if(el) el.value=a?dot(Math.round(a)):""; });
     return r;
   };
+})();
+</script>
+
+<style id="v344-css">
+/* v34.4 — Cài ứng dụng (PWA) */
+#pwaBtn{display:inline-flex}
+@media(max-width:720px){ #pwaBtn{display:none!important} }
+html.v344-app #pwaBtn{display:none!important}
+.v344-app{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+.v344-app img{width:52px;height:52px;border-radius:12px}
+.v344-app b{display:block;font-size:16px;color:var(--t-ink,#003047)}
+.v344-app small{color:var(--sub,#5B6B7D);font-size:13px}
+.v344-steps{display:grid;gap:12px;margin:4px 0 0;padding:0;list-style:none;counter-reset:st}
+.v344-steps li{display:grid;grid-template-columns:30px 1fr;gap:10px;align-items:start;font-size:14px;line-height:1.5;color:var(--ink,#1F2A37)}
+.v344-steps li::before{counter-increment:st;content:counter(st);width:26px;height:26px;border-radius:50%;background:var(--t-soft,#F0F7FF);color:var(--t-ink,#003047);font-weight:700;display:grid;place-items:center;font-size:13px}
+.v344-steps .ic{display:inline-flex;vertical-align:-5px;width:22px;height:22px;padding:2px;border:1px solid #E6EAEF;border-radius:6px;color:var(--t-pri,#3A5CAA);background:#fff}
+.v344-steps .ic svg{width:100%;height:100%;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.v344-note{margin-top:14px;padding:10px 12px;border-radius:10px;background:var(--t-soft,#F0F7FF);font-size:13px;color:var(--sub,#5B6B7D);line-height:1.5}
+</style>
+<script id="v344-js">
+/* v34.4 (02/11/2026) — CÀI ĐƯỢC NHƯ ỨNG DỤNG (PWA), cùng cách với Training Hub v6.4.
+   manifest.webmanifest + media/app/*.png + sw.js (quy tắc lưu đệm ở đầu sw.js: trang & dữ liệu luôn lấy mạng trước).
+   Máy tính: nút "Cài app" #pwaBtn trên thanh trên cùng · Điện thoại: Thêm ▸ Tiện ích ▸ Cài app. Ẩn khi đang mở bằng app đã cài.
+   Chrome / Edge / Android ⇒ hộp cài của trình duyệt; iPhone / iPad / Safari Mac ⇒ hướng dẫn từng bước. window.MMHApp.install() */
+(function(){
+  var SV={ install:'<path d="M12 3v11M7.5 9.5L12 14l4.5-4.5"/><path d="M4 17v2a2 2 0 002 2h12a2 2 0 002-2v-2"/>',
+           share:'<path d="M12 3v12M8 7l4-4 4 4"/><path d="M6 11H5v8a2 2 0 002 2h10a2 2 0 002-2v-8h-1"/>',
+           addsq:'<rect x="4" y="4" width="16" height="16" rx="3"/><path d="M12 8v8M8 12h8"/>',
+           dots:'<circle cx="12" cy="5" r="1.3"/><circle cx="12" cy="12" r="1.3"/><circle cx="12" cy="19" r="1.3"/>' };
+  function svg(k,c){ return '<svg class="'+(c||"v30i")+'" viewBox="0 0 24 24" aria-hidden="true" style="fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round">'+SV[k]+'</svg>'; }
+  function T(vi,en){ try{ return TX(vi,en); }catch(_){ return vi; } }
+  var ua=navigator.userAgent;
+  var isIOS=/iPad|iPhone|iPod/.test(ua) || (navigator.platform==="MacIntel" && navigator.maxTouchPoints>1);
+  var isMacSafari=!isIOS && /Macintosh/.test(ua) && /Safari\//.test(ua) && !/Chrome|Chromium|Edg|OPR|Firefox/.test(ua);
+  function standalone(){ return (window.matchMedia && matchMedia("(display-mode: standalone)").matches) || navigator.standalone===true; }
+  if(standalone()) document.documentElement.classList.add("v344-app");
+  var deferred=null;
+  window.addEventListener("beforeinstallprompt",function(e){ e.preventDefault(); deferred=e; });
+  window.addEventListener("appinstalled",function(){ deferred=null; document.documentElement.classList.add("v344-app");
+    toast(T("Đã cài MMH CRM. Mở từ biểu tượng MMH CRM trên màn hình chính / Start menu.","MMH CRM is installed. Open it from the MMH CRM icon on your home screen / Start menu."),"ok",6000); });
+  function ic(k){ return '<span class="ic">'+svg(k,"")+'</span>'; }
+  function guide(){
+    var head='<div class="v344-app"><img src="media/app/icon-192.png" alt=""><div><b>MMH CRM</b><small>'+T("Cài một lần, mở như ứng dụng, tự cập nhật","Install once, open like an app, updates itself")+'</small></div></div>', body, title=T("Cài ứng dụng","Install the app");
+    if(isIOS){
+      title=T("Cài lên iPhone / iPad","Install on iPhone / iPad");
+      body=head+'<ol class="v344-steps">'+
+        '<li><span>'+T("Mở trang này bằng <b>Safari</b> (nếu đang ở Zalo, Messenger, Gmail… bấm <b>Mở bằng Safari</b>).","Open this page in <b>Safari</b> (from Zalo, Messenger, Gmail… tap <b>Open in Safari</b> first).")+'</span></li>'+
+        '<li><span>'+T("Bấm nút <b>Chia sẻ</b> "+ic("share")+" ở thanh dưới (iPad: góc trên bên phải; iOS 26: bấm ••• cạnh thanh địa chỉ ▸ Chia sẻ).","Tap <b>Share</b> "+ic("share")+" on the bottom bar (iPad: top right; iOS 26: tap ••• next to the address bar ▸ Share).")+'</span></li>'+
+        '<li><span>'+T("Kéo xuống, chọn <b>Thêm vào MH chính</b> "+ic("addsq")+", rồi bấm <b>Thêm</b>.","Scroll down, choose <b>Add to Home Screen</b> "+ic("addsq")+", then tap <b>Add</b>.")+'</span></li>'+
+        '<li><span>'+T("Mở app từ biểu tượng <b>MMH CRM</b> trên màn hình chính và đăng nhập lại một lần.","Open the app from the <b>MMH CRM</b> icon on the home screen and sign in once more.")+'</span></li></ol>'+
+        '<div class="v344-note">'+T("iPhone giữ đăng nhập của app riêng với Safari, nên lần đầu mở app cần nhập email công ty và mã 6 số.","iPhone keeps the app's sign-in separate from Safari, so the first time you open the app you enter your company e-mail and the 6-digit code again.")+'</div>';
+    }else if(isMacSafari){
+      body=head+'<ol class="v344-steps">'+
+        '<li><span>'+T("Trên thanh menu của Safari, bấm <b>File</b> (Tệp).","In the Safari menu bar, click <b>File</b>.")+'</span></li>'+
+        '<li><span>'+T("Chọn <b>Add to Dock…</b> (Thêm vào Dock), rồi bấm <b>Add</b>.","Choose <b>Add to Dock…</b>, then click <b>Add</b>.")+'</span></li>'+
+        '<li><span>'+T("Mở app từ Dock hoặc Launchpad.","Open the app from the Dock or Launchpad.")+'</span></li></ol>'+
+        '<div class="v344-note">'+T("Cần macOS 14 (Sonoma) trở lên. Máy cũ hơn: mở trang bằng Chrome hoặc Edge rồi cài.","Needs macOS 14 (Sonoma) or later. Older Macs: open the page in Chrome or Edge and install from there.")+'</div>';
+    }else{
+      body=head+'<ol class="v344-steps">'+
+        '<li><span>'+T("Mở trang này bằng <b>Chrome</b> hoặc <b>Microsoft Edge</b>.","Open this page in <b>Chrome</b> or <b>Microsoft Edge</b>.")+'</span></li>'+
+        '<li><span>'+T("Máy tính: bấm biểu tượng cài "+ic("install")+" ở cuối thanh địa chỉ. Điện thoại Android: bấm menu "+ic("dots")+" ▸ <b>Cài đặt ứng dụng</b> (hoặc <b>Thêm vào màn hình chính</b> ▸ <b>Cài đặt</b>).","Computer: click the install icon "+ic("install")+" at the end of the address bar. Android phone: tap the menu "+ic("dots")+" ▸ <b>Install app</b> (or <b>Add to Home screen</b> ▸ <b>Install</b>).")+'</span></li>'+
+        '<li><span>'+T("Bấm <b>Cài đặt</b>. App có trong Start menu / màn hình chính.","Click <b>Install</b>. The app appears in the Start menu / on the home screen.")+'</span></li></ol>'+
+        '<div class="v344-note">'+T("Không thấy nút cài? Có thể app đã được cài trên máy này, hoặc trình duyệt chưa hỗ trợ (Firefox). Tải lại trang rồi thử lại.","No install button? The app may already be installed on this device, or the browser does not support it (Firefox). Reload the page and try again.")+'</div>';
+    }
+    openModal2(title, body, '<button class="btn pri" onclick="closeModal2()">'+T("Đã hiểu","Got it")+'</button>');
+  }
+  function install(){
+    if(standalone()) return toast(T("Bạn đang dùng ứng dụng đã cài.","You are already using the installed app."),"ok");
+    if(deferred){
+      var d=deferred; deferred=null;
+      try{ d.prompt(); d.userChoice.then(function(c){ if(c && c.outcome==="dismissed") toast(T("Đã huỷ cài. Muốn cài lại: bấm Cài app.","Install cancelled. To install later, click Install app.")); }).catch(function(){}); }
+      catch(e){ guide(); }
+      return;
+    }
+    guide();
+  }
+  window.MMHApp={ install:install, guide:guide, standalone:standalone, isIOS:isIOS };
+
+  /* máy tính: nút "Cài app" trên thanh trên cùng (trước Có gì mới / Hướng dẫn) */
+  function addBtn(){
+    var h=document.querySelector("#app header"); if(!h || document.getElementById("pwaBtn") || standalone()) return;
+    var b=document.createElement("button"); b.className="tb2"; b.id="pwaBtn"; b.title=T("Cài MMH CRM lên máy này","Install MMH CRM on this device");
+    b.innerHTML=svg("install")+"<span>"+T("Cài app","Install app")+"</span>"; b.onclick=install;
+    var at=document.getElementById("updBtn")||document.getElementById("btnHelp")||document.getElementById("btnUser");
+    if(at) h.insertBefore(b, at); else h.appendChild(b);
+  }
+  (function wait(){ var a=document.getElementById("app"); if(a && a.classList.contains("on")) addBtn(); else setTimeout(wait, 1000); })();
+  document.addEventListener("DOMContentLoaded", function(){ setTimeout(addBtn, 0); });
+
+  /* điện thoại: Thêm ▸ Tiện ích ▸ Cài app */
+  var mo=window.V30 && V30.more;
+  if(mo) V30.more=function(){ var r=mo.apply(this,arguments);
+    try{ if(!standalone()){ var g=null; [].forEach.call(document.querySelectorAll("#v30-more .gt"),function(t){ if(/Tiện ích|Utilities|Tools/.test(t.textContent)) g=t.nextElementSibling; });
+      if(g && !g.querySelector("[data-pwa]")){ var b=document.createElement("button"); b.setAttribute("data-pwa","1");
+        b.innerHTML=svg("install")+'<span>'+T("Cài app","Install app")+'</span>';
+        b.onclick=function(){ document.getElementById("v30-more").classList.remove("show"); setTimeout(install, 200); }; g.insertBefore(b, g.firstChild); } } }catch(_){}
+    return r; };
+
+  /* service worker: chỉ trên https (GitHub Pages) hoặc máy chủ thử cục bộ */
+  if("serviceWorker" in navigator && (location.protocol==="https:" || /^(localhost|127\.0\.0\.1)$/.test(location.hostname))){
+    window.addEventListener("load",function(){ navigator.serviceWorker.register("sw.js",{updateViaCache:"none"}).catch(function(e){ try{ console.warn("SW",e); }catch(_){} }); });
+  }
+  try{ if(window.ADD){ ADD["Cài app"]="Install app"; } }catch(_){}
 })();
 </script>
 

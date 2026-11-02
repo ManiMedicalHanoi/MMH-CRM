@@ -7,6 +7,15 @@
 function E(u){ u.en={ title:u.title, items:u.items.map(function(i){ return { title:i.title, text:i.text }; }) }; return u; }
 window.MMH_UPDATES = [
   E({
+    id:"2026-11-02-v34.4", version:"v34.4", date:"2026-11-02",
+    title:"Install MMH CRM like an app",
+    summary:"MMH CRM can now be installed on your phone and computer: open it from its own icon, full screen, no link to type. It updates itself.",
+    items:[
+      { type:"new", icon:"⤓", title:"Install on your computer", text:"Click <b>Install app</b> on the top bar (Chrome or Edge) ▸ <b>Install</b>. MMH CRM opens in its own window and appears in the Start menu / Launchpad.", img:"updates/v34.4/install.jpg" },
+      { type:"new", icon:"⤓", title:"Install on your phone", text:"Android: <b>More ▸ Utilities ▸ Install app</b> ▸ <b>Install</b>. iPhone: open the CRM in <b>Safari</b> ▸ <b>Share</b> ▸ <b>Add to Home Screen</b> ▸ <b>Add</b>, then sign in once more inside the app. The step-by-step guide opens from the same button.", img:"updates/v34.4/install_phone.jpg" }
+    ]
+  }),
+  E({
     id:"2026-10-31-v34.3", version:"v34.3", date:"2026-10-31",
     title:"Task Result in 4 boxes · care history in the order form · finish date · quantity first",
     summary:"Task Result has 4 fixed boxes. A missing care history can be added right inside the order form. Completing a task no longer jumps the date to today — you choose. New contacts are saved to Key stakeholders automatically.",
