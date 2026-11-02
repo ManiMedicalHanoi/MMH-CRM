@@ -7,6 +7,16 @@
 function E(u){ u.en={ title:u.title, items:u.items.map(function(i){ return { title:i.title, text:i.text }; }) }; return u; }
 window.MMH_UPDATES = [
   E({
+    id:"2026-11-02-v34.7", version:"v34.7", date:"2026-11-02",
+    title:"Monthly and quarterly KPI reports follow the new KPI procedure MMHSOP_009: official forms, due on day 05",
+    summary:"Under the <b>KPI Management Procedure MMHSOP_009</b> (effective 01/10/2026) the Monthly KPI Report (form <b>FM01</b>) and Quarterly KPI Report (form <b>FM02</b>) go to your <b>Department Head and the General Director, CC Accounting</b>, by <b>day 05</b>. The Word file in the official form is attached automatically.",
+    items:[
+      { type:"new", icon:"#", title:"Monthly KPI report on form FM01", text:"Submit Report ▸ <b>KPI</b> (or KPI & Targets ▸ Monthly KPI report): targets, actuals and % come from the KPI file. Write the <b>reason for each target</b>, next-month actions, highlights, challenges and support needed, then <b>Send</b>. The e-mail follows FM01 and the Word file is attached.", img:"updates/v34.7/kpimonth.jpg" },
+      { type:"new", icon:"#", title:"Quarterly KPI report on form FM02", text:"KPI & Targets ▸ <b>Quarterly KPI report</b> (replaces Setting Expectation): quarter KPIs are pre-filled, results capped at 130% except sales KPIs. Fill the 5 competencies (1–5), strengths, areas to improve and EE / AE / PA / NA, then send it or download the Word file for signature.", img:"updates/v34.7/kpiquarter.jpg" },
+      { type:"imp", icon:"✓", title:"Due on day 05 · Vietnamese form for Vietnam, English form for Thailand", text:"Monthly report by <b>day 05</b>; quarterly report by <b>day 05 of the first month of the next quarter</b> (was 16:00 on day 02 / 17:00 on day 09). A reminder pops up on day 05 if not sent yet. Vietnam sales teams get the Vietnamese form, the Thailand teams the English form.", img:"updates/v34.7/word.jpg" }
+    ]
+  }),
+  E({
     id:"2026-11-02-v34.6", version:"v34.6", date:"2026-11-02",
     title:"JIZAI blisters and Composite tubes on the Orders page · back-filling last month's orders",
     summary:"The Orders page now counts JIZAI blisters and Composite tubes. Orders you forgot to enter for a previous month can be added: care activities logged after the order date now count.",
