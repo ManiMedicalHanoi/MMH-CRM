@@ -7,6 +7,15 @@
 function E(u){ u.en={ title:u.title, items:u.items.map(function(i){ return { title:i.title, text:i.text }; }) }; return u; }
 window.MMH_UPDATES = [
   E({
+    id:"2026-11-02-v34.6", version:"v34.6", date:"2026-11-02",
+    title:"JIZAI blisters and Composite tubes on the Orders page · back-filling last month's orders",
+    summary:"The Orders page now counts JIZAI blisters and Composite tubes. Orders you forgot to enter for a previous month can be added: care activities logged after the order date now count.",
+    items:[
+      { type:"new", icon:"#", title:"JIZAI blisters · Composite tubes", text:"Orders ▸ two new figures: <b>JIZAI · blisters</b> and <b>Composite · tubes</b> for the selected month (or year to date), with how many are approved. Rejected orders are not counted.", img:"updates/v34.6/order_stats.jpg" },
+      { type:"fix", icon:"✓", title:"Adding a missed order for last month", text:"There is no monthly lock on orders. A new order needs a care activity (Visiting, Telephone, Message…) from 30 days before the order date — now <b>up to today</b>, so an October order entered in November is no longer blocked. No care yet? Click <b>＋ Add care history</b> inside the order form." }
+    ]
+  }),
+  E({
     id:"2026-11-02-v34.5", version:"v34.5", date:"2026-11-02",
     title:"Mentions button: see @mentions and tasks from the MKT Events app right in CRM",
     summary:"The <b>MKT Events</b> app now has discussions, meeting notes and task assignment. When someone <b>@mentions you</b>, assigns you a task or sends you something to review there, CRM shows it on the new <b>Mentions</b> button (red number) — one click opens the right place.",
@@ -20,7 +29,7 @@ window.MMH_UPDATES = [
     summary:"MMH CRM can now be installed on your phone and computer: open it from its own icon, full screen, no link to type. It updates itself.",
     items:[
       { type:"new", icon:"⤓", title:"Install on your computer", text:"Click <b>Install app</b> on the top bar (Chrome or Edge) ▸ <b>Install</b>. MMH CRM opens in its own window and appears in the Start menu / Launchpad.", img:"updates/v34.4/install.jpg" },
-      { type:"new", icon:"⤓", title:"Install on your phone", text:"Android: <b>More ▸ Utilities ▸ Install app</b> ▸ <b>Install</b>. iPhone: open the CRM in <b>Safari</b> ▸ <b>Share</b> ▸ <b>Add to Home Screen</b> ▸ <b>Add</b>, then sign in once more inside the app. The step-by-step guide opens from the same button.", img:"updates/v34.4/install_phone.jpg" }
+      { type:"new", icon:"⤓", title:"Install on your phone", text:"Android: <b>More ▸ Tools ▸ Install app</b> ▸ <b>Install</b>. iPhone: open the CRM in <b>Safari</b> ▸ <b>Share</b> ▸ <b>Add to Home Screen</b> ▸ <b>Add</b>, then sign in once more inside the app. The step-by-step guide opens from the same button.", img:"updates/v34.4/install_phone.jpg" }
     ]
   }),
   E({

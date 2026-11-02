@@ -235,3 +235,7 @@ Kiến trúc & quy ước giống MMH Report Hub (repo `ManiMedicalHanoi/MMH-Rep
   điện thoại chỉ biểu tượng @): hộp thông báo chung Training Hub v3.38 (`RH_Notify`, `rhNotifyList` / `rhNotifySeen`). App **Sự kiện MKT** ghi khi PIC được @nhắc tên (bình luận, biên bản họp), được giao việc,
   có việc chờ duyệt / bị trả lại ⇒ số đỏ + thẻ báo 1 lần / phiên (chờ `#upd` / `#dl` / `#kpn` / `#ov` đóng) ⇒ bấm mở đúng chỗ ở app Sự kiện. `TRN_KEY` nằm trong phạm vi riêng ⇒ `RHN_CFG.key` có giá trị dự phòng.
   Xem CLAUDE.md của MMH-Report (v19.0).
+- **v34.6 (02/11/2026, sửa khối `v322-js` + `v343b-js`, khối mới `v346-css`; backend CRM v10.23)**: ① trang Đơn hàng thêm 2 thẻ **JIZAI · số vỉ** / **Composite · số tuýp** (tổng SL dòng có chữ jizai / composite trong
+  Product type + Detail, cùng phạm vi Nhóm sản phẩm: tháng đang chọn / lũy kế đến tháng; bỏ đơn từ chối; "đã duyệt" = `apSt` ok | old), lưới thẻ 3 cột (`.v346-kp`).
+  ② KHÔNG có khoá tháng khi thêm đơn; luật duy nhất = lịch sử chăm sóc. Đơn nhập bù (ngày đặt đã qua): lượt Completed từ ngày đặt − 30 **đến hôm nay** đều tính (`v322CareOf` + backend `ordCareOf_`);
+  khung Thêm lịch sử chăm sóc cho chọn ngày tới hôm nay (mặc định = ngày đặt).
