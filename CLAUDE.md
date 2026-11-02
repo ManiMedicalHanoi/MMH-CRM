@@ -245,3 +245,6 @@ Kiến trúc & quy ước giống MMH Report Hub (repo `ManiMedicalHanoi/MMH-Rep
   chữ trên app nhắc tên sheet đổi theo khi nhóm `thaid` (bọc `i18nNode` / `trBlock` / `thdSheetName`, `window.thdTaskName`). Nhóm Surgical Thái giữ tên cũ. Cùng đợt backend: mã khách "N??" (CODE MAP), dropdown Co-visiting,
   PRODUCT TEST cột Result link, ADP cột Key account + Profile completed ⇒ KPI C2-02 tự tính.
 - **v34.9 (02/11/2026, `kpisop.js` v1.1)**: gửi chính thức báo cáo KPI = thanh xác nhận trên khung (không dùng `confirm()`), lời chào theo chức danh (nhóm Thái "Ha san") — xem CLAUDE.md MMH-Report v19.2.
+- **v35.0 (02/11/2026, sửa khối `v335-js`)**: màn Duyệt đơn hàng — trạng thái "Đã yêu cầu chỉnh sửa" (`V.st` = `ret`) chỉ nhớ trên máy, trước đây coi là xong (`done`) ⇒ ẩn mọi nút và KHÔNG bao giờ xoá
+  khi trang còn mở ⇒ sales sửa / gửi lại, HOD vẫn không thấy nút Xác nhận. Nay: `fin(o)` (chỉ `ok` / `no`) quyết định ẩn nút; `merge()` bỏ `ret` khi Ghi chú duyệt trên máy chủ không còn "Cần bổ sung"
+  (sales đã Gửi xác nhận lại) hoặc đơn đổi (`sig`: số tiền, dòng, chứng từ, loại, thầu); `open()` luôn đọc lại `orderPending` rồi vẽ lại.

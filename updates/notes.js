@@ -7,6 +7,14 @@
 function E(u){ u.en={ title:u.title, items:u.items.map(function(i){ return { title:i.title, text:i.text }; }) }; return u; }
 window.MMH_UPDATES = [
   E({
+    id:"2026-11-02-v35.0", version:"v35.0", date:"2026-11-02",
+    title:"Approve orders: the Approve button is back after a change request",
+    summary:"After an approver requested changes on an order and the sales PIC edited or re-sent it, the approval screen kept showing \"Changes requested\" with no buttons. The order now comes back as a normal pending order.",
+    items:[
+      { type:"fix", icon:"✔", title:"Approve after changes", text:"<b>Orders</b> ▸ <b>Approve orders</b>: once the sales PIC sends the order again (or edits it), it shows as <b>Pending</b> with <b>Approve</b> / <b>Reject</b> / <b>Request changes</b>. The screen always reloads the latest list when you open it, and an order you just returned can still be approved." }
+    ]
+  }),
+  E({
     id:"2026-11-02-v34.9", version:"v34.9", date:"2026-11-02",
     title:"KPI report: greetings by title, send confirmation inside the window",
     summary:"Fixes sending the KPI report officially on some devices (nothing happened after clicking Send). The greeting is filled in by the recipient's title.",
