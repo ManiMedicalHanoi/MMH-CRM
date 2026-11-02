@@ -231,3 +231,7 @@ Kiến trúc & quy ước giống MMH Report Hub (repo `ManiMedicalHanoi/MMH-Rep
   `sw.js` KHÔNG giữ dữ liệu cũ: mọi file cùng trang (trang, .js, .json) lấy mạng trước; chỉ ảnh / biểu tượng trả bản lưu rồi tải mới; Apps Script / Drive / CDN / PDF / Word không đụng tới.
   Đổi quy tắc lưu đệm ⇒ tăng hằng `V` trong `sw.js`. Gỡ khẩn cấp: thay `sw.js` bằng dòng ghi ở đầu file. iPhone: app đã cài có bộ nhớ riêng ⇒ đăng nhập lại 1 lần.
   HDSD CRM đầy đủ (VN + EN) dựng ở kho riêng tư mmh-backend `ifu/` (đích `crmvi` / `crmen`) — có link Sheet thật nên KHÔNG đưa PDF lên repo công khai này.
+- **v34.5 (02/11/2026, khối `v345-js` + `v345-css` + `rhnotify/rhnotify.js` GIỐNG HỆT MMH-Report — sửa 1 nơi chép sang nơi kia) — nút "Nhắc tôi" / "Mentions" `#rhn-btn`** (thanh trên cùng, trước `#updBtn`;
+  điện thoại chỉ biểu tượng @): hộp thông báo chung Training Hub v3.38 (`RH_Notify`, `rhNotifyList` / `rhNotifySeen`). App **Sự kiện MKT** ghi khi PIC được @nhắc tên (bình luận, biên bản họp), được giao việc,
+  có việc chờ duyệt / bị trả lại ⇒ số đỏ + thẻ báo 1 lần / phiên (chờ `#upd` / `#dl` / `#kpn` / `#ov` đóng) ⇒ bấm mở đúng chỗ ở app Sự kiện. `TRN_KEY` nằm trong phạm vi riêng ⇒ `RHN_CFG.key` có giá trị dự phòng.
+  Xem CLAUDE.md của MMH-Report (v19.0).
