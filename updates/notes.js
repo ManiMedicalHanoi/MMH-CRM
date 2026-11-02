@@ -7,6 +7,15 @@
 function E(u){ u.en={ title:u.title, items:u.items.map(function(i){ return { title:i.title, text:i.text }; }) }; return u; }
 window.MMH_UPDATES = [
   E({
+    id:"2026-11-02-v34.9", version:"v34.9", date:"2026-11-02",
+    title:"KPI report: greetings by title, send confirmation inside the window",
+    summary:"Fixes sending the KPI report officially on some devices (nothing happened after clicking Send). The greeting is filled in by the recipient's title.",
+    items:[
+      { type:"fix", icon:"✓", title:"Sending no longer does \"nothing\"", text:"Click <b>Send monthly (or quarterly) KPI report</b>: a confirmation bar shows the recipients right below the window ⇒ <b>Confirm & send</b>. After sending, the window shows the time and recipients.", img:"updates/v34.9/confirm.jpg" },
+      { type:"imp", icon:"#", title:"Greeting by title", text:"The greeting is filled in by recipient — Vietnam teams: Dear chị Tuyên / chị Hòa / sếp Hà; Thailand teams: <b>Dear Ha san</b>. It can still be edited before sending." }
+    ]
+  }),
+  E({
     id:"2026-11-02-v34.8", version:"v34.8", date:"2026-11-02",
     title:"Thailand Dental CRM file: renamed sheets, fixed customer codes, Product test result link, key-account profiling KPI",
     summary:"Fixes from the review of the <b>Thailand Dental</b> CRM file: sheet names, customer / contact codes, the Co-visiting dropdown, a result link in PRODUCT TEST and an automatic KPI C2-02 from sheet ADP.",

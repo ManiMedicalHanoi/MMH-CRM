@@ -244,3 +244,4 @@ Kiến trúc & quy ước giống MMH Report Hub (repo `ManiMedicalHanoi/MMH-Rep
 - **v34.8 (02/11/2026, khối `v348-js`)**: file CRM Thailand Dental đổi tên sheet **CUSTOMER VISITING → CUSTOMER TASK**, **ALL TASK → OTHERS TASK** (backend `crm-thai-dental/TH_DentalFix.gs`, xem CLAUDE.md mmh-backend) ⇒
   chữ trên app nhắc tên sheet đổi theo khi nhóm `thaid` (bọc `i18nNode` / `trBlock` / `thdSheetName`, `window.thdTaskName`). Nhóm Surgical Thái giữ tên cũ. Cùng đợt backend: mã khách "N??" (CODE MAP), dropdown Co-visiting,
   PRODUCT TEST cột Result link, ADP cột Key account + Profile completed ⇒ KPI C2-02 tự tính.
+- **v34.9 (02/11/2026, `kpisop.js` v1.1)**: gửi chính thức báo cáo KPI = thanh xác nhận trên khung (không dùng `confirm()`), lời chào theo chức danh (nhóm Thái "Ha san") — xem CLAUDE.md MMH-Report v19.2.
