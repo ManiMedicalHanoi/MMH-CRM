@@ -16,12 +16,13 @@ function more(sel){ return function(){ return TOUR.find(sel) || TOUR.find("nav.m
 function calTools(){ try{ if(window.CAL && !CAL.mt && TOUR.find(".cal-dots3")){ CAL.mt=true; renderCal(); } }catch(_){} }
 function V(vi,en){ return { vi:vi, en:en }; }
 TOUR.add([
- { id:"start", v:5, d:"2026-10-17", g:V("Bắt đầu","Getting started"), ic:"start", t:V("Làm quen MMH CRM","Tour of MMH CRM"), x:V("Các khu vực chính và chỗ tìm mọi chức năng.","The main areas and where to find every feature."),
+ { id:"start", v:6, d:"2026-11-02", g:V("Bắt đầu","Getting started"), ic:"start", t:V("Làm quen MMH CRM","Tour of MMH CRM"), x:V("Các khu vực chính và chỗ tìm mọi chức năng.","The main areas and where to find every feature."),
    steps:[
     { el:more("#side"), do:wk("cal"), zoom:false, t:V("Menu chức năng","Feature menu"), x:V("<i>(Điện thoại: nút <b>Thêm</b> ở thanh dưới.)</i> Menu chia 5 nhóm: <b>Tổng quan</b> · <b>Khách hàng</b> (Địa bàn, Khách hàng) · <b>Cập nhật công việc</b> (Đi địa bàn, Công việc khác, Thuyết trình, Kế hoạch tháng) · <b>Kết quả bán hàng</b> · <b>Công cụ & Báo cáo</b>.","<i>(Phone: the <b>More</b> button in the bottom bar.)</i> The menu has 5 groups: <b>Overview</b> · <b>Customers</b> · <b>Activities & Plans</b> · <b>Sales Result</b> · <b>Tools & Reports</b>.") },
     { el:"#mcBtn", t:V("MMH Calendar","MMH Calendar"), x:V("Lịch chung của công ty: công tác, đào tạo, sự kiện.","The company calendar: trips, trainings, events.") },
     { el:"#qsBtn", t:V("Tìm nhanh","Quick search"), x:V("Bấm hoặc nhấn <b>Ctrl + K</b> để tìm khách hàng, việc, đơn hàng.","Click or press <b>Ctrl + K</b> to find customers, tasks, orders.") },
     { el:more("#fySel"), t:V("Năm tài chính","Fiscal year"), x:V("Chọn FY cần xem (FY bắt đầu từ tháng 9).","Pick the fiscal year to view (FY starts in September).") },
+    { el:more("#pwaBtn"), when:function(){ try{ return !(window.MMHApp && MMHApp.standalone()); }catch(_){ return true; } }, t:V("Cài app","Install the app"), x:V("Cài MMH CRM lên máy như một ứng dụng: mở từ biểu tượng, toàn màn hình, tự cập nhật. <i>(Điện thoại: <b>Thêm ▸ Tiện ích ▸ Cài app</b>; iPhone: Safari ▸ Chia sẻ ▸ Thêm vào MH chính.)</i>","Install MMH CRM like an app: open it from its icon, full screen, updates itself. <i>(Phone: <b>More ▸ Utilities ▸ Install app</b>; iPhone: Safari ▸ Share ▸ Add to Home Screen.)</i>") },
     { el:more("#updBtn"), t:V("Có gì mới","What's new"), x:V("Xem các bản cập nhật của app. <i>(Điện thoại: <b>Thêm ▸ Có gì mới</b>.)</i>","See the latest app updates. <i>(Phone: <b>More ▸ What's new</b>.)</i>") },
     { el:"#btnUser", t:V("Tài khoản","Account"), x:V("Bấm để xem tài khoản, đổi nhóm (quản lý) hoặc đăng xuất.","Click to see your account, switch team (managers) or sign out.") }
    ] },
