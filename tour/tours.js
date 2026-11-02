@@ -166,6 +166,15 @@ TOUR.add([
     { el:".sbx-teams", do:function(){ try{ SBX.pick(); }catch(_){} }, wait:500, t:V("Chọn nhóm","Pick the team"), x:V("Dental · Surgical · Eyeless.","Dental · Surgical · Eyeless.") },
     { el:".sbx-people", t:V("Chọn người","Pick the person"), x:V("Bấm tên để dùng app như người đó: sales, trưởng nhóm, HOD, Giám đốc.","Click a name to use the app as that person: sales, team leader, HOD, Director.") }
    ] },
+ { id:"nhactoi", v:1, d:"2026-11-02", g:V("Lịch & công việc","Calendar & tasks"), ic:"mail", t:V("Nhắc tôi — thông báo từ app Sự kiện MKT","Mentions from the MKT Events app"),
+   x:V("Được @nhắc tên, được giao việc hay có việc chờ duyệt ở app Sự kiện MKT ⇒ báo ngay trên CRM.","When someone @mentions you or assigns you a task in MKT Events, CRM shows it right away."),
+   when:function(){ return !!document.getElementById("rhn-btn"); },
+   steps:[
+    { el:"#rhn-btn", t:V("Nút Nhắc tôi","Mentions button"), x:V("Số đỏ = thông báo chưa xem: bạn được <b>@nhắc tên</b> trong thảo luận / biên bản họp, được <b>giao việc</b>, có việc <b>chờ duyệt</b> hoặc bị <b>trả lại</b> ở app Sự kiện MKT.",
+      "The red number = unread notifications: you were <b>@mentioned</b> in a discussion or meeting note, <b>assigned</b> a task, or have work to <b>review</b> / work <b>returned</b> in MKT Events.") },
+    { el:"#rhn-pop", do:function(){ try{ RHN.open(); }catch(_){} }, wait:600, t:V("Danh sách thông báo","Notification list"), x:V("Mới nhất ở trên, chấm xanh = chưa xem. Bấm 1 dòng ⇒ mở đúng việc / biên bản / thảo luận ở app Sự kiện MKT (tab mới).",
+      "Newest first, blue dot = unread. Click a line to open that task / meeting note / discussion in MKT Events (new tab).") }
+   ] },
  { id:"rpstat", v:1, d:"2026-10-23", g:V("Quản trị","Admin"), ic:"doc", t:V("Thống kê gửi báo cáo","Report statistics"), x:V("Ai gửi báo cáo tuần, KPI tháng, tự đánh giá quý đúng hạn / muộn — xuất Excel.","Who sent weekly, monthly KPI and quarterly reports on time — Excel export."),
    when:function(){ return !!(window.RPSTAT && RPSTAT.can()) && !(window.matchMedia && matchMedia("(max-width:720px)").matches); },
    steps:[

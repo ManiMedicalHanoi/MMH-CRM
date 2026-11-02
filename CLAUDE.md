@@ -225,3 +225,7 @@ Kiến trúc & quy ước giống MMH Report Hub (repo `ManiMedicalHanoi/MMH-Rep
   hàng `#v343-fin` "Task này kết thúc vào: Ngày đã chọn (mặc định) · Hôm nay · Ngày khác (≤ hôm nay)" đặt lại ô Ngày; lưu ⇒ `finish` = ngày đó + `finKeep:1` (backend `wkApplyRule_` v10.22 giữ, kẹp [start, hôm nay]). `dnNote` tắt.
   ⑤ Dòng sản phẩm đơn hàng (`v343c-js`, ghi đè `ordRowHtml` / `ordSync` / `ordNum` / `ordCalc`): thứ tự Product type · **SL** · **Unit price** · Amount; ô giá + Amount hiện dấu chấm nghìn (`v343Dot`),
   `ordSync` bỏ dấu chấm ⇒ `S.ordProds[i].price` luôn là số trơn (đừng đọc thẳng `#op_u…` mà không bỏ dấu).
+- **v34.4 (02/11/2026, khối `v344-js` + `v344-css` + `rhnotify/rhnotify.js` GIỐNG HỆT MMH-Report — sửa 1 nơi chép sang nơi kia) — nút "Nhắc tôi" / "Mentions" `#rhn-btn`** (thanh trên cùng, trước `#updBtn`;
+  điện thoại chỉ biểu tượng @): hộp thông báo chung Training Hub v3.38 (`RH_Notify`, `rhNotifyList` / `rhNotifySeen`). App **Sự kiện MKT** ghi khi PIC được @nhắc tên (bình luận, biên bản họp), được giao việc,
+  có việc chờ duyệt / bị trả lại ⇒ số đỏ + thẻ báo 1 lần / phiên (chờ `#upd` / `#dl` / `#kpn` / `#ov` đóng) ⇒ bấm mở đúng chỗ ở app Sự kiện. `TRN_KEY` nằm trong phạm vi riêng ⇒ `RHN_CFG.key` có giá trị dự phòng.
+  Xem CLAUDE.md của MMH-Report (v19.0).

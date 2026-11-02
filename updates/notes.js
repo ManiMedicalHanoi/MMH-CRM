@@ -7,6 +7,14 @@
 function E(u){ u.en={ title:u.title, items:u.items.map(function(i){ return { title:i.title, text:i.text }; }) }; return u; }
 window.MMH_UPDATES = [
   E({
+    id:"2026-11-02-v34.4", version:"v34.4", date:"2026-11-02",
+    title:"Mentions button: see @mentions and tasks from the MKT Events app right in CRM",
+    summary:"The <b>MKT Events</b> app now has discussions, meeting notes and task assignment. When someone <b>@mentions you</b>, assigns you a task or sends you something to review there, CRM shows it on the new <b>Mentions</b> button (red number) — one click opens the right place.",
+    items:[
+      { type:"new", icon:"@", title:"Mentions button on the top bar", text:"Click <b>Nhắc tôi / Mentions</b> (the @ icon at the top; on phones the @ icon next to Guide) to see when you were @mentioned in a discussion or <b>meeting note</b>, assigned a task, or have work to review / work returned in MKT Events. Click a line to open it in MKT Events; it is marked as read.", img:"updates/v34.4/mentions.jpg" }
+    ]
+  }),
+  E({
     id:"2026-10-31-v34.3", version:"v34.3", date:"2026-10-31",
     title:"Task Result in 4 boxes · care history in the order form · finish date · quantity first",
     summary:"Task Result has 4 fixed boxes. A missing care history can be added right inside the order form. Completing a task no longer jumps the date to today — you choose. New contacts are saved to Key stakeholders automatically.",

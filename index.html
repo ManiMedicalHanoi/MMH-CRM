@@ -4010,7 +4010,7 @@ function buildNav(){
     if(t.grp!==lastGrp){ h+='<div class="grp">'+t.grp+'</div>'; lastGrp=t.grp; }
     h+='<button class="nvi" data-t="'+t.id+'" onclick="go(\''+t.id+'\')"><span class="ic">'+t.ic+'</span><span class="lb">'+t.lb+'</span></button>';
   });
-  h+='<div style="flex:1"></div><div style="padding:10px;font-size:10.5px;color:var(--mute);line-height:1.5">MMH CRM v34.3<br>'+
+  h+='<div style="flex:1"></div><div style="padding:10px;font-size:10.5px;color:var(--mute);line-height:1.5">MMH CRM v34.4<br>'+
      (isMgmt()?'<a href="'+DRIVE_FOLDER+'" target="_blank">📁 Folder ảnh Drive</a>':"")+'</div>';
   $("side").innerHTML=h;
   /* ⭐ v4.5 — thanh dưới trượt ngang, đủ mọi mục, bỏ nút "Thêm" */
@@ -20750,7 +20750,7 @@ window.QS2={ open:qsOpen };
 </script>
 
 <!-- ⭐ v30.3 — THÔNG BÁO CẬP NHẬT (chép từ Report Hub): dữ liệu updates/notes.js · tự hiện 7 ngày · nút "Có gì mới" trên thanh trên cùng -->
-<script src="updates/notes.js?v=34.3"></script>
+<script src="updates/notes.js?v=34.4"></script>
 <style id="upd-css">
 #upd,#upd-zoom{--t-pri:var(--blue);--t-pri2:var(--blue-d);--t-ink:var(--navy);--t-soft:var(--pale);--t-line:var(--lb2);--t-bg:#F6F8FA;--mmh-blue:var(--blue);--mmh-navy:var(--navy)}
 
@@ -24865,9 +24865,21 @@ window.RPSTAT_CFG={ lang:function(){ return (window.I18N && I18N.on) ? "en" : "v
   mount:function(b){ var h=document.getElementById("btnHelp"); if(!h || !h.parentNode) return; b.className="hbtn"; b.innerHTML=(typeof V30_ICON==="function"?V30_ICON("chart"):"")+'<span style="margin-left:5px">'+((window.I18N&&I18N.on)?"Report stats":"Thống kê báo cáo")+'</span>'; h.parentNode.insertBefore(b, h); } };
 </script>
 <script src="rpstat/rpstat.js?v=1.0"></script>
+<script id="v344-js">
+/* ⭐ v34.4 (02/11/2026) — "Nhắc tôi": thông báo từ app Sự kiện MKT — rhnotify/rhnotify.js (GIỐNG HỆT MMH-Report). Hộp thông báo chung = Training Hub RH_Notify
+   (rhNotifyList / rhNotifySeen). Sales được @nhắc tên / được giao việc ở app Sự kiện ⇒ nút trên thanh trên cùng + số đỏ; bấm ⇒ mở đúng việc ở app Sự kiện. */
+window.RHN_CFG={ url:window.TRAINING_HUB_API, key:(typeof TRN_KEY!=="undefined"?TRN_KEY:"mmh-rh-training-2026"), actor:function(){ return (window.S&&S.user&&S.user.pic)||""; },
+  lang:function(){ return (window.I18N&&I18N.on)?"en":"vi"; },
+  busy:function(){ return !!(window.__tourOn||document.querySelector("#upd.show,#dl.show,#kpn.show,#ov.show,#ov2.show")); },
+  mount:function(b){ var go=function(){ var h=document.querySelector("#app header"), u=document.getElementById("updBtn")||document.getElementById("thBtn")||document.getElementById("btnUser"); if(!h||!u) return setTimeout(go,800);
+    b.className="tb2"; b.innerHTML='<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M16 12v1.5a2.5 2.5 0 0 0 5 0V12a9 9 0 1 0-3.5 7.1"/></svg><span>'+((window.I18N&&I18N.on)?"Mentions":"Nhắc tôi")+'</span>';
+    b.title=(window.I18N&&I18N.on)?"Mentions, assignments and reviews from the MKT Events app":"Nhắc tôi — @nhắc tên, giao việc, việc chờ duyệt từ app Sự kiện MKT"; u.parentNode.insertBefore(b,u); }; go(); } };
+</script>
+<style id="v344-css">@media(max-width:720px){ #rhn-btn{display:inline-flex!important} #rhn-btn span{display:none} }</style>
+<script src="rhnotify/rhnotify.js?v=1.0"></script>
 <script src="testflow/testflow.js?v=1.0"></script>
 <script src="tour/tour.js?v=1.1"></script>
-<script src="tour/tours.js?v=34.3"></script>
+<script src="tour/tours.js?v=34.4"></script>
 <script id="v319-i18n">
 /* v31.9 — bổ sung bản dịch EN (nhóm Thái): ô chọn account "N kết quả" */
 (function(){ try{ if(typeof RULES_EN!=="undefined" && RULES_EN.unshift){
