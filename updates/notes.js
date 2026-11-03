@@ -7,6 +7,15 @@
 function E(u){ u.en={ title:u.title, items:u.items.map(function(i){ return { title:i.title, text:i.text }; }) }; return u; }
 window.MMH_UPDATES = [
   E({
+    id:"2026-11-03-v35.1", version:"v35.1", date:"2026-11-03",
+    title:"Dental VN: monthly report for each distributor (Word)",
+    summary:"Sales can export the monthly report to send back to their distributor — one Word file per distributor, filled in from the Turnover file, the orders and the customer visits of the month.",
+    items:[
+      { type:"new", icon:"+", title:"Report for distributors", text:"<b>Send report</b> ▸ <b>Monthly report</b> (or <b>Monthly Plan</b>) ▸ <b>Báo cáo gửi NPP</b>. Pick the month and the distributor — a PIC with two distributors (Phuong: Meci and Việt Thái) makes two files. Every line and table cell can be edited before <b>Create Word file</b>.", img:"updates/v35.1/dialog.jpg" },
+      { type:"new", icon:"#", title:"What is filled in automatically", text:"Sales of that distributor from the <b>Turnover</b> file (month and FY to date against target, Dental / MMG, Jizai and Composite), <b>supported orders</b> whose Partner is that distributor (rejected orders left out), and a summary of the month's <b>customer visits</b>: customers reached, customer groups, provinces, focus products, top positive and negative feedback. Part 2 lists next month's trainings, new accounts in progress, the Turnover forecast and planned visits. Tenders and MKT activities are typed in.", img:"updates/v35.1/word.jpg" }
+    ]
+  }),
+  E({
     id:"2026-11-02-v35.0", version:"v35.0", date:"2026-11-02",
     title:"Approve orders: the Approve button is back after a change request",
     summary:"After an approver requested changes on an order and the sales PIC edited or re-sent it, the approval screen kept showing \"Changes requested\" with no buttons. The order now comes back as a normal pending order.",
