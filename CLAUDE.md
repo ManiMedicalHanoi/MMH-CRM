@@ -248,3 +248,9 @@ Kiến trúc & quy ước giống MMH Report Hub (repo `ManiMedicalHanoi/MMH-Rep
 - **v35.0 (02/11/2026, sửa khối `v335-js`)**: màn Duyệt đơn hàng — trạng thái "Đã yêu cầu chỉnh sửa" (`V.st` = `ret`) chỉ nhớ trên máy, trước đây coi là xong (`done`) ⇒ ẩn mọi nút và KHÔNG bao giờ xoá
   khi trang còn mở ⇒ sales sửa / gửi lại, HOD vẫn không thấy nút Xác nhận. Nay: `fin(o)` (chỉ `ok` / `no`) quyết định ẩn nút; `merge()` bỏ `ret` khi Ghi chú duyệt trên máy chủ không còn "Cần bổ sung"
   (sales đã Gửi xác nhận lại) hoặc đơn đổi (`sig`: số tiền, dòng, chứng từ, loại, thầu); `open()` luôn đọc lại `orderPending` rồi vẽ lại.
+- **v35.1 (03/11/2026, khối `v351-js` + móc chế độ trong `v338-js`) — Báo cáo gửi NPP (Dental VN)**: nút **Báo cáo gửi NPP** `#mrw-npp` cạnh `#mrw-btn` (Gửi báo cáo ▸ Báo cáo tháng, Kế hoạch tháng) ⇒ `V351.open(mon)` =
+  `MRW.open(mon,"npp")`. `MRW` nay có chế độ: `MRW.modes[tên] = {title, init, head, model(D,R,ST,H), file, name}`, `MRW.H` = hàm dựng mục, `MRW.st()`; khoá nháp thêm `_npp_<npp>`.
+  **Mỗi file = 1 NPP** (Phuong: Meci + Việt Thái = 2 file; sales chỉ thấy NPP của mình theo `DISTRIBUTORS_BY_TEAM.dental`, quản lý / trưởng nhóm thấy cả 4). Số liệu: Turnover của đúng NPP
+  (segment Dental / MMG, Jizai / Composite, tháng + lũy kế + Forecast tháng sau), đơn hàng hỗ trợ = Partner khớp NPP (`V351.isNpp`; Partner trống + PIC chỉ có 1 NPP cũng tính; bỏ đơn từ chối),
+  tóm tắt Customer visiting tháng của PIC (Completed, bỏ TBD): số khách, nhóm khách, tỉnh, sản phẩm, phản hồi tích cực / tiêu cực (cột Customer feedback — xét tiêu cực trước, "Không quan tâm" = tiêu cực;
+  trích mục "3. Customer Feedback" của Task Result). Ghi tay: yếu tố thị trường, số đại lý mở mới, doanh số kênh tư nhân, kênh thầu, MKT.
