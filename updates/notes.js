@@ -7,6 +7,15 @@
 function E(u){ u.en={ title:u.title, items:u.items.map(function(i){ return { title:i.title, text:i.text }; }) }; return u; }
 window.MMH_UPDATES = [
   E({
+    id:"2026-11-04-v35.2", version:"v35.2", date:"2026-11-04",
+    title:"Orders: sales PICs can delete their own orders again",
+    summary:"Deleting an order from the CRM did not work for sales PICs — the server only allowed managers. Now the PIC of an order can delete it (the whole order, every product line, in one step) as long as it is not approved yet.",
+    items:[
+      { type:"fix", icon:"✓", title:"Delete order works for the PIC", text:"<b>Orders</b> ▸ open your order ▸ <b>Xoá đơn</b> ▸ confirm in the red bar at the bottom of the window. The whole order (all product lines) is removed from sheet 3. SALE ORDER at once — no more half-deleted orders. The confirmation is shown inside the window, so it also works in the installed app and in the e-mail app browser.", img:"updates/v35.2/delete.jpg" },
+      { type:"imp", icon:"#", title:"Approved orders stay protected", text:"An order that is already <b>Approved</b> counts for KPI C5 – C7, so only the approver or a manager can delete it — the PIC sees a short note instead of the button. If the sheet changed meanwhile, the CRM finds the right rows again or asks you to <b>Reload</b> first, so it never deletes the wrong row." }
+    ]
+  }),
+  E({
     id:"2026-11-03-v35.1", version:"v35.1", date:"2026-11-03",
     title:"Dental VN: monthly report for each distributor (Word)",
     summary:"Sales can export the monthly report to send back to their distributor — one Word file per distributor, filled in from the Turnover file, the orders and the customer visits of the month.",
