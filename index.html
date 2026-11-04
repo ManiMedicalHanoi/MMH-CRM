@@ -4017,7 +4017,7 @@ function buildNav(){
     if(t.grp!==lastGrp){ h+='<div class="grp">'+t.grp+'</div>'; lastGrp=t.grp; }
     h+='<button class="nvi" data-t="'+t.id+'" onclick="go(\''+t.id+'\')"><span class="ic">'+t.ic+'</span><span class="lb">'+t.lb+'</span></button>';
   });
-  h+='<div style="flex:1"></div><div style="padding:10px;font-size:10.5px;color:var(--mute);line-height:1.5">MMH CRM v35.1<br>'+
+  h+='<div style="flex:1"></div><div style="padding:10px;font-size:10.5px;color:var(--mute);line-height:1.5">MMH CRM v35.2<br>'+
      (isMgmt()?'<a href="'+DRIVE_FOLDER+'" target="_blank">📁 Folder ảnh Drive</a>':"")+'</div>';
   $("side").innerHTML=h;
   /* ⭐ v4.5 — thanh dưới trượt ngang, đủ mọi mục, bỏ nút "Thêm" */
@@ -20761,7 +20761,7 @@ window.QS2={ open:qsOpen };
 </script>
 
 <!-- ⭐ v30.3 — THÔNG BÁO CẬP NHẬT (chép từ Report Hub): dữ liệu updates/notes.js · tự hiện 7 ngày · nút "Có gì mới" trên thanh trên cùng -->
-<script src="updates/notes.js?v=35.1"></script>
+<script src="updates/notes.js?v=35.2"></script>
 <style id="upd-css">
 #upd,#upd-zoom{--t-pri:var(--blue);--t-pri2:var(--blue-d);--t-ink:var(--navy);--t-soft:var(--pale);--t-line:var(--lb2);--t-bg:#F6F8FA;--mmh-blue:var(--blue);--mmh-navy:var(--navy)}
 
@@ -29321,6 +29321,90 @@ function mount(){ try{ if(!on() || $("mrw-npp")) return; var w=$("mrw-btn"); if(
 ["renderReport","renderMonthly"].forEach(function(f){ var _f=window[f]; if(typeof _f!=="function") return;
   window[f]=function(){ var r=_f.apply(this,arguments); mount(); return r; };
   try{ if(f==="renderReport") renderReport=window[f]; else renderMonthly=window[f]; }catch(_){} });
+})();
+</script>
+
+<style id="v352-css">
+.v352-ask{display:flex;align-items:center;gap:8px;flex-wrap:wrap;width:100%;padding:8px 10px;border:1px solid #E8B4B2;background:#FDF3F2;border-radius:10px;font-size:13px;color:#7A2723}
+.v352-ask .sp{flex:1;min-width:160px}
+.v352-note{font-size:12px;color:var(--mute,#666);margin-right:auto;max-width:330px;line-height:1.35}
+</style>
+<script id="v352-js">
+/* ═════════ v35.2 (04/11/2026) — XOÁ ĐƠN HÀNG CHO PIC (người dùng báo: đơn hàng nha khoa không xoá được) ═════════
+   Lỗi: ① backend deleteRow chặn tab order với sales (chỉ quản lý) ⇒ PIC bấm "Xoá đơn" luôn báo lỗi;
+        ② đơn nhiều dòng xoá từng dòng một (1 dòng lỗi ⇒ đơn bị xoá dở); ③ confirm() bị chặn trong app đã cài / trình duyệt của app email ⇒ bấm không thấy gì.
+   Nay: backend CRM v10.24 action deleteOrder (MMH_OrderDelete.gs) xoá CẢ ĐƠN trong 1 lệnh, kiểm đúng dòng (_no = Order No., _nm = account; số dòng đã dời ⇒ tự tìm lại);
+        quyền: PIC của đơn (đơn chưa "Đã duyệt") · quản lý · người duyệt / Admin. Xác nhận ngay ở chân hộp (không dùng confirm).
+        Đơn đã duyệt + PIC thường ⇒ thay nút bằng ghi chú "nhờ người duyệt xoá". */
+(function(){
+"use strict";
+function L(v,e){ try{ return (window.I18N&&I18N.on)?e:v; }catch(_){ return v; } }
+try{ if(typeof W28==="object") W28.deleteOrder=1; }catch(_){}                 /* gắn rid chống ghi trùng như các lệnh ghi khác */
+try{ if(window.TESTFLOW_CFG&&TESTFLOW_CFG.labels) TESTFLOW_CFG.labels.deleteOrder={t:["Xoá đơn hàng","Delete order"],tab:"3. SALE ORDER"}; }catch(_){}
+function esc2(s){ return String(s==null?"":s).replace(/[&<>"]/g,function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]; }); }
+function boss(){
+  try{
+    if(S.user&&S.user.role==="manager") return true;
+    var u=window.AUTH&&AUTH.user&&AUTH.user(); if(u&&u.admin) return true;
+    return typeof window.v316OrdIsAp==="function" && !!window.v316OrdIsAp();
+  }catch(_){ return false; }
+}
+function allRows(){ return (S.cache&&S.cache.order&&S.cache.order.rows)||[]; }
+function find(r){ var a=allRows(); for(var i=0;i<a.length;i++) if(a[i]._row===r) return a[i]; return null; }
+function linesOf(row){
+  var ed=S.editing||{}, ln=(ed.tab==="order"&&ed.lines&&ed.lines.length)?ed.lines.slice():[row];
+  if(ln.indexOf(row)<0) ln.push(row);
+  return ln.map(function(r){ return find(r)||(r===row&&ed.ctx)||{ _row:r }; });
+}
+function approved(list){
+  return list.some(function(o){ try{ return window.v316OrdNeed(o) && window.v316OrdAppr(o.appr)==="ok"; }catch(_){ return false; } });
+}
+window.V352={ boss:boss, linesOf:linesOf };
+
+/* nút ở chân hộp Sửa đơn: đơn đã duyệt + PIC thường ⇒ ghi chú thay cho nút */
+var _fo=window.formOrder;
+window.formOrder=formOrder=function(o){
+  var r=_fo.apply(this,arguments);
+  try{
+    var b=document.querySelector('#mFoot button[onclick^="delOrder("]');
+    if(b && o && o._row && !boss() && approved(linesOf(o._row))){
+      var n=document.createElement("span"); n.className="v352-note"; n.id="v352-note";
+      n.textContent=L("Đơn đã được duyệt — muốn xoá, nhờ người duyệt đơn hoặc quản lý.","This order is approved — ask the approver or a manager to delete it.");
+      b.parentNode.replaceChild(n,b);
+    }
+  }catch(e){ try{ console.warn(e); }catch(_){} }
+  return r;
+};
+
+/* xoá: xác nhận ngay ở chân hộp ⇒ 1 lệnh deleteOrder cho cả đơn */
+window.delOrder=delOrder=function(row){
+  var list=linesOf(row), n=list.length, ft=document.getElementById("mFoot");
+  if(!ft) return;
+  var keep=ft.innerHTML, o0=list[0]||{}, no=String(o0.orderNo||""), nm=o0.name||"";
+  ft.innerHTML='<div class="v352-ask" id="v352-ask"><span class="sp">'+
+    esc2(L("Xoá đơn hàng "+(no?no+" · ":"")+nm+" ("+n+" dòng sản phẩm) khỏi sheet Sale Order? Không hoàn tác được.",
+           "Delete order "+(no?no+" · ":"")+nm+" ("+n+" product line"+(n>1?"s":"")+") from the Sale Order sheet? This cannot be undone."))+'</span>'+
+    '<button class="btn" id="v352-no" type="button">'+L("Không xoá","Keep")+'</button>'+
+    '<button class="btn dg" id="v352-yes" type="button">'+L("Xoá đơn","Delete order")+'</button></div>';
+  document.getElementById("v352-no").onclick=function(){ ft.innerHTML=keep; };
+  document.getElementById("v352-yes").onclick=function(){
+    var yes=this; yes.disabled=true; yes.textContent=L("Đang xoá…","Deleting…");
+    var items=list.map(function(o){ return { _row:o._row, _no:String(o.orderNo||""), _nm:o.name||"" }; });
+    apiPost({ action:"deleteOrder", rows:items }).then(function(r){
+      var rows=(r&&r.rows&&r.rows.length)?r.rows.slice():items.map(function(x){ return x._row; });
+      rows.sort(function(a,b){ return b-a; }).forEach(function(x){ try{ patchLocal("order",x,null,true); }catch(_){} });
+      closeAllModals();
+      toast((r&&r.message)||L("Đã xoá đơn hàng","Order deleted"),"ok");
+      try{ afterWrite("order",0,null); }catch(_){}
+      setTimeout(function(){ try{ syncOrderTasks(); }catch(_){} },600);
+      if(S.tab==="order"){ try{ renderOrder(); }catch(_){} }
+    }).catch(function(e){
+      var msg=(e&&e.message)||"Lỗi";
+      if(/Unknown action|không rõ|chưa hỗ trợ/i.test(msg)) msg=L("Máy chủ chưa cập nhật lệnh xoá đơn — thử lại sau ít phút.","The server is not updated yet — try again in a few minutes.");
+      ft.innerHTML=keep; toast(msg,"err",7000);
+    });
+  };
+};
 })();
 </script>
 

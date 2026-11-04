@@ -254,3 +254,6 @@ Kiến trúc & quy ước giống MMH Report Hub (repo `ManiMedicalHanoi/MMH-Rep
   (segment Dental / MMG, Jizai / Composite, tháng + lũy kế + Forecast tháng sau), đơn hàng hỗ trợ = Partner khớp NPP (`V351.isNpp`; Partner trống + PIC chỉ có 1 NPP cũng tính; bỏ đơn từ chối),
   tóm tắt Customer visiting tháng của PIC (Completed, bỏ TBD): số khách, nhóm khách, tỉnh, sản phẩm, phản hồi tích cực / tiêu cực (cột Customer feedback — xét tiêu cực trước, "Không quan tâm" = tiêu cực;
   trích mục "3. Customer Feedback" của Task Result). Ghi tay: yếu tố thị trường, số đại lý mở mới, doanh số kênh tư nhân, kênh thầu, MKT.
+- **v35.2 (04/11/2026, khối `v352-css` + `v352-js`, backend CRM v10.24 `deleteOrder`)**: PIC xoá được đơn hàng của mình — lỗi cũ: backend `deleteRow` chặn tab order với sales, đơn nhiều dòng xoá từng dòng,
+  `confirm()` bị chặn trong app đã cài. `delOrder` ghi đè: xác nhận ở chân hộp (`#v352-ask`) ⇒ 1 lệnh `deleteOrder rows=[{_row,_no,_nm}]` (mọi dòng `S.editing.lines`) ⇒ `patchLocal` từ dưới lên + `afterWrite`.
+  Đơn đã duyệt + không phải quản lý / người duyệt / Admin ⇒ nút thay bằng ghi chú `#v352-note` (backend cũng chặn `APPROVED`). `W28.deleteOrder` (rid).
