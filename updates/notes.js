@@ -7,6 +7,15 @@
 function E(u){ u.en={ title:u.title, items:u.items.map(function(i){ return { title:i.title, text:i.text }; }) }; return u; }
 window.MMH_UPDATES = [
   E({
+    id:"2026-11-05-v35.4", version:"v35.4", date:"2026-11-05",
+    title:"Orders: no more duplicate saves, order data cleaned up",
+    summary:"Clicking Save twice (slow network, double tap on the phone) no longer sends the same order twice. Order data on the sheet was checked and fixed: duplicate order numbers, lines without an order date and duplicated product lines.",
+    items:[
+      { type:"fix", icon:"✓", title:"Save sends the order once", text:"<b>Orders</b> ▸ <b>Lưu</b>: a second click within a few seconds, or saving exactly the same order again within 2 minutes, is ignored with a short note. Nothing to change in how you work." },
+      { type:"fix", icon:"#", title:"Order list = approval screen", text:"Orders are counted the same way on your <b>Orders</b> page and on the approver's <b>Approve orders</b> screen, so the number of products and the total are the same for the sales PIC and the HOD." }
+    ]
+  }),
+  E({
     id:"2026-11-05-v35.3", version:"v35.3", date:"2026-11-05",
     title:"Orders: editing and removing product lines now saves correctly",
     summary:"Some orders went back to the old total after you removed product lines and saved, and two different orders could get the same order number and be counted as one. Both are fixed; the CRM now refuses to save when the order changed on the sheet instead of editing the wrong line.",

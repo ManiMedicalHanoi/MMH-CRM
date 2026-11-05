@@ -262,3 +262,5 @@ Kiến trúc & quy ước giống MMH Report Hub (repo `ManiMedicalHanoi/MMH-Rep
   ② Sửa cả đơn chỉ lấy dòng từ bản tab Đơn hàng mới nhất (`pool`, không trộn `S.acc` / `S.detail` có số dòng cũ ⇒ dòng "ma"), đơn mở từ trang khác đổi sang đúng dòng (`fresh`, theo số + account + chữ ký).
   ③ Mỗi dòng sửa / bỏ gửi `_no` / `_nm` / `_sg` (`ordSigOf` = loại · SL · đơn giá lúc mở form) ⇒ máy chủ lệch thì trả `STALE`, không ghi gì; `obSend` bỏ lệnh + tải lại đơn (không gửi lại).
   ④ Đơn chưa có ngày đặt: không tự điền hôm nay (`#v353-day`). ⑤ Máy chủ cấp số mới khi số app tự đếm đã có (`renumbered`) ⇒ toast số thật. Test: `mmh-backend/ifu/capture` + kịch bản backend có trạng thái (dời số dòng).
+- **v35.4 (05/11/2026, khối `v354-js`)**: chống lưu đơn trùng — `saveOrder` bỏ qua lần bấm trong 4 giây sau một lần gửi thật (`hold`, dùng `setTimeout`, không dùng `Date.now()` vì test cố định giờ);
+  `obAddOrders` bỏ lô dòng giống hệt lô vừa gửi trong 2 phút (`sig`: dòng sửa / bỏ + account · ngày · số · loại · SL · giá · Detail). Dữ liệu cũ rà / sửa bằng backend `ordDiag op=audit` · `op=heal` · `op=renumber` · `op=dellines` (CLAUDE.md mmh-backend).

@@ -4017,7 +4017,7 @@ function buildNav(){
     if(t.grp!==lastGrp){ h+='<div class="grp">'+t.grp+'</div>'; lastGrp=t.grp; }
     h+='<button class="nvi" data-t="'+t.id+'" onclick="go(\''+t.id+'\')"><span class="ic">'+t.ic+'</span><span class="lb">'+t.lb+'</span></button>';
   });
-  h+='<div style="flex:1"></div><div style="padding:10px;font-size:10.5px;color:var(--mute);line-height:1.5">MMH CRM v35.3<br>'+
+  h+='<div style="flex:1"></div><div style="padding:10px;font-size:10.5px;color:var(--mute);line-height:1.5">MMH CRM v35.4<br>'+
      (isMgmt()?'<a href="'+DRIVE_FOLDER+'" target="_blank">📁 Folder ảnh Drive</a>':"")+'</div>';
   $("side").innerHTML=h;
   /* ⭐ v4.5 — thanh dưới trượt ngang, đủ mọi mục, bỏ nút "Thêm" */
@@ -20784,7 +20784,7 @@ window.QS2={ open:qsOpen };
 </script>
 
 <!-- ⭐ v30.3 — THÔNG BÁO CẬP NHẬT (chép từ Report Hub): dữ liệu updates/notes.js · tự hiện 7 ngày · nút "Có gì mới" trên thanh trên cùng -->
-<script src="updates/notes.js?v=35.3"></script>
+<script src="updates/notes.js?v=35.4"></script>
 <style id="upd-css">
 #upd,#upd-zoom{--t-pri:var(--blue);--t-pri2:var(--blue-d);--t-ink:var(--navy);--t-soft:var(--pale);--t-line:var(--lb2);--t-bg:#F6F8FA;--mmh-blue:var(--blue);--mmh-navy:var(--navy)}
 
@@ -29447,5 +29447,32 @@ window.delOrder=delOrder=function(row){
 })();
 </script>
 
+<script id="v354-js">
+/* ═════════ v35.4 (05/11/2026) — CHỐNG LƯU ĐƠN TRÙNG ═════════
+   Bấm Lưu 2 lần (mạng chậm, chạm đúp trên điện thoại) hoặc gửi lại đúng đơn vừa lưu ⇒ chỉ gửi 1 lần.
+   · saveOrder: bỏ qua lần bấm Lưu trong 4 giây sau một lần gửi thật.
+   · obAddOrders: lô dòng GIỐNG HỆT lô vừa gửi trong 2 phút (cùng account, ngày, số, từng dòng loại · SL · giá · Detail, cùng dòng sửa / bỏ) ⇒ không gửi lại. */
+(function(){
+"use strict";
+var hold=false, recent=[];
+var _so=window.saveOrder;
+window.saveOrder=saveOrder=function(){
+  if(hold) return;                            /* hold = 4 giây sau một lần gửi thật (bấm Lưu bị chặn vì thiếu ô thì vẫn bấm lại được ngay) */
+  return _so.apply(this,arguments);
+};
+function sig(rows){
+  return (rows||[]).map(function(d){ return [d._row||0,d._del?1:0,String(d.name||"").trim().toLowerCase(),String(d.day||"").slice(0,10),String(d.orderNo||""),
+    String(d.ptype||"").trim().toLowerCase(),n(d.qty),n(d.price),String(d.detail||"").trim().toLowerCase()].join("|"); }).sort().join("\n");
+}
+var _ob=window.obAddOrders;
+window.obAddOrders=obAddOrders=function(rows,label){
+  var k=sig(rows);
+  if(recent.indexOf(k)>=0){ try{ toast(TX("Đơn này vừa được lưu — không gửi lại lần nữa","This order was just saved — not sent again"),"warn",4000); }catch(_){} return ""; }
+  recent.push(k); setTimeout(function(){ var i=recent.indexOf(k); if(i>=0) recent.splice(i,1); },120000);
+  hold=true; setTimeout(function(){ hold=false; },4000);
+  return _ob.apply(this,arguments);
+};
+})();
+</script>
 </body>
 </html>
