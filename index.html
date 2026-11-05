@@ -17950,7 +17950,7 @@ function k8OrderRows(){
 }
 function k8Ym(o){ var m=String(o.month==null?"":o.month).replace(/\D/g,"").slice(0,6); return m||ymOf(o.day); }
 /* ⭐ v35.3 — KHOÁ 1 ĐƠN HÀNG, GIỐNG máy chủ (ordKey_ v10.25): Order No. + PIC + tháng + account + ngày đặt (dòng không số: account + ngày + PIC + tháng).
-   Trước đây app gom theo số + account + ngày, máy chủ theo số + PIC + tháng ⇒ 2 đơn trùng số bị máy chủ gộp (danh sách 6 sản phẩm · 51,5 tr) mà form sửa chỉ thấy 2 dòng. */
+   Trước đây app gom theo số + account + ngày, máy chủ theo số + PIC + tháng ⇒ 2 đơn trùng số bị máy chủ gộp mà form sửa chỉ thấy 2 dòng. */
 function ordGK(o){
   var nn=function(x){ return noAcc(x).replace(/[^a-z0-9]/g,""); }, no=String((window.v336OrdNo?v336OrdNo(o):o.orderNo)||"").trim(), d=String(o.day||"").slice(0,10), ym=k8Ym(o);
   return no ? no+"|"+nn(o.pic)+"|"+ym+"|"+nn(o.name)+"|"+d : "~"+nn(o.name)+"|"+d+"|"+nn(o.pic)+"|"+ym;
