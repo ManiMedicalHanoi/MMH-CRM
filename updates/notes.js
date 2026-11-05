@@ -7,6 +7,16 @@
 function E(u){ u.en={ title:u.title, items:u.items.map(function(i){ return { title:i.title, text:i.text }; }) }; return u; }
 window.MMH_UPDATES = [
   E({
+    id:"2026-11-05-v35.3", version:"v35.3", date:"2026-11-05",
+    title:"Orders: editing and removing product lines now saves correctly",
+    summary:"Some orders went back to the old total after you removed product lines and saved, and two different orders could get the same order number and be counted as one. Both are fixed; the CRM now refuses to save when the order changed on the sheet instead of editing the wrong line.",
+    items:[
+      { type:"fix", icon:"✓", title:"Remove lines, save, the total stays", text:"<b>Orders</b> ▸ open an order ▸ <b>✕</b> on a product line ▸ <b>Lưu</b>. Only the lines you see in the window are changed or removed on sheet 3. SALE ORDER — each line is checked (product type, quantity, unit price) before it is written. If the order changed on the sheet in the meantime (a line added or deleted elsewhere), nothing is saved: the CRM reloads the order and asks you to edit again.", img:"updates/v35.3/edit.jpg" },
+      { type:"fix", icon:"#", title:"No more shared order numbers", text:"A new order whose number is already used on the sheet gets the next free number automatically (the toast shows the new number). Before, two orders entered a few minutes apart could both get the same number, so the list showed one big order while <b>Edit</b> showed only 2 lines. Orders are now grouped by number + PIC + month + account + order date, the same way on the list, in <b>Edit</b> and on the approval screen." },
+      { type:"imp", icon:"!", title:"Orders without an order date", text:"Opening an older order that has no order date no longer fills in today's date (which moved the order to another month). The date box stays empty with a red note — pick the date on the document, then save." }
+    ]
+  }),
+  E({
     id:"2026-11-04-v35.2", version:"v35.2", date:"2026-11-04",
     title:"Orders: sales PICs can delete their own orders again",
     summary:"Deleting an order from the CRM did not work for sales PICs — the server only allowed managers. Now the PIC of an order can delete it (the whole order, every product line, in one step) as long as it is not approved yet.",

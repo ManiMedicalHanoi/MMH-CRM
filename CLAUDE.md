@@ -257,3 +257,8 @@ Kiến trúc & quy ước giống MMH Report Hub (repo `ManiMedicalHanoi/MMH-Rep
 - **v35.2 (04/11/2026, khối `v352-css` + `v352-js`, backend CRM v10.24 `deleteOrder`)**: PIC xoá được đơn hàng của mình — lỗi cũ: backend `deleteRow` chặn tab order với sales, đơn nhiều dòng xoá từng dòng,
   `confirm()` bị chặn trong app đã cài. `delOrder` ghi đè: xác nhận ở chân hộp (`#v352-ask`) ⇒ 1 lệnh `deleteOrder rows=[{_row,_no,_nm}]` (mọi dòng `S.editing.lines`) ⇒ `patchLocal` từ dưới lên + `afterWrite`.
   Đơn đã duyệt + không phải quản lý / người duyệt / Admin ⇒ nút thay bằng ghi chú `#v352-note` (backend cũng chặn `APPROVED`). `W28.deleteOrder` (rid).
+- **v35.3 (05/11/2026, sửa khối `v334-js` + `obSend`, backend CRM v10.25)**: sửa / bỏ dòng đơn hàng lưu đúng (sales báo 05/11/2026). ① `ordGK(o)` (cạnh `k8Ym`) = khoá 1 đơn GIỐNG máy chủ `ordKey_`:
+  số + PIC + tháng + account + ngày đặt (không số: account + ngày + PIC + tháng) — mọi chỗ gom đơn (danh sách v32.2 / v32.9 / v33.0, Sửa cả đơn `okey`, `renderOrder`) dùng hàm này; gom đơn mới phải dùng `ordGK`.
+  ② Sửa cả đơn chỉ lấy dòng từ bản tab Đơn hàng mới nhất (`pool`, không trộn `S.acc` / `S.detail` có số dòng cũ ⇒ dòng "ma"), đơn mở từ trang khác đổi sang đúng dòng (`fresh`, theo số + account + chữ ký).
+  ③ Mỗi dòng sửa / bỏ gửi `_no` / `_nm` / `_sg` (`ordSigOf` = loại · SL · đơn giá lúc mở form) ⇒ máy chủ lệch thì trả `STALE`, không ghi gì; `obSend` bỏ lệnh + tải lại đơn (không gửi lại).
+  ④ Đơn chưa có ngày đặt: không tự điền hôm nay (`#v353-day`). ⑤ Máy chủ cấp số mới khi số app tự đếm đã có (`renumbered`) ⇒ toast số thật. Test: `mmh-backend/ifu/capture` + kịch bản backend có trạng thái (dời số dòng).
