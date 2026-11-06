@@ -177,6 +177,13 @@ TOUR.add([
     { el:"#rhn-pop", do:function(){ try{ RHN.open(); }catch(_){} }, wait:600, t:V("Danh sách thông báo","Notification list"), x:V("Mới nhất ở trên, chấm xanh = chưa xem. Bấm 1 dòng ⇒ mở đúng việc / biên bản / thảo luận ở app Sự kiện MKT (tab mới).",
       "Newest first, blue dot = unread. Click a line to open that task / meeting note / discussion in MKT Events (new tab).") }
    ] },
+ { id:"photoalert", v:1, d:"2026-11-06", g:V("Quản trị","Admin"), ic:"camera", t:V("Cảnh báo ảnh đi địa bàn","Field-visit photo alerts"), x:V("HOD và Giám đốc: ảnh đi địa bàn chụp quá dày (dưới 15 phút giữa 2 khách).","HODs and the Director: field-visit photos taken too close together (under 15 minutes between customers)."),
+   when:function(){ return !!(window.PHA && PHA.allowed()); },
+   steps:[
+    { el:"#pha-ov .oh", do:function(){ try{ PHA.open(); }catch(_){} }, wait:700, t:V("Bảng cảnh báo","Alert panel"), x:V("Mở từ nút <b>Ảnh bất thường</b> trên thanh trên cùng (chỉ hiện khi có cảnh báo chưa xem) hoặc <b>Ctrl + K</b> ▸ \"ảnh địa bàn\". Có cảnh báo mới ⇒ bảng tự mở 1 lần.","Open it from the <b>Photo alerts</b> button in the top bar (shown when there are new alerts) or <b>Ctrl + K</b> ▸ \"photo\". New alerts open the panel once.") },
+    { el:"#pha-ov .rule", t:V("Luật","The rule"), x:V("2 ảnh liên tiếp của 1 PIC ở 2 khách khác nhau cách nhau dưới 15 phút ⇒ cảnh báo. Chuỗi 3 ảnh ⇒ bất thường, 5 ảnh ⇒ rất bất thường; khoảng cách GPS không khớp thời gian di chuyển cũng được đánh dấu. Xét 14 ngày gần nhất của Dental, Surgical, Eyeless.","Two consecutive photos of one PIC at two different customers under 15 minutes apart are flagged. 3 photos in a row = unusual, 5 = highly unusual; GPS distance that does not match the travel time is also flagged. Last 14 days of Dental, Surgical and Eyeless.") },
+    { el:"#pha-seg", t:V("Chưa xem · Tất cả","New · All"), x:V("Bấm <b>Đã xem</b> trên từng cảnh báo sau khi đã trao đổi với PIC. Bấm ảnh để xem lớn.","Click <b>Mark as reviewed</b> on each alert after talking to the PIC. Click a photo to enlarge it.") }
+   ] },
  { id:"rpstat", v:2, d:"2026-11-02", g:V("Quản trị","Admin"), ic:"doc", t:V("Thống kê gửi báo cáo","Report statistics"), x:V("Ai gửi báo cáo tuần, KPI tháng, tự đánh giá quý đúng hạn / muộn — xuất Excel.","Who sent weekly, monthly KPI and quarterly reports on time — Excel export."),
    when:function(){ return !!(window.RPSTAT && RPSTAT.can()) && !(window.matchMedia && matchMedia("(max-width:720px)").matches); },
    steps:[

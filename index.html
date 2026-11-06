@@ -4017,7 +4017,7 @@ function buildNav(){
     if(t.grp!==lastGrp){ h+='<div class="grp">'+t.grp+'</div>'; lastGrp=t.grp; }
     h+='<button class="nvi" data-t="'+t.id+'" onclick="go(\''+t.id+'\')"><span class="ic">'+t.ic+'</span><span class="lb">'+t.lb+'</span></button>';
   });
-  h+='<div style="flex:1"></div><div style="padding:10px;font-size:10.5px;color:var(--mute);line-height:1.5">MMH CRM v35.4<br>'+
+  h+='<div style="flex:1"></div><div style="padding:10px;font-size:10.5px;color:var(--mute);line-height:1.5">MMH CRM v35.5<br>'+
      (isMgmt()?'<a href="'+DRIVE_FOLDER+'" target="_blank">📁 Folder ảnh Drive</a>':"")+'</div>';
   $("side").innerHTML=h;
   /* ⭐ v4.5 — thanh dưới trượt ngang, đủ mọi mục, bỏ nút "Thêm" */
@@ -20784,7 +20784,7 @@ window.QS2={ open:qsOpen };
 </script>
 
 <!-- ⭐ v30.3 — THÔNG BÁO CẬP NHẬT (chép từ Report Hub): dữ liệu updates/notes.js · tự hiện 7 ngày · nút "Có gì mới" trên thanh trên cùng -->
-<script src="updates/notes.js?v=35.4"></script>
+<script src="updates/notes.js?v=35.5"></script>
 <style id="upd-css">
 #upd,#upd-zoom{--t-pri:var(--blue);--t-pri2:var(--blue-d);--t-ink:var(--navy);--t-soft:var(--pale);--t-line:var(--lb2);--t-bg:#F6F8FA;--mmh-blue:var(--blue);--mmh-navy:var(--navy)}
 
@@ -22769,7 +22769,7 @@ function enqueue(body){
   var tmp=isNew ? -(Math.floor(Date.now()%1e9)+Math.floor(Math.random()*997)) : 0;
   var row=isNew ? tmp : (b.action==="saveWeekly" && b.data ? +b.data._row : +b.row||0);
   if(b.action==="saveWeekly" && b.photo && (b.photo.b64||"").length){ ph=b.photo; delete b.photo; }
-  if(b.action==="uploadPhoto"){ ph={ b64:b.b64, lat:b.lat, lng:b.lng, acc:b.acc }; }
+  if(b.action==="uploadPhoto"){ ph={ b64:b.b64, lat:b.lat, lng:b.lng, acc:b.acc, shot:b.shot }; }
   var acc=(b.data&&b.data.account)||b.account||w.account||"", day=String((b.data&&b.data.start)||b.date||w.start||todayISO()).slice(0,10);
   var nm=(parseAcc(acc).name||"task")+" · "+fmtVN(day);
   if(b.action!=="uploadPhoto"){
@@ -22780,7 +22780,7 @@ function enqueue(body){
   if(ph){
     var pid=rid(); THUMB[pid]=ph.b64; bput(pid, ph.b64);
     items.push({ id:pid, kind:"photo", blob:pid, row:row, tab:"weekly", pic:pic, kb:photoSizeKB(ph.b64),
-      body:{ action:"uploadPhoto", mime:"image/jpeg", account:acc, date:day, pic:(b.data&&b.data.pic)||b.pic||w.pic||pic, replace:1, lat:ph.lat, lng:ph.lng, acc:ph.acc, rid:pid,
+      body:{ action:"uploadPhoto", mime:"image/jpeg", account:acc, date:day, pic:(b.data&&b.data.pic)||b.pic||w.pic||pic, replace:1, lat:ph.lat, lng:ph.lng, acc:ph.acc, shot:ph.shot||"", rid:pid,   /* ⭐ v35.5 — giờ chụp */
              _no:(b.data&&b.data._no)||b._no||"", _acc:acc, _pic:(b.data&&b.data.pic)||(b.data&&b.data._pic)||b.pic||w.pic||pic, _start:day },   /* ⭐ v31.6 — gợi ý nhận đúng dòng */
       label:"Ảnh "+nm });
   }
@@ -29472,6 +29472,244 @@ window.obAddOrders=obAddOrders=function(rows,label){
   hold=true; setTimeout(function(){ hold=false; },4000);
   return _ob.apply(this,arguments);
 };
+})();
+</script>
+<style id="v355-css">
+/* ⭐ v35.5 — cảnh báo ảnh đi địa bàn dày đặc (HOD / Giám đốc) */
+#pha-chip{display:none;align-items:center;gap:6px;position:relative}
+#pha-chip.on{display:inline-flex}
+#pha-chip .v30i{width:16px;height:16px}
+#pha-chip b{min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:#C2605C;color:#fff;font:700 11px/18px Aptos,system-ui,sans-serif;text-align:center}
+#pha-ov{position:fixed;inset:0;z-index:9300;background:rgba(0,30,50,.28);display:none;justify-content:center;align-items:flex-start;font-family:Aptos,"Segoe UI",system-ui,sans-serif}
+#pha-ov.on{display:flex}
+#pha-ov .ob{background:#fff;width:min(860px,100%);margin:28px 16px;max-height:calc(100vh - 56px);border:1px solid #E6EAEF;border-radius:14px;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 10px 30px rgba(0,30,50,.12)}
+#pha-ov .oh{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:12px 16px;border-bottom:1px solid #E6EAEF}
+#pha-ov .oh h3{margin:0;font-size:16px;font-weight:700;color:var(--t-ink,#003047)}
+#pha-ov .oh .sp{flex:1}
+#pha-ov .x{border:0;background:none;font-size:20px;line-height:1;color:#5B6B7D;cursor:pointer;padding:4px 6px}
+#pha-ov .seg{display:inline-flex;border:1px solid var(--fld-line,#C3CDD8);border-radius:9px;overflow:hidden}
+#pha-ov .seg button{border:0;background:#fff;padding:5px 11px;font:600 12.5px Aptos,system-ui,sans-serif;color:#41566F;cursor:pointer}
+#pha-ov .seg button.on{background:var(--t-soft,#F0F7FF);color:var(--t-pri,#3A5CAA)}
+#pha-ov .seg button+button{border-left:1px solid var(--fld-line,#C3CDD8)}
+#pha-ov .rule{padding:9px 16px;font-size:12.5px;color:#41566F;background:#FBFCFE;border-bottom:1px solid #EEF1F4}
+#pha-ov .bd{flex:1;overflow:auto;padding:14px 16px}
+#pha-ov .dh{margin:4px 0 8px;font-size:12.5px;font-weight:700;color:#5B6B7D;text-transform:uppercase;letter-spacing:.02em}
+#pha-ov .it{border:1px solid #E6EAEF;border-left:3px solid #E0A800;border-radius:10px;padding:11px 13px;margin:0 0 10px;background:#fff}
+#pha-ov .it.hi{border-left-color:#C2605C}
+#pha-ov .it.seen{opacity:.6;border-left-color:#C3CDD8}
+#pha-ov .it h4{margin:0 0 4px;font-size:14px;font-weight:600;color:#1F3347}
+#pha-ov .it .lv{display:inline-block;margin-left:6px;padding:1px 8px;border-radius:999px;font-size:11.5px;font-weight:600;background:#FFF8E6;color:#7A5A00;border:1px solid #F1D48A}
+#pha-ov .it.hi .lv{background:#FDEEEE;color:#9B2C2C;border-color:#EBB4B4}
+#pha-ov .it .why{font-size:13px;color:#41566F;margin:6px 0 8px}
+#pha-ov .ln{display:grid;grid-template-columns:52px 46px minmax(0,1fr) auto;gap:8px;align-items:center;padding:5px 0;border-top:1px solid #F1F3F6;font-size:13px}
+#pha-ov .ln:first-of-type{border-top:0}
+#pha-ov .ln img{width:46px;height:46px;object-fit:cover;border-radius:6px;background:#F3F5F8;cursor:zoom-in}
+#pha-ov .ln .t{font-weight:700;color:#1F3347}
+#pha-ov .ln .a{min-width:0}
+#pha-ov .ln .a b{display:block;font-weight:600;color:#1F3347;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#pha-ov .ln .a small{color:#5B6B7D}
+#pha-ov .ln .g{font-size:12px;color:#5B6B7D;white-space:nowrap;text-align:right}
+#pha-ov .acts{display:flex;justify-content:flex-end;gap:8px;margin-top:8px}
+#pha-ov .empty2{padding:44px 10px;text-align:center;color:#5B6B7D;font-size:14px}
+@media(max-width:720px){ #pha-chip span{display:none} #pha-ov .ob{margin:0;border-radius:0;max-height:100vh;height:100vh} #pha-ov .ln{grid-template-columns:44px 40px minmax(0,1fr)} #pha-ov .ln .g{grid-column:3;text-align:left} }
+</style>
+<script id="v355-js">
+/* ═════════ v35.5 (06/11/2026) — CẢNH BÁO ẢNH ĐI ĐỊA BÀN DÀY ĐẶC (người dùng yêu cầu) ═════════
+   Ai thấy: HOD + Giám đốc (+ Admin để kiểm tra) — Team Leader KHÔNG thấy. Nhóm có chụp ảnh: Dental · Surgical · Eyeless (nhóm Thái không chụp ảnh ⇒ bỏ).
+   Luật: 2 ảnh đi địa bàn LIÊN TIẾP của cùng 1 PIC, ở 2 khách KHÁC nhau, cách nhau < 15 phút ⇒ bất thường (bình thường ≥ 15 phút).
+   Các cặp liền nhau gộp thành 1 chuỗi: ≥ 5 ảnh = rất bất thường · ≥ 3 ảnh = bất thường · 2 ảnh = cần xem xét. Kèm khoảng cách GPS nếu có.
+   Giờ ảnh = giờ CHỤP (`shotAt`, backend v10.26, ảnh từ app v35.5) — ảnh cũ hơn chỉ có giờ TẢI LÊN (`upAt`) nên có thể báo nhầm khi ảnh chờ mạng rồi tải bù.
+   Dữ liệu: visitFeed 14 ngày gần nhất của từng nhóm (jsonpTo tới backend của nhóm đó), làm mới 15 phút / lần. "Đã xem" lưu trên máy (`mmh_pha_seen_<pic>`).
+   Có cảnh báo MỚI ⇒ tự mở bảng 1 lần (chờ các hộp thoại khác đóng). Nút `#pha-chip` trên thanh trên cùng (chỉ hiện khi còn cảnh báo chưa xem). API test: PHA.detect(rows, team), PHA.open(), PHA.data(). */
+(function(){
+"use strict";
+var GAP=15, DAYS=14, REFRESH=15*60000;
+function L(vi,en){ try{ return (window.I18N&&I18N.on)?en:vi; }catch(_){ return vi; } }
+function E(s){ return String(s==null?"":s).replace(/[&<>"']/g,function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]; }); }
+function I(k){ try{ return window.V30_ICON?V30_ICON(k):""; }catch(_){ return ""; } }
+function me(){ return String((window.S&&S.user&&S.user.pic)||""); }
+function au(){ try{ return window.AUTH&&AUTH.user&&AUTH.user(); }catch(_){ return null; } }
+/* HOD / Giám đốc (+ Admin) — không phải Team Leader */
+function allowed(){
+  var u=au(), t=String(((window.ROLES||{})[me()]||{}).title||"");
+  if(u && u.admin) return true;
+  if(u && /^(hod|director)$/.test(String(u.level||""))) return true;
+  return /director|head of/i.test(t);
+}
+function teams(){ return ["dental","surgical","eyeless"].filter(function(k){ var t=(window.TEAMS||{})[k]; return t && t.url && !t.noPhoto; }); }
+function nk(s){ return String(s||"").normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/đ/g,"d").replace(/Đ/g,"D").toLowerCase().replace(/[^a-z0-9]/g,""); }
+function tOf(w){ var s=String(w.shotAt||w.upAt||""), m=/^(\d{4})-(\d{2})-(\d{2})\s+(\d{1,2}):(\d{2})/.exec(s); if(!m) return null;
+  return { at:new Date(+m[1],+m[2]-1,+m[3],+m[4],+m[5]).getTime(), day:m[1]+"-"+m[2]+"-"+m[3], hm:("0"+m[4]).slice(-2)+":"+m[5], src:w.shotAt?"shot":"up" }; }
+function ll(w){ var m=/(-?\d+(?:\.\d+)?)\s*,\s*(-?\d+(?:\.\d+)?)/.exec(String(w.gps||"")); return m?{ a:+m[1], b:+m[2] }:null; }
+function km(p,q){ if(!p||!q) return null; var R=6371, r=Math.PI/180, dA=(q.a-p.a)*r, dB=(q.b-p.b)*r, x=Math.sin(dA/2)*Math.sin(dA/2)+Math.cos(p.a*r)*Math.cos(q.a*r)*Math.sin(dB/2)*Math.sin(dB/2); return 2*R*Math.asin(Math.sqrt(x)); }
+function accOf(w){ var a=w.accName||w.account||""; try{ if(!w.accName && window.parseAcc) a=parseAcc(w.account).name||a; }catch(_){} return String(a); }
+function hasPhoto(w){ return !!((w.photos&&w.photos.length)||w.photo); }
+/* chuỗi ảnh liền nhau < GAP phút, khác khách ⇒ 1 cảnh báo */
+function detect(rows, team){
+  var by={}, out=[];
+  (rows||[]).forEach(function(w){
+    if(!w || !hasPhoto(w)) return; var t=tOf(w); if(!t) return;
+    var k=String(w.pic||"")+"|"+t.day; (by[k]=by[k]||[]).push({ w:w, t:t, acc:accOf(w), ak:nk(accOf(w)), g:ll(w) });
+  });
+  Object.keys(by).forEach(function(k){
+    var L2=by[k].sort(function(a,b){ return a.t.at-b.t.at; }), cur=null;
+    for(var i=1;i<L2.length;i++){
+      var p=L2[i-1], q=L2[i], gap=(q.t.at-p.t.at)/60000;
+      if(gap<GAP && q.ak!==p.ak){
+        if(!cur){ cur={ team:team, pic:String(p.w.pic||""), day:p.t.day, items:[p], gaps:[] }; out.push(cur); }
+        cur.items.push(q); cur.gaps.push({ min:Math.round(gap), km:km(p.g,q.g) });
+      } else cur=null;
+    }
+  });
+  out.forEach(function(c){
+    var n=c.items.length, a=c.items[0].t.at, b=c.items[n-1].t.at;
+    c.n=n; c.span=Math.round((b-a)/60000);
+    c.level=n>=5?3:n>=3?2:1;
+    c.fast=c.gaps.some(function(g){ return g.km!=null && g.min>0 && g.km/(g.min/60)>60; }) || c.gaps.some(function(g){ return g.km!=null && g.min===0 && g.km>1; });
+    if(c.fast && c.level<2) c.level=2;
+    c.up=c.items.some(function(x){ return x.t.src==="up"; });
+    c.key=c.team+"|"+c.pic+"|"+c.day+"|"+c.items.map(function(x){ return x.w._row; }).join(",");
+    c.at=a;
+  });
+  return out.sort(function(x,y){ return y.at-x.at; });
+}
+var D={ list:[], at:0, busy:false, err:"", view:"new" };
+function seenKey(){ return "mmh_pha_seen_"+me(); }
+function seen(){ try{ return JSON.parse(localStorage.getItem(seenKey())||"{}")||{}; }catch(_){ return {}; } }
+function setSeen(o){ try{ localStorage.setItem(seenKey(),JSON.stringify(o)); }catch(_){} }
+function fresh(){ var s=seen(); return D.list.filter(function(c){ return !s[c.key]; }); }
+function iso(d){ return d.getFullYear()+"-"+("0"+(d.getMonth()+1)).slice(-2)+"-"+("0"+d.getDate()).slice(-2); }
+function sbx(){ try{ return !!localStorage.getItem("mmh_sbx_crm") || !!window.__CRM_TEST; }catch(_){ return false; } }
+function load(force){
+  if(!allowed() || sbx() || D.busy) return Promise.resolve(D.list);
+  if(!force && D.at && Date.now()-D.at<REFRESH) return Promise.resolve(D.list);
+  D.busy=true;
+  var to=new Date(), fr=new Date(); fr.setDate(fr.getDate()-(DAYS-1));
+  var q={ action:"visitFeed", from:iso(fr), to:iso(to) };
+  return Promise.all(teams().map(function(k){
+    return window.__phaJp(TEAMS[k].url, Object.assign({}, q), 60000).then(function(j){ return detect((j&&j.rows)||[], k); }).catch(function(){ return null; });
+  })).catch(function(){ return []; }).then(function(R){
+    D.busy=false; D.at=Date.now(); var all=[], bad=0;
+    R.forEach(function(x){ if(x===null) bad++; else all=all.concat(x); });
+    D.err=bad?L("Chưa đọc được "+bad+" nhóm — thử lại sau.","Could not read "+bad+" team(s) — try again later."):"";
+    D.list=all.sort(function(x,y){ return y.at-x.at; });
+    paintChip(); if($i("pha-ov")&&$i("pha-ov").classList.contains("on")) paint(); else maybePop();
+    return D.list;
+  });
+}
+function $i(id){ return document.getElementById(id); }
+/* JSONP tới backend của 1 nhóm (jsonpTo của hàng đợi WQ nằm trong phạm vi riêng). AUTH tự gắn tk. */
+function jp(url, params, ms){
+  return new Promise(function(res, rej){
+    var cb="__pha_"+Date.now()+"_"+Math.floor(Math.random()*1e5), s=document.createElement("script");
+    var t=setTimeout(function(){ done(); rej(new Error("__TIMEOUT__")); }, ms||60000);
+    function done(){ clearTimeout(t); try{ delete window[cb]; }catch(_){} if(s.parentNode) s.parentNode.removeChild(s); }
+    window[cb]=function(d){ done(); res(d); };
+    s.onerror=function(){ done(); rej(new Error("Failed to fetch")); };
+    params.callback=cb;
+    s.src=url+"?"+Object.keys(params).map(function(k){ return encodeURIComponent(k)+"="+encodeURIComponent(params[k]==null?"":params[k]); }).join("&");
+    document.body.appendChild(s);
+  });
+}
+window.__phaJp=jp;
+function teamLb(k){ var t=(window.TEAMS||{})[k]||{}; return t.label||k; }
+function dLb(d){ try{ return fmtVN(d); }catch(_){ return d; } }
+function msg(c){
+  return L("<b>"+E(c.pic)+"</b> đã cập nhật <b>"+c.n+" ảnh</b> đi địa bàn cách nhau chưa đến "+GAP+" phút"+(c.n>2?" (cả chuỗi trong "+c.span+" phút)":""),
+           "<b>"+E(c.pic)+"</b> uploaded <b>"+c.n+" field-visit photos</b> less than "+GAP+" minutes apart"+(c.n>2?" ("+c.span+" minutes in total)":""));
+}
+function card(c, isSeen){
+  var lv=[null,L("Cần xem xét","Review"),L("Bất thường","Unusual"),L("Rất bất thường","Highly unusual")][c.level];
+  var lines=c.items.map(function(x,i){
+    var ph=(x.w.photos&&x.w.photos[0])||{}, th=ph.thumb||ph.full||"", op=ph.open||x.w.photo||"";
+    var g=i?c.gaps[i-1]:null;
+    return '<div class="ln"><span class="t">'+E(x.t.hm)+'</span>'+(th?'<img loading="lazy" src="'+E(th)+'" alt="" data-open="'+E(op)+'">':'<span></span>')+
+      '<span class="a"><b>'+E(x.acc||"—")+'</b><small>'+E([x.w.typeAction,x.w.accProv||x.w.province].filter(Boolean).join(" · "))+'</small></span>'+
+      '<span class="g">'+(g?(L("cách ","+")+g.min+L(" phút"," min")+(g.km!=null?" · "+(g.km<1?Math.round(g.km*1000)+" m":g.km.toFixed(1)+" km"):"")):"")+'</span></div>';
+  }).join("");
+  return '<div class="it'+(c.level>=2?" hi":"")+(isSeen?" seen":"")+'" data-k="'+E(c.key)+'"><h4>'+msg(c)+'<span class="lv">'+E(lv)+'</span></h4>'+
+    '<div class="why">'+E(teamLb(c.team))+' · '+E(dLb(c.day))+(c.fast?' · '+E(L("khoảng cách GPS không khớp thời gian di chuyển","GPS distance does not match the travel time")):'')+
+    (c.up?' · <i>'+E(L("theo giờ tải ảnh lên","by upload time"))+'</i>':'')+'</div>'+lines+
+    '<div class="why">'+E(L("Cần xem xét lại hiệu quả của việc tiếp cận các khách hàng này và xác thực về thông tin được cập nhật.","Please review how effectively these customers were approached and verify the information that was updated."))+'</div>'+
+    (isSeen?'':'<div class="acts"><button class="btn sm" data-seen="'+E(c.key)+'">'+E(L("Đã xem","Mark as reviewed"))+'</button></div>')+'</div>';
+}
+function shell(){
+  var ov=$i("pha-ov"); if(ov) return ov;
+  ov=document.createElement("div"); ov.id="pha-ov"; ov.setAttribute("role","dialog"); ov.setAttribute("aria-modal","true");
+  ov.innerHTML='<div class="ob"><div class="oh"><h3>'+E(L("Cảnh báo ảnh đi địa bàn","Field-visit photo alerts"))+'</h3><span class="seg" id="pha-seg">'+
+    '<button data-v="new">'+E(L("Chưa xem","New"))+'</button><button data-v="all">'+E(L("Tất cả "+DAYS+" ngày","All "+DAYS+" days"))+'</button></span><span class="sp"></span>'+
+    '<button type="button" class="x" aria-label="Close">✕</button></div>'+
+    '<div class="rule">'+E(L("2 ảnh đi địa bàn liên tiếp của 1 PIC ở 2 khách khác nhau cách nhau dưới "+GAP+" phút được coi là bất thường (bình thường: từ "+GAP+" phút trở lên). Chỉ HOD và Giám đốc thấy.",
+      "Two consecutive field-visit photos of one PIC at two different customers less than "+GAP+" minutes apart are flagged ("+GAP+" minutes or more is normal). Visible to HODs and the Director only."))+'</div>'+
+    '<div class="bd" id="pha-bd"></div></div>';
+  document.body.appendChild(ov);
+  ov.querySelector(".x").onclick=close;
+  ov.addEventListener("mousedown",function(e){ if(e.target===ov) close(); });
+  ov.addEventListener("click",function(e){
+    var b=e.target.closest("[data-v]"); if(b && b.parentNode.id==="pha-seg"){ D.view=b.getAttribute("data-v"); paint(); return; }
+    var s=e.target.closest("[data-seen]"); if(s){ var o=seen(); o[s.getAttribute("data-seen")]=Date.now(); setSeen(o); paint(); paintChip(); return; }
+    var im=e.target.closest("img[data-open]"); if(im){ var u=im.getAttribute("data-open"); try{ if(window.openLb) openLb([{ thumb:im.src, full:im.src.replace(/sz=w\d+/,"sz=w1600"), open:u }],0); else if(u) window.open(u,"_blank"); }catch(_){ if(u) window.open(u,"_blank"); } }
+  });
+  return ov;
+}
+function paint(){
+  var bd=$i("pha-bd"); if(!bd) return;
+  Array.prototype.forEach.call(document.querySelectorAll("#pha-seg button"),function(b){ b.classList.toggle("on",b.getAttribute("data-v")===D.view); });
+  if(!D.at){ bd.innerHTML='<div class="empty2">'+E(L("Đang kiểm tra ảnh đi địa bàn…","Checking field-visit photos…"))+'</div>'; return; }
+  var s=seen(), L2=D.view==="new"?D.list.filter(function(c){ return !s[c.key]; }):D.list;
+  if(!L2.length){ bd.innerHTML=(D.err?'<div class="why">'+E(D.err)+'</div>':'')+'<div class="empty2">'+E(D.view==="new"?L("Không có cảnh báo mới.","No new alerts."):L("Không có ảnh bất thường trong "+DAYS+" ngày qua.","No unusual photos in the last "+DAYS+" days."))+'</div>'; return; }
+  var h=D.err?'<div class="why">'+E(D.err)+'</div>':'', lastD="";
+  L2.forEach(function(c){ if(c.day!==lastD){ lastD=c.day; h+='<div class="dh">'+E(dLb(c.day))+'</div>'; } h+=card(c,!!s[c.key]); });
+  bd.innerHTML=h;
+}
+function open(){ shell().classList.add("on"); if(!fresh().length && D.list.length) D.view="all"; paint(); load(); }
+function close(){ var ov=$i("pha-ov"); if(ov) ov.classList.remove("on"); }
+function paintChip(){
+  var b=$i("pha-chip"); if(!b) return; var n=fresh().length;
+  b.classList.toggle("on", allowed() && n>0);
+  var c=b.querySelector("b"); if(c) c.textContent=n>99?"99+":String(n);
+}
+function mount(){
+  if($i("pha-chip")) return;
+  var h=document.querySelector("#app header"), u=$i("rhn-btn")||$i("updBtn")||$i("btnUser");
+  if(!h||!u) return setTimeout(mount,900);
+  var b=document.createElement("button"); b.id="pha-chip"; b.type="button"; b.className="tb2";
+  b.innerHTML=I("camera")+'<span>'+E(L("Ảnh bất thường","Photo alerts"))+'</span><b>0</b>';
+  b.title=L("Cảnh báo ảnh đi địa bàn chụp quá dày (dưới "+GAP+" phút giữa 2 khách)","Field-visit photos taken too close together (under "+GAP+" minutes between customers)");
+  b.onclick=open; u.parentNode.insertBefore(b,u); paintChip();
+}
+/* tự mở 1 lần khi có cảnh báo MỚI (chữ ký khác lần đã báo), chờ các hộp thoại khác đóng */
+function popKey(){ return "mmh_pha_pop_"+me(); }
+function maybePop(){
+  var F=fresh(); if(!F.length) return;
+  var sig=F.map(function(c){ return c.key; }).sort().join(";");
+  try{ if(localStorage.getItem(popKey())===sig) return; }catch(_){}
+  var n=0, ok=0;
+  (function w(){
+    var busy=!!(window.__tourOn||document.querySelector("#upd.show,#dl.show,#kpn.show,#ov.on,#ov2.on,#oxv.on,#oav.on,#pha-ov.on"));
+    ok=busy?0:ok+1;
+    if(ok>=3){ try{ localStorage.setItem(popKey(),sig); }catch(_){} D.view="new"; open(); return; }
+    if(++n<240) setTimeout(w,1500);
+  })();
+}
+window.PHA={ detect:detect, open:open, close:close, load:load, data:function(){ return D; }, allowed:allowed, GAP:GAP };
+var _tc=window.__tourClean; window.__tourClean=function(){ try{ close(); }catch(_){} if(typeof _tc==="function") return _tc.apply(this,arguments); };
+try{ if(window.QS_EXTRA_CMDS) QS_EXTRA_CMDS.push(function(){ return allowed()?{ ic:"camera", title:L("Cảnh báo ảnh đi địa bàn","Field-visit photo alerts"), hay:"anh dia ban bat thuong canh bao photo alert", run:open }:null; }); }catch(_){}
+/* gắn GIỜ CHỤP (file.lastModified) vào lệnh tải ảnh — backend v10.26 ghi "📷" */
+var _pg=window.photoGate;
+if(typeof _pg==="function") window.photoGate=photoGate=function(file){ var r=_pg.apply(this,arguments); try{ if(r && file){ var lm=file.lastModified||(file.lastModifiedDate&&+file.lastModifiedDate)||0; window.__phaShot=lm||Date.now(); } }catch(_){} return r; };
+var _ap=window.apiPost;
+window.apiPost=apiPost=function(body){
+  try{
+    if(body && window.__phaShot){
+      if(body.action==="uploadPhoto" && !body.shot) body.shot=window.__phaShot;
+      if(body.photo && typeof body.photo==="object" && !body.photo.shot) body.photo.shot=window.__phaShot;
+    }
+  }catch(_){}
+  return _ap.apply(this,arguments);
+};
+function boot(){ if(!window.S||!S.user) return setTimeout(boot,1500); if(!allowed()) return; mount(); setTimeout(function(){ load(true); },4000); setInterval(function(){ load(); },REFRESH); }
+boot();
 })();
 </script>
 </body>
