@@ -7,6 +7,15 @@
 function E(u){ u.en={ title:u.title, items:u.items.map(function(i){ return { title:i.title, text:i.text }; }) }; return u; }
 window.MMH_UPDATES = [
   E({
+    id:"2026-11-06-v35.5", version:"v35.5", date:"2026-11-06",
+    title:"HOD & Director: alerts for field-visit photos taken too close together",
+    summary:"The CRM now flags field-visit photos of one PIC at two different customers taken less than 15 minutes apart, so HODs and the Director can review those visits. Team leaders and sales PICs do not see these alerts.",
+    items:[
+      { type:"new", icon:"!", title:"Field-visit photo alerts", text:"When there are new alerts, the <b>Photo alerts</b> panel opens once (top bar button, or <b>Ctrl + K</b> ▸ photo). Each alert reads e.g. \"Phuong uploaded 2 field-visit photos less than 15 minutes apart\" with the times, customers, photos and GPS distance — review how these customers were approached and verify the information. 3 photos in a row = unusual, 5 = highly unusual. Click <b>Mark as reviewed</b> when done.", img:"updates/v35.5/alerts.jpg" },
+      { type:"imp", icon:"#", title:"Photos keep the time they were taken", text:"From this version each field-visit photo also records the time it was taken (not only the upload time), so photos uploaded later because of a weak network are not flagged by mistake. Covers Dental, Surgical and Eyeless (teams that take photos)." }
+    ]
+  }),
+  E({
     id:"2026-11-05-v35.4", version:"v35.4", date:"2026-11-05",
     title:"Orders: no more duplicate saves, order data cleaned up",
     summary:"Clicking Save twice (slow network, double tap on the phone) no longer sends the same order twice. Order data on the sheet was checked and fixed: duplicate order numbers, lines without an order date and duplicated product lines.",
