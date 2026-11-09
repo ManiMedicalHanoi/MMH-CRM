@@ -4017,7 +4017,7 @@ function buildNav(){
     if(t.grp!==lastGrp){ h+='<div class="grp">'+t.grp+'</div>'; lastGrp=t.grp; }
     h+='<button class="nvi" data-t="'+t.id+'" onclick="go(\''+t.id+'\')"><span class="ic">'+t.ic+'</span><span class="lb">'+t.lb+'</span></button>';
   });
-  h+='<div style="flex:1"></div><div style="padding:10px;font-size:10.5px;color:var(--mute);line-height:1.5">MMH CRM v35.7<br>'+
+  h+='<div style="flex:1"></div><div style="padding:10px;font-size:10.5px;color:var(--mute);line-height:1.5">MMH CRM v35.8<br>'+
      (isMgmt()?'<a href="'+DRIVE_FOLDER+'" target="_blank">📁 Folder ảnh Drive</a>':"")+'</div>';
   $("side").innerHTML=h;
   /* ⭐ v4.5 — thanh dưới trượt ngang, đủ mọi mục, bỏ nút "Thêm" */
@@ -17541,7 +17541,7 @@ function renderReportKpi(){
       var v=d.sum&&d.sum.m?d.sum.m[i]:null;
       return '<div class="chip'+(S.kmMonth===ym?" on":"")+'" onclick="rpKpiMonth(\''+ym+'\')">'+kmYm(ym)+((d.closed||[]).indexOf(ym)>=0?" ✓":"")+(v!=null?' <span style="opacity:.75;font-weight:600">'+kmPct(v)+'</span>':"")+'</div>'; }).join("")+'</div>'+
     '<div class="hint" style="margin-top:8px">'+(closed?TX("Tháng ","Month ")+kmYm(S.kmMonth)+TX(" đã chốt số."," is closed."):
-      '<b style="color:#B7791F">'+TX("Tháng ","Month ")+kmYm(S.kmMonth)+TX(" chưa chốt số (chốt sau 16:00 ngày 2 tháng sau) — số còn có thể thay đổi."," is not closed yet (closes 16:00 on day 2 of the next month) — figures may still change.")+'</b>')+'</div></div>';
+      '<b style="color:#B7791F">'+TX("Tháng ","Month ")+kmYm(S.kmMonth)+TX(" chưa chốt số — số còn có thể thay đổi. Hạn gửi báo cáo KPI tháng: ngày 05 tháng sau."," is not closed yet — figures may still change. The monthly KPI report is due on day 05 of the next month.")+'</b>')+'</div></div>';
   var steps='<div class="kr-steps"><span><i>1</i>'+TX("Xem bảng KPI tháng","Review the monthly KPI")+'</span><span><i>2</i>'+TX("Soạn email","Compose")+'</span><span><i>3</i>'+TX("Xem trước & gửi","Preview & send")+'</span></div>';
   var table='<section class="card km" id="krTable"><div class="km-h"><h3>① '+TX("Bảng KPI tháng ","KPI table ")+kmYm(S.kmMonth)+' · '+esc(m.key)+'</h3>'+
     '<span class="km-live"><i></i>'+TX("đọc lúc ","read at ")+esc(String(d.readAt||"").slice(-8,-3))+'</span><div class="sp" style="flex:1"></div>'+
@@ -20289,7 +20289,7 @@ function krForm(){
   L.innerHTML='<div class="kx-row"><div class="kx-f"><label>Người báo cáo</label><select id="kr-pic">'+mem.map(function(m){ return '<option'+(m===sel?" selected":"")+'>'+esc(m)+'</option>'; }).join("")+'</select></div>'
     +'<div class="kx-f"><label>Tổng KPI tháng</label><div style="font-size:22px;font-weight:700;padding-top:2px" class="g-'+tone(total(sel,KS.month))+'">'+pct(total(sel,KS.month))+'</div></div></div>'
     +'<div class="kx-f"><label>Tháng báo cáo</label><div class="kx-months">'+ms.map(function(m){ var t=total(sel,m); return '<button type="button" data-m="'+m+'" class="'+(m===KS.month?"on":"")+'">'+monthLabel(m)+(t!==null&&hasAct(sel,m)?'<small class="g-'+tone(t)+'">'+Math.round(t*100)+'%</small>':'')+'</button>'; }).join("")+'</div>'
-      +'<small>Số tháng chốt sau 16:00 ngày 2 tháng sau.</small></div>'
+      +'<small>Hạn gửi báo cáo KPI tháng: ngày 05 tháng sau.</small></div>'
     +'<div class="kx-f"><label>Gửi tới (To)</label><div class="kx-chips" id="kr-to">'+chipsHtml("to")+'</div></div>'
     +'<div class="kx-f"><label>CC</label><div class="kx-chips" id="kr-cc">'+chipsHtml("cc")+'</div><small>Mặc định theo sơ đồ tổ chức (Team Leader / HOD / Director). Chỉ email công ty.</small></div>'
     +'<div class="kx-f"><label>Tiêu đề</label><input id="kr-sub" maxlength="200" value="'+esc(dr.subject||("KPI "+(EN?"":"T")+monthLabel(KS.month)+" · "+(s.full||sel)))+'"></div>'
@@ -20516,7 +20516,7 @@ function showNotice(list){
   var it=list.shift(), o=$("kpn");
   if(!o){ o=document.createElement("div"); o.id="kpn"; document.body.appendChild(o); }
   o.innerHTML='<div class="c" role="dialog"><div class="k">'+it.kick+'</div><h3>'+esc(it.title)+'</h3><p>'+it.text+'</p><div class="a">'
-    +(it.kq?'<button class="kp-btn" data-a="never">Đã nộp, không nhắc nữa</button>':'')+'<button class="kp-btn" data-a="later">Để sau</button><button class="kp-btn pri" data-a="go">'+it.btn+'</button></div></div>';
+    +(it.kq?'<button class="kp-btn" data-a="never">Đã gửi, không nhắc nữa</button>':'')+'<button class="kp-btn" data-a="later">Để sau</button><button class="kp-btn pri" data-a="go">'+it.btn+'</button></div></div>';
   o.classList.add("show");
   o.querySelectorAll("button").forEach(function(b){ b.onclick=function(){
     var a=b.getAttribute("data-a"); o.classList.remove("show");
@@ -20795,7 +20795,7 @@ window.QS2={ open:qsOpen };
 </script>
 
 <!-- ⭐ v30.3 — THÔNG BÁO CẬP NHẬT (chép từ Report Hub): dữ liệu updates/notes.js · tự hiện 7 ngày · nút "Có gì mới" trên thanh trên cùng -->
-<script src="updates/notes.js?v=35.7"></script>
+<script src="updates/notes.js?v=35.8"></script>
 <style id="upd-css">
 #upd,#upd-zoom{--t-pri:var(--blue);--t-pri2:var(--blue-d);--t-ink:var(--navy);--t-soft:var(--pale);--t-line:var(--lb2);--t-bg:#F6F8FA;--mmh-blue:var(--blue);--mmh-navy:var(--navy)}
 
@@ -21973,7 +21973,7 @@ function pMem(){
 }
 function pRule(){
   var d=T.d;
-  var VN=[[/^KPI is summarised/i,"KPI được tổng hợp và chốt hằng tháng."],[/^Deadline/i,"Hạn hoàn thành KPI: ngày 02 tháng sau — sau ngày này không sửa KPI tháng trước."],
+  var VN=[[/^KPI is summarised/i,"KPI được tổng hợp và chốt hằng tháng."],[/^Deadline/i,"Hạn gửi báo cáo KPI: ngày 05 tháng sau (KPI quý: ngày 05 tháng đầu quý kế tiếp)."],
     [/^Email the KPI/i,"Gửi email kết quả KPI cho Part leader và Director, cc Ms. Hoa (Part leader Back-office)."],
     [/^If 10%/i,"Muộn / thiếu 10% báo cáo: trừ 20% thưởng; trên 50%: không xét thưởng (quy định MMH-009)."],
     [/^Result cap/i,"Mỗi KPI tối đa 130% (tháng, quý, năm), trừ Doanh số Turnover và Doanh số sản phẩm mới / tái ra mắt."],
@@ -22282,7 +22282,7 @@ var A={
   "Setting Expectation cần đăng nhập bằng email.":"Setting Expectation requires signing in with your email.", "Không tải được file mẫu.":"Could not load the template file.",
   /* Báo cáo KPI tháng */
   "📧 Báo cáo KPI tháng":"📧 Monthly KPI report", "Chọn kỳ":"Choose period", "Soạn email":"Write email", "Xem trước & gửi":"Preview & send",
-  "Người báo cáo":"Reporter", "Tháng báo cáo":"Report month", "Số tháng chốt sau 16:00 ngày 2 tháng sau.":"Monthly figures are closed after 16:00 on the 2nd of the next month.",
+  "Người báo cáo":"Reporter", "Tháng báo cáo":"Report month", "Hạn gửi báo cáo KPI tháng: ngày 05 tháng sau.":"The monthly KPI report is due on day 05 of the next month.", "Số tháng chốt sau 16:00 ngày 2 tháng sau.":"Monthly figures are closed after 16:00 on the 2nd of the next month.",
   "Gửi tới (To)":"Send to (To)", "Mặc định theo sơ đồ tổ chức (Team Leader / HOD / Director). Chỉ email công ty.":"Default from the organisation chart (Team Leader / HOD / Director). Company emails only.",
   "Tiêu đề":"Subject", "Lời chào":"Greeting", "Mở đầu":"Opening", "Chữ ký":"Signature", "Kèm KPI lũy kế quý":"Include quarter-to-date KPI",
   "gõ email rồi Enter":"type an email and press Enter", "Mỗi dòng là 1 ý":"One point per line",
@@ -22295,7 +22295,7 @@ var A={
   /* nhắc hạn KPI · tự đánh giá */
   "ĐÁNH GIÁ CÔNG VIỆC QUÝ":"QUARTERLY PERFORMANCE REVIEW", "Hạn hoàn thành form Setting Expectation & tự đánh giá":"The deadline for the Setting Expectation & self-assessment form",
   "là":"is", ". KPI của quý được điền sẵn — bạn chỉ cần viết phần tự đánh giá rồi tải file Word.":". Your KPIs of the quarter are filled in — just write your self-assessment and download the Word file.",
-  "Đã nộp, không nhắc nữa":"Submitted, don't remind me", "Để sau":"Later", "📝 Mở form tự đánh giá":"📝 Open self-assessment form", "Mở form tự đánh giá":"Open self-assessment form",
+  "Đã gửi, không nhắc nữa":"Already sent, don't remind me", "Để sau":"Later", "📝 Mở form tự đánh giá":"📝 Open self-assessment form", "Mở form tự đánh giá":"Open self-assessment form",
   "BÁO CÁO KPI THÁNG":"MONTHLY KPI REPORT", "trước 16:00 hôm nay":"before 16:00 today", "(sau giờ này số liệu tháng được chốt).":"(the monthly figures are closed after this time).",
   "Mở báo cáo KPI tháng":"Open monthly KPI report", "📧 Mở báo cáo KPI tháng":"📧 Open monthly KPI report",
   /* nhắc hạn chứng từ (Kế toán) */
@@ -29126,7 +29126,7 @@ html.v344-app #pwaBtn{display:none!important}
 window.KPISOP_CFG={ en:function(){ return !!(window.I18N && I18N.on); },
   thai:function(pic, s){ try{ if(typeof isTH==="function" && isTH()) return true; }catch(_){} return /thai/i.test([s&&s.team, s&&s.dept].join(" ")); } };
 </script>
-<script src="kpisop/kpisop.js?v=1.1"></script>
+<script src="kpisop/kpisop.js?v=1.2"></script>
 
 <script id="v348-js">
 /* ═════════ v34.8 (02/11/2026) — Thailand Dental: sheet CUSTOMER VISITING → CUSTOMER TASK · ALL TASK → OTHERS TASK

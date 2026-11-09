@@ -7,6 +7,15 @@
 function E(u){ u.en={ title:u.title, items:u.items.map(function(i){ return { title:i.title, text:i.text }; }) }; return u; }
 window.MMH_UPDATES = [
   E({
+    id:"2026-11-09-v35.8", version:"v35.8", date:"2026-11-09",
+    title:"KPI reports: due on day 05 — you send the e-mail from your own mailbox",
+    summary:"The Monthly KPI Report and the Quarterly KPI Report (self-assessment) are due on <b>day 05</b>. The system no longer sends the reports to other people: the CRM prepares the content and the Word file, and <b>you send the e-mail yourself</b> to your Department Head and the General Director, CC Accounting.",
+    items:[
+      { type:"imp", icon:"@", title:"Compose e-mail", text:"<b>Submit Report ▸ KPI report</b> (or <b>KPIs & Targets ▸ Send KPI report / Quarterly KPI report</b>) ▸ fill in the reasons and actions ▸ <b>Compose e-mail</b>: the content is copied, choose <b>Outlook / Gmail / Mail app</b> ⇒ your mailbox opens with the recipients and subject filled in ⇒ paste (Ctrl+V), attach the Word file, send ⇒ click <b>I have sent it</b>." },
+      { type:"imp", icon:"!", title:"Reminders from day 01 to day 05", text:"From day 01 to 05 of each month the CRM reminds you once a day (days left / due today); days 06–10 show an <b>overdue</b> reminder. The first month of each quarter also reminds the quarterly report. <b>I have sent it</b> or <b>Already sent, don't remind me</b> stops the reminders." }
+    ]
+  }),
+  E({
     id:"2026-11-09-v35.7", version:"v35.7", date:"2026-11-09",
     title:"Report submission statistics now include the Thailand Dental CRM",
     summary:"The report statistics (Excel) now read the weekly reports sent from the Thailand Dental CRM, with the Thailand working calendar.",
