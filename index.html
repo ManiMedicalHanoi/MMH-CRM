@@ -1603,8 +1603,8 @@ var TEAMS = {
      backend crm-thai-dental (mmh-backend), giao diện TIẾNG ANH, không Sales order, không chụp ảnh, "Công việc khác" ở sheet ALL TASK */
   thaid: {
     key:"thaid", label:"Thailand Dental", short:"Dental · MMG (Thailand)", ic:"🇹🇭",
-    url:"https://script.google.com/macros/s/AKfycbz2QxuRLqmadEoM5bWaXRflzOkX9J44JmxeKHOAQmwVvv-m--iD5CY1LHWty8bZZg74ug/exec",
-    eventSrc:"", taskType:"Sales-Thailand Dental", crmFile:"1. Thailand - Dental Action FY68",
+    url:"https://script.google.com/macros/s/AKfycbwEvi4Y2rnLKwR0JKaqJKNCiHgyS6SEY473dEM9meSGHZ8B6b4tVka5jB4ppEAEPPHQ/exec",   /* v35.6 — file thật (trước: bản draft) */
+    eventSrc:"", taskType:"Sales-Thailand Dental", crmFile:"1. Thailand - Dental Action",
     lang:"en", noOrder:true, noPhoto:true, ownTasks:true, noTrip:false, noTurnover:false
   }
 };
@@ -4017,7 +4017,7 @@ function buildNav(){
     if(t.grp!==lastGrp){ h+='<div class="grp">'+t.grp+'</div>'; lastGrp=t.grp; }
     h+='<button class="nvi" data-t="'+t.id+'" onclick="go(\''+t.id+'\')"><span class="ic">'+t.ic+'</span><span class="lb">'+t.lb+'</span></button>';
   });
-  h+='<div style="flex:1"></div><div style="padding:10px;font-size:10.5px;color:var(--mute);line-height:1.5">MMH CRM v35.5<br>'+
+  h+='<div style="flex:1"></div><div style="padding:10px;font-size:10.5px;color:var(--mute);line-height:1.5">MMH CRM v35.6<br>'+
      (isMgmt()?'<a href="'+DRIVE_FOLDER+'" target="_blank">📁 Folder ảnh Drive</a>':"")+'</div>';
   $("side").innerHTML=h;
   /* ⭐ v4.5 — thanh dưới trượt ngang, đủ mọi mục, bỏ nút "Thêm" */
@@ -14873,6 +14873,17 @@ var EV_URL="https://script.google.com/macros/s/AKfycbykuiMSXhyVeujpffSi0l8hU8yok
 var EV_SHEET="https://docs.google.com/spreadsheets/d/1s6ny0CSsF0WECR_8Zu41eU2kCFrmYHYbEa3GIWSbO1M/edit";
 var EV_GID={ event:"2090468147", cust:"2139397591" };
 try{ TEAMS.thai.evUrl=EV_URL; }catch(e){}
+/* ⭐ v35.6 — Thailand Dental: tab Event đọc / ghi file "2. Thailand - Dental Event Report FY67" (backend thai-dental-mkt, cùng API) */
+try{ TEAMS.thaid.evUrl="https://script.google.com/macros/s/AKfycbyUjFiuSPFRvBSS5JOODOhd8PkaNJSwoazwKSFDwO5O-eCQxTT5Yl4tXHsA_JprsnALQg/exec"; TEAMS.thaid.evFile="Dental Event Report";
+     TEAMS.thaid.evSheet="https://docs.google.com/spreadsheets/d/12GnjS0esEOfW3_uWTrTwe0AQgOtAVsIuqDiSSCea308/edit"; }catch(e){}
+function evFileLb(){ try{ return curTeam().evFile||"Marketing Offline"; }catch(e){ return "Marketing Offline"; } }
+/* link "Open sheet": gid do backend trả (lists.sheet) — nhóm khác file ⇒ không dùng gid của Surgical */
+function evSheetHref(k){
+  var t=curTeam()||{}, L=(EVS._team===curTeamKey()&&EVS.lists&&EVS.lists.sheet)||null;
+  if(L&&L.url) return L.url+(L[k]?"#gid="+L[k]:"");
+  if(t.evSheet) return t.evSheet;
+  return EV_SHEET+"#gid="+EV_GID[k];
+}
 function hasEvents(){ try{ return !!curTeam().evUrl; }catch(e){ return false; } }
 var EV_COL="#D9477E";
 try{ CAL_COL.e=EV_COL; if(CAL.show.e===undefined) CAL.show.e=1; }catch(e){}
@@ -14902,8 +14913,8 @@ function evJsonp(params, ms){
 }
 function evErrText(e){
   var m=String((e&&e.message)||e||"");
-  if(m==="__EV_TIMEOUT__") return "The Marketing Offline file did not answer in time. Check that its Apps Script (Event backend) is deployed as a Web app with access “Anyone”, then press ⟳.";
-  if(m==="__EV_BLOCKED__") return "Cannot reach the Marketing Offline file. If this phone is signed in to several Google accounts, open the app in a private window, or check the Web app access is “Anyone”.";
+  if(m==="__EV_TIMEOUT__") return "The "+evFileLb()+" file did not answer in time. Check that its Apps Script (Event backend) is deployed as a Web app with access “Anyone”, then press ⟳.";
+  if(m==="__EV_BLOCKED__") return "Cannot reach the "+evFileLb()+" file. If this phone is signed in to several Google accounts, open the app in a private window, or check the Web app access is “Anyone”.";
   return m||"Unknown error";
 }
 function evRid(){ return "e"+Date.now().toString(36)+Math.random().toString(36).slice(2,8); }
@@ -15077,10 +15088,10 @@ function renderEvent(){
   var note=EVS.err?'<div class="cal-note">⚠️ '+esc(EVS.err)+' <a href="javascript:void(0)" onclick="loadEvents(true)">Retry</a></div>'
           :(!EVS.rows?'<div class="cal-note">⏳ Reading sheet REPORT_EVENT…</div>':'');
   $("main").innerHTML='<div class="pg ev-pg">'+
-    '<div class="ev-head"><div><h2>🎪 Marketing events</h2><p>'+esc(rg.label)+' · sheet REPORT_EVENT · Marketing Offline file'+
+    '<div class="ev-head"><div><h2>🎪 Marketing events</h2><p>'+esc(rg.label)+' · sheet REPORT_EVENT · '+esc(evFileLb())+' file'+
       (EVS.loading?' · <span class="stale"><span class="dot"></span>syncing…</span>':'')+'</p></div>'+
       '<div class="ev-acts"><button class="btn sm" onclick="loadEvents(true);loadEvCust(true)" title="Read the sheet again">⟳</button>'+
-      '<a class="btn sm hide-m" href="'+EV_SHEET+'#gid='+EV_GID.event+'" target="_blank">📄 Open sheet</a>'+
+      '<a class="btn sm hide-m" href="'+evSheetHref("event")+'" target="_blank">📄 Open sheet</a>'+
       (evCanEdit()?'<button class="btn pri sm" onclick="evForm(null)">＋ Add event</button>':'')+'</div></div>'+
     note+evPeriodBar(rg,mCnt)+
     '<div class="ev-strip">'+
@@ -15268,14 +15279,14 @@ function calIc(k){ return k==="v"?"📍":k==="t"?"✈️":k==="e"?"🎪":"🧩";
     var p=document.querySelector("#mBody .cal-pick"); if(!p) return;
     iso=iso||todayISO();
     p.insertAdjacentHTML("beforeend",'<button onclick="closeModal();evForm(null,\''+iso+'\')"><span class="ic">🎪</span><span class="ti">Event</span>'+
-      '<span class="ds">Seminar, workshop, wetlab, booth… — saved to sheet REPORT_EVENT (Marketing Offline file)</span></button>');
+      '<span class="ds">Seminar, workshop, wetlab, booth… — saved to sheet REPORT_EVENT ('+esc(evFileLb())+' file)</span></button>');
   };
   var pk=pickTaskKind; pickTaskKind=function(){
     pk.apply(this,arguments);
     if(!hasEvents()) return;
     var p=document.querySelector("#mBody .pick2"); if(!p) return;
     p.insertAdjacentHTML("beforeend",'<button class="pick2-c ev" onclick="closeModal();evForm(null)"><div class="ic">🎪</div><div class="ti">Event</div>'+
-      '<div class="ds">Seminar, workshop, wetlab, presentation, booth…</div><div class="sh">Saved to <b>Marketing Offline</b> · sheet REPORT_EVENT</div></button>');
+      '<div class="ds">Seminar, workshop, wetlab, presentation, booth…</div><div class="sh">Saved to <b>'+esc(evFileLb())+'</b> · sheet REPORT_EVENT</div></button>');
   };
 })();
 /* số event trong kỳ đang xem (ô thống kê trên lịch) */
@@ -15464,7 +15475,7 @@ function renderEvCust(){
   $("main").innerHTML='<div class="pg">'+stakeTabBar()+
     '<div class="trhead compact"><div class="tt"><span class="sub"><b>'+fmtN(rows.length)+'</b> customers from events'+(fy?' · '+esc(fy):' · all FY')+'</span></div>'+
       '<div class="acts"><button class="btn sm" onclick="loadEvCust(true);loadEvents(true)">⟳ Reload</button>'+
-      '<a class="btn sm hide-m" href="'+EV_SHEET+'#gid='+EV_GID.cust+'" target="_blank">📄 CUSTOMER LIST</a></div></div>'+
+      '<a class="btn sm hide-m" href="'+evSheetHref("cust")+'" target="_blank">📄 CUSTOMER LIST</a></div></div>'+
     (EVS.custErr?'<div class="cal-note">⚠️ '+esc(EVS.custErr)+'</div>':(!EVS.cust?'<div class="cal-note">⏳ Reading sheet CUSTOMER LIST…</div>':''))+
     '<div class="grid g4 ev-g4" style="margin-bottom:13px">'+
       '<div class="kpi"><div class="lb">Event customers</div><div class="vl">'+fmtN(rows.length)+'</div><div class="sb">Sheet CUSTOMER LIST</div></div>'+
@@ -20784,7 +20795,7 @@ window.QS2={ open:qsOpen };
 </script>
 
 <!-- ⭐ v30.3 — THÔNG BÁO CẬP NHẬT (chép từ Report Hub): dữ liệu updates/notes.js · tự hiện 7 ngày · nút "Có gì mới" trên thanh trên cùng -->
-<script src="updates/notes.js?v=35.5"></script>
+<script src="updates/notes.js?v=35.6"></script>
 <style id="upd-css">
 #upd,#upd-zoom{--t-pri:var(--blue);--t-pri2:var(--blue-d);--t-ink:var(--navy);--t-soft:var(--pale);--t-line:var(--lb2);--t-bg:#F6F8FA;--mmh-blue:var(--blue);--mmh-navy:var(--navy)}
 
@@ -29712,5 +29723,113 @@ function boot(){ if(!window.S||!S.user) return setTimeout(boot,1500); if(!allowe
 boot();
 })();
 </script>
+<script id="v356-trip">
+/* ══ v35.6 (09/11/2026) — CÔNG TÁC NHÓM THÁI = FILE BUSINESS TRIP RIÊNG CỦA TỪNG NHÓM (người dùng yêu cầu) ══
+   Thailand Dental ⇒ "Thailand Dental - Business trip Approval and Report" · Thailand Surgical ⇒ "Thailand Surgical - …".
+   Mọi lệnh công tác của nhóm Thái (tripMaster / tripPropose / tripInfo / tripUpdate / tripDelete / tripReport) đi backend CRM của nhóm
+   (mmh-backend ▸ TH_Trip.gs ▸ thtRoute_), KHÔNG qua Report Hub / file Business Trip Việt Nam. Lịch công tác đọc tfTrips của backend đó.
+   Form tiếng Anh, tiền chỉ THB (bỏ ô chọn đơn vị), không có Equipment (file Thái không có cột này). Thailand Surgical có lại Công tác. */
+(function(){
+"use strict";
+function TH(){ try{ return isTH(); }catch(_){ return false; } }
+try{ TEAMS.thai.noTrip=false; }catch(_){}
+function thTripFile(){ return (curTeamKey&&curTeamKey()==="thaid"?"Thailand Dental":"Thailand Surgical")+" Business Trip file"; }
+/* ① chi phí: luôn THB */
+function thbLines(){
+  var L=(window.TPC||[]).filter(function(r){ return String(r.d||"").trim()||r.a; });
+  return L.map(function(r){ return { d:String(r.d||"").trim(), a:r.a||0, c:"THB" }; });
+}
+/* ② mọi lệnh công tác của nhóm Thái ⇒ backend CRM của nhóm */
+var prev=tripHub;
+window.tripHub=tripHub=function(body,ms){
+  var a=String((body&&body.action)||"");
+  if(!TH() || !/^trip(Master|Propose|Info|Update|Delete|Report|Sync)$/.test(a)) return prev.apply(this,arguments);
+  if(a==="tripSync") return Promise.resolve({ ok:true, later:true });
+  var p={}; Object.keys(body||{}).forEach(function(k){ p[k]=body[k]; });
+  p.forPic=p.forPic||S.user.pic; p.actor=S.user.pic;
+  if(p.trip && /^(tripPropose|tripUpdate)$/.test(a)){
+    try{ var f=typeof p.trip==="string"?JSON.parse(p.trip):p.trip, L=thbLines();
+      if(L.length){ f.costLines=L; f.estimatedCost=L.map(function(r){ return (r.d||"Expense")+": "+Math.round(r.a).toLocaleString("en-US")+" THB"; }).join("\n");
+        f.totalCost=String(L.reduce(function(s,r){ return s+(r.a||0); },0)); }
+      f.currency="THB"; delete f.equipment;
+      p.trip=JSON.stringify(f); }catch(_){}
+  }
+  var go=(a==="tripMaster"||a==="tripInfo") ? apiGet(a, Object.assign(p,{ _ts:Date.now() })) : apiPost(Object.assign(p,{ action:a, rid:p.rid||uid28() }));
+  return go.then(function(j){
+    if(!j || j.ok===false) throw new Error((j&&j.error)||"Error");
+    if(/^(tripPropose|tripUpdate|tripDelete|tripReport)$/.test(a)){ try{ S.trCache && p.id && delete S.trCache[p.id]; }catch(_){} setTimeout(function(){ thTripLoad(true); },900); }
+    return j;
+  });
+};
+/* ③ lịch công tác nhóm Thái: tfTrips của backend CRM (file của nhóm) — thay bản đọc Report Hub */
+window.thTripLoad=thTripLoad=function(force){
+  if(!ownTasks() || noTrip()) return Promise.resolve(null);
+  if(S._thTripLd) return S._thTripLd;
+  if(!force && S.thTrips && Date.now()-(S.thTripsAt||0)<600000) return Promise.resolve(S.thTrips);
+  S._thTripLd=apiGet("tfTrips",{ force:force?1:"", _ts:Date.now() }).then(function(j){
+    S._thTripLd=null;
+    var by={}; ((j&&j.trips)||[]).forEach(function(t){ var m=(t.vMeta&&t.vMeta.m)||String(t.start||"").replace(/-/g,"").slice(0,6); (by[m]=by[m]||[]).push(t); });
+    S.thTrips=Object.keys(by).sort().map(function(m){
+      return { _hub:1, _tf:1, no:"BTK"+m, row:0, keyTask:"Business trips "+m.slice(4,6)+"/"+m.slice(0,4), type:"Business trip", pic:"", status:"", progress:0,
+               start:m.slice(0,4)+"-"+m.slice(4,6)+"-01", vSrc:"trip-key", vMeta:{ m:m }, subs:by[m] };
+    });
+    S.thTripsAt=Date.now(); S.thTripFile=j&&j.file;
+    try{ if(S.tab==="weekly" && S.wkTab==="cal") renderCal(); if(S.tab==="meet" && typeof mtPaintCrm==="function") mtPaintCrm(); }catch(_){}
+    return S.thTrips;
+  }).catch(function(){ S._thTripLd=null; return S.thTrips||null; });
+  return S._thTripLd;
+};
+/* ④ form đề xuất / sửa: tiếng Anh, THB, không Equipment */
+if(typeof tripProposeForm==="function"){
+  var f0=tripProposeForm;
+  window.tripProposeForm=tripProposeForm=function(r){
+    var out=f0.apply(this,arguments);
+    if(!TH()) return out;
+    try{
+      var ei=document.getElementById("ms-i-eq"), eq=ei&&ei.closest(".fld");
+      if(eq){ eq.style.display="none"; }
+      if(window.MS && MS.eq){ MS.eq.sel=["N/A"]; }
+      var box=$("mBody").querySelector(".tp-box");
+      if(box && !(window.TP && TP.edit)) box.innerHTML='Saved to the <b>'+esc(thTripFile())+'</b> (Approval Status = <b>Not Yet</b>) and the approval e-mail is sent '
+        +'<b>To:</b> '+esc((r&&r.to)||"")+((r&&r.cc)?' · <b>CC:</b> '+esc(r.cc):'')+'. The manager approves with the <b>HOD Menu</b> of the Google Sheet. Costs are in <b>Thai baht (THB)</b>.';
+      (window.TPC||[]).forEach(function(x){ x.c="THB"; });
+      var hc=$("tp-costs"), hf=hc&&hc.closest(".fld"), hh=hf&&hf.querySelector(".tp-hint"); if(hh) hh.textContent="one item per row — description, amount in THB";
+      tpCostPaint();
+    }catch(_){}
+    return out;
+  };
+}
+/* ⑤ thẻ chuyến đi (xem / báo cáo) của nhóm Thái: tiếng Anh, không Equipment, link đúng file của nhóm */
+if(typeof tripViewPaint==="function"){
+  var v0=tripViewPaint;
+  window.tripViewPaint=tripViewPaint=function(t){
+    var r=v0.apply(this,arguments);
+    if(!TH() || !t) return r;
+    try{
+      var mb=$("mBody"), url=t.file||S.thTripFile||"";
+      var d=mb.querySelector(".tr6-date"); if(d) d.innerHTML=d.innerHTML.replace(/ ngày /," day(s) ");
+      mb.querySelectorAll("div").forEach(function(x){ if(x.children.length<=3 && /^(Thiết bị|Device|Equipment)/i.test((x.firstElementChild&&x.firstElementChild.textContent||"").trim())) x.style.display="none"; });
+      var ph={ "tr6-ka":"Main activities during the trip…", "tr6-kf":"Important findings / information…", "tr6-fu":"Next actions…" };
+      Object.keys(ph).forEach(function(id){ var e=$(id); if(e) e.placeholder=ph[id]; });
+      var nt=mb.querySelector(".tr6-note"); if(nt && /Google Doc|Khi lưu/.test(nt.textContent)) nt.innerHTML='On save: a <b>report document</b> is created in the trip folder, the report is written to column <b>Business trip Report</b> of the '+esc(thTripFile())+' and e-mailed to <b>Shuhei-san</b> (CC Director); the trip turns <b>Completed</b> on the calendar.';
+      if(url) document.querySelectorAll("#mFoot a.btn").forEach(function(a){ if(/Business Trip/i.test(a.textContent)){ a.href=url; a.textContent="Open "+thTripFile()+" ↗"; } });
+    }catch(_){}
+    return r;
+  };
+}
+if(typeof tpCostPaint==="function"){
+  var p0=tpCostPaint;
+  window.tpCostPaint=tpCostPaint=function(){
+    if(TH()) (window.TPC||[]).forEach(function(x){ x.c="THB"; });
+    var r=p0.apply(this,arguments);
+    if(TH()){ document.querySelectorAll("#tp-costs select.tpc-cur").forEach(function(sel){ var s=document.createElement("span"); s.className="tpc-cur thb"; s.textContent="THB"; sel.parentNode.replaceChild(s,sel); }); }
+    return r;
+  };
+}
+})();
+</script>
+<style id="v356-trip-css">
+#tp-costs span.tpc-cur.thb{display:inline-flex;align-items:center;padding:0 8px;font-weight:600;color:var(--sub,#5B6B7D);font-size:12.5px}
+</style>
 </body>
 </html>

@@ -124,6 +124,13 @@ TOUR.add([
     { el:"#te-tab", do:function(){ try{ go("present"); S.presTab="te"; renderPresent(); }catch(_){} }, wait:700, t:V("Tab Đào tạo khách hàng","Customer training tab"), x:V("Trong trang Thuyết trình · Đào tạo KH.","Inside the Presentation · Customer training page.") },
     { el:"#te-add", t:V("Thêm buổi đào tạo","New session"), x:V("Ngày, chủ đề, sản phẩm, khách tham dự — chỉ chọn trong danh sách khách hàng của PIC buổi đào tạo (bác sĩ / người liên hệ, địa bàn). Lưu vào Training Master, tính KPI đào tạo C10. Hoàn thành cần Actual > 0 và review đủ 5 dòng mẫu.","Date, topic, product and attendees — picked only from the session PIC's customer list (contacts, accounts). Saved to the Training Master (sheet Training Report, category Customer Training). Completed needs Actual > 0 and the 5-line review.") }
    ] },
+ { id:"event", v:1, d:"2026-11-09", g:V("Khách hàng & bán hàng","Customers & sales"), ic:"people", t:V("Sự kiện marketing (nhóm Thái)","Marketing events (Thailand)"), x:V("Thêm / sửa sự kiện trong sheet REPORT_EVENT của file sự kiện nhóm, sự kiện tự lên lịch.","Add or edit events in sheet REPORT_EVENT of your team's event file; they show on the calendar."),
+   when:function(){ try{ return hasEvents(); }catch(_){ return false; } },
+   steps:[
+    { el:".ev-head", do:pg("event"), wait:900, t:V("Trang Event","Events page"), x:V("Mọi sự kiện của nhóm theo tháng. Thailand Surgical: file Marketing Offline · Thailand Dental: file Dental Event Report.","All events of your team by month. Thailand Surgical: Marketing Offline file · Thailand Dental: Dental Event Report file.") },
+    { el:"[onclick=\"evForm(null)\"]", t:V("Thêm sự kiện","Add an event"), x:V("Ngày, loại sự kiện, sản phẩm, chủ đề, KOL / PIC. Ghi <b>MMH &lt;tên&gt;</b> ở KOL / PIC khi thành viên MMH dẫn — KPI tính sự kiện do MMH dẫn theo cột này.","Date, type of event, product, topic, KOL / PIC. Write <b>MMH &lt;name&gt;</b> as KOL / PIC when an MMH member leads it — the KPI counts MMH-led events from this column.") },
+    { el:"#ev_q", t:V("Tìm và lọc","Search and filter"), x:V("Tìm theo chủ đề, KOL, nơi tổ chức; lọc theo loại sự kiện.","Search by topic, KOL or place; filter by type of event.") }
+   ] },
  { id:"newacc", v:1, d:"2026-10-11", g:V("Khách hàng & bán hàng","Customers & sales"), ic:"kpi", t:V("Mở mới & SKU mới","New accounts & SKUs"), x:V("Ghi case mở mới để tính KPI, quản lý duyệt.","Log new-account cases for KPI; managers approve."),
    steps:[
     { el:"[onclick=\"naForm(null)\"]", do:pg("newacc"), wait:700, t:V("Thêm case","Add a case"), x:V("Ghi khách mới / SKU mới kèm chứng từ. App tự đối chiếu 4 điều kiện.","Log the new customer or SKU with evidence. The app checks the 4 conditions.") },
