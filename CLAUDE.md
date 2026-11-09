@@ -273,3 +273,4 @@ Kiến trúc & quy ước giống MMH Report Hub (repo `ManiMedicalHanoi/MMH-Rep
   `evFile` / `evSheet` theo nhóm; `evFileLb()` (tên file trong chữ của trang Event) + `evSheetHref(k)` (nút Open sheet / CUSTOMER LIST: gid do backend trả trong `lists.sheet`, nhóm khác file không dùng gid Surgical `EV_GID`).
   Backend Dental: Type of Event / Plan / Action / tỉnh đọc Master name của file Dental, sản phẩm Jizai and handfile · Bur · Composite, cột A PIC-KPI tự điền khi Sui / Man / Yong tạo sự kiện.
   CRM Dental Thái (backend `crm-thai-dental` TH_DentalFix f2): Type action **Event** + **Co-visiting with distributor** luôn có trong danh sách. Tour `event` (when `hasEvents()`).
+  Cùng bản: `TEAMS.thaid.url` = web app MỚI của file THẬT "1. Thailand - Dental Action" (`1ONYLqq…`, backend crm-thai-dental đã chuyển khỏi file draft 09/11/2026).
