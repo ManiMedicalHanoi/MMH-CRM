@@ -7,6 +7,18 @@
 function E(u){ u.en={ title:u.title, items:u.items.map(function(i){ return { title:i.title, text:i.text }; }) }; return u; }
 window.MMH_UPDATES = [
   E({
+    id:"2026-11-09-v35.9", version:"v35.9", date:"2026-11-09",
+    title:"Thailand Dental: Account tracking, Thailand map and event ROI / follow-up",
+    summary:"From the CRM improvement survey: a new <b>Account tracking</b> page (one row per account with district, distributor, distributor sales rep, last visit, next step, next visit and stage), a <b>map of Thailand</b> with your accounts by province and region, and <b>budget, revenue, ROI and follow-ups</b> on every event.",
+    items:[
+      { type:"new", icon:"+", title:"Account tracking", text:"Menu <b>Customers ▸ Account tracking</b>: one row per account of CUSTOMER CODE with <b>District</b>, <b>Distributor</b>, <b>Distributor sales rep</b>, <b>Last visit</b>, <b>Next step</b>, <b>Next visit</b>, <b>Stage</b> and activities in the last 30 / 90 days (from sheet CUSTOMER TASK). Numbers at the top: accounts, active accounts (activity in 90 days), visits and calls this month, new accounts. Filter by PIC, province, district (Bangkok), distributor, stage or status.", img:"updates/v35.9/acct_list.jpg" },
+      { type:"new", icon:"+", title:"District, distributor and the distributor's sales rep", text:"Click an account ▸ fill in <b>District</b> (Bangkok khet suggested), <b>Distributor</b> (DDI · Promptdent · VRP · Siamdent) and <b>Distributor sales rep</b> ▸ <b>Save</b> ⇒ written to the new sheet <b>ACCOUNT TRACKING</b> of the Thailand Dental file. The district is pre-filled from the address when possible.", img:"updates/v35.9/acct_edit.jpg" },
+      { type:"new", icon:"+", title:"Map of Thailand", text:"Account tracking ▸ <b>Map</b>: provinces shaded by number of accounts, choose a region (Central, North, Northeast, East, West, South) or click a province; pins coloured by distributor. <b>Locate accounts</b> finds the location of each account (OpenStreetMap hospitals and dental clinics by name, then the address, else the province centre — shown as approximate). Wrong place? <b>Move pin</b> and drag it: a pin placed by hand is kept. Tick <b>Hospitals (OpenStreetMap)</b> to see hospitals that are not accounts yet.", img:"updates/v35.9/acct_map.jpg" },
+      { type:"new", icon:"+", title:"Event budget, revenue and ROI", text:"Menu <b>Event</b>: each card shows cost, revenue, profit / loss, <b>ROI</b> and cost per attendee (actual numbers once the event is done, else the budget). In the event ▸ <b>Budget &amp; ROI</b>: numbers linked to the budget sheet are grey; <b>Create budget sheet</b> copies the latest <i>Sale out Event Budget</i> sheet for the event and links the numbers. Note and Next follow up are saved to REPORT_EVENT.", img:"updates/v35.9/event_form.jpg" },
+      { type:"new", icon:"+", title:"Follow-ups 2 · 4 · 8 weeks after the event", text:"Every done event has follow-up checkpoints 2, 4 and 8 weeks after it. <b>Follow-ups due</b> at the top of the Event page lists what is due ▸ <b>Log</b> ▸ choose the checkpoint, write what was done (calls, visits, quotations, orders) ▸ <b>Log follow-up</b> ⇒ saved to the new column <b>Follow-up log</b> of REPORT_EVENT.", img:"updates/v35.9/event_roi.jpg" }
+    ]
+  }),
+  E({
     id:"2026-11-09-v35.8", version:"v35.8", date:"2026-11-09",
     title:"KPI reports: due on day 05 — you send the e-mail from your own mailbox",
     summary:"The Monthly KPI Report and the Quarterly KPI Report (self-assessment) are due on <b>day 05</b>. The system no longer sends the reports to other people: the CRM prepares the content and the Word file, and <b>you send the e-mail yourself</b> to your Department Head and the General Director, CC Accounting.",
