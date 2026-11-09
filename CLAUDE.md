@@ -211,7 +211,7 @@ Kiến trúc & quy ước giống MMH Report Hub (repo `ManiMedicalHanoi/MMH-Rep
   T&E (`teOn()`): Dental VN + thai + thaid (Training Hub `rhCustTrain` nhận team thaid, nhóm Thái ghi tiếng Anh; chỉ Dental VN tính C10). Kiểm tra tour thêm `tools/tour_check.js --thaid`.
   File Dental Thái KHÔNG đánh số tên sheet (người dùng yêu cầu): khối `v341-js` bỏ số trong chữ hiển thị tên sheet ("sheet 6. CUSTOMER VISITING" ⇒ "sheet CUSTOMER VISITING") khi nhóm thaid
   (bọc `i18nNode` + `trBlock`), thêm luật `RULES_EN` cho chữ còn sót (Họp tuần, Gửi báo cáo). Nhóm thaid PHẢI full tiếng Anh — kiểm bằng bộ quét chữ Việt (đăng nhập Yong, team thaid).
-  Chưa làm: Thống kê gửi báo cáo (`rpstat/rpstat.js`, dùng chung Report Hub) chưa đọc backend crm-thai-dental.
+  Thống kê gửi báo cáo đọc backend crm-thai-dental từ v35.7 (`rpstat.js` v1.2).
 - **v34.2 (31/10/2026, khối `v342-css` + `v342-js`)**: sales gửi xác nhận NHIỀU đơn 1 lần — nút "Gửi xác nhận nhiều đơn" (`.v342-b` trong dải `.v321-ban`, `#v342-h` đầu trang khi ≥ 2 đơn đủ điều kiện) ⇒ `v342Open()`
   bảng đơn Chờ duyệt của mình (Admin: mọi đơn) từ `S.ordAp`, chọn từng đơn / Chọn tất cả (chỉ đơn `ready`; mặc định chọn sẵn đơn chưa gửi / "Cần bổ sung") ⇒ `orderRequest keys=[…]` 1 lệnh mỗi PIC
   (backend vốn nhận nhiều đơn: 1 email liệt kê mọi đơn, link `#oa`). Đơn chưa đủ điều kiện hiện mờ + lý do.
@@ -277,3 +277,4 @@ Kiến trúc & quy ước giống MMH Report Hub (repo `ManiMedicalHanoi/MMH-Rep
 - **v35.6 (cùng bản) — công tác nhóm Thái (khối `v356-trip` cuối file)**: 2 nhóm Thái (`isTH()`) ⇒ `tripHub` tripMaster / tripPropose / tripInfo / tripUpdate / tripDelete / tripReport đi backend CRM của nhóm
   (mmh-backend `TH_Trip.gs`, file "Thailand Dental / Thailand Surgical - Business trip Approval and Report"), KHÔNG qua Report Hub / file Business Trip VN; `thTripLoad` đọc `tfTrips` của backend đó (key "Business trips MM/yyyy").
   Form: chữ tiếng Anh, chi phí chỉ THB (ô chọn đơn vị thay bằng chữ THB), ẩn Equipment (file Thái không có cột). Thẻ chuyến đi: bỏ ô Device, link "Open … Business Trip file" = file của nhóm. `TEAMS.thai.noTrip=false` (Surgical Thái có lại Công tác).
+- **v35.7 (09/11/2026, `rpstat/rpstat.js` v1.2 GIỐNG HỆT MMH-Report v19.3)**: Thống kê gửi báo cáo đọc thêm `rpLog` của **CRM Thailand Dental** (web app file thật `AKfycbwEvi4Y…`), nhãn nguồn tách Thailand Surgical / Thailand Dental (9 nguồn).
