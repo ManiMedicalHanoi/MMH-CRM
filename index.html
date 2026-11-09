@@ -29723,5 +29723,113 @@ function boot(){ if(!window.S||!S.user) return setTimeout(boot,1500); if(!allowe
 boot();
 })();
 </script>
+<script id="v356-trip">
+/* ══ v35.6 (09/11/2026) — CÔNG TÁC NHÓM THÁI = FILE BUSINESS TRIP RIÊNG CỦA TỪNG NHÓM (người dùng yêu cầu) ══
+   Thailand Dental ⇒ "Thailand Dental - Business trip Approval and Report" · Thailand Surgical ⇒ "Thailand Surgical - …".
+   Mọi lệnh công tác của nhóm Thái (tripMaster / tripPropose / tripInfo / tripUpdate / tripDelete / tripReport) đi backend CRM của nhóm
+   (mmh-backend ▸ TH_Trip.gs ▸ thtRoute_), KHÔNG qua Report Hub / file Business Trip Việt Nam. Lịch công tác đọc tfTrips của backend đó.
+   Form tiếng Anh, tiền chỉ THB (bỏ ô chọn đơn vị), không có Equipment (file Thái không có cột này). Thailand Surgical có lại Công tác. */
+(function(){
+"use strict";
+function TH(){ try{ return isTH(); }catch(_){ return false; } }
+try{ TEAMS.thai.noTrip=false; }catch(_){}
+function thTripFile(){ return (curTeamKey&&curTeamKey()==="thaid"?"Thailand Dental":"Thailand Surgical")+" Business Trip file"; }
+/* ① chi phí: luôn THB */
+function thbLines(){
+  var L=(window.TPC||[]).filter(function(r){ return String(r.d||"").trim()||r.a; });
+  return L.map(function(r){ return { d:String(r.d||"").trim(), a:r.a||0, c:"THB" }; });
+}
+/* ② mọi lệnh công tác của nhóm Thái ⇒ backend CRM của nhóm */
+var prev=tripHub;
+window.tripHub=tripHub=function(body,ms){
+  var a=String((body&&body.action)||"");
+  if(!TH() || !/^trip(Master|Propose|Info|Update|Delete|Report|Sync)$/.test(a)) return prev.apply(this,arguments);
+  if(a==="tripSync") return Promise.resolve({ ok:true, later:true });
+  var p={}; Object.keys(body||{}).forEach(function(k){ p[k]=body[k]; });
+  p.forPic=p.forPic||S.user.pic; p.actor=S.user.pic;
+  if(p.trip && /^(tripPropose|tripUpdate)$/.test(a)){
+    try{ var f=typeof p.trip==="string"?JSON.parse(p.trip):p.trip, L=thbLines();
+      if(L.length){ f.costLines=L; f.estimatedCost=L.map(function(r){ return (r.d||"Expense")+": "+Math.round(r.a).toLocaleString("en-US")+" THB"; }).join("\n");
+        f.totalCost=String(L.reduce(function(s,r){ return s+(r.a||0); },0)); }
+      f.currency="THB"; delete f.equipment;
+      p.trip=JSON.stringify(f); }catch(_){}
+  }
+  var go=(a==="tripMaster"||a==="tripInfo") ? apiGet(a, Object.assign(p,{ _ts:Date.now() })) : apiPost(Object.assign(p,{ action:a, rid:p.rid||uid28() }));
+  return go.then(function(j){
+    if(!j || j.ok===false) throw new Error((j&&j.error)||"Error");
+    if(/^(tripPropose|tripUpdate|tripDelete|tripReport)$/.test(a)){ try{ S.trCache && p.id && delete S.trCache[p.id]; }catch(_){} setTimeout(function(){ thTripLoad(true); },900); }
+    return j;
+  });
+};
+/* ③ lịch công tác nhóm Thái: tfTrips của backend CRM (file của nhóm) — thay bản đọc Report Hub */
+window.thTripLoad=thTripLoad=function(force){
+  if(!ownTasks() || noTrip()) return Promise.resolve(null);
+  if(S._thTripLd) return S._thTripLd;
+  if(!force && S.thTrips && Date.now()-(S.thTripsAt||0)<600000) return Promise.resolve(S.thTrips);
+  S._thTripLd=apiGet("tfTrips",{ force:force?1:"", _ts:Date.now() }).then(function(j){
+    S._thTripLd=null;
+    var by={}; ((j&&j.trips)||[]).forEach(function(t){ var m=(t.vMeta&&t.vMeta.m)||String(t.start||"").replace(/-/g,"").slice(0,6); (by[m]=by[m]||[]).push(t); });
+    S.thTrips=Object.keys(by).sort().map(function(m){
+      return { _hub:1, _tf:1, no:"BTK"+m, row:0, keyTask:"Business trips "+m.slice(4,6)+"/"+m.slice(0,4), type:"Business trip", pic:"", status:"", progress:0,
+               start:m.slice(0,4)+"-"+m.slice(4,6)+"-01", vSrc:"trip-key", vMeta:{ m:m }, subs:by[m] };
+    });
+    S.thTripsAt=Date.now(); S.thTripFile=j&&j.file;
+    try{ if(S.tab==="weekly" && S.wkTab==="cal") renderCal(); if(S.tab==="meet" && typeof mtPaintCrm==="function") mtPaintCrm(); }catch(_){}
+    return S.thTrips;
+  }).catch(function(){ S._thTripLd=null; return S.thTrips||null; });
+  return S._thTripLd;
+};
+/* ④ form đề xuất / sửa: tiếng Anh, THB, không Equipment */
+if(typeof tripProposeForm==="function"){
+  var f0=tripProposeForm;
+  window.tripProposeForm=tripProposeForm=function(r){
+    var out=f0.apply(this,arguments);
+    if(!TH()) return out;
+    try{
+      var ei=document.getElementById("ms-i-eq"), eq=ei&&ei.closest(".fld");
+      if(eq){ eq.style.display="none"; }
+      if(window.MS && MS.eq){ MS.eq.sel=["N/A"]; }
+      var box=$("mBody").querySelector(".tp-box");
+      if(box && !(window.TP && TP.edit)) box.innerHTML='Saved to the <b>'+esc(thTripFile())+'</b> (Approval Status = <b>Not Yet</b>) and the approval e-mail is sent '
+        +'<b>To:</b> '+esc((r&&r.to)||"")+((r&&r.cc)?' · <b>CC:</b> '+esc(r.cc):'')+'. The manager approves with the <b>HOD Menu</b> of the Google Sheet. Costs are in <b>Thai baht (THB)</b>.';
+      (window.TPC||[]).forEach(function(x){ x.c="THB"; });
+      var hc=$("tp-costs"), hf=hc&&hc.closest(".fld"), hh=hf&&hf.querySelector(".tp-hint"); if(hh) hh.textContent="one item per row — description, amount in THB";
+      tpCostPaint();
+    }catch(_){}
+    return out;
+  };
+}
+/* ⑤ thẻ chuyến đi (xem / báo cáo) của nhóm Thái: tiếng Anh, không Equipment, link đúng file của nhóm */
+if(typeof tripViewPaint==="function"){
+  var v0=tripViewPaint;
+  window.tripViewPaint=tripViewPaint=function(t){
+    var r=v0.apply(this,arguments);
+    if(!TH() || !t) return r;
+    try{
+      var mb=$("mBody"), url=t.file||S.thTripFile||"";
+      var d=mb.querySelector(".tr6-date"); if(d) d.innerHTML=d.innerHTML.replace(/ ngày /," day(s) ");
+      mb.querySelectorAll("div").forEach(function(x){ if(x.children.length<=3 && /^(Thiết bị|Device|Equipment)/i.test((x.firstElementChild&&x.firstElementChild.textContent||"").trim())) x.style.display="none"; });
+      var ph={ "tr6-ka":"Main activities during the trip…", "tr6-kf":"Important findings / information…", "tr6-fu":"Next actions…" };
+      Object.keys(ph).forEach(function(id){ var e=$(id); if(e) e.placeholder=ph[id]; });
+      var nt=mb.querySelector(".tr6-note"); if(nt && /Google Doc|Khi lưu/.test(nt.textContent)) nt.innerHTML='On save: a <b>report document</b> is created in the trip folder, the report is written to column <b>Business trip Report</b> of the '+esc(thTripFile())+' and e-mailed to <b>Shuhei-san</b> (CC Director); the trip turns <b>Completed</b> on the calendar.';
+      if(url) document.querySelectorAll("#mFoot a.btn").forEach(function(a){ if(/Business Trip/i.test(a.textContent)){ a.href=url; a.textContent="Open "+thTripFile()+" ↗"; } });
+    }catch(_){}
+    return r;
+  };
+}
+if(typeof tpCostPaint==="function"){
+  var p0=tpCostPaint;
+  window.tpCostPaint=tpCostPaint=function(){
+    if(TH()) (window.TPC||[]).forEach(function(x){ x.c="THB"; });
+    var r=p0.apply(this,arguments);
+    if(TH()){ document.querySelectorAll("#tp-costs select.tpc-cur").forEach(function(sel){ var s=document.createElement("span"); s.className="tpc-cur thb"; s.textContent="THB"; sel.parentNode.replaceChild(s,sel); }); }
+    return r;
+  };
+}
+})();
+</script>
+<style id="v356-trip-css">
+#tp-costs span.tpc-cur.thb{display:inline-flex;align-items:center;padding:0 8px;font-weight:600;color:var(--sub,#5B6B7D);font-size:12.5px}
+</style>
 </body>
 </html>

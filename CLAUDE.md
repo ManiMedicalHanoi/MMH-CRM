@@ -274,3 +274,6 @@ Kiến trúc & quy ước giống MMH Report Hub (repo `ManiMedicalHanoi/MMH-Rep
   Backend Dental: Type of Event / Plan / Action / tỉnh đọc Master name của file Dental, sản phẩm Jizai and handfile · Bur · Composite, cột A PIC-KPI tự điền khi Sui / Man / Yong tạo sự kiện.
   CRM Dental Thái (backend `crm-thai-dental` TH_DentalFix f2): Type action **Event** + **Co-visiting with distributor** luôn có trong danh sách. Tour `event` (when `hasEvents()`).
   Cùng bản: `TEAMS.thaid.url` = web app MỚI của file THẬT "1. Thailand - Dental Action" (`1ONYLqq…`, backend crm-thai-dental đã chuyển khỏi file draft 09/11/2026).
+- **v35.6 (cùng bản) — công tác nhóm Thái (khối `v356-trip` cuối file)**: 2 nhóm Thái (`isTH()`) ⇒ `tripHub` tripMaster / tripPropose / tripInfo / tripUpdate / tripDelete / tripReport đi backend CRM của nhóm
+  (mmh-backend `TH_Trip.gs`, file "Thailand Dental / Thailand Surgical - Business trip Approval and Report"), KHÔNG qua Report Hub / file Business Trip VN; `thTripLoad` đọc `tfTrips` của backend đó (key "Business trips MM/yyyy").
+  Form: chữ tiếng Anh, chi phí chỉ THB (ô chọn đơn vị thay bằng chữ THB), ẩn Equipment (file Thái không có cột). Thẻ chuyến đi: bỏ ô Device, link "Open … Business Trip file" = file của nhóm. `TEAMS.thai.noTrip=false` (Surgical Thái có lại Công tác).
