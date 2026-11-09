@@ -4017,7 +4017,7 @@ function buildNav(){
     if(t.grp!==lastGrp){ h+='<div class="grp">'+t.grp+'</div>'; lastGrp=t.grp; }
     h+='<button class="nvi" data-t="'+t.id+'" onclick="go(\''+t.id+'\')"><span class="ic">'+t.ic+'</span><span class="lb">'+t.lb+'</span></button>';
   });
-  h+='<div style="flex:1"></div><div style="padding:10px;font-size:10.5px;color:var(--mute);line-height:1.5">MMH CRM v35.8<br>'+
+  h+='<div style="flex:1"></div><div style="padding:10px;font-size:10.5px;color:var(--mute);line-height:1.5">MMH CRM v35.9<br>'+
      (isMgmt()?'<a href="'+DRIVE_FOLDER+'" target="_blank">📁 Folder ảnh Drive</a>':"")+'</div>';
   $("side").innerHTML=h;
   /* ⭐ v4.5 — thanh dưới trượt ngang, đủ mọi mục, bỏ nút "Thêm" */
@@ -20795,7 +20795,7 @@ window.QS2={ open:qsOpen };
 </script>
 
 <!-- ⭐ v30.3 — THÔNG BÁO CẬP NHẬT (chép từ Report Hub): dữ liệu updates/notes.js · tự hiện 7 ngày · nút "Có gì mới" trên thanh trên cùng -->
-<script src="updates/notes.js?v=35.8"></script>
+<script src="updates/notes.js?v=35.9"></script>
 <style id="upd-css">
 #upd,#upd-zoom{--t-pri:var(--blue);--t-pri2:var(--blue-d);--t-ink:var(--navy);--t-soft:var(--pale);--t-line:var(--lb2);--t-bg:#F6F8FA;--mmh-blue:var(--blue);--mmh-navy:var(--navy)}
 
@@ -29831,5 +29831,780 @@ if(typeof tpCostPaint==="function"){
 <style id="v356-trip-css">
 #tp-costs span.tpc-cur.thb{display:inline-flex;align-items:center;padding:0 8px;font-weight:600;color:var(--sub,#5B6B7D);font-size:12.5px}
 </style>
+<style id="v359-css">
+/* ⭐ v35.9 — Thailand Dental: Account tracking · Thailand map · Event ROI / follow-up */
+.acm-pg .ph{display:flex;align-items:flex-start;gap:12px;flex-wrap:wrap;margin-bottom:12px}
+.acm-pg .ph h2{margin:0;font-size:20px;color:var(--t-pri,#003047)}
+.acm-pg .ph p{margin:3px 0 0;font-size:12.5px;color:#5B6B7D}
+.acm-pg .ph .sp{flex:1}
+.acm-pg .acts{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.acm-seg{display:inline-flex;border:1px solid #D5DCE4;border-radius:9px;overflow:hidden}
+.acm-seg button{border:0;background:#fff;padding:6px 14px;font:600 12.5px inherit;color:#5B6B7D;cursor:pointer}
+.acm-seg button.on{background:#EAF1F7;color:var(--t-pri,#003047)}
+.acm-kp{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;margin-bottom:12px}
+.acm-kp>div{background:#fff;border:1px solid #E6EAEF;border-radius:12px;padding:10px 12px}
+.acm-kp b{display:block;font-size:20px;color:var(--t-pri,#003047);line-height:1.2}
+.acm-kp span{font-size:11.5px;color:#5B6B7D}
+.acm-f{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;align-items:center}
+.acm-f .inp{height:32px;font-size:12.5px;padding:0 8px;max-width:190px}
+.acm-f .q{flex:1;min-width:170px;max-width:none}
+.acm-f .n{font-size:12px;color:#5B6B7D;margin-left:auto}
+.acm-tb{background:#fff;border:1px solid #E6EAEF;border-radius:12px;overflow:auto}
+.acm-tb table{width:100%;border-collapse:collapse;font-size:12.5px}
+.acm-tb th{position:sticky;top:0;background:#F6F8FA;text-align:left;font-size:11px;font-weight:700;color:#5B6B7D;padding:8px 10px;border-bottom:1px solid #E6EAEF;white-space:nowrap;cursor:pointer;user-select:none}
+.acm-tb td{padding:8px 10px;border-bottom:1px solid #F0F3F6;vertical-align:top}
+.acm-tb tr:hover td{background:#FAFCFE;cursor:pointer}
+.acm-tb td small{display:block;color:#8A97A6;font-size:11px;margin-top:2px}
+.acm-tb td.c{text-align:center;white-space:nowrap}
+.acm-tb .ns{max-width:260px;color:#34465A;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.acm-chip{display:inline-block;padding:1px 8px;border-radius:20px;font-size:11px;font-weight:700;white-space:nowrap}
+.acm-chip.on{background:#E7F5EE;color:#1E7A4A}.acm-chip.off{background:#F1F3F5;color:#7A8796}.acm-chip.nv{background:#FFF4DB;color:#A86B00}
+.acm-more{display:block;margin:10px auto;}
+.acm-mapw{position:relative;background:#fff;border:1px solid #E6EAEF;border-radius:12px;overflow:hidden;isolation:isolate}
+#acm-map{height:calc(100vh - 290px);min-height:440px;background:#EEF2F5}
+.acm-mbar{display:flex;gap:6px;flex-wrap:wrap;align-items:center;padding:8px 10px;border-bottom:1px solid #E6EAEF;font-size:12px}
+.acm-mbar .rg button{border:1px solid #D5DCE4;background:#fff;border-radius:16px;padding:3px 10px;font:600 11.5px inherit;color:#5B6B7D;cursor:pointer}
+.acm-mbar .rg button.on{border-color:var(--t-pri,#003047);color:var(--t-pri,#003047);background:#EAF1F7}
+.acm-mbar label{display:inline-flex;align-items:center;gap:4px;color:#34465A}
+.acm-mbar .sp{flex:1}
+.acm-lg{position:absolute;left:10px;bottom:10px;z-index:500;background:#fff;border:1px solid #E6EAEF;border-radius:10px;padding:7px 9px;font-size:11px;color:#34465A;line-height:1.7}
+.acm-lg i{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:5px;vertical-align:-1px}
+.acm-prog{position:absolute;right:10px;bottom:10px;z-index:500;background:#fff;border:1px solid #E6EAEF;border-radius:10px;padding:7px 10px;font-size:11.5px;color:#34465A;max-width:260px}
+.acm-pop{font:12px/1.5 inherit;min-width:200px}
+.acm-pop b{font-size:13px;color:#003047}
+.acm-pop .r{color:#5B6B7D}
+.acm-pop .bt{display:flex;gap:6px;margin-top:6px}
+.acm-pop .bt button{border:1px solid #D5DCE4;background:#fff;border-radius:7px;padding:3px 9px;font:600 11.5px inherit;cursor:pointer}
+.acm-tip{font-size:12px}
+.acm-pin{background:none;border:0}
+.acm-cl{background:rgba(0,48,71,.18);border-radius:50%}
+.acm-cl span{position:absolute;inset:4px;display:flex;align-items:center;justify-content:center;border-radius:50%;background:#003047;color:#fff;font:700 12px/1 inherit}
+.v359-roi{display:flex;flex-wrap:wrap;gap:4px 10px;margin-top:6px;font-size:11.5px;color:#5B6B7D}
+.v359-roi b{color:#34465A}
+.v359-roi .pl.p{color:#1E7A4A}.v359-roi .pl.n{color:#B3261E}
+.v359-fu{display:flex;gap:4px;margin-top:6px;flex-wrap:wrap}
+.v359-fu span{font-size:10.5px;font-weight:700;padding:1px 7px;border-radius:12px;background:#F1F3F5;color:#7A8796}
+.v359-fu span.ok{background:#E7F5EE;color:#1E7A4A}.v359-fu span.due{background:#FFF4DB;color:#A86B00}.v359-fu span.late{background:#FEECEC;color:#B3261E}
+.ev-pg .ev-strip.v359-s6{grid-template-columns:repeat(6,minmax(0,1fr))}
+@media (max-width:900px){ .ev-pg .ev-strip.v359-s6{grid-template-columns:repeat(3,minmax(0,1fr))} }
+@media (max-width:560px){ .ev-pg .ev-strip.v359-s6{grid-template-columns:repeat(2,minmax(0,1fr))} }
+.v359-due{background:#fff;border:1px solid #F1D9A6;border-radius:12px;padding:10px 12px;margin:0 0 12px}
+.v359-due h4{margin:0 0 6px;font-size:13px;color:#7A5200}
+.v359-due .it{display:flex;gap:8px;align-items:center;padding:5px 0;border-top:1px solid #F6EEDD;font-size:12.5px}
+.v359-due .it:first-of-type{border-top:0}
+.v359-due .it .t{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.v359-sec{margin-top:12px;border-top:1px solid #E6EAEF;padding-top:10px}
+.v359-sec h4{margin:0 0 8px;font-size:13px;color:var(--t-pri,#003047);display:flex;gap:8px;align-items:center}
+.v359-sec h4 .sp{flex:1}
+.v359-g{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.v359-g .fld label{font-size:11px}
+.v359-g input[readonly]{background:#F6F8FA;color:#5B6B7D}
+.v359-sum{display:flex;gap:14px;flex-wrap:wrap;font-size:12.5px;margin:8px 0;color:#34465A}
+.v359-log{margin:6px 0 0;padding:0;list-style:none;font-size:12.5px}
+.v359-log li{padding:5px 0;border-top:1px solid #F0F3F6;display:flex;gap:8px}
+.v359-log li .k{font-weight:700;color:#3A5CAA;min-width:40px}
+.v359-log li .d{color:#8A97A6;white-space:nowrap}
+.v359-add{display:grid;grid-template-columns:110px 130px 1fr auto;gap:6px;margin-top:8px}
+@media (max-width:760px){
+  .acm-pg .ph{margin-bottom:8px}
+  .acm-kp{grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+  .acm-kp>div{padding:7px 9px}
+  .acm-kp b{font-size:16px}
+  .acm-kp span{font-size:10.5px;line-height:1.25;display:block}
+  .acm-kp .lx{display:none}
+  .acm-pg.mapv .acm-kp{display:none}
+  .acm-f .inp{max-width:none;flex:1 1 45%;height:30px}
+  .acm-f .n{width:100%;text-align:right}
+  .acm-mbar .rg{display:flex;gap:4px;overflow-x:auto;width:100%;padding-bottom:2px}
+  .acm-mbar .rg button{flex:0 0 auto}
+  .acm-lg{display:none}
+  #acm-map{height:calc(100vh - 330px);min-height:380px}
+  .acm-tb{background:none;border:0}
+  .acm-tb table,.acm-tb tbody{display:block}
+  .acm-tb thead{display:none}
+  .acm-tb tr{display:grid;grid-template-columns:1fr 1fr;gap:2px 10px;background:#fff;border:1px solid #E6EAEF;border-radius:12px;padding:10px 12px;margin-bottom:8px}
+  .acm-tb td{display:block;padding:0;border:0;font-size:12px}
+  .acm-tb td:first-child{grid-column:span 2;font-size:13px;margin-bottom:4px}
+  .acm-tb td.c{text-align:left}
+  .acm-tb td.c:before{content:attr(data-l) " ";color:#8A97A6;font-size:11px}
+  .v359-g{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .v359-add{grid-template-columns:1fr 1fr}
+  .v359-add .nt{grid-column:span 2}
+  .acm-tb .hm{display:none}
+}
+</style>
+<script id="v359-js">
+/* ════════════════════════════════════════════════════════════════════════════════════════
+   ⭐ v35.9 (09/11/2026) — Thailand Dental (team thaid), from the CRM improvement survey (user approved items 1 · 2 · 3 · 6)
+   ① Account tracking (tab "acct", group Customers): 1 row / account of sheet ACCOUNT TRACKING (backend crm-thai-dental TH_AccountMap.gs:
+      acctList / acctSave / acctGeo) + activity from CUSTOMER TASK (visitFeed): last visit · next step · next visit · stage · visits 30 / 90 days · active.
+      District (Bangkok khet), Distributor, Distributor sales rep edited in the app.
+   ② Thailand map (same tab, view "Map"): Leaflet + province polygons geo/th-provinces.json (CC BY 4.0, chingchai/OpenGISData-Thailand, simplified),
+      provinces shaded by number of accounts, 6 regions, account pins (colour = distributor), OpenStreetMap hospitals layer.
+      Locating accounts runs in the browser: OpenStreetMap hospitals / dental clinics (Overpass, name + province) ⇒ address search (Nominatim, ≤ 1 / second)
+      ⇒ province centre (approximate). Results saved with acctGeo; a pin moved by hand = "pin" (never overwritten).
+   ③ Event ROI + follow-up (Event tab, Thailand Dental): budget / revenue / P&L estimated + actual (REPORT_EVENT T..Y, usually formulas to the
+      "Sale out Event Budget" sheet), ROI %, cost per attendee, follow-up checkpoints 2 / 4 / 8 weeks after the event (log = column AB,
+      backend thai-dental-mkt EV_Roi.gs: followup · budgetSheet), "Follow-ups due" strip.
+   ════════════════════════════════════════════════════════════════════════════════════════ */
+(function(){
+"use strict";
+function on(){ try{ return curTeamKey()==="thaid"; }catch(e){ return false; } }
+function e2(s){ return esc(s==null?"":String(s)); }
+function nz(s){ return noAcc(String(s||"")).toLowerCase().replace(/[^a-z0-9฀-๿]+/g," ").trim(); }
+function num(v){ var n=Number(v); return v===""||v==null||!isFinite(n)?null:n; }
+function thb(v){ var n=num(v); if(n==null) return "—"; return (n<0?"−":"")+Math.round(Math.abs(n)).toLocaleString("en-US"); }
+function ymOf(iso){ return String(iso||"").slice(0,4)+String(iso||"").slice(5,7); }
+var I=window.V30_ICON||function(){ return ""; };
+var DIST_COL={ DDI:"#2F6FB0", Promptdent:"#D9822B", VRP:"#7A4FB0", Siamdent:"#1E9E7A" }, NO_COL="#8A97A6";
+function distCol(d){ return DIST_COL[d]||NO_COL; }
+
+/* ═════════ DATA ═════════ */
+var ACM=window.ACM={ rows:null, dist:["DDI","Promptdent","VRP","Siamdent"], sheet:"", at:0, err:"", loading:null,
+  vis:null, visAt:0, visLoading:null, view:"list", lim:200, sort:"name", sdir:1, f:{ q:"", pic:"", prov:"", dis:"", dist:"", stage:"", st:"" } };
+try{ var v0=localStorage.getItem("mmh_acm_view"); if(v0==="map"||v0==="list") ACM.view=v0; }catch(e){}
+function lsK(){ return "k:thaid:acm"; }
+function restore(){ if(ACM.rows) return; var a=lsGet(lsK()); if(a&&a.rows){ ACM.rows=a.rows; ACM.dist=a.dist||ACM.dist; ACM.sheet=a.sheet||""; ACM.at=1; } }
+function load(force){
+  if(!on()) return Promise.resolve(null);
+  restore();
+  if(ACM.loading) return ACM.loading;
+  if(!force && ACM.rows && Date.now()-ACM.at<120000) return Promise.resolve(ACM.rows);
+  ACM.loading=apiGet("acctList",force?{force:1}:{}).then(function(j){
+    ACM.loading=null;
+    if(j && j.unchanged && ACM.rows){ ACM.at=Date.now(); return ACM.rows; }
+    var cols=j.cols||[];
+    ACM.rows=(j.rows||[]).map(function(a){ var o={}; cols.forEach(function(c,i){ o[c]=a[i]; }); o._row=a[cols.length]; return o; });
+    if(j.distributors&&j.distributors.length) ACM.dist=j.distributors;
+    ACM.sheet=j.sheet||ACM.sheet; ACM.at=Date.now(); ACM.err=""; _mx=null;
+    lsSet(lsK(),{ rows:ACM.rows, dist:ACM.dist, sheet:ACM.sheet });
+    repaint(); return ACM.rows;
+  }).catch(function(e){ ACM.loading=null; ACM.err=String(e&&e.message||e); repaint(); return null; });
+  return ACM.loading;
+}
+function loadVis(force){
+  if(!on()) return Promise.resolve(null);
+  if(ACM.visLoading) return ACM.visLoading;
+  if(!force && ACM.vis && Date.now()-ACM.visAt<180000) return Promise.resolve(ACM.vis);
+  var t=todayISO();
+  ACM.visLoading=apiGet("visitFeed",{ pic:"", from:addDays(t,-400), to:addDays(t,200) }).then(function(j){
+    ACM.visLoading=null;
+    if(!(j && j.unchanged && ACM.vis)){ ACM.vis=j.rows||[]; _mx=null; }
+    ACM.visAt=Date.now(); repaint(); return ACM.vis;
+  }).catch(function(){ ACM.visLoading=null; return ACM.vis; });
+  return ACM.visLoading;
+}
+
+/* ═════════ METRICS (CUSTOMER TASK ⇒ per account) ═════════ */
+var _mx=null;
+function isDone(w){ return /complet/i.test(w.status||""); }
+function isCancel(w){ return /cancel|stop/i.test(w.status||""); }
+function isVisit(w){ return /visit/i.test(w.typeAction||""); }
+function isCall(w){ return /tele|call|phone|line|message|chat|zoom|online/i.test(w.typeAction||""); }
+function metrics(){
+  if(_mx) return _mx;
+  var t=todayISO(), d30=addDays(t,-30), d90=addDays(t,-90), ym=ymOf(t), byName={}, by={};
+  (ACM.rows||[]).forEach(function(a){ var k=nz(a.name); (byName[k]=byName[k]||[]).push(a); });
+  var tot={ vm:0, cm:0 };
+  (ACM.vis||[]).forEach(function(w){
+    var p=parseAcc(w.account), L=byName[nz(w.accName||p.name)]; if(!L) return;
+    var a=L.length===1?L[0]:(L.filter(function(x){ return nz(x.province)===nz(w.accProv||p.province); })[0]||L[0]);
+    var m=by[a.code||a.name]||(by[a.code||a.name]={ last:"", lastAny:"", next:"", nextW:null, step:"", stepD:"", stage:"", stageD:"", n30:0, n90:0, vm:0, cm:0, pics:{} });
+    var s=String(w.start||"").slice(0,10); if(!s || isCancel(w)) return;
+    if(w.pic) m.pics[w.pic]=1;
+    if(w.process && s<=t && s>=m.stageD){ m.stage=w.process; m.stageD=s; }
+    if(isDone(w) && s<=t){
+      if(s>m.lastAny) m.lastAny=s;
+      if(isVisit(w) && s>m.last) m.last=s;
+      if(s>=d30) m.n30++; if(s>=d90) m.n90++;
+      if(w.nextAction && s>=m.stepD){ m.step=w.nextAction; m.stepD=s; }
+      if(ymOf(s)===ym){ if(isVisit(w)){ tot.vm++; m.vm++; } else if(isCall(w)){ tot.cm++; m.cm++; } }
+    } else if(s>=t && !isDone(w)){
+      if(!m.next || s<m.next){ m.next=s; m.nextW=w; }
+    }
+  });
+  return (_mx={ by:by, tot:tot });
+}
+function mOf(a){ return metrics().by[a.code||a.name]||null; }
+function activeOf(a){ var m=mOf(a); return !!(m && m.lastAny && m.lastAny>=addDays(todayISO(),-90)); }
+function custOf(a){ try{ return (S.custMap&&S.custMap[a.code])||null; }catch(e){ return null; } }
+function picOf(a){ var c=custOf(a); return c?c.pic:""; }
+function isNewThisMonth(a){ var c=custOf(a); if(!c) return false; var ym=ymOf(todayISO()); return String(c.month||"")===ym || ymOf(c.openDate)===ym; }
+function canAll(){ try{ return isMgrView() || (S.user&&/admin|director|hod/i.test(String(S.user.level||S.user.role||""))); }catch(e){ return false; } }
+
+/* ═════════ PROVINCES (account ⇄ map polygon) ═════════ */
+var PALIAS={ bkk:"Bangkok", bangkok:"Bangkok", krungthep:"Bangkok", korat:"Nakhon Ratchasima", ayutthaya:"Phra Nakhon Si Ayutthaya", ayuthaya:"Phra Nakhon Si Ayutthaya",
+  chonburi:"Chonburi", cholburi:"Chonburi", sisaket:"Sisaket", srisaket:"Sisaket", lopburi:"Lopburi", prachinburi:"Prachin Buri", nongbualamphu:"Nong Bua Lamphu",
+  pathumtani:"Pathum Thani", pathumthani:"Pathum Thani", chainat:"Chainat", buriram:"Buriram" };
+var GEO=null, GEOP=null, _pk={};
+function lev(a,b){ var m=a.length,n=b.length,d=[],i,j; for(i=0;i<=m;i++){ d[i]=[i]; } for(j=0;j<=n;j++) d[0][j]=j;
+  for(i=1;i<=m;i++) for(j=1;j<=n;j++) d[i][j]=Math.min(d[i-1][j]+1,d[i][j-1]+1,d[i-1][j-1]+(a[i-1]===b[j-1]?0:1)); return d[m][n]; }
+function pk(s){ return noAcc(String(s||"")).toLowerCase().replace(/[^a-z]/g,""); }
+function provName(p){
+  var k=pk(p); if(!k) return ""; if(_pk[k]!==undefined) return _pk[k];
+  var r=PALIAS[k]||"";
+  if(!r && GEO){ var best=9, bn=""; GEO.features.forEach(function(f){ var c=pk(f.properties.n), d=c===k?0:lev(c,k); if(d<best){ best=d; bn=f.properties.n; } });
+    if(best<=2) r=bn; else { var th=String(p||"").trim(); GEO.features.forEach(function(f){ if(!r && f.properties.th===th) r=f.properties.n; }); } }
+  if(GEO) _pk[k]=r; return r;
+}
+function loadGeo(){
+  if(GEOP) return GEOP;
+  GEOP=fetch("geo/th-provinces.json").then(function(r){ return r.json(); }).then(function(g){
+    GEO=g; _pk={};
+    g.features.forEach(function(f){ var bb=[180,90,-180,-90], big=null, ba=0;
+      f.geometry.coordinates.forEach(function(poly){ var ring=poly[0], a=0, mx=[180,90,-180,-90];
+        ring.forEach(function(p){ mx[0]=Math.min(mx[0],p[0]); mx[1]=Math.min(mx[1],p[1]); mx[2]=Math.max(mx[2],p[0]); mx[3]=Math.max(mx[3],p[1]); });
+        for(var i=0;i<ring.length-1;i++) a+=ring[i][0]*ring[i+1][1]-ring[i+1][0]*ring[i][1];
+        a=Math.abs(a/2); if(a>ba){ ba=a; big=ring; }
+        bb=[Math.min(bb[0],mx[0]),Math.min(bb[1],mx[1]),Math.max(bb[2],mx[2]),Math.max(bb[3],mx[3])]; });
+      f._bb=bb; f._c=centroid(big||f.geometry.coordinates[0][0]); });
+    return g;
+  }).catch(function(e){ GEOP=null; throw e; });
+  return GEOP;
+}
+function centroid(r){ var x=0,y=0,a=0; for(var i=0;i<r.length-1;i++){ var c=r[i][0]*r[i+1][1]-r[i+1][0]*r[i][1]; a+=c; x+=(r[i][0]+r[i+1][0])*c; y+=(r[i][1]+r[i+1][1])*c; }
+  if(!a) return [r[0][1],r[0][0]]; a/=2; return [y/(6*a), x/(6*a)]; }
+function inRing(x,y,r){ var ins=false; for(var i=0,j=r.length-1;i<r.length;j=i++){ var xi=r[i][0],yi=r[i][1],xj=r[j][0],yj=r[j][1];
+  if(((yi>y)!==(yj>y)) && (x<(xj-xi)*(y-yi)/(yj-yi)+xi)) ins=!ins; } return ins; }
+function provAt(lat,lng){
+  if(!GEO) return "";
+  for(var i=0;i<GEO.features.length;i++){ var f=GEO.features[i], b=f._bb; if(lng<b[0]||lng>b[2]||lat<b[1]||lat>b[3]) continue;
+    if(f.geometry.coordinates.some(function(poly){ return inRing(lng,lat,poly[0]) && !poly.slice(1).some(function(h){ return inRing(lng,lat,h); }); })) return f.properties.n; }
+  return "";
+}
+function featOf(name){ return GEO?GEO.features.filter(function(f){ return f.properties.n===name; })[0]||null:null; }
+function regionOf(a){ var f=featOf(provName(a.province)); return f?f.properties.r:""; }
+var REGIONS=["Central","North","Northeast","East","West","South"];
+
+/* ═════════ FILTERS ═════════ */
+function filtered(){
+  var f=ACM.f, q=nz(f.q), me=S.user&&S.user.pic, t=todayISO();
+  return (ACM.rows||[]).filter(function(a){
+    if(f.pic==="__me"){ if(picOf(a)!==me) return false; } else if(f.pic && picOf(a)!==f.pic) return false;
+    if(f.prov && provName(a.province)!==f.prov && a.province!==f.prov) return false;
+    if(f.reg && regionOf(a)!==f.reg) return false;
+    if(f.dis && String(a.district||"")!==f.dis) return false;
+    if(f.dist==="__none"){ if(a.dist) return false; } else if(f.dist && a.dist!==f.dist) return false;
+    var m=mOf(a);
+    if(f.stage && (!m || m.stage!==f.stage)) return false;
+    if(f.st==="active" && !activeOf(a)) return false;
+    if(f.st==="inactive" && (activeOf(a) || !(m&&m.lastAny))) return false;
+    if(f.st==="never" && m && m.lastAny) return false;
+    if(f.st==="next" && !(m && m.next)) return false;
+    if(f.st==="new" && !isNewThisMonth(a)) return false;
+    if(f.st==="noloc" && num(a.lat)!=null) return false;
+    if(q){ var hay=nz([a.name,a.code,a.type,a.province,a.district,a.dist,a.dsr,picOf(a)].join(" ")); if(q.split(" ").some(function(x){ return x && hay.indexOf(x)<0; })) return false; }
+    return true;
+  });
+}
+function sorted(rows){
+  var k=ACM.sort, d=ACM.sdir;
+  var val=function(a){ var m=mOf(a)||{};
+    switch(k){ case "prov": return (a.province||"")+"|"+(a.district||""); case "dist": return (a.dist||"~")+"|"+(a.dsr||"");
+      case "last": return m.last||""; case "next": return m.next||"9999"; case "stage": return m.stage||"~"; case "n90": return ("000"+(m.n90||0)).slice(-4);
+      default: return nz(a.name); } };
+  return rows.slice().sort(function(a,b){ var x=val(a), y=val(b); return x<y?-d:x>y?d:0; });
+}
+
+/* ═════════ PAGE ═════════ */
+var _rt=null;
+function repaint(){ clearTimeout(_rt); _rt=setTimeout(function(){ if(S.tab==="acct") render(); },60); }
+function pg(){
+  restore();
+  if(!S.custIndex||!S.custIndex.length) loadCustomerIndex().then(function(){ _mx=null; repaint(); });
+  if(!canAll() && !ACM._picInit){ ACM._picInit=1; ACM.f.pic="__me"; }
+  render(); load(!ACM.at||Date.now()-ACM.at>60000); loadVis(false);
+  loadGeo().then(function(){ _pk={}; repaint(); }).catch(function(){});
+}
+window.acmSet=function(k,v){ ACM.f[k]=v; if(k==="prov") ACM.f.dis=""; ACM.lim=200; render(); if(k==="prov" && MAP.m) fitReg(); };
+window.acmView=function(v){ ACM.view=v; try{ localStorage.setItem("mmh_acm_view",v); }catch(e){} render(); };
+window.acmSort=function(k){ if(ACM.sort===k) ACM.sdir=-ACM.sdir; else { ACM.sort=k; ACM.sdir=(k==="last"||k==="n90")?-1:1; } render(); };
+window.acmMore=function(){ ACM.lim+=300; render(); };
+var _qd; window.acmQ=function(v){ ACM.f.q=v; clearTimeout(_qd); _qd=setTimeout(function(){ keepCaret("acm_q",render); },200); };
+function kpis(){
+  var all=ACM.rows||[], f=filtered(), act=0, nw=0, vm=0, cm=0;
+  f.forEach(function(a){ if(activeOf(a)) act++; if(isNewThisMonth(a)) nw++; var m=mOf(a); if(m){ vm+=m.vm; cm+=m.cm; } });
+  return '<div class="acm-kp">'+
+    '<div><b>'+fmtN(f.length)+'<small style="font-size:12px;color:#8A97A6">'+(f.length!==all.length?' / '+fmtN(all.length):'')+'</small></b><span>Accounts</span></div>'+
+    '<div><b>'+fmtN(act)+'</b><span>Active<span class="lx"> · activity in the last 90 days</span></span></div>'+
+    '<div><b>'+fmtN(vm)+'</b><span>Visits this month</span></div>'+
+    '<div><b>'+fmtN(cm)+'</b><span>Calls<span class="lx"> / messages</span> this month</span></div>'+
+    '<div><b>'+fmtN(nw)+'</b><span>New accounts<span class="lx"> this month</span></span></div></div>';
+}
+function filterBar(n){
+  var f=ACM.f, all=ACM.rows||[], provs={}, dis={}, stages={}, pics={};
+  all.forEach(function(a){ var p=provName(a.province)||a.province; if(p) provs[p]=(provs[p]||0)+1;
+    if(f.prov && (provName(a.province)===f.prov||a.province===f.prov) && a.district) dis[a.district]=(dis[a.district]||0)+1;
+    var m=mOf(a); if(m&&m.stage) stages[m.stage]=1; var pc=picOf(a); if(pc) pics[pc]=1; });
+  var o=function(obj,sel,ph,cnt){ return '<option value="">'+ph+'</option>'+Object.keys(obj).sort().map(function(k){ return '<option value="'+e2(k)+'"'+(sel===k?" selected":"")+'>'+e2(k)+(cnt?' ('+obj[k]+')':'')+'</option>'; }).join(""); };
+  return '<div class="acm-f">'+
+    '<input class="inp q" id="acm_q" placeholder="Search account, code, district, distributor…" value="'+e2(f.q)+'" oninput="acmQ(this.value)">'+
+    '<select class="inp" onchange="acmSet(\'pic\',this.value)"><option value="">All PICs</option><option value="__me"'+(f.pic==="__me"?" selected":"")+'>My accounts</option>'+
+      Object.keys(pics).sort().map(function(k){ return '<option value="'+e2(k)+'"'+(f.pic===k?" selected":"")+'>'+e2(k)+'</option>'; }).join("")+'</select>'+
+    '<select class="inp" onchange="acmSet(\'prov\',this.value)">'+o(provs,f.prov,"All provinces",1)+'</select>'+
+    (f.prov?'<select class="inp" onchange="acmSet(\'dis\',this.value)">'+o(dis,f.dis,"All districts",1)+'</select>':'')+
+    '<select class="inp" onchange="acmSet(\'dist\',this.value)"><option value="">All distributors</option>'+ACM.dist.map(function(d){ return '<option'+(f.dist===d?" selected":"")+'>'+e2(d)+'</option>'; }).join("")+
+      '<option value="__none"'+(f.dist==="__none"?" selected":"")+'>No distributor yet</option></select>'+
+    '<select class="inp" onchange="acmSet(\'stage\',this.value)">'+o(stages,f.stage,"All stages")+'</select>'+
+    '<select class="inp" onchange="acmSet(\'st\',this.value)">'+[["","All statuses"],["active","Active (90 days)"],["inactive","Inactive"],["never","No activity yet"],["next","Next visit planned"],["new","New this month"],["noloc","No map location"]]
+      .map(function(x){ return '<option value="'+x[0]+'"'+(f.st===x[0]?" selected":"")+'>'+x[1]+'</option>'; }).join("")+'</select>'+
+    '<span class="n">'+fmtN(n)+' shown</span></div>';
+}
+function render(){
+  if(S.tab!=="acct") return;
+  var rows=ACM.rows, mapOpen=ACM.view==="map";
+  if(mapOpen && $("acm-map") && MAP.m && $("acm-body")){ /* map already on screen ⇒ only refresh numbers, filters and layers */
+    $("acm-kpw").innerHTML=kpis(); $("acm-fw").innerHTML=filterBar(filtered().length); mapPaint(); return; }
+  var note=ACM.err?'<div class="cal-note">'+e2(ACM.err)+' <a href="javascript:void(0)" onclick="ACM.err=\'\';acmLoad(true)">Retry</a></div>'
+          :(!rows?'<div class="cal-note">Reading sheet ACCOUNT TRACKING…</div>':'');
+  $("main").innerHTML='<div class="pg acm-pg'+(mapOpen?' mapv':'')+'">'+
+    '<div class="ph"><div><h2>Account tracking</h2><p>1 row per account · sheet ACCOUNT TRACKING · activity from sheet CUSTOMER TASK'+
+      (ACM.loading||ACM.visLoading?' · <span class="stale"><span class="dot"></span>syncing…</span>':'')+'</p></div><div class="sp"></div>'+
+      '<div class="acts"><div class="acm-seg"><button class="'+(!mapOpen?"on":"")+'" onclick="acmView(\'list\')">List</button><button class="'+(mapOpen?"on":"")+'" onclick="acmView(\'map\')">Map</button></div>'+
+      '<button class="btn sm" title="Read the sheet again" onclick="acmLoad(true)">⟳</button>'+
+      (ACM.sheet?'<a class="btn sm hide-m" target="_blank" href="'+e2(ACM.sheet)+'">Open sheet</a>':'')+'</div></div>'+
+    note+'<div id="acm-kpw">'+kpis()+'</div><div id="acm-fw">'+filterBar(rows?filtered().length:0)+'</div>'+
+    '<div id="acm-body">'+(mapOpen?mapShell():listHtml())+'</div><div style="height:70px"></div></div>';
+  if(mapOpen) mapInit();
+}
+window.acmLoad=function(f){ load(!!f); loadVis(!!f); render(); };
+function dd(iso){ if(!iso) return ""; var d=calDate(iso); return d?d.getDate()+" "+["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"][d.getMonth()]+(d.getFullYear()!==new Date().getFullYear()?" "+d.getFullYear():""):iso; }
+function listHtml(){
+  if(!ACM.rows) return typeof skRows==="function"?skRows(8,true):"";
+  var rows=sorted(filtered()), t=todayISO();
+  if(!rows.length) return '<div class="card pad"><div class="empty"><p>No account matches the filters.</p></div></div>';
+  var th=function(k,lb,cls){ return '<th'+(cls?' class="'+cls+'"':'')+' onclick="acmSort(\''+k+'\')">'+lb+(ACM.sort===k?(ACM.sdir>0?" ▲":" ▼"):"")+'</th>'; };
+  return '<div class="acm-tb"><table><thead><tr>'+th("name","Account")+th("prov","Province · District")+th("dist","Distributor · Sales rep")+th("last","Last visit")+
+    '<th class="hm">Next step</th>'+th("next","Next visit")+th("stage","Stage","hm")+th("n90","Activities 30 / 90 days","hm")+'<th>Status</th></tr></thead><tbody>'+
+    rows.slice(0,ACM.lim).map(function(a){
+      var m=mOf(a)||{}, act=activeOf(a), od=m.last && m.last<addDays(t,-60);
+      return '<tr onclick="acmEdit('+a._row+')"><td><b>'+e2(a.name)+'</b><small>'+e2([a.code,a.type,picOf(a)].filter(Boolean).join(" · "))+'</small></td>'+
+        '<td>'+e2(a.province||"—")+'<small>'+e2(a.district||"")+'</small></td>'+
+        '<td>'+(a.dist?'<span style="color:'+distCol(a.dist)+';font-weight:700">'+e2(a.dist)+'</span>':'<span style="color:#A0AAB6">—</span>')+'<small>'+e2(a.dsr||"")+'</small></td>'+
+        '<td class="c" data-l="Last visit"'+(od?' style="color:#B3261E"':'')+'>'+(m.last?dd(m.last):'—')+'</td>'+
+        '<td class="hm"><div class="ns" title="'+e2(m.step||"")+'">'+e2(m.step||"")+'</div></td>'+
+        '<td class="c" data-l="Next visit">'+(m.next?dd(m.next):'—')+'</td>'+
+        '<td class="hm">'+e2(m.stage||"")+'</td>'+
+        '<td class="c hm">'+(m.n30||0)+' / '+(m.n90||0)+'</td>'+
+        '<td>'+(act?'<span class="acm-chip on">Active</span>':(m.lastAny?'<span class="acm-chip off">Inactive</span>':'<span class="acm-chip nv">No activity</span>'))+'</td></tr>';
+    }).join("")+'</tbody></table></div>'+
+    (rows.length>ACM.lim?'<button class="btn sm acm-more" onclick="acmMore()">Show more ('+fmtN(rows.length-ACM.lim)+' left)</button>':'');
+}
+
+/* ═════════ EDIT 1 ACCOUNT ═════════ */
+var BKK=["Phra Nakhon","Dusit","Nong Chok","Bang Rak","Bang Khen","Bang Kapi","Pathum Wan","Pom Prap Sattru Phai","Phra Khanong","Min Buri","Lat Krabang","Yan Nawa","Samphanthawong","Phaya Thai","Thon Buri","Bangkok Yai","Huai Khwang","Khlong San","Taling Chan","Bangkok Noi","Bang Khun Thian","Phasi Charoen","Nong Khaem","Rat Burana","Bang Phlat","Din Daeng","Bueng Kum","Sathon","Bang Sue","Chatuchak","Bang Kho Laem","Prawet","Khlong Toei","Suan Luang","Chom Thong","Don Mueang","Ratchathewi","Lat Phrao","Watthana","Bang Khae","Lak Si","Sai Mai","Khan Na Yao","Saphan Sung","Wang Thonglang","Khlong Sam Wa","Bang Na","Thawi Watthana","Thung Khru","Bang Bon"];
+function byRow(r){ return (ACM.rows||[]).filter(function(a){ return String(a._row)===String(r); })[0]||null; }
+window.acmEdit=function(r){
+  var a=byRow(r); if(!a) return;
+  var m=mOf(a)||{}, dis={}, dsr={};
+  (ACM.rows||[]).forEach(function(x){ if(x.district && provName(x.province)===provName(a.province)) dis[x.district]=1; if(x.dsr && (!a.dist||x.dist===a.dist)) dsr[x.dsr]=1; });
+  if(provName(a.province)==="Bangkok") BKK.forEach(function(d){ dis[d]=1; });
+  var loc=num(a.lat)!=null?(Number(a.lat).toFixed(5)+", "+Number(a.lng).toFixed(5)+' <span class="acm-chip off">'+e2(srcLb(a.src))+'</span>'):'not located yet';
+  var h='<div class="q16-meta"><span>'+e2(a.code||"")+'</span><span>'+e2(a.type||"")+'</span><span>'+e2(a.province||"")+'</span>'+(picOf(a)?'<span>PIC '+e2(picOf(a))+'</span>':'')+'</div>'+
+    '<div class="row"><div class="fld"><label>District</label><input class="inp" id="acm_dis" list="acm_dis_l" value="'+e2(a.district||"")+'" placeholder="'+(provName(a.province)==="Bangkok"?"Bangkok district (khet)":"District / Amphoe")+'">'+
+      '<datalist id="acm_dis_l">'+Object.keys(dis).sort().map(function(d){ return '<option value="'+e2(d)+'">'; }).join("")+'</datalist></div>'+
+    '<div class="fld"><label>Distributor</label><select class="inp" id="acm_dist">'+opts(ACM.dist,a.dist||"","— none —")+'</select></div></div>'+
+    '<div class="fld"><label>Distributor sales rep</label><input class="inp" id="acm_dsr" list="acm_dsr_l" value="'+e2(a.dsr||"")+'" placeholder="Name of the distributor\'s sales rep who covers this account">'+
+      '<datalist id="acm_dsr_l">'+Object.keys(dsr).sort().map(function(d){ return '<option value="'+e2(d)+'">'; }).join("")+'</datalist></div>'+
+    '<div class="v359-sum"><span>Last visit <b>'+(m.last?fmtVN(m.last):"—")+'</b></span><span>Next visit <b>'+(m.next?fmtVN(m.next):"—")+'</b></span><span>Stage <b>'+e2(m.stage||"—")+'</b></span><span>Activities 30 / 90 days <b>'+(m.n30||0)+' / '+(m.n90||0)+'</b></span></div>'+
+    (m.step?'<div class="hint">Next step: '+e2(m.step)+'</div>':'')+
+    '<div class="hint" style="margin-top:8px">Map location: '+loc+'</div>'+
+    (a.at?'<div class="hint">Updated '+e2(a.at)+(a.by?' by '+e2(a.by):'')+'</div>':'');
+  openModal(e2(a.name), h,
+    (num(a.lat)!=null?'<button class="btn" onclick="acmClearLoc('+a._row+')">Remove location</button>':'')+
+    '<button class="btn" onclick="closeModal();acmShow('+a._row+')">Show on map</button><div style="flex:1"></div>'+
+    '<button class="btn" onclick="closeModal()">Cancel</button><button class="btn pri" id="acm_save" onclick="acmSave('+a._row+')">Save</button>');
+};
+function srcLb(s){ return s==="pin"?"placed by hand":s==="osm"?"OpenStreetMap":s==="search"?"address search":s==="province"?"province centre (approximate)":(s||""); }
+function patch(a,j){
+  if(j && j.row){ var cols=["code","name","type","province","district","dist","dsr","lat","lng","src","at","by"]; cols.forEach(function(c,i){ if(j.row[i]!==undefined) a[c]=j.row[i]; }); }
+  lsSet(lsK(),{ rows:ACM.rows, dist:ACM.dist, sheet:ACM.sheet });
+}
+window.acmSave=function(r){
+  var a=byRow(r); if(!a) return;
+  var v={ district:$("acm_dis").value.trim(), dist:$("acm_dist").value, dsr:$("acm_dsr").value.trim() };
+  var old={ district:a.district, dist:a.dist, dsr:a.dsr };
+  a.district=v.district; a.dist=v.dist; a.dsr=v.dsr; closeModal(); render();
+  apiPost({ action:"acctSave", code:a.code, name:a.name, district:v.district, dist:v.dist, dsr:v.dsr }).then(function(j){ patch(a,j); toast("Saved to ACCOUNT TRACKING","ok"); repaint(); })
+    .catch(function(e){ a.district=old.district; a.dist=old.dist; a.dsr=old.dsr; render(); toast("Not saved: "+(e&&e.message||e),"err",7000); });
+};
+window.acmClearLoc=function(r){
+  var a=byRow(r); if(!a) return; closeModal();
+  var o=[a.lat,a.lng,a.src]; a.lat=""; a.lng=""; a.src=""; render();
+  apiPost({ action:"acctSave", code:a.code, name:a.name, src:"clear" }).then(function(j){ patch(a,j); toast("Location removed","ok"); })
+    .catch(function(e){ a.lat=o[0]; a.lng=o[1]; a.src=o[2]; render(); toast("Not saved: "+(e&&e.message||e),"err",7000); });
+};
+
+/* ═════════ MAP ═════════ */
+var MAP=window.ACM_MAP={ m:null, prov:null, cl:null, hosp:null, showH:false, reg:"", mk:{}, move:null };
+/* Leaflet = LF (window.L; the cluster plugin needs the global L at run time, so no noConflict — the app has no global L of its own) */
+var LF=null;
+function loadLeaflet(){
+  if(LF) return Promise.resolve();
+  if(MAP._lp) return MAP._lp;
+  var css=function(h){ var l=document.createElement("link"); l.rel="stylesheet"; l.href=h; document.head.appendChild(l); };
+  var js=function(s){ return new Promise(function(res,rej){ var el=document.createElement("script"); el.src=s; el.onload=res; el.onerror=function(){ rej(new Error("Map library could not be loaded")); }; document.head.appendChild(el); }); };
+  css("https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css");
+  css("https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/MarkerCluster.min.css");
+  css("https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/MarkerCluster.Default.min.css");
+  MAP._lp=js("https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js")
+    .then(function(){ if(!window.L || !window.L.map) throw new Error("Map library could not be loaded"); return js("https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/leaflet.markercluster.min.js"); })
+    .then(function(){ var x=window.L; if(!x || !x.markerClusterGroup) throw new Error("Map library could not be loaded"); LF=x; })
+    .catch(function(e){ MAP._lp=null; throw e; });
+  return MAP._lp;
+}
+function mapShell(){
+  var nLoc=(ACM.rows||[]).filter(function(a){ return num(a.lat)!=null; }).length, n=(ACM.rows||[]).length;
+  return '<div class="acm-mapw"><div class="acm-mbar"><span class="rg"><button class="'+(!MAP.reg?"on":"")+'" onclick="acmReg(\'\')">All Thailand</button>'+
+      REGIONS.map(function(r){ return '<button class="'+(MAP.reg===r?"on":"")+'" onclick="acmReg(\''+r+'\')">'+r+'</button>'; }).join("")+'</span><span class="sp"></span>'+
+      '<label><input type="checkbox" id="acm_h"'+(MAP.showH?" checked":"")+' onchange="acmHosp(this.checked)"> Hospitals (OpenStreetMap)</label>'+
+      '<span id="acm_nloc" style="color:#5B6B7D">'+fmtN(nLoc)+' / '+fmtN(n)+' located</span>'+
+      '<button class="btn sm" onclick="acmLocate()" title="Find map locations of the accounts not located yet">Locate accounts</button></div>'+
+    '<div id="acm-map"></div><div class="acm-lg">'+ACM.dist.map(function(d){ return '<div><i style="background:'+distCol(d)+'"></i>'+e2(d)+'</div>'; }).join("")+
+      '<div><i style="background:'+NO_COL+'"></i>No distributor</div><div><i style="background:#fff;border:2px dashed #5B6B7D;width:7px;height:7px"></i>Approximate (province centre)</div></div>'+
+    '<div class="acm-prog" id="acm-prog" style="display:none"></div></div>';
+}
+function mapInit(){
+  Promise.all([loadLeaflet(), loadGeo()]).then(function(){
+    if(S.tab!=="acct" || ACM.view!=="map" || !$("acm-map")) return;
+    if(MAP.m){ try{ MAP.m.remove(); }catch(e){} MAP.m=null; }
+    var m=MAP.m=LF.map("acm-map",{ zoomControl:true, preferCanvas:true, minZoom:5, zoomSnap:0.25, zoomDelta:0.5, maxBounds:[[3,93],[23,110]] });
+    LF.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png",{ subdomains:"abcd", maxZoom:19,
+      attribution:'&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions" target="_blank">CARTO</a> · provinces: OpenGISData-Thailand (CC BY 4.0)' }).addTo(m);
+    MAP.prov=LF.geoJSON(GEO,{ style:provStyle, onEachFeature:function(f,ly){
+      ly.on("click",function(){ acmSet("prov", ACM.f.prov===f.properties.n?"":f.properties.n); });
+      ly.on("mouseover",function(){ ly.setStyle({ weight:2, color:"#003047" }); }); ly.on("mouseout",function(){ MAP.prov.resetStyle(ly); }); } }).addTo(m);
+    MAP.cl=LF.markerClusterGroup({ showCoverageOnHover:false, maxClusterRadius:40, chunkedLoading:true,
+      iconCreateFunction:function(c){ var n=c.getChildCount(), z=n<10?28:n<100?34:42; return LF.divIcon({ html:'<span>'+n+'</span>', className:'acm-cl', iconSize:[z,z] }); } }).addTo(m);
+    m.on("zoomend",function(){ try{ MAP.prov.setStyle(provStyle); }catch(e){} });
+    fitReg(); mapPaint();
+    if(MAP.showH) acmHosp(true);
+    setTimeout(function(){ try{ m.invalidateSize(); fitReg(); }catch(e){} },200);
+  }).catch(function(e){ var el=$("acm-map"); if(el) el.innerHTML='<div class="cal-note" style="margin:20px">'+e2(e.message||e)+'</div>'; });
+}
+function counts(){ var c={}; filtered().forEach(function(a){ var p=provName(a.province); if(p) c[p]=(c[p]||0)+1; }); return c; }
+var SHADE=["#F3F6F9","#D6E6F2","#A9CBE4","#6FA6CE","#3B7DB4","#1C5A8F"];
+function shade(n,mx){ if(!n) return SHADE[0]; var k=Math.ceil(Math.log(n+1)/Math.log(mx+1)*5); return SHADE[Math.max(1,Math.min(5,k))]; }
+var _cnt={}, _cmx=1;
+function provStyle(f){ var n=_cnt[f.properties.n]||0, sel=ACM.f.prov===f.properties.n, dim=MAP.reg&&f.properties.r!==MAP.reg;
+  var z=MAP.m?MAP.m.getZoom():6, op=z>=10?0.08:z>=8?0.3:0.75;
+  return { weight:sel?2.5:0.8, color:sel?"#003047":(z>=8?"#7FA3BF":"#FFFFFF"), fillColor:shade(n,_cmx), fillOpacity:dim?Math.min(op,0.25):op }; }
+function fitReg(){
+  if(!MAP.m || !GEO) return;
+  var fs=GEO.features.filter(function(f){ return ACM.f.prov ? f.properties.n===ACM.f.prov : (!MAP.reg || f.properties.r===MAP.reg); });
+  var bb=[180,90,-180,-90]; fs.forEach(function(f){ var b=f._bb; bb=[Math.min(bb[0],b[0]),Math.min(bb[1],b[1]),Math.max(bb[2],b[2]),Math.max(bb[3],b[3])]; });
+  if(fs.length) MAP.m.fitBounds([[bb[1],bb[0]],[bb[3],bb[2]]],{ padding:[10,10], maxZoom:11 });
+}
+window.acmReg=function(r){ MAP.reg=r; ACM.f.reg=r; ACM.f.prov=""; ACM.f.dis=""; render(); if(MAP.m){ fitReg(); } };
+function popHtml(a){
+  var m=mOf(a)||{};
+  return '<div class="acm-pop"><b>'+e2(a.name)+'</b><div class="r">'+e2([a.type,a.district,a.province].filter(Boolean).join(" · "))+'</div>'+
+    '<div>'+(a.dist?'<b style="color:'+distCol(a.dist)+'">'+e2(a.dist)+'</b>'+(a.dsr?' · '+e2(a.dsr):''):'No distributor')+'</div>'+
+    '<div class="r">Last visit '+(m.last?fmtVN(m.last):"—")+' · next '+(m.next?fmtVN(m.next):"—")+(m.stage?' · '+e2(m.stage):'')+'</div>'+
+    (a.src&&a.src!=="pin"?'<div class="r" style="font-size:11px">Location: '+e2(srcLb(a.src))+'</div>':'')+
+    '<div class="bt"><button onclick="acmEdit('+a._row+')">Details</button><button onclick="acmMove('+a._row+')">Move pin</button></div></div>';
+}
+function mapPaint(){
+  if(!MAP.m || !GEO) return;
+  _cnt=counts(); _cmx=1; Object.keys(_cnt).forEach(function(k){ if(_cnt[k]>_cmx) _cmx=_cnt[k]; });
+  MAP.prov.setStyle(provStyle);
+  MAP.prov.eachLayer(function(ly){ var p=ly.feature.properties, n=_cnt[p.n]||0;
+    ly.bindTooltip('<div class="acm-tip"><b>'+e2(p.n)+'</b> · '+e2(p.r)+'<br>'+fmtN(n)+' account'+(n===1?"":"s")+'</div>',{ sticky:true }); });
+  MAP.cl.clearLayers(); MAP.mk={};
+  var ms=[];
+  filtered().forEach(function(a){
+    var la=num(a.lat), ln=num(a.lng); if(la==null||ln==null) return;
+    var ap=a.src==="province", c=distCol(a.dist);
+    var mk=LF.circleMarker([la,ln],{ radius:ap?6:7, color:ap?"#5B6B7D":"#fff", weight:ap?1.5:1.5, dashArray:ap?"3 2":null, fillColor:ap?"#fff":c, fillOpacity:ap?0.6:0.95 });
+    mk.bindPopup(popHtml(a)); mk._acm=a._row; MAP.mk[a._row]=mk; ms.push(mk);
+  });
+  MAP.cl.addLayers(ms);
+  var nl=$("acm_nloc"); if(nl){ var n=(ACM.rows||[]).length, k=(ACM.rows||[]).filter(function(a){ return num(a.lat)!=null; }).length; nl.textContent=fmtN(k)+" / "+fmtN(n)+" located"; }
+  if(MAP.showH) hospPaint();
+}
+window.acmShow=function(r){
+  var a=byRow(r); if(!a) return;
+  if(num(a.lat)==null){ toast("This account has no map location yet — use Locate accounts or Move pin","warn",5000); }
+  ACM.f={ q:"", pic:"", prov:"", dis:"", dist:"", stage:"", st:"", reg:"" }; MAP.reg="";
+  ACM.view="map"; render();
+  var go2=function(k){ if(!MAP.m || !MAP.mk[r]){ if(k<40) setTimeout(function(){ go2(k+1); },150); else if(num(a.lat)==null) acmMove(r); return; }
+    MAP.cl.zoomToShowLayer(MAP.mk[r],function(){ MAP.mk[r].openPopup(); }); };
+  go2(0);
+};
+/* Move pin: a draggable marker; drop ⇒ saved as "pin" (never overwritten by the automatic search) */
+window.acmMove=function(r){
+  var a=byRow(r); if(!a || !MAP.m) return;
+  MAP.m.closePopup();
+  if(MAP.move){ MAP.m.removeLayer(MAP.move); MAP.move=null; }
+  var at=num(a.lat)!=null?[Number(a.lat),Number(a.lng)]:(function(){ var f=featOf(provName(a.province)); return f?f._c:MAP.m.getCenter(); })();
+  var ic=LF.divIcon({ className:"acm-pin", iconSize:[30,40], iconAnchor:[15,38], popupAnchor:[0,-34],
+    html:'<svg viewBox="0 0 24 32" width="30" height="40"><path d="M12 31s-10-10.6-10-18.5a10 10 0 0 1 20 0C22 20.4 12 31 12 31z" fill="#C8102E" stroke="#fff" stroke-width="1.6"/><circle cx="12" cy="12.5" r="3.6" fill="#fff"/></svg>' });
+  var mv=MAP.move=LF.marker(at,{ draggable:true, autoPan:true, icon:ic }).addTo(MAP.m);
+  mv.bindPopup('<div class="acm-pop"><b>'+e2(a.name)+'</b><div class="r">Drag the pin to the exact place, then press Save.</div><div class="bt"><button onclick="acmPinSave('+r+')">Save location</button><button onclick="acmPinCancel()">Cancel</button></div></div>',{ closeOnClick:false, autoClose:false }).openPopup();
+  mv.on("dragend",function(){ mv.openPopup(); });
+  MAP.m.setView(at, Math.max(MAP.m.getZoom(), 14));
+};
+window.acmPinCancel=function(){ if(MAP.move){ MAP.m.removeLayer(MAP.move); MAP.move=null; } };
+window.acmPinSave=function(r){
+  var a=byRow(r); if(!a || !MAP.move) return;
+  var ll=MAP.move.getLatLng(), o=[a.lat,a.lng,a.src];
+  if(GEO && !provAt(ll.lat,ll.lng)) return toast("The pin is outside Thailand","warn");
+  a.lat=+ll.lat.toFixed(6); a.lng=+ll.lng.toFixed(6); a.src="pin"; acmPinCancel(); mapPaint();
+  apiPost({ action:"acctSave", code:a.code, name:a.name, lat:a.lat, lng:a.lng, src:"pin" }).then(function(j){ patch(a,j); toast("Location saved","ok"); })
+    .catch(function(e){ a.lat=o[0]; a.lng=o[1]; a.src=o[2]; mapPaint(); toast("Not saved: "+(e&&e.message||e),"err",7000); });
+};
+
+/* ═════════ OpenStreetMap: hospitals / dental clinics (Overpass, once per session) ═════════ */
+var OSM={ list:null, p:null };
+var OVERPASS=["https://overpass-api.de/api/interpreter","https://overpass.kumi.systems/api/interpreter"];
+function loadOsm(){
+  if(OSM.list) return Promise.resolve(OSM.list);
+  if(OSM.p) return OSM.p;
+  var q='[out:json][timeout:90];area["ISO3166-1"="TH"][admin_level=2]->.a;(nwr["amenity"~"^(hospital|dentist|clinic)$"](area.a);nwr["healthcare"~"^(hospital|dentist)$"](area.a););out center tags;';
+  var tryAt=function(i){ return fetch(OVERPASS[i],{ method:"POST", body:"data="+encodeURIComponent(q), headers:{ "Content-Type":"application/x-www-form-urlencoded" } })
+    .then(function(r){ if(!r.ok) throw new Error("OpenStreetMap is busy ("+r.status+")"); return r.json(); })
+    .catch(function(e){ if(i+1<OVERPASS.length) return tryAt(i+1); throw e; }); };
+  OSM.p=tryAt(0).then(function(j){
+    OSM.list=(j.elements||[]).map(function(x){ var t=x.tags||{}, la=x.lat!=null?x.lat:(x.center&&x.center.lat), ln=x.lon!=null?x.lon:(x.center&&x.center.lon);
+      if(la==null||!(t.name||t["name:en"]||t["name:th"])) return null;
+      var k=t.amenity==="hospital"||t.healthcare==="hospital"?"h":(t.amenity==="dentist"||t.healthcare==="dentist"||/dent|ทันต/i.test(t.name||"")?"d":"c");
+      return { n:t["name:en"]||t.name||t["name:th"], o:[t.name,t["name:en"],t["name:th"],t.official_name,t["alt_name"]].filter(Boolean), la:la, ln:ln, k:k, p:"" }; }).filter(Boolean);
+    OSM.list.forEach(function(o){ o.p=provAt(o.la,o.ln); o.t=o.o.map(toks); });
+    OSM.p=null; return OSM.list;
+  }).catch(function(e){ OSM.p=null; throw e; });
+  return OSM.p;
+}
+window.acmHosp=function(onx){
+  MAP.showH=!!onx;
+  if(!MAP.m) return;
+  if(!onx){ if(MAP.hosp){ MAP.m.removeLayer(MAP.hosp); MAP.hosp=null; } return; }
+  prog("Loading hospitals from OpenStreetMap…");
+  loadOsm().then(function(){ prog(""); hospPaint(); }).catch(function(e){ prog(""); toast(String(e.message||e),"warn",6000); var c=$("acm_h"); if(c) c.checked=false; MAP.showH=false; });
+};
+function hospPaint(){
+  if(!OSM.list || !MAP.m) return;
+  if(MAP.hosp) MAP.m.removeLayer(MAP.hosp);
+  var ly=MAP.hosp=LF.layerGroup(), mine={};
+  (ACM.rows||[]).forEach(function(a){ if(num(a.lat)!=null) mine[Number(a.lat).toFixed(3)+","+Number(a.lng).toFixed(3)]=1; });
+  OSM.list.forEach(function(o){ if(o.k!=="h") return; if(MAP.reg && featOf(o.p) && featOf(o.p).properties.r!==MAP.reg) return; if(ACM.f.prov && o.p!==ACM.f.prov) return;
+    var ours=mine[o.la.toFixed(3)+","+o.ln.toFixed(3)];
+    LF.circleMarker([o.la,o.ln],{ radius:3.5, color:ours?"#1E7A4A":"#B3261E", weight:1, fillColor:"#fff", fillOpacity:1 })
+      .bindTooltip(e2(o.n)+(ours?" · account":" · not an account yet")).addTo(ly); });
+  ly.addTo(MAP.m);
+}
+
+/* ═════════ LOCATE ACCOUNTS (OSM name match ⇒ address search ⇒ province centre) ═════════ */
+var STOP={ dental:1, dent:1, clinic:1, clinics:1, hospital:1, hosp:1, the:1, co:1, ltd:1, company:1, limited:1, center:1, centre:1, branch:1, dr:1, and:1, of:1, by:1,
+  smile:0, care:0, "ทันตกรรม":1, "คลินิก":1, "โรงพยาบาล":1, "รพ":1, polyclinic:1, medical:1, health:1, public:1, "&":1 };
+function toks(s){ return nz(s).split(" ").filter(function(w){ return w && w.length>1 && !STOP[w]; }); }
+/* share of common words (stop words removed); 1 common word counts only when both names are that single long word */
+function score(a,b){ if(!a.length||!b.length) return 0; var n=0; a.forEach(function(w){ if(b.indexOf(w)>=0) n++; });
+  if(n<2 && !(n===1 && a.length===1 && b.length===1 && a[0].length>=5)) return 0; return n/Math.max(a.length,b.length); }
+function kindOf(a){ return /hosp/i.test(a.type||"")?"h":/univ/i.test(a.type||"")?"u":"d"; }
+function matchOsm(a){
+  var pn=provName(a.province), at=toks(a.name); if(!pn || !at.length || !OSM.list) return null;
+  var best=null, bs=0, sec=0, k=kindOf(a);
+  OSM.list.forEach(function(o){ if(o.p!==pn) return;
+    var s=Math.max.apply(null,o.t.map(function(t){ return score(at,t); }));
+    if(s>0 && ((k==="h"&&o.k==="h")||(k==="d"&&o.k!=="h")||k==="u")) s+=0.05;
+    if(s>bs){ sec=bs; bs=s; best=o; } else if(s>sec) sec=s; });
+  return best && bs>=0.6 && bs-sec>=0.1 ? best : null;
+}
+function sleep(ms){ return new Promise(function(r){ setTimeout(r,ms); }); }
+function nomi(a){
+  var pn=provName(a.province)||a.province, q=[a.name, a.district, pn, "Thailand"].filter(Boolean).join(", ");
+  return fetch("https://nominatim.openstreetmap.org/search?format=jsonv2&limit=3&countrycodes=th&accept-language=en&q="+encodeURIComponent(q),{ headers:{ "Accept":"application/json" } })
+    .then(function(r){ if(!r.ok) throw new Error("search "+r.status); return r.json(); })
+    .then(function(L2){ var hit=(L2||[]).filter(function(x){ return provAt(+x.lat,+x.lon)===provName(a.province); })[0]; return hit?{ la:+hit.lat, ln:+hit.lon }:null; });
+}
+function prog(t){ var p=$("acm-prog"); if(!p) return; p.style.display=t?"block":"none"; p.innerHTML=t||""; }
+function triedKey(){ return "mmh_acm_tried"; }
+var LOC={ run:false, stop:false };
+window.acmLocateStop=function(){ LOC.stop=true; };
+window.acmLocate=function(){
+  if(LOC.run) return;
+  if(!ACM.rows) return toast("Accounts are still loading","warn");
+  var tried=lsGet(triedKey())||{}, now=Date.now(), DAY=86400000;
+  var todo=(ACM.rows||[]).filter(function(a){ return (num(a.lat)==null || a.src==="province") && a.src!=="pin" && !(tried[a.code||a.name] && now-tried[a.code||a.name]<14*DAY); });
+  if(!todo.length) return toast("Every account has a location (or was searched in the last 14 days). Use Move pin for the rest.","ok",6000);
+  LOC.run=true; LOC.stop=false;
+  var found=[], stats={ osm:0, search:0, prov:0 }, MAXS=80;
+  var flush=function(){ if(!found.length) return Promise.resolve(); var b=found.splice(0,found.length);
+    b.forEach(function(it){ var a=(ACM.rows||[]).filter(function(x){ return (x.code&&x.code===it.code) || (!x.code && x.name===it.name); })[0]; if(a && a.src!=="pin"){ a.lat=it.lat; a.lng=it.lng; a.src=it.src; } });
+    lsSet(lsK(),{ rows:ACM.rows, dist:ACM.dist, sheet:ACM.sheet }); mapPaint();
+    return apiPost({ action:"acctGeo", items:b }).catch(function(e){ toast("Locations not saved: "+(e&&e.message||e),"err",6000); }); };
+  prog('Matching '+fmtN(todo.length)+' accounts with OpenStreetMap hospitals / clinics… <a href="javascript:void(0)" onclick="acmLocateStop()">Stop</a>');
+  loadGeo().then(function(){ return loadOsm().catch(function(){ return []; }); }).then(function(){
+    var rest=[];
+    todo.forEach(function(a){ var o=matchOsm(a); if(o){ found.push({ code:a.code, name:a.name, lat:+o.la.toFixed(6), lng:+o.ln.toFixed(6), src:"osm" }); stats.osm++; } else rest.push(a); });
+    return flush().then(function(){
+      var i=0, nS=0;
+      var step=function(){
+        if(LOC.stop || i>=rest.length || nS>=MAXS) return Promise.resolve();
+        var a=rest[i++]; nS++;
+        prog('Address search '+nS+' / '+Math.min(rest.length,MAXS)+' · found '+(stats.osm+stats.search)+' <a href="javascript:void(0)" onclick="acmLocateStop()">Stop</a>');
+        return nomi(a).then(function(h){ tried[a.code||a.name]=Date.now();
+          if(h){ found.push({ code:a.code, name:a.name, lat:+h.la.toFixed(6), lng:+h.ln.toFixed(6), src:"search" }); stats.search++; a._hit=1; }
+          if(found.length>=20) return flush(); }).catch(function(){}).then(function(){ return sleep(1100); }).then(step);
+      };
+      return step().then(function(){
+        rest.forEach(function(a){ if(a._hit || num(a.lat)!=null) return; var f=featOf(provName(a.province)); if(!f) return;
+          found.push({ code:a.code, name:a.name, lat:+f._c[0].toFixed(5), lng:+f._c[1].toFixed(5), src:"province" }); stats.prov++; });
+        lsSet(triedKey(),tried); return flush();
+      });
+    });
+  }).then(function(){
+    LOC.run=false; prog("");
+    toast("Located: "+stats.osm+" from OpenStreetMap · "+stats.search+" by address · "+stats.prov+" approximate (province centre)."+(LOC.stop?" Stopped.":""),"ok",8000);
+  }).catch(function(e){ LOC.run=false; prog(""); toast(String(e&&e.message||e),"err",6000); });
+};
+
+/* ═════════ NAVIGATION (tab "acct", group Customers, Thailand Dental only) ═════════ */
+var AT={ id:"acct", ic:"🗺️", mob:0 };
+Object.defineProperty(AT,"lb",{ get:function(){ return "Account tracking"; }, enumerable:true });
+Object.defineProperty(AT,"mlb",{ get:function(){ return "Accounts"; }, enumerable:true });
+Object.defineProperty(AT,"grp",{ get:function(){ return TX("Khách hàng","Customers"); }, enumerable:true });
+var si=-1; TABS.forEach(function(t,i){ if(t.id==="stake") si=i; });
+TABS.splice(si>=0?si+1:TABS.length,0,AT);
+var _nt=window.navTabs;
+window.navTabs=navTabs=function(){ return _nt.apply(this,arguments).filter(function(t){ return t.id!=="acct" || on(); }); };
+var _bn=window.buildNav;
+window.buildNav=buildNav=function(){ var r=_bn.apply(this,arguments);
+  try{ document.querySelectorAll('[data-t="acct"] .ic').forEach(function(ic){ ic.innerHTML=I("globe"); }); }catch(e){} return r; };
+var _go=window.go;
+window.go=go=function(tab){
+  if(tab==="acct"){
+    if(!on()) tab="cust";
+    else {
+      if(typeof CAL!=="undefined" && CAL.full) try{ calFull(false); }catch(e){}
+      S.tab="acct";
+      document.querySelectorAll("[data-t]").forEach(function(el){ el.classList.toggle("on", el.getAttribute("data-t")==="acct"); });
+      try{ $("fab").classList.remove("on"); }catch(e){}
+      $("main").scrollTop=0; pg(); try{ if(window.v323Mark) v323Mark(); }catch(e){} return;
+    }
+  }
+  if(MAP.m && tab!=="acct"){ try{ MAP.m.remove(); }catch(e){} MAP.m=null; MAP.hosp=null; MAP.move=null; }
+  return _go.apply(this,[tab]);
+};
+try{ if(S.user) buildNav(); }catch(e){}
+/* data written elsewhere (task saved) ⇒ metrics read again next time */
+var _ap=window.afterWrite;
+if(typeof _ap==="function") window.afterWrite=afterWrite=function(){ ACM.visAt=0; return _ap.apply(this,arguments); };
+
+/* ═════════════════════════ ③ EVENT ROI + FOLLOW-UP (Thailand Dental) ═════════════════════════ */
+var FU=[["2w",14,"2 weeks"],["4w",28,"4 weeks"],["8w",56,"8 weeks"]];
+function roiOn(e){ return on() && e && e.roi; }
+function useAct(e){ var r=e.roi||{}; return evState(e)==="done" && (num(r.expAct)||num(r.revAct)); }
+function roiNums(e){
+  var r=e.roi||{}, act=useAct(e), ex=num(act?r.expAct:r.expEst), rv=num(act?r.revAct:r.revEst);
+  var pl=num(act?r.plAct:r.plEst); if(pl==null && (ex!=null||rv!=null)) pl=(rv||0)-(ex||0);
+  var roi=ex?((rv||0)-ex)/ex:null, ac=evActual(e), cpa=ex&&ac?ex/ac:null;
+  return { act:act, ex:ex, rv:rv, pl:pl, roi:roi, cpa:cpa };
+}
+function fuState(e){
+  if(!e.start || evState(e)==="cancel") return [];
+  var end=evEnd(e), t=todayISO(), log=e.fu||[];
+  return FU.map(function(f){ var d=addDays(end,f[1]), done=log.filter(function(x){ return x.k===f[0]; })[0];
+    return { k:f[0], lb:f[2], d:d, done:done, st:done?"ok":(t<d?"up":(t>addDays(d,7)?"late":"due")) }; });
+}
+var _card=window.evCardHtml;
+window.evCardHtml=evCardHtml=function(e){
+  var h=_card.apply(this,arguments); if(!roiOn(e)) return h;
+  var n=roiNums(e), fs=fuState(e), x='';
+  if(n.ex!=null||n.rv!=null) x+='<div class="v359-roi"><span>'+(n.act?"Actual":"Budget")+' <b>'+thb(n.ex)+'</b></span><span>Revenue <b>'+thb(n.rv)+'</b></span>'+
+    (n.pl!=null?'<span class="pl '+(n.pl>=0?"p":"n")+'">P/L <b>'+thb(n.pl)+'</b></span>':'')+(n.roi!=null?'<span>ROI <b>'+Math.round(n.roi*100)+'%</b></span>':'')+
+    (n.cpa!=null?'<span>THB / attendee <b>'+thb(n.cpa)+'</b></span>':'')+'</div>';
+  if(evState(e)==="done" && fs.length) x+='<div class="v359-fu">'+fs.map(function(f){ return '<span class="'+(f.st==="ok"?"ok":f.st==="late"?"late":f.st==="due"?"due":"")+'" title="Follow-up '+f.lb+' after the event · '+fmtVN(f.d)+'">'+(f.st==="ok"?"✓ ":"")+f.k+'</span>'; }).join("")+'</div>';
+  return x?h.replace(/<\/div><\/button>$/, x+'</div></button>'):h;
+};
+var _re=window.renderEvent;
+window.renderEvent=renderEvent=function(){
+  var r=_re.apply(this,arguments);
+  try{
+    if(!on() || S.tab!=="event" || !(EVS.rows||[]).some(function(e){ return e.roi; })) return r;
+    var t=todayISO(), due=[];
+    evRows().forEach(function(e){ if(evState(e)!=="done" || evEnd(e)<addDays(t,-150)) return;
+      fuState(e).forEach(function(f){ if(f.st==="due"||f.st==="late") due.push({ e:e, f:f }); }); });
+    due.sort(function(a,b){ return a.f.d.localeCompare(b.f.d); });
+    var strip=document.querySelector(".ev-pg .ev-strip");
+    if(strip){
+      var rg=evPeriod(), ex=0, rv=0, nx=0;
+      (rg.per==="fy"?evFyRows():evRows().filter(function(e){ return e.start && e.start<=rg.to && evEnd(e)>=rg.from; })).forEach(function(e){
+        if(evState(e)==="cancel" || !e.roi) return; var n=roiNums(e); if(n.ex!=null){ ex+=n.ex; nx++; } if(n.rv!=null) rv+=n.rv; });
+      if(nx){ strip.classList.add("v359-s6"); strip.insertAdjacentHTML("beforeend",'<div><b>'+thb(ex)+'</b><span>cost (THB)</span></div><div><b>'+thb(rv)+'</b><span>revenue · ROI '+(ex?Math.round((rv-ex)/ex*100)+'%':'—')+'</span></div>'); }
+      if(due.length) strip.insertAdjacentHTML("afterend",'<div class="v359-due"><h4>Follow-ups due ('+due.length+')</h4>'+due.slice(0,8).map(function(x){
+        return '<div class="it"><span class="v359-fu"><span class="'+(x.f.st==="late"?"late":"due")+'">'+x.f.k+'</span></span><span class="t"><b>'+e2(x.e.topic||x.e.type)+'</b> · '+e2(evDates(x.e))+(x.e.place?' · '+e2(x.e.place):'')+'</span>'+
+          '<span style="color:#8A97A6;font-size:11.5px">'+(x.f.st==="late"?"since ":"due ")+fmtVN(x.f.d)+'</span><button class="btn sm" onclick="evForm('+x.e.row+');setTimeout(function(){v359Fu(\''+x.f.k+'\')},60)">Log</button></div>'; }).join("")+
+        (due.length>8?'<div class="hint">+ '+(due.length-8)+' more</div>':'')+'</div>');
+    }
+  }catch(err){ try{ console.error(err); }catch(_){} }
+  return r;
+};
+var _ef=window.evForm;
+window.evForm=evForm=function(row, iso){
+  var r=_ef.apply(this,arguments);
+  try{
+    var e=row?evByRow(row):null;
+    if(!on() || !(EVS.rows||[]).some(function(x){ return x.roi; })) return r;
+    var nm=$("ev_name"); if(!nm) return r;
+    var can=evCanEdit(), ro=can?"":" disabled", R=(e&&e.roi)||{ fx:{} }, fx=R.fx||{};
+    var fld=function(k,lb){ var v=R[k], pl=/^pl/.test(k); return '<div class="fld"><label>'+lb+'</label><input class="inp" type="number" step="any" id="v359_'+k+'" value="'+(v===""||v==null?"":e2(v))+'"'+(fx[k]?' readonly title="'+(pl&&!bs?"Revenue − expenses":"Formula — from the budget sheet")+'"':pl?' readonly title="Revenue − expenses"':ro)+'></div>'; };
+    var n=e?roiNums(e):null, fs=e?fuState(e):[];
+    var bs=e&&e.bs, sheetUrl=(EVS.lists&&EVS.lists.sheet&&EVS.lists.sheet.url)||"";
+    var h='<div class="v359-sec" id="v359-roi"><h4>Budget &amp; ROI <span style="font-weight:600;color:#8A97A6;font-size:11.5px">THB</span><span class="sp"></span>'+
+        (bs?'<a class="btn sm" target="_blank" href="'+e2(sheetUrl+(bs.gid?"#gid="+bs.gid:""))+'">Open budget sheet ('+e2(bs.name)+')</a>'
+           :(e&&can?'<button class="btn sm" id="v359_bs" onclick="v359Budget()">Create budget sheet</button>':''))+'</h4>'+
+      '<div class="v359-g">'+fld("expEst","Expenses · estimated")+fld("revEst","Revenue · estimated")+fld("plEst","Profit / loss · estimated")+
+        fld("expAct","Expenses · actual")+fld("revAct","Revenue · actual")+fld("plAct","Profit / loss · actual")+'</div>'+
+      (n&&(n.ex!=null||n.rv!=null)?'<div class="v359-sum"><span>ROI <b>'+(n.roi!=null?Math.round(n.roi*100)+'%':'—')+'</b> ('+(n.act?"actual":"estimated")+')</span><span>Cost per attendee <b>'+(n.cpa!=null?thb(n.cpa):'—')+'</b></span></div>':'')+
+      (fx.expEst||fx.expAct?'<div class="hint">Grey numbers come from the budget sheet — edit them there.</div>':(e&&can?'<div class="hint">Tip: "Create budget sheet" copies the latest Sale out Event Budget sheet for this event and links these numbers to it.</div>':''))+
+      '<div class="row" style="margin-top:8px"><div class="fld"><label>Note</label><textarea class="inp" id="v359_note" style="min-height:54px"'+ro+'>'+e2(e?e.note:"")+'</textarea></div>'+
+        '<div class="fld"><label>Next follow up</label><textarea class="inp" id="v359_next" style="min-height:54px"'+ro+' placeholder="e.g. send quotation to Dr. … · visit 20/12">'+e2(e?e.next:"")+'</textarea></div></div></div>'+
+      (e&&evState(e)!=="cancel"?'<div class="v359-sec" id="v359-fusec"><h4>Follow-up after the event<span class="sp"></span><span class="v359-fu">'+fs.map(function(f){
+          return '<span class="'+(f.st==="ok"?"ok":f.st==="late"?"late":f.st==="due"?"due":"")+'">'+(f.st==="ok"?"✓ ":"")+f.lb+' · '+fmtVN(f.d)+'</span>'; }).join("")+'</span></h4>'+
+        ((e.fu||[]).length?'<ul class="v359-log">'+(e.fu||[]).slice().reverse().map(function(x){ return '<li><span class="k">'+e2(x.k)+'</span><span style="flex:1">'+e2(x.t)+'</span><span class="d">'+e2(fmtVN(x.d))+(x.pic?' · '+e2(x.pic):'')+'</span></li>'; }).join("")+'</ul>'
+          :'<div class="hint">No follow-up logged yet. Log what was done 2, 4 and 8 weeks after the event (calls, visits, quotations, orders).</div>')+
+        (can?'<div class="v359-add"><select class="inp" id="v359_fk">'+[["2w","2 weeks"],["4w","4 weeks"],["8w","8 weeks"],["call","Call"],["visit","Visit"],["order","Order"],["other","Other"]].map(function(k){
+            var d=fs.filter(function(f){ return f.st!=="ok" && f.st!=="up"; })[0]; return '<option value="'+k[0]+'"'+(d&&d.k===k[0]?" selected":"")+'>'+k[1]+'</option>'; }).join("")+'</select>'+
+          '<input class="inp" type="date" id="v359_fd" value="'+todayISO()+'" max="'+todayISO()+'"><input class="inp nt" id="v359_ft" placeholder="What was done / result (orders, quotations, customers contacted…)">'+
+          '<button class="btn pri sm" id="v359_fb" onclick="v359FuSave()">Log follow-up</button></div>':'')+'</div>':'');
+    nm.insertAdjacentHTML("beforebegin",h);
+  }catch(err){ try{ console.error(err); }catch(_){} }
+  return r;
+};
+window.v359Fu=function(k){ var s=$("v359_fk"); if(s) s.value=k; var t=$("v359_ft"); if(t){ t.scrollIntoView({ block:"center", behavior:"smooth" }); t.focus(); } };
+var _fv=window.evfVal;
+window.evfVal=evfVal=function(){
+  var v=_fv.apply(this,arguments);
+  if(!$("v359-roi")) return v;
+  v.note=$("v359_note").value; v.next=$("v359_next").value;
+  var roi={}; ["expEst","revEst","expAct","revAct"].forEach(function(k){ var el=$("v359_"+k); if(el && !el.readOnly) roi[k]=el.value; });
+  v.roi=roi; return v;
+};
+function evPatch(ev){ if(!ev) return; var i=-1; (EVS.rows||[]).forEach(function(x,k){ if(x.row===ev.row) i=k; }); if(i>=0) EVS.rows[i]=ev; else (EVS.rows=EVS.rows||[]).push(ev);
+  try{ lsSet(evLsKey("list"),{ rows:EVS.rows, lists:EVS.lists, editors:EVS.editors, tpl:EVS.tpl }); }catch(e){} }
+window.v359FuSave=function(){
+  var e=evByRow(EVF&&EVF.row); if(!e) return;
+  var k=$("v359_fk").value, t=$("v359_ft").value.trim(), d=$("v359_fd").value;
+  if(!t) return toast("Write what was done","warn");
+  var b=$("v359_fb"); if(b) b.disabled=true;
+  evWrite({ action:"followup", row:e.row, sig:e.sig, k:k, note:t, d:d }).then(function(j){
+    evPatch(j.event); toast("Follow-up saved","ok"); evForm(e.row); setTimeout(function(){ var s=$("v359-fusec"); if(s) s.scrollIntoView({ block:"center" }); },80); evRepaint();
+  }).catch(function(er){ if(b) b.disabled=false; toast("Not saved: "+(er.stale?er.message:evErrText(er)),"err",8000); if(er.stale) loadEvents(true); });
+};
+window.v359Budget=function(){
+  var e=evByRow(EVF&&EVF.row); if(!e) return;
+  var R=e.roi||{}, typed=["expEst","revEst","expAct","revAct"].some(function(k){ return num(R[k])!=null && !(R.fx||{})[k]; });
+  var b=$("v359_bs");
+  if(typed && b && !b._ok){ b._ok=1; b.textContent="Numbers typed here will be replaced by the new sheet — press again"; return; }
+  if(b) b.disabled=true; busy(true,"Creating the budget sheet…");
+  evWrite({ action:"budgetSheet", row:e.row, sig:e.sig }).then(function(j){
+    busy(false); toast((j.created?"Budget sheet created: ":"Budget sheet: ")+((j.bs&&j.bs.name)||""),"ok",6000);
+    var url=(EVS.lists&&EVS.lists.sheet&&EVS.lists.sheet.url)||""; if(url && j.bs) window.open(url+(j.bs.gid?"#gid="+j.bs.gid:""),"_blank");
+    loadEvents(true).then(function(){ if($("v359-roi")) evForm(e.row); });
+  }).catch(function(er){ busy(false); if(b) b.disabled=false; toast("Not created: "+(er.stale?er.message:evErrText(er)),"err",8000); });
+};
+})();
+</script>
 </body>
 </html>
