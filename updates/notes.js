@@ -7,6 +7,14 @@
 function E(u){ u.en={ title:u.title, items:u.items.map(function(i){ return { title:i.title, text:i.text }; }) }; return u; }
 window.MMH_UPDATES = [
   E({
+    id:"2026-11-09-v35.7", version:"v35.7", date:"2026-11-09",
+    title:"Report submission statistics now include the Thailand Dental CRM",
+    summary:"The report statistics (Excel) now read the weekly reports sent from the Thailand Dental CRM, with the Thailand working calendar.",
+    items:[
+      { type:"imp", icon:"#", title:"Thailand Dental in the report statistics", text:"Top bar ▸ <b>Report stats</b> (Admin / Director / HOD) ▸ <b>Export Excel</b>: weekly reports sent by Yong, Man and Sui from the Thailand Dental CRM are now counted (on time / late / not sent) with the Thailand working calendar. The source list shows <b>CRM Thailand Surgical</b> and <b>CRM Thailand Dental</b> separately." }
+    ]
+  }),
+  E({
     id:"2026-11-09-v35.6", version:"v35.6", date:"2026-11-09",
     title:"Thailand teams: own Business Trip files · Thailand Dental: real CRM file and Event tab",
     summary:"The Thailand Dental CRM now works on the team's real file \"1. Thailand - Dental Action\" (no longer the draft copy) and has its own Event tab, connected to the file \"2. Thailand - Dental Event Report FY67\". The Customer Task form also has the type action Event next to Co-visiting with distributor.",
