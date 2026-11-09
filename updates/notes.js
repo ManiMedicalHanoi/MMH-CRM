@@ -7,6 +7,16 @@
 function E(u){ u.en={ title:u.title, items:u.items.map(function(i){ return { title:i.title, text:i.text }; }) }; return u; }
 window.MMH_UPDATES = [
   E({
+    id:"2026-11-09-v35.6", version:"v35.6", date:"2026-11-09",
+    title:"Thailand Dental: Event tab and the Event type action",
+    summary:"The Thailand Dental team now has its own Event tab, connected to the file \"2. Thailand - Dental Event Report FY67\". The Customer Task form also has the type action Event next to Co-visiting with distributor.",
+    items:[
+      { type:"new", icon:"+", title:"Event tab for Thailand Dental", text:"Menu <b>Event</b> ▸ all events of sheet <b>REPORT_EVENT</b> of the Dental Event Report file, by month, with upcoming / done and participants. Events also show on the work calendar. <b>Open sheet</b> opens the Dental file.", img:"updates/v35.6/event_list.jpg" },
+      { type:"new", icon:"+", title:"Add or edit an event from the CRM", text:"Click <b>+ Add event</b> ▸ date, type of event, product (Jizai and handfile · Bur · Composite), topic, KOL / PIC, place ▸ <b>Save to Google Sheet</b>. Write <b>MMH &lt;name&gt;</b> as KOL / PIC when an MMH member leads the event — KPI C11-02 counts MMH-led events from this column.", img:"updates/v35.6/event_form.jpg" },
+      { type:"imp", icon:"✓", title:"Type action: Event · Co-visiting with distributor", text:"When you log a customer task, the <b>Type action</b> list always has <b>Event</b> and <b>Co-visiting with distributor</b> (KPI C4-01 / C4-03). The dropdown of sheet CUSTOMER TASK has them too." }
+    ]
+  }),
+  E({
     id:"2026-11-06-v35.5", version:"v35.5", date:"2026-11-06",
     title:"HOD & Director: alerts for field-visit photos taken too close together",
     summary:"The CRM now flags field-visit photos of one PIC at two different customers taken less than 15 minutes apart, so HODs and the Director can review those visits. Team leaders and sales PICs do not see these alerts.",
