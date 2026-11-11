@@ -250,7 +250,7 @@ function geoReady(c){
     });
     var alias={};
     if(c==="vn") VN_NEW.forEach(function(x){ alias[nk(x[0])]=x[0]; x[1].forEach(function(o){ alias[nk(o)]=x[0]; }); });
-    else { feats.forEach(function(f){ alias[f.key]=f.n; if(f.th) alias[nk(f.th)]=f.n; }); Object.keys(TH_ALIAS).forEach(function(k){ alias[k]=TH_ALIAS[k]; }); }
+    else { feats.forEach(function(f){ alias[f.key]=f.n; if(f.th) alias[nk(f.th)]=f.n; }); var byK={}; feats.forEach(function(f){ byK[f.key]=f.n; }); Object.keys(TH_ALIAS).forEach(function(k){ var v=byK[nk(TH_ALIAS[k])]; if(v) alias[k]=v; }); }
     GEO[c]={ feats:feats, by:feats.reduce(function(o,f){ o[f.n]=f; return o; }, {}), bb:gb, P:P, alias:alias };
     return GEO[c];
   });
@@ -905,8 +905,8 @@ function ready(){ try{ var a=$i("app"); return !!(a && a.classList.contains("on"
   setTimeout(wait, 700);
 })();
 /* điện thoại: Thêm ▸ Working Map */
-(function hookMore(){
-  var mo=window.V30 && V30.more; if(!mo){ return setTimeout(hookMore, 1500); }
+(function hookMore(n){
+  var mo=window.V30 && V30.more; if(!mo){ if((n||0)<40) setTimeout(function(){ hookMore((n||0)+1); }, 1500); return; }
   V30.more=function(){ var r=mo.apply(this, arguments);
     try{ var box0=document.getElementById("v30-more"); if(box0 && !box0.querySelector("[data-wm]")){ var g=box0.querySelector(".gt"); var b=document.createElement("button"); b.setAttribute("data-wm","1"); b.className="wm-more-b";
       b.innerHTML=svg("map")+"<span>Working Map</span>"; b.onclick=function(){ try{ V30.close && V30.close(); }catch(_){} var ov=document.getElementById("v30-more"); if(ov) ov.classList.remove("on"); open(); };
@@ -914,7 +914,8 @@ function ready(){ try{ var a=$i("app"); return !!(a && a.classList.contains("on"
     return r; };
 })();
 /* đang chạy hướng dẫn của CRM ⇒ đóng bản đồ để không che phần tử */
-setInterval(function(){ if(ST.open && window.__tourOn && !window.__wmTour) close(false); }, 800);
+setInterval(function(){ if(!window.__tourOn) window.__wmTour=false; else if(ST.open && !window.__wmTour) close(false); }, 800);
+if(window.TOUR && TOUR.run){ var _run=TOUR.run; TOUR.run=function(id){ window.__wmTour=(id==="wmap"); if(id!=="wmap" && ST.open) close(false); return _run.apply(this, arguments); }; }
 
 window.WM={ open:open, close:close, state:function(){ return ST; }, data:function(){ return DB; }, scope:function(){ return scope(); }, model:function(){ return CUR; },
   pick:pick, search:search, provOf:provOf, ver:VER, cfg:CFG };

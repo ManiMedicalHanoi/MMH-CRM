@@ -7,6 +7,17 @@
 function E(u){ u.en={ title:u.title, items:u.items.map(function(i){ return { title:i.title, text:i.text }; }) }; return u; }
 window.MMH_UPDATES = [
   E({
+    id:"2026-11-11-v36.4", version:"v36.4", date:"2026-11-11",
+    title:"Working Map: work calendar + field-visit map when you sign in",
+    summary:"After you sign in the CRM now opens the <b>Working Map</b>: a small work calendar on top and the map of your field activities below (Vietnam or Thailand). Click <b>CRM</b> (top left) to go back to the usual screens — nothing else has changed.",
+    items:[
+      { type:"new", icon:"+", title:"Calendar + map in one screen", text:"Top: the week (or month) with an icon per person and per task type — visit, call, presentation, business trip. Click a day ⇒ its tasks, and the map shows only that day. Below: every account you worked with this month (filled dot = done, hollow dot = planned). Open it again with the <b>Working Map</b> button in the top bar (phone: More ▸ Working Map).", img:"updates/v36.4/map_overview.jpg" },
+      { type:"new", icon:"+", title:"Click an account ⇒ from plan to result", text:"The panel on the right lists every visit of the last 5 months: plan, result, customer feedback, next step and the latest photo. Buttons: <b>Add a plan</b> (opens the usual task form, account filled in), <b>Propose a trip</b> to the province, <b>Open the CRM profile</b>. Thailand Dental: <b>New follow-up</b> for tenders and purchases (saved to sheet FOLLOW UP).", img:"updates/v36.4/map_account.jpg" },
+      { type:"new", icon:"+", title:"Coverage and quick search", text:"<b>Coverage</b> colours each province by the share of its CRM accounts visited this month. The search box finds CRM accounts, provinces and also hospitals / health centres that are not in the CRM yet (Vietnam: public facility list; Thailand: OpenStreetMap) ⇒ <b>Add to the CRM and plan a visit</b>.", img:"updates/v36.4/map_coverage.jpg" },
+      { type:"imp", icon:"↑", title:"Who sees what", text:"Sales see only their own work. Team leaders see their whole team and can pick one person (Viet: Dental, Giang: Surgical Vietnam, Dao: Surgical Thailand). Tuyen sees every Vietnam team; Nguyen Ha can switch <b>Vietnam / Thailand</b> (Vietnam by default). Thailand Dental: each person sees their own work, Nguyen Ha sees the team.", img:"updates/v36.4/map_day.jpg" }
+    ]
+  }),
+  E({
     id:"2026-11-11-v36.3", version:"v36.3", date:"2026-11-11",
     title:"Thailand: Task Result in one box with the 4 headings",
     summary:"For the Thailand teams the Task Result is now one box instead of 4. The 4 headings stay in the box and cannot be deleted.",

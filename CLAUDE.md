@@ -294,3 +294,13 @@ Kiến trúc & quy ước giống MMH Report Hub (repo `ManiMedicalHanoi/MMH-Rep
 - **v36.3 (11/11/2026, khối `v363-css` + `v363-js`, đề xuất của nhóm Thái)**: nhóm `thai` / `thaid` (`V363.teams`) — Task Result = **1 ô** `#<id>-one` luôn có 4 tiêu đề RESULT_GUIDE, viết sau mỗi tiêu đề.
   `beforeinput` chặn xoá / gõ đè tiêu đề (cả dấu xuống dòng trước tiêu đề; chọn vùng có tiêu đề ⇒ chỉ xoá phần chữ), lưới an toàn `split` / `join` tự đặt lại tiêu đề.
   4 ô ẩn của v34.3 (`#<id>-p0..3`) vẫn là nơi ghép / kiểm đủ 4 mục khi Completed ⇒ backend, báo cáo không đổi; thiếu mục ⇒ ô chung đỏ + con trỏ tới tiêu đề trống. Nhóm VN giữ 4 ô.
+- **v36.4 (11/11/2026) — Working Map (`wmap/wmap.js` + `wmap/wmap.css`, người dùng yêu cầu: "kết hợp Tender Map + CRM, gọi là Working Map")**: màn hình mở đầu sau khi đăng nhập
+  (1 lần / lượt mở app, `sessionStorage.mmh_wm_seen`) = LỊCH làm việc (trên, Tuần / Tháng, biểu tượng người + loại việc: đi địa bàn · gọi · tin nhắn · thuyết trình / sự kiện · công tác) + BẢN ĐỒ (dưới, SVG tự vẽ
+  như Tender Map — KHÔNG dùng Leaflet / thư viện ngoài, chạy cả file://) + bảng chi tiết (phải; điện thoại: trượt lên). Nút **CRM** (`#wm-back`) về giao diện cũ, nút `#wmBtn` trên thanh trên cùng / Thêm ▸ Working Map mở lại.
+  Phạm vi xem `WM.cfg.SCOPE`: Nguyen Ha = Việt Nam (mặc định) | Thái Lan, mọi nhóm · Tuyen / Hoa = mọi nhóm VN · Giang = Surgical VN · Viet = Dental VN · Dao = Surgical Thái · người khác (kể cả Dental Thái) = chỉ việc của mình;
+  quản lý mặc định xem cả phòng ban, chọn từng người (`#wm-flt`). Dữ liệu chỉ ĐỌC backend từng nhóm qua JSONP (`visitFeed` 5 tháng trước → tháng sau, `customerIndex`, `tfTrips`; surgical + `fuVisits` (vị trí ghim / GPS) + `fuList`;
+  thaid + `acctList` + `fuList` / `fuSave` — backend `crm-thai-dental/TH_FollowUp.gs`). Vị trí khách: ghim / GPS ảnh (trung vị) ⇒ khớp danh mục cơ sở y tế theo tên + tỉnh ⇒ tâm tỉnh (gần đúng, chấm mờ).
+  Địa lý: `geo/wm-vn-geo.js` (34 tỉnh) + `geo/wm-vn-csyt.js` (1.269 cơ sở, từ Tender Map — dựng lại: `node tools/wmap/vn_geo.js ../Tender-Result/map`), `geo/wm-th-geo.js`, `geo/wm-th-csyt.js`
+  (3.181 bệnh viện / trạm y tế / nha khoa OpenStreetMap — workflow **Working Map · danh mục cơ sở y tế Thái Lan** tự chạy khi đổi `tools/wmap/th_csyt.py`, máy Claude không tải được). Thao tác dùng form cũ:
+  `formWeekly` (Thêm kế hoạch, điền account + ngày), `openNewAccount` (cơ sở chưa có trong CRM), `tripProposeOpen` + `MS.dest` (Đề xuất công tác tới tỉnh), `openAcc`. Khách nhóm khác ⇒ nút mở nhóm đó (`switchTeam`, mở lại bản đồ).
+  Đang chạy tour khác ⇒ bản đồ tự đóng (`__wmTour` cho bài `wmap`). Kiểm thử: `NODE_PATH=$(npm root -g) node tools/wmap/wm_test.js --pic "Nguyen Ha"|Viet|Yong|Dao [--mobile] [--th] [--shots <thư mục>]`.

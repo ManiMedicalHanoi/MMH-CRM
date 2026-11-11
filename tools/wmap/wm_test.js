@@ -18,14 +18,14 @@ const ACT = ["Visiting", "Visiting", "Visiting", "Telephone", "Presentation", "M
 function team(url){ const m = { yzmh: "dental", xxck: "surgical", xsoT: "eyeless", wglP: "thai", wEvi: "thaid" }; for (const k in m) if (url.includes(k)) return m[k]; return "dental"; }
 function build(k){
   const D = DATA[k], r = rnd(k.length * 77 + 3), accs = [], rows = [];
-  D.names.forEach((nm, i) => D.provs.forEach((pv, j) => { if ((i + j) % 2) return; accs.push({ code: k.slice(0, 2).toUpperCase() + (100 + accs.length), name: nm + (j ? " " + (j + 1) : ""), type: k === "thaid" || k === "dental" ? "Clinic" : "Public hospital", province: pv, area: "", pic: D.pics[(i + j) % D.pics.length] }); }));
+  D.names.forEach((nm, i) => D.provs.forEach((pv, j) => { if ((i + j) % 2) return; accs.push({ code: k.slice(0, 2).toUpperCase() + (100 + accs.length), name: nm + (j ? " " + (j + 1) : ""), type: k === "thaid" || k === "dental" ? "Clinic" : "Public hospital", province: pv, area: "", pic: D.pics[accs.length % D.pics.length] }); }));
   const base = new Date(); base.setDate(1); base.setMonth(base.getMonth() - 2);
   for (let n = 0; n < accs.length * 3; n++){
     const a = accs[Math.floor(r() * accs.length)], d = new Date(base); d.setDate(d.getDate() + Math.floor(r() * 95));
     const iso = d.toISOString().slice(0, 10), past = d < new Date(), ta = ACT[Math.floor(r() * ACT.length)];
     rows.push({ _row: 10 + n, start: iso, finish: iso, pic: a.pic, account: a.name + "/" + a.type + "/" + a.province + "/", accName: a.name, accType: a.type, accProv: a.province,
-      typeTask: "Sales", typeAction: ta, status: past ? "Completed" : "To do", plan: "Giới thiệu sản phẩm mới", result: past ? "Người gặp: BS. A\n1. Actions Taken: demo sản phẩm\n2. Current Situation: đang dùng hãng khác" : "",
-      feedback: past ? "Quan tâm" : "", nextAction: past ? "Gửi báo giá" : "", photo: "", gps: (k === "surgical" || k === "dental") && past && r() > 0.5 ? "" : "" });
+      typeTask: "Sales", typeAction: ta, status: past ? "Completed" : "To do", plan: k[0] === "t" ? "Introduce new products" : "Giới thiệu sản phẩm mới", result: !past ? "" : k[0] === "t" ? "Person met: Dr. A\n1. Actions Taken: product demo\n2. Current Situation: uses another brand" : "Người gặp: BS. A\n1. Actions Taken: demo sản phẩm\n2. Current Situation: đang dùng hãng khác",
+      feedback: past ? (k[0] === "t" ? "Interested" : "Quan tâm") : "", nextAction: past ? (k[0] === "t" ? "Send a quotation" : "Gửi báo giá") : "", photo: "", gps: (k === "surgical" || k === "dental") && past && r() > 0.5 ? "" : "" });
   }
   return { accs, rows };
 }
@@ -69,7 +69,7 @@ const CACHE = {};
   ok(side.indexOf(k0) >= 0, "Chi tiết khách: " + k0);
   if (SHOTS) await p.screenshot({ path: path.join(SHOTS, "wm_" + PIC.replace(/\s/g, "") + (MOB ? "_m" : "") + "_2.png") });
   /* tìm kiếm danh mục */
-  await p.fill("#wm-q", TH ? "siriraj" : "mat trung uong"); await p.waitForTimeout(400);
+  await p.fill("#wm-q", TH ? "bangkok hosp" : "mat trung uong"); await p.waitForTimeout(400);
   const qr = await p.evaluate(() => document.getElementById("wm-qr").innerText);
   console.log("search:", qr.split("\n").slice(0, 6).join(" | "));
   ok(qr.length > 0, "Tìm kiếm có kết quả");
@@ -85,6 +85,19 @@ const CACHE = {};
   await p.evaluate(() => { const b = document.querySelector('#wm-vw [data-v="cov"]'); if (b) b.click(); }); await p.waitForTimeout(300);
   ok(await p.evaluate(() => document.querySelectorAll("#wm-pv path[class*=c]").length > 0), "Chế độ Độ phủ tô màu tỉnh");
   if (SHOTS) await p.screenshot({ path: path.join(SHOTS, "wm_" + PIC.replace(/\s/g, "") + (MOB ? "_m" : "") + "_4.png") });
+  if (PIC === "Yong"){
+    await p.evaluate(() => { const a = WM.model().list.filter(x => x.team === "thaid")[0]; WM.pick("acc", a.key); }); await p.waitForTimeout(300);
+    await p.evaluate(() => document.querySelector('#wm-sc [data-act="fu"]').click()); await p.waitForTimeout(300);
+    await p.evaluate(() => { document.getElementById("wmfu_pkg").value = "Test tender"; document.getElementById("wmfu_s").value = "12"; document.getElementById("wmfu_ok").click(); });
+    await p.waitForTimeout(800);
+    ok(await p.evaluate(() => !document.querySelector("#ov.on") && document.getElementById("wm-sc").innerText.indexOf("Test tender") >= 0), "Follow-up Thailand Dental: lưu và hiện ngay");
+  }
+  if (PIC === "Nguyen Ha"){
+    await p.evaluate(() => { ["wm-q"].forEach(id => { const q = document.getElementById(id); q.value = ""; q.dispatchEvent(new Event("input")); }); document.querySelector('#wm-flt [data-c="th"]').click(); });
+    await p.waitForTimeout(2500);
+    ok(await p.evaluate(() => document.querySelectorAll("#wm-pv path").length === 77 && WM.state().country === "th"), "Giám đốc: chuyển sang Thái Lan (77 tỉnh)");
+    if (SHOTS) await p.screenshot({ path: path.join(SHOTS, "wm_NguyenHa_th.png") });
+  }
   /* quay về CRM */
   await p.click("#wm-back"); await p.waitForTimeout(300);
   ok(await p.evaluate(() => !WM.state().open && document.getElementById("main").offsetHeight > 0), "Nút CRM quay về giao diện cũ");

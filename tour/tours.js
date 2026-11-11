@@ -15,9 +15,20 @@ function th(){ try{ return /^thaid?$/.test(curTeamKey()); }catch(_){ return fals
 function more(sel){ return function(){ return TOUR.find(sel) || TOUR.find("nav.mob button:last-of-type"); }; }
 function calTools(){ try{ if(window.CAL && !CAL.mt && TOUR.find(".cal-dots3")){ CAL.mt=true; renderCal(); } }catch(_){} }
 function V(vi,en){ return { vi:vi, en:en }; }
+function wmo(){ window.__wmTour=true; try{ if(window.WM && !WM.state().open) WM.open(); }catch(_){} }   /* v36.4 — Working Map */
 function thd(){ try{ return curTeamKey()==="thaid"; }catch(_){ return false; } }   /* Thailand Dental (v35.9: account tracking, event ROI) */
 function roi(){ try{ return thd() && (EVS.rows||[]).some(function(x){ return x.roi && x.row; }); }catch(_){ return false; } }
 TOUR.add([
+ { id:"wmap", v:1, d:"2026-11-11", g:V("Bắt đầu","Getting started"), ic:"map", t:V("Working Map — lịch + bản đồ","Working Map — calendar + map"), x:V("Màn hình mở đầu: lịch làm việc, bản đồ đi địa bàn, độ phủ, thêm kế hoạch nhanh.","Start screen: work calendar, field-visit map, coverage, quick plans."),
+   steps:[
+    { el:"#wmBtn", do:function(){ window.__wmTour=true; }, t:V("Mở Working Map","Open the Working Map"), x:V("Working Map tự mở sau khi đăng nhập. Bấm nút này để mở lại bất cứ lúc nào (điện thoại: Thêm ▸ Working Map).","The Working Map opens after you sign in. Click this button to open it again at any time (phone: More ▸ Working Map).") },
+    { el:"#wm-flt", do:wmo, wait:900, t:V("Xem của ai","Whose work"), x:V("Sales thấy việc của chính mình. Quản lý xem cả nhóm hoặc bấm từng người; Giám đốc chọn được Việt Nam / Thái Lan.","Sales see their own work. Managers see the whole team or click one person; the Director can switch Vietnam / Thailand.") },
+    { el:"#wm-cal", do:wmo, t:V("Lịch làm việc","Work calendar"), x:V("Mỗi ngày: biểu tượng người + loại việc (đi địa bàn, gọi điện, thuyết trình, công tác). Bấm 1 ngày ⇒ danh sách việc của ngày đó, bản đồ chỉ hiện ngày đó.","Each day shows people and task types (visit, call, presentation, trip). Click a day to list its tasks; the map then shows only that day.") },
+    { el:"#wm-mapc", do:wmo, t:V("Bản đồ địa bàn","Territory map"), x:V("Chấm đặc = đã làm, chấm rỗng = kế hoạch. <b>Độ phủ</b> tô tỉnh theo % khách CRM đã gặp trong tháng. Bấm khách / tỉnh để xem chi tiết.","Filled dot = done, hollow dot = planned. <b>Coverage</b> colours provinces by the share of CRM accounts visited this month. Click an account or a province for details.") },
+    { el:"#wm-q", do:wmo, t:V("Tìm nhanh","Quick search"), x:V("Tìm khách CRM, tỉnh và cả bệnh viện / trung tâm y tế chưa có trong CRM ⇒ bấm để thêm vào CRM và lên kế hoạch.","Search CRM accounts, provinces and hospitals not yet in the CRM, then add them and plan a visit.") },
+    { el:"#wm-sc", do:wmo, t:V("Chi tiết và thao tác","Details and actions"), x:V("Từ kế hoạch đến kết quả của từng lượt; nút <b>Thêm kế hoạch</b>, <b>Đề xuất công tác</b> tới tỉnh, theo dõi thầu / mua sắm.","From plan to result of every visit; buttons <b>Add a plan</b>, <b>Propose a trip</b> to the province, tender / purchase follow-up.") },
+    { el:"#wm-back", do:wmo, t:V("Về CRM","Back to the CRM"), x:V("Quay lại giao diện nhập liệu như trước — mọi chức năng cũ không đổi.","Back to the usual CRM screens — every feature works as before.") }
+   ] },
  { id:"start", v:6, d:"2026-11-02", g:V("Bắt đầu","Getting started"), ic:"start", t:V("Làm quen MMH CRM","Tour of MMH CRM"), x:V("Các khu vực chính và chỗ tìm mọi chức năng.","The main areas and where to find every feature."),
    steps:[
     { el:more("#side"), do:wk("cal"), zoom:false, t:V("Menu chức năng","Feature menu"), x:V("<i>(Điện thoại: nút <b>Thêm</b> ở thanh dưới.)</i> Menu chia 5 nhóm: <b>Tổng quan</b> · <b>Khách hàng</b> (Địa bàn, Khách hàng) · <b>Cập nhật công việc</b> (Đi địa bàn, Công việc khác, Thuyết trình, Kế hoạch tháng) · <b>Kết quả bán hàng</b> · <b>Công cụ & Báo cáo</b>.","<i>(Phone: the <b>More</b> button in the bottom bar.)</i> The menu has 5 groups: <b>Overview</b> · <b>Customers</b> · <b>Activities & Plans</b> · <b>Sales Result</b> · <b>Tools & Reports</b>.") },
