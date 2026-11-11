@@ -7,6 +7,16 @@
 function E(u){ u.en={ title:u.title, items:u.items.map(function(i){ return { title:i.title, text:i.text }; }) }; return u; }
 window.MMH_UPDATES = [
   E({
+    id:"2026-11-11-v36.1", version:"v36.1", date:"2026-11-11",
+    title:"Thailand Dental KPIs updated to the KPI file of 4 Nov 2026",
+    summary:"The KPIs of Yong, Man and Sui now follow the KPI file filled by Owen san after the meeting of 4 Nov 2026: new KPIs, new monthly targets and the counting rules agreed in the meeting. <b>KPIs & Targets</b> shows the new names and targets.",
+    items:[
+      { type:"new", icon:"+", title:"C2-02 — visits to distributor key accounts (Yong)", text:"<b>Customers ▸ Account tracking</b> ▸ click an account ▸ tick <b>Distributor key account</b> ▸ Save. Yong's visits (Visiting, Co-visiting with distributor, Event/Co-visiting with distributor) to the ticked accounts count for C2-02 (target 6 a month, 9 from January). The filter <b>Distributor key accounts</b> lists them." },
+      { type:"new", icon:"+", title:"New Type action: Event/Co-visiting with distributor", text:"When you log a field visit with a customer approached at an event together with the distributor rep, choose <b>Event/Co-visiting with distributor</b>. It counts for C4-01 like <b>Co-visiting with distributor</b>. Please re-check your September – October visits before 20 Nov." },
+      { type:"imp", icon:"✓", title:"Rules agreed on 4 Nov 2026", text:"C4-03 counts the days with <b>at least 5</b> co-visits. C11-02 counts the sessions logged in <b>PRODUCT PRESENTATION</b> (with actual participants) plus MMH-led events; they also count in C14-00. C16-00 is now <b>participants in T&E events</b> (from the Dental Event Report). C11-03 target 60%, C17-07 targets set by Owen san." }
+    ]
+  }),
+  E({
     id:"2026-11-11-v36.0", version:"v36.0", date:"2026-11-11",
     title:"Save button always visible, type to search in drop-downs, shared visits on a teammate's account",
     summary:"Answers to questions from the Thailand Dental team: the <b>Update to Sheet</b> button no longer disappears when a task is opened from the account's 360° profile, long drop-down lists can be <b>searched by typing</b>, and when you visit an account together, you can pick your <b>teammate's account</b> instead of creating a new one.",
