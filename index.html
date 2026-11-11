@@ -4017,7 +4017,7 @@ function buildNav(){
     if(t.grp!==lastGrp){ h+='<div class="grp">'+t.grp+'</div>'; lastGrp=t.grp; }
     h+='<button class="nvi" data-t="'+t.id+'" onclick="go(\''+t.id+'\')"><span class="ic">'+t.ic+'</span><span class="lb">'+t.lb+'</span></button>';
   });
-  h+='<div style="flex:1"></div><div style="padding:10px;font-size:10.5px;color:var(--mute);line-height:1.5">MMH CRM v35.9<br>'+
+  h+='<div style="flex:1"></div><div style="padding:10px;font-size:10.5px;color:var(--mute);line-height:1.5">MMH CRM v36.0<br>'+
      (isMgmt()?'<a href="'+DRIVE_FOLDER+'" target="_blank">📁 Folder ảnh Drive</a>':"")+'</div>';
   $("side").innerHTML=h;
   /* ⭐ v4.5 — thanh dưới trượt ngang, đủ mọi mục, bỏ nút "Thêm" */
@@ -20795,7 +20795,7 @@ window.QS2={ open:qsOpen };
 </script>
 
 <!-- ⭐ v30.3 — THÔNG BÁO CẬP NHẬT (chép từ Report Hub): dữ liệu updates/notes.js · tự hiện 7 ngày · nút "Có gì mới" trên thanh trên cùng -->
-<script src="updates/notes.js?v=35.9"></script>
+<script src="updates/notes.js?v=36.0"></script>
 <style id="upd-css">
 #upd,#upd-zoom{--t-pri:var(--blue);--t-pri2:var(--blue-d);--t-ink:var(--navy);--t-soft:var(--pale);--t-line:var(--lb2);--t-bg:#F6F8FA;--mmh-blue:var(--blue);--mmh-navy:var(--navy)}
 
@@ -30604,6 +30604,188 @@ window.v359Budget=function(){
     loadEvents(true).then(function(){ if($("v359-roi")) evForm(e.row); });
   }).catch(function(er){ busy(false); if(b) b.disabled=false; toast("Not created: "+(er.stale?er.message:evErrText(er)),"err",8000); });
 };
+})();
+</script>
+<style id="v360-css">
+/* v36.0 — ô chọn dài: gõ để tìm (Thailand Dental hỏi 11/11/2026) */
+.ssx{position:fixed;z-index:100000;background:#fff;border:1px solid var(--fld-line,#C3CDD8);border-radius:10px;box-shadow:0 10px 28px rgba(16,40,60,.18);display:flex;flex-direction:column;overflow:hidden;font-family:inherit}
+.ssx input{margin:8px 8px 6px;padding:8px 10px;border:1px solid var(--fld-line,#C3CDD8);border-radius:8px;font:inherit;font-size:14px;outline:none;background:#fff;color:var(--t-ink,#003047)}
+.ssx input:focus{border-color:var(--t-pri,#3A5CAA);box-shadow:0 0 0 3px var(--t-soft,#F0F7FF)}
+.ssx .l{overflow:auto;padding:0 6px 6px;overscroll-behavior:contain}
+.ssx .o{padding:8px 10px;border-radius:7px;cursor:pointer;font-size:14px;line-height:1.35;color:var(--t-ink,#003047)}
+.ssx .o.on{background:var(--t-soft,#F0F7FF)}
+.ssx .o.cur{font-weight:700}
+.ssx .o mark{background:#FFF2B3;color:inherit;padding:0;border-radius:2px}
+.ssx .e{padding:10px;color:var(--mute,#6B7A89);font-size:13px}
+.cbo-i span.v360-o{color:var(--t-pri,#3A5CAA);font-weight:700}
+</style>
+<script id="v360-js">
+/* ⭐ v36.0 (11/11/2026) — câu hỏi của Yong (Thailand Dental):
+   ① Mở task từ hồ sơ 360° (Customer Task / timeline của account) ⇒ khung giữ lớp acc360 ⇒ chân khung (nút "Update to Sheet") bị ẩn
+      (#drw.acc360 .drw-f{display:none}) và bản tải ngầm của hồ sơ account có thể vẽ đè lên task đang gõ.
+      Nay openTask đặt S.drw = {kind:"task"} trước khi mở ⇒ bỏ lớp acc360, luôn có nút lưu; đóng task mở lại đúng hồ sơ account vừa xem.
+   ② Ô chọn (select) từ 6 lựa chọn: bấm chuột hoặc gõ chữ khi đang ở ô ⇒ bảng tìm (không dấu, khớp đầu từ: gõ "c" ⇒ Sale-Clinics, Co-visiting…).
+      Chỉ máy tính (chuột); điện thoại giữ danh sách của máy. Chọn ⇒ đặt value + phát input/change như chọn bình thường.
+   ③ Nhóm Thái (sales, không phải quản lý): ô chọn account liệt kê account của mình TRƯỚC, sau đó account của đồng nghiệp
+      ("PIC Yong · shared visit") ⇒ đi chung thì mỗi người ghi task của mình trên CÙNG account, không tạo account trùng. */
+(function(){
+  /* ① ---------------------------------------------------------------- */
+  var _ot=window.openTask;
+  if(typeof _ot==="function"){
+    window.openTask=openTask=function(row){
+      var back=null;
+      if(S.drw && S.drw.kind==="acc" && S.acc && S.acc.customer) back={ code:S.acc.customer.code||"", name:S.acc.customer.name||"" };
+      else if(S.drw && S.drw.kind==="task" && S.drw.back) back=S.drw.back;
+      S.drw={ kind:"task", back:back };
+      var d=$("drw"); if(d) d.classList.remove("acc360");
+      return _ot.apply(this,arguments);
+    };
+  }
+  var _cd=window.closeDrw;
+  window.closeDrw=closeDrw=function(){
+    var b=(S.drw && S.drw.kind==="task" && S.drw.back)||null;
+    var r=_cd.apply(this,arguments);
+    if(b && (b.code||b.name)) setTimeout(function(){
+      if($("drw") && $("drw").classList.contains("on")) return;     /* đã mở khung khác */
+      try{ openAcc(b.code,b.name); }catch(e){}
+    },60);
+    return r;
+  };
+
+  /* ② ---------------------------------------------------------------- */
+  var MIN=6, P=null, lastTouch=0;
+  function fine(){ try{ return matchMedia("(pointer:fine)").matches; }catch(e){ return true; } }
+  function ok(s){
+    return s && s.tagName==="SELECT" && !s.multiple && !s.disabled && (s.size||0)<=1 &&
+      s.options.length>=MIN && !s.hasAttribute("data-nosearch") && !(s.closest && s.closest(".ssx-off"));
+  }
+  function norm(x){ return noAcc(String(x==null?"":x)).toLowerCase(); }
+  function rank(o,q){
+    if(!q) return 0;
+    var toks=q.split(/\s+/).filter(Boolean);
+    if(!toks.every(function(t){ return o.n.indexOf(t)>=0; })) return -1;
+    if(o.n.indexOf(q)===0) return 3;
+    var words=o.n.split(/[^a-z0-9]+/).filter(Boolean);
+    if(words.some(function(w){ return w.indexOf(toks[0])===0; })) return 2;
+    return 1;
+  }
+  function mark(t,q){
+    var e=esc(t); if(!q) return e;
+    var n=norm(t); if(n.length!==t.length) return e;
+    var i=n.indexOf(q.split(/\s+/)[0]); if(i<0) return e;
+    var L=q.split(/\s+/)[0].length;
+    return esc(t.slice(0,i))+"<mark>"+esc(t.slice(i,i+L))+"</mark>"+esc(t.slice(i+L));
+  }
+  function place(){
+    if(!P) return;
+    var r=P.sel.getBoundingClientRect(), vw=innerWidth, vh=innerHeight;
+    var w=Math.min(Math.max(r.width,260),vw-16), left=Math.min(Math.max(8,r.left),vw-w-8);
+    var below=vh-r.bottom-10, above=r.top-10, up=below<240 && above>below;
+    var h=Math.max(160,Math.min(380,up?above:below));
+    P.el.style.left=left+"px"; P.el.style.width=w+"px"; P.el.style.maxHeight=h+"px";
+    if(up){ P.el.style.top=""; P.el.style.bottom=(vh-r.top+4)+"px"; }
+    else  { P.el.style.bottom=""; P.el.style.top=(r.bottom+4)+"px"; }
+  }
+  function draw(){
+    var q=norm(P.inp.value).trim();
+    var L=P.opts.map(function(o){ return { o:o, k:rank(o,q) }; }).filter(function(x){ return x.k>=0; });
+    if(q) L.sort(function(a,b){ return (b.k-a.k)||(a.o.i-b.o.i); });
+    P.cur=L.map(function(x){ return x.o; });
+    if(P.hi>=P.cur.length) P.hi=P.cur.length-1; if(P.hi<0) P.hi=0;
+    P.L.innerHTML=P.cur.length ? P.cur.map(function(o,i){
+        return '<div class="o'+(i===P.hi?" on":"")+(o.i===P.sel.selectedIndex?" cur":"")+'" data-k="'+i+'">'+(o.t?mark(o.t,q):"—")+'</div>';
+      }).join("")
+      : '<div class="e">'+esc(TX("Không có lựa chọn nào khớp","No matching option"))+'</div>';
+    var on=P.L.querySelector(".o.on"); if(on && on.scrollIntoView) on.scrollIntoView({block:"nearest"});
+  }
+  function pick(i){
+    var o=P&&P.cur[i]; if(!o) return;
+    var s=P.sel; close(true);
+    if(s.selectedIndex!==o.i){
+      s.selectedIndex=o.i;
+      try{ s.dispatchEvent(new Event("input",{bubbles:true})); }catch(e){}
+      try{ s.dispatchEvent(new Event("change",{bubbles:true})); }catch(e){}
+    }
+  }
+  function close(focusBack){
+    if(!P) return; var s=P.sel;
+    try{ P.el.remove(); }catch(e){} P=null;
+    if(focusBack && s) try{ s.focus({preventScroll:true}); }catch(e){}
+  }
+  function open(sel,first){
+    close();
+    var el=document.createElement("div"); el.className="ssx"; el.setAttribute("role","listbox");
+    el.innerHTML='<input type="text" autocomplete="off" spellcheck="false" placeholder="'+esc(TX("Gõ để tìm…","Type to search…"))+'"><div class="l"></div>';
+    document.body.appendChild(el);
+    var opts=[]; Array.prototype.forEach.call(sel.options,function(o,i){
+      if(o.disabled || o.hidden) return; opts.push({ i:i, t:o.text, n:norm(o.text) }); });
+    P={ sel:sel, el:el, inp:el.querySelector("input"), L:el.querySelector(".l"), opts:opts, cur:[], hi:Math.max(0,sel.selectedIndex) };
+    P.hi=Math.max(0,opts.findIndex(function(o){ return o.i===sel.selectedIndex; }));
+    place();
+    P.inp.value=first||""; if(first) P.hi=0;
+    draw();
+    P.inp.focus();
+    P.inp.addEventListener("input",function(){ P.hi=0; draw(); });
+    P.inp.addEventListener("keydown",function(e){
+      if(!P) return;
+      if(e.key==="ArrowDown"){ e.preventDefault(); P.hi=Math.min(P.cur.length-1,P.hi+1); draw(); }
+      else if(e.key==="ArrowUp"){ e.preventDefault(); P.hi=Math.max(0,P.hi-1); draw(); }
+      else if(e.key==="Enter"){ e.preventDefault(); pick(P.hi); }
+      else if(e.key==="Escape"){ e.preventDefault(); e.stopPropagation(); close(true); }
+      else if(e.key==="Tab"){ close(false); }
+    });
+    P.L.addEventListener("mousedown",function(e){
+      e.preventDefault();
+      var d=e.target.closest("[data-k]"); if(d) pick(+d.getAttribute("data-k"));
+    });
+  }
+  window.SSX={ open:open, close:close, isOpen:function(){ return !!P; } };
+
+  document.addEventListener("touchstart",function(){ lastTouch=Date.now(); },{capture:true,passive:true});
+  document.addEventListener("mousedown",function(e){
+    if(P && !P.el.contains(e.target)){
+      var same=e.target===P.sel; close(false);
+      if(same){ e.preventDefault(); return; }
+    }
+    var s=e.target;
+    if(e.button!==0 || !ok(s) || !fine() || Date.now()-lastTouch<900) return;
+    e.preventDefault();
+    try{ s.focus({preventScroll:true}); }catch(_){}
+    open(s,"");
+  },true);
+  document.addEventListener("keydown",function(e){
+    if(P) return;
+    var s=e.target;
+    if(!ok(s) || !fine() || e.ctrlKey || e.metaKey) return;
+    var ch=e.key && e.key.length===1 && e.key!==" " && !e.altKey ? e.key : "";
+    if(ch || e.key==="F4" || (e.altKey && e.key==="ArrowDown")){ e.preventDefault(); open(s,ch); }
+  },true);
+  /* Escape trong bảng tìm không đóng cả khung task */
+  window.addEventListener("keydown",function(e){ if(P && e.key==="Escape"){ e.stopPropagation(); e.preventDefault(); close(true); } },true);
+  window.addEventListener("resize",function(){ close(false); });
+  document.addEventListener("scroll",function(e){ if(P && !P.el.contains(e.target)) close(false); },true);
+
+  /* ③ ---------------------------------------------------------------- */
+  var _ac=window.accountCombo;
+  if(typeof _ac==="function"){
+    window.accountCombo=accountCombo=function(inputId,hiddenId,onPick){
+      var th=false; try{ th=isTH() && !isMgrView(); }catch(e){}
+      if(!th) return _ac.apply(this,arguments);
+      combo(inputId,function(){
+        var me=(S.user&&S.user.pic)||"", all=S.custIndex||[];
+        var mine=all.filter(function(c){ return c && c.pic && picMatch(c.pic,me); });
+        var other=all.filter(function(c){ return c && !(c.pic && picMatch(c.pic,me)); });
+        function it(c,shared){
+          return { v:c.name, label:c.name, raw:c,
+            meta:[c.code,c.type,c.province,c.area,"PIC "+(c.pic||"—")+(shared?" · "+TX("đi cùng","shared visit"):"")].filter(Boolean).join(" · ") };
+        }
+        return mine.map(function(c){ return it(c,false); }).concat(other.map(function(c){ return it(c,true); }));
+      },function(c){
+        if($(hiddenId)) $(hiddenId).value=mkAcc(c);
+        if(onPick) onPick(c);
+      },TX("Bấm để xem danh sách · gõ để lọc (có cả account của đồng nghiệp)","Click to list · type to filter (includes teammates' accounts)"));
+    };
+  }
 })();
 </script>
 </body>
