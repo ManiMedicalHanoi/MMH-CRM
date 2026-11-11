@@ -291,3 +291,6 @@ Kiến trúc & quy ước giống MMH Report Hub (repo `ManiMedicalHanoi/MMH-Rep
   tên rút gọn KPI mới trong `RULES_ENK` ("Key account visits"). Tour `acct` v2.
 - **v36.2 (11/11/2026, khối `v362-js`)**: nhóm `thaid` — lượt Type action "Co-visiting with distributor" / "Event/Co-visiting with distributor" (Completed) được đếm là lượt viếng thăm ở mọi bộ đếm của app
   (`kpiVisitOk` bọc: Dashboard, so sánh PIC, Họp tuần, thẻ KPI) — Yong báo co-visit không vào "visits". Nhóm khác giữ rule chỉ "Visiting". `window.thdIsCoVisit(w)`.
+- **v36.3 (11/11/2026, khối `v363-css` + `v363-js`, đề xuất của nhóm Thái)**: nhóm `thai` / `thaid` (`V363.teams`) — Task Result = **1 ô** `#<id>-one` luôn có 4 tiêu đề RESULT_GUIDE, viết sau mỗi tiêu đề.
+  `beforeinput` chặn xoá / gõ đè tiêu đề (cả dấu xuống dòng trước tiêu đề; chọn vùng có tiêu đề ⇒ chỉ xoá phần chữ), lưới an toàn `split` / `join` tự đặt lại tiêu đề.
+  4 ô ẩn của v34.3 (`#<id>-p0..3`) vẫn là nơi ghép / kiểm đủ 4 mục khi Completed ⇒ backend, báo cáo không đổi; thiếu mục ⇒ ô chung đỏ + con trỏ tới tiêu đề trống. Nhóm VN giữ 4 ô.
