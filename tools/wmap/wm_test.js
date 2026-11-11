@@ -15,7 +15,7 @@ const DATA = {
   thaid:   { pics: ["Yong", "Man", "Sui"], provs: ["Bangkok", "Nonthaburi", "Chon Buri", "Phuket"], names: ["Smile Dental Clinic", "Bangkok Dental Center", "Siam Dental", "BFC Dental", "Phuket Dental Studio"] }
 };
 const ACT = ["Visiting", "Visiting", "Visiting", "Telephone", "Presentation", "Message"];
-function team(url){ const m = { yzmh: "dental", xxck: "surgical", xsoT: "eyeless", wglP: "thai", wEvi: "thaid" }; for (const k in m) if (url.includes(k)) return m[k]; return "dental"; }
+function team(url){ const m = { x58h: "kpi", yL5FR: "hv", x8xuG: "ic", yzmh: "dental", xxck: "surgical", xsoT: "eyeless", wglP: "thai", wEvi: "thaid" }; for (const k in m) if (url.includes(k)) return m[k]; return "dental"; }
 function build(k){
   const D = DATA[k], r = rnd(k.length * 77 + 3), accs = [], rows = [];
   D.names.forEach((nm, i) => D.provs.forEach((pv, j) => { if ((i + j) % 2) return; accs.push({ code: k.slice(0, 2).toUpperCase() + (100 + accs.length), name: nm + (j ? " " + (j + 1) : ""), type: k === "thaid" || k === "dental" ? "Clinic" : "Public hospital", province: pv, area: "", pic: D.pics[accs.length % D.pics.length] }); }));
@@ -35,10 +35,19 @@ const CACHE = {};
   const p = await ctx.newPage(); const errs = []; p.on("pageerror", e => errs.push(e.message));
   const team0 = TEAM_OF[PIC] || (TH ? "thaid" : "dental");
   await p.addInitScript(([pic, lv, t]) => { localStorage.setItem("mmh_tk", JSON.stringify({ tk: "xxxxxxxxxxxx.sig", exp: Date.now() + 864e5, user: { pic, email: "x@manimedicalhanoi.com", local: "x", level: lv, admin: false } }));
-    localStorage.setItem("mmh_auth_later", new Date().toISOString().slice(0, 10)); localStorage.setItem("mmh_team", t); localStorage.setItem("mmh_upd_hide_all", "1"); }, [PIC, LEVEL, team0]);
+    localStorage.setItem("mmh_auth_later", new Date().toISOString().slice(0, 10)); localStorage.setItem("mmh_team", t); localStorage.setItem("mmh_upd_hide_all", "1"); if (!window.__WM_TUT) localStorage.setItem("wm2_tut_" + pic, "1"); }, [PIC, LEVEL, team0]);
   await p.route(/fonts\.g|cdnjs|drive\.google|googleusercontent/, r => r.fulfill({ body: "" }));
   await p.route(/script\.google\.com/, r => { const u = new URL(r.request().url()); const a = u.searchParams.get("action"), cb = u.searchParams.get("callback"), k = team(u.pathname);
-    const D = CACHE[k] || (CACHE[k] = build(k)); let o = { ok: true };
+    let o = { ok: true };
+    if (k === "kpi" || k === "hv" || k === "ic"){
+      const now = new Date(), ym = now.getFullYear() + String(now.getMonth() + 1).padStart(2, "0"), P = ["FY68", "Q1", "Q2", "Q3", "Q4", ym];
+      if (k === "kpi") o = { ok: true, periods: P, rows: Object.keys(TEAM_OF).flatMap(pic => [["C3-0", "Sales – Customer Visits & Co-visits", "Number of Customer Visits – X", "Times", 0.4, 30], ["F1-0", "Sales – Turnover", "MMH Sales Amount to Distributors – X", "USD", 0.6, 9000]]
+        .map(d => ({ member: pic, code: d[0] + "1", group: d[1], name: d[2], unit: d[3], agg: "SUM", v: P.map(() => [d[5], Math.round(d[5] * 0.7), d[4], 0.7, 0.7 * d[4]]) }))) };
+      else if (u.searchParams.get("action") === "winMap") o = { ok: true, rows: [{ hospital: "Bệnh viện Mắt Hà Nội", city: "Hà Nội", approve: "2026-06-01", result: "Win", wonProduct: "MSL28", wonQty: 500, wonPrice: 60000, dur: 12 }] };
+      else if (u.searchParams.get("action") === "kqttMap") o = { ok: true, cols: ["tbmt","buyer","pname","pcode","brand","mfr","qty","price","pub","dec","prov","dur"], rows: [["", "Bệnh viện Mắt Trung ương", "Dao Slit", "", "Alcon", "Alcon", 900, 70000, "2026-03-01", "2026-03-05", "Hà Nội", 12]] };
+      return r.fulfill({ contentType: cb ? "application/javascript" : "application/json", body: cb ? cb + "(" + JSON.stringify(o) + ");" : JSON.stringify(o) });
+    }
+    const D = CACHE[k] || (CACHE[k] = build(k));
     if (a === "bundle") o = { ok: true, picList: [{ pic: PIC }], master: { pic: DATA[team0].pics, fy: ["FY68"], typeAction: ["Visiting", "Telephone", "Presentation"], province: DATA[team0].provs, accountType: ["Clinic", "Public hospital"] }, fyList: ["FY68"], fyCurrent: "FY68", cidx: [], cidxCols: [] };
     if (a === "weekly") o = { ok: true, keyTasks: [] };
     if (a === "visitFeed") o = { ok: true, rows: D.rows.filter(x => !u.searchParams.get("from") || x.start >= u.searchParams.get("from")) };
@@ -46,6 +55,8 @@ const CACHE = {};
     if (a === "tfTrips") o = { ok: true, trips: [{ pic: DATA[k].pics[0], start: new Date().toISOString().slice(0, 8) + "20", planned: new Date().toISOString().slice(0, 8) + "22", subTask: (k[0] === "t" ? "Business trip " : "Đi công tác ") + DATA[k].provs[1] + " · 3 ngày · x", approval: "Approved" }] };
     if (a === "fuList" && (k === "thaid" || k === "surgical")) o = { ok: true, cols: ["at","id","rev","pic","mail","code","hosp","prov","pkg","ptype","qty","value","stage","stageName","due","note","rid","src"], stages: ["", "Not approached", "Introduced", "Building specs", "Quotation sent", "Bidding", "", "Won", "Lost", "Paused", "Not participating", "Introduction", "Demo", "Proposal", "Purchase contract", "Using", "", "", "Unsuccessful", "Stopped"],
       rows: [["2026-11-05 10:00", "TF1", 1, D.accs[0].pic, "", D.accs[0].code, D.accs[0].name, D.accs[0].province, "Composite 2027", "JIZAI", 100, 250000, 12, "Demo", "2026-11-25", "Demo planned with Dr. A", "", ""]] };
+    if (a === "oppList") o = { ok: true, rows: (D.opp = D.opp || [{ id: "OP1", rev: 1, pic: D.accs[0].pic, acc: D.accs[0].name, prov: D.accs[0].province, kind: "pri", stage: 12, lines: [{ g: k === "thaid" || k === "dental" ? "diaburs" : "knife", qty: 200, price: 3, cur: "USD" }], usd: 600, due: "2026-11-30", note: "demo" }]) };
+    if (a === "oppSave"){ const rec = JSON.parse(u.searchParams.get("rec")); rec.id = rec.id || "OP" + Date.now(); rec.rev = 1; o = { ok: true, rec }; }
     if (a === "fuSave") o = { ok: true, rec: ["2026-11-11 10:00", "TF2", 1, PIC, "", "", u.searchParams.get("hosp"), "", u.searchParams.get("pkg"), "", "", "", +u.searchParams.get("stage"), "Demo", "", "", "", ""], cols: ["at","id","rev","pic","mail","code","hosp","prov","pkg","ptype","qty","value","stage","stageName","due","note","rid","src"] };
     r.fulfill({ contentType: cb ? "application/javascript" : "application/json", body: cb ? cb + "(" + JSON.stringify(o) + ");" : JSON.stringify(o) }); });
   const URL0 = process.env.WM_URL || ("file://" + path.resolve(__dirname, "../../index.html"));
@@ -69,6 +80,7 @@ const CACHE = {};
   ok(side.indexOf(k0) >= 0, "Chi tiết khách: " + k0);
   if (SHOTS) await p.screenshot({ path: path.join(SHOTS, "wm_" + PIC.replace(/\s/g, "") + (MOB ? "_m" : "") + "_2.png") });
   /* tìm kiếm danh mục */
+  if (MOB) await p.evaluate(() => document.getElementById("wm-qb").click());
   await p.fill("#wm-q", TH ? "bangkok hosp" : "mat trung uong"); await p.waitForTimeout(400);
   const qr = await p.evaluate(() => document.getElementById("wm-qr").innerText);
   console.log("search:", qr.split("\n").slice(0, 6).join(" | "));
@@ -85,18 +97,26 @@ const CACHE = {};
   await p.evaluate(() => { const b = document.querySelector('#wm-vw [data-v="cov"]'); if (b) b.click(); }); await p.waitForTimeout(300);
   ok(await p.evaluate(() => document.querySelectorAll("#wm-pv path[class*=c]").length > 0), "Chế độ Độ phủ tô màu tỉnh");
   if (SHOTS) await p.screenshot({ path: path.join(SHOTS, "wm_" + PIC.replace(/\s/g, "") + (MOB ? "_m" : "") + "_4.png") });
-  if (PIC === "Yong"){
-    await p.evaluate(() => { const a = WM.model().list.filter(x => x.team === "thaid")[0]; WM.pick("acc", a.key); }); await p.waitForTimeout(300);
-    await p.evaluate(() => document.querySelector('#wm-sc [data-act="fu"]').click()); await p.waitForTimeout(300);
-    await p.evaluate(() => { document.getElementById("wmfu_pkg").value = "Test tender"; document.getElementById("wmfu_s").value = "12"; document.getElementById("wmfu_ok").click(); });
-    await p.waitForTimeout(800);
-    ok(await p.evaluate(() => !document.querySelector("#ov.on") && document.getElementById("wm-sc").innerText.indexOf("Test tender") >= 0), "Follow-up Thailand Dental: lưu và hiện ngay");
+  {
+    await p.evaluate(() => { const a = WM.model().list.filter(x => x.inCrm)[0]; WM.pick("acc", a.key); }); await p.waitForTimeout(300);
+    const has = await p.evaluate(() => { const b = document.querySelector('#wm-sc [data-act="fu2"]'); if (b){ b.click(); return true; } return false; });
+    if (has){ await p.waitForTimeout(300);
+      await p.evaluate(() => { const r = document.querySelector("#wmf-ls .wm-fl"); r.querySelector(".q").value = "120"; r.querySelector(".q").dispatchEvent(new Event("input")); document.getElementById("wmf-ok").click(); });
+      await p.waitForTimeout(900);
+      ok(await p.evaluate(() => !document.querySelector("#ov.on")), "Thêm cơ hội: lưu xong, đóng form"); }
+    ok(await p.evaluate(() => document.querySelectorAll(".wm-ring").length > 0), "KPI vòng tròn có dữ liệu");
   }
   if (PIC === "Nguyen Ha"){
     await p.evaluate(() => { ["wm-q"].forEach(id => { const q = document.getElementById(id); q.value = ""; q.dispatchEvent(new Event("input")); }); document.querySelector('#wm-flt [data-c="th"]').click(); });
     await p.waitForTimeout(2500);
     ok(await p.evaluate(() => document.querySelectorAll("#wm-pv path").length === 77 && WM.state().country === "th"), "Giám đốc: chuyển sang Thái Lan (77 tỉnh)");
     if (SHOTS) await p.screenshot({ path: path.join(SHOTS, "wm_NguyenHa_th.png") });
+  }
+  if (await p.evaluate(() => WM.scope().teams.vn && WM.scope().teams.vn.indexOf("surgical") >= 0 && WM.state().country === "vn")){
+    await p.evaluate(() => document.querySelector('#wm-vw [data-v="win"]').click()); await p.waitForTimeout(1800);
+    ok(await p.evaluate(() => document.querySelectorAll("#wm-mk .wn, #wm-mk .wo, #wm-mk .wm-cl").length > 0), "Trúng thầu (Surgical VN): có chấm kết quả thầu");
+    if (SHOTS) await p.screenshot({ path: path.join(SHOTS, "wm_" + PIC.replace(/\s/g, "") + (MOB ? "_m" : "") + "_win.png") });
+    await p.evaluate(() => document.querySelector('#wm-vw [data-v="act"]').click());
   }
   /* quay về CRM */
   await p.click("#wm-back"); await p.waitForTimeout(300);
