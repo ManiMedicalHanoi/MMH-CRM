@@ -685,7 +685,7 @@ function accHtml(a){
     var res=v.result||"", st=v.st||(v.done?L("Đã làm","Done"):L("Kế hoạch","Planned"));
     return '<li class="'+(v.done?"dn":"pl")+'"><div class="hd">'+svg(v.kind,"k-"+v.kind)+'<b>'+E(dmy(v.d))+'</b><span>'+E(v.ta||L(KIND[v.kind].vi,KIND[v.kind].en))+'</span><span class="st">'+E(st)+'</span>'+(SC.mgr?'<span class="mu">'+E(v.pic)+'</span>':'')+'</div>'+
       (v.plan?'<div class="ln"><i>'+L("Kế hoạch","Plan")+'</i>'+E(short2(v.plan, 400))+'</div>':'')+
-      (res?'<div class="ln"><i>'+L("Kết quả","Result")+'</i><span class="pre">'+E(short2(res, 700))+'</span></div>':'')+
+      (res?'<div class="ln"><i>'+L("Kết quả","Result")+'</i><span class="pre">'+E(shortL(res, 900))+'</span></div>':'')+
       (v.fb?'<div class="ln"><i>'+L("Phản hồi","Feedback")+'</i>'+E(v.fb)+'</div>':'')+
       (v.next?'<div class="ln"><i>'+L("Bước tiếp theo","Next step")+'</i>'+E(short2(v.next, 300))+'</div>':'')+
       (v.stop?'<div class="ln"><i>'+L("Lý do dừng","Stop reason")+'</i>'+E(v.stop)+'</div>':'')+
