@@ -212,6 +212,10 @@ TOUR.add([
     { el:"#rhn-pop", do:function(){ try{ RHN.open(); }catch(_){} }, wait:600, t:V("Danh sách thông báo","Notification list"), x:V("Mới nhất ở trên, chấm xanh = chưa xem. Bấm 1 dòng ⇒ mở đúng việc / biên bản / thảo luận ở app Sự kiện MKT (tab mới).",
       "Newest first, blue dot = unread. Click a line to open that task / meeting note / discussion in MKT Events (new tab).") }
    ] },
+ { id:"password", v:1, d:"2026-11-11", g:V("Bắt đầu","Getting started"), ic:"user", t:V("Mật khẩu đăng nhập","Sign-in password"), x:V("Đăng nhập bằng email công ty + mật khẩu riêng; đổi mật khẩu, đăng xuất.","Sign in with your company email + your own password; change password, sign out."),
+   steps:[
+    { el:"#btnUser", t:V("Tài khoản","Your account"), x:V("Bấm tên của bạn ⇒ <b>Đặt / Đổi mật khẩu</b> hoặc <b>Đăng xuất</b> (bấm 2 lần). Lần đầu: đăng nhập bằng mã email rồi tạo mật khẩu; lần sau chỉ cần email + mật khẩu, trình duyệt / app nhớ giúp. Mật khẩu dùng chung Report Hub, Tender Map.","Click your name ⇒ <b>Set / Change password</b> or <b>Sign out</b> (click twice). First time: sign in with the email code, then create a password; after that just email + password — your browser / app remembers it. Same password for Report Hub and Tender Map.") }
+   ] },
  { id:"photoalert", v:1, d:"2026-11-06", g:V("Quản trị","Admin"), ic:"camera", t:V("Cảnh báo ảnh đi địa bàn","Field-visit photo alerts"), x:V("HOD và Giám đốc: ảnh đi địa bàn chụp quá dày (dưới 15 phút giữa 2 khách).","HODs and the Director: field-visit photos taken too close together (under 15 minutes between customers)."),
    when:function(){ return !!(window.PHA && PHA.allowed()); },
    steps:[

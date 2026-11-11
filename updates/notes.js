@@ -7,6 +7,16 @@
 function E(u){ u.en={ title:u.title, items:u.items.map(function(i){ return { title:i.title, text:i.text }; }) }; return u; }
 window.MMH_UPDATES = [
   E({
+    id:"2026-11-11-v36.5", version:"v36.5", date:"2026-11-11",
+    title:"Sign in with your company email + your own password",
+    summary:"The first time, sign in with the 6-digit code from your email, then create a password. After that you only need <b>email + password</b> — your browser or the installed app remembers it, so you no longer wait for a code by email.",
+    items:[
+      { type:"new", icon:"+", title:"Email + password", text:"On the sign-in screen enter your company email and password ▸ <b>Sign in</b>. First time or forgot your password ⇒ <b>Get a code by email</b>. The same password works in Report Hub and Tender Map.", img:"updates/v36.5/signin.jpg" },
+      { type:"new", icon:"+", title:"Create the password once", text:"After you enter the code, the CRM asks you to create a password (at least 8 characters). Allow your browser / phone to save it. Already signed in? A small banner offers <b>Create password</b> once.", img:"updates/v36.5/create.jpg" },
+      { type:"imp", icon:"↑", title:"Change password, sign out", text:"Click your name (top right) ▸ <b>Change password</b> or <b>Sign out</b> (click twice). Your session renews itself while you keep using the CRM — you sign in again only on a new browser or device.", img:"updates/v36.5/menu.jpg" }
+    ]
+  }),
+  E({
     id:"2026-11-11-v36.4", version:"v36.4", date:"2026-11-11",
     title:"Working Map: work calendar, territory map, KPIs and estimated sales when you sign in",
     summary:"After you sign in the CRM opens the <b>Working Map</b>: the work calendar on top, the map of your field activities below (Vietnam or Thailand), your KPIs and the estimated sales on the right. Click <b>CRM</b> (top left) to go back to the usual screens — nothing else has changed. The first time, a short guide shows each part; the <b>?</b> button shows it again.",
