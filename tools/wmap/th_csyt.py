@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Dựng geo/th-csyt.json — danh mục cơ sở khám chữa bệnh Thái Lan cho Working Map của CRM (tìm nhanh để thêm vào kế hoạch).
+"""Dựng geo/wm-th-csyt.js — danh mục cơ sở khám chữa bệnh Thái Lan cho Working Map của CRM (tìm nhanh để thêm vào kế hoạch).
 Nguồn: OpenStreetMap — bản xuất "health facilities" của HOT (raw-data-api, ODbL), tải tự động (GitHub Actions; máy Claude bị chặn mạng):
   https://s3.dualstack.us-east-1.amazonaws.com/production-raw-data-api/ISO3/THA/health_facilities/{points,polygons}/…geojson.zip
 Giữ: bệnh viện (amenity / healthcare = hospital), phòng khám nha khoa (dentist), trung tâm / trạm y tế công (healthcare=centre, รพ.สต.).
@@ -97,7 +97,9 @@ def main():
     out = {"v": datetime.date.today().isoformat(), "src": "OpenStreetMap (HOT export, ODbL)",
            "cols": ["id", "n", "th", "t", "own", "p", "a", "lat", "lng"],
            "types": {"h": "Hospital", "d": "Dental clinic", "c": "Health centre"}, "rows": rows}
-    json.dump(out, open(os.path.join(ROOT, "geo", "th-csyt.json"), "w", encoding="utf-8"), ensure_ascii=False, separators=(",", ":"))
+    with open(os.path.join(ROOT, "geo", "wm-th-csyt.js"), "w", encoding="utf-8") as f:
+        f.write("/* Working Map — danh mục cơ sở y tế Thái Lan (OpenStreetMap HOT, ODbL). Dựng bằng tools/wmap/th_csyt.py (GitHub Actions) */\nwindow.WM_DATA=window.WM_DATA||{};WM_DATA.thCsyt=")
+        json.dump(out, f, ensure_ascii=False, separators=(",", ":")); f.write(";\n")
     cnt = {}
     for r in rows: cnt[r[3]] = cnt.get(r[3], 0) + 1
     print("th-csyt:", len(rows), cnt)

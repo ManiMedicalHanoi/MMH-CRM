@@ -1,5 +1,5 @@
 name: Working Map · danh mục cơ sở y tế Thái Lan
-# Tải bản xuất OpenStreetMap (HOT) ⇒ geo/th-csyt.json rồi commit lại đúng nhánh (máy Claude không tải được).
+# Tải bản xuất OpenStreetMap (HOT) ⇒ geo/wm-th-csyt.js rồi commit lại đúng nhánh (máy Claude không tải được).
 on:
   workflow_dispatch:
   push:
@@ -17,7 +17,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add geo/th-csyt.json
+          git add geo/wm-th-csyt.js
           git diff --cached --quiet && { echo "Không đổi"; exit 0; }
           git commit -m "Working Map: danh mục cơ sở y tế Thái Lan (OpenStreetMap)"
           git push origin HEAD:${GITHUB_REF_NAME}
