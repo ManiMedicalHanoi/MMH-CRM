@@ -7,6 +7,14 @@
 function E(u){ u.en={ title:u.title, items:u.items.map(function(i){ return { title:i.title, text:i.text }; }) }; return u; }
 window.MMH_UPDATES = [
   E({
+    id:"2026-11-11-v36.2", version:"v36.2", date:"2026-11-11",
+    title:"Thailand Dental: co-visits now count as customer visits",
+    summary:"Visits with Type action <b>Co-visiting with distributor</b> or <b>Event/Co-visiting with distributor</b> are now counted as customer visits on the Dashboard, in the PIC comparison and in the weekly meeting (Thailand Dental team).",
+    items:[
+      { type:"fix", icon:"✓", title:"Co-visits counted as visits", text:"<b>Dashboard ▸ Customer visits</b> now counts Visiting, Co-visiting with distributor and Event/Co-visiting with distributor (status Completed). Other teams are unchanged." }
+    ]
+  }),
+  E({
     id:"2026-11-11-v36.1", version:"v36.1", date:"2026-11-11",
     title:"Thailand Dental KPIs updated to the KPI file of 4 Nov 2026",
     summary:"The KPIs of Yong, Man and Sui now follow the KPI file filled by Owen san after the meeting of 4 Nov 2026: new KPIs, new monthly targets and the counting rules agreed in the meeting. <b>KPIs & Targets</b> shows the new names and targets.",

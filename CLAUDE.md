@@ -289,3 +289,5 @@ Kiến trúc & quy ước giống MMH Report Hub (repo `ManiMedicalHanoi/MMH-Rep
 - **v36.1 (11/11/2026, sửa khối `v359-js`, backend crm-thai-dental TH_AccountMap v1.3 + kpi KpiThdFix)**: KPI Dental Thailand theo file 04/11/2026 của Owen san — Account tracking có ô **Distributor key account**
   (cột M ACCOUNT TRACKING, `acctSave key=Yes|No`, chip "Key", lọc "Distributor key accounts") ⇒ KPI C2-02 = lượt thăm key account; Type action **Event/Co-visiting with distributor** (đến từ MASTER LIST qua `master_`);
   tên rút gọn KPI mới trong `RULES_ENK` ("Key account visits"). Tour `acct` v2.
+- **v36.2 (11/11/2026, khối `v362-js`)**: nhóm `thaid` — lượt Type action "Co-visiting with distributor" / "Event/Co-visiting with distributor" (Completed) được đếm là lượt viếng thăm ở mọi bộ đếm của app
+  (`kpiVisitOk` bọc: Dashboard, so sánh PIC, Họp tuần, thẻ KPI) — Yong báo co-visit không vào "visits". Nhóm khác giữ rule chỉ "Visiting". `window.thdIsCoVisit(w)`.
