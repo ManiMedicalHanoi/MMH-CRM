@@ -1,0 +1,23 @@
+name: Working Map · danh mục cơ sở y tế Thái Lan
+# Tải bản xuất OpenStreetMap (HOT) ⇒ geo/th-csyt.json rồi commit lại đúng nhánh (máy Claude không tải được).
+on:
+  workflow_dispatch:
+  push:
+    paths: ['tools/wmap/th_csyt.py', '.github/workflows/th-csyt.yml']
+permissions: { contents: write }
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.12' }
+      - run: python3 -I tools/wmap/th_csyt.py
+      - name: Commit
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add geo/th-csyt.json
+          git diff --cached --quiet && { echo "Không đổi"; exit 0; }
+          git commit -m "Working Map: danh mục cơ sở y tế Thái Lan (OpenStreetMap)"
+          git push origin HEAD:${GITHUB_REF_NAME}
