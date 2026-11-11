@@ -4017,7 +4017,7 @@ function buildNav(){
     if(t.grp!==lastGrp){ h+='<div class="grp">'+t.grp+'</div>'; lastGrp=t.grp; }
     h+='<button class="nvi" data-t="'+t.id+'" onclick="go(\''+t.id+'\')"><span class="ic">'+t.ic+'</span><span class="lb">'+t.lb+'</span></button>';
   });
-  h+='<div style="flex:1"></div><div style="padding:10px;font-size:10.5px;color:var(--mute);line-height:1.5">MMH CRM v36.2<br>'+
+  h+='<div style="flex:1"></div><div style="padding:10px;font-size:10.5px;color:var(--mute);line-height:1.5">MMH CRM v36.3<br>'+
      (isMgmt()?'<a href="'+DRIVE_FOLDER+'" target="_blank">📁 Folder ảnh Drive</a>':"")+'</div>';
   $("side").innerHTML=h;
   /* ⭐ v4.5 — thanh dưới trượt ngang, đủ mọi mục, bỏ nút "Thêm" */
@@ -20796,7 +20796,7 @@ window.QS2={ open:qsOpen };
 </script>
 
 <!-- ⭐ v30.3 — THÔNG BÁO CẬP NHẬT (chép từ Report Hub): dữ liệu updates/notes.js · tự hiện 7 ngày · nút "Có gì mới" trên thanh trên cùng -->
-<script src="updates/notes.js?v=36.2"></script>
+<script src="updates/notes.js?v=36.3"></script>
 <style id="upd-css">
 #upd,#upd-zoom{--t-pri:var(--blue);--t-pri2:var(--blue-d);--t-ink:var(--navy);--t-soft:var(--pale);--t-line:var(--lb2);--t-bg:#F6F8FA;--mmh-blue:var(--blue);--mmh-navy:var(--navy)}
 
@@ -30823,6 +30823,118 @@ if(typeof _rd==="function") window.renderDash=renderDash=function(){
   }catch(e){}
   return r;
 };
+})();
+</script>
+<style id="v363-css">
+.v363-one .lb{display:flex;align-items:center;gap:8px;font-size:12.5px;font-weight:600;color:var(--t-ink,#003047);margin-bottom:4px}
+.v363-one .lb small{font-weight:400;color:var(--sub,#5B6B7D)}
+.v363-one .lb .sp{flex:1}
+.v363-one .lb .rq{color:var(--dang,#C0392B)}
+.v363-one textarea{width:100%;min-height:150px;line-height:1.5;resize:vertical;padding:9px 11px;box-sizing:border-box}
+.v363-one textarea.bad{border-color:var(--dang,#C0392B)!important;background:#FFF6F5}
+.v343-rs.v363 .v343-p{display:none}
+</style>
+<script id="v363-js">
+/* ═════════ v36.3 (11/11/2026) — Task Result = 1 ô, vẫn giữ 4 tiêu đề bắt buộc (đề xuất của nhóm Thái) ═════════
+   v34.3 tách Task Result thành 4 ô. Nhóm Thái (thai · thaid, V363.teams) muốn gõ trong 1 ô: ô #<id>-one luôn có sẵn 4 dòng tiêu đề
+   RESULT_GUIDE ("1. Actions Taken:" …), viết nội dung sau mỗi tiêu đề. Xoá / sửa mất tiêu đề ⇒ tự đặt lại (nội dung giữ nguyên).
+   Bên dưới vẫn là 4 ô ẩn của v34.3 (#<id>-p0..3) ⇒ cách ghép "1. Actions Taken: …", kiểm đủ 4 mục khi Completed, backend / báo cáo không đổi. */
+(function(){
+"use strict";
+var V363=window.V363={ teams:["thai","thaid"] };
+function on(){ try{ return V363.teams.indexOf(curTeamKey())>=0; }catch(e){ return false; } }
+var G=RESULT_GUIDE;
+var HRE=/^\s*([1-4])\s*[.)]\s*(Actions Taken|Current Situation|Customer Feedback|Opportunities\s*\/\s*Next Steps)\s*:?[ \t]*/i;
+function split(v){
+  var parts=["","","",""], cur=0, seen=[], ok=true;
+  String(v||"").split("\n").forEach(function(line){
+    var m=HRE.exec(line);
+    if(m){ var k=+m[1]-1; if(k!==seen.length) ok=false; seen.push(k); cur=k; var t=line.slice(m[0].length); parts[k]=parts[k]?parts[k]+"\n"+t:t; return; }
+    if(!seen.length) ok=false;
+    parts[cur]=parts[cur]?parts[cur]+"\n"+line:line;
+  });
+  if(seen.length!==4) ok=false;
+  return { ok:ok, parts:parts.map(function(x){ return String(x||"").replace(/^\n+|\s+$/g,""); }) };
+}
+function join(parts){ return G.map(function(g,i){ return g+" "+String(parts[i]||"").trim(); }).join("\n"); }
+function conv(id){
+  var box=document.getElementById(id+"-v343"); if(!box || box.dataset.v363) return;
+  box.dataset.v363="1"; box.classList.add("v363");
+  var w=document.createElement("div"); w.className="v363-one";
+  w.innerHTML='<div class="lb">Task Result <span class="rq">*</span><small>'+esc(TX("Giữ 4 tiêu đề, viết nội dung sau mỗi tiêu đề","Keep the 4 headings, write after each one"))+'</small><span class="sp"></span>'+
+    '<button type="button" class="mini" onclick="toggleVoice(\''+id+'-one\',this)">'+TX("Nói","Voice")+'</button></div>'+
+    '<textarea id="'+id+'-one" spellcheck="true"></textarea>';
+  box.appendChild(w);
+  var one=document.getElementById(id+"-one");
+  function ps(){ return [0,1,2,3].map(function(i){ var e=document.getElementById(id+"-p"+i); return e?e.value:""; }); }
+  var last="";
+  function paint(){ var v=join(ps()); if(v!==last && document.activeElement!==one){ one.value=v; last=v; } }
+  /* chặn ngay từ phím: không xoá / gõ đè lên tiêu đề (kể cả dấu xuống dòng trước tiêu đề) */
+  function spans(v){
+    var out=[], re=/^[ \t]*[1-4]\s*[.)]\s*(?:Actions Taken|Current Situation|Customer Feedback|Opportunities\s*\/\s*Next Steps)\s*:?[ \t]?/gim, m;
+    while((m=re.exec(v))){ out.push([m.index>0?m.index-1:0, m.index+m[0].length]); if(re.lastIndex===m.index) re.lastIndex++; }
+    return out;
+  }
+  function put(v,caret){ one.value=v; try{ one.setSelectionRange(caret,caret); }catch(_){} sync(); }
+  one.addEventListener("beforeinput",function(e){
+    var v=one.value, s=one.selectionStart, t=one.selectionEnd, it=String(e.inputType||""), sp=spans(v), i, x=null;
+    function prot(k){ return sp.some(function(r){ return k>=r[0] && k<r[1]; }); }
+    function endOf(k){ var r=sp.filter(function(r){ return k>=r[0] && k<r[1]; })[0]; return r?r[1]:k; }
+    var data=it.indexOf("insert")===0?(e.data!=null?e.data:(e.dataTransfer?e.dataTransfer.getData("text/plain"):"")):"";
+    if(it==="insertLineBreak"||it==="insertParagraph") data="\n";
+    if(s!==t){
+      var touch=false; for(i=s;i<t;i++) if(prot(i)){ touch=true; break; }
+      if(!touch) return;
+      e.preventDefault();
+      var out=v.slice(0,s), caret=null, sp0=prot(s);
+      if(!sp0){ out+=data; caret=out.length; }
+      for(i=s;i<t;i++) if(prot(i)){ out+=v[i]; if(sp0 && caret==null && !prot(i+1)){ out+=data; caret=out.length; } }
+      var tail=t; if(caret==null){ var en=endOf(t); out+=v.slice(t,en); tail=en; out+=data; caret=out.length; }
+      return put(out+v.slice(tail),caret);
+    }
+    if(/^delete.*Backward$/.test(it)){ if(s>0 && prot(s-1)) e.preventDefault(); return; }
+    if(/^delete.*Forward$/.test(it)){ if(prot(s)) e.preventDefault(); return; }
+    if(it.indexOf("insert")===0){
+      sp.forEach(function(r){ if(!x && (r[0]<s || (r[0]===0 && s===0)) && s<r[1]) x=r; });
+      if(!x) return;
+      if(data==="\n" && x[0]>0 && s===x[0]+1) return;                 /* xuống dòng ngay trước tiêu đề: được */
+      e.preventDefault();
+      put(v.slice(0,x[1])+data+v.slice(x[1]), x[1]+data.length);
+    }
+  });
+  one.addEventListener("input",sync);
+  function sync(){
+    one.classList.remove("bad");
+    var r=split(one.value);
+    if(!r.ok){                                                     /* tiêu đề bị xoá / sửa ⇒ đặt lại, giữ chỗ con trỏ */
+      var pos=one.selectionStart, fixed=join(r.parts); one.value=fixed;
+      try{ var p=Math.min(pos,fixed.length); one.setSelectionRange(p,p); }catch(_){}
+      r=split(fixed);
+    }
+    last=one.value;
+    r.parts.forEach(function(t,i){ var e=document.getElementById(id+"-p"+i); if(e){ e.value=t; e.classList.remove("bad"); } });
+    var e0=document.getElementById(id+"-p0"); if(e0) e0.dispatchEvent(new Event("input",{bubbles:true}));
+  }
+  one.addEventListener("blur",function(){ last=""; paint(); });
+  var iv=setInterval(function(){ if(!document.body.contains(one)){ clearInterval(iv); return; } paint(); },400);
+  paint();
+}
+function scan(){ if(!on()) return; ["tk-result","nt_result"].forEach(function(id){ if(document.getElementById(id+"-v343")) conv(id); }); }
+new MutationObserver(scan).observe(document.body,{childList:true,subtree:true});
+scan();
+/* thiếu mục khi Completed (v34.3 đánh dấu ô ẩn) ⇒ tô đỏ ô chung + đưa con trỏ tới tiêu đề còn trống */
+function mark(id){
+  var one=document.getElementById(id+"-one"); if(!one) return;
+  var bad=[0,1,2,3].filter(function(i){ var e=document.getElementById(id+"-p"+i); return e && e.classList.contains("bad"); });
+  if(!bad.length) return;
+  one.classList.add("bad");
+  var i=one.value.indexOf(G[bad[0]]); try{ one.focus(); if(i>=0){ var p=i+G[bad[0]].length+1; one.setSelectionRange(p,p); } one.scrollIntoView({block:"center",behavior:"smooth"}); }catch(_){}
+}
+["saveTask","submitNewTask"].forEach(function(fn){
+  var f=window[fn]; if(typeof f!=="function") return;
+  window[fn]=function(){ var r=f.apply(this,arguments); try{ if(on()) mark(fn==="saveTask"?"tk-result":"nt_result"); }catch(_){} return r; };
+  try{ if(fn==="saveTask") saveTask=window[fn]; else submitNewTask=window[fn]; }catch(_){}
+});
 })();
 </script>
 </body>

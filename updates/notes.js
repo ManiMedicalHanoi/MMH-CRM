@@ -7,6 +7,14 @@
 function E(u){ u.en={ title:u.title, items:u.items.map(function(i){ return { title:i.title, text:i.text }; }) }; return u; }
 window.MMH_UPDATES = [
   E({
+    id:"2026-11-11-v36.3", version:"v36.3", date:"2026-11-11",
+    title:"Thailand: Task Result in one box with the 4 headings",
+    summary:"For the Thailand teams the Task Result is now one box instead of 4. The 4 headings stay in the box and cannot be deleted.",
+    items:[
+      { type:"imp", icon:"↑", title:"One box, 4 fixed headings", text:"Open a task ▸ <b>Task Result</b>: write after each heading (Actions Taken · Current Situation · Customer Feedback · Opportunities / Next Steps). If a heading is deleted it comes back automatically. A <b>Completed</b> task still needs text under all 4 headings." }
+    ]
+  }),
+  E({
     id:"2026-11-11-v36.2", version:"v36.2", date:"2026-11-11",
     title:"Thailand Dental: co-visits now count as customer visits",
     summary:"Visits with Type action <b>Co-visiting with distributor</b> or <b>Event/Co-visiting with distributor</b> are now counted as customer visits on the Dashboard, in the PIC comparison and in the weekly meeting (Thailand Dental team).",
