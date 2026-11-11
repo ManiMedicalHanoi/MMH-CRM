@@ -4017,7 +4017,7 @@ function buildNav(){
     if(t.grp!==lastGrp){ h+='<div class="grp">'+t.grp+'</div>'; lastGrp=t.grp; }
     h+='<button class="nvi" data-t="'+t.id+'" onclick="go(\''+t.id+'\')"><span class="ic">'+t.ic+'</span><span class="lb">'+t.lb+'</span></button>';
   });
-  h+='<div style="flex:1"></div><div style="padding:10px;font-size:10.5px;color:var(--mute);line-height:1.5">MMH CRM v36.0<br>'+
+  h+='<div style="flex:1"></div><div style="padding:10px;font-size:10.5px;color:var(--mute);line-height:1.5">MMH CRM v36.1<br>'+
      (isMgmt()?'<a href="'+DRIVE_FOLDER+'" target="_blank">📁 Folder ảnh Drive</a>':"")+'</div>';
   $("side").innerHTML=h;
   /* ⭐ v4.5 — thanh dưới trượt ngang, đủ mọi mục, bỏ nút "Thêm" */
@@ -20043,6 +20043,7 @@ var RULES_ENK=[
   [/^Number of Co-visits with Distributor Sales Representatives – (.+)$/, "Co-visits with distributor reps · $1"],
   [/^Number of Co-visiting Days with Distributor Sales Representatives – (.+)$/, "Co-visit days with distributor reps · $1"],
   [/^Key Account Profiling Coverage Rate – (.+)$/, "Key account profiling · $1"],
+  [/^Number of Visits to Distributor Key Accounts – (.+)$/, "Key account visits · $1"],
   [/^Product Knowledge Test Pass Rate – (.+)$/, "Product test pass rate · $1"],
   [/^Number of New Product Categories Launched – (.+)$/, "New product categories launched · $1"],
   [/^Number of Product Content Items Published – (.+)$/, "Product content published · $1"]
@@ -20795,7 +20796,7 @@ window.QS2={ open:qsOpen };
 </script>
 
 <!-- ⭐ v30.3 — THÔNG BÁO CẬP NHẬT (chép từ Report Hub): dữ liệu updates/notes.js · tự hiện 7 ngày · nút "Có gì mới" trên thanh trên cùng -->
-<script src="updates/notes.js?v=36.0"></script>
+<script src="updates/notes.js?v=36.1"></script>
 <style id="upd-css">
 #upd,#upd-zoom{--t-pri:var(--blue);--t-pri2:var(--blue-d);--t-ink:var(--navy);--t-soft:var(--pale);--t-line:var(--lb2);--t-bg:#F6F8FA;--mmh-blue:var(--blue);--mmh-navy:var(--navy)}
 
@@ -29858,7 +29859,10 @@ if(typeof tpCostPaint==="function"){
 .acm-tb td.c{text-align:center;white-space:nowrap}
 .acm-tb .ns{max-width:260px;color:#34465A;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .acm-chip{display:inline-block;padding:1px 8px;border-radius:20px;font-size:11px;font-weight:700;white-space:nowrap}
-.acm-chip.on{background:#E7F5EE;color:#1E7A4A}.acm-chip.off{background:#F1F3F5;color:#7A8796}.acm-chip.nv{background:#FFF4DB;color:#A86B00}
+.acm-chip.on{background:#E7F5EE;color:#1E7A4A}.acm-chip.key{background:#EAF1F7;color:#003047;vertical-align:1px}
+.acm-key{display:flex;gap:8px;align-items:flex-start;margin:4px 0 2px;font-size:13px;color:#34465A;cursor:pointer}
+.acm-key input{margin-top:3px}
+.acm-key small{display:block;color:#8A97A6;font-size:11.5px}.acm-chip.off{background:#F1F3F5;color:#7A8796}.acm-chip.nv{background:#FFF4DB;color:#A86B00}
 .acm-more{display:block;margin:10px auto;}
 .acm-mapw{position:relative;background:#fff;border:1px solid #E6EAEF;border-radius:12px;overflow:hidden;isolation:isolate}
 #acm-map{height:calc(100vh - 290px);min-height:440px;background:#EEF2F5}
@@ -30030,6 +30034,7 @@ function activeOf(a){ var m=mOf(a); return !!(m && m.lastAny && m.lastAny>=addDa
 function custOf(a){ try{ return (S.custMap&&S.custMap[a.code])||null; }catch(e){ return null; } }
 function picOf(a){ var c=custOf(a); return c?c.pic:""; }
 function isNewThisMonth(a){ var c=custOf(a); if(!c) return false; var ym=ymOf(todayISO()); return String(c.month||"")===ym || ymOf(c.openDate)===ym; }
+function isKey(a){ return /^(y|yes|x|true|1)$/i.test(String(a&&a.key||"").trim()); }
 function canAll(){ try{ return isMgrView() || (S.user&&/admin|director|hod/i.test(String(S.user.level||S.user.role||""))); }catch(e){ return false; } }
 
 /* ═════════ PROVINCES (account ⇄ map polygon) ═════════ */
@@ -30093,6 +30098,7 @@ function filtered(){
     if(f.st==="next" && !(m && m.next)) return false;
     if(f.st==="new" && !isNewThisMonth(a)) return false;
     if(f.st==="noloc" && num(a.lat)!=null) return false;
+    if(f.st==="key" && !isKey(a)) return false;
     if(q){ var hay=nz([a.name,a.code,a.type,a.province,a.district,a.dist,a.dsr,picOf(a)].join(" ")); if(q.split(" ").some(function(x){ return x && hay.indexOf(x)<0; })) return false; }
     return true;
   });
@@ -30146,7 +30152,7 @@ function filterBar(n){
     '<select class="inp" onchange="acmSet(\'dist\',this.value)"><option value="">All distributors</option>'+ACM.dist.map(function(d){ return '<option'+(f.dist===d?" selected":"")+'>'+e2(d)+'</option>'; }).join("")+
       '<option value="__none"'+(f.dist==="__none"?" selected":"")+'>No distributor yet</option></select>'+
     '<select class="inp" onchange="acmSet(\'stage\',this.value)">'+o(stages,f.stage,"All stages")+'</select>'+
-    '<select class="inp" onchange="acmSet(\'st\',this.value)">'+[["","All statuses"],["active","Active (90 days)"],["inactive","Inactive"],["never","No activity yet"],["next","Next visit planned"],["new","New this month"],["noloc","No map location"]]
+    '<select class="inp" onchange="acmSet(\'st\',this.value)">'+[["","All statuses"],["key","Distributor key accounts"],["active","Active (90 days)"],["inactive","Inactive"],["never","No activity yet"],["next","Next visit planned"],["new","New this month"],["noloc","No map location"]]
       .map(function(x){ return '<option value="'+x[0]+'"'+(f.st===x[0]?" selected":"")+'>'+x[1]+'</option>'; }).join("")+'</select>'+
     '<span class="n">'+fmtN(n)+' shown</span></div>';
 }
@@ -30178,7 +30184,7 @@ function listHtml(){
     '<th class="hm">Next step</th>'+th("next","Next visit")+th("stage","Stage","hm")+th("n90","Activities 30 / 90 days","hm")+'<th>Status</th></tr></thead><tbody>'+
     rows.slice(0,ACM.lim).map(function(a){
       var m=mOf(a)||{}, act=activeOf(a), od=m.last && m.last<addDays(t,-60);
-      return '<tr onclick="acmEdit('+a._row+')"><td><b>'+e2(a.name)+'</b><small>'+e2([a.code,a.type,picOf(a)].filter(Boolean).join(" · "))+'</small></td>'+
+      return '<tr onclick="acmEdit('+a._row+')"><td><b>'+e2(a.name)+'</b>'+(isKey(a)?' <span class="acm-chip key" title="Distributor key account (KPI C2-02)">Key</span>':'')+'<small>'+e2([a.code,a.type,picOf(a)].filter(Boolean).join(" · "))+'</small></td>'+
         '<td>'+e2(a.province||"—")+'<small>'+e2(a.district||"")+'</small></td>'+
         '<td>'+(a.dist?'<span style="color:'+distCol(a.dist)+';font-weight:700">'+e2(a.dist)+'</span>':'<span style="color:#A0AAB6">—</span>')+'<small>'+e2(a.dsr||"")+'</small></td>'+
         '<td class="c" data-l="Last visit"'+(od?' style="color:#B3261E"':'')+'>'+(m.last?dd(m.last):'—')+'</td>'+
@@ -30206,6 +30212,7 @@ window.acmEdit=function(r){
     '<div class="fld"><label>Distributor</label><select class="inp" id="acm_dist">'+opts(ACM.dist,a.dist||"","— none —")+'</select></div></div>'+
     '<div class="fld"><label>Distributor sales rep</label><input class="inp" id="acm_dsr" list="acm_dsr_l" value="'+e2(a.dsr||"")+'" placeholder="Name of the distributor\'s sales rep who covers this account">'+
       '<datalist id="acm_dsr_l">'+Object.keys(dsr).sort().map(function(d){ return '<option value="'+e2(d)+'">'; }).join("")+'</datalist></div>'+
+    '<label class="acm-key"><input type="checkbox" id="acm_key"'+(isKey(a)?" checked":"")+'><span><b>Distributor key account</b><small>Visits to these accounts count for KPI C2-02 (Yong).</small></span></label>'+
     '<div class="v359-sum"><span>Last visit <b>'+(m.last?fmtVN(m.last):"—")+'</b></span><span>Next visit <b>'+(m.next?fmtVN(m.next):"—")+'</b></span><span>Stage <b>'+e2(m.stage||"—")+'</b></span><span>Activities 30 / 90 days <b>'+(m.n30||0)+' / '+(m.n90||0)+'</b></span></div>'+
     (m.step?'<div class="hint">Next step: '+e2(m.step)+'</div>':'')+
     '<div class="hint" style="margin-top:8px">Map location: '+loc+'</div>'+
@@ -30217,16 +30224,18 @@ window.acmEdit=function(r){
 };
 function srcLb(s){ return s==="pin"?"placed by hand":s==="osm"?"OpenStreetMap":s==="search"?"address search":s==="province"?"province centre (approximate)":(s||""); }
 function patch(a,j){
-  if(j && j.row){ var cols=["code","name","type","province","district","dist","dsr","lat","lng","src","at","by"]; cols.forEach(function(c,i){ if(j.row[i]!==undefined) a[c]=j.row[i]; }); }
+  if(j && j.row){ var cols=["code","name","type","province","district","dist","dsr","lat","lng","src","at","by","key"]; cols.forEach(function(c,i){ if(j.row[i]!==undefined) a[c]=j.row[i]; }); }
   lsSet(lsK(),{ rows:ACM.rows, dist:ACM.dist, sheet:ACM.sheet });
 }
 window.acmSave=function(r){
   var a=byRow(r); if(!a) return;
-  var v={ district:$("acm_dis").value.trim(), dist:$("acm_dist").value, dsr:$("acm_dsr").value.trim() };
-  var old={ district:a.district, dist:a.dist, dsr:a.dsr };
-  a.district=v.district; a.dist=v.dist; a.dsr=v.dsr; closeModal(); render();
-  apiPost({ action:"acctSave", code:a.code, name:a.name, district:v.district, dist:v.dist, dsr:v.dsr }).then(function(j){ patch(a,j); toast("Saved to ACCOUNT TRACKING","ok"); repaint(); })
-    .catch(function(e){ a.district=old.district; a.dist=old.dist; a.dsr=old.dsr; render(); toast("Not saved: "+(e&&e.message||e),"err",7000); });
+  var kb=$("acm_key"), v={ district:$("acm_dis").value.trim(), dist:$("acm_dist").value, dsr:$("acm_dsr").value.trim() };
+  if(kb && kb.checked!==isKey(a)) v.key=kb.checked?"Yes":"No";
+  var old={ district:a.district, dist:a.dist, dsr:a.dsr, key:a.key };
+  a.district=v.district; a.dist=v.dist; a.dsr=v.dsr; if(v.key) a.key=v.key; closeModal(); render();
+  var body={ action:"acctSave", code:a.code, name:a.name, district:v.district, dist:v.dist, dsr:v.dsr }; if(v.key) body.key=v.key;
+  apiPost(body).then(function(j){ patch(a,j); toast("Saved to ACCOUNT TRACKING","ok"); repaint(); })
+    .catch(function(e){ a.district=old.district; a.dist=old.dist; a.dsr=old.dsr; a.key=old.key; render(); toast("Not saved: "+(e&&e.message||e),"err",7000); });
 };
 window.acmClearLoc=function(r){
   var a=byRow(r); if(!a) return; closeModal();

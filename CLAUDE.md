@@ -286,3 +286,6 @@ Kiến trúc & quy ước giống MMH Report Hub (repo `ManiMedicalHanoi/MMH-Rep
   ⇒ Nominatim (≤ 80 / lượt, 1,1 s / lần) ⇒ tâm tỉnh (`province`, gần đúng); account đã tìm trong 14 ngày bỏ qua (`mmh_acm_tried`). Ghim tay = `pin` (Move pin), backend không bao giờ ghi đè.
   ③ **Event ROI** (`thaid`, khi `list` trả `roi`): thẻ sự kiện + dải tổng chi phí / doanh thu / ROI, khung **Follow-ups due** (mốc 2 / 4 / 8 tuần sau ngày kết thúc), form sự kiện thêm Budget & ROI (ô công thức = chỉ đọc), Note (Z), Next follow up (AA),
   nhật ký theo dõi (`followup` ⇒ cột AB), **Create budget sheet** (`budgetSheet`). Tour `acct` + bước mới của `event` (`thd()` / `roi()` trong tours.js). Test: Playwright + `mmh-backend/ifu/capture` (app phục vụ qua http — `fetch` file JSON không chạy với `file://`).
+- **v36.1 (11/11/2026, sửa khối `v359-js`, backend crm-thai-dental TH_AccountMap v1.3 + kpi KpiThdFix)**: KPI Dental Thailand theo file 04/11/2026 của Owen san — Account tracking có ô **Distributor key account**
+  (cột M ACCOUNT TRACKING, `acctSave key=Yes|No`, chip "Key", lọc "Distributor key accounts") ⇒ KPI C2-02 = lượt thăm key account; Type action **Event/Co-visiting with distributor** (đến từ MASTER LIST qua `master_`);
+  tên rút gọn KPI mới trong `RULES_ENK` ("Key account visits"). Tour `acct` v2.
