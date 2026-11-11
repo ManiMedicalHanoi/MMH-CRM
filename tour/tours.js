@@ -15,9 +15,20 @@ function th(){ try{ return /^thaid?$/.test(curTeamKey()); }catch(_){ return fals
 function more(sel){ return function(){ return TOUR.find(sel) || TOUR.find("nav.mob button:last-of-type"); }; }
 function calTools(){ try{ if(window.CAL && !CAL.mt && TOUR.find(".cal-dots3")){ CAL.mt=true; renderCal(); } }catch(_){} }
 function V(vi,en){ return { vi:vi, en:en }; }
+function wmo(){ window.__wmTour=true; try{ if(window.WM && !WM.state().open) WM.open(); }catch(_){} }   /* v36.4 — Working Map */
 function thd(){ try{ return curTeamKey()==="thaid"; }catch(_){ return false; } }   /* Thailand Dental (v35.9: account tracking, event ROI) */
 function roi(){ try{ return thd() && (EVS.rows||[]).some(function(x){ return x.roi && x.row; }); }catch(_){ return false; } }
 TOUR.add([
+ { id:"wmap", v:2, d:"2026-11-11", g:V("Bắt đầu","Getting started"), ic:"map", t:V("Working Map — lịch + bản đồ","Working Map — calendar + map"), x:V("Màn hình mở đầu: lịch làm việc, bản đồ đi địa bàn, KPI, doanh số dự kiến.","Start screen: work calendar, field-visit map, KPIs, estimated sales."),
+   steps:[
+    { el:"#wmBtn", do:function(){ window.__wmTour=true; }, t:V("Mở Working Map","Open the Working Map"), x:V("Working Map tự mở sau khi đăng nhập. Bấm nút này để mở lại bất cứ lúc nào (điện thoại: Thêm ▸ Working Map). Nút ? trong Working Map mở hướng dẫn nhanh.","The Working Map opens after you sign in. Click this button to open it again (phone: More ▸ Working Map). The ? button inside opens the quick guide.") },
+    { el:"#wm-flt", do:wmo, wait:900, t:V("Xem của ai","Whose work"), x:V("Sales thấy việc của chính mình. Quản lý xem cả nhóm hoặc bấm từng người; Giám đốc chọn được Việt Nam / Thái Lan.","Sales see their own work. Managers see the whole team or click one person; the Director can switch Vietnam / Thailand.") },
+    { el:"#wm-cal", do:wmo, t:V("Lịch làm việc","Work calendar"), x:V("Mỗi ô là 1 ngày: chấm xanh lá = đã làm, chấm rỗng = kế hoạch, biểu tượng = loại việc. Bấm 1 ngày ⇒ bản đồ chỉ hiện ngày đó.","Each cell is a day: green dot = done, hollow dot = planned, the icon = task type. Click a day to see only that day on the map.") },
+    { el:"#wm-mapc", do:wmo, t:V("Bản đồ địa bàn","Territory map"), x:V("Chế độ Hoạt động · Độ phủ · Cơ hội (Surgical VN thêm Trúng thầu). Bấm khách / tỉnh để xem chi tiết.","Modes Activity · Coverage · Pipeline. Click an account or a province for details.") },
+    { el:"#wm-kpi", do:wmo, t:"KPI", x:V("Vòng tròn KPI cập nhật trực tiếp, đổi Tháng / Quý. Quản lý thấy theo đầu KPI của nhóm, Giám đốc thấy theo nhóm.","Live KPI rings, switch Month / Quarter. Managers see team KPIs, the Director sees each team.") },
+    { el:"#wm-pipe", do:wmo, t:V("Doanh số dự kiến","Estimated sales"), x:V("Cộng các cơ hội thầu / mua sắm Sales cập nhật ở từng khách, đổi USD / VND (tỷ giá 26.700).","Sum of the tender / purchase opportunities sales update per account, switch USD / THB.") },
+    { el:"#wm-back", do:wmo, t:V("Về CRM","Back to the CRM"), x:V("Quay lại giao diện nhập liệu như cũ — mọi chức năng cũ không đổi.","Back to the usual CRM screens — every feature works as before.") }
+   ] },
  { id:"start", v:6, d:"2026-11-02", g:V("Bắt đầu","Getting started"), ic:"start", t:V("Làm quen MMH CRM","Tour of MMH CRM"), x:V("Các khu vực chính và chỗ tìm mọi chức năng.","The main areas and where to find every feature."),
    steps:[
     { el:more("#side"), do:wk("cal"), zoom:false, t:V("Menu chức năng","Feature menu"), x:V("<i>(Điện thoại: nút <b>Thêm</b> ở thanh dưới.)</i> Menu chia 5 nhóm: <b>Tổng quan</b> · <b>Khách hàng</b> (Địa bàn, Khách hàng) · <b>Cập nhật công việc</b> (Đi địa bàn, Công việc khác, Thuyết trình, Kế hoạch tháng) · <b>Kết quả bán hàng</b> · <b>Công cụ & Báo cáo</b>.","<i>(Phone: the <b>More</b> button in the bottom bar.)</i> The menu has 5 groups: <b>Overview</b> · <b>Customers</b> · <b>Activities & Plans</b> · <b>Sales Result</b> · <b>Tools & Reports</b>.") },

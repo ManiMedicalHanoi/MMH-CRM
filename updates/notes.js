@@ -7,6 +7,17 @@
 function E(u){ u.en={ title:u.title, items:u.items.map(function(i){ return { title:i.title, text:i.text }; }) }; return u; }
 window.MMH_UPDATES = [
   E({
+    id:"2026-11-11-v36.4", version:"v36.4", date:"2026-11-11",
+    title:"Working Map: work calendar, territory map, KPIs and estimated sales when you sign in",
+    summary:"After you sign in the CRM opens the <b>Working Map</b>: the work calendar on top, the map of your field activities below (Vietnam or Thailand), your KPIs and the estimated sales on the right. Click <b>CRM</b> (top left) to go back to the usual screens — nothing else has changed. The first time, a short guide shows each part; the <b>?</b> button shows it again.",
+    items:[
+      { type:"new", icon:"+", title:"Calendar + map in one screen", text:"Top: the week (or month) calendar with an icon per person and per task type — visit, call, presentation, business trip; green dot = done, hollow dot = planned. Click a day ⇒ the map shows only that day. Open the Working Map again with the button in the top bar (phone: More ▸ Working Map).", img:"updates/v36.4/map_overview.jpg" },
+      { type:"new", icon:"+", title:"KPI rings, live", text:"Your KPIs as rings for the current month or quarter (<b>Month · Quarter</b>). Team leaders see each team KPI and can click a ring to see every person; HOD and the Director see a score per team.", img:"updates/v36.4/map_day.jpg" },
+      { type:"new", icon:"+", title:"Opportunities and estimated sales", text:"Click an account ▸ <b>Add an opportunity</b>: tender or private purchase, stage, products by group (e.g. DIA-BURS 200 sheets). A detailed item code needs a unit price; with prices the estimated sales are calculated and summed in <b>Estimated sales</b> (USD ⇄ local currency, fixed rate).", img:"updates/v36.4/map_account.jpg" },
+      { type:"new", icon:"+", title:"Coverage, search, quick actions", text:"<b>Coverage</b> colours provinces by the share of CRM accounts visited. Search finds CRM accounts, provinces and hospitals not yet in the CRM. Buttons open the usual forms: <b>Add a plan</b>, <b>Propose a trip</b>, <b>Open the CRM profile</b>.", img:"updates/v36.4/map_coverage.jpg" }
+    ]
+  }),
+  E({
     id:"2026-11-11-v36.3", version:"v36.3", date:"2026-11-11",
     title:"Thailand: Task Result in one box with the 4 headings",
     summary:"For the Thailand teams the Task Result is now one box instead of 4. The 4 headings stay in the box and cannot be deleted.",
