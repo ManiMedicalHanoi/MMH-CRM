@@ -7,6 +7,16 @@
 function E(u){ u.en={ title:u.title, items:u.items.map(function(i){ return { title:i.title, text:i.text }; }) }; return u; }
 window.MMH_UPDATES = [
   E({
+    id:"2026-11-11-v36.0", version:"v36.0", date:"2026-11-11",
+    title:"Save button always visible, type to search in drop-downs, shared visits on a teammate's account",
+    summary:"Answers to questions from the Thailand Dental team: the <b>Update to Sheet</b> button no longer disappears when a task is opened from the account's 360° profile, long drop-down lists can be <b>searched by typing</b>, and when you visit an account together, you can pick your <b>teammate's account</b> instead of creating a new one.",
+    items:[
+      { type:"fix", icon:"!", title:"Update to Sheet button always visible", text:"Open a task from the account's <b>360° profile</b> ▸ the button <b>Update to Sheet</b> (bottom right) is now shown — before, it was hidden in this view so there was no way to save. Your text is saved only when you press this button. Closing the task takes you back to the same account profile.", img:"updates/v36.0/task_save.jpg" },
+      { type:"new", icon:"+", title:"Type to search in drop-down lists", text:"Click a drop-down (Type task, Type action, Status, Province…) or just start typing while it is selected ▸ a search box opens: type <b>c</b> ⇒ Sale-Clinics, Co-visiting… ▸ <b>Enter</b> or click to choose, <b>Esc</b> to close. On computers; phones keep their own picker.", img:"updates/v36.0/select_search.jpg" },
+      { type:"imp", icon:"+", title:"Shared visits: pick your teammate's account", text:"Thailand teams: the <b>Account</b> list of a new task shows your accounts first, then your teammates' accounts (<i>PIC Yong · shared visit</i>). Visiting together ⇒ each person logs a task on the <b>same</b> account — no need to create a new account, so there are no duplicates. The account PIC (owner) stays the same; only a lead can change it in Edit profile.", img:"updates/v36.0/shared_account.jpg" }
+    ]
+  }),
+  E({
     id:"2026-11-09-v35.9", version:"v35.9", date:"2026-11-09",
     title:"Thailand Dental: Account tracking, Thailand map and event ROI / follow-up",
     summary:"From the CRM improvement survey: a new <b>Account tracking</b> page (one row per account with district, distributor, distributor sales rep, last visit, next step, next visit and stage), a <b>map of Thailand</b> with your accounts by province and region, and <b>budget, revenue, ROI and follow-ups</b> on every event.",
