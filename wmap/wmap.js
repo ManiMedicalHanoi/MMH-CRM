@@ -261,7 +261,7 @@ function loadKpi(force){
   if(!CFG.KPI_URL) return Promise.resolve(null);
   if(!force && KP.d && Date.now()-KP.at<60000) return Promise.resolve(KP.d);
   if(KP.busy) return KP.busy;
-  KP.busy=jp(CFG.KPI_URL, { action:"rhKpi" }, 60000).then(function(j){ KP.busy=null; if(j && j.ok){ KP.d=j; KP.at=Date.now(); } return KP.d; }).catch(function(){ KP.busy=null; return KP.d; });
+  KP.busy=jp(CFG.KPI_URL, { action:"rhKpi" }, 60000).then(function(j){ KP.busy=null; if(j && j.ok && Array.isArray(j.rows) && Array.isArray(j.periods)){ KP.d=j; KP.at=Date.now(); } return KP.d; }).catch(function(){ KP.busy=null; return KP.d; });
   return KP.busy;
 }
 function loadAll(force){

@@ -6,7 +6,7 @@ const ARGS=process.argv.slice(2), THD=ARGS.includes("--thaid"), THAI=THD||ARGS.i
 const MOB=ARGS.includes("--mobile");   /* --mobile: khung điện thoại 390×844 */
 (async()=>{
   const b=await chromium.launch(); const p=await (await b.newContext(MOB?{viewport:{width:390,height:844},isMobile:true,hasTouch:true}:{viewport:{width:1440,height:900}})).newPage();
-  const errs=[]; p.on("pageerror",e=>errs.push(e.message));
+  const errs=[]; p.on("pageerror",e=>errs.push(e.message+" @ "+String(e.stack||"").split("\n").slice(1,3).join(" | ")));
   const pic=THD?"Yong":THAI?"Dao":"Viet";
   await p.addInitScript((pic)=>{ localStorage.setItem("mmh_tk",JSON.stringify({tk:"xxxxxxxxxxxx.sig",exp:Date.now()+864e5,user:{pic:pic,email:"x@manimedicalhanoi.com",local:"x",level:"lead",admin:true}}));
     localStorage.setItem("mmh_auth_later",new Date().toISOString().slice(0,10)); if(pic==="Dao") localStorage.setItem("mmh_team","thai"); if(pic==="Yong") localStorage.setItem("mmh_team","thaid"); }, pic);
