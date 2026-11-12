@@ -4017,7 +4017,7 @@ function buildNav(){
     if(t.grp!==lastGrp){ h+='<div class="grp">'+t.grp+'</div>'; lastGrp=t.grp; }
     h+='<button class="nvi" data-t="'+t.id+'" onclick="go(\''+t.id+'\')"><span class="ic">'+t.ic+'</span><span class="lb">'+t.lb+'</span></button>';
   });
-  h+='<div style="flex:1"></div><div style="padding:10px;font-size:10.5px;color:var(--mute);line-height:1.5">MMH CRM v36.5<br>'+
+  h+='<div style="flex:1"></div><div style="padding:10px;font-size:10.5px;color:var(--mute);line-height:1.5">MMH CRM v36.6<br>'+
      (isMgmt()?'<a href="'+DRIVE_FOLDER+'" target="_blank">📁 Folder ảnh Drive</a>':"")+'</div>';
   $("side").innerHTML=h;
   /* ⭐ v4.5 — thanh dưới trượt ngang, đủ mọi mục, bỏ nút "Thêm" */
@@ -21005,7 +21005,7 @@ window.QS2={ open:qsOpen };
 </script>
 
 <!-- ⭐ v30.3 — THÔNG BÁO CẬP NHẬT (chép từ Report Hub): dữ liệu updates/notes.js · tự hiện 7 ngày · nút "Có gì mới" trên thanh trên cùng -->
-<script src="updates/notes.js?v=36.5"></script>
+<script src="updates/notes.js?v=36.6"></script>
 <style id="upd-css">
 #upd,#upd-zoom{--t-pri:var(--blue);--t-pri2:var(--blue-d);--t-ink:var(--navy);--t-soft:var(--pale);--t-line:var(--lb2);--t-bg:#F6F8FA;--mmh-blue:var(--blue);--mmh-navy:var(--navy)}
 
@@ -26687,7 +26687,7 @@ mtOverviewHtml=function(p){
   function viaSet(on){ try{ if(on) localStorage.setItem(K,String(Date.now()+12*3600e3)); else localStorage.removeItem(K); }catch(_){} }
   function hub(params,ms){
     var base=window.TRAINING_HUB_API; if(!base) return Promise.reject(new Error("Training Hub?"));
-    var q={ action:"rhTurnover", op:params.action||"getTurnoverData", rhKey:(typeof TRN_KEY!=="undefined"?TRN_KEY:""), actor:(S.user&&S.user.pic)||"" };
+    var q={ action:"rhTurnover", op:params.action||"getTurnoverData", rhKey:(typeof TRN_KEY!=="undefined"?TRN_KEY:"mmh-rh-training-2026"), actor:(S.user&&S.user.pic)||"" };   /* ⭐ v36.6: TRN_KEY ở phạm vi riêng ⇒ trước gửi khoá rỗng */
     ["fy","seg","fresh","n","_ts"].forEach(function(k){ if(params[k]!=null && params[k]!=="") q[k]=params[k]; });
     return new Promise(function(res,rej){
       var cb="__mmhtoh_"+Date.now()+"_"+Math.floor(Math.random()*1e5), sc=document.createElement("script");
@@ -31163,6 +31163,133 @@ function mark(id){
   window[fn]=function(){ var r=f.apply(this,arguments); try{ if(on()) mark(fn==="saveTask"?"tk-result":"nt_result"); }catch(_){} return r; };
   try{ if(fn==="saveTask") saveTask=window[fn]; else submitNewTask=window[fn]; }catch(_){}
 });
+})();
+</script>
+<style id="v366-css">
+/* ⭐ v36.6 — T&E: bản lưu khi Training Hub lỗi · bản nháp · Thuyết trình Dental */
+.v366-stale{border:1px solid #F1D48A;background:#FFFBEB;color:#3D2E00;border-radius:10px;padding:9px 12px;font-size:13px;margin:0 0 10px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.v366-stale .sp{flex:1}
+.v366-draft{border:1px solid var(--t-line,#CFE2F3);background:var(--t-soft,#F0F7FF);border-radius:10px;padding:9px 12px;font-size:13px;margin:0 0 12px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.v366-draft .sp{flex:1}
+.v366-note{font-size:12.5px;color:#5B6B7D;margin:4px 0 0}
+.v366-note a{cursor:pointer;color:var(--t-pri,#3A5CAA);text-decoration:underline}
+</style>
+<script id="v366-js">
+/* ═════════ ⭐ v36.6 (12/11/2026) — ĐÀO TẠO KHÁCH HÀNG (T&E) · THUYẾT TRÌNH (DENTAL VN) ═════════
+   Sự cố 12/11: sheet "Training Report FY67" của Training Master bị đổi tên ⇒ Training Hub báo "Không tìm thấy sheet" ⇒ tab T&E
+   hiện danh sách TRỐNG (sales tưởng mất hết buổi đào tạo), lưu buổi mới lỗi ⇒ nội dung vừa gõ mất. Backend đã sửa (Training Hub v3.45 tự nhận tên mới).
+   ① Danh sách T&E đọc được lần cuối lưu trên máy (localStorage mmh_te_cache_<nhóm>_<pic|all>) ⇒ Training Hub lỗi / chậm vẫn hiện bản lưu + dải vàng,
+      câu lỗi kỹ thuật ⇒ câu thường. ② Bấm Lưu ⇒ nội dung form giữ làm bản nháp (mmh_te_draft_<nhóm>_<pic>) tới khi lưu được; mở lại form ⇒ Khôi phục / Bỏ.
+      Lỗi ⇒ 30 giây sau mới tự đọc lại (trước: mỗi lần vẽ lại gọi lại ngay ⇒ lỗi ⇒ vẽ lại… = gọi Training Hub liên tục không nghỉ).
+   ③ Dental VN: buổi Thuyết trình sản phẩm KHÔNG vào KPI (C10-03 / 04 / 05 = buổi Đào tạo khách hàng T&E ở Training Master) ⇒ nhãn "Tính KPI" ⇒ "Đủ báo cáo"
+      + dòng chỉ sang tab T&E. ④ rhTurnover (v32.7) đã gắn khoá dự phòng (TRN_KEY nằm trong phạm vi riêng ⇒ trước gửi khoá rỗng). */
+(function(){
+"use strict";
+function L(v,e){ try{ return (window.I18N&&I18N.on)?e:v; }catch(_){ return v; } }
+function $i(id){ return document.getElementById(id); }
+function team(){ try{ return curTeamKey(); }catch(_){ return ""; } }
+function me(){ return String((window.S&&S.user&&S.user.pic)||""); }
+function mgr(){ try{ return isMgrView(); }catch(_){ return false; } }
+function teOn(){ try{ return !!(window.v316TeOn && v316TeOn()); }catch(_){ return false; } }
+function lsGet(k){ try{ return JSON.parse(localStorage.getItem(k)||"null"); }catch(_){ return null; } }
+function lsSet(k,v){ try{ if(v==null) localStorage.removeItem(k); else localStorage.setItem(k,JSON.stringify(v)); }catch(_){} }
+function cKey(){ return "mmh_te_cache_"+team()+"_"+(mgr()?"all":me()); }
+function dKey(){ return "mmh_te_draft_"+team()+"_"+me(); }
+function hm(t){ try{ var d=new Date(t); return ("0"+d.getHours()).slice(-2)+":"+("0"+d.getMinutes()).slice(-2)+" "+("0"+d.getDate()).slice(-2)+"/"+("0"+(d.getMonth()+1)).slice(-2); }catch(_){ return ""; } }
+function plainErr(m){
+  m=String(m||"");
+  if(/không tìm thấy sheet|training report/i.test(m)) return L("Training Hub chưa đọc được sheet buổi đào tạo trong file Training Master (sheet vừa bị đổi tên / sửa). Dữ liệu không mất — thử lại sau ít phút.","The Training Hub cannot read the training sheet of the Training Master right now (the sheet was just renamed / edited). No data is lost — try again in a few minutes.");
+  if(/chậm|slow|kết nối|reach|timed? ?out/i.test(m)) return L("Training Hub phản hồi chậm hoặc mất kết nối — thử lại sau ít phút.","The Training Hub is slow or unreachable — try again in a few minutes.");
+  return L("Chưa đọc được Training Hub: ","Training Hub error: ")+m;
+}
+window.v366PlainErr=plainErr;
+
+/* ① bản lưu danh sách T&E */
+var TE=window.TE||{}, _lastAt=0, _rp=window.renderPresent;
+function decorate(){
+  var main=$i("main"); if(!main) return;
+  var er=main.querySelector(".v316-err.on");
+  if(er && TE.err){
+    var cache=lsGet(cKey());
+    er.outerHTML=TE._v366stale && cache
+      ? '<div class="v366-stale"><span>'+esc(plainErr(TE.err))+' '+esc(L("Đang hiện danh sách lưu trên máy lúc ","Showing the list saved on this device at "))+esc(hm(cache.at))+'.</span><span class="sp"></span><button class="btn sm" onclick="teLoad(true)">'+esc(L("Thử lại","Retry"))+'</button></div>'
+      : '<div class="v366-stale"><span>'+esc(plainErr(TE.err))+'</span><span class="sp"></span><button class="btn sm" onclick="teLoad(true)">'+esc(L("Thử lại","Retry"))+'</button></div>';
+    if(!TE._v366stale){ var emp=main.querySelector(".te-list")?null:main.querySelector(".card .empty p"); if(emp) emp.textContent=L("Chưa tải được danh sách buổi đào tạo — bấm Thử lại.","The session list has not loaded yet — click Retry."); }
+  }
+}
+window.renderPresent=renderPresent=function(){
+  if(teOn() && S.presTab==="te"){
+    if(TE.rows && !TE.err && TE.at && TE.at!==_lastAt){ _lastAt=TE.at; TE._v366stale=false; lsSet(cKey(),{ at:TE.at, items:TE.rows.slice(0,400) }); }
+    if(TE.err && (!TE.rows || !TE.rows.length)){ var c=lsGet(cKey()); if(c && (c.items||[]).length){ TE.rows=c.items.slice(); TE._v366stale=true; } }
+    /* lỗi ⇒ trang T&E gọi teLoad() mỗi lần vẽ lại mà TE.at không đổi ⇒ tải lại liên tục (bão lệnh tới Training Hub). Lỗi ⇒ 30 giây sau mới tự thử lại. */
+    if(TE.err && !TE.loading){ if(!TE.rows) TE.rows=[]; TE.at=Date.now()-90000; }
+  }
+  var r=_rp.apply(this,arguments);
+  try{ if(teOn() && S.presTab==="te") decorate(); else dentalPres(); }catch(e){ try{ console.warn(e); }catch(_){} }
+  return r;
+};
+
+/* ② bản nháp form T&E */
+function readForm(){
+  var g=function(id){ var e=$i(id); return e?e.value:""; }, x=TE.edit||{};
+  return { sid:x.sid||"", date:g("te_date"), pic:g("te_pic"), status:g("te_status"), topic:g("te_topic"), product:g("te_product"), place:g("te_place"),
+    target:g("te_target"), actual:g("te_actual"), review:g("te_review"), audience:(TE.aud||[]).slice(), at:Date.now() };
+}
+var _ts=window.teSave;
+if(typeof _ts==="function") window.teSave=function(){
+  var d=null; try{ d=readForm(); if(d.topic||d.review||d.audience.length) lsSet(dKey(),d); }catch(_){}
+  var t0=TE.at, r=_ts.apply(this,arguments), n=0;
+  (function w(){ if(TE.at!==t0){ var cur=lsGet(dKey()); if(cur && d && cur.at===d.at) lsSet(dKey(),null); return; } if(++n<180) setTimeout(w,500); })();
+  setTimeout(function(){ var e=$i("te_err"); if(e && e.classList.contains("on") && /sheet|training report|hub/i.test(e.textContent)) e.innerHTML=esc(plainErr(e.textContent))+"<br>"+esc(L("Nội dung đã được giữ lại trên máy — mở lại form để khôi phục.","Your input is kept on this device — reopen the form to restore it.")); },1200);
+  setTimeout(function(){ var e=$i("te_err"); if(e && e.classList.contains("on") && /sheet|training report|hub/i.test(e.textContent) && !/giữ lại|kept on/.test(e.textContent)) e.innerHTML=esc(plainErr(e.textContent))+"<br>"+esc(L("Nội dung đã được giữ lại trên máy — mở lại form để khôi phục.","Your input is kept on this device — reopen the form to restore it.")); },8000);
+  return r;
+};
+function restore(d){
+  var set=function(id,v){ var e=$i(id); if(e && v!=null && v!==""){ e.value=v; try{ e.dispatchEvent(new Event("input",{bubbles:true})); }catch(_){} } };
+  ["date","status","topic","product","place","target","actual"].forEach(function(k){ set("te_"+k,d[k]); });
+  var p=$i("te_pic"); if(p && d.pic && p.tagName==="SELECT") p.value=d.pic;
+  var ta=$i("te_review"); if(ta && d.review) ta.value=d.review;
+  TE.aud=(d.audience||[]).slice();
+  try{ if(S.modalRewire) S.modalRewire(); }catch(_){}
+  var b=$i("v366-draft"); if(b) b.remove();
+}
+var _tf=window.teForm;
+if(typeof _tf==="function") window.teForm=function(k){
+  var r=_tf.apply(this,arguments);
+  try{
+    var d=lsGet(dKey()), x=TE.edit||{};
+    if(d && Date.now()-d.at<14*864e5 && String(d.sid||"")===String(x.sid||"")){
+      var host=$i("te_date"); host=host&&host.closest(".row");
+      if(host){
+        var bar=document.createElement("div"); bar.id="v366-draft"; bar.className="v366-draft";
+        bar.innerHTML='<span>'+esc(L("Có nội dung chưa lưu được lúc ","Unsaved input from "))+esc(hm(d.at))+(d.topic?' · <b>'+esc(d.topic)+'</b>':'')+'</span><span class="sp"></span>'+
+          '<button type="button" class="btn sm pri" id="v366-rs">'+esc(L("Khôi phục","Restore"))+'</button><button type="button" class="btn sm" id="v366-rx">'+esc(L("Bỏ","Discard"))+'</button>';
+        host.parentNode.insertBefore(bar,host);
+        $i("v366-rs").onclick=function(){ restore(d); };
+        $i("v366-rx").onclick=function(){ lsSet(dKey(),null); bar.remove(); };
+      }
+    }
+  }catch(e){ try{ console.warn(e); }catch(_){} }
+  return r;
+};
+
+/* ③ Thuyết trình — Dental VN: không tính KPI */
+function dentalPres(){
+  if(team()!=="dental" || S.tab!=="present" || S.presTab==="te") return;
+  var main=$i("main"); if(!main) return;
+  var ph=main.querySelector(".pg .ph p");
+  if(ph && !ph._v366){ ph._v366=1;
+    ph.innerHTML=esc(L("Buổi đủ báo cáo = Actual > 0 + đủ 5 mục. KPI C10 của nhóm Dental tính theo buổi ","Complete report = Actual > 0 + all 5 sections. Dental KPI C10 counts sessions in "))+
+      '<a onclick="S.presTab=\'te\';renderPresent()">'+esc(L("Đào tạo khách hàng (T&E)","Customer training (T&E)"))+'</a>'+esc(L(", không tính buổi thuyết trình.",", not presentations.")); ph.className="v366-note"; }
+  var k=main.querySelector("#v322-pk .it small"); if(k) k.textContent=L("Buổi đủ báo cáo","Complete reports");
+  main.querySelectorAll(".v322-pc .v316-chip.ok").forEach(function(c){ c.textContent=L("Đủ báo cáo","Complete"); });
+  var rem=main.querySelector(".v322-rem span"); if(rem) rem.innerHTML=rem.innerHTML.replace(/chưa đủ báo cáo — chưa được tính KPI\./,"chưa đủ báo cáo.").replace(/without a complete report — not counted for KPI\./,"without a complete report.");
+}
+var _toast=window.toast;
+if(typeof _toast==="function") window.toast=function(m){
+  try{ if(team()==="dental" && typeof m==="string") m=m.replace(" — điền đủ để được tính KPI"," — mở buổi và điền đủ 5 mục").replace(" need a complete report to count for KPI"," need a complete report"); }catch(_){}
+  var a=[].slice.call(arguments); a[0]=m; return _toast.apply(this,a);
+};
 })();
 </script>
 <!-- ═════════ v36.4 (11/11/2026) — WORKING MAP: lịch làm việc + bản đồ hoạt động địa bàn (thay Tender Map trong CRM, người dùng yêu cầu) ═════════
