@@ -7,6 +7,16 @@
 function E(u){ u.en={ title:u.title, items:u.items.map(function(i){ return { title:i.title, text:i.text }; }) }; return u; }
 window.MMH_UPDATES = [
   E({
+    id:"2026-11-12-v36.6", version:"v36.6", date:"2026-11-12",
+    title:"Customer training (T&E): your sessions stay visible, unsaved input is kept",
+    summary:"On 12 Nov the Training Hub could not read the training sheet for a few hours, so the Customer training tab looked empty. No session was lost — the tab works again. From now on, if the Training Hub cannot be read for a moment, the tab shows the last list saved on your device and keeps the session you could not save.",
+    items:[
+      { type:"fix", icon:"!", title:"The list never looks empty because of a server error", text:"Presentations ▸ <b>Customer training (T&E)</b> ▸ if the Training Hub cannot be read, a yellow note explains it and the last list saved on your device is shown. The app tries again after 30 seconds and <b>Retry</b> reloads at once.", img:"updates/v36.6/te_saved.jpg" },
+      { type:"imp", icon:"+", title:"Unsaved session kept as a draft", text:"If saving fails, your input stays on this device. Open <b>New session</b> again ▸ <b>Restore</b> ▸ <b>Save to the Training Master</b>.", img:"updates/v36.6/te_draft.jpg" },
+      { type:"fix", icon:"i", title:"Dental Vietnam: presentations and KPI", text:"Product presentations with a complete report now show <b>Complete</b> instead of “Counted”: Dental KPI C10-03 / 04 / 05 counts only the sessions in the <b>Customer training (T&E)</b> tab." }
+    ]
+  }),
+  E({
     id:"2026-11-11-v36.5", version:"v36.5", date:"2026-11-11",
     title:"Sign in with your company email + your own password",
     summary:"The first time, sign in with the 6-digit code from your email, then create a password. After that you only need <b>email + password</b> — your browser or the installed app remembers it, so you no longer wait for a code by email.",
