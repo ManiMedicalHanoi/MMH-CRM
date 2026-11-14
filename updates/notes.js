@@ -7,6 +7,14 @@
 function E(u){ u.en={ title:u.title, items:u.items.map(function(i){ return { title:i.title, text:i.text }; }) }; return u; }
 window.MMH_UPDATES = [
   E({
+    id:"2026-11-14-v36.7", version:"v36.7", date:"2026-11-14",
+    title:"Surgical Vietnam: Khang covers Manipler in Da Nang",
+    summary:"Hospitals in Da Nang belong to Viet Ha for knives and sutures, so Khang could not choose them when planning a visit. Khang is now also in charge of <b>Manipler</b> in the Da Nang area.",
+    items:[
+      { type:"fix", icon:"!", title:"Plan Manipler visits in Da Nang", text:"Field visits ▸ <b>+ New task</b> ▸ <b>Account</b>: Khang's list now also shows Da Nang accounts, marked <b>Manipler · Da Nang</b>. Choose one ▸ Product group is set to <b>Manipler</b> ▸ save. The account keeps its PIC (Viet Ha); the task is yours.", img:"updates/v36.7/khang_danang.jpg" }
+    ]
+  }),
+  E({
     id:"2026-11-12-v36.6", version:"v36.6", date:"2026-11-12",
     title:"Customer training (T&E): your sessions stay visible, unsaved input is kept",
     summary:"On 12 Nov the Training Hub could not read the training sheet for a few hours, so the Customer training tab looked empty. No session was lost — the tab works again. From now on, if the Training Hub cannot be read for a moment, the tab shows the last list saved on your device and keeps the session you could not save.",

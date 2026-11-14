@@ -4017,7 +4017,7 @@ function buildNav(){
     if(t.grp!==lastGrp){ h+='<div class="grp">'+t.grp+'</div>'; lastGrp=t.grp; }
     h+='<button class="nvi" data-t="'+t.id+'" onclick="go(\''+t.id+'\')"><span class="ic">'+t.ic+'</span><span class="lb">'+t.lb+'</span></button>';
   });
-  h+='<div style="flex:1"></div><div style="padding:10px;font-size:10.5px;color:var(--mute);line-height:1.5">MMH CRM v36.6<br>'+
+  h+='<div style="flex:1"></div><div style="padding:10px;font-size:10.5px;color:var(--mute);line-height:1.5">MMH CRM v36.7<br>'+
      (isMgmt()?'<a href="'+DRIVE_FOLDER+'" target="_blank">📁 Folder ảnh Drive</a>':"")+'</div>';
   $("side").innerHTML=h;
   /* ⭐ v4.5 — thanh dưới trượt ngang, đủ mọi mục, bỏ nút "Thêm" */
@@ -21005,7 +21005,7 @@ window.QS2={ open:qsOpen };
 </script>
 
 <!-- ⭐ v30.3 — THÔNG BÁO CẬP NHẬT (chép từ Report Hub): dữ liệu updates/notes.js · tự hiện 7 ngày · nút "Có gì mới" trên thanh trên cùng -->
-<script src="updates/notes.js?v=36.6"></script>
+<script src="updates/notes.js?v=36.7"></script>
 <style id="upd-css">
 #upd,#upd-zoom{--t-pri:var(--blue);--t-pri2:var(--blue-d);--t-ink:var(--navy);--t-soft:var(--pale);--t-line:var(--lb2);--t-bg:#F6F8FA;--mmh-blue:var(--blue);--mmh-navy:var(--navy)}
 
@@ -31290,6 +31290,74 @@ if(typeof _toast==="function") window.toast=function(m){
   try{ if(team()==="dental" && typeof m==="string") m=m.replace(" — điền đủ để được tính KPI"," — mở buổi và điền đủ 5 mục").replace(" need a complete report to count for KPI"," need a complete report"); }catch(_){}
   var a=[].slice.call(arguments); a[0]=m; return _toast.apply(this,a);
 };
+})();
+</script>
+<script id="v367-js">
+/* ═════════ v36.7 (14/11/2026) — Khang phụ trách Manipler khu vực Đà Nẵng (người dùng yêu cầu) ═════════
+   Lỗi: ô chọn Account (accountCombo / myTerritories) chỉ cho Sales chọn địa bàn có PIC = chính mình. Bệnh viện Đà Nẵng có PIC Viet Ha (dao, chỉ khâu)
+   ⇒ Khang không lên được kế hoạch đi địa bàn Manipler ở Đà Nẵng ⇒ gửi báo cáo tuần bị nhắc "chưa có kế hoạch tuần mới".
+   PIC_EXTRA[pic] = vùng phụ trách THÊM (theo nhóm + tỉnh, bỏ dấu): account trong vùng đó hiện thêm trong ô chọn, ghi nhãn "Manipler · Đà Nẵng";
+   chọn ⇒ Product group tự chọn Manipler (nếu có trong danh mục). Account vẫn giữ PIC gốc (Viet Ha) trên CUSTOMER CODE; task ghi PIC = người tạo.
+   Đổi phân vùng ⇒ sửa bảng này (Tender Map + backend crm-surgical MMH_TenderFU dùng cùng luật). */
+(function(){
+"use strict";
+window.PIC_EXTRA = window.PIC_EXTRA || {
+  "Khang": [{ team:"surgical", prov:["da nang","quang nam"], prod:/manipler/i, lbl:["Manipler · Đà Nẵng","Manipler · Da Nang"] }]
+};
+function nk(s){ return (typeof noAcc==="function"?noAcc(s):String(s||"")).toLowerCase().replace(/[^a-z0-9]+/g," ").trim(); }
+function L2(a){ try{ return (window.I18N && I18N.on) ? a[1] : a[0]; }catch(_){ return a[0]; } }
+function rules(pic){
+  var R=(window.PIC_EXTRA||{})[pic]||[], tk=""; try{ tk=curTeamKey(); }catch(_){}
+  return R.filter(function(r){ return !r.team || r.team===tk; });
+}
+/* luật vùng thêm mà account c thuộc (null nếu không) */
+function extraOf(c, pic){
+  if(!c || !pic) return null;
+  var R=rules(pic); if(!R.length) return null;
+  if(c.pic && picMatch(c.pic,pic)) return null;
+  var p=" "+nk(c.province)+" ";
+  for(var i=0;i<R.length;i++) if(R[i].prov.some(function(x){ return p.indexOf(" "+x+" ")>=0; })) return R[i];
+  return null;
+}
+window.picExtraOf=extraOf;
+function on(){ try{ return !isMgrView() && S.user && S.user.pic && rules(S.user.pic).length>0; }catch(_){ return false; } }
+function setProd(r){
+  if(!r || !r.prod) return;
+  setTimeout(function(){
+    var sel=document.querySelector("#mBody select[id$='product'], #mBody select[id$='_prod']"); if(!sel) return;
+    var o=[].filter.call(sel.options,function(x){ return r.prod.test(x.value||x.text); })[0];
+    if(o && sel.value!==o.value){ sel.value=o.value; try{ sel.dispatchEvent(new Event("change",{bubbles:true})); }catch(_){} }
+  },120);
+}
+var _ac=window.accountCombo;
+if(typeof _ac==="function"){
+  window.accountCombo=accountCombo=function(inputId,hiddenId,onPick){
+    if(!on()) return _ac.apply(this,arguments);
+    var me=S.user.pic;
+    combo(inputId,function(){
+      var all=S.custIndex||[];
+      var mine=all.filter(function(c){ return c && c.pic===me; });
+      if(!mine.length) mine=all;
+      var ext=all.filter(function(c){ return mine.indexOf(c)<0 && extraOf(c,me); });
+      function it(c,r){ return { v:c.name, label:c.name, raw:c,
+        meta:[c.code,c.type,c.province,c.area,"PIC "+(c.pic||"—"),r?L2(r.lbl):""].filter(Boolean).join(" · ") }; }
+      return mine.map(function(c){ return it(c,null); }).concat(ext.map(function(c){ return it(c,extraOf(c,me)); }));
+    },function(c){
+      if($(hiddenId)) $(hiddenId).value=mkAcc(c);
+      if(onPick) onPick(c);
+      setProd(extraOf(c,me));
+    },TX("Bấm để xem danh sách · gõ để lọc","Click to list · type to filter"));
+  };
+}
+var _mt=window.myTerritories;
+if(typeof _mt==="function"){
+  window.myTerritories=myTerritories=function(){
+    var r=_mt.apply(this,arguments);
+    if(!on()) return r;
+    var me=S.user.pic, add=(S.custIndex||[]).filter(function(c){ return r.indexOf(c)<0 && extraOf(c,me); });
+    return add.length ? r.concat(add) : r;
+  };
+}
 })();
 </script>
 <!-- ═════════ v36.4 (11/11/2026) — WORKING MAP: lịch làm việc + bản đồ hoạt động địa bàn (thay Tender Map trong CRM, người dùng yêu cầu) ═════════
