@@ -7,6 +7,14 @@
 function E(u){ u.en={ title:u.title, items:u.items.map(function(i){ return { title:i.title, text:i.text }; }) }; return u; }
 window.MMH_UPDATES = [
   E({
+    id:"2026-11-17-v37.1", version:"v37.1", date:"2026-11-17",
+    title:"Deleting an order without an order number",
+    summary:"Some orders without an Order No. could not be deleted: <b>Delete order</b> kept failing and the order stayed in <b>Orders to be revised</b>. Fixed.",
+    items:[
+      { type:"fix", icon:"!", title:"Delete order works again", text:"Open the order ▸ <b>Delete order</b> ▸ <b>Delete</b>: the CRM now finds the order on the sheet by account, PIC and order date, even when other rows were added or removed above it." }
+    ]
+  }),
+  E({
     id:"2026-11-17-v37.0", version:"v37.0", date:"2026-11-17",
     title:"Thailand Dental: sales orders, right from the visit",
     summary:"Record the order on the same page as the visit. Orders are written to the sheet <b>SALE ORDERS</b> and listed in the new <b>Orders</b> page.",
