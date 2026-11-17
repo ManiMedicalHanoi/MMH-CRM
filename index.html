@@ -4019,7 +4019,7 @@ function buildNav(){
     if(t.grp!==lastGrp){ h+='<div class="grp">'+t.grp+'</div>'; lastGrp=t.grp; }
     h+='<button class="nvi" data-t="'+t.id+'" onclick="go(\''+t.id+'\')"><span class="ic">'+t.ic+'</span><span class="lb">'+t.lb+'</span></button>';
   });
-  h+='<div style="flex:1"></div><div style="padding:10px;font-size:10.5px;color:var(--mute);line-height:1.5">MMH CRM v36.8<br>'+
+  h+='<div style="flex:1"></div><div style="padding:10px;font-size:10.5px;color:var(--mute);line-height:1.5">MMH CRM v36.9<br>'+
      (isMgmt()?'<a href="'+DRIVE_FOLDER+'" target="_blank">📁 Folder ảnh Drive</a>':"")+'</div>';
   $("side").innerHTML=h;
   /* ⭐ v4.5 — thanh dưới trượt ngang, đủ mọi mục, bỏ nút "Thêm" */
@@ -21007,7 +21007,7 @@ window.QS2={ open:qsOpen };
 </script>
 
 <!-- ⭐ v30.3 — THÔNG BÁO CẬP NHẬT (chép từ Report Hub): dữ liệu updates/notes.js · tự hiện 7 ngày · nút "Có gì mới" trên thanh trên cùng -->
-<script src="updates/notes.js?v=36.8"></script>
+<script src="updates/notes.js?v=36.9"></script>
 <style id="upd-css">
 #upd,#upd-zoom{--t-pri:var(--blue);--t-pri2:var(--blue-d);--t-ink:var(--navy);--t-soft:var(--pale);--t-line:var(--lb2);--t-bg:#F6F8FA;--mmh-blue:var(--blue);--mmh-navy:var(--navy)}
 
@@ -22961,19 +22961,28 @@ Q=Q.map(function(x){ if(!x.kind) x.kind="data"; return x; });
 function rid(){ return "w"+Date.now().toString(36)+Math.random().toString(36).slice(2,8); }
 /* ── ảnh lưu IndexedDB (to, không vướng giới hạn 5 MB của localStorage) ── */
 var DB=null;
+/* ⭐ v36.9 (17/11/2026) — iPhone: IndexedDB có lúc mở / đọc treo mãi (không lỗi, không xong) hoặc kết nối bị iOS đóng khi app chạy nền
+   ("Connection is closing") ⇒ hàng đợi đứng ở "thử 0 lần" và ảnh bị coi là "không còn trên máy" rồi bị xoá. Nay: mọi bước có giờ chờ,
+   lỗi ⇒ đóng kết nối cũ, mở lại 1 lần; đọc lỗi ≠ ảnh không có (bget2). */
+function idbT(p, ms, what){ return new Promise(function(res,rej){ var t=setTimeout(function(){ rej(new Error("IDB "+what+" timeout")); }, ms); p.then(function(v){ clearTimeout(t); res(v); }, function(e){ clearTimeout(t); rej(e); }); }); }
+function idbReset(){ var d=DB; DB=null; if(d) d.then(function(db){ try{ db.close(); }catch(_){} }, function(){}); }
 function idb(){
   if(DB) return DB;
-  DB=new Promise(function(res,rej){
+  DB=idbT(new Promise(function(res,rej){
     try{ var r=indexedDB.open("mmh_crm_wq",1);
       r.onupgradeneeded=function(){ r.result.createObjectStore("b"); };
-      r.onsuccess=function(){ res(r.result); }; r.onerror=function(){ rej(r.error); };
+      r.onsuccess=function(){ var db=r.result; try{ db.onclose=function(){ DB=null; }; db.onversionchange=function(){ try{ db.close(); }catch(_){} DB=null; }; }catch(_){} res(db); };
+      r.onerror=function(){ rej(r.error); }; r.onblocked=function(){ rej(new Error("IDB blocked")); };
     }catch(e){ rej(e); }
-  });
+  }), 6000, "open");
+  DB.catch(function(){ DB=null; });
   return DB;
 }
-function tx(mode, fn){ return idb().then(function(db){ return new Promise(function(res,rej){ var t=db.transaction("b",mode), st=t.objectStore("b"), out=fn(st); t.oncomplete=function(){ res(out&&out.result); }; t.onerror=function(){ rej(t.error); }; }); }); }
+function tx1(mode, fn){ return idb().then(function(db){ return idbT(new Promise(function(res,rej){ var t=db.transaction("b",mode), st=t.objectStore("b"), out=fn(st); t.oncomplete=function(){ res(out&&out.result); }; t.onerror=function(){ rej(t.error); }; t.onabort=function(){ rej(t.error||new Error("IDB abort")); }; }), 8000, mode); }); }
+function tx(mode, fn){ return tx1(mode, fn).catch(function(){ idbReset(); return tx1(mode, fn); }); }
 function bput(k,v){ MEM[k]=v; return tx("readwrite",function(s){ s.put(v,k); }).then(function(){ delete MEM[k]; }).catch(function(){}); }
 function bget(k){ if(MEM[k]) return Promise.resolve(MEM[k]); return tx("readonly",function(s){ return s.get(k); }).catch(function(){ return null; }); }
+function bget2(k){ if(MEM[k]) return Promise.resolve(MEM[k]); return tx("readonly",function(s){ return s.get(k); }); }   /* ⭐ v36.9: lỗi đọc ⇒ reject (không coi là mất ảnh) */
 function bdel(k){ delete MEM[k]; return tx("readwrite",function(s){ s.delete(k); }).catch(function(){}); }
 
 function realRow(r){ r=+r||0; return r<0 ? (+TMP[r]||r) : r; }
@@ -23073,23 +23082,34 @@ function runnable(it){
   if(r>=0 || !it.row) return true;
   return Q.some(function(x){ return x.tmp===it.row && !x.err; }) ? false : (it.err="Task gốc chưa lưu được — bấm Thử lại ở task gốc", save(), false);
 }
+var PT=0;
 function pump(){
+  if(RUN && RUN.at && Date.now()-RUN.at>150000){ var h=RUN.it; RUN=false; if(h && Q.indexOf(h)>=0) fail(h, "__TIMEOUT__"); return; }   /* ⭐ v36.9: lượt gửi treo quá 150 giây */
   if(RUN || !navigator.onLine) { paint(); return; }
-  var it=Q.filter(runnable)[0]; if(!it){ paint(); return; }
-  RUN=true; paint(); S._lastWriteAt=Date.now();
+  var all=Q.filter(runnable), now=Date.now(), rdy=all.filter(function(x){ return !x.nx || x.nx<=now; });
+  /* ⭐ v36.9: chữ đi trước ảnh; mục đang chờ thử lại không chặn mục khác */
+  var it=rdy.filter(function(x){ return x.kind!=="photo"; })[0]||rdy[0];
+  if(!it){ paint(); if(all.length){ clearTimeout(PT); PT=setTimeout(pump, Math.max(500, Math.min.apply(null, all.map(function(x){ return x.nx||now; }))-now)); } return; }
+  var my=RUN={ at:Date.now(), it:it }; paint(); S._lastWriteAt=Date.now();
+  function off(){ if(RUN===my){ RUN=false; return true; } return false; }   /* lượt cũ trả lời muộn (đã bị coi là treo) ⇒ không đụng lượt đang chạy */
   var body=JSON.parse(JSON.stringify(it.body)); body.pic=body.pic||it.pic;
   if(body.data && typeof body.data==="object") body.data._row = it.tmp ? 0 : realRow(body.data._row);
   if(it.kind==="photo" || "row" in body) body.row=realRow(it.row);
-  var ready = it.kind==="photo" ? bget(it.blob) : Promise.resolve(null);
+  var ready = it.kind==="photo" ? bget2(it.blob).then(function(v){ return v||""; }, function(e){ return { idbErr:String((e&&e.message)||e||"IDB") }; }) : Promise.resolve(null);
   ready.then(function(b64){
     if(it.kind==="photo"){
+      if(b64 && b64.idbErr){   /* ⭐ v36.9: đọc bộ nhớ máy lỗi / treo ⇒ thử lại, KHÔNG xoá ảnh */
+        if(!off()) return; it.idb=(it.idb||0)+1;
+        if(it.idb>=5){ it.err=(typeof isTH==="function"&&isTH())?"Cannot read the photo on this phone — close and reopen the app, then tap Retry":"Máy chưa đọc được ảnh đã lưu — tắt hẳn app / trình duyệt rồi mở lại, bấm Thử lại"; it.idb=0; save(); paint(); setTimeout(pump,50); return; }
+        return fail(it, "Bộ nhớ máy bận ("+b64.idbErr+")");
+      }
       if(!b64){ drop(it, "Ảnh không còn trên máy (bộ nhớ trình duyệt bị xoá) — chụp lại giúp nhé."); return; }
       body.b64=b64;
     }
-    return send(it, body).then(function(r){ RUN=false; done(it, r); }, function(e){ RUN=false; fail(it, String((e&&e.message)||"")); });
-  }).catch(function(e){ RUN=false; fail(it, String((e&&e.message)||"")); });
+    return send(it, body).then(function(r){ if(off()) done(it, r); else if(r && r.ok!==false && Q.indexOf(it)>=0) done(it, r); }, function(e){ if(off()) fail(it, String((e&&e.message)||"")); });
+  }).catch(function(e){ if(off()) fail(it, String((e&&e.message)||"")); });
 }
-function drop(it, msg){ RUN=false; Q=Q.filter(function(x){ return x.id!==it.id; }); if(it.blob) bdel(it.blob); save(); paint(); if(msg) toast(msg,"warn",7000); setTimeout(pump,50); }
+function drop(it, msg){ if(RUN && RUN.it===it) RUN=false; Q=Q.filter(function(x){ return x.id!==it.id; }); if(it.blob) bdel(it.blob); save(); paint(); if(msg) toast(msg,"warn",7000); setTimeout(pump,50); }
 function done(it, r){
   /* ⭐ v31.6 — dòng trên sheet đã đổi (task bị xoá / dời): không gửi lại mù quáng — báo đỏ + tải lại dữ liệu */
   if(r && r.ok===false && r.stale){ it.n=(it.n||0)+1; it.err=String(r.error||"Dòng đã đổi — tải lại"); save(); paint(); try{ loadTerritoryAll(true); }catch(_){} setTimeout(pump,50); return; }
@@ -23119,14 +23139,15 @@ function done(it, r){
 function fail(it, m, hard){
   it.n=(it.n||0)+1; it.last=m;
   if(hard && it.n>=3){ it.err=m||"Lỗi không rõ"; save(); paint(); toast("Chưa lưu được: "+it.label+" — "+it.err,"err",8000); setTimeout(pump,50); return; }
+  var wait=Math.min(60000, 2000*it.n); it.nx=Date.now()+wait;   /* ⭐ v36.9: mục khác vẫn được gửi trong lúc chờ */
   save(); paint();
-  clearTimeout(it._t); setTimeout(pump, Math.min(60000, 2000*it.n));     /* cùng rid ⇒ gửi lại an toàn */
+  clearTimeout(it._t); setTimeout(pump, 50);     /* cùng rid ⇒ gửi lại an toàn */
 }
 var WQ=window.WQ={
   add:function(o){ /* tương thích bản cũ */ return enqueue(o.body||o); },
   list:function(){ return Q.slice(); },
   pending:function(tab){ return Q.filter(function(x){ return !tab || x.tab===tab; }); },
-  retry:function(id){ Q.forEach(function(x){ if(!id || x.id===id){ x.err=""; x.n=0; } }); save(); pump(); },
+  retry:function(id){ Q.forEach(function(x){ if(!id || x.id===id){ x.err=""; x.n=0; x.nx=0; x.idb=0; } }); if(RUN && RUN.it && (!id || RUN.it.id===id)) RUN=false; idbReset(); save(); pump(); },   /* ⭐ v36.9: Thử lại ngay gỡ cả lượt đang treo */
   drop:function(id){ var it=Q.filter(function(x){ return x.id===id; })[0]; if(it) drop(it); },
   pump:pump, realRow:realRow
 };
@@ -23153,10 +23174,10 @@ function panel(){
         +'<button class="btn sm" onclick="if(confirm(\'Bỏ mục này? Dữ liệu chưa lưu lên Sheet sẽ mất.\')){WQ.drop(\''+x.id+'\');closeModal();terrRefresh();}">Bỏ</button></div></div>';
     }).join(""), '<button class="btn" onclick="closeModal()">Đóng</button>');
 }
-window.addEventListener("online", function(){ paint(); Q.forEach(function(x){ if(!x.err) x.n=0; }); pump(); });
+window.addEventListener("online", function(){ paint(); Q.forEach(function(x){ if(!x.err){ x.n=0; x.nx=0; } }); pump(); });
 window.addEventListener("offline", paint);
-document.addEventListener("visibilitychange", function(){ if(!document.hidden) pump(); });
-setInterval(function(){ if(Q.length && !RUN) pump(); }, 15000);
+document.addEventListener("visibilitychange", function(){ if(!document.hidden){ idbReset(); pump(); } });   /* ⭐ v36.9: iOS đóng kết nối IndexedDB khi app chạy nền */
+setInterval(function(){ if(Q.length) pump(); }, 15000);   /* ⭐ v36.9: pump tự gỡ lượt treo */
 setTimeout(function(){ paint(); pump(); }, 2000);
 
 /* dữ liệu đi địa bàn tải lại trong lúc còn chờ ⇒ giữ thay đổi của mình (không "nhảy ngược", task mới không biến mất) */
@@ -31412,6 +31433,9 @@ window.probeCors=probeCors=function(){
     .then(function(j){ var ok=!!(j&&j.ok); cput(u,ok); CORS_OK=ok; return ok; })
     .catch(function(){ cput(u,false); CORS_OK=false; return false; });
 };
+/* v36.9: hàng đợi ảnh (fetchPost) chỉ đổi sang đường dự phòng khi CORS_OK === false ⇒ nạp kết quả đã nhớ của máy chủ nhóm đang xem, chưa có thì thử ngầm 1 lần */
+try{ var e0=cmap()[gasUrl()]; if(e0 && (e0.ok || Date.now()-e0.at<10*60000)) CORS_OK=!!e0.ok; }catch(_){}
+setTimeout(function(){ try{ if(CORS_OK===null) probeCors(); }catch(_){} }, 3000);
 
 /* ───────── ① nháp tự lưu ───────── */
 var TXT=["tk-plan","tk-result","tk-stop","tk-result-p0","tk-result-p1","tk-result-p2","tk-result-p3","tk-result-one",
