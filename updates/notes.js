@@ -7,6 +7,15 @@
 function E(u){ u.en={ title:u.title, items:u.items.map(function(i){ return { title:i.title, text:i.text }; }) }; return u; }
 window.MMH_UPDATES = [
   E({
+    id:"2026-11-17-v37.0", version:"v37.0", date:"2026-11-17",
+    title:"Thailand Dental: sales orders, right from the visit",
+    summary:"Record the order on the same page as the visit. Orders are written to the sheet <b>SALE ORDERS</b> and listed in the new <b>Orders</b> page.",
+    items:[
+      { type:"new", icon:"+", title:"Order from this visit", text:"Open a visit (or + New task) ▸ <b>Order from this visit</b> ▸ <b>+ Add order</b>: distributor, products (group, product / code, quantity, unit price THB), note ▸ <b>Save order</b>. Saving the task also saves the order.", img:"updates/v37.0/visit_order.jpg" },
+      { type:"new", icon:"+", title:"Orders page", text:"Menu <b>Sales Result ▸ Orders</b>: orders, accounts, quantity and amount of the month, amount by distributor. Tap an order to edit or delete it, or <b>+ New order</b>.", img:"updates/v37.0/orders_tab.jpg" }
+    ]
+  }),
+  E({
     id:"2026-11-17-v36.9", version:"v36.9", date:"2026-11-17",
     title:"Saving on iPhone no longer gets stuck",
     summary:"On some iPhones the list <b>Waiting to be saved to Google Sheet</b> kept spinning (“sending · tried 0 times”) and a photo could be removed as “no longer on this device”. Fixed.",

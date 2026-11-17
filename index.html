@@ -4019,7 +4019,7 @@ function buildNav(){
     if(t.grp!==lastGrp){ h+='<div class="grp">'+t.grp+'</div>'; lastGrp=t.grp; }
     h+='<button class="nvi" data-t="'+t.id+'" onclick="go(\''+t.id+'\')"><span class="ic">'+t.ic+'</span><span class="lb">'+t.lb+'</span></button>';
   });
-  h+='<div style="flex:1"></div><div style="padding:10px;font-size:10.5px;color:var(--mute);line-height:1.5">MMH CRM v36.9<br>'+
+  h+='<div style="flex:1"></div><div style="padding:10px;font-size:10.5px;color:var(--mute);line-height:1.5">MMH CRM v37.0<br>'+
      (isMgmt()?'<a href="'+DRIVE_FOLDER+'" target="_blank">📁 Folder ảnh Drive</a>':"")+'</div>';
   $("side").innerHTML=h;
   /* ⭐ v4.5 — thanh dưới trượt ngang, đủ mọi mục, bỏ nút "Thêm" */
@@ -21007,7 +21007,7 @@ window.QS2={ open:qsOpen };
 </script>
 
 <!-- ⭐ v30.3 — THÔNG BÁO CẬP NHẬT (chép từ Report Hub): dữ liệu updates/notes.js · tự hiện 7 ngày · nút "Có gì mới" trên thanh trên cùng -->
-<script src="updates/notes.js?v=36.9"></script>
+<script src="updates/notes.js?v=37.0"></script>
 <style id="upd-css">
 #upd,#upd-zoom{--t-pri:var(--blue);--t-pri2:var(--blue-d);--t-ink:var(--navy);--t-soft:var(--pale);--t-line:var(--lb2);--t-bg:#F6F8FA;--mmh-blue:var(--blue);--mmh-navy:var(--navy)}
 
@@ -31551,6 +31551,344 @@ if(typeof _st==="function") window.saveTask=saveTask=function(){
 };
 var _sn=window.submitNewTask;
 if(typeof _sn==="function") window.submitNewTask=submitNewTask=function(){ var c=ctx(), k=c?key(c):""; var r=_sn.apply(this,arguments); if(k) afterSave(k,"nt"); return r; };
+})();
+</script>
+<style id="v370-css">
+/* v37.0 (17/11/2026) — Thailand Dental: sales orders (sheet SALE ORDERS) */
+.tho-box{border:1px solid var(--t-line,#CFE2F3);border-radius:12px;padding:10px 12px;margin:10px 0;background:#fff}
+.tho-hd{display:flex;align-items:center;gap:8px;font-size:13.5px;color:var(--t-ink,#003047)}
+.tho-hd .sp{flex:1}
+.tho-ex{display:flex;flex-direction:column;gap:6px;margin-top:8px}
+.tho-ex .it{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;font-size:12.5px;border:1px solid #E6EAEF;border-radius:9px;padding:7px 10px}
+.tho-ex .it b{color:var(--t-ink,#003047)} .tho-ex .it .m{color:#5E738C} .tho-ex .it .sp{flex:1}
+.tho-ex .it.q{border-style:dashed;color:#5E738C}
+.tho-ed{margin-top:10px;display:flex;flex-direction:column;gap:8px}
+.tho-ed .r2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.tho-ed label{font-size:11.5px;font-weight:600;color:#5E738C;display:block;margin-bottom:3px}
+.tho-l{display:grid;grid-template-columns:1.1fr 1.5fr .6fr .8fr .7fr auto;gap:6px;align-items:center}
+.tho-l .a{font-size:12.5px;text-align:right;color:var(--t-ink,#003047);font-weight:600;white-space:nowrap}
+.tho-l .x{border:0;background:none;color:#8A97A6;font-size:18px;cursor:pointer;padding:0 4px}
+.tho-lh{display:grid;grid-template-columns:1.1fr 1.5fr .6fr .8fr .7fr auto;gap:6px;font-size:11px;color:#8A97A6;font-weight:600}
+.tho-tot{display:flex;justify-content:space-between;align-items:center;font-size:13px}
+.tho-tot b{font-size:14px;color:var(--t-ink,#003047)}
+.tho-ft{display:flex;gap:8px;justify-content:flex-end}
+@media (max-width:720px){ .tho-l,.tho-lh{grid-template-columns:1fr 1fr .7fr auto} .tho-l .p,.tho-lh .p{grid-column:1/2} .tho-l .a{grid-column:2/4;text-align:left} .tho-lh{display:none} .tho-ed .r2{grid-template-columns:1fr} }
+.tho-pg .kp{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:12px 0}
+.tho-pg .kp div{border:1px solid #E6EAEF;border-radius:12px;padding:10px 12px;background:#fff}
+.tho-pg .kp b{display:block;font-size:20px;color:var(--t-ink,#003047)} .tho-pg .kp span{font-size:12px;color:#5E738C}
+.tho-pg .fl{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:10px}
+.tho-pg .fl .inp{width:auto;min-width:130px}
+.tho-pg .dd{display:flex;flex-wrap:wrap;gap:6px;margin:-2px 0 12px}
+.tho-pg .dd span{border:1px solid #E6EAEF;border-radius:999px;padding:3px 10px;font-size:12px;color:#24384D;background:#fff}
+.tho-card{border:1px solid #E6EAEF;border-radius:12px;padding:10px 12px;margin-bottom:8px;background:#fff;cursor:pointer}
+.tho-card:hover{border-color:var(--t-pri,#3A5CAA)}
+.tho-card .t{display:flex;flex-wrap:wrap;gap:4px 10px;align-items:baseline}
+.tho-card .t b{font-size:14px;color:var(--t-ink,#003047)} .tho-card .t .m{font-size:12px;color:#5E738C} .tho-card .t .sp{flex:1} .tho-card .t .amt{font-weight:700;color:var(--t-ink,#003047)}
+.tho-card ul{margin:6px 0 0 18px;padding:0;font-size:12.5px;color:#24384D}
+.tho-warn{border:1px solid #E8D9A8;background:#FFF9E8;border-radius:10px;padding:8px 11px;font-size:12.5px;color:#5B4A12;margin:8px 0;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+@media (max-width:720px){ .tho-pg .kp{grid-template-columns:repeat(2,minmax(0,1fr))} }
+</style>
+<script id="v370-js">
+/* ═════════ v37.0 (17/11/2026) — Thailand Dental: SALES ORDERS (Yong: "fill in the order on the same page as the visit") ═════════
+   ① Task form (visit / new task, team thaid): block "Order from this visit" under the Task Result — distributor, product lines (group · product / code ·
+      qty · unit price THB), note ⇒ "Save order". Saving the task while the order block has products also saves the order. Orders already made for
+      this account on that day are listed (Edit).
+   ② Tab "Orders" (group Sales Result, thaid only): month / PIC / search filters, totals (orders · accounts · quantity · amount THB) + by distributor,
+      list of orders ⇒ edit / delete; "New order".
+   Backend crm-thai-dental TH_Orders.gs (ordList / ordSave / ordDelete) writes the EXISTING sheet SALE ORDERS (1 row per product, "Order No." No.<n>).
+   Orders are queued on the device (localStorage mmh_thord_q, rid) ⇒ sent in the background, retried until saved. */
+(function(){
+"use strict";
+function on(){ try{ return curTeamKey()==="thaid"; }catch(_){ return false; } }
+function e2(s){ return esc(s==null?"":String(s)); }
+function num(v){ var n=Number(String(v==null?"":v).replace(/,/g,"")); return v===""||v==null||!isFinite(n)?null:n; }
+function thb(v){ var n=num(v); return n==null?"—":Math.round(n).toLocaleString("en-US"); }
+function today(){ try{ return todayISO(); }catch(_){ return new Date().toISOString().slice(0,10); } }
+function me(){ return (S.user&&S.user.pic)||""; }
+function mgr(){ try{ return isMgrView(); }catch(_){ return false; } }
+function accName(s){ try{ return parseAcc(s).name; }catch(_){ return String(s||"").split("/")[0]; } }
+function nk(s){ return String(s||"").toLowerCase().replace(/\s+/g," ").trim(); }
+var O=window.THO={ rows:null, at:0, loading:null, err:"", dist:["DDI","Promptdent","VRP","Siamdent"], sheet:"", f:{ mon:"", pic:"", q:"" }, ed:null };
+var LK="k:thaid:orders", QK="mmh_thord_q";
+function lsG(k){ try{ return JSON.parse(localStorage.getItem(k)||"null"); }catch(_){ return null; } }
+function lsS(k,v){ try{ localStorage.setItem(k,JSON.stringify(v)); }catch(_){} }
+function groups(){ var g=(S.master&&S.master.product)||[]; return g.length?g:["Jizai and handfile","Bur","Composite","Mani Bond"]; }
+function dists(){ try{ if(window.ACM && ACM.dist && ACM.dist.length) return ACM.dist; }catch(_){} return O.dist; }
+
+/* ── data ── */
+function restore(){ if(O.rows) return; var a=lsG(LK); if(a&&a.rows){ O.rows=a.rows; O.sheet=a.sheet||""; } }
+function load(force){
+  if(!on()) return Promise.resolve(null);
+  restore();
+  if(O.loading) return O.loading;
+  if(!force && O.rows && Date.now()-O.at<90000) return Promise.resolve(O.rows);
+  O.loading=apiGet("ordList",{}).then(function(j){
+    O.loading=null; O.rows=j.rows||[]; O.sheet=j.sheet||O.sheet; if(j.distributors&&j.distributors.length) O.dist=j.distributors;
+    O.at=Date.now(); O.err=""; lsS(LK,{ rows:O.rows, sheet:O.sheet }); repaint(); return O.rows;
+  }).catch(function(e){ O.loading=null; O.err=String(e&&e.message||e); repaint(); return null; });
+  return O.loading;
+}
+window.thoLoad=load;
+function distOf(partner){ var p=String(partner||"").split("/")[0].trim(); return p; }
+/* rows ⇒ orders (same Order No. + account) */
+function orders(){
+  var m={}, out=[];
+  (O.rows||[]).forEach(function(r){
+    var k=(r.orderNo||("row"+r._row))+"|"+nk(accName(r.account));
+    var o=m[k]; if(!o){ o=m[k]={ k:k, no:r.orderNo, account:r.account, name:accName(r.account), pic:r.pic, day:r.day||"", month:String(r.month||"").replace(/\D/g,"")||String(r.day||"").slice(0,7).replace("-",""),
+      dist:distOf(r.partner), contact:r.contact, note:r.note, lines:[], qty:0, amt:0 }; out.push(o); }
+    o.lines.push({ group:r.group, item:r.item, qty:r.qty, price:r.price, amount:r.amount });
+    o.qty+=num(r.qty)||0; o.amt+=num(r.amount)!=null?num(r.amount):(num(r.qty)||0)*(num(r.price)||0);
+    if(!o.day && r.day) o.day=r.day;
+  });
+  out.sort(function(a,b){ return String(b.day).localeCompare(String(a.day)) || String(b.no).localeCompare(String(a.no),undefined,{numeric:true}); });
+  return out;
+}
+window.thoOrders=orders;
+
+/* ── queue (saved on the device, sent in the background) ── */
+var Q=lsG(QK)||[], RUN=false;
+function qsave(){ lsS(QK,Q); }
+function rid(){ return "o"+Date.now().toString(36)+Math.random().toString(36).slice(2,7); }
+function enqueue(order, kind){
+  Q.push({ id:rid(), kind:kind||"save", order:order, n:0, at:Date.now() }); qsave();
+  setTimeout(pump,30); repaint(); paintBox();
+}
+window.thoQueue=function(){ return Q.slice(); };
+function pump(){
+  if(RUN || !Q.length || !navigator.onLine) return;
+  var it=Q.filter(function(x){ return !x.err && (!x.nx || x.nx<=Date.now()); })[0]; if(!it){ return; }
+  RUN=true;
+  var body=it.kind==="del" ? { action:"ordDelete", no:it.order.no, account:it.order.account, rid:it.id, actor:me() }
+                           : { action:"ordSave", order:it.order, rid:it.id, actor:me() };
+  var t=setTimeout(function(){ if(RUN===it){ RUN=false; fail(it,"timeout",false); } },120000);
+  RUN=it;
+  Promise.resolve(apiPost(body)).then(function(j){
+    clearTimeout(t); if(RUN!==it) return; RUN=false;
+    if(j && j.softTimeout) return fail(it,"timeout",false);
+    if(j && j.ok===false) return fail(it,String(j.error||"Error"),true);
+    Q=Q.filter(function(x){ return x!==it; }); qsave();
+    toast(it.kind==="del"?"Order deleted":"Order "+((j&&j.no)||"")+" saved to sheet SALE ORDERS","ok",3500);
+    O.at=0; load(true); paintBox(); setTimeout(pump,50);
+  },function(e){ clearTimeout(t); if(RUN!==it) return; RUN=false; fail(it,String(e&&e.message||e),false); });
+}
+function fail(it,m,hard){
+  it.n=(it.n||0)+1; it.last=m;
+  if(hard && it.n>=2){ it.err=m; toast("Order not saved: "+m,"err",7000); }
+  else it.nx=Date.now()+Math.min(60000,3000*it.n);
+  qsave(); repaint(); paintBox(); setTimeout(pump,100);
+}
+window.thoRetry=function(id){ Q.forEach(function(x){ if(!id||x.id===id){ x.err=""; x.n=0; x.nx=0; } }); qsave(); pump(); repaint(); };
+window.thoDrop=function(id){ Q=Q.filter(function(x){ return x.id!==id; }); qsave(); repaint(); paintBox(); };
+setInterval(pump,15000); window.addEventListener("online",pump); setTimeout(pump,3000);
+
+/* ── editor (task form + modal) ── */
+function lineHtml(l){
+  l=l||{};
+  return '<div class="tho-l"><select class="inp g">'+opts(groups(),l.group||"","Product group")+'</select>'+
+    '<input class="inp it" placeholder="Product / code (e.g. JIZAI 025 06)" value="'+e2(l.item||"")+'">'+
+    '<input class="inp q" type="number" inputmode="decimal" min="0" placeholder="Qty" value="'+e2(l.qty==null?"":l.qty)+'">'+
+    '<input class="inp p" type="number" inputmode="decimal" min="0" placeholder="Unit price THB" value="'+e2(l.price==null?"":l.price)+'">'+
+    '<span class="a"></span><button type="button" class="x" title="Remove this product" onclick="thoDelLine(this)">×</button></div>';
+}
+function edHtml(o, full){
+  o=o||{}; var ls=(o.lines&&o.lines.length?o.lines:[{}]);
+  return (full?'<div class="r2"><div><label>Account *</label><input class="inp" id="tho_acc" list="tho_accl" placeholder="Type to search the account" value="'+e2(o.name||"")+'">'+
+      '<datalist id="tho_accl">'+(S.custIndex||[]).filter(function(c){ return !mgr() ? (!c.pic||c.pic===me()) : true; }).slice(0,1500).map(function(c){ return '<option value="'+e2(c.name)+'">'+e2([c.type,c.province].filter(String).join(" · "))+'</option>'; }).join("")+'</datalist></div>'+
+      '<div><label>Order date *</label><input class="inp" type="date" id="tho_day" value="'+e2(o.day||today())+'" max="'+today()+'"></div></div>'+
+      (mgr()?'<div class="r2"><div><label>MMH sales PIC</label><select class="inp" id="tho_pic">'+opts((S.master&&S.master.pic)||[],o.pic||me())+'</select></div><div></div></div>':''):'')+
+    '<div class="r2"><div><label>Distributor</label><select class="inp tho-dist">'+opts(dists(),o.dist||"","— choose —")+'</select></div>'+
+      '<div><label>Contact (who ordered)</label><input class="inp tho-ct" value="'+e2(o.contact||"")+'" placeholder="e.g. Dr. Somchai"></div></div>'+
+    '<div class="tho-lh"><span>Product group</span><span>Product / code</span><span>Qty</span><span class="p">Unit price THB</span><span style="text-align:right">Amount</span><span></span></div>'+
+    '<div class="tho-ls">'+ls.map(lineHtml).join("")+'</div>'+
+    '<div><button type="button" class="mini" onclick="thoAddLine(this)">+ Add product</button></div>'+
+    '<div><label>Note</label><input class="inp tho-nt" value="'+e2(o.note||"")+'" placeholder="Delivery, promotion, payment…"></div>'+
+    '<div class="tho-tot"><span>Total</span><b class="tho-sum">—</b></div>';
+}
+function rootOf(el){ return el.closest(".tho-ed")||el.closest("#m2Body"); }
+window.thoAddLine=function(b){ var r=rootOf(b); r.querySelector(".tho-ls").insertAdjacentHTML("beforeend",lineHtml({})); calc(r); };
+window.thoDelLine=function(b){ var r=rootOf(b), ls=r.querySelectorAll(".tho-l"); if(ls.length>1) b.closest(".tho-l").remove(); else b.closest(".tho-l").querySelectorAll("input").forEach(function(i){ i.value=""; }); calc(r); };
+function calc(r){
+  if(!r) return; var tot=0, any=false;
+  r.querySelectorAll(".tho-l").forEach(function(l){ var q=num(l.querySelector(".q").value), p=num(l.querySelector(".p").value), a=l.querySelector(".a");
+    if(q!=null&&p!=null){ a.textContent=thb(q*p); tot+=q*p; any=true; } else a.textContent=""; });
+  var s=r.querySelector(".tho-sum"); if(s) s.textContent=any?thb(tot)+" THB":"—";
+}
+document.addEventListener("input",function(e){ var r=e.target&&e.target.closest&&(e.target.closest(".tho-ed")||e.target.closest("#m2Body")); if(r&&r.querySelector(".tho-ls")) calc(r); },true);
+function readEd(r){
+  var lines=[], bad="";
+  r.querySelectorAll(".tho-l").forEach(function(l,i){
+    var g=l.querySelector(".g").value, it=l.querySelector(".it").value.trim(), q=num(l.querySelector(".q").value), p=num(l.querySelector(".p").value);
+    if(!g && !it && q==null && p==null) return;
+    if(!(q>0) && !bad) bad="Quantity is missing on product "+(i+1)+".";
+    if(!g && !it && !bad) bad="Choose the product group or type the product on line "+(i+1)+".";
+    lines.push({ group:g, item:it||g, qty:q, price:p==null?"":p });
+  });
+  return { dist:(r.querySelector(".tho-dist")||{}).value||"", contact:((r.querySelector(".tho-ct")||{}).value||"").trim(), note:((r.querySelector(".tho-nt")||{}).value||"").trim(), lines:lines, bad:bad };
+}
+
+/* ── ① block in the task form ── */
+function ctx(){
+  if($("tk-result")){ var w=S.task||{}; return { kind:"tk", account:w.account||"", day:String(($("tk-date")||{}).value||w.start||"").slice(0,10), pic:w.pic||me(), res:($("tk-result")||{}).value||"" }; }
+  if($("nt_result")||$("nt_plan")){ var acc=($("nt_account")||{}).value||""; if(!acc){ var nm=($("nt_accName")||{}).value||""; var c=(S.custIndex||[]).filter(function(x){ return nk(x.name)===nk(nm); })[0]; acc=c?mkAcc(c):nm; }
+    return { kind:"nt", account:acc, day:String(($("nt_start")||{}).value||today()).slice(0,10), pic:(($("nt_pic")||{}).value)||me(), res:($("nt_result")||{}).value||"" }; }
+  return null;
+}
+function personMet(t){ var m=/^(Người gặp|Person met):\s*([^\n(]*)/m.exec(String(t||"")); return m?m[2].trim():""; }
+function sameVisit(o,c){ return nk(o.name)===nk(accName(c.account)) && String(o.day)===String(c.day); }
+function paintBox(){
+  var box=$("tho-box"); if(!box) return; var c=ctx(); if(!c) return;
+  var ex=$("tho-exist"); if(!ex) return;
+  var mine=orders().filter(function(o){ return c.account && sameVisit(o,c); }), pend=Q.filter(function(x){ return x.kind==="save" && nk(accName(x.order.account))===nk(accName(c.account)) && String(x.order.date)===String(c.day); });
+  ex.innerHTML=mine.map(function(o){ return '<div class="it"><b>'+e2(o.no||"Order")+'</b><span class="m">'+o.lines.length+' product'+(o.lines.length>1?'s':'')+' · '+e2(o.dist||"no distributor")+'</span><span class="sp"></span><b>'+thb(o.amt)+' THB</b>'+
+      '<button type="button" class="mini" onclick="thoEditOrder(\''+e2(o.k).replace(/'/g,"\\'")+'\')">Edit</button></div>'; }).join("")+
+    pend.map(function(x){ return '<div class="it q">'+(x.err?'Not saved: '+e2(x.err)+' <button type="button" class="mini" onclick="thoRetry(\''+x.id+'\')">Retry</button>':'Order '+x.order.lines.length+' product(s) · saving to the sheet…')+'</div>'; }).join("");
+}
+function addBox(){
+  if(!on() || $("tho-box")) return;
+  var c=ctx(); if(!c) return;
+  var anchor=c.kind==="tk"?($("tk-result")&&$("tk-result").closest(".te-sec")):$("nt_resWrap"); if(!anchor||!anchor.parentNode) return;
+  var d=document.createElement("div"); d.id="tho-box"; d.className="tho-box";
+  d.innerHTML='<div class="tho-hd"><b>Order from this visit</b><span class="sp"></span><button type="button" class="mini" id="tho-add" onclick="thoOpenEd()">+ Add order</button></div>'+
+    '<div class="tho-ex" id="tho-exist"></div><div class="tho-ed" id="tho-ed" style="display:none"></div>';
+  anchor.parentNode.insertBefore(d, anchor.nextSibling);
+  paintBox(); if(!O.rows||Date.now()-O.at>90000) load(false).then(paintBox);
+}
+window.thoOpenEd=function(){
+  var ed=$("tho-ed"), c=ctx(); if(!ed||!c) return;
+  if(ed.style.display!=="none"){ ed.style.display="none"; ed.innerHTML=""; $("tho-add").textContent="+ Add order"; return; }
+  var dist=""; try{ var a=(window.ACM&&ACM.rows||[]).filter(function(x){ return nk(x.name)===nk(accName(c.account)); })[0]; if(a) dist=a.dist||""; }catch(_){}
+  ed.innerHTML=edHtml({ dist:dist, contact:personMet(c.res) })+'<div class="tho-ft"><button type="button" class="btn sm" onclick="thoOpenEd()">Cancel</button><button type="button" class="btn pri sm" onclick="thoSaveBox()">Save order</button></div>';
+  ed.style.display=""; $("tho-add").textContent="Close"; calc(ed);
+};
+function boxOrder(){
+  var ed=$("tho-ed"), c=ctx(); if(!ed||ed.style.display==="none"||!c) return null;
+  var r=readEd(ed); if(!r.lines.length) return null;
+  return { r:r, order:{ date:c.day||today(), pic:c.pic, account:c.account, contact:r.contact, dist:r.dist, note:r.note, lines:r.lines } };
+}
+window.thoSaveBox=function(){
+  var x=boxOrder(); if(!x) return toast("Add at least one product","warn");
+  if(x.r.bad) return toast(x.r.bad,"warn",5000);
+  if(!x.order.account) return toast("Choose the account first","warn");
+  enqueue(x.order); var ed=$("tho-ed"); ed.style.display="none"; ed.innerHTML=""; $("tho-add").textContent="+ Add order";
+  toast("Order saved on this device — sending to sheet SALE ORDERS","ok",3000);
+};
+new MutationObserver(function(){ if(on() && !$("tho-box") && ($("tk-result")||$("nt_resWrap"))) addBox(); }).observe(document.body,{childList:true,subtree:true});
+/* saving the task also saves an order that is still open in the block */
+function hook(name){
+  var f=window[name]; if(typeof f!=="function") return;
+  window[name]=function(){
+    try{
+      var x=on()?boxOrder():null;
+      if(x){
+        if(x.r.bad){ toast("Order: "+x.r.bad+" Fix it, or remove the product line.","warn",6000); return; }
+        if(x.order.account){ enqueue(x.order); var ed=$("tho-ed"); if(ed){ ed.style.display="none"; ed.innerHTML=""; } }
+      }
+    }catch(_){}
+    return f.apply(this,arguments);
+  };
+  try{ if(name==="saveTask") saveTask=window.saveTask; else submitNewTask=window.submitNewTask; }catch(_){}
+}
+hook("saveTask"); hook("submitNewTask");
+
+/* ── modal: new / edit order ── */
+window.thoEditOrder=function(k){
+  var o=k?orders().filter(function(x){ return x.k===k; })[0]:null;
+  if(k && !o) return toast("Order not found — reload","warn");
+  if(!S.custIndex||!S.custIndex.length) try{ loadCustomerIndex(); }catch(_){}
+  O.ed=o||null;
+  var canDel=o && (mgr() || o.pic===me());
+  openModal2(o?"Order "+(o.no||""):"New order", '<div class="tho-ed" style="margin:0">'+edHtml(o||{ day:today(), pic:me() }, true)+'</div>',
+    (canDel?'<button class="btn dg" id="tho-del" onclick="thoDelAsk()">Delete order</button>':'')+'<div style="flex:1"></div><button class="btn" onclick="closeModal2()">Cancel</button><button class="btn pri" onclick="thoSaveModal()">Save order</button>');
+  calc($("m2Body"));
+};
+window.thoDelAsk=function(){
+  var b=$("tho-del"); if(!b) return;
+  if(b.dataset.ask){ var o=O.ed; closeModal2(); enqueue({ no:o.no, account:o.account }, "del");
+    O.rows=(O.rows||[]).filter(function(r){ return !(r.orderNo===o.no && nk(accName(r.account))===nk(o.name)); }); repaint(); return; }
+  b.dataset.ask=1; b.textContent="Tap again to delete";
+};
+window.thoSaveModal=function(){
+  var r=readEd($("m2Body")), nm=(($("tho_acc")||{}).value||"").trim(), day=($("tho_day")||{}).value||today();
+  if(!nm) return toast("Choose the account","warn");
+  var c=(S.custIndex||[]).filter(function(x){ return nk(x.name)===nk(nm); })[0];
+  if(!c && !(O.ed && nk(O.ed.name)===nk(nm))) return toast("Choose an account from the list (new account: add it first in Customers)","warn",5000);
+  if(!r.lines.length) return toast("Add at least one product","warn");
+  if(r.bad) return toast(r.bad,"warn",5000);
+  var o={ date:day, pic:(($("tho_pic")||{}).value)||(O.ed&&O.ed.pic)||me(), account:c?mkAcc(c):O.ed.account, contact:r.contact, dist:r.dist, note:r.note, lines:r.lines };
+  if(O.ed){ o.no=O.ed.no; o.oldAccount=O.ed.account; }
+  closeModal2(); enqueue(o);
+};
+
+/* ── ② tab "Orders" ── */
+var _rt=null;
+function repaint(){ clearTimeout(_rt); _rt=setTimeout(function(){ if(S.tab==="thord") render(); },60); }
+window.thoSet=function(k,v){ O.f[k]=v; render(); };
+var _qd; window.thoQ=function(v){ O.f.q=v; clearTimeout(_qd); _qd=setTimeout(function(){ try{ keepCaret("tho_q",render); }catch(_){ render(); } },200); };
+function filtered(){
+  var f=O.f, q=nk(f.q);
+  return orders().filter(function(o){
+    if(!mgr() && o.pic!==me()) return false;
+    if(f.pic && o.pic!==f.pic) return false;
+    if(f.mon && o.month!==f.mon) return false;
+    if(q && nk([o.name,o.no,o.dist,o.pic,o.contact,o.lines.map(function(l){ return l.item+" "+l.group; }).join(" ")].join(" ")).indexOf(q)<0) return false;
+    return true;
+  });
+}
+function monLb(m){ return m ? m.slice(4,6)+"/"+m.slice(0,4) : ""; }
+function render(){
+  if(S.tab!=="thord") return;
+  if(O.f.mon===""&&!O._mi){ O._mi=1; O.f.mon=today().slice(0,7).replace("-",""); }
+  var all=orders(), list=filtered(), mons={}, pics={};
+  all.forEach(function(o){ if(o.month) mons[o.month]=1; if(o.pic) pics[o.pic]=1; }); mons[today().slice(0,7).replace("-","")]=1;
+  var acc={}, qty=0, amt=0, byD={};
+  list.forEach(function(o){ acc[nk(o.name)]=1; qty+=o.qty; amt+=o.amt; var d=o.dist||"No distributor"; byD[d]=(byD[d]||0)+o.amt; });
+  var pend=Q.length, bad=Q.filter(function(x){ return x.err; });
+  $("main").innerHTML='<div class="pg tho-pg"><div class="ph"><div><h2>Orders</h2><p>Sales orders · sheet SALE ORDERS'+(O.sheet?' · <a href="'+e2(O.sheet)+'" target="_blank" rel="noopener">Open sheet</a>':'')+
+      (O.loading?' · <span class="stale"><span class="dot"></span>syncing…</span>':'')+'</p></div><div class="sp"></div><div class="acts"><button class="btn pri" id="tho-new" onclick="thoEditOrder()">+ New order</button></div></div>'+
+    (O.err?'<div class="tho-warn">'+e2(O.err)+' <a href="javascript:void(0)" onclick="THO.err=\'\';thoLoad(true)">Retry</a></div>':'')+
+    (pend?'<div class="tho-warn">'+(bad.length?bad.length+' order(s) not saved: '+e2(bad[0].err)+' <button class="mini" onclick="thoRetry()">Retry</button> <button class="mini" onclick="thoDrop(\''+bad[0].id+'\')">Discard</button>':pend+' order change(s) saved on this device — sending to the sheet…')+'</div>':'')+
+    '<div class="kp"><div><b>'+list.length+'</b><span>Orders</span></div><div><b>'+Object.keys(acc).length+'</b><span>Accounts</span></div><div><b>'+thb(qty)+'</b><span>Quantity</span></div><div><b>'+thb(amt)+'</b><span>Amount THB</span></div></div>'+
+    (Object.keys(byD).length?'<div class="dd">'+Object.keys(byD).sort().map(function(d){ return '<span>'+e2(d)+' · <b>'+thb(byD[d])+'</b> THB</span>'; }).join("")+'</div>':'')+
+    '<div class="fl"><input class="inp" id="tho_q" placeholder="Search account, product, order no…" value="'+e2(O.f.q)+'" oninput="thoQ(this.value)">'+
+      '<select class="inp" onchange="thoSet(\'mon\',this.value)"><option value="">All months</option>'+Object.keys(mons).sort().reverse().map(function(m){ return '<option value="'+m+'"'+(O.f.mon===m?" selected":"")+'>'+monLb(m)+'</option>'; }).join("")+'</select>'+
+      (mgr()?'<select class="inp" onchange="thoSet(\'pic\',this.value)"><option value="">All PICs</option>'+Object.keys(pics).sort().map(function(p){ return '<option'+(O.f.pic===p?" selected":"")+'>'+e2(p)+'</option>'; }).join("")+'</select>':'')+'</div>'+
+    (!O.rows?'<div class="cal-note">Reading sheet SALE ORDERS…</div>':(!list.length?'<div class="cal-note">No order'+(O.f.mon?' in '+monLb(O.f.mon):'')+'. Add one with <b>+ New order</b>, or from a visit: open the task ▸ <b>Order from this visit</b>.</div>':''))+
+    list.slice(0,300).map(function(o){
+      return '<div class="tho-card" onclick="thoEditOrder(\''+e2(o.k).replace(/'/g,"\\'")+'\')"><div class="t"><b>'+e2(o.name)+'</b><span class="m">'+e2([o.no, o.day?fmtVN(o.day):"", o.pic, o.dist].filter(String).join(" · "))+'</span><span class="sp"></span><span class="amt">'+(o.amt?thb(o.amt)+' THB':'')+'</span></div>'+
+        '<ul>'+o.lines.slice(0,6).map(function(l){ return '<li>'+e2(l.item||l.group)+(l.group&&l.item&&l.item!==l.group?' <span class="m">· '+e2(l.group)+'</span>':'')+' — '+thb(l.qty)+(num(l.price)?' × '+thb(l.price):'')+'</li>'; }).join("")+(o.lines.length>6?'<li>+'+(o.lines.length-6)+' more</li>':'')+'</ul></div>';
+    }).join("")+'</div>';
+}
+
+/* ── navigation: tab "thord" (Sales Result, thaid only) ── */
+var T={ id:"thord", ic:"🧾", mob:0 };
+Object.defineProperty(T,"lb",{ get:function(){ return "Orders"; }, enumerable:true });
+Object.defineProperty(T,"mlb",{ get:function(){ return "Orders"; }, enumerable:true });
+Object.defineProperty(T,"grp",{ get:function(){ return TX("Kết quả bán hàng","Sales Result"); }, enumerable:true });
+var ni=-1; TABS.forEach(function(t,i){ if(t.id==="newacc") ni=i; });
+TABS.splice(ni>=0?ni+1:TABS.length,0,T);
+var _nt=window.navTabs;
+window.navTabs=navTabs=function(){ return _nt.apply(this,arguments).filter(function(t){ return t.id!=="thord" || on(); }); };
+var _bn=window.buildNav;
+window.buildNav=buildNav=function(){ var r=_bn.apply(this,arguments);
+  try{ var I=window.V30_ICON; if(I) document.querySelectorAll('[data-t="thord"] .ic').forEach(function(ic){ ic.innerHTML=I("doc")||I("list")||""; }); }catch(e){} return r; };
+var _go=window.go;
+window.go=go=function(tab){
+  if(tab==="thord"){
+    if(!on()) tab="dash";
+    else {
+      if(typeof CAL!=="undefined" && CAL.full) try{ calFull(false); }catch(e){}
+      S.tab="thord";
+      document.querySelectorAll("[data-t]").forEach(function(el){ el.classList.toggle("on", el.getAttribute("data-t")==="thord"); });
+      try{ $("fab").classList.remove("on"); }catch(e){}
+      $("main").scrollTop=0; restore(); render(); load(!O.at||Date.now()-O.at>60000);
+      if(!S.custIndex||!S.custIndex.length) try{ loadCustomerIndex(); }catch(_){}
+      try{ if(window.v323Mark) v323Mark(); }catch(e){} return;
+    }
+  }
+  return _go.apply(this,[tab]);
+};
+try{ if(S.user) buildNav(); }catch(e){}
 })();
 </script>
 <!-- ═════════ v36.4 (11/11/2026) — WORKING MAP: lịch làm việc + bản đồ hoạt động địa bàn (thay Tender Map trong CRM, người dùng yêu cầu) ═════════

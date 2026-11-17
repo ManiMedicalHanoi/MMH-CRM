@@ -328,3 +328,9 @@ Kiến trúc & quy ước giống MMH Report Hub (repo `ManiMedicalHanoi/MMH-Rep
   ④ Nhóm Thái: lượt Visit / Co-visit / Event có kết quả mà chưa Completed ⇒ khi lưu hiện `#v368-cnt` "Đánh dấu Completed rồi lưu" / "Lưu như cũ" (luật KPI không đổi).
   ⑤ `probeCors` nhớ theo TỪNG URL backend (`localStorage mmh_cors2`), lần hỏng chỉ nhớ 10 phút; bỏ `mmh_cors_ok` cũ (nhớ vĩnh viễn, chung mọi nhóm ⇒ tải chứng từ Mở mới / SKU báo "No answer from the server").
   Kiểm thử: Playwright + `mmh-backend/ifu/capture` (lib.cjs `newPage({pic:'Yong'})`).
+- **v36.9 (17/11/2026, sửa module WQ v30.6)**: iPhone — IndexedDB (ảnh chờ gửi) có lúc treo / bị iOS đóng ⇒ hàng chờ đứng "thử 0 lần", ảnh bị coi là "không còn trên máy" rồi bị XOÁ (Viet 17/11). Nay `idb` / `tx` có giờ chờ 6–8 giây, lỗi ⇒ mở lại kết nối
+  (`idbReset`, cả khi app hiện lại); `bget2` phân biệt lỗi đọc (thử lại, 5 lần ⇒ báo đỏ) với ảnh không có (mới bỏ); `pump` chữ trước ảnh, mục chờ thử lại (`it.nx`) không chặn mục khác, lượt treo > 150 giây tự gỡ (`RUN={at,it}`), Thử lại ngay gỡ cả lượt treo.
+- **v37.0 (17/11/2026, khối `v370-css` + `v370-js`, backend crm-thai-dental `TH_Orders.gs`) — Đơn hàng Dental Thái (Yong)**: khối **Order from this visit** (`#tho-box`) dưới Task Result của form task / task mới (chỉ `thaid`):
+  NPP · Contact (tự lấy "Person met") · dòng Product group / Product / Qty / Unit price THB ⇒ **Save order**; lưu task khi khối còn mở có sản phẩm ⇒ tự lưu đơn (thiếu SL ⇒ chặn lưu task). Tab **Orders** (`thord`, nhóm Sales Result, chỉ thaid):
+  tháng / PIC / tìm, tổng đơn · account · SL · tiền THB, theo NPP, sửa / xoá (hộp `#m2Body`, xoá bấm 2 lần) / **+ New order**. Hàng đợi trên máy `mmh_thord_q` (rid) ⇒ `ordSave` / `ordDelete`; dữ liệu `ordList` (đệm `k:thaid:orders`).
+  Sales chỉ thấy đơn của mình, quản lý (`isMgrView`) cả nhóm. Ghi vào sheet CÓ SẴN SALE ORDERS (xem CLAUDE.md mmh-backend). Tour `thord` + bước `#tho-box` của `visit`.
