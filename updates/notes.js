@@ -7,6 +7,15 @@
 function E(u){ u.en={ title:u.title, items:u.items.map(function(i){ return { title:i.title, text:i.text }; }) }; return u; }
 window.MMH_UPDATES = [
   E({
+    id:"2026-11-17-v36.9", version:"v36.9", date:"2026-11-17",
+    title:"Saving on iPhone no longer gets stuck",
+    summary:"On some iPhones the list <b>Waiting to be saved to Google Sheet</b> kept spinning (“sending · tried 0 times”) and a photo could be removed as “no longer on this device”. Fixed.",
+    items:[
+      { type:"fix", icon:"!", title:"The queue keeps moving", text:"Tasks are sent before photos, and one item that is waiting no longer blocks the others. A send that hangs is retried by itself after 2½ minutes; <b>Retry now</b> also restarts it." },
+      { type:"fix", icon:"!", title:"Photos are not removed by mistake", text:"If the phone's storage is busy (common after the app was in the background), the photo stays in the queue and is retried — it is removed only when it is really gone." }
+    ]
+  }),
+  E({
     id:"2026-11-17-v36.8", version:"v36.8", date:"2026-11-17",
     title:"Thailand Dental: faster saving, drafts kept, dates kept, reports to Owen san",
     summary:"Fixes for the points raised by the Thailand Dental team. Owen san (manager of the Dental team) now has access to the CRM and receives every weekly and monthly report, and you get a copy of the report you send.",
