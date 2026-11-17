@@ -7,6 +7,15 @@
 function E(u){ u.en={ title:u.title, items:u.items.map(function(i){ return { title:i.title, text:i.text }; }) }; return u; }
 window.MMH_UPDATES = [
   E({
+    id:"2026-11-17-v37.3", version:"v37.3", date:"2026-11-17",
+    title:"Thailand teams: tag a colleague in a visit (@mention)",
+    summary:"Visited a clinic together? Type <b>@</b> and pick the colleague. They get a notice under <b>Mentions</b> and the visit is added to their weekly report.",
+    items:[
+      { type:"new", icon:"+", title:"Type @ to tag", text:"In Task Result, Plan or Next action type <b>@</b> (or click <b>@ Tag</b>) ▸ pick a teammate ▸ save the task. The line <b>Tagged: …</b> shows who will be notified. The visit still counts once, for the person who logged it.", img:"updates/v37.3/tag.jpg" },
+      { type:"new", icon:"+", title:"Notice and weekly report", text:"The tagged colleague sees the notice under <b>Mentions</b>; click it to open the task (read-only). The visit is also added to his / her weekly report as <b>Joint · logged by …</b>." }
+    ]
+  }),
+  E({
     id:"2026-11-17-v37.2", version:"v37.2", date:"2026-11-17",
     title:"Business trip report: send the report e-mail from your own mailbox",
     summary:"After you save a business trip report, the CRM prepares the report e-mail — To the <b>Director</b>, CC the <b>head of department</b> and your <b>co-travelers</b>. You open Outlook / Gmail, paste and <b>send it yourself</b>; it no longer goes out from the system address. (Vietnam teams)",

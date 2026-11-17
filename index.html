@@ -4019,7 +4019,7 @@ function buildNav(){
     if(t.grp!==lastGrp){ h+='<div class="grp">'+t.grp+'</div>'; lastGrp=t.grp; }
     h+='<button class="nvi" data-t="'+t.id+'" onclick="go(\''+t.id+'\')"><span class="ic">'+t.ic+'</span><span class="lb">'+t.lb+'</span></button>';
   });
-  h+='<div style="flex:1"></div><div style="padding:10px;font-size:10.5px;color:var(--mute);line-height:1.5">MMH CRM v37.2<br>'+
+  h+='<div style="flex:1"></div><div style="padding:10px;font-size:10.5px;color:var(--mute);line-height:1.5">MMH CRM v37.3<br>'+
      (isMgmt()?'<a href="'+DRIVE_FOLDER+'" target="_blank">📁 Folder ảnh Drive</a>':"")+'</div>';
   $("side").innerHTML=h;
   /* ⭐ v4.5 — thanh dưới trượt ngang, đủ mọi mục, bỏ nút "Thêm" */
@@ -21007,7 +21007,7 @@ window.QS2={ open:qsOpen };
 </script>
 
 <!-- ⭐ v30.3 — THÔNG BÁO CẬP NHẬT (chép từ Report Hub): dữ liệu updates/notes.js · tự hiện 7 ngày · nút "Có gì mới" trên thanh trên cùng -->
-<script src="updates/notes.js?v=37.2"></script>
+<script src="updates/notes.js?v=37.3"></script>
 <style id="upd-css">
 #upd,#upd-zoom{--t-pri:var(--blue);--t-pri2:var(--blue-d);--t-ink:var(--navy);--t-soft:var(--pale);--t-line:var(--lb2);--t-bg:#F6F8FA;--mmh-blue:var(--blue);--mmh-navy:var(--navy)}
 
@@ -25173,7 +25173,7 @@ window.RHN_CFG={ url:window.TRAINING_HUB_API, key:(typeof TRN_KEY!=="undefined"?
     b.title=(window.I18N&&I18N.on)?"Mentions, assignments and reviews from the MKT Events app":"Nhắc tôi — @nhắc tên, giao việc, việc chờ duyệt từ app Sự kiện MKT"; u.parentNode.insertBefore(b,u); }; go(); } };
 </script>
 <style id="v345-css">@media(max-width:720px){ #rhn-btn{display:inline-flex!important} #rhn-btn span{display:none} }</style>
-<script src="rhnotify/rhnotify.js?v=1.0"></script>
+<script src="rhnotify/rhnotify.js?v=1.1"></script>
 <script src="testflow/testflow.js?v=1.0"></script>
 <script src="tour/tour.js?v=1.1"></script>
 <script src="tour/tours.js?v=36.5"></script>
@@ -31934,5 +31934,187 @@ window.TRIPMAIL_CFG={ call:function(b){ return tripHub(b, 60000); }, email:funct
 })();
 </script>
 <script src="tripmail/tripmail.js?v=1.0"></script>
+<style id="v373-css">
+/* ⭐ v37.3 — @tag đồng nghiệp trong task (nhóm Thái) */
+#men-pop{position:fixed;z-index:4000;background:#fff;border:1px solid var(--fld-line,#C3CDD8);border-radius:10px;box-shadow:0 6px 18px rgba(0,48,71,.14);
+  min-width:200px;max-width:min(320px,calc(100vw - 24px));max-height:220px;overflow:auto;padding:4px;font-family:Aptos,"Segoe UI",sans-serif}
+#men-pop .mi{display:flex;align-items:center;gap:8px;padding:7px 9px;border-radius:7px;cursor:pointer;font-size:13px;color:#1A2340}
+#men-pop .mi.on,#men-pop .mi:hover{background:var(--t-soft,#F0F7FF)}
+#men-pop .av{flex:0 0 26px;height:26px;border-radius:50%;background:#E6EEF8;color:#3A5CAA;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center}
+#men-pop .tt{font-size:11px;color:#6B7A90;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#men-pop .hd{font-size:11px;color:#6B7A90;padding:4px 9px 2px}
+.men-tags{font-size:11.5px;color:#41506B;margin-top:4px;line-height:1.5}
+.men-tags b{color:#3A5CAA;font-weight:600}
+.men-b{margin-left:6px;white-space:nowrap;flex:0 0 auto}
+.men-view .r{display:flex;gap:10px;padding:6px 0;border-bottom:1px solid #EEF1F5;font-size:13px}
+.men-view .r>span:first-child{flex:0 0 118px;color:#6B7A90}
+.men-view .r>span:last-child{flex:1;min-width:0;white-space:pre-wrap;word-break:break-word}
+@media (max-width:720px){.men-view .r{flex-direction:column;gap:2px}.men-view .r>span:first-child{flex:none}}
+</style>
+<script id="v373-js">
+/* ═════════ v37.3 (17/11/2026) — @TAG ĐỒNG NGHIỆP TRONG TASK (Yong, nhóm Thailand Dental; bật cho thai + thaid) ═════════
+   Đi thăm khách cùng Man / Sui ⇒ gõ "@" trong Task Result / Plan / Next action ⇒ danh sách người cùng nhóm ⇒ chọn ⇒ "@Man ".
+   Nút "@ Tag" cạnh nút Voice của ô Task Result. Dưới ô: "Tagged: Man · Sui (notified when you save)".
+   Lưu task ⇒ backend TH_Mention.gs ghi thông báo (bell "Mentions") cho người MỚI được tag + đưa task vào báo cáo tuần của họ.
+   Bấm thông báo / link #tag=<team>:<row>:<yyyy-mm-dd> ⇒ CRM mở task đó: của mình thì form thường, của người khác thì xem (chỉ đọc).
+   Không đổi KPI. Nhóm VN chưa bật (backend VN chưa có). */
+(function(){
+"use strict";
+var TEAMS_ON=["thai","thaid"];
+function on(){ try{ return TEAMS_ON.indexOf(curTeamKey())>=0; }catch(e){ return false; } }
+function me(){ try{ return (S.user&&S.user.pic)||""; }catch(e){ return ""; } }
+function people(){
+  var k=curTeamKey(), m=me().toLowerCase();
+  return Object.keys(ROLES).filter(function(n){ var r=ROLES[n]||{}; return (r.team===k || (r.teams||[]).indexOf(k)>=0) && n.toLowerCase()!==m && !/^test/i.test(n); })
+    .map(function(n){ var r=ROLES[n]||{}; return { n:n, t:r.title||"", ini:r.ini||n.slice(0,2).toUpperCase() }; });
+}
+function esc2(s){ return String(s==null?"":s).replace(/[&<>"']/g,function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]; }); }
+function tagsIn(v){
+  var out=[]; String(v||"").replace(/(^|[^A-Za-z0-9_@])@([A-Za-z][A-Za-z0-9_]*)/g,function(_,a,n){
+    var hit=people().concat([{n:me()}]).filter(function(p){ return p.n.toLowerCase()===n.toLowerCase(); })[0];
+    if(hit && hit.n!==me() && out.indexOf(hit.n)<0) out.push(hit.n); return _; });
+  return out;
+}
+/* ô nào có gợi ý @: Task Result (1 ô của nhóm Thái), Plan, Next action, Customer feedback — trong form task */
+function target(el){
+  if(!el || !on() || !el.id) return false;
+  if(!(el.tagName==="TEXTAREA" || (el.tagName==="INPUT" && (el.type||"text")==="text"))) return false;
+  if(/-p[0-3]$/.test(el.id)) return false;
+  if(!el.getClientRects().length) return false;                 /* ô ẩn (ô gốc của v34.3 / v36.3 nhận bản sao chữ) */
+  return /^(tk|nt)[-_].*(result|plan|next|feedback)/i.test(el.id) || /^(tk|nt)[-_]?result-one$/.test(el.id);
+}
+var POP=null, CUR=null;
+function close(){ if(POP){ POP.remove(); POP=null; } CUR=null; }
+function query(el){
+  var v=el.value, c=el.selectionStart; if(c==null || c!==el.selectionEnd) return null;
+  var left=v.slice(0,c), m=/(^|[^A-Za-z0-9_@])@([A-Za-z0-9_]{0,20})$/.exec(left); if(!m) return null;
+  return { q:m[2], at:c-m[2].length-1, end:c };
+}
+function place(el){
+  if(!POP) return;
+  var r=el.getBoundingClientRect(), vv=window.visualViewport, vh=vv?vv.height+vv.offsetTop:window.innerHeight, h=POP.offsetHeight||180;
+  var left=Math.max(8,Math.min(r.left,window.innerWidth-POP.offsetWidth-8));
+  var below=Math.min(r.bottom,vh)+4, top=(below+h<=vh-6)?below:Math.max(8,r.top-h-4);
+  if(r.bottom>vh && r.top<vh) top=Math.max(8,vh-h-6);
+  POP.style.left=left+"px"; POP.style.top=top+"px";
+}
+function show(el,st){
+  var q=st.q.toLowerCase(), list=people().filter(function(p){ return !q || p.n.toLowerCase().indexOf(q)===0 || p.n.toLowerCase().indexOf(q)>=0; });
+  if(!list.length){ close(); return; }
+  if(!POP){ POP=document.createElement("div"); POP.id="men-pop"; POP.setAttribute("role","listbox"); document.body.appendChild(POP);
+    POP.addEventListener("mousedown",function(e){ e.preventDefault(); }); }
+  CUR={ el:el, st:st, list:list, i:0 };
+  draw(); place(el);
+}
+function draw(){
+  if(!POP||!CUR) return;
+  POP.innerHTML='<div class="hd">'+esc2(TX("Tag đồng nghiệp","Tag a colleague"))+'</div>'+CUR.list.map(function(p,i){
+    return '<div class="mi'+(i===CUR.i?" on":"")+'" role="option" data-i="'+i+'"><span class="av">'+esc2(p.ini)+'</span><div style="min-width:0"><div>'+esc2(p.n)+'</div>'+(p.t?'<div class="tt">'+esc2(p.t)+'</div>':"")+'</div></div>'; }).join("");
+  Array.prototype.forEach.call(POP.querySelectorAll(".mi"),function(d){ d.onclick=function(){ pick(+d.dataset.i); }; });
+}
+function fire(el){ try{ el.dispatchEvent(new Event("input",{bubbles:true})); el.dispatchEvent(new Event("change",{bubbles:true})); }catch(e){} }
+function pick(i){
+  if(!CUR) return; var p=CUR.list[i], el=CUR.el, st=CUR.st; if(!p) return close();
+  var v=el.value, ins="@"+p.n+" ";
+  if(v.charAt(st.end)===" ") ins="@"+p.n;
+  el.value=v.slice(0,st.at)+ins+v.slice(st.end);
+  var c=st.at+ins.length+(v.charAt(st.end)===" "?1:0); try{ el.focus(); el.setSelectionRange(c,c); }catch(e){}
+  close(); fire(el); paintTags(el);
+}
+document.addEventListener("input",function(e){
+  var el=e.target; if(!target(el)) return;
+  var st=(el===document.activeElement)?query(el):null; if(st) show(el,st); else if(!CUR || CUR.el===el) close();
+  paintTags(el);
+},true);
+document.addEventListener("keydown",function(e){
+  if(!POP||!CUR||e.target!==CUR.el) return;
+  if(e.key==="ArrowDown"){ e.preventDefault(); CUR.i=(CUR.i+1)%CUR.list.length; draw(); }
+  else if(e.key==="ArrowUp"){ e.preventDefault(); CUR.i=(CUR.i-1+CUR.list.length)%CUR.list.length; draw(); }
+  else if(e.key==="Enter"||e.key==="Tab"){ e.preventDefault(); e.stopPropagation(); pick(CUR.i); }
+  else if(e.key==="Escape"){ e.preventDefault(); e.stopPropagation(); close(); }
+},true);
+document.addEventListener("click",function(e){ if(POP && !POP.contains(e.target) && (!CUR || e.target!==CUR.el)) close(); },true);
+document.addEventListener("focusout",function(e){ if(CUR && e.target===CUR.el) setTimeout(function(){ if(CUR && document.activeElement!==CUR.el) close(); },150); },true);
+window.addEventListener("resize",function(){ if(CUR) place(CUR.el); });
+if(window.visualViewport) window.visualViewport.addEventListener("resize",function(){ if(CUR) place(CUR.el); });
+/* dòng "Tagged: …" dưới ô */
+function paintTags(el){
+  if(!el || !el.parentNode) return;
+  var id="men-t-"+el.id, box=document.getElementById(id), tags=tagsIn(el.value);
+  if(!tags.length){ if(box) box.remove(); return; }
+  if(!box){ box=document.createElement("div"); box.id=id; box.className="men-tags"; el.parentNode.insertBefore(box,el.nextSibling); }
+  box.innerHTML=esc2(TX("Đã tag: ","Tagged: "))+tags.map(function(n){ return "<b>"+esc2(n)+"</b>"; }).join(" · ")+
+    ' <span style="color:#8A97B5">'+esc2(TX("— họ nhận thông báo khi bạn lưu, task vào báo cáo tuần của họ","— notified when you save, added to their weekly report"))+'</span>';
+}
+/* nút "@ Tag" cạnh nút Voice của ô Task Result (nhóm Thái) */
+function addBtn(){
+  if(!on()) return;
+  Array.prototype.forEach.call(document.querySelectorAll(".v363-one .lb"),function(lb){
+    if(lb.querySelector(".men-b")) return;
+    var ta=lb.parentNode.querySelector("textarea"); if(!ta) return;
+    var b=document.createElement("button"); b.type="button"; b.className="mini men-b"; b.textContent="@ Tag";
+    b.title=TX("Tag đồng nghiệp đi cùng","Tag a colleague who was with you");
+    b.addEventListener("mousedown",function(e){ e.preventDefault(); });
+    b.onclick=function(){
+      var v=ta.value, c=ta.selectionStart;
+      if(c==null || document.activeElement!==ta){ var m1=/^[ \t]*1\s*[.)][^\n]*/m.exec(v); c=m1?m1.index+m1[0].length:v.length; }   /* chưa đặt con trỏ ⇒ cuối dòng "1. Actions Taken:" */
+      var pre=(c>0 && !/\s/.test(v.charAt(c-1)))?" @":"@";
+      ta.value=v.slice(0,c)+pre+v.slice(c); var nc=c+pre.length; ta.focus(); try{ ta.setSelectionRange(nc,nc); }catch(e){}
+      fire(ta); var st=query(ta); if(st) show(ta,st);
+    };
+    var voice=lb.querySelector("button.mini"); if(voice && voice.nextSibling) lb.insertBefore(b,voice.nextSibling); else lb.appendChild(b);
+    setTimeout(function(){ paintTags(ta); },400);
+  });
+  Array.prototype.forEach.call(document.querySelectorAll("textarea[id^='tk-'],textarea[id^='nt_']"),function(t){ if(target(t) && !t.dataset.men){ t.dataset.men="1"; setTimeout(function(){ paintTags(t); },400); } });
+}
+try{ new MutationObserver(function(){ if(on()) addBtn(); }).observe(document.body,{childList:true,subtree:true}); }catch(e){}
+
+/* ── mở task được tag: #tag=<team>:<row>:<yyyy-mm-dd> (link trong thông báo) ── */
+function row2(label,val){ return val?'<div class="r"><span>'+esc2(label)+'</span><span>'+esc2(val)+'</span></div>':""; }
+function view(w){
+  var a=parseAcc(w.account||""), mine=String(w.pic||"").toLowerCase()===me().toLowerCase();
+  if(mine) return openTask(w._row);
+  var body='<div class="men-view">'+
+    row2(TX("Người ghi","Logged by"),w.pic)+row2("Account",a.name||w.accName)+row2(TX("Ngày","Date"),fmtVN?fmtVN(w.start):w.start)+
+    row2("Type action",w.typeAction)+row2("Status",w.status)+row2("Plan",w.plan)+row2("Task Result",w.result)+
+    row2("Customer feedback",w.feedback)+row2("Next action",w.nextAction)+'</div>';
+  openModal2(TX("Task bạn được tag","Task you were tagged in"),body,'<button class="btn gho" onclick="closeModal2()">'+esc2(TX("Đóng","Close"))+'</button>');
+}
+function openTag(h){
+  var m=/^#?tag=([a-z]+):(\d+):?(\d{4}-\d{2}-\d{2})?/.exec(String(h||"")); if(!m) return false;
+  var team=m[1], row=+m[2], d=m[3]||"";
+  if(team!==curTeamKey()){
+    if(userTeams().indexOf(team)<0){ toast(TX("Task này thuộc nhóm khác.","This task belongs to another team."),"warn"); return true; }
+    try{ sessionStorage.setItem("mmh_men_open",h); }catch(e){}
+    switchTeam(team); return true;
+  }
+  toast(TX("Đang mở task…","Opening the task…"));
+  var q=d?{ from:d, to:d }:{};
+  apiGet("visitFeed",q).then(function(x){
+    var w=((x&&x.rows)||[]).filter(function(r){ return +r._row===row; })[0];
+    if(!w){ var f=(typeof findTask==="function")?findTask(row):null; if(f) w=f; }
+    if(!w) return toast(TX("Không tìm thấy task (có thể đã bị xoá).","Task not found (it may have been deleted)."),"warn");
+    view(w);
+  }).catch(function(e){ toast(e&&e.message||String(e),"err"); });
+  return true;
+}
+window.MEN={ open:openTag, tags:tagsIn, people:people };
+if(window.RHN_CFG) window.RHN_CFG.go=function(u){ var i=String(u||"").indexOf("#tag="); if(i<0 || String(u).indexOf("MMH-CRM")<0) return false; return openTag(String(u).slice(i)); };
+function boot(){
+  var h=location.hash||"", s=""; try{ s=sessionStorage.getItem("mmh_men_open")||""; }catch(e){}
+  var go=/^#tag=/.test(h)?h:s; if(!go) return;
+  var t=0, iv=setInterval(function(){
+    t++; if(t>60){ clearInterval(iv); return; }
+    if(!(window.S&&S.user&&S.user.pic) || document.getElementById("au-ov")) return;
+    clearInterval(iv);
+    try{ sessionStorage.removeItem("mmh_men_open"); }catch(e){}
+    if(/^#tag=/.test(location.hash||"")) try{ history.replaceState(null,"",location.pathname+location.search); }catch(e){}
+    setTimeout(function(){ openTag(go); },1200);
+  },1000);
+}
+boot();
+window.addEventListener("hashchange",function(){ if(/^#tag=/.test(location.hash||"")){ var h=location.hash; try{ history.replaceState(null,"",location.pathname+location.search); }catch(e){} openTag(h); } });
+})();
+</script>
 </body>
 </html>
