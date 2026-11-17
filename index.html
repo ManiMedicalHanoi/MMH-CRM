@@ -4019,7 +4019,7 @@ function buildNav(){
     if(t.grp!==lastGrp){ h+='<div class="grp">'+t.grp+'</div>'; lastGrp=t.grp; }
     h+='<button class="nvi" data-t="'+t.id+'" onclick="go(\''+t.id+'\')"><span class="ic">'+t.ic+'</span><span class="lb">'+t.lb+'</span></button>';
   });
-  h+='<div style="flex:1"></div><div style="padding:10px;font-size:10.5px;color:var(--mute);line-height:1.5">MMH CRM v37.3<br>'+
+  h+='<div style="flex:1"></div><div style="padding:10px;font-size:10.5px;color:var(--mute);line-height:1.5">MMH CRM v37.4<br>'+
      (isMgmt()?'<a href="'+DRIVE_FOLDER+'" target="_blank">📁 Folder ảnh Drive</a>':"")+'</div>';
   $("side").innerHTML=h;
   /* ⭐ v4.5 — thanh dưới trượt ngang, đủ mọi mục, bỏ nút "Thêm" */
@@ -21007,7 +21007,7 @@ window.QS2={ open:qsOpen };
 </script>
 
 <!-- ⭐ v30.3 — THÔNG BÁO CẬP NHẬT (chép từ Report Hub): dữ liệu updates/notes.js · tự hiện 7 ngày · nút "Có gì mới" trên thanh trên cùng -->
-<script src="updates/notes.js?v=37.3"></script>
+<script src="updates/notes.js?v=37.4"></script>
 <style id="upd-css">
 #upd,#upd-zoom{--t-pri:var(--blue);--t-pri2:var(--blue-d);--t-ink:var(--navy);--t-soft:var(--pale);--t-line:var(--lb2);--t-bg:#F6F8FA;--mmh-blue:var(--blue);--mmh-navy:var(--navy)}
 
@@ -32114,6 +32114,88 @@ function boot(){
 }
 boot();
 window.addEventListener("hashchange",function(){ if(/^#tag=/.test(location.hash||"")){ var h=location.hash; try{ history.replaceState(null,"",location.pathname+location.search); }catch(e){} openTag(h); } });
+})();
+</script>
+<style id="v374-css">
+/* ⭐ v37.4 — giải trình ảnh đi địa bàn < 15 phút trước khi gửi báo cáo tuần */
+.phw-h{font-size:15px;font-weight:800;color:#8A3B00;margin:0 0 6px}
+.phw-box{border:1.5px solid #D9981F;background:#FFF8E8;border-radius:10px;padding:12px 14px;font-size:13.5px;line-height:1.55;color:#3A2A00}
+.phw-box ul{margin:8px 0 0 18px;padding:0}.phw-box li{margin:3px 0}
+.phw-box .g{color:#8A5A00}.phw-box .u{color:#6B7A90;font-size:12px}
+.phw-lb{display:block;font-weight:700;font-size:13px;margin:14px 0 6px;color:var(--t-ink,#003047)}
+#phw-note{width:100%;min-height:96px;box-sizing:border-box;border:1px solid var(--fld-line,#C3CDD8);border-radius:8px;padding:9px 11px;font:inherit;font-size:14px;resize:vertical}
+#phw-note:focus{outline:none;border-color:var(--t-pri,#3A5CAA);box-shadow:0 0 0 3px rgba(58,92,170,.15)}
+.phw-hint{font-size:12px;color:#6B7A90;margin-top:6px}
+</style>
+<script id="v374-js">
+/* ═════════ v37.4 (17/11/2026) — CẢNH BÁO ĐỘ TIN CẬY ẢNH ĐI ĐỊA BÀN KHI GỬI BÁO CÁO TUẦN (người dùng yêu cầu) ═════════
+   Nhóm có chụp ảnh (Dental · Surgical · Eyeless VN): sales bấm gửi CHÍNH THỨC báo cáo tuần của mình (option team) ⇒ app đọc visitFeed
+   tuần đó của chính PIC, dò bằng PHA.detect (v35.5): 2 ảnh liên tiếp, cùng ngày, khác khách, cách nhau < 15 phút.
+   Có ⇒ hộp "CẢNH BÁO VỀ ĐỘ TIN CẬY CỦA THÔNG TIN CẬP NHẬT" (danh sách ảnh + ô giải trình bắt buộc) ⇒ Xác nhận ⇒ gửi kèm photoNote.
+   Backend MMH_PhotoCheck.gs chèn khối cảnh báo + giải trình vào email / PDF; thiếu giải trình ⇒ máy chủ trả PHOTO_NOTE, không gửi. */
+(function(){
+"use strict";
+var TEAMS_ON=["dental","surgical","eyeless"];
+function on(){ try{ return TEAMS_ON.indexOf(curTeamKey())>=0 && !noPhoto(); }catch(e){ return false; } }
+function esc3(s){ return String(s==null?"":s).replace(/[&<>"']/g,function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]; }); }
+function d2(iso){ var m=/^(\d{4})-(\d{2})-(\d{2})/.exec(String(iso||"")); return m?m[3]+"/"+m[2]:iso; }
+var OK={}, NOTE=null;
+function lsKey(pic,from){ return "mmh_phw:"+curTeamKey()+":"+pic+":"+from; }
+function check(pic,from,to){
+  return apiGet("visitFeed",{ pic:pic, from:from, to:to }).then(function(x){
+    var rows=(x&&x.rows)||[];
+    if(!(window.PHA&&PHA.detect)) return { n:0, chains:[] };
+    var ch=PHA.detect(rows,curTeamKey()).filter(function(c){ return c.day>=from && c.day<=to && String(c.pic)===String(pic); });
+    var seen={}; ch.forEach(function(c){ c.items.forEach(function(it){ seen[it.w._row]=1; }); });
+    return { n:Object.keys(seen).length, chains:ch.sort(function(a,b){ return a.at-b.at; }) };
+  });
+}
+function ask(r,pic,from,go){
+  var list=r.chains.map(function(c){
+    return "<li>"+esc3(d2(c.day))+": "+c.items.map(function(it,i){
+      return "<b>"+esc3(it.t.hm)+"</b> "+esc3(it.acc)+(i?' <span class="g">('+(c.gaps[i-1]?c.gaps[i-1].min:"")+" phút)</span>":""); }).join(" → ")+
+      (c.up?' <span class="u">· có ảnh chỉ có giờ tải lên</span>':"")+"</li>"; }).join("");
+  var last=""; try{ last=localStorage.getItem(lsKey(pic,from))||""; }catch(e){}
+  var body='<div class="phw-box"><div class="phw-h">CẢNH BÁO VỀ ĐỘ TIN CẬY CỦA THÔNG TIN CẬP NHẬT</div>'+
+    'Lưu ý: bạn có <b>'+r.n+' ảnh</b> cuộc gặp khách hàng diễn ra cách nhau <b>dưới 15 phút</b>. Hãy <b>CHẮC CHẮN</b> thông tin bạn nhập vào hệ thống là chính xác.'+
+    '<ul>'+list+'</ul></div>'+
+    '<label class="phw-lb" for="phw-note">Ghi chú giải trình <span class="rq">*</span></label>'+
+    '<textarea id="phw-note" placeholder="Giải thích ngắn gọn: vd. các phòng khám cùng một toà nhà / cùng con phố; chụp ảnh tại chỗ rồi gặp bác sĩ sau…">'+esc3(last)+'</textarea>'+
+    '<div class="phw-hint">Ghi chú này được gửi kèm trong email báo cáo tuần. Không có giải trình thì không gửi được báo cáo.</div>';
+  openModal2("Xác nhận trước khi gửi báo cáo tuần",body,
+    '<button class="btn gho" id="phw-no">Huỷ</button><button class="btn pri" id="phw-yes" disabled>Xác nhận và gửi</button>');
+  var ta=document.getElementById("phw-note"), yes=document.getElementById("phw-yes");
+  function upd(){ yes.disabled=String(ta.value||"").trim().length<10; }
+  ta.addEventListener("input",upd); upd(); setTimeout(function(){ try{ ta.focus(); }catch(e){} },80);
+  document.getElementById("phw-no").onclick=function(){ closeModal2(); };
+  yes.onclick=function(){
+    var t=String(ta.value||"").trim(); if(t.length<10) return;
+    try{ localStorage.setItem(lsKey(pic,from),t); }catch(e){}
+    NOTE={ pic:pic, from:from, text:t, n:r.n };
+    closeModal2(); go();
+  };
+}
+var _send=window.sendReport||sendReport;
+window.sendReport=sendReport=function(option,confirmed){
+  var who=(S.rpPic||S.user.pic), me=S.user&&S.user.pic;
+  if(!confirmed || S.rpKind!=="week" || option!=="team" || !on() || who!==me) return _send.apply(this,arguments);
+  var key=curTeamKey()+"|"+who+"|"+S.rpFrom;
+  if(OK[key]) return _send.apply(this,arguments);
+  var self=this, args=arguments, from=S.rpFrom, to=S.rpTo;
+  busy(true,"Đang kiểm tra ảnh đi địa bàn…");
+  check(who,from,to).then(function(r){
+    busy(false);
+    if(!r.n){ OK[key]=1; NOTE=null; setTimeout(function(){ delete OK[key]; },60000); return _send.apply(self,args); }
+    ask(r,who,from,function(){ OK[key]=1; _send.apply(self,args); setTimeout(function(){ delete OK[key]; },60000); });
+  }).catch(function(){ busy(false); OK[key]=1; _send.apply(self,args); setTimeout(function(){ delete OK[key]; },60000); });
+};
+var _pb=window.postBody||postBody;
+window.postBody=postBody=function(body){
+  if(body && body.action==="weeklyReport" && NOTE && String(body.from)===String(NOTE.from) && String(body.toPic||S.user.pic)===String(NOTE.pic) && !body.photoNote)
+    body.photoNote=JSON.stringify(NOTE);
+  return _pb.apply(this,arguments).then(function(r){ if(body && body.action==="weeklyReport") NOTE=null; return r; });
+};
+window.PHW={ check:check };
 })();
 </script>
 </body>

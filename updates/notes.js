@@ -7,6 +7,15 @@
 function E(u){ u.en={ title:u.title, items:u.items.map(function(i){ return { title:i.title, text:i.text }; }) }; return u; }
 window.MMH_UPDATES = [
   E({
+    id:"2026-11-17-v37.4", version:"v37.4", date:"2026-11-17",
+    title:"Weekly report: explain visit photos taken less than 15 minutes apart",
+    summary:"Dental / Surgical / Eyeless Vietnam: if your week has visit photos at different customers taken less than 15 minutes apart, the CRM asks for a short explanation before the weekly report is sent. The explanation is part of the report e-mail.",
+    items:[
+      { type:"new", icon:"!", title:"Reliability warning before sending", text:"<b>Send report</b> ▸ <b>Send officially</b> ▸ the box <b>RELIABILITY WARNING</b> lists the photos (time, customer, minutes apart) ▸ check your data, write a <b>short explanation</b> ▸ <b>Confirm and send</b>. Without an explanation the report cannot be sent.", img:"updates/v37.4/photo_warn.jpg" },
+      { type:"new", icon:"+", title:"Explanation in the weekly report e-mail", text:"The weekly report e-mail and PDF start with the warning block: the list of photos and your explanation (or “No explanation yet” when a manager sends it for you)." }
+    ]
+  }),
+  E({
     id:"2026-11-17-v37.3", version:"v37.3", date:"2026-11-17",
     title:"Thailand teams: tag a colleague in a visit (@mention)",
     summary:"Visited a clinic together? Type <b>@</b> and pick the colleague. They get a notice under <b>Mentions</b> and the visit is added to their weekly report.",
