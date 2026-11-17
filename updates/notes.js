@@ -7,6 +7,16 @@
 function E(u){ u.en={ title:u.title, items:u.items.map(function(i){ return { title:i.title, text:i.text }; }) }; return u; }
 window.MMH_UPDATES = [
   E({
+    id:"2026-11-17-v37.6", version:"v37.6", date:"2026-11-17",
+    title:"New: Manager assistant — ask about the sales work by voice",
+    summary:"Directors, heads of department and team leaders get their own page: <b>speak, type or pick a question</b> and see the answer on screen — field visits, plans, business trips, orders, new accounts, weekly reports, photo alerts. Free, no token.",
+    items:[
+      { type:"new", icon:"+", title:"Ask by voice, typing or picking", text:"Click <b>Manager assistant</b> on the top bar (phone: <b>More ▸ Manager assistant</b>) ▸ tap the <b>microphone</b> and speak, type a question, or tap a ready question. The answer appears as a short summary and a table.", img:"updates/v37.6/pick.jpg" },
+      { type:"new", icon:"+", title:"Status of all teams in one tap", text:"<b>Status of all teams</b> shows every team: today, visits this week, overdue tasks, trips, orders waiting, new accounts, weekly reports not sent, unusual photos. Click a line to see the details.", img:"updates/v37.6/overview.jpg" },
+      { type:"new", icon:"+", title:"Per person and per team", text:"Pick a team and a person on the filter bar, or say the name, e.g. “Visits of Yong this week”. Click a person in the table to see each visit with result, feedback and next action.", img:"updates/v37.6/visits.jpg" }
+    ]
+  }),
+  E({
     id:"2026-11-17-v37.5", version:"v37.5", date:"2026-11-17",
     title:"Report statistics: 2027 working calendar and new rules",
     summary:"The weekly report must be sent <b>on the last working day of the week</b> (MMH Vietnam / Thailand calendar, now with 2027). Monthly / quarterly KPI reports are no longer counted because you send them from your own mailbox.",

@@ -4019,7 +4019,7 @@ function buildNav(){
     if(t.grp!==lastGrp){ h+='<div class="grp">'+t.grp+'</div>'; lastGrp=t.grp; }
     h+='<button class="nvi" data-t="'+t.id+'" onclick="go(\''+t.id+'\')"><span class="ic">'+t.ic+'</span><span class="lb">'+t.lb+'</span></button>';
   });
-  h+='<div style="flex:1"></div><div style="padding:10px;font-size:10.5px;color:var(--mute);line-height:1.5">MMH CRM v37.5<br>'+
+  h+='<div style="flex:1"></div><div style="padding:10px;font-size:10.5px;color:var(--mute);line-height:1.5">MMH CRM v37.6<br>'+
      (isMgmt()?'<a href="'+DRIVE_FOLDER+'" target="_blank">📁 Folder ảnh Drive</a>':"")+'</div>';
   $("side").innerHTML=h;
   /* ⭐ v4.5 — thanh dưới trượt ngang, đủ mọi mục, bỏ nút "Thêm" */
@@ -21007,7 +21007,7 @@ window.QS2={ open:qsOpen };
 </script>
 
 <!-- ⭐ v30.3 — THÔNG BÁO CẬP NHẬT (chép từ Report Hub): dữ liệu updates/notes.js · tự hiện 7 ngày · nút "Có gì mới" trên thanh trên cùng -->
-<script src="updates/notes.js?v=37.5"></script>
+<script src="updates/notes.js?v=37.6"></script>
 <style id="upd-css">
 #upd,#upd-zoom{--t-pri:var(--blue);--t-pri2:var(--blue-d);--t-ink:var(--navy);--t-soft:var(--pale);--t-line:var(--lb2);--t-bg:#F6F8FA;--mmh-blue:var(--blue);--mmh-navy:var(--navy)}
 
@@ -32196,6 +32196,41 @@ window.postBody=postBody=function(body){
   return _pb.apply(this,arguments).then(function(r){ if(body && body.action==="weeklyReport") NOTE=null; return r; });
 };
 window.PHW={ check:check };
+})();
+</script>
+<!-- ═════════ v37.6 (17/11/2026) — TRỢ LÝ QUẢN LÝ (trang riêng manager/, người dùng yêu cầu): hỏi bằng giọng nói · gõ · bấm chọn, trả lời bằng bảng gọn.
+     Nút #mgrBtn trên thanh trên cùng (điện thoại: Thêm ▸ Trợ lý quản lý) — chỉ hiện với người có phạm vi xem (manager/scope.js ▸ MGR_SCOPE). ═════════ -->
+<script src="manager/scope.js?v=1.0"></script>
+<script id="v376-js">
+(function(){
+var SVG='<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:16px;height:16px"><path d="M2.6 3.4h10.8v7.2H6.2L3.4 13V10.6h-.8z"/><path d="M5.4 6.2h5.2M5.4 8.2h3.4"/></svg>';
+function lb(){ return (window.I18N && I18N.on) ? "Manager assistant" : "Trợ lý quản lý"; }
+function ok(){ try{ var u=window.AUTH && AUTH.user(); return !!(u && window.MGR_SCOPE && MGR_SCOPE(u)); }catch(_){ return false; } }
+function go(){ location.href="manager/"; }
+function paint(){
+  var h=document.querySelector("#app header"); if(!h) return;
+  var b=document.getElementById("mgrBtn");
+  if(!ok()){ if(b) b.remove(); return; }
+  if(!b){ b=document.createElement("button"); b.type="button"; b.className="tb2"; b.id="mgrBtn"; b.onclick=go; b.style.cssText="display:inline-flex;align-items:center;gap:5px";
+    var at=document.getElementById("wmBtn")||document.getElementById("rhn-btn")||document.getElementById("updBtn")||document.getElementById("btnHelp")||document.getElementById("btnUser");
+    if(at) h.insertBefore(b, at); else h.appendChild(b); }
+  b.innerHTML=SVG+"<span>"+lb()+"</span>"; b.title=(window.I18N && I18N.on) ? "Ask about the sales work by voice, typing or picking" : "Hỏi nhanh tình hình đội Sales bằng giọng nói, gõ hoặc bấm chọn";
+}
+(function wait(n){
+  var a=document.getElementById("app");
+  if(a && a.classList.contains("on") && window.S && S.user && S.user.pic){ paint(); setInterval(paint, 5000); return; }
+  setTimeout(function(){ wait((n||0)+1); }, 800);
+})();
+/* điện thoại: Thêm ▸ Trợ lý quản lý */
+(function hookMore(n){
+  var mo=window.V30 && V30.more; if(!mo){ if((n||0)<40) setTimeout(function(){ hookMore((n||0)+1); }, 1500); return; }
+  V30.more=function(){ var r=mo.apply(this, arguments);
+    try{ var box=document.getElementById("v30-more"); if(ok() && box && !box.querySelector("[data-mgr]")){ var g=box.querySelector(".gt"), b=document.createElement("button");
+      b.setAttribute("data-mgr","1"); b.className="wm-more-b"; b.innerHTML=SVG+"<span>"+lb()+"</span>"; b.onclick=go;
+      if(g && g.parentNode) g.parentNode.insertBefore(b, g); else box.appendChild(b); } }catch(_){}
+    return r; };
+})();
+window.MGRLINK={ paint:paint, ok:ok };
 })();
 </script>
 </body>
