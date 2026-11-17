@@ -126,7 +126,7 @@ const shot = async (p, f) => { if (SHOTS){ fs.mkdirSync(SHOTS, { recursive: true
   await p.context().close();
   /* 5. Chưa đăng nhập ⇒ đăng nhập mật khẩu */
   p = await page(b, {}); await p.waitForSelector("#lg-f");
-  await p.fill("#lg-e", "tt.tuyen"); await p.fill("#lg-p", "12345678"); await p.click("#lg-f button[type=submit]");
+  await p.fill("#lg-e", "manager.test"); await p.fill("#lg-p", "12345678"); await p.click("#lg-f button[type=submit]");
   await p.waitForSelector(".mg-menu", { timeout: 15000 });
   check("đăng nhập mật khẩu ⇒ Tuyen thấy 3 nhóm VN", (await p.evaluate(() => MGR.state().scope.length)) === 3);
   await p.context().close();
