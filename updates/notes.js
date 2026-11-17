@@ -7,6 +7,15 @@
 function E(u){ u.en={ title:u.title, items:u.items.map(function(i){ return { title:i.title, text:i.text }; }) }; return u; }
 window.MMH_UPDATES = [
   E({
+    id:"2026-11-17-v37.5", version:"v37.5", date:"2026-11-17",
+    title:"Report statistics: 2027 working calendar and new rules",
+    summary:"The weekly report must be sent <b>on the last working day of the week</b> (MMH Vietnam / Thailand calendar, now with 2027). Monthly / quarterly KPI reports are no longer counted because you send them from your own mailbox.",
+    items:[
+      { type:"imp", icon:"↻", title:"Weekly report: send it on the last working day", text:"Deadline = the last working day of the week (working Saturdays and holidays from the MMH calendar). Sent on that day before 23:59 ⇒ <b>On time</b>; earlier ⇒ <b>Early</b>; after 23:59 ⇒ <b>Late</b>." },
+      { type:"imp", icon:"↻", title:"Statistics count weekly reports only", text:"Report statistics (Admin / Director / HOD): the table and the Excel file count weekly reports only, with a new <b>Early</b> column; the 2026–2027 calendar is in the Work calendar sheet." }
+    ]
+  }),
+  E({
     id:"2026-11-17-v37.4", version:"v37.4", date:"2026-11-17",
     title:"Weekly report: explain visit photos taken less than 15 minutes apart",
     summary:"Dental / Surgical / Eyeless Vietnam: if your week has visit photos at different customers taken less than 15 minutes apart, the CRM asks for a short explanation before the weekly report is sent. The explanation is part of the report e-mail.",
