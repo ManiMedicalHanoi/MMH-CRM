@@ -2361,7 +2361,9 @@ var ROLES = {
   /* ⭐ v34.1 — Thailand Dental Sales (Dao = trưởng nhóm Thái, chuyển được giữa 2 nhóm Thái) · email để trống: repo công khai, đăng nhập bằng phiên email */
   "Yong":      { grp:"Thailand Dental Sales", title:"Thailand Dental - Commercial Lead", email:"", ini:"YO", team:"thaid" },
   "Man":       { grp:"Thailand Dental Sales", title:"Thailand Dental - Training & Education Lead", email:"", ini:"MA", team:"thaid" },
-  "Sui":       { grp:"Thailand Dental Sales", title:"Thailand Dental - Marketing Lead", email:"", ini:"SU", team:"thaid" }
+  "Sui":       { grp:"Thailand Dental Sales", title:"Thailand Dental - Marketing Lead", email:"", ini:"SU", team:"thaid" },
+  /* ⭐ v36.8 — Owen san: quản lý nhóm Thailand Dental (xem / sửa cả nhóm, không phải PIC, nhận mọi báo cáo) */
+  "Owen":      { grp:"Thailand Dental Sales", title:"Thailand Dental Manager", email:"", ini:"OW", team:"thaid", lead:1, notPic:1 }
 };
 var ROLE_GROUPS = [
   { k:"Management",     ic:"🏛", sub:"Xem toàn bộ dữ liệu · cần mã nội bộ" },
@@ -2382,7 +2384,7 @@ function isMgmt(){ return !!(S.user && S.user.grp === "Management"); }
    Danh sách PIC trong MASTER LIST của file Surgical/Eyeless có thể còn tên của Dental (file
    được nhân bản từ template) ⇒ bộ lọc, form, báo cáo hiện sai người. Nay luôn lấy PIC của
    đúng nhóm làm chuẩn, loại tên thuộc nhóm khác, giữ thêm tên lạ có trong sheet (nếu có). */
-function teamPicNames(k){ k=k||curTeamKey(); return Object.keys(ROLES).filter(function(nm){ return ROLES[nm].team===k; }); }
+function teamPicNames(k){ k=k||curTeamKey(); return Object.keys(ROLES).filter(function(nm){ return ROLES[nm].team===k && !ROLES[nm].notPic; }); }   /* v36.8: notPic = Owen */
 function picKey_(s){ return String(s||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/\s+/g," ").trim(); }
 function normTeamPics(){
   try{
@@ -2552,7 +2554,7 @@ function startApp(pic){
            role:(r.grp==="Management")?"manager":"pic",
            title:r.title||p.title||"", email:r.email||p.email||"",
            team:p.team||r.grp, level:(r.grp==="Management")?"lead":"pic",
-           lead:(!!r.team && /leader/i.test(r.title||"")) };          /* ⭐ v22 — Dao: xem cả nhóm */
+           lead:(!!r.team && (!!r.lead || /leader/i.test(r.title||""))) };   /* v36.8: r.lead = Owen san */          /* ⭐ v22 — Dao: xem cả nhóm */
   if(S.user.lead) S.user.role="manager";
   if(!isMgrView()) S.filt.pic=S.user.pic;      /* sales: khoá cứng theo PIC của mình */
   else S.filt.pic="";
@@ -4017,7 +4019,7 @@ function buildNav(){
     if(t.grp!==lastGrp){ h+='<div class="grp">'+t.grp+'</div>'; lastGrp=t.grp; }
     h+='<button class="nvi" data-t="'+t.id+'" onclick="go(\''+t.id+'\')"><span class="ic">'+t.ic+'</span><span class="lb">'+t.lb+'</span></button>';
   });
-  h+='<div style="flex:1"></div><div style="padding:10px;font-size:10.5px;color:var(--mute);line-height:1.5">MMH CRM v36.7<br>'+
+  h+='<div style="flex:1"></div><div style="padding:10px;font-size:10.5px;color:var(--mute);line-height:1.5">MMH CRM v36.8<br>'+
      (isMgmt()?'<a href="'+DRIVE_FOLDER+'" target="_blank">📁 Folder ảnh Drive</a>':"")+'</div>';
   $("side").innerHTML=h;
   /* ⭐ v4.5 — thanh dưới trượt ngang, đủ mọi mục, bỏ nút "Thêm" */
@@ -21005,7 +21007,7 @@ window.QS2={ open:qsOpen };
 </script>
 
 <!-- ⭐ v30.3 — THÔNG BÁO CẬP NHẬT (chép từ Report Hub): dữ liệu updates/notes.js · tự hiện 7 ngày · nút "Có gì mới" trên thanh trên cùng -->
-<script src="updates/notes.js?v=36.7"></script>
+<script src="updates/notes.js?v=36.8"></script>
 <style id="upd-css">
 #upd,#upd-zoom{--t-pri:var(--blue);--t-pri2:var(--blue-d);--t-ink:var(--navy);--t-soft:var(--pale);--t-line:var(--lb2);--t-bg:#F6F8FA;--mmh-blue:var(--blue);--mmh-navy:var(--navy)}
 
@@ -31360,11 +31362,178 @@ if(typeof _mt==="function"){
 }
 })();
 </script>
+<style id="v368-css">
+/* v36.8 (17/11/2026) — nháp tự lưu · nhắc lượt thăm chưa Completed */
+.v368-dr{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:0 0 10px;padding:8px 11px;border:1px solid #E8D9A8;background:#FFF9E8;border-radius:10px;font-size:12.5px;color:#5B4A12}
+.v368-dr b{font-weight:600}
+.v368-dr .sp{flex:1}
+.v368-cnt{display:flex;flex-wrap:wrap;align-items:center;gap:8px;width:100%;margin:0 0 8px;padding:9px 11px;border:1px solid var(--t-line,#CFE2F3);background:var(--t-soft,#F0F7FF);border-radius:10px;font-size:12.5px;color:var(--t-ink,#003047)}
+.v368-cnt .sp{flex:1;min-width:180px}
+.v368-saved{font-size:11px;color:var(--mute,#7A8797);margin-left:6px;font-weight:400}
+</style>
+<script id="v368-js">
+/* ═════════ v36.8 (17/11/2026) — rà soát CRM theo phản hồi nhóm Thailand Dental (Yong, 14–16/11/2026) ═════════
+   ① Nháp tự lưu: chữ gõ / đọc bằng giọng nói trong form task (Plan, Task Result, lý do dừng; form task mới thêm account) lưu ngay trên máy
+      (localStorage mmh_crm_draft:<nhóm>:<PIC>:<task>). Form đóng mà chưa lưu được / app tắt ⇒ mở lại cùng task: dải vàng Khôi phục · Bỏ. Lưu xong ⇒ xoá nháp.
+   ② Ngày không nhảy sang hôm nay: khi app TỰ chuyển Completed (đã có Person met + Next action — nhóm Thái không cần ảnh nên hay gặp)
+      lớp v23 đổi ô Ngày sang hôm nay lúc lưu. Nay giữ ngày đang có (≤ hôm nay), gửi finish = ngày đó + finKeep (backend Thái 17/11/2026).
+   ③ Nhóm Thái: lượt thăm (Visiting / Co-visiting / Event) đã có kết quả mà chưa Completed ⇒ trước khi lưu hỏi "Đánh dấu Completed rồi lưu" / "Lưu như cũ"
+      (chỉ lượt Completed được đếm trong báo cáo và KPI).
+   ④ Tải file (chứng từ Mở mới / SKU mới…): kết quả thử kết nối máy chủ trước đây nhớ VĨNH VIỄN và dùng chung mọi nhóm ⇒ 1 lần thử hỏng (vd. web app
+      Dental Thái mới tạo 09/11 chưa cấp quyền) làm mọi lần tải sau báo "No answer from the server". Nay nhớ theo từng máy chủ, lần hỏng chỉ nhớ 10 phút.
+   ⑤ Owen san (quản lý nhóm Dental Thái): xem / sửa cả nhóm, không nằm trong danh sách PIC; người nhận báo cáo tuần hiện đúng. */
+(function(){
+"use strict";
+function L(vi,en){ try{ return TX(vi,en); }catch(_){ return vi; } }
+function today(){ try{ return todayISO(); }catch(_){ return new Date().toISOString().slice(0,10); } }
+function tk(){ try{ return curTeamKey(); }catch(_){ return ""; } }
+function me(){ try{ return (S.user&&S.user.pic)||""; }catch(_){ return ""; } }
+function thai(){ var k=tk(); return k==="thai"||k==="thaid"; }
+
+/* ───────── ⑤ Owen san ───────── */
+try{
+  var _mtg=window.mailTargets;
+  if(typeof _mtg==="function") window.mailTargets=mailTargets=function(){
+    if(tk()==="thaid") return { to:["Owen san","Shuhei (MANI Japan)"], cc:[MAIL_HA,MAIL_HR,L("bản sao về email của bạn","a copy to your own e-mail")] };
+    return _mtg.apply(this,arguments);
+  };
+}catch(_){}
+
+/* ───────── ④ thử kết nối theo từng máy chủ ───────── */
+var CK="mmh_cors2";
+function cmap(){ try{ return JSON.parse(localStorage.getItem(CK)||"{}")||{}; }catch(_){ return {}; } }
+function cput(u,ok){ var m=cmap(); m[u]={ ok:ok?1:0, at:Date.now() }; try{ localStorage.setItem(CK,JSON.stringify(m)); }catch(_){} }
+try{ localStorage.removeItem("mmh_cors_ok"); }catch(_){}
+window.probeCors=probeCors=function(){
+  var u=gasUrl(), e=cmap()[u];
+  if(e && (e.ok || Date.now()-e.at<10*60000)){ CORS_OK=!!e.ok; return Promise.resolve(CORS_OK); }
+  return fetch(u,{ method:"POST", headers:{"Content-Type":"text/plain;charset=utf-8"}, body:JSON.stringify({action:"ping"}), redirect:"follow" })
+    .then(function(r){ return r.json(); })
+    .then(function(j){ var ok=!!(j&&j.ok); cput(u,ok); CORS_OK=ok; return ok; })
+    .catch(function(){ cput(u,false); CORS_OK=false; return false; });
+};
+
+/* ───────── ① nháp tự lưu ───────── */
+var TXT=["tk-plan","tk-result","tk-stop","tk-result-p0","tk-result-p1","tk-result-p2","tk-result-p3","tk-result-one",
+         "nt_accName","nt_account","nt_plan","nt_result","nt_stop","nt_result-p0","nt_result-p1","nt_result-p2","nt_result-p3","nt_result-one"];
+function ctx(){
+  if($("tk-result")){ var w=S.task||{}, a=""; try{ a=parseAcc(w.account).name; }catch(_){}
+    return { k:"tk:"+(S.taskRow||w._row||"")+":"+a, p:"tk" }; }
+  if($("nt_result")||$("nt_plan")) return { k:"nt", p:"nt" };
+  return null;
+}
+function key(c){ return "mmh_crm_draft:"+tk()+":"+me()+":"+c.k; }
+function vals(c){ var o={}; TXT.forEach(function(id){ if(id.indexOf(c.p)!==0) return; var e=$(id); if(e) o[id]=e.value; }); return o; }
+function textOf(o){ return Object.keys(o).filter(function(k){ return !/^nt_account$/.test(k); }).map(function(k){ return o[k]; }).join("\u0001"); }
+function get(k){ try{ var d=JSON.parse(localStorage.getItem(k)||"null"); if(d && Date.now()-d.at>14*86400000){ localStorage.removeItem(k); return null; } return d; }catch(_){ return null; } }
+var D={ base:null, k:"", t:0 };
+window.V368D=D;
+function save(){
+  var c=ctx(); if(!c) return; var k=key(c); if(k!==D.k) return;     /* chưa khởi tạo cho form này */
+  var v=vals(c), s=textOf(v);
+  if(s===D.base){ try{ localStorage.removeItem(k); }catch(_){} return; }
+  try{ localStorage.setItem(k,JSON.stringify({ at:Date.now(), v:v })); }catch(_){}
+  var m=$("v368-saved"); if(m) m.textContent=L("Đã lưu nháp trên máy","Draft kept on this device");
+}
+document.addEventListener("input",function(e){
+  var id=e.target&&e.target.id; if(!id || TXT.indexOf(id)<0) return;
+  clearTimeout(D.t); D.t=setTimeout(save,400);
+},true);
+function restore(c,d){
+  var v=d.v||{}, pre=c.p==="tk"?"tk-result":"nt_result";
+  if(v.nt_account!=null && $("nt_account")) $("nt_account").value=v.nt_account;
+  var order=[];
+  if($(pre+"-one") && v[pre+"-one"]!=null) order.push(pre+"-one");
+  else if($(pre+"-p0") && v[pre+"-p0"]!=null) order=order.concat([0,1,2,3].map(function(i){ return pre+"-p"+i; }));
+  else order.push(pre);
+  Object.keys(v).forEach(function(id){ if(id!=="nt_account" && id.indexOf(pre)!==0) order.push(id); });
+  order.forEach(function(id){ var e=$(id); if(!e || v[id]==null || e.value===v[id]) return; e.value=v[id]; e.dispatchEvent(new Event("input",{bubbles:true})); });
+}
+function banner(c,d){
+  var old=$("v368-dr"); if(old) old.remove();
+  var anchor=c.p==="tk"?$("tk-plan"):($("nt_accName")||$("nt_plan")); if(!anchor) return;
+  var host=c.p==="tk"?anchor.closest(".te-sec"):anchor.closest(".fld"); if(!host||!host.parentNode) return;
+  var b=document.createElement("div"); b.id="v368-dr"; b.className="v368-dr";
+  var t=new Date(d.at), hm=("0"+t.getHours()).slice(-2)+":"+("0"+t.getMinutes()).slice(-2)+" "+("0"+t.getDate()).slice(-2)+"/"+("0"+(t.getMonth()+1)).slice(-2);
+  b.innerHTML='<span class="sp">'+L("Có nội dung chưa lưu từ lúc ","Unsaved text from ")+'<b>'+hm+'</b></span>'+
+    '<button type="button" class="btn sm pri" id="v368-rs">'+L("Khôi phục","Restore")+'</button>'+
+    '<button type="button" class="btn sm" id="v368-no">'+L("Bỏ","Discard")+'</button>';
+  host.parentNode.insertBefore(b,host);
+  $("v368-rs").onclick=function(){ restore(c,d); b.remove(); D.base="\u0002"; save(); };
+  $("v368-no").onclick=function(){ try{ localStorage.removeItem(key(c)); }catch(_){} b.remove(); };
+}
+function arm(){
+  var c=ctx(); if(!c){ D.k=""; return; }
+  var k=key(c), el=$(c.p==="tk"?"tk-result":"nt_result")||$("nt_plan");
+  if(k===D.k && el && el._v368) return;
+  if(el) el._v368=1;
+  D.k=k; D.base=textOf(vals(c));
+  var d=get(k);
+  if(d && textOf(d.v||{})!==D.base) banner(c,d);
+  else if(d){ try{ localStorage.removeItem(k); }catch(_){} }
+}
+var armT=0;
+new MutationObserver(function(){ clearTimeout(armT); armT=setTimeout(arm,350); }).observe(document.body,{childList:true,subtree:true});
+function afterSave(k,p){
+  setTimeout(function(){ var still=$(p==="tk"?"tk-result":"nt_result"); var c=ctx();
+    if(!still || !c || key(c)!==k){ try{ localStorage.removeItem(k); }catch(_){} } }, 1500);
+}
+
+/* ───────── ② + ③ bọc lưu task ───────── */
+function stDone2(){ var l=(S.master&&S.master.status)||[]; return l.filter(function(x){ return /complet/i.test(x); })[0]||"Completed"; }
+function visitLike(ta){ return /visit|event/i.test(String(ta||"")); }
+function resultHas(v){
+  var s=String(v||"").replace(/^\s*[1-4]\s*[.)]\s*(Actions Taken|Current Situation|Customer Feedback|Opportunities\s*\/\s*Next Steps)\s*:?/gim,"").replace(/^(Người gặp|Person met):\s*$/gim,"");
+  return s.replace(/[\s\-–—.:]+/g,"").length>0;
+}
+var ASK={};
+function askCount(go){
+  var foot=$("tk-save")&&$("tk-save").parentNode; if(!foot) return false;
+  var old=$("v368-cnt"); if(old) old.remove();
+  var b=document.createElement("div"); b.id="v368-cnt"; b.className="v368-cnt";
+  b.innerHTML='<span class="sp">'+L("Lượt thăm này đã có kết quả nhưng chưa Completed — chỉ lượt Completed được đếm trong báo cáo và KPI. Việc theo dõi tiếp hãy lên task mới.",
+      "This visit already has a result but is not Completed — only Completed visits are counted in reports and KPI. Plan the follow-up as a new task.")+'</span>'+
+    '<button type="button" class="btn sm pri" id="v368-cd">'+L("Đánh dấu Completed rồi lưu","Mark Completed and save")+'</button>'+
+    '<button type="button" class="btn sm" id="v368-as">'+L("Lưu như cũ","Save as it is")+'</button>';
+  foot.parentNode.insertBefore(b,foot);
+  $("v368-cd").onclick=function(){ var s=$("tk-status"); b.remove();
+    if(s){ var want=stDone2(); if(![].some.call(s.options,function(o){ return o.value===want; })) s.insertAdjacentHTML("beforeend",'<option>'+esc(want)+'</option>');
+      s.value=want; s.dispatchEvent(new Event("change",{bubbles:true})); try{ markDirty("status",want); }catch(_){} }
+    setTimeout(go,60); };
+  $("v368-as").onclick=function(){ b.remove(); go(true); };
+  try{ b.scrollIntoView({block:"nearest",behavior:"smooth"}); }catch(_){}
+  return true;
+}
+var _st=window.saveTask;
+if(typeof _st==="function") window.saveTask=saveTask=function(){
+  var self=this, args=arguments, c=ctx(), k=c?key(c):"";
+  function go(skip){
+    if(skip) ASK[S.taskRow]=1;
+    try{
+      var st=curV("tk-status","status"), d=$("tk-date"), v=d?String(d.value||"").slice(0,10):"";
+      if(dnIsDone(st) && v && v<=today() && !("start" in (S.dirty||{}))){ S.dirty=S.dirty||{}; S.dirty.start=v; }   /* ② giữ ngày */
+    }catch(_){}
+    var r=_st.apply(self,args); if(k) afterSave(k,"tk"); return r;
+  }
+  try{
+    if(thai() && !ASK[S.taskRow]){
+      var st=curV("tk-status","status"), ta=curV("tk-ta","typeAction"), d=$("tk-date"), v=d?String(d.value||"").slice(0,10):"";
+      if(visitLike(ta) && !/complet|cancel/i.test(String(st||"")) && v && v<=today() && resultHas(curV("tk-result","result"))){
+        if(askCount(go)) return;
+      }
+    }
+  }catch(_){}
+  return go(false);
+};
+var _sn=window.submitNewTask;
+if(typeof _sn==="function") window.submitNewTask=submitNewTask=function(){ var c=ctx(), k=c?key(c):""; var r=_sn.apply(this,arguments); if(k) afterSave(k,"nt"); return r; };
+})();
+</script>
 <!-- ═════════ v36.4 (11/11/2026) — WORKING MAP: lịch làm việc + bản đồ hoạt động địa bàn (thay Tender Map trong CRM, người dùng yêu cầu) ═════════
      wmap/wmap.js + wmap/wmap.css · dữ liệu địa lý geo/wm-*.js (dựng bằng tools/wmap/). Tự mở sau khi đăng nhập, nút "CRM" quay về giao diện cũ,
      nút "Working Map" trên thanh trên cùng (điện thoại: Thêm ▸ Working Map). Phạm vi xem: WM.cfg.SCOPE. API test: window.WM -->
 <link rel="stylesheet" href="wmap/wmap.css?v=2.0">
 <script src="wmap/products.js?v=2.0"></script>
-<script src="wmap/wmap.js?v=2.0"></script>
+<script src="wmap/wmap.js?v=2.1"></script>
 </body>
 </html>

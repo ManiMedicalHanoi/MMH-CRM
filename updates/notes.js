@@ -7,6 +7,19 @@
 function E(u){ u.en={ title:u.title, items:u.items.map(function(i){ return { title:i.title, text:i.text }; }) }; return u; }
 window.MMH_UPDATES = [
   E({
+    id:"2026-11-17-v36.8", version:"v36.8", date:"2026-11-17",
+    title:"Thailand Dental: faster saving, drafts kept, dates kept, reports to Owen san",
+    summary:"Fixes for the points raised by the Thailand Dental team. Owen san (manager of the Dental team) now has access to the CRM and receives every weekly and monthly report, and you get a copy of the report you send.",
+    items:[
+      { type:"fix", icon:"!", title:"Weekly report: Owen san + a copy for you", text:"<b>Send report</b> ▸ the Thailand Dental report now goes to <b>Owen san</b> and Shuhei san, cc Ha san, Hoa san and <b>yourself</b> — the report you send is in your own mailbox. Owen san can sign in and see the whole team." },
+      { type:"imp", icon:"↑", title:"Saving a task is faster", text:"Click <b>Save</b>: the server no longer copies all customer tasks to OTHERS TASK before answering — this runs in the background a few seconds later." },
+      { type:"new", icon:"+", title:"Your text is kept as a draft", text:"What you type or dictate in Plan / Task Result is kept on your device. Form closed before saving? Open the same task again ▸ <b>Restore</b>.", img:"updates/v36.8/draft.jpg" },
+      { type:"fix", icon:"!", title:"The date no longer jumps to today", text:"When a task becomes <b>Completed</b> (also when the CRM completes it for you after Person met + Next action), the task keeps its own date instead of today." },
+      { type:"imp", icon:"↑", title:"Visits that are not Completed", text:"Only <b>Completed</b> visits are counted in reports and KPI. Saving a visit that already has a result but is still In Progress ⇒ the CRM offers <b>Mark Completed and save</b>. Plan the follow-up as a new task.", img:"updates/v36.8/visit.jpg" },
+      { type:"fix", icon:"!", title:"Uploading screenshots (new accounts & SKU)", text:"A failed connection test was remembered for ever on some devices, so every upload said “No answer from the server”. The test now runs again after 10 minutes, per server." }
+    ]
+  }),
+  E({
     id:"2026-11-14-v36.7", version:"v36.7", date:"2026-11-14",
     title:"Surgical Vietnam: Khang covers Manipler in Da Nang",
     summary:"Hospitals in Da Nang belong to Viet Ha for knives and sutures, so Khang could not choose them when planning a visit. Khang is now also in charge of <b>Manipler</b> in the Da Nang area.",

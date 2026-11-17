@@ -321,3 +321,10 @@ Kiến trúc & quy ước giống MMH Report Hub (repo `ManiMedicalHanoi/MMH-Rep
   lỗi ⇒ `TE.at` lùi để 30 giây sau mới tự đọc lại (trước: trang T&E gọi `teLoad()` mỗi lần vẽ lại ⇒ lỗi ⇒ vẽ lại… = hàng trăm lệnh / giây tới Training Hub). ② `teSave` bọc: nội dung form giữ ở `mmh_te_draft_<nhóm>_<pic>` tới khi lưu được
   (TE.at đổi), mở lại form cùng buổi (sid) ⇒ dải `#v366-draft` Khôi phục / Bỏ. ③ Dental VN: Thuyết trình sản phẩm KHÔNG tính KPI (C10-03/04/05 = buổi T&E ở Training Master) ⇒ nhãn "Tính KPI" ⇒ "Đủ báo cáo", dòng chỉ sang tab T&E
   (`dentalPres`, toast bỏ chữ "được tính KPI"). ④ `rhTurnover` (v32.7) gửi khoá rỗng vì `TRN_KEY` ở phạm vi riêng ⇒ thêm khoá dự phòng. Chẩn đoán dữ liệu T&E thật: mmh-backend `training?action=teDiag` (xem CLAUDE.md kho đó).
+- **v36.8 (17/11/2026, khối `v368-css` + `v368-js` trước Working Map) — rà soát nhóm Thailand Dental theo phản hồi của Yong**: ① **Owen san** (`ROLES.Owen`, quản lý nhóm `thaid`: `lead:1` ⇒ `S.user.lead` / xem cả nhóm,
+  `notPic:1` ⇒ không nằm trong `teamPicNames`; Working Map `SCOPE.Owen` = thaid; Training Hub RH_Users level lead). Báo cáo tuần / tháng thaid: backend To Owen + Shuhei · Cc Ha + Hoa + chính người gửi (`mailTargets` hiện theo).
+  ② Nháp tự lưu form task (`tk-*` / `nt_*`: Plan, Task Result kể cả ô 1 ô / 4 ô, lý do dừng, account) ⇒ `localStorage mmh_crm_draft:<nhóm>:<PIC>:<tk:row:account|nt>`, mở lại ⇒ dải `#v368-dr` Khôi phục · Bỏ; lưu xong (form đóng) ⇒ xoá.
+  ③ App TỰ chuyển Completed (`tkReqSync`: Person met + Next action, nhóm `noPhoto`) không qua ô chọn ⇒ lớp v23 đổi ngày sang hôm nay; nay `saveTask` (lớp ngoài cùng) giữ ngày đang có ⇒ v34.3 gửi finish + `finKeep` (backend Thái cũng nhận finKeep từ 17/11).
+  ④ Nhóm Thái: lượt Visit / Co-visit / Event có kết quả mà chưa Completed ⇒ khi lưu hiện `#v368-cnt` "Đánh dấu Completed rồi lưu" / "Lưu như cũ" (luật KPI không đổi).
+  ⑤ `probeCors` nhớ theo TỪNG URL backend (`localStorage mmh_cors2`), lần hỏng chỉ nhớ 10 phút; bỏ `mmh_cors_ok` cũ (nhớ vĩnh viễn, chung mọi nhóm ⇒ tải chứng từ Mở mới / SKU báo "No answer from the server").
+  Kiểm thử: Playwright + `mmh-backend/ifu/capture` (lib.cjs `newPage({pic:'Yong'})`).

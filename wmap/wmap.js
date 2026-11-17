@@ -20,7 +20,8 @@ var CFG = {
     "Hoa":       { c:["vn"], t:"*" },
     "Giang":     { c:["vn"], t:["surgical"] },
     "Viet":      { c:["vn"], t:["dental"] },
-    "Dao":       { c:["th"], t:["thai"] }
+    "Dao":       { c:["th"], t:["thai"] },
+    "Owen":      { c:["th"], t:["thaid"] }      /* 17/11/2026 — quản lý nhóm Thailand Dental */
   },
   COUNTRY_TEAMS: { vn:["dental","surgical","eyeless"], th:["thai","thaid"] },
   TTL: 5*60000, HIST_MONTHS: 5,
