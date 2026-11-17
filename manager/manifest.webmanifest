@@ -1,0 +1,19 @@
+{
+  "id": "./",
+  "name": "MMH Trợ lý quản lý",
+  "short_name": "MMH Quản lý",
+  "description": "Hỏi nhanh tình hình đội Sales (đi địa bàn, kế hoạch, công tác, đơn hàng, mở mới, báo cáo) bằng giọng nói, gõ hoặc bấm chọn.",
+  "lang": "vi",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#FFFFFF",
+  "theme_color": "#FFFFFF",
+  "categories": ["business", "productivity"],
+  "icons": [
+    { "src": "../media/app/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "../media/app/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "../media/app/icon-maskable-192.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
+    { "src": "../media/app/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
