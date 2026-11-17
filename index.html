@@ -10910,7 +10910,7 @@ var MAIL_RULE={
   surgical: { team:"Surgical Sales Team", toTeam:false, fixed:[MAIL_TUYEN,MAIL_HA,MAIL_PROD,MAIL_HR] },
   eyeless : { team:"Eyeless Sales Team",  toTeam:false, fixed:[MAIL_TUYEN,MAIL_HA,MAIL_PROD,MAIL_HR] },
   thai    : { team:"Thailand Surgical Sales Team", toTeam:false, fixed:[MAIL_HA,MAIL_HR] },
-  thaid   : { team:"Thailand Dental Sales Team", toTeam:false, fixed:["Shuhei (MANI Japan)",MAIL_HA,MAIL_HR] }   /* email nhân sự không đưa vào repo công khai — backend tự gửi đúng địa chỉ */
+  thaid   : { team:"Thailand Dental Sales Team", toTeam:false, fixed:["Owen san",MAIL_HA,MAIL_HR] }   /* email nhân sự không đưa vào repo công khai — backend tự gửi đúng địa chỉ */
 };
 function mailRule(){ return MAIL_RULE[curTeamKey()]||MAIL_RULE.dental; }
 function teamMails(){
@@ -16383,7 +16383,7 @@ canEditOther=function(pic){ if(isMgrView()) return true; return picEq(pic, S.use
 /* ── (2) người nhận báo cáo tuần / tháng ── */
 mailTargets=(function(){ var _m=mailTargets; return function(){
   if(!isTH()) return _m.apply(this,arguments);
-  if(curTeamKey()==="thaid") return { to:["Shuhei (MANI Japan)"], cc:[MAIL_HA,MAIL_HR] };   /* ⭐ v34.1 — Dental Thái: To Shuhei · Cc Ha + Hoa (như báo cáo cũ) */
+  if(curTeamKey()==="thaid") return { to:["Owen san"], cc:[MAIL_HA,MAIL_HR] };   /* Dental Thái: To Owen · Cc Ha + Hoa (17/11/2026: bỏ Shuhei) */
   var who=(S.rpPic||(S.user&&S.user.pic)||"");
   var dao=(ROLES.Dao||{}).email||"manithailand@manimedicalhanoi.com";
   if(picEq(who,"Miew")) return { to:[MAIL_HA], cc:[dao,MAIL_HR] };
@@ -30064,7 +30064,7 @@ if(typeof tripViewPaint==="function"){
       mb.querySelectorAll("div").forEach(function(x){ if(x.children.length<=3 && /^(Thiết bị|Device|Equipment)/i.test((x.firstElementChild&&x.firstElementChild.textContent||"").trim())) x.style.display="none"; });
       var ph={ "tr6-ka":"Main activities during the trip…", "tr6-kf":"Important findings / information…", "tr6-fu":"Next actions…" };
       Object.keys(ph).forEach(function(id){ var e=$(id); if(e) e.placeholder=ph[id]; });
-      var nt=mb.querySelector(".tr6-note"); if(nt && /Google Doc|Khi lưu/.test(nt.textContent)) nt.innerHTML='On save: a <b>report document</b> is created in the trip folder, the report is written to column <b>Business trip Report</b> of the '+esc(thTripFile())+' and e-mailed to <b>Shuhei-san</b> (CC Director); the trip turns <b>Completed</b> on the calendar.';
+      var nt=mb.querySelector(".tr6-note"); if(nt && /Google Doc|Khi lưu/.test(nt.textContent)) nt.innerHTML='On save: a <b>report document</b> is created in the trip folder, the report is written to column <b>Business trip Report</b> of the '+esc(thTripFile())+' and e-mailed to the <b>Director</b> (Ha san); the trip turns <b>Completed</b> on the calendar.';
       if(url) document.querySelectorAll("#mFoot a.btn").forEach(function(a){ if(/Business Trip/i.test(a.textContent)){ a.href=url; a.textContent="Open "+thTripFile()+" ↗"; } });
     }catch(_){}
     return r;
@@ -31416,7 +31416,7 @@ function thai(){ var k=tk(); return k==="thai"||k==="thaid"; }
 try{
   var _mtg=window.mailTargets;
   if(typeof _mtg==="function") window.mailTargets=mailTargets=function(){
-    if(tk()==="thaid") return { to:["Owen san","Shuhei (MANI Japan)"], cc:[MAIL_HA,MAIL_HR,L("bản sao về email của bạn","a copy to your own e-mail")] };
+    if(tk()==="thaid") return { to:["Owen san"], cc:[MAIL_HA,MAIL_HR,L("bản sao về email của bạn","a copy to your own e-mail")] };
     return _mtg.apply(this,arguments);
   };
 }catch(_){}
