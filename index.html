@@ -4019,7 +4019,7 @@ function buildNav(){
     if(t.grp!==lastGrp){ h+='<div class="grp">'+t.grp+'</div>'; lastGrp=t.grp; }
     h+='<button class="nvi" data-t="'+t.id+'" onclick="go(\''+t.id+'\')"><span class="ic">'+t.ic+'</span><span class="lb">'+t.lb+'</span></button>';
   });
-  h+='<div style="flex:1"></div><div style="padding:10px;font-size:10.5px;color:var(--mute);line-height:1.5">MMH CRM v37.1<br>'+
+  h+='<div style="flex:1"></div><div style="padding:10px;font-size:10.5px;color:var(--mute);line-height:1.5">MMH CRM v37.2<br>'+
      (isMgmt()?'<a href="'+DRIVE_FOLDER+'" target="_blank">📁 Folder ảnh Drive</a>':"")+'</div>';
   $("side").innerHTML=h;
   /* ⭐ v4.5 — thanh dưới trượt ngang, đủ mọi mục, bỏ nút "Thêm" */
@@ -21007,7 +21007,7 @@ window.QS2={ open:qsOpen };
 </script>
 
 <!-- ⭐ v30.3 — THÔNG BÁO CẬP NHẬT (chép từ Report Hub): dữ liệu updates/notes.js · tự hiện 7 ngày · nút "Có gì mới" trên thanh trên cùng -->
-<script src="updates/notes.js?v=37.1"></script>
+<script src="updates/notes.js?v=37.2"></script>
 <style id="upd-css">
 #upd,#upd-zoom{--t-pri:var(--blue);--t-pri2:var(--blue-d);--t-ink:var(--navy);--t-soft:var(--pale);--t-line:var(--lb2);--t-bg:#F6F8FA;--mmh-blue:var(--blue);--mmh-navy:var(--navy)}
 
@@ -31898,5 +31898,41 @@ try{ if(S.user) buildNav(); }catch(e){}
 <link rel="stylesheet" href="wmap/wmap.css?v=2.0">
 <script src="wmap/products.js?v=2.0"></script>
 <script src="wmap/wmap.js?v=2.1"></script>
+<script id="v372-js">
+/* ⭐ v37.2 (17/11/2026) — Báo cáo công tác (nhóm VN): người báo cáo TỰ GỬI email từ hộp thư của mình (tripmail/tripmail.js GIỐNG HỆT MMH-Report).
+   Backend Report Hub (mmh-backend ReportHub_Trip_Mail v13.0): tripReport mailMode=self ⇒ lưu + trả `mail`. Nhóm Thái (TH_Trip.gs) giữ cách cũ. */
+window.TRIPMAIL_CFG={ call:function(b){ return tripHub(b, 60000); }, email:function(){ var u=window.AUTH&&AUTH.user(); return (u&&u.email)||""; } };
+(function(){
+  var th=function(){ try{ return isTH(); }catch(_){ return false; } };
+  var _h=tripHub;
+  window.tripHub=tripHub=function(body, ms){
+    var self=!th() && body && body.action==="tripReport" && String(body.sendEmail)!=="false";
+    if(self) body.mailMode="self";
+    var pr=_h.apply(this, arguments);
+    if(self && window.TRIPMAIL) pr.then(function(r){
+      var tr={ id:body.id, row:body.r };
+      if(r && r.mail) setTimeout(function(){ TRIPMAIL.open(r.mail, tr, { saved:true }); }, 450);
+      else if(r && r.posted) TRIPMAIL.openAfterSave(tr, String(body.keyActivities||"").slice(0,30));
+    }, function(){});
+    return pr;
+  };
+  var _p=tripViewPaint;
+  window.tripViewPaint=tripViewPaint=function(t){
+    var out=_p.apply(this, arguments);
+    if(th()) return out;
+    try{
+      var cb=document.getElementById("tr6-mail"), lb=cb&&cb.closest("label");
+      if(lb){ var sp=lb.lastChild; while(sp && sp.nodeType!==3) sp=sp.previousSibling;
+        var txt=" Gửi email báo cáo từ hộp thư của tôi — To Giám đốc, CC quản lý và người đi cùng (app soạn sẵn sau khi lưu)";
+        if(sp) sp.nodeValue=txt; else lb.appendChild(document.createTextNode(txt)); }
+      if(t && t.report && t.approved && t.canReport && window.TRIPMAIL){
+        var host=document.querySelector("#mBody .tr6-rep"); if(host) TRIPMAIL.bar(host, { id:t.id, row:t.row });
+      }
+    }catch(_){}
+    return out;
+  };
+})();
+</script>
+<script src="tripmail/tripmail.js?v=1.0"></script>
 </body>
 </html>

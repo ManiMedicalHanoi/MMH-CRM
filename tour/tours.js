@@ -85,6 +85,15 @@ TOUR.add([
     { el:"#tp-sched", t:V("Lịch trình","Schedule"), x:V("Ghi theo ngày.","Write it day by day.") },
     { el:"#tp-send", t:V("Gửi đề xuất","Send"), x:V("Email <b>Business Trip Approval Request</b> gửi Giám đốc, CC trưởng phòng và bạn. Ghi nhật ký ở tab Business Trip Log của file CRM nhóm.","A <b>Business Trip Approval Request</b> email goes to the Director, CC your head of department and you.") }
    ] },
+ { id:"tripmail", v:1, d:"2026-11-17", g:V("Công tác","Business trips"), ic:"trip", t:V("Gửi email báo cáo công tác","Send the trip report e-mail"), x:V("Lưu báo cáo xong, bạn tự gửi email báo cáo từ hộp thư của mình.","After saving the report you send the report e-mail from your own mailbox."),
+   when:function(){ try{ return !noTrip() && !isTH(); }catch(_){ return true; } },
+   steps:[
+    { el:"#tpm-ov .tpm-r", do:function(){ try{ TRIPMAIL.open({to:["nt.ha@manimedicalhanoi.com"],cc:["tt.tuyen@manimedicalhanoi.com"],subject:"Business Trip Report - Ví dụ - Da Nang",html:"<p>Dear Ha-san,</p><p>Here is my report…</p>"},{id:"__tour",row:0},{saved:true}); }catch(_){} }, wait:400,
+      t:V("Người nhận soạn sẵn","Recipients ready"), x:V("To Giám đốc, CC trưởng phòng và người đi cùng.","To the Director, CC the head of department and co-travelers.") },
+    { el:"#tpm-ov a[data-k]", t:V("Mở hộp thư của bạn","Open your mailbox"), x:V("Bấm <b>Outlook</b>, <b>Gmail</b> hoặc <b>Ứng dụng mail</b>: nội dung tự sao chép ⇒ dán (Ctrl+V) rồi gửi.","Click <b>Outlook</b>, <b>Gmail</b> or <b>Mail app</b>: the content is copied ⇒ paste (Ctrl+V) and send.") },
+    { el:"#tpm-ov [data-a=\"done\"]", t:V("Bấm Đã gửi","Click Sent"), x:V("Gửi xong quay lại bấm <b>Đã gửi</b>.","When sent, come back and click <b>Đã gửi</b>.") },
+    { el:"#tpm-ov [data-a=\"sys\"]", t:V("Không mở được hộp thư?","Cannot open your mailbox?"), x:V("Nhờ hệ thống gửi thay từ email MMH.","Ask the system to send it for you.") }
+   ] },
  { id:"cust", v:3, d:"2026-10-30", g:V("Khách hàng & bán hàng","Customers & sales"), ic:"people", t:V("Địa bàn","Customer List"), x:V("Tìm, lọc và thêm account.","Find, filter and add accounts."),
    steps:[
     { el:"#cq", do:pg("cust"), wait:600, t:V("Tìm địa bàn","Find an account"), x:V("Gõ tên, mã, tỉnh, PIC — không cần dấu.","Type a name, code, province or PIC.") },

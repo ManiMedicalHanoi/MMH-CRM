@@ -7,6 +7,15 @@
 function E(u){ u.en={ title:u.title, items:u.items.map(function(i){ return { title:i.title, text:i.text }; }) }; return u; }
 window.MMH_UPDATES = [
   E({
+    id:"2026-11-17-v37.2", version:"v37.2", date:"2026-11-17",
+    title:"Business trip report: send the report e-mail from your own mailbox",
+    summary:"After you save a business trip report, the CRM prepares the report e-mail — To the <b>Director</b>, CC the <b>head of department</b> and your <b>co-travelers</b>. You open Outlook / Gmail, paste and <b>send it yourself</b>; it no longer goes out from the system address. (Vietnam teams)",
+    items:[
+      { type:"new", icon:"+", title:"Send the report e-mail", text:"Calendar ▸ open the trip ▸ fill in the 3 sections ▸ <b>Save report</b> ⇒ a box shows To · CC · Subject and the content. Click <b>Outlook</b>, <b>Gmail</b> or <b>Mail app</b> (content is copied) ⇒ paste (Ctrl+V) ⇒ send ⇒ come back and click <b>Đã gửi</b>.", img:"updates/v37.2/gui-email.jpg" },
+      { type:"imp", icon:"i", title:"See which trips have been e-mailed", text:"Re-open a trip with a report: not sent ⇒ <b>Soạn email báo cáo</b>; sent ⇒ the time it was sent and <b>Gửi lại email</b>. Cannot open your mailbox ⇒ <b>Không mở được hộp thư?</b> ▸ <b>Gửi thay</b>.", img:"" }
+    ]
+  }),
+  E({
     id:"2026-11-17-v37.1", version:"v37.1", date:"2026-11-17",
     title:"Deleting an order without an order number",
     summary:"Some orders without an Order No. could not be deleted: <b>Delete order</b> kept failing and the order stayed in <b>Orders to be revised</b>. Fixed.",
