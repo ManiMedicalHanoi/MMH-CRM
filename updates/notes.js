@@ -7,6 +7,16 @@
 function E(u){ u.en={ title:u.title, items:u.items.map(function(i){ return { title:i.title, text:i.text }; }) }; return u; }
 window.MMH_UPDATES = [
   E({
+    id:"2026-11-18-v37.7", version:"v37.7", date:"2026-11-18",
+    title:"Working Map: tenders on muasamcong for each account",
+    summary:"Click a hospital on the <b>Working Map</b> and see its tenders on muasamcong straight away: open tenders, results and plans of the last 12 months, the latest packages. Names in the CRM stay as they are — a separate name table links each account to its buyer name on muasamcong.",
+    items:[
+      { type:"new", icon:"+", title:"Tenders of the account at a glance", text:"<b>Working Map</b> ▸ click an account ▸ the <b>Tenders on muasamcong</b> block shows open tenders, results and plans (12 months) and the 5 latest packages. <b>All packages · documents</b> opens the Tender Watch app on that buyer to download the files.", img:"updates/v37.7/tnd.jpg" },
+      { type:"new", icon:"+", title:"Not sure of the name? Pick the right buyer", text:"When the name on muasamcong is only similar (e.g. a short name in the CRM), the block asks <b>Pick the right buyer name</b> ▸ click <b>Yes</b> on the right one. The choice is saved for everyone; <b>Not this one?</b> fixes a wrong automatic match.", img:"updates/v37.7/ask.jpg" },
+      { type:"new", icon:"+", title:"Follow a tender in one click (Surgical VN)", text:"On an open tender or plan, click <b>Follow</b> ▸ the opportunity form opens with the package name, TBMT number and closing date filled in ▸ add products and save — it goes into Tender follow-up as usual.", img:"" }
+    ]
+  }),
+  E({
     id:"2026-11-17-v37.6", version:"v37.6", date:"2026-11-17",
     title:"New: Manager assistant — ask about the sales work by voice",
     summary:"Directors, heads of department and team leaders get their own page: <b>speak, type or pick a question</b> and see the answer on screen — field visits, plans, business trips, orders, new accounts, weekly reports, photo alerts. Free, no token.",

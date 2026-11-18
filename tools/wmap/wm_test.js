@@ -15,7 +15,7 @@ const DATA = {
   thaid:   { pics: ["Yong", "Man", "Sui"], provs: ["Bangkok", "Nonthaburi", "Chon Buri", "Phuket"], names: ["Smile Dental Clinic", "Bangkok Dental Center", "Siam Dental", "BFC Dental", "Phuket Dental Studio"] }
 };
 const ACT = ["Visiting", "Visiting", "Visiting", "Telephone", "Presentation", "Message"];
-function team(url){ const m = { x58h: "kpi", yL5FR: "hv", x8xuG: "ic", yzmh: "dental", xxck: "surgical", xsoT: "eyeless", wglP: "thai", wEvi: "thaid" }; for (const k in m) if (url.includes(k)) return m[k]; return "dental"; }
+function team(url){ const m = { wv3R7E: "ti", x58h: "kpi", yL5FR: "hv", x8xuG: "ic", yzmh: "dental", xxck: "surgical", xsoT: "eyeless", wglP: "thai", wEvi: "thaid" }; for (const k in m) if (url.includes(k)) return m[k]; return "dental"; }
 function build(k){
   const D = DATA[k], r = rnd(k.length * 77 + 3), accs = [], rows = [];
   D.names.forEach((nm, i) => D.provs.forEach((pv, j) => { if ((i + j) % 2) return; accs.push({ code: k.slice(0, 2).toUpperCase() + (100 + accs.length), name: nm + (j ? " " + (j + 1) : ""), type: k === "thaid" || k === "dental" ? "Clinic" : "Public hospital", province: pv, area: "", pic: D.pics[accs.length % D.pics.length] }); }));
@@ -39,6 +39,22 @@ const CACHE = {};
   await p.route(/fonts\.g|cdnjs|drive\.google|googleusercontent/, r => r.fulfill({ body: "" }));
   await p.route(/script\.google\.com/, r => { const u = new URL(r.request().url()); const a = u.searchParams.get("action"), cb = u.searchParams.get("callback"), k = team(u.pathname);
     let o = { ok: true };
+    if (k === "ti"){   /* v2.2: tender-info ▸ wAcct / wName (gói thầu muasamcong của khách) */
+      const nm = u.searchParams.get("name") || "", d0 = new Date(), dd = n => new Date(d0 - n * 864e5).toISOString().slice(0, 10), dmy = n => { const x = new Date(d0 - n * 864e5); return x.getDate() + "/" + (x.getMonth() + 1) + "/" + x.getFullYear(); };
+      const pk = inv => ({ n: { open: 1, kq: 3, kh: 2, tbmt: 2, all: 14 }, cols: ["type","no","name","date","price","win","winner","close","n"], list: [
+        ["tbmt", "IB2600581234-00", "Mua sắm vật tư tiêu hao chuyên khoa mắt năm 2027", dd(2), "2.350.000.000", "", "", dmy(-9), 1],
+        ["kqdt", "IB2600512345-00", "Gói thầu số 3: Dao phẫu thuật nhãn khoa", dd(20), "860.000.000", "812.400.000", "Công ty TNHH Thiết bị Y tế Hùng Vĩ", "", 1],
+        ["khmt", "PL2600276110-00", "Kế hoạch lựa chọn nhà thầu mua sắm vật tư y tế 2027", dd(31), "5.100.000.000", "", "", "", 4]] });
+      const W = global.__WN = global.__WN || {};
+      if (a === "wName"){ const id = u.searchParams.get("src") + "|" + u.searchParams.get("code"); W[id] = u.searchParams.get("st"); global.__WNSET = (global.__WNSET || 0) + 1;
+        o = W[id] === "ok" ? { ok: true, st: "ok", inv: u.searchParams.get("inv"), pk: pk(), saved: true } : { ok: true, st: "no", cands: [] }; }
+      else if (a === "wAcct"){ const id = u.searchParams.get("src") + "|" + u.searchParams.get("code");
+        if (W[id] === "no") o = { ok: true, st: "no" };
+        else if (/Mắt Hà Nội|Mắt Trung ương/.test(nm)) o = { ok: true, st: "auto", how: "tên trùng", inv: "Bệnh viện Mắt Hà Nội", pk: pk() };
+        else if (/Mắt Nghệ An/.test(nm)) o = { ok: true, st: "ask", cands: [{ name: "Bệnh viện Mắt Nghệ An", score: 80, prov: "Nghệ An", n: 12 }, { name: "Sở Y tế Nghệ An", score: 66, prov: "Nghệ An", n: 40 }] };
+        else o = { ok: true, st: "none", cands: [] }; }
+      return r.fulfill({ contentType: cb ? "application/javascript" : "application/json", body: cb ? cb + "(" + JSON.stringify(o) + ");" : JSON.stringify(o) });
+    }
     if (k === "kpi" || k === "hv" || k === "ic"){
       const now = new Date(), ym = now.getFullYear() + String(now.getMonth() + 1).padStart(2, "0"), P = ["FY68", "Q1", "Q2", "Q3", "Q4", ym];
       if (k === "kpi") o = { ok: true, periods: P, rows: Object.keys(TEAM_OF).flatMap(pic => [["C3-0", "Sales – Customer Visits & Co-visits", "Number of Customer Visits – X", "Times", 0.4, 30], ["F1-0", "Sales – Turnover", "MMH Sales Amount to Distributors – X", "USD", 0.6, 9000]]
@@ -105,6 +121,26 @@ const CACHE = {};
       await p.waitForTimeout(900);
       ok(await p.evaluate(() => !document.querySelector("#ov.on")), "Thêm cơ hội: lưu xong, đóng form"); }
     ok(await p.evaluate(() => document.querySelectorAll(".wm-ring").length > 0), "KPI vòng tròn có dữ liệu");
+  }
+  /* v2.2: gói thầu muasamcong của khách (VN) */
+  if (await p.evaluate(() => WM.state().country === "vn")){
+    const pickN = async re => p.evaluate(src => { const R = new RegExp(src); const a = WM.model().list.filter(x => x.inCrm && R.test(x.name))[0]; if (!a) return ""; WM.pick("acc", a.key); return a.name; }, re);
+    const n1 = (await pickN("Mắt Hà Nội")) || (await pickN("Kim"));
+    if (n1){ await p.waitForTimeout(700);
+      const t = await p.evaluate(() => { const el = document.querySelector("#wm-sc .wm-tnd"); return el ? { hid: el.hidden, txt: el.innerText } : null; });
+      if (/Mắt Hà Nội/.test(n1)){ ok(t && !t.hid && /Đang mời thầu|Open tenders/.test(t.txt) && /Dao phẫu thuật/.test(t.txt), "Gói thầu muasamcong hiện ở chi tiết khách " + n1);
+        if (SHOTS){ await p.evaluate(() => { const el = document.querySelector("#wm-sc .wm-tnd"); el.scrollIntoView({ block: "start" }); }); await p.screenshot({ path: path.join(SHOTS, "wm_" + PIC.replace(/\s/g, "") + (MOB ? "_m" : "") + "_tnd.png") }); }
+        const fu = await p.evaluate(() => { const b = document.querySelector("#wm-sc [data-tfu]"); if (!b) return null; b.click(); return true; });
+        if (fu){ await p.waitForTimeout(300); ok(await p.evaluate(() => !!document.querySelector("#ov.on") && [].some.call(document.querySelectorAll("#ov input"), x => /Mua sắm vật tư tiêu hao/.test(x.value))), "Theo dõi gói ⇒ form cơ hội điền sẵn tên gói"); await p.evaluate(() => closeModal()); }
+      } else ok(!t || t.hid, "Khách không có trên muasamcong ⇒ không hiện khối gói thầu (" + n1 + ")");
+    }
+    const n2 = await pickN("Mắt Nghệ An");
+    if (n2){ await p.waitForTimeout(700);
+      ok(await p.evaluate(() => /Chọn đúng tên chủ đầu tư|Pick the right/.test((document.querySelector("#wm-sc .wm-tnd") || {}).innerText || "")), "Tên chưa chắc ⇒ hỏi chọn chủ đầu tư");
+      if (SHOTS) await p.screenshot({ path: path.join(SHOTS, "wm_" + PIC.replace(/\s/g, "") + (MOB ? "_m" : "") + "_ask.png") });
+      await p.evaluate(() => document.querySelector('#wm-sc [data-tok="0"]').click()); await p.waitForTimeout(700);
+      ok(await p.evaluate(() => /Đang mời thầu|Open tenders/.test((document.querySelector("#wm-sc .wm-tnd") || {}).innerText || "")), "Bấm Đúng ⇒ lưu tên chung, hiện gói thầu");
+    }
   }
   if (PIC === "Nguyen Ha"){
     await p.evaluate(() => { ["wm-q"].forEach(id => { const q = document.getElementById(id); q.value = ""; q.dispatchEvent(new Event("input")); }); document.querySelector('#wm-flt [data-c="th"]').click(); });
