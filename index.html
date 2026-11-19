@@ -4019,7 +4019,7 @@ function buildNav(){
     if(t.grp!==lastGrp){ h+='<div class="grp">'+t.grp+'</div>'; lastGrp=t.grp; }
     h+='<button class="nvi" data-t="'+t.id+'" onclick="go(\''+t.id+'\')"><span class="ic">'+t.ic+'</span><span class="lb">'+t.lb+'</span></button>';
   });
-  h+='<div style="flex:1"></div><div style="padding:10px;font-size:10.5px;color:var(--mute);line-height:1.5">MMH CRM v37.8<br>'+
+  h+='<div style="flex:1"></div><div style="padding:10px;font-size:10.5px;color:var(--mute);line-height:1.5">MMH CRM v37.9<br>'+
      (isMgmt()?'<a href="'+DRIVE_FOLDER+'" target="_blank">📁 Folder ảnh Drive</a>':"")+'</div>';
   $("side").innerHTML=h;
   /* ⭐ v4.5 — thanh dưới trượt ngang, đủ mọi mục, bỏ nút "Thêm" */
@@ -21007,7 +21007,7 @@ window.QS2={ open:qsOpen };
 </script>
 
 <!-- ⭐ v30.3 — THÔNG BÁO CẬP NHẬT (chép từ Report Hub): dữ liệu updates/notes.js · tự hiện 7 ngày · nút "Có gì mới" trên thanh trên cùng -->
-<script src="updates/notes.js?v=37.8"></script>
+<script src="updates/notes.js?v=37.9"></script>
 <style id="upd-css">
 #upd,#upd-zoom{--t-pri:var(--blue);--t-pri2:var(--blue-d);--t-ink:var(--navy);--t-soft:var(--pale);--t-line:var(--lb2);--t-bg:#F6F8FA;--mmh-blue:var(--blue);--mmh-navy:var(--navy)}
 
@@ -32249,6 +32249,135 @@ function paint(){
     return r; };
 })();
 window.MGRLINK={ paint:paint, ok:ok };
+})();
+</script>
+<style id="v379-css">
+/* v37.9 (19/11/2026) — ảnh đi địa bàn: xác nhận ngay trên khung (không dùng hộp hỏi của trình duyệt), ảnh xem trước chưa có */
+.v379-ask{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:8px 0 0;padding:8px 11px;border:1px solid #E8D9A8;background:#FFF9E8;border-radius:10px;font-size:12.5px;color:#5B4A12}
+.v379-ask .sp{flex:1;min-width:160px}
+.v379-wait{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;min-height:120px;padding:14px;text-align:center;font-size:12.5px;color:var(--sub,#5E738C)}
+.v379-wait b{color:var(--t-ink,#003047);font-weight:600}
+.v379-wait a{color:var(--t-pri,#3A5CAA)}
+</style>
+<script id="v379-js">
+/* ═════════ v37.9 (19/11/2026) — luồng chụp / gửi ảnh đi địa bàn (Viet báo: "chụp giờ không lưu", "cứ báo có việc chưa lưu") ═════════
+   ① Bấm "✓ Gửi ảnh ngay" (uploadPending) ⇒ openTaskAfterSync() vẽ lại cả form task từ dữ liệu đã lưu ⇒ MỌI chữ đang gõ (Task Result, Next action, Feedback…)
+      bị xoá trắng, nháp v36.8 thấy khác ⇒ dải vàng "Có nội dung chưa lưu… Khôi phục / Bỏ". Nay giữ nguyên nội dung đang gõ khi form vẽ lại (giữ cả S.dirty, nháp).
+   ② Ảnh vừa tải: app thay ảnh trên máy bằng ảnh xem trước của Drive (thumbnail?id=…) — file mới Drive chưa dựng kịp ⇒ ô ảnh xám, tưởng chưa lưu.
+      Nay ảnh vừa chụp trong phiên dùng bản trên máy; ảnh Drive lỗi ⇒ chữ "Ảnh đã lưu trên Drive" + Mở ảnh, tự tải lại 3 lần.
+   ③ "Chụp đè ảnh mới" / xoá ảnh dùng confirm() — app cài / trình duyệt trong app chặn hộp hỏi ⇒ bấm chụp xong không có gì xảy ra. Nay hỏi ngay trên khung. */
+(function(){
+"use strict";
+function L(vi,en){ try{ return TX(vi,en); }catch(_){ return vi; } }
+function rr(r){ try{ return (window.WQ&&WQ.realRow)?WQ.realRow(r):r; }catch(_){ return r; } }
+
+/* ── ② ảnh vừa chụp trong phiên ── */
+var LOC={};
+function remember(){ try{ if(S.pending&&S.pending.dataUrl&&S.taskRow) LOC[S.taskRow]={ b64:S.pending.dataUrl, at:Date.now() }; }catch(_){} }
+function localOf(row){
+  var hit=null; Object.keys(LOC).forEach(function(k){ if((+k===+row || rr(+k)===+row) && Date.now()-LOC[k].at<6*3600000) hit=LOC[k]; });
+  return hit;
+}
+function fixPhoto(){
+  var box=document.querySelector("#drw .pp-cur"), img=box&&box.querySelector("img"); if(!img || img._v379) return;
+  img._v379=1;
+  var src=img.getAttribute("src")||"";
+  if(/^data:/.test(src)) return;
+  var loc=localOf(S.taskRow);
+  if(loc){ img.src=loc.b64; return; }
+  var n=0, ph=((S.task&&S.task.photos)||[])[0]||{}, open=ph.open||(S.task&&S.task.photo)||"";
+  img.onerror=function(){
+    img.style.display="none";
+    var w=box.querySelector(".v379-wait");
+    if(!w){ w=document.createElement("div"); w.className="v379-wait";
+      w.innerHTML='<b>'+L("Ảnh đã lưu trên Drive","Photo saved on Drive")+'</b><span>'+L("Drive đang tạo ảnh xem trước, vài phút nữa sẽ hiện.","Drive is still making the preview, it shows in a few minutes.")+'</span>'+
+        (open?'<a href="'+esc(open)+'" target="_blank" rel="noopener">'+L("Mở ảnh","Open photo")+'</a>':"");
+      box.insertBefore(w, img); }
+    if(n++<3) setTimeout(function(){ if(!img.isConnected) return; img.src=src.replace(/([?&])r=\d+/,"")+(src.indexOf("?")<0?"?":"&")+"r="+Date.now(); }, 8000*n);
+  };
+  img.onload=function(){ if(img.naturalWidth>1){ img.style.display=""; var w=box.querySelector(".v379-wait"); if(w) w.remove(); } };
+  if(img.complete && img.naturalWidth===0 && src) img.onerror();
+}
+
+/* ── ③ hỏi ngay trên khung ── */
+function ask(anchor, text, okLb, ok){
+  var old=document.getElementById("v379-ask"); if(old) old.remove();
+  var b=document.createElement("div"); b.id="v379-ask"; b.className="v379-ask";
+  b.innerHTML='<span class="sp">'+text+'</span><button type="button" class="btn sm pri" id="v379-ok">'+okLb+'</button><button type="button" class="btn sm" id="v379-no">'+L("Huỷ","Cancel")+'</button>';
+  anchor.parentNode.insertBefore(b, anchor.nextSibling);
+  document.getElementById("v379-ok").onclick=function(){ b.remove(); ok(); };
+  document.getElementById("v379-no").onclick=function(){ b.remove(); };
+  try{ b.scrollIntoView({block:"nearest",behavior:"smooth"}); }catch(_){}
+}
+var YES=0;
+function quiet(fn, self, args){ var c0=window.confirm; window.confirm=function(){ return true; }; try{ return fn.apply(self,args); } finally{ window.confirm=c0; } }
+function wireButtons(){
+  var act=document.querySelector("#drw .pp-act button"), cam=document.getElementById("tk-cam");
+  if(act && cam && !act._v379 && ((S.task&&S.task.photos)||[]).length){
+    act._v379=1;
+    act.onclick=function(){
+      ask(act.parentNode, L("Ảnh mới sẽ <b>thay</b> ảnh cũ (ảnh cũ bị xoá khỏi Drive).","The new photo <b>replaces</b> the old one (the old one is removed from Drive)."),
+        L("Chụp ảnh mới","Take new photo"), function(){ YES=Date.now(); cam.click(); });
+    };
+  }
+  var del=document.querySelector("#drw .pp-cur .del");
+  if(del && !del._v379){
+    del._v379=1;
+    var on=del.getAttribute("onclick")||"", m=on.match(/deleteTaskPhoto\('([^']*)'\)/), id=m?m[1]:"";
+    del.removeAttribute("onclick");
+    del.onclick=function(e){ e.stopPropagation();
+      ask(del.closest(".pp-cur"), L("Xoá ảnh này khỏi Drive và khỏi sheet?","Delete this photo from Drive and the sheet?"), L("Xoá ảnh","Delete photo"),
+        function(){ quiet(window.deleteTaskPhoto, null, [id]); });
+    };
+  }
+}
+var _hf=window.handleFiles;
+if(typeof _hf==="function") window.handleFiles=handleFiles=function(){
+  if(YES && Date.now()-YES<15*60000){ YES=0; return quiet(_hf, this, arguments); }
+  return _hf.apply(this, arguments);
+};
+
+/* ── ① giữ nội dung đang gõ khi form task vẽ lại ── */
+var SEL={ "tk-status":"status","tk-next":"nextAction","tk-fb":"feedback","tk-proc":"process","tk-tt":"typeTask","tk-ta":"typeAction","tk-prod":"product","tk-date":"start" };
+function snap(){
+  var root=document.querySelector("#drw.on .te-split"); if(!root || !document.getElementById("tk-result")) return null;
+  var v={}; [].forEach.call(root.querySelectorAll("[id^='tk-']"), function(e){
+    if(e.type==="file" || !("value" in e) || e.tagName==="BUTTON") return; v[e.id]=e.value; });
+  return { row:S.taskRow, v:v, dirty:Object.assign({}, S.dirty||{}), man:S.tkStatusManual, pend:S.pending };
+}
+function restore(s){
+  if(!s || !document.getElementById("tk-result") || rr(+S.taskRow)!==rr(+s.row)) return;
+  Object.keys(s.v).forEach(function(id){
+    var e=document.getElementById(id); if(!e || e.value===s.v[id]) return;
+    var f=SEL[id];
+    if(f){ if(!(f in s.dirty)) return;            /* chọn ô chưa đổi ⇒ để app tự tính (vd. tự chuyển Completed khi đã có ảnh) */
+      if(e.tagName==="SELECT" && ![].some.call(e.options,function(o){ return o.value===s.v[id]; })) e.insertAdjacentHTML("beforeend",'<option>'+esc(s.v[id])+'</option>'); }
+    e.value=s.v[id];
+  });
+  S.dirty=Object.assign(S.dirty||{}, s.dirty);
+  if("status" in s.dirty) S.tkStatusManual=s.man;
+  var st=document.getElementById("tk-stop-sec"); if(st && String(s.v["tk-stop"]||"").trim()) st.style.display="";
+  if(Object.keys(s.dirty).length){ var b=document.getElementById("tk-save"); if(b) b.classList.add("acc"); }
+  var r=document.getElementById("tk-result"); if(r) r._v368=1;      /* giữ nháp v36.8 (chưa lưu lên Sheet) */
+  try{ tkReqSync(); }catch(_){}
+}
+var _oas=window.openTaskAfterSync;
+if(typeof _oas==="function") window.openTaskAfterSync=openTaskAfterSync=function(){
+  var s=snap(); var r=_oas.apply(this, arguments); restore(s); return r;
+};
+
+/* lớp ngoài cùng */
+var _up=window.uploadPending;
+if(typeof _up==="function") window.uploadPending=uploadPending=function(){ remember(); return _up.apply(this, arguments); };
+var _sv=window.saveTask;
+if(typeof _sv==="function") window.saveTask=saveTask=function(){ remember(); return _sv.apply(this, arguments); };
+var _ot=window.openTask;
+if(typeof _ot==="function") window.openTask=openTask=function(){
+  var r=_ot.apply(this, arguments);
+  try{ fixPhoto(); wireButtons(); }catch(_){}
+  return r;
+};
+window.V379={ LOC:LOC, fixPhoto:fixPhoto };
 })();
 </script>
 </body>

@@ -7,6 +7,16 @@
 function E(u){ u.en={ title:u.title, items:u.items.map(function(i){ return { title:i.title, text:i.text }; }) }; return u; }
 window.MMH_UPDATES = [
   E({
+    id:"2026-11-19-v37.9", version:"v37.9", date:"2026-11-19",
+    title:"Field photo: typing is kept, photo shows right after upload",
+    summary:"Fixes in the field-visit photo of a task: sending the photo no longer clears what you typed, the photo you just took shows at once, and retaking / deleting a photo works in the installed app.",
+    items:[
+      { type:"fix", icon:"!", title:"Send photo now keeps your text", text:"Open a task ▸ type the Task Result, Next action… ▸ take a photo ▸ <b>✓ Send photo now</b>. The form now keeps everything you typed (before, it was cleared and the app then said there was unsaved text). Tap <b>Update to Sheet</b> to save the text.", img:"updates/v37.9/retake.jpg" },
+      { type:"fix", icon:"!", title:"The photo no longer looks empty", text:"Right after upload Drive needs a few minutes to make the preview, so the photo box was grey and looked unsaved. The photo you just took now shows from your phone; when only Drive has it, the box says <b>Photo saved on Drive</b> with <b>Open photo</b> and loads again by itself.", img:"updates/v37.9/preview.jpg" },
+      { type:"fix", icon:"!", title:"Retake and delete ask on the form", text:"<b>Retake photo</b> and the bin icon now ask on the form (<b>Take new photo</b> / <b>Delete photo</b> · <b>Cancel</b>). Before, the installed app blocked the browser's question box, so the new photo was silently dropped.", img:"" }
+    ]
+  }),
+  E({
     id:"2026-11-19-v37.8", version:"v37.8", date:"2026-11-19",
     title:"KPI: supported sales capped at 130% (process KPI)",
     summary:"KPI pages now follow the KPI rule exactly: <b>Result</b> KPIs (distributor and new-product sales, codes F) have no cap; every <b>Process</b> KPI — including supported sales C5–C7 — counts at most 130%.",
