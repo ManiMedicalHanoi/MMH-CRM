@@ -7,6 +7,15 @@
 function E(u){ u.en={ title:u.title, items:u.items.map(function(i){ return { title:i.title, text:i.text }; }) }; return u; }
 window.MMH_UPDATES = [
   E({
+    id:"2026-11-19-v38.0", version:"v38.0", date:"2026-11-19",
+    title:"Thailand: new field-visit tasks save again, save messages in English",
+    summary:"Adding a field-visit task could stop with \"the operation is not supported on a range with a filtered-out row\" when the CUSTOMER TASK sheet had a filter on. The server now saves even with a filter, and the saving messages are in English for the Thailand teams.",
+    items:[
+      { type:"fix", icon:"!", title:"Tasks waiting to save: tap Retry now", text:"If the chip at the bottom still shows items not saved, tap it ▸ <b>Retry now</b> on each task. The task is written to Google Sheet and shows again on the calendar." },
+      { type:"fix", icon:"!", title:"Saving messages in English", text:"The <b>Waiting to save to Google Sheet</b> box, its buttons (<b>Retry now</b> · <b>Discard</b>) and the note <b>Google Sheet changed — updating…</b> are now in English for the Thailand teams." }
+    ]
+  }),
+  E({
     id:"2026-11-19-v37.9", version:"v37.9", date:"2026-11-19",
     title:"Field photo: typing is kept, photo shows right after upload",
     summary:"Fixes in the field-visit photo of a task: sending the photo no longer clears what you typed, the photo you just took shows at once, and retaking / deleting a photo works in the installed app.",

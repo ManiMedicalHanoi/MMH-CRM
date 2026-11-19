@@ -2292,12 +2292,12 @@ function verPoll(){
 
     if(j&&j.vers){
       var ch=verApply(j.vers,mine);
-      if(ch.length&&!mine) toast("Google Sheet vừa thay đổi — đang cập nhật "+ch.length+" mục…","ok",2600);
+      if(ch.length&&!mine) toast(TX("Google Sheet vừa thay đổi — đang cập nhật "+ch.length+" mục…","Google Sheet changed — updating "+ch.length+(ch.length>1?" items…":" item…")),"ok",2600);
       return;
     }
     if(mine) return;                                  /* backend đời cũ, không có bảng tab */
     verSyncNow();
-    toast("Google Sheet vừa thay đổi — đang cập nhật dữ liệu mới…","ok",3200);
+    toast(TX("Google Sheet vừa thay đổi — đang cập nhật dữ liệu mới…","Google Sheet changed — loading the latest data…"),"ok",3200);
   }).catch(function(){ _verBusy=false; });
 }
 function verAutoOn(){ verAutoOff(); _verTimer=setInterval(verPoll,VER_POLL_MS); }
@@ -4019,7 +4019,7 @@ function buildNav(){
     if(t.grp!==lastGrp){ h+='<div class="grp">'+t.grp+'</div>'; lastGrp=t.grp; }
     h+='<button class="nvi" data-t="'+t.id+'" onclick="go(\''+t.id+'\')"><span class="ic">'+t.ic+'</span><span class="lb">'+t.lb+'</span></button>';
   });
-  h+='<div style="flex:1"></div><div style="padding:10px;font-size:10.5px;color:var(--mute);line-height:1.5">MMH CRM v37.9<br>'+
+  h+='<div style="flex:1"></div><div style="padding:10px;font-size:10.5px;color:var(--mute);line-height:1.5">MMH CRM v38.0<br>'+
      (isMgmt()?'<a href="'+DRIVE_FOLDER+'" target="_blank">📁 Folder ảnh Drive</a>':"")+'</div>';
   $("side").innerHTML=h;
   /* ⭐ v4.5 — thanh dưới trượt ngang, đủ mọi mục, bỏ nút "Thêm" */
@@ -21007,7 +21007,7 @@ window.QS2={ open:qsOpen };
 </script>
 
 <!-- ⭐ v30.3 — THÔNG BÁO CẬP NHẬT (chép từ Report Hub): dữ liệu updates/notes.js · tự hiện 7 ngày · nút "Có gì mới" trên thanh trên cùng -->
-<script src="updates/notes.js?v=37.9"></script>
+<script src="updates/notes.js?v=38.0"></script>
 <style id="upd-css">
 #upd,#upd-zoom{--t-pri:var(--blue);--t-pri2:var(--blue-d);--t-ink:var(--navy);--t-soft:var(--pale);--t-line:var(--lb2);--t-bg:#F6F8FA;--mmh-blue:var(--blue);--mmh-navy:var(--navy)}
 
@@ -23026,14 +23026,14 @@ function enqueue(body){
   if(b.action!=="uploadPhoto"){
     var patch=b.data?Object.assign({}, b.data):null; if(patch) delete patch._row;
     items.push({ id:rid(), kind:"data", body:b, tab:b.action==="saveWeekly"?"weekly":(b.tab||""), row:row, tmp:tmp, patch:patch, pic:pic,
-      label:(isNew?"Thêm task ":"Cập nhật task ")+nm });
+      label:(isNew?TX("Thêm task ","New task "):TX("Cập nhật task ","Update task "))+nm });
   }
   if(ph){
     var pid=rid(); THUMB[pid]=ph.b64; bput(pid, ph.b64);
     items.push({ id:pid, kind:"photo", blob:pid, row:row, tab:"weekly", pic:pic, kb:photoSizeKB(ph.b64),
       body:{ action:"uploadPhoto", mime:"image/jpeg", account:acc, date:day, pic:(b.data&&b.data.pic)||b.pic||w.pic||pic, replace:1, lat:ph.lat, lng:ph.lng, acc:ph.acc, shot:ph.shot||"", rid:pid,   /* ⭐ v35.5 — giờ chụp */
              _no:(b.data&&b.data._no)||b._no||"", _acc:acc, _pic:(b.data&&b.data.pic)||(b.data&&b.data._pic)||b.pic||w.pic||pic, _start:day },   /* ⭐ v31.6 — gợi ý nhận đúng dòng */
-      label:"Ảnh "+nm });
+      label:TX("Ảnh ","Photo ")+nm });
   }
   items.forEach(function(it){ it.url=gasUrl(); it.team=curTeamKey(); it.at=Date.now(); if(!it.body.rid) it.body.rid=it.id; Q.push(it); });
   save(); paint(); setTimeout(pump, 30);
@@ -23041,7 +23041,7 @@ function enqueue(body){
   S._lastWriteAt=Date.now();
   return Promise.resolve({ ok:true, queued:true, row:row, url:"", id:"", thumb:ph?ph.b64:"", gpsAddr:"",
     photo: ph ? { ok:true, url:"", id:"", thumb:ph.b64, gpsAddr:"" } : undefined,
-    message:"Đã lưu trên máy — đang gửi lên Google Sheet" });
+    message:TX("Đã lưu trên máy — đang gửi lên Google Sheet","Saved on this device — sending to Google Sheet") });
 }
 
 /* ── 3. gửi ── */
@@ -23061,7 +23061,7 @@ function fetchPost(url, body, ms){
   var ac=window.AbortController?new AbortController():null, t=setTimeout(function(){ if(ac) ac.abort(); }, ms||60000);
   return fetch(url,{ method:"POST", headers:{"Content-Type":"text/plain;charset=utf-8"}, body:JSON.stringify(body), redirect:"follow", signal:ac?ac.signal:undefined })
     .then(function(r){ return r.text(); })
-    .then(function(tx){ clearTimeout(t); var m=String(tx||"").replace(/^[^{[]*/,"").replace(/\);?\s*$/,""); try{ return JSON.parse(m); }catch(_){ throw new Error("Máy chủ trả về lỗi — thử lại"); } },
+    .then(function(tx){ clearTimeout(t); var m=String(tx||"").replace(/^[^{[]*/,"").replace(/\);?\s*$/,""); try{ return JSON.parse(m); }catch(_){ throw new Error(TX("Máy chủ trả về lỗi — thử lại","The server returned an error — try again")); } },
           function(e){ clearTimeout(t);
             if(e && e.name==="AbortError") throw new Error("__TIMEOUT__");
             if(typeof CORS_OK!=="undefined" && CORS_OK===false)
@@ -23101,9 +23101,9 @@ function pump(){
       if(b64 && b64.idbErr){   /* ⭐ v36.9: đọc bộ nhớ máy lỗi / treo ⇒ thử lại, KHÔNG xoá ảnh */
         if(!off()) return; it.idb=(it.idb||0)+1;
         if(it.idb>=5){ it.err=(typeof isTH==="function"&&isTH())?"Cannot read the photo on this phone — close and reopen the app, then tap Retry":"Máy chưa đọc được ảnh đã lưu — tắt hẳn app / trình duyệt rồi mở lại, bấm Thử lại"; it.idb=0; save(); paint(); setTimeout(pump,50); return; }
-        return fail(it, "Bộ nhớ máy bận ("+b64.idbErr+")");
+        return fail(it, TX("Bộ nhớ máy bận (","Device storage busy (")+b64.idbErr+")");
       }
-      if(!b64){ drop(it, "Ảnh không còn trên máy (bộ nhớ trình duyệt bị xoá) — chụp lại giúp nhé."); return; }
+      if(!b64){ drop(it, TX("Ảnh không còn trên máy (bộ nhớ trình duyệt bị xoá) — chụp lại giúp nhé.","The photo is no longer on this device (browser storage was cleared) — please take it again.")); return; }
       body.b64=b64;
     }
     return send(it, body).then(function(r){ if(off()) done(it, r); else if(r && r.ok!==false && Q.indexOf(it)>=0) done(it, r); }, function(e){ if(off()) fail(it, String((e&&e.message)||"")); });
@@ -23112,8 +23112,8 @@ function pump(){
 function drop(it, msg){ if(RUN && RUN.it===it) RUN=false; Q=Q.filter(function(x){ return x.id!==it.id; }); if(it.blob) bdel(it.blob); save(); paint(); if(msg) toast(msg,"warn",7000); setTimeout(pump,50); }
 function done(it, r){
   /* ⭐ v31.6 — dòng trên sheet đã đổi (task bị xoá / dời): không gửi lại mù quáng — báo đỏ + tải lại dữ liệu */
-  if(r && r.ok===false && r.stale){ it.n=(it.n||0)+1; it.err=String(r.error||"Dòng đã đổi — tải lại"); save(); paint(); try{ loadTerritoryAll(true); }catch(_){} setTimeout(pump,50); return; }
-  if(r && r.ok===false){ return fail(it, String(r.error||"Lỗi máy chủ"), !TRANSIENT.test(String(r.error||""))); }
+  if(r && r.ok===false && r.stale){ it.n=(it.n||0)+1; it.err=String(r.error||TX("Dòng đã đổi — tải lại","The row changed — reload")); save(); paint(); try{ loadTerritoryAll(true); }catch(_){} setTimeout(pump,50); return; }
+  if(r && r.ok===false){ return fail(it, String(r.error||TX("Lỗi máy chủ","Server error")), !TRANSIENT.test(String(r.error||""))); }
   Q=Q.filter(function(x){ return x.id!==it.id; });
   var row=realRow(it.row);
   try{
@@ -23128,7 +23128,7 @@ function done(it, r){
       if(it.blob) bdel(it.blob);
       var th=THUMB[it.id]; delete THUMB[it.id];
       if(r && r.url) patchLocal("weekly", row, { photo:r.url, photos:[{ id:r.id, thumb:r.thumb||th||"", full:r.thumb||th||"", open:r.url }], gpsAddr:r.gpsAddr||"" }, false);
-      if(r && r.gpsAddr) toast("✓ Đã tải ảnh lên Drive · "+r.gpsAddr,"ok",3200);
+      if(r && r.gpsAddr) toast(TX("✓ Đã tải ảnh lên Drive · ","✓ Photo uploaded to Drive · ")+r.gpsAddr,"ok",3200);
     }
   }catch(_){}
   save();
@@ -23138,7 +23138,7 @@ function done(it, r){
 }
 function fail(it, m, hard){
   it.n=(it.n||0)+1; it.last=m;
-  if(hard && it.n>=3){ it.err=m||"Lỗi không rõ"; save(); paint(); toast("Chưa lưu được: "+it.label+" — "+it.err,"err",8000); setTimeout(pump,50); return; }
+  if(hard && it.n>=3){ it.err=m||TX("Lỗi không rõ","Unknown error"); save(); paint(); toast(TX("Chưa lưu được: ","Not saved: ")+wqLbl(it.label)+" — "+wqErr(it.err),"err",8000); setTimeout(pump,50); return; }
   var wait=Math.min(60000, 2000*it.n); it.nx=Date.now()+wait;   /* ⭐ v36.9: mục khác vẫn được gửi trong lúc chờ */
   save(); paint();
   clearTimeout(it._t); setTimeout(pump, 50);     /* cùng rid ⇒ gửi lại an toàn */
@@ -23151,6 +23151,16 @@ var WQ=window.WQ={
   drop:function(id){ var it=Q.filter(function(x){ return x.id===id; })[0]; if(it) drop(it); },
   pump:pump, realRow:realRow
 };
+/* ⭐ v38.0 — nhãn / lỗi đã lưu trong hàng chờ (có thể bằng tiếng Việt từ trước) ⇒ tiếng Anh cho nhóm Thái */
+function wqLbl(l){ l=String(l||""); if(!isTH()) return l; return l.replace(/^Thêm task /,"New task ").replace(/^Cập nhật task /,"Update task ").replace(/^Ảnh /,"Photo "); }
+var WQ_ERR_EN=[[/không được hỗ trợ trên dải ô có một hàng đã bị lọc bỏ/i,"This operation is not supported on a range with a filtered-out row (fixed on the server — tap Retry now)."],
+  [/hết giờ chờ/i,"timed out"],[/Hệ thống đang bận/i,"The system is busy — try again in a few seconds."],[/Lỗi không rõ/i,"Unknown error"],[/Lỗi máy chủ/i,"Server error"],
+  [/Dòng đã đổi/i,"The row changed — reload"],[/Máy chủ trả về lỗi/i,"The server returned an error — try again"],[/Bộ nhớ máy bận/i,"Device storage busy"],
+  [/Máy chưa đọc được ảnh/i,"Cannot read the photo on this phone — close and reopen the app, then tap Retry"],[/Ảnh không còn trên máy/i,"The photo is no longer on this device — please take it again."],
+  [/Không tìm thấy/i,"Not found — reload the app and try again."],[/Bạn không có quyền|không có quyền/i,"You do not have permission for this action."]];
+function wqErr(m){ m=String(m||""); if(!isTH() || !/[ăâđêôơưạảấầẩẫậắằẳẵặẹẻẽếềểễệỉịọỏốồổỗộớờởỡợụủứừửữựỳỵỷỹ]/i.test(m)) return m;
+  for(var i=0;i<WQ_ERR_EN.length;i++) if(WQ_ERR_EN[i][0].test(m)) return WQ_ERR_EN[i][1];
+  return "The Google Sheet returned an error — tap Retry now. ("+m+")"; }
 /* chip trạng thái */
 function paint(){
   var c=document.getElementById("wq-chip");
@@ -23166,13 +23176,14 @@ function paint(){
 }
 function panel(){
   if(!Q.length) return;
-  openModal("Đang chờ lưu lên Google Sheet", '<div style="font-size:13px;color:#7A8999;margin-bottom:10px">Các mục dưới đây đã lưu an toàn trên máy này và tự gửi lên khi có mạng. Đừng xoá dữ liệu trình duyệt trước khi gửi xong.</div>'
+  /* ⭐ v38.0: nhóm Thái ⇒ toàn bộ tiếng Anh (cả nhãn / lỗi đã lưu trên máy bằng tiếng Việt) */
+  openModal(TX("Đang chờ lưu lên Google Sheet","Waiting to save to Google Sheet"), '<div style="font-size:13px;color:#7A8999;margin-bottom:10px">'+TX("Các mục dưới đây đã lưu an toàn trên máy này và tự gửi lên khi có mạng. Đừng xoá dữ liệu trình duyệt trước khi gửi xong.","These items are saved safely on this device and are sent automatically when online. Do not clear the browser data before they are sent.")+'</div>'
     +Q.map(function(x){
-      return '<div class="wq-li"><b>'+esc(x.label||x.body.action)+'</b><span class="mt">'+(x.kind==="photo"?(x.kb||"")+" KB · ":"")+(x.err?"":"đang gửi · thử "+(x.n||0)+" lần")+'</span>'
-        +(x.err?'<small>'+esc(x.err)+'</small>':(x.last&&x.n?'<small style="color:#7A8999">Lần trước: '+esc(x.last.replace(/__TIMEOUT__/,"hết giờ chờ"))+'</small>':''))
-        +'<div style="margin-top:6px;display:flex;gap:6px"><button class="btn sm" onclick="WQ.retry(\''+x.id+'\');closeModal()">Thử lại ngay</button>'
-        +'<button class="btn sm" onclick="if(confirm(\'Bỏ mục này? Dữ liệu chưa lưu lên Sheet sẽ mất.\')){WQ.drop(\''+x.id+'\');closeModal();terrRefresh();}">Bỏ</button></div></div>';
-    }).join(""), '<button class="btn" onclick="closeModal()">Đóng</button>');
+      return '<div class="wq-li"><b>'+esc(wqLbl(x.label)||x.body.action)+'</b><span class="mt">'+(x.kind==="photo"?(x.kb||"")+" KB · ":"")+(x.err?"":TX("đang gửi · thử "+(x.n||0)+" lần","sending · "+(x.n||0)+" tries"))+'</span>'
+        +(x.err?'<small>'+esc(wqErr(x.err))+'</small>':(x.last&&x.n?'<small style="color:#7A8999">'+TX("Lần trước: ","Last try: ")+esc(wqErr(x.last.replace(/__TIMEOUT__/,TX("hết giờ chờ","timed out"))))+'</small>':''))
+        +'<div style="margin-top:6px;display:flex;gap:6px"><button class="btn sm" onclick="WQ.retry(\''+x.id+'\');closeModal()">'+TX("Thử lại ngay","Retry now")+'</button>'
+        +'<button class="btn sm" onclick="if(confirm(\''+TX("Bỏ mục này? Dữ liệu chưa lưu lên Sheet sẽ mất.","Discard this item? Data not yet saved to the Sheet will be lost.")+'\')){WQ.drop(\''+x.id+'\');closeModal();terrRefresh();}">'+TX("Bỏ","Discard")+'</button></div></div>';
+    }).join(""), '<button class="btn" onclick="closeModal()">'+TX("Đóng","Close")+'</button>');
 }
 window.addEventListener("online", function(){ paint(); Q.forEach(function(x){ if(!x.err){ x.n=0; x.nx=0; } }); pump(); });
 window.addEventListener("offline", paint);

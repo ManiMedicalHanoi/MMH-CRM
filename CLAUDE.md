@@ -350,3 +350,6 @@ Kiến trúc & quy ước giống MMH Report Hub (repo `ManiMedicalHanoi/MMH-Rep
   nhóm **Kết quả** = mã F (doanh số NPP, sản phẩm mới) KHÔNG giới hạn; nhóm **Quá trình** = mọi mã khác, kể cả **hỗ trợ bán C5–C7**, tối đa 130% (tháng, quý, FY) — giống công thức file KPI (sheet 5, `kscZeroTargetFix_`) và tab TARGET & KPI (`capF`).
   Lỗi cũ: trang KPI & Mục tiêu / Dashboard / Họp tuần hiện % thô (vd. C6 175%) và điểm lại giới hạn cả mã F. Nay `window.kpiIsResult(code)` / `window.kpiCapP(p, code)` (v323-js); bảng KPI chia 2 phần Kết quả · Quá trình,
   ô bị giới hạn có dấu "tối đa" (rê chuột xem % thực tế). Kiểm số thật trong file KPI: mmh-backend ▸ ping `kpi?action=capDiag&key=<8 ký tự cuối ID file KPI>&full=1` (chỉ đọc).
+- **v38.0 (19/11/2026, sửa module WQ v30.6 + `verPoll` toast; backend crm-thai-dental / crm-thai `fmlCopy_`)**: Yong (Dental Thái) thêm task đi địa bàn báo lỗi Google "dải ô có một hàng đã bị lọc bỏ" (sheet CUSTOMER TASK bật bộ lọc) —
+  backend đã sửa; task lỗi trong hàng chờ bấm **Retry now** là lưu. Hộp "Đang chờ lưu lên Google Sheet", nút, nhãn task / ảnh, toast "Google Sheet vừa thay đổi…" ⇒ `TX(vi,en)`; nhãn / lỗi đã lưu sẵn trên máy bằng tiếng Việt
+  ⇒ `wqLbl` / `wqErr` (bảng `WQ_ERR_EN`) dịch khi hiện cho nhóm Thái. Chữ mới trong hàng chờ / toast phải qua `TX`.
