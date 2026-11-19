@@ -7,6 +7,14 @@
 function E(u){ u.en={ title:u.title, items:u.items.map(function(i){ return { title:i.title, text:i.text }; }) }; return u; }
 window.MMH_UPDATES = [
   E({
+    id:"2026-11-19-v38.1", version:"v38.1", date:"2026-11-19",
+    title:"Completing a task keeps its dates",
+    summary:"A task that runs over several days (e.g. start 15/11, finish 17/11) now keeps its start and finish dates when you mark it Completed — it stays on the 15th in the calendar.",
+    items:[
+      { type:"fix", icon:"!", title:"Start and finish dates stay as planned", text:"Open a task ▸ set <b>Completed</b> ▸ <b>Save</b>. The start date and the finish date no longer jump to today. Under the status you can still pick <b>Today</b> or <b>Another date</b> if the task really ended on a different day." }
+    ]
+  }),
+  E({
     id:"2026-11-19-v38.0", version:"v38.0", date:"2026-11-19",
     title:"Thailand: new field-visit tasks save again, save messages in English",
     summary:"Adding a field-visit task could stop with \"the operation is not supported on a range with a filtered-out row\" when the CUSTOMER TASK sheet had a filter on. The server now saves even with a filter, and the saving messages are in English for the Thailand teams.",
