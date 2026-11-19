@@ -4019,7 +4019,7 @@ function buildNav(){
     if(t.grp!==lastGrp){ h+='<div class="grp">'+t.grp+'</div>'; lastGrp=t.grp; }
     h+='<button class="nvi" data-t="'+t.id+'" onclick="go(\''+t.id+'\')"><span class="ic">'+t.ic+'</span><span class="lb">'+t.lb+'</span></button>';
   });
-  h+='<div style="flex:1"></div><div style="padding:10px;font-size:10.5px;color:var(--mute);line-height:1.5">MMH CRM v37.7<br>'+
+  h+='<div style="flex:1"></div><div style="padding:10px;font-size:10.5px;color:var(--mute);line-height:1.5">MMH CRM v37.8<br>'+
      (isMgmt()?'<a href="'+DRIVE_FOLDER+'" target="_blank">📁 Folder ảnh Drive</a>':"")+'</div>';
   $("side").innerHTML=h;
   /* ⭐ v4.5 — thanh dưới trượt ngang, đủ mọi mục, bỏ nút "Thêm" */
@@ -21007,7 +21007,7 @@ window.QS2={ open:qsOpen };
 </script>
 
 <!-- ⭐ v30.3 — THÔNG BÁO CẬP NHẬT (chép từ Report Hub): dữ liệu updates/notes.js · tự hiện 7 ngày · nút "Có gì mới" trên thanh trên cùng -->
-<script src="updates/notes.js?v=37.7"></script>
+<script src="updates/notes.js?v=37.8"></script>
 <style id="upd-css">
 #upd,#upd-zoom{--t-pri:var(--blue);--t-pri2:var(--blue-d);--t-ink:var(--navy);--t-soft:var(--pale);--t-line:var(--lb2);--t-bg:#F6F8FA;--mmh-blue:var(--blue);--mmh-navy:var(--navy)}
 
@@ -22053,7 +22053,7 @@ function ratio(k,t,a){
 }
 function ta(k){
   var i=T.mi, t=null, a=null, tt=k.t||[], aa=k.a||[];
-  if(T.mode==="fy") return { t:k.tgt, a:k.act, p:k.pct };
+  if(T.mode==="fy") return { t:k.tgt, a:k.act, p:(k.pct!=null&&!turnover(k)&&!lower(k))?Math.min(k.pct,1.3):k.pct };   /* v37.8 / v20.1: mã không phải F tối đa 130% */
   if(T.mode==="m"){ t=tt[i]; a=aa[i]; }
   else {
     var tn=tt.slice(0,i+1).filter(function(v){ return v!==null; }), an=aa.slice(0,i+1).filter(function(v){ return v!==null; });
@@ -25176,7 +25176,7 @@ window.RHN_CFG={ url:window.TRAINING_HUB_API, key:(typeof TRN_KEY!=="undefined"?
 <script src="rhnotify/rhnotify.js?v=1.1"></script>
 <script src="testflow/testflow.js?v=1.0"></script>
 <script src="tour/tour.js?v=1.1"></script>
-<script src="tour/tours.js?v=36.5"></script>
+<script src="tour/tours.js?v=37.8"></script>
 <script id="v319-i18n">
 /* v31.9 — bổ sung bản dịch EN (nhóm Thái): ô chọn account "N kết quả" */
 (function(){ try{ if(typeof RULES_EN!=="undefined" && RULES_EN.unshift){
@@ -25918,6 +25918,8 @@ window.renderOrder=renderOrder=function(){
 .k3-tb td{padding:7px 12px;border-top:1px solid #F0F3F6;vertical-align:middle}
 .k3-tb .num{text-align:right;white-space:nowrap}
 .k3-tb .cd{color:#8A97A6;font-size:11.5px;white-space:nowrap}
+.k3-tb tr.k3-grp td{background:#F7FAFE;color:#5A84A6;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.03em;padding:6px 12px}
+.k3-cap{font-size:9px;font-weight:600;color:#8A97A6;margin-left:3px;text-transform:none}
 .k3-tb .pc{font-weight:800}
 .t-low{color:#8A97A6}.t-mid{color:#3A5CAA}.t-ok{color:#B7860B}.t-top{color:#1E7B46}
 .b-low{background:#C3CDD8}.b-mid{background:#3A5CAA}.b-ok{background:#D9A520}.b-top{background:#2E8B57}
@@ -26047,6 +26049,12 @@ new MutationObserver(function(){ clearTimeout(retitle.t); retitle.t=setTimeout(f
 /* ═════════ màu theo file KPI ═════════ */
 function tone(p){ return p==null?"low":p>1.2?"top":p>=1?"ok":p>=0.9?"mid":"low"; }
 function pc(p){ return p==null?"—":Math.round(p*100)+"%"; }
+/* v37.8 (19/11/2026) — Rule KPI (4. Rule · MMHSOP_009): nhóm KẾT QUẢ = doanh số NPP / sản phẩm mới (mã F0–F6) không giới hạn;
+   nhóm QUÁ TRÌNH = mọi mã còn lại, kể cả hỗ trợ bán C5–C7, tối đa 130% (tháng, quý, năm) — giống công thức file KPI / tab TARGET & KPI. */
+function kRes(c){ return /^F/i.test(String(c||"").trim()); }
+function kCap(p,c){ return p==null||kRes(c)?p:Math.min(p,1.3); }
+window.kpiIsResult=kRes; window.kpiCapP=kCap;
+function pcCap(p,c){ var q=kCap(p,c); return q!==p&&p!=null?'<span title="'+e2(L("Thực tế ","Actual ")+pc(p)+L(" · ghi nhận tối đa 130%"," · capped at 130%"))+'">'+pc(q)+'<sup class="k3-cap">'+e2(L("tối đa","cap"))+'</sup></span>':pc(p); }
 
 /* ═════════ ② DASHBOARD ═════════ */
 S.d3=S.d3||{ m:"" };
@@ -26151,14 +26159,18 @@ window.renderKPI=renderKPI=function(){
   var pics=k8Pics().filter(function(p){ return !pic || p.pic===pic; });
   var body=pics.map(function(p){
     var sw=0, sp=0;
-    var rows=(p.rows||[]).map(function(r){
+    var rr=(p.rows||[]).map(function(r){
       var t=ix.reduce(function(a,i){ return a+n((r.t||[])[i]); },0), has=ix.some(function(i){ var v=(r.a||[])[i]; return v!=null&&v!==""; }), a=ix.reduce(function(a,i){ return a+n((r.a||[])[i]); },0);
       var tSet=ix.every(function(i){ var v=(r.t||[])[i]; return v!==""&&v!=null; });
       var p2=t?a/t:(tSet&&t===0?1:null); if(!has && t) p2=null;
-      var w=n(r.w); if(w && p2!=null){ sw+=w; sp+=Math.min(p2,1.3)*w; } else if(w && t) sw+=w;
+      var pk=kCap(p2,r.code);                                           /* v37.8: % ghi nhận (Quá trình tối đa 130%) */
+      var w=n(r.w); if(w && pk!=null){ sw+=w; sp+=pk*w; } else if(w && t) sw+=w;
       var u=k8Unit(r), nm=k3Name(r);
-      return '<tr title="'+e2(r.code+" · "+r.name)+'"><td class="cd">'+e2(r.code)+'</td><td>'+e2(nm)+'</td><td class="num w">'+(w?Math.round(w*100)+"%":"—")+'</td><td class="num">'+k8Fmt(t,u)+'</td><td class="num">'+(has?k8Fmt(a,u):'—')+'</td><td class="num pc t-'+tone(p2)+'">'+pc(p2)+'</td></tr>';
-    }).join("");
+      return { res:kRes(r.code), h:'<tr title="'+e2(r.code+" · "+r.name)+'"><td class="cd">'+e2(r.code)+'</td><td>'+e2(nm)+'</td><td class="num w">'+(w?Math.round(w*100)+"%":"—")+'</td><td class="num">'+k8Fmt(t,u)+'</td><td class="num">'+(has?k8Fmt(a,u):'—')+'</td><td class="num pc t-'+tone(pk)+'">'+pcCap(p2,r.code)+'</td></tr>' };
+    });
+    var gh=function(res){ return '<tr class="k3-grp"><td colspan="6">'+e2(res?L("Kết quả · doanh số NPP, sản phẩm mới (không giới hạn)","Result · distributor & new-product sales (no cap)"):L("Quá trình · tối đa 130%","Process · max 130%"))+'</td></tr>'; };
+    var rR=rr.filter(function(x){ return x.res; }), rP=rr.filter(function(x){ return !x.res; });
+    var rows=(rR.length?gh(true)+rR.map(function(x){ return x.h; }).join(""):"")+(rP.length?gh(false)+rP.map(function(x){ return x.h; }).join(""):"");
     var score=sw?sp/sw:null;
     return '<div class="k3-pic"><div class="k3-ph"><b>'+e2(p.pic)+'</b><span>'+e2(p.role||"")+'</span><span class="sp"></span><span>'+e2(L("Điểm","Score"))+'</span><span class="sc t-'+tone(score)+'">'+pc(score)+'</span></div>'+
       '<table class="k3-tb"><thead><tr><th class="cd">'+e2(L("Mã","Code"))+'</th><th>KPI</th><th class="num w">'+e2(L("Trọng số","Weight"))+'</th><th class="num">Target</th><th class="num">Actual</th><th class="num">%</th></tr></thead><tbody>'+rows+'</tbody></table></div>';
@@ -26451,7 +26463,8 @@ function kpiData(pic){
     var t=n((r.t||[])[mi]), av=(r.a||[])[mi], has=av!=null&&av!=="", a=n(av), ct=0, ca=0, ch=false;
     for(var i=0;i<=mi;i++){ ct+=n((r.t||[])[i]); var v=(r.a||[])[i]; if(v!=null&&v!==""){ ch=true; ca+=n(v); } }
     var p1=has&&t?a/t:null, p2=ch&&ct?ca/ct:null, w=n(r.w);
-    if(w && p1!=null){ sw+=w; sp+=Math.min(p1,1.3)*w; } else if(w && t) sw+=w;
+    if(!/^F/i.test(String(r.code||"").trim())){ if(p1!=null) p1=Math.min(p1,1.3); if(p2!=null) p2=Math.min(p2,1.3); }   /* v37.8: Quá trình (kể cả hỗ trợ bán C5–C7) tối đa 130%, Kết quả (mã F) không giới hạn */
+    if(w && p1!=null){ sw+=w; sp+=p1*w; } else if(w && t) sw+=w;
     return { c:r.code||"", n:kName(r), u:k8Unit(r), t:t, a:has?a:null, p:p1, ct:ct, ca:ch?ca:null, pf:p2 };
   });
   return { ym:ym, rows:rows, sc:sw?sp/sw:null };
@@ -26859,6 +26872,7 @@ mtOverviewHtml=function(p){
 .d4-svg text{font-size:10px;fill:#8A97A6;font-family:inherit}
 .d4-svg text.v{fill:#1F2A37;font-weight:600}
 .d4-hb{display:flex;flex-direction:column;gap:7px}
+.d4-sec{font-size:11px;font-weight:700;color:#5A84A6;text-transform:uppercase;letter-spacing:.03em;margin:4px 0 6px}.d4-hb+.d4-sec{margin-top:14px}
 .d4-hr{display:grid;grid-template-columns:minmax(90px,38%) 1fr auto;gap:8px;align-items:center;font-size:12.5px}
 .d4-hr .nm{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--ink,#1F2A37)}
 .d4-hr .tr{height:10px;background:#F0F2F5;border-radius:4px;overflow:hidden;display:flex}
@@ -26955,7 +26969,7 @@ window.renderDash=renderDash=function(){
     /* nhóm KPI doanh số (giống v32.3) */
     var groups=[], gi={};
     k8Pics().forEach(function(p){ if(pic && p.pic!==pic) return; (p.rows||[]).forEach(function(r){ if(!/^(turnover|supp_|newacct)/.test(r.key)) return;
-      var k=k8Label(r)+"|"+k8Unit(r); if(gi[k]==null){ gi[k]=groups.length; groups.push({ lb:k8Label(r), unit:k8Unit(r), list:[] }); } groups[gi[k]].list.push({ pic:p.pic, r:r }); }); });
+      var k=k8Label(r)+"|"+k8Unit(r); if(gi[k]==null){ gi[k]=groups.length; groups.push({ lb:k8Label(r), unit:k8Unit(r), list:[], res:/^F/i.test(String(r.code||"").trim()) }); } groups[gi[k]].list.push({ pic:p.pic, r:r }); }); });
     var rank=function(g){ return /NPP|Distributor/.test(g.lb)?0:/Composite sales|Doanh số Composite/.test(g.lb)?1:/JIZAI sales|Doanh số JIZAI/.test(g.lb)?2:/C5/.test(g.lb)?3:/C6/.test(g.lb)?4:/C7/.test(g.lb)?5:6; };
     groups.sort(function(a,b){ return rank(a)-rank(b); });
     var ser=groups.map(function(g){ return { g:g, s:k8Series(g.list,true) }; });
@@ -26973,11 +26987,15 @@ window.renderDash=renderDash=function(){
       (noOrder()?'':card(L("Giá trị đơn hàng theo tháng","Order value by month"),S.fy+L(" · không tính đơn bị từ chối"," · rejected orders excluded"),vbars(ms,ms.map(function(y){ return oV[y]||0; }),null,fmtVND,m),lgd(L("Giá trị đơn","Order value"))))+
       '</div>';
     /* KPI doanh số: tháng / lũy kế — thanh thực tế trên mục tiêu */
+    /* v37.8 — Kết quả (mã F, không giới hạn) tách khỏi Quá trình (hỗ trợ bán C5–C7, mở mới C1: % tối đa 130% như file KPI) */
     var kpiList=function(cum){ return ser.slice(0,8).map(function(x){ var ix=cum?cumIx:[mi], a=sum(x.s.a,ix), t=sum(x.s.t,ix), any=ix.some(function(i){ return x.s.has[i]; });
-      return { lb:x.g.lb, v:any?a:0, w:t, txt:(any?k8Fmt(a,x.g.unit):"—")+' <small>/ '+k8Fmt(t,x.g.unit)+' · '+pc(t&&any?a/t:null)+'</small>', tip:x.g.lb+" · "+(any?k8Fmt(a,x.g.unit):"—")+" / "+k8Fmt(t,x.g.unit) }; }); };
+      var p0=t&&any?a/t:null, pk=x.g.res||p0==null?p0:Math.min(p0,1.3);
+      return { res:x.g.res, lb:x.g.lb, v:any?a:0, w:t, txt:(any?k8Fmt(a,x.g.unit):"—")+' <small>/ '+k8Fmt(t,x.g.unit)+' · '+pc(pk)+(pk!==p0?' '+e2(L("(tối đa)","(cap)")):'')+'</small>', tip:x.g.lb+" · "+(any?k8Fmt(a,x.g.unit):"—")+" / "+k8Fmt(t,x.g.unit)+(pk!==p0?" · "+L("thực tế ","actual ")+pc(p0)+L(", ghi nhận tối đa 130%",", capped at 130%"):"") }; }); };
+    var kpiBody=function(cum){ var all=kpiList(cum), R=all.filter(function(x){ return x.res; }), P=all.filter(function(x){ return !x.res; }), f=function(v){ return short(v); };
+      return (R.length?'<div class="d4-sec">'+e2(L("Kết quả · không giới hạn","Result · no cap"))+'</div>'+hbars(R,f,0,1):'')+(P.length?'<div class="d4-sec">'+e2(L("Quá trình · tối đa 130%","Process · max 130%"))+'</div>'+hbars(P,f,0,1):''); };
     var kp2='<div class="d4-grid" id="d3-sales">'+
-      card(L("Tháng này","This month")+" · "+mLbl,L("mỗi dòng: thực tế so với mục tiêu của dòng đó (phần nhạt = còn thiếu)","each row: actual vs its own target (light = remaining)"),ser.length?hbars(kpiList(false),function(v){ return short(v); },0,1):'<div class="d4-empty">'+e2(L("Đang nạp chỉ tiêu…","Loading targets…"))+'</div>')+
-      card(L("Lũy kế","Cumulative"),cumLbl,ser.length?hbars(kpiList(true),function(v){ return short(v); },0,1):'<div class="d4-empty">'+e2(L("Đang nạp chỉ tiêu…","Loading targets…"))+'</div>')+'</div>';
+      card(L("Tháng này","This month")+" · "+mLbl,L("mỗi dòng: thực tế so với mục tiêu của dòng đó (phần nhạt = còn thiếu)","each row: actual vs its own target (light = remaining)"),ser.length?kpiBody(false):'<div class="d4-empty">'+e2(L("Đang nạp chỉ tiêu…","Loading targets…"))+'</div>')+
+      card(L("Lũy kế","Cumulative"),cumLbl,ser.length?kpiBody(true):'<div class="d4-empty">'+e2(L("Đang nạp chỉ tiêu…","Loading targets…"))+'</div>')+'</div>';
     /* nhóm sản phẩm + khách hàng giá trị cao */
     var pt={}, byAcc={}; ords.forEach(function(o){ if(upto.indexOf(k8Ym(o))<0) return; var t=String(o.ptype||"").split(/[,\n]/)[0].trim()||L("Khác","Other"); pt[t]=(pt[t]||0)+n(o.amount); var a=String(o.name||o.code||"—"); byAcc[a]=(byAcc[a]||0)+n(o.amount); });
     var ptL=Object.keys(pt).sort(function(a,b){ return pt[b]-pt[a]; }).slice(0,8).map(function(k){ return { lb:k, v:pt[k] }; });
@@ -29378,7 +29396,7 @@ html.v344-app #pwaBtn{display:none!important}
 window.KPISOP_CFG={ en:function(){ return !!(window.I18N && I18N.on); },
   thai:function(pic, s){ try{ if(typeof isTH==="function" && isTH()) return true; }catch(_){} return /thai/i.test([s&&s.team, s&&s.dept].join(" ")); } };
 </script>
-<script src="kpisop/kpisop.js?v=1.2"></script>
+<script src="kpisop/kpisop.js?v=1.3"></script>
 
 <script id="v348-js">
 /* ═════════ v34.8 (02/11/2026) — Thailand Dental: sheet CUSTOMER VISITING → CUSTOMER TASK · ALL TASK → OTHERS TASK
@@ -31897,7 +31915,7 @@ try{ if(S.user) buildNav(); }catch(e){}
      nút "Working Map" trên thanh trên cùng (điện thoại: Thêm ▸ Working Map). Phạm vi xem: WM.cfg.SCOPE. API test: window.WM -->
 <link rel="stylesheet" href="wmap/wmap.css?v=2.2">
 <script src="wmap/products.js?v=2.0"></script>
-<script src="wmap/wmap.js?v=2.2"></script>
+<script src="wmap/wmap.js?v=2.3"></script>
 <script id="v372-js">
 /* ⭐ v37.2 (17/11/2026) — Báo cáo công tác (nhóm VN): người báo cáo TỰ GỬI email từ hộp thư của mình (tripmail/tripmail.js GIỐNG HỆT MMH-Report).
    Backend Report Hub (mmh-backend ReportHub_Trip_Mail v13.0): tripReport mailMode=self ⇒ lưu + trả `mail`. Nhóm Thái (TH_Trip.gs) giữ cách cũ. */
