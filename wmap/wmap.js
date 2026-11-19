@@ -726,7 +726,9 @@ function kAgg(rows){
   var units={}, sum=rows.every(function(r){ units[r.unit]=1; return r.agg!=="AVG" && r.unit!=="%" && r.unit!=="Point"; }) && Object.keys(units).length===1;
   var T=0, A=0, n=0, ps=[];
   rows.forEach(function(r){ var v=kv(r); if(!v) return; if(v[0]!=null) T+=v[0]; if(v[1]!=null){ A+=v[1]; n++; } if(v[3]!=null) ps.push(v[3]); });
-  if(sum && T) return { p:n?A/T:null, a:n?A:null, t:T, unit:Object.keys(units)[0] };
+  /* v37.8: nhóm Kết quả (mọi mã F) không giới hạn; nhóm Quá trình (hỗ trợ bán C5–C7, viếng thăm, mở mới…) tối đa 130% như file KPI */
+  var res=rows.length && rows.every(function(r){ return /^F/i.test(String(r.code||"").trim()); }), cap=function(p){ return p==null||res?p:Math.min(p,1.3); };
+  if(sum && T) return { p:cap(n?A/T:null), a:n?A:null, t:T, unit:Object.keys(units)[0] };
   return { p:ps.length?ps.reduce(function(s,x){ return s+x; },0)/ps.length:null, a:null, t:null, unit:"" };
 }
 function kScore(rows){ /* điểm KPI 1 người = Σ (% × trọng số), % tối đa 130% */

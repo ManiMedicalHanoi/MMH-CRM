@@ -7,6 +7,15 @@
 function E(u){ u.en={ title:u.title, items:u.items.map(function(i){ return { title:i.title, text:i.text }; }) }; return u; }
 window.MMH_UPDATES = [
   E({
+    id:"2026-11-19-v37.8", version:"v37.8", date:"2026-11-19",
+    title:"KPI: supported sales capped at 130% (process KPI)",
+    summary:"KPI pages now follow the KPI rule exactly: <b>Result</b> KPIs (distributor and new-product sales, codes F) have no cap; every <b>Process</b> KPI — including supported sales C5–C7 — counts at most 130%.",
+    items:[
+      { type:"fix", icon:"!", title:"KPI & Targets: Result and Process split", text:"<b>KPIs & Targets</b> ▸ each PIC table now has two parts: <b>Result</b> (F codes, no cap) and <b>Process</b> (max 130%). A process KPI above 130% shows <b>130%</b> with a small <i>cap</i> mark (hover to see the actual %). The score uses the same rule as the KPI file: F codes are no longer capped, C5–C7 are.", img:"updates/v37.8/kpi.jpg" },
+      { type:"fix", icon:"!", title:"Dashboard and weekly meeting use the same rule", text:"<b>Dashboard</b> ▸ <b>Sales</b>: supported sales and new accounts are listed under <b>Process · max 130%</b>, separate from distributor sales. The KPI table in the <b>Weekly meeting</b>, the KPI rings on the <b>Working Map</b> and the quarterly KPI report (FM02) apply the same 130% cap.", img:"updates/v37.8/dash.jpg" }
+    ]
+  }),
+  E({
     id:"2026-11-18-v37.7", version:"v37.7", date:"2026-11-18",
     title:"Working Map: tenders on muasamcong for each account",
     summary:"Click a hospital on the <b>Working Map</b> and see its tenders on muasamcong straight away: open tenders, results and plans of the last 12 months, the latest packages. Names in the CRM stay as they are — a separate name table links each account to its buyer name on muasamcong.",
