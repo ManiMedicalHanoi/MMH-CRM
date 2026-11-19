@@ -353,3 +353,5 @@ Kiến trúc & quy ước giống MMH Report Hub (repo `ManiMedicalHanoi/MMH-Rep
 - **v38.0 (19/11/2026, sửa module WQ v30.6 + `verPoll` toast; backend crm-thai-dental / crm-thai `fmlCopy_`)**: Yong (Dental Thái) thêm task đi địa bàn báo lỗi Google "dải ô có một hàng đã bị lọc bỏ" (sheet CUSTOMER TASK bật bộ lọc) —
   backend đã sửa; task lỗi trong hàng chờ bấm **Retry now** là lưu. Hộp "Đang chờ lưu lên Google Sheet", nút, nhãn task / ảnh, toast "Google Sheet vừa thay đổi…" ⇒ `TX(vi,en)`; nhãn / lỗi đã lưu sẵn trên máy bằng tiếng Việt
   ⇒ `wqLbl` / `wqErr` (bảng `WQ_ERR_EN`) dịch khi hiện cho nhóm Thái. Chữ mới trong hàng chờ / toast phải qua `TX`.
+- **v38.1 (19/11/2026, sửa khối `v343b-js` ④, Yong + người dùng: "finish cũng đừng nhảy ngày")**: task NHIỀU NGÀY (Finish > Start của dòng gốc) chuyển Completed ⇒ ô Ngày (Start) không đổi, finish gửi đi = Finish đang có (kẹp [Start, hôm nay]);
+  khung `#v343-fin` hiện "Ngày kết thúc dự kiến" (`multi()` / `keepFin()`), "Hôm nay" / "Ngày khác" chỉ đổi Finish. Task 1 ngày giữ cách cũ (Start = Finish = ngày chọn). Lịch đặt task theo Start (`calItems` d = start).
