@@ -7,6 +7,16 @@
 function E(u){ u.en={ title:u.title, items:u.items.map(function(i){ return { title:i.title, text:i.text }; }) }; return u; }
 window.MMH_UPDATES = [
   E({
+    id:"2026-11-20-v38.2", version:"v38.2", date:"2026-11-20",
+    title:"Surgical Vietnam: one weekly meeting for the whole team",
+    summary:"Weekly meeting of the Surgical Vietnam team is now one page for the team: Forecast · Tenders · Field visits & plan · Other matters, with last week's plan, notes anyone can write, full screen, and a formal minutes e-mail to Ms Tuyen (CC Ms Ha).",
+    items:[
+      { type:"new", icon:"+", title:"One page, four parts", text:"Open <b>Weekly meeting</b> (Surgical VN) ▸ the page shows <b>1. Forecast</b> (month, to date and full FY vs budget, by distributor and product, plus the forecast explanation of the Turnover file) · <b>2. Tenders</b> (packages followed, milestones in 14 days, new results) · <b>3. Field visits</b> (this week and next week's plan for Viet Ha and Khang) · <b>4. Other matters</b>." },
+      { type:"new", icon:"+", title:"Last week's plan and notes for each part", text:"Each part shows the plan agreed last week, then boxes <b>Done since last week</b> · <b>Meeting notes</b> · <b>Plan for next week</b>. Anyone in the team can write; press <b>Save</b>. <b>Full screen</b> shows the page on the TV, ← → switches parts." },
+      { type:"new", icon:"+", title:"Send the minutes", text:"Press <b>Send minutes</b> ▸ check To (Ms Tuyen) and CC (Ms Ha) ▸ preview ▸ <b>Send e-mail</b> ▸ <b>Confirm and send</b>. The e-mail opens with \"Dear chị Tuyên\" and lists the 4 parts with figures and notes. <b>Per PIC</b> brings back the old screen." }
+    ]
+  }),
+  E({
     id:"2026-11-19-v38.1", version:"v38.1", date:"2026-11-19",
     title:"Completing a task keeps its dates",
     summary:"A task that runs over several days (e.g. start 15/11, finish 17/11) now keeps its start and finish dates when you mark it Completed — it stays on the 15th in the calendar.",
