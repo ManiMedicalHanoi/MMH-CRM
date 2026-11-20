@@ -7,6 +7,18 @@
 function E(u){ u.en={ title:u.title, items:u.items.map(function(i){ return { title:i.title, text:i.text }; }) }; return u; }
 window.MMH_UPDATES = [
   E({
+    id:"2026-11-20-v38.5", version:"v38.5", date:"2026-11-20",
+    title:"Team meeting: view by PIC, distributor cards, sales opportunities by channel, presentations",
+    summary:"The Surgical team meeting now shows each PIC's role, one card per distributor with actual sales to date, sales opportunities split into public and private channels with new accounts marked, a presentations part and larger note boxes. Dental uses the same layout plus distributor support orders.",
+    items:[
+      { type:"new", icon:"👤", title:"View by PIC", text:"<b>Weekly meeting</b> ▸ <b>View</b> Whole team or one PIC (role · area · distributors). Every part follows the choice; the saved minutes and the e-mail always cover the whole team.", img:"" },
+      { type:"imp", icon:"▦", title:"Forecast: one card per distributor", text:"Each distributor shows the month, <b>actual to date</b> (invoiced to the distributor, Turnover file), to date and full FY, plus a 12-month chart: dark = actual, light = forecast, line = budget.", img:"" },
+      { type:"new", icon:"◎", title:"Sales opportunities (was Tenders)", text:"Tiles: estimated sales (public · private · new), MANI wins this FY, new packages this week, new accounts. Tabs <b>Public</b> · <b>Private</b>, PIC first, sorted by funnel (lost in red on top, then won / bidding, quotation, early steps). Approved new accounts / new SKUs are always marked with what they bought since approval.", img:"" },
+      { type:"new", icon:"▤", title:"Presentations and Dental orders", text:"New part <b>Product presentations</b> (this week with review, plan for the next 2 weeks). Dental adds <b>Distributor support orders</b> (confirmed / waiting for HOD, by PIC and distributor).", img:"" },
+      { type:"imp", icon:"✎", title:"Bigger note boxes, nothing lost", text:"Done · Meeting notes · Next week boxes are larger. Switching parts, tabs, weeks or full screen keeps what you typed; Save stores every part.", img:"" }
+    ]
+  }),
+  E({
     id:"2026-11-20-v38.4", version:"v38.4", date:"2026-11-20",
     title:"Faster start on phones, cleaner top bar, no more wrong \"unsaved text\" bar",
     summary:"The app opens faster on phones, the top bar on phones keeps only the essentials, and the yellow \"unsaved text\" bar no longer shows text you already saved. Update notices no longer pop up.",
