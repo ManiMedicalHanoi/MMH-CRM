@@ -1333,6 +1333,8 @@ function ready(){ try{ var a=$i("app"); return !!(a && a.classList.contains("on"
   if(ready()){
     paintBtn();
     var auto=true; try{ auto=!sessionStorage.getItem("mmh_wm_seen") || !!sessionStorage.getItem("mmh_wm_reopen") || !!hashAcc(); }catch(_){}
+    /* v38.4: điện thoại không tự mở Working Map khi vào app (tải bản đồ + nhiều nhóm làm app mở rất lâu) — mở bằng Thêm ▸ Working Map; link #wm=… vẫn mở */
+    try{ if(auto && isMob() && !hashAcc() && !sessionStorage.getItem("mmh_wm_reopen")) auto=false; }catch(_){}
     if(auto && !window.__tourOn && !window.__WM_NOAUTO) setTimeout(function(){ if(!ST.open && !window.__tourOn) open(); }, 600);
     return;
   }
