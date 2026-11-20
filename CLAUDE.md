@@ -371,3 +371,12 @@ Kiến trúc & quy ước giống MMH Report Hub (repo `ManiMedicalHanoi/MMH-Rep
      `sw.js` (V `mmh-crm-38.4`): file có `?v=` lấy bản đã lưu (không hỏi mạng); mở trang mạng chậm > 4 giây ⇒ trang đã lưu, bản mới lưu cho lần sau.
   Đo thử (backend giả lập trễ 3–4 giây): mở lại app có dữ liệu ⇒ lịch hiện < 1 giây; chụp ảnh nén ~0,3 giây, bấm lưu khung đóng ngay, ảnh gửi ngầm — chậm còn lại là thời gian Google (Drive + Sheet) xử lý.
   ⚠️ Từ v38.4 `sw.js` trả bản ĐÃ LƯU cho mọi file có `?v=` ⇒ sửa file .js / .css riêng (tours.js, wmap.js, kpisop.js…) BẮT BUỘC tăng `?v=` trong index.html, không thì máy đã cài vẫn chạy bản cũ.
+- **v38.5 (20/11/2026, viết lại khối `v382-js` + khối `v385-css`) — HỌP NHÓM Surgical VN + Dental VN (người dùng review buổi họp)**: cấu hình `CFGS` (surgical: Team Surgical, Theo dõi thầu `fu`;
+  dental: Team Dental, cơ hội `oppList`, thêm phần Đơn hàng). Thanh **Xem theo** Cả nhóm / từng PIC (`MS.pic`, `localStorage.mmh_mts_pic_<nhóm>`, vai trò = title + `area` + NPP) lọc mọi phần — snapshot / email luôn cả nhóm.
+  Phần: 1 Forecast (ô **Thực tế đến nay** = cột Actual tháng ≤ hiện tại của getNppDetail; mỗi NPP 1 thẻ `.v385-nc` + biểu đồ 12 tháng `spark`) · 2 **Cơ hội bán hàng** (ô: Doanh số ước tính = `fuFcList` valFy inFc theo kênh / nhóm ①②③ / loại SP —
+  Dental = `oppList` usd × 26.700; Gói MANI trúng FY = `fuFcList` ① có tháng bắt đầu trong FY; Gói mới tuần họp = `fuNews` days từ đầu FY; Mở mới = `naList` Approved FY + đơn đã xác nhận sau `decAt`) + tab Kênh công lập / tư nhân
+  (`#mts-td-w` rộng hết khung, PIC đầu, nhóm theo PIC, phễu `RANK`: trượt (đỏ) → trúng / dự thầu → báo giá → bước sớm → dừng), nhãn New account / New SKU (`naRows` khớp tên `sameH`; chưa có cơ hội ⇒ thêm dòng) + dòng "đã mua gì"
+  + "SL dùng / tháng" (`fuFcList` Tư nhân qty ÷ dur) · 3 Đơn hàng hỗ trợ NPP (chỉ Dental, `list tab=order pic=""`) · Địa bàn · **Thuyết trình sản phẩm** (`list tab=present`, review tách "-Nhãn: nội dung") · Nội dung khác.
+  Trường biên bản mới `odPrev/odNote/odPlan`, `prPrev/prNote/prPlan` (giữ `td*` cho Cơ hội bán hàng). Nháp ghi ngay khi rời ô / đổi phần / ẩn trang (`flush`). Meeting ID `MT-<thứ Hai>-TEAMSURGICAL | TEAMDENTAL` (backend mtSave sẵn, không cần sửa).
+  Chưa làm: ô bắt buộc "SL dùng trung bình / tháng" khi mở mới trên Tender Map (hiện nhập qua Doanh số ước tính ▸ SL + thời gian dùng). Doanh số NPP bán ra bệnh viện (sell-out) không có trong file nào.
+  Test: kịch bản Playwright với mock `onReq` (getNppDetail mảng, fuList / fuFcList / fuNews / oppList / naList / list order·present / visitFeed).
