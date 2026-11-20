@@ -7,13 +7,23 @@
 function E(u){ u.en={ title:u.title, items:u.items.map(function(i){ return { title:i.title, text:i.text }; }) }; return u; }
 window.MMH_UPDATES = [
   E({
-    id:"2026-11-20-v38.2", version:"v38.2", date:"2026-11-20",
+    id:"2026-11-20-v38.3", version:"v38.3", date:"2026-11-20",
     title:"Thailand: other tasks show on every working day, Done keeps the dates",
     summary:"Other tasks now appear on every day from start to due date, marking a task Done no longer moves it to today, and finishing several tasks at once no longer shows \"The system is busy\".",
     items:[
-      { type:"imp", icon:"↔", title:"A task shows on every day you work on it", text:"<b>Work calendar</b> ▸ an other task from 8/10 to 10/10 now shows on 8, 9 and 10/10 (label <b>8/10→10/10</b>), not only on the due date. Tasks longer than a month show on the start and due dates. The Other tasks box counts each task once.", img:"updates/v38.2/calendar-span.jpg" },
-      { type:"fix", icon:"!", title:"Done: choose the finish date", text:"Click the task ▸ <b>Done</b> ▸ <b>Finished on</b>: <b>Due date</b> · <b>Today</b> · <b>Other date</b> ▸ <b>Save</b>. When the due date has passed, the due date is chosen for you, so the task stays where it was. In the overdue list, <b>✓ Completed</b> also keeps the task's own dates.", img:"updates/v38.2/finished-on.jpg" },
+      { type:"imp", icon:"↔", title:"A task shows on every day you work on it", text:"<b>Work calendar</b> ▸ an other task from 8/10 to 10/10 now shows on 8, 9 and 10/10 (label <b>8/10→10/10</b>), not only on the due date. Tasks longer than a month show on the start and due dates. The Other tasks box counts each task once.", img:"updates/v38.3/calendar-span.jpg" },
+      { type:"fix", icon:"!", title:"Done: choose the finish date", text:"Click the task ▸ <b>Done</b> ▸ <b>Finished on</b>: <b>Due date</b> · <b>Today</b> · <b>Other date</b> ▸ <b>Save</b>. When the due date has passed, the due date is chosen for you, so the task stays where it was. In the overdue list, <b>✓ Completed</b> also keeps the task's own dates.", img:"updates/v38.3/finished-on.jpg" },
       { type:"fix", icon:"!", title:"No more \"The system is busy\" when finishing many tasks", text:"Tick several tasks Done in a row: the app now saves them one after another and retries by itself when the Google Sheet is busy. You only see a red message if a task really cannot be saved." }
+    ]
+  }),
+  E({
+    id:"2026-11-20-v38.2", version:"v38.2", date:"2026-11-20",
+    title:"Surgical Vietnam: one weekly meeting for the whole team",
+    summary:"Weekly meeting of the Surgical Vietnam team is now one page for the team: Forecast · Tenders · Field visits & plan · Other matters, with last week's plan, notes anyone can write, full screen, and a formal minutes e-mail to Ms Tuyen (CC Ms Ha).",
+    items:[
+      { type:"new", icon:"+", title:"One page, four parts", text:"Open <b>Weekly meeting</b> (Surgical VN) ▸ the page shows <b>1. Forecast</b> (month, to date and full FY vs budget, by distributor and product, plus the forecast explanation of the Turnover file) · <b>2. Tenders</b> (packages followed, milestones in 14 days, new results) · <b>3. Field visits</b> (this week and next week's plan for Viet Ha and Khang) · <b>4. Other matters</b>." },
+      { type:"new", icon:"+", title:"Last week's plan and notes for each part", text:"Each part shows the plan agreed last week, then boxes <b>Done since last week</b> · <b>Meeting notes</b> · <b>Plan for next week</b>. Anyone in the team can write; press <b>Save</b>. <b>Full screen</b> shows the page on the TV, ← → switches parts." },
+      { type:"new", icon:"+", title:"Send the minutes", text:"Press <b>Send minutes</b> ▸ check To (Ms Tuyen) and CC (Ms Ha) ▸ preview ▸ <b>Send e-mail</b> ▸ <b>Confirm and send</b>. The e-mail opens with \"Dear chị Tuyên\" and lists the 4 parts with figures and notes. <b>Per PIC</b> brings back the old screen." }
     ]
   }),
   E({
