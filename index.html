@@ -2078,12 +2078,14 @@ function kvWarm(){
   return new Promise(function(res){
     var done=false;
     function fin(){ if(done) return; done=true; res(); }
-    setTimeout(fin,1800);                       /* IndexedDB chậm bất thường ⇒ vẫn mở app */
+    setTimeout(function(){ if(!done){ KV.late=true; fin(); } },1800);   /* IndexedDB chậm bất thường ⇒ vẫn mở app */
     kvOpen().then(function(db){
       if(!db) return fin();
       KV.db=db; KV.ok=true;
       Promise.all([kvReadRange(db,"k:"+curTeamKey()+":"), kvReadRange(db,"k:*:")]).then(function(){
         kvMigrateLegacy(); fin();
+        /* ⭐ v38.4 — dữ liệu đã lưu về muộn (iPhone) ⇒ vẫn dùng ngay, không bắt chờ tải lại toàn bộ từ Google Sheet */
+        if(KV.late){ KV.late=false; try{ if(typeof KV.onLate==="function") KV.onLate(); }catch(e){} }
       });
     });
   });
@@ -2158,12 +2160,30 @@ function boot(){
     return;
   }
   $("ldtxt").textContent="Đang kết nối Google Sheet…";
+  /* ⭐ v38.4 — bộ nhớ máy trả dữ liệu đã lưu muộn hơn 1,8 giây ⇒ mở app bằng dữ liệu đó, bản từ Sheet về sau thì cập nhật tại chỗ */
+  var lateOn=false;
+  KV.onLate=function(){
+    KV.onLate=null;
+    var c=kvGet(bundleKey_());
+    if(!(c&&c.picList&&c.picList.length) || $("loader").style.display==="none") return;
+    lateOn=true;
+    S.picList=c.picList; S.master=c.master||{}; S.driveFolder=c.driveFolder||"";
+    S.fy=fyNewest_(c.fyCurrent,fyToday());
+    S.fyList=(c.fyList&&c.fyList.length)?c.fyList:((S.master.fy&&S.master.fy.length)?S.master.fy.slice():[S.fy]);
+    applyBundle(c,true);
+    $("loader").style.display="none";
+    if(canAuto(saved)) startApp(saved); else showLogin();
+  };
   fetchBundle(saved||"").then(function(b){
+    KV.onLate=null;
+    if(lateOn){ if(b && !b.unchanged){ applyBundle(b); try{ softRepaint(); }catch(e){} } return; }
     applyBundle(b);
     $("loader").style.display="none";
     if(canAuto(saved)) startApp(saved);
     else showLogin();
   }).catch(function(e){
+    KV.onLate=null;
+    if(lateOn) return;
     $("ldtxt").innerHTML='<span style="color:#A82F2C">'+esc(e.message)+'</span><br><br>'+
       '<button class="btn sm" onclick="location.reload()">Thử lại</button>';
   });
@@ -4019,7 +4039,7 @@ function buildNav(){
     if(t.grp!==lastGrp){ h+='<div class="grp">'+t.grp+'</div>'; lastGrp=t.grp; }
     h+='<button class="nvi" data-t="'+t.id+'" onclick="go(\''+t.id+'\')"><span class="ic">'+t.ic+'</span><span class="lb">'+t.lb+'</span></button>';
   });
-  h+='<div style="flex:1"></div><div style="padding:10px;font-size:10.5px;color:var(--mute);line-height:1.5">MMH CRM v38.3<br>'+
+  h+='<div style="flex:1"></div><div style="padding:10px;font-size:10.5px;color:var(--mute);line-height:1.5">MMH CRM v38.4<br>'+
      (isMgmt()?'<a href="'+DRIVE_FOLDER+'" target="_blank">📁 Folder ảnh Drive</a>':"")+'</div>';
   $("side").innerHTML=h;
   /* ⭐ v4.5 — thanh dưới trượt ngang, đủ mọi mục, bỏ nút "Thêm" */
@@ -21007,7 +21027,7 @@ window.QS2={ open:qsOpen };
 </script>
 
 <!-- ⭐ v30.3 — THÔNG BÁO CẬP NHẬT (chép từ Report Hub): dữ liệu updates/notes.js · tự hiện 7 ngày · nút "Có gì mới" trên thanh trên cùng -->
-<script src="updates/notes.js?v=38.3"></script>
+<script src="updates/notes.js?v=38.4"></script>
 <style id="upd-css">
 #upd,#upd-zoom{--t-pri:var(--blue);--t-pri2:var(--blue-d);--t-ink:var(--navy);--t-soft:var(--pale);--t-line:var(--lb2);--t-bg:#F6F8FA;--mmh-blue:var(--blue);--mmh-navy:var(--navy)}
 
@@ -25187,7 +25207,7 @@ window.RHN_CFG={ url:window.TRAINING_HUB_API, key:(typeof TRN_KEY!=="undefined"?
 <script src="rhnotify/rhnotify.js?v=1.1"></script>
 <script src="testflow/testflow.js?v=1.0"></script>
 <script src="tour/tour.js?v=1.1"></script>
-<script src="tour/tours.js?v=37.8"></script>
+<script src="tour/tours.js?v=38.4"></script>
 <script id="v319-i18n">
 /* v31.9 — bổ sung bản dịch EN (nhóm Thái): ô chọn account "N kết quả" */
 (function(){ try{ if(typeof RULES_EN!=="undefined" && RULES_EN.unshift){
@@ -31483,15 +31503,23 @@ setTimeout(function(){ try{ if(CORS_OK===null) probeCors(); }catch(_){} }, 3000)
 /* ───────── ① nháp tự lưu ───────── */
 var TXT=["tk-plan","tk-result","tk-stop","tk-result-p0","tk-result-p1","tk-result-p2","tk-result-p3","tk-result-one",
          "nt_accName","nt_account","nt_plan","nt_result","nt_stop","nt_result-p0","nt_result-p1","nt_result-p2","nt_result-p3","nt_result-one"];
+/* v38.4: khung đóng chỉ bị ẨN (#drw / #ov bỏ lớp "on"), nội dung vẫn nằm trong trang ⇒ phải xét khung còn hiện hay không.
+   Trước đây lưu task mới xong vẫn coi form "còn mở" ⇒ nháp không bao giờ bị xoá ⇒ lần sau bấm "Thêm task" hiện dải vàng nội dung cũ (Viet báo 20/11/2026). */
+function shown(id){ var e=$(id); if(!e) return false; var h=e.closest("#drw,#ov,#ov2"); return !h || h.classList.contains("on"); }
 function ctx(){
-  if($("tk-result")){ var w=S.task||{}, a=""; try{ a=parseAcc(w.account).name; }catch(_){}
+  if(shown("tk-result")){ var w=S.task||{}, a=""; try{ a=parseAcc(w.account).name; }catch(_){}
     return { k:"tk:"+(S.taskRow||w._row||"")+":"+a, p:"tk" }; }
-  if($("nt_result")||$("nt_plan")) return { k:"nt", p:"nt" };
+  if(shown("nt_result")||shown("nt_plan")) return { k:"nt", p:"nt" };
   return null;
 }
 function key(c){ return "mmh_crm_draft:"+tk()+":"+me()+":"+c.k; }
 function vals(c){ var o={}; TXT.forEach(function(id){ if(id.indexOf(c.p)!==0) return; var e=$(id); if(e) o[id]=e.value; }); return o; }
-function textOf(o){ return Object.keys(o).filter(function(k){ return !/^nt_account$/.test(k); }).map(function(k){ return o[k]; }).join("\u0001"); }
+function textOf(o){ return Object.keys(o).filter(function(k){ return !/^nt_acc(ount|Name)$/.test(k); }).map(function(k){ return o[k]; }).join("\u0001"); }
+/* v38.4: chỉ chữ thật (Plan / Task Result / lý do dừng) mới là "nội dung chưa lưu" — chọn account, khung 4 mục trống thì không */
+function realText(o){ return Object.keys(o||{}).some(function(k){ if(/^nt_acc(ount|Name)$/.test(k)) return false;
+  return String(o[k]||"").replace(/^\s*[1-4]\s*[.)]\s*(Actions Taken|Current Situation|Customer Feedback|Opportunities\s*\/\s*Next Steps)\s*:?/gim,"").replace(/^(Người gặp|Person met):\s*$/gim,"").replace(/[\s\-–—.:]+/g,"").length>0; }); }
+function preview(o){ var t=""; ["nt_result","nt_result-one","nt_result-p0","nt_plan","tk-result","tk-result-one","tk-result-p0","tk-plan"].some(function(k){ var v=String((o||{})[k]||"").replace(/\s+/g," ").trim(); if(v){ t=v; return true; } return false; });
+  return t.length>70?t.slice(0,70)+"…":t; }
 function get(k){ try{ var d=JSON.parse(localStorage.getItem(k)||"null"); if(d && Date.now()-d.at>14*86400000){ localStorage.removeItem(k); return null; } return d; }catch(_){ return null; } }
 var D={ base:null, k:"", t:0 };
 window.V368D=D;
@@ -31522,7 +31550,9 @@ function banner(c,d){
   var host=c.p==="tk"?anchor.closest(".te-sec"):anchor.closest(".fld"); if(!host||!host.parentNode) return;
   var b=document.createElement("div"); b.id="v368-dr"; b.className="v368-dr";
   var t=new Date(d.at), hm=("0"+t.getHours()).slice(-2)+":"+("0"+t.getMinutes()).slice(-2)+" "+("0"+t.getDate()).slice(-2)+"/"+("0"+(t.getMonth()+1)).slice(-2);
-  b.innerHTML='<span class="sp">'+L("Có nội dung chưa lưu từ lúc ","Unsaved text from ")+'<b>'+hm+'</b></span>'+
+  var pv=preview(d.v), an=c.p==="nt"?String((d.v||{}).nt_accName||"").trim():"";
+  b.innerHTML='<span class="sp">'+L("Còn nội dung chưa lưu lúc ","Unsaved text from ")+'<b>'+hm+'</b>'+(an?' · '+esc(an):'')+
+    (pv?'<br><i class="v384-pv">“'+esc(pv)+'”</i>':'')+'</span>'+
     '<button type="button" class="btn sm pri" id="v368-rs">'+L("Khôi phục","Restore")+'</button>'+
     '<button type="button" class="btn sm" id="v368-no">'+L("Bỏ","Discard")+'</button>';
   host.parentNode.insertBefore(b,host);
@@ -31536,15 +31566,20 @@ function arm(){
   if(el) el._v368=1;
   D.k=k; D.base=textOf(vals(c));
   var d=get(k);
-  if(d && textOf(d.v||{})!==D.base) banner(c,d);
+  if(d && textOf(d.v||{})!==D.base && realText(d.v)) banner(c,d);
   else if(d){ try{ localStorage.removeItem(k); }catch(_){} }
 }
 var armT=0;
 new MutationObserver(function(){ clearTimeout(armT); armT=setTimeout(arm,350); }).observe(document.body,{childList:true,subtree:true});
 function afterSave(k,p){
-  setTimeout(function(){ var still=$(p==="tk"?"tk-result":"nt_result"); var c=ctx();
-    if(!still || !c || key(c)!==k){ try{ localStorage.removeItem(k); }catch(_){} } }, 1500);
+  /* lưu xong khung đóng (ẩn) ⇒ xoá nháp; lưu bị chặn (thiếu ô bắt buộc) thì khung vẫn mở, nháp giữ nguyên */
+  [600,1500,4000].forEach(function(ms){ setTimeout(function(){ var c=ctx();
+    if(!c || key(c)!==k){ try{ localStorage.removeItem(k); }catch(_){} } }, ms); });
 }
+/* v38.4: dọn 1 lần các nháp "task mới" cũ — phần lớn là nội dung ĐÃ lưu nhưng không được xoá do lỗi trên */
+try{ if(!localStorage.getItem("mmh_draft_fix384")){
+  var dk=[]; for(var i=0;i<localStorage.length;i++){ var kk=localStorage.key(i)||""; if(/^mmh_crm_draft:.*:nt$/.test(kk)) dk.push(kk); }
+  dk.forEach(function(x){ localStorage.removeItem(x); }); localStorage.setItem("mmh_draft_fix384","1"); } }catch(_){}
 
 /* ───────── ② + ③ bọc lưu task ───────── */
 function stDone2(){ var l=(S.master&&S.master.status)||[]; return l.filter(function(x){ return /complet/i.test(x); })[0]||"Completed"; }
@@ -31939,7 +31974,7 @@ try{ if(S.user) buildNav(); }catch(e){}
      nút "Working Map" trên thanh trên cùng (điện thoại: Thêm ▸ Working Map). Phạm vi xem: WM.cfg.SCOPE. API test: window.WM -->
 <link rel="stylesheet" href="wmap/wmap.css?v=2.2">
 <script src="wmap/products.js?v=2.0"></script>
-<script src="wmap/wmap.js?v=2.3"></script>
+<script src="wmap/wmap.js?v=2.4"></script>
 <script id="v372-js">
 /* ⭐ v37.2 (17/11/2026) — Báo cáo công tác (nhóm VN): người báo cáo TỰ GỬI email từ hộp thư của mình (tripmail/tripmail.js GIỐNG HỆT MMH-Report).
    Backend Report Hub (mmh-backend ReportHub_Trip_Mail v13.0): tripReport mailMode=self ⇒ lưu + trả `mail`. Nhóm Thái (TH_Trip.gs) giữ cách cũ. */
@@ -33288,6 +33323,62 @@ try{
     RULES_EN.unshift([/^(?:⚠️ ?)?Lưu thất bại: (.*)$/, "Not saved: $1"]);
   }
 }catch(_){}
+})();
+</script>
+<style id="v384-css">
+/* v38.4 (20/11/2026) — điện thoại gọn hơn: thanh trên cùng chỉ còn logo · Tìm · Nhắc tôi · tên; ô ngày iPhone không tràn viền; chữ dài tự xuống dòng */
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+#updBtn{display:none!important}
+#v30-more [data-upd]{display:none!important}
+.v368-dr .v384-pv{font-style:normal;color:#7A6A2E;font-size:12px;display:inline-block;margin-top:2px;overflow-wrap:anywhere}
+input[type=date],input[type=time],input[type=month],input[type=datetime-local]{min-width:0;max-width:100%;box-sizing:border-box}
+@supports (-webkit-touch-callout:none){
+  /* Safari iPhone: ô ngày có bề rộng tối thiểu riêng + chữ căn giữa ⇒ tràn viền phải (ảnh Viet 20/11/2026) */
+  input[type=date],input[type=time],input[type=month],input[type=datetime-local]{-webkit-appearance:none;appearance:none;text-align:left;min-height:42px;line-height:1.3}
+  input[type=date]::-webkit-date-and-time-value,input[type=time]::-webkit-date-and-time-value{text-align:left;margin:0}
+  .fld input[type=date],.fld input[type=time]{display:block;width:100%}
+}
+@media (max-width:720px){
+  #app header #wmBtn,#app header #mgrBtn,#app header #tourMob,#app header #rps-btn,#app header #mcBtn{display:none!important}
+
+  #app header > *{flex-shrink:0}
+  #main,#ov .modal,#ov2,#drwBody{overflow-wrap:anywhere}
+  #ov .modal .fld,#drwBody .fld{min-width:0}
+  .wm-tt{flex:0 1 auto;min-width:0}
+  .wm-tt b{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+}
+</style>
+<script id="v384-js">
+/* ═════════ v38.4 (20/11/2026) — phản hồi: CRM mở chậm, giao diện điện thoại rối, dải "Có nội dung chưa lưu" hiện sai, bỏ thông báo cập nhật ═════════
+   ① Thông báo cập nhật KHÔNG tự hiện nữa, bỏ nút "Có gì mới" (người dùng: "rối"). Số phiên bản ở cuối menu bên vẫn mở được lịch sử.
+   ② Điện thoại: thanh trên cùng chỉ còn logo · Tìm nhanh · Nhắc tôi · tên. Working Map, Trợ lý quản lý, Hướng dẫn, Lịch chung, Thống kê báo cáo ⇒ Thêm.
+      Working Map không tự mở khi vào app trên điện thoại (tải bản đồ + 5 tháng dữ liệu nhiều nhóm làm app mở rất lâu) — mở bằng Thêm ▸ Working Map.
+   ③ Mở app nhanh hơn khi bộ nhớ máy (IndexedDB) chậm: trước đây quá 1,8 giây là bỏ dữ liệu đã lưu, tải lại toàn bộ từ Google Sheet; nay dữ liệu lưu về muộn
+      vẫn được dùng ngay (hiện lịch, khách hàng), bản mới từ Sheet cập nhật sau. */
+(function(){
+"use strict";
+function L(vi,en){ try{ return TX(vi,en); }catch(_){ return vi; } }
+var I=window.V30_ICON||function(){ return ""; };
+function mob(){ try{ return matchMedia("(max-width:720px)").matches; }catch(_){ return false; } }
+
+/* ① thông báo cập nhật */
+try{ if(window.UPD){ UPD.active=function(){ return []; }; } }catch(_){}
+
+/* ② Thêm ▸ Tiện ích: Lịch chung · Thống kê báo cáo (nút trên thanh trên cùng đã ẩn ở điện thoại) */
+var mo=window.V30 && V30.more;
+if(mo) V30.more=function(){ var r=mo.apply(this,arguments);
+  try{
+    var box=document.getElementById("v30-more"); if(!box || !mob()) return r;
+    var g=null; [].forEach.call(box.querySelectorAll(".gt"),function(t){ if(!g && /Tiện ích|Tools|Utilities/i.test(t.textContent)) g=t.nextElementSibling; });
+    if(!g) return r;
+    [["mcBtn","calendar",L("Lịch chung","Shared calendar")],["rps-btn","chart",L("Thống kê","Report stats")]].forEach(function(x){
+      var src=document.getElementById(x[0]); if(!src || g.querySelector('[data-v384="'+x[0]+'"]')) return;
+      var b=document.createElement("button"); b.setAttribute("data-v384",x[0]); b.innerHTML=I(x[1])+"<span>"+x[2]+"</span>";
+      b.onclick=function(){ box.classList.remove("show"); var t=document.getElementById(x[0]); if(t) t.click(); };
+      g.appendChild(b);
+    });
+  }catch(_){}
+  return r; };
 })();
 </script>
 </body>

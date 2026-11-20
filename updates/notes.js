@@ -7,6 +7,17 @@
 function E(u){ u.en={ title:u.title, items:u.items.map(function(i){ return { title:i.title, text:i.text }; }) }; return u; }
 window.MMH_UPDATES = [
   E({
+    id:"2026-11-20-v38.4", version:"v38.4", date:"2026-11-20",
+    title:"Faster start on phones, cleaner top bar, no more wrong \"unsaved text\" bar",
+    summary:"The app opens faster on phones, the top bar on phones keeps only the essentials, and the yellow \"unsaved text\" bar no longer shows text you already saved. Update notices no longer pop up.",
+    items:[
+      { type:"fix", icon:"✓", title:"No more wrong \"unsaved text\" bar", text:"After you save a new field visit, the yellow bar <b>Unsaved text … Restore / Discard</b> no longer appears the next time you press <b>Add task</b>. It only shows when you really closed a form with text you had not saved, and it now shows the beginning of that text.", img:"" },
+      { type:"imp", icon:"⚡", title:"Faster start on phones", text:"On phones the app opens straight on your calendar (Working Map is under <b>More ▸ Working Map</b>). Saved data on the phone is used even when the phone storage answers slowly, and app files are reused instead of downloaded again.", img:"" },
+      { type:"imp", icon:"▭", title:"Cleaner top bar on phones", text:"The top bar keeps the logo, <b>Search</b>, <b>Mentions</b> and your name. Working Map, Manager assistant, Guide, Shared calendar and Report stats are under <b>More</b>. Date boxes on iPhone no longer run past the right edge.", img:"" },
+      { type:"imp", icon:"–", title:"Update notices no longer pop up", text:"The \"What's new\" pop-up and button are removed. The version number at the bottom of the side menu still opens the list of updates.", img:"" }
+    ]
+  }),
+  E({
     id:"2026-11-20-v38.3", version:"v38.3", date:"2026-11-20",
     title:"Thailand: other tasks show on every working day, Done keeps the dates",
     summary:"Other tasks now appear on every day from start to due date, marking a task Done no longer moves it to today, and finishing several tasks at once no longer shows \"The system is busy\".",

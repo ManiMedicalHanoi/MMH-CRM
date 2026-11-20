@@ -1,4 +1,4 @@
-/* MMH CRM — service worker (v34.4, 02/11/2026). Cho phép CÀI app (PWA) và mở nhanh hơn. Cùng nguyên tắc với Training Hub v6.4:
+/* MMH CRM — service worker (v34.4, 02/11/2026; v38.4 20/11/2026: file có ?v= lấy bản đã lưu, trang mở bằng bản đã lưu khi mạng chậm quá 4 giây). Cho phép CÀI app (PWA) và mở nhanh hơn. Cùng nguyên tắc với Training Hub v6.4:
    KHÔNG BAO GIỜ giữ dữ liệu cũ.
    · Trang, *.js, *.json, *.webmanifest của app: lấy từ mạng trước; mất mạng mới dùng bản đã lưu.
    · Ảnh / biểu tượng cùng trang: trả bản đã lưu cho nhanh RỒI tải bản mới về thay.
@@ -6,7 +6,7 @@
    Gỡ khẩn cấp: thay toàn bộ file này bằng 1 dòng
      self.addEventListener('install',()=>self.skipWaiting());self.addEventListener('activate',e=>e.waitUntil(self.registration.unregister()));
 */
-const V = 'mmh-crm-34.4';
+const V = 'mmh-crm-38.4';
 const SCOPE = new URL(self.registration.scope).pathname;
 const SHELL = [SCOPE, SCOPE + 'manifest.webmanifest', SCOPE + 'media/app/icon-192.png', SCOPE + 'media/app/apple-touch-icon.png'];
 
@@ -30,6 +30,25 @@ self.addEventListener('fetch', e => {
     e.respondWith(caches.match(r).then(m => m || net));
     return;
   }
-  /* trang + script + dữ liệu: mạng trước, hết mạng ⇒ bản đã lưu (trang chủ cho mọi đường dẫn trong app) */
+  /* v38.4 — file có số phiên bản trong đường dẫn (…js?v=2.4): mỗi phiên bản 1 đường dẫn riêng ⇒ không bao giờ cũ ⇒ lấy bản đã lưu ngay, không hỏi mạng */
+  if (/[?&]v=[\w.-]+/.test(u.search) && r.mode !== 'navigate') {
+    e.respondWith(caches.match(r).then(m => m || fresh(r)));
+    return;
+  }
+  /* v38.4 — mở trang: mạng chậm (quá 4 giây, sóng yếu) ⇒ dùng trang đã lưu cho nhanh, bản mới tải xong lưu lại cho lần mở sau */
+  if (r.mode === 'navigate') {
+    const net = fresh(r);
+    e.waitUntil(net.then(() => {}, () => {}));
+    e.respondWith(new Promise(ok => {
+      let done = false;
+      const give = res => { if (!done && res) { done = true; ok(res); } };
+      const fallback = () => caches.match(r, {ignoreSearch: true}).then(m => m || caches.match(SCOPE));
+      const t = setTimeout(() => fallback().then(m => give(m)), 4000);
+      net.then(res => { clearTimeout(t); give(res); },
+        () => { clearTimeout(t); fallback().then(m => give(m || Response.error())); });
+    }));
+    return;
+  }
+  /* script + dữ liệu không có số phiên bản: mạng trước, hết mạng ⇒ bản đã lưu */
   e.respondWith(fresh(r).catch(() => caches.match(r, {ignoreSearch: r.mode === 'navigate'}).then(m => m || (r.mode === 'navigate' ? caches.match(SCOPE) : undefined)).then(m => m || Response.error())));
 });

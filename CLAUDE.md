@@ -360,3 +360,14 @@ Kiến trúc & quy ước giống MMH Report Hub (repo `ManiMedicalHanoi/MMH-Rep
   "Finished on" (Due date · Today · Other date; mặc định = hạn khi hạn ≤ hôm nay, không thì hôm nay) ⇒ `revised` = ngày chọn (`q16Save` riêng cho Thái); danh sách quá hạn ▸ Completed giữ ngày hạn (`calOdDone`).
   Backend: Completed mà không có `revised` ⇒ hạn đã qua thì giữ ngày; `updateStatus` / `updateProgress` nhận `revised`. ③ `hubPost` lệnh ghi Other tasks của nhóm `ownTasks()` chạy LẦN LƯỢT, máy chủ bận ⇒ tự thử lại cùng rid
   (3 / 6 / 10 / 15 / 20 giây). Nhóm VN không đổi. Ảnh + ý kiến gốc: mmh-backend `docs/feedback/2026-11-19-yong-crm-thaid/`.
+- **v38.4 (20/11/2026, khối `v384-css` + `v384-js` cuối file, sửa khối `v368-js` + `kvWarm` / `boot` + `wmap.js` + `sw.js`) — phản hồi "CRM mở chậm, điện thoại rối"**:
+  ① **Bỏ thông báo cập nhật tự hiện + nút "Có gì mới"** (người dùng: "rối") — `UPD.active` trả rỗng, `#updBtn` / Thêm ▸ Có gì mới ẩn; số phiên bản cuối menu bên vẫn mở lịch sử. `updates/notes.js` vẫn thêm mục (email `UPM`, lịch sử), không cần ảnh.
+  ② Nháp v36.8: khung đóng chỉ bị ẨN (`#ov` / `#drw` bỏ lớp `on`, nội dung còn trong trang) ⇒ trước đây lưu task mới xong nháp KHÔNG bị xoá ⇒ lần sau "Thêm task" hiện dải vàng nội dung cũ (Viet báo).
+     Nay `ctx()` chỉ nhận form đang HIỆN (`shown`), dải vàng chỉ khi nháp có chữ thật (Plan / Task Result / lý do dừng, không tính account) + hiện đoạn đầu nội dung; dọn 1 lần nháp `…:nt` cũ (`mmh_draft_fix384`).
+  ③ Điện thoại (≤ 720px): thanh trên cùng chỉ còn logo · Tìm · Nhắc tôi · tên (`#wmBtn` `#mgrBtn` `#tourMob` `#rps-btn` `#mcBtn` ẩn — Thêm có Working Map, Trợ lý, Hướng dẫn, **Lịch chung**, **Thống kê**).
+     Nút mới cho thanh trên cùng: trên điện thoại đưa vào Thêm, không thêm vào header. Working Map KHÔNG tự mở khi vào app trên điện thoại (trừ link `#wm=` / đổi nhóm).
+     iPhone: ô ngày `-webkit-appearance:none` + căn trái (trước tràn viền phải), `text-size-adjust:100%`, chữ dài tự xuống dòng trong `#main` / hộp thoại.
+  ④ Mở nhanh: `kvWarm` quá 1,8 giây (IndexedDB iPhone chậm) ⇒ `KV.late`; dữ liệu về muộn ⇒ `KV.onLate` mở app bằng bundle đã lưu, bản từ Sheet về sau cập nhật tại chỗ.
+     `sw.js` (V `mmh-crm-38.4`): file có `?v=` lấy bản đã lưu (không hỏi mạng); mở trang mạng chậm > 4 giây ⇒ trang đã lưu, bản mới lưu cho lần sau.
+  Đo thử (backend giả lập trễ 3–4 giây): mở lại app có dữ liệu ⇒ lịch hiện < 1 giây; chụp ảnh nén ~0,3 giây, bấm lưu khung đóng ngay, ảnh gửi ngầm — chậm còn lại là thời gian Google (Drive + Sheet) xử lý.
+  ⚠️ Từ v38.4 `sw.js` trả bản ĐÃ LƯU cho mọi file có `?v=` ⇒ sửa file .js / .css riêng (tours.js, wmap.js, kpisop.js…) BẮT BUỘC tăng `?v=` trong index.html, không thì máy đã cài vẫn chạy bản cũ.
