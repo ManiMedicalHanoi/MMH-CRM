@@ -46,12 +46,15 @@ TOUR.add([
     { el:more("#updBtn"), t:V("Có gì mới","What's new"), x:V("Xem các bản cập nhật của app. <i>(Điện thoại: <b>Thêm ▸ Có gì mới</b>.)</i>","See the latest app updates. <i>(Phone: <b>More ▸ What's new</b>.)</i>") },
     { el:"#btnUser", t:V("Tài khoản","Account"), x:V("Bấm để xem tài khoản, đổi nhóm (quản lý) hoặc đăng xuất.","Click to see your account, switch team (managers) or sign out.") }
    ] },
- { id:"calendar", v:3, d:"2026-10-30", g:V("Lịch & công việc","Calendar & tasks"), ic:"cal", t:V("Lịch công việc","Work calendar"), x:V("Xem đi địa bàn, việc khác, công tác theo tuần / tháng.","Field visits, other tasks and trips by week or month."),
+ { id:"calendar", v:4, d:"2026-11-20", g:V("Lịch & công việc","Calendar & tasks"), ic:"cal", t:V("Lịch công việc","Work calendar"), x:V("Xem đi địa bàn, việc khác, công tác theo tuần / tháng.","Field visits, other tasks and trips by week or month."),
    steps:[
     { el:function(){ return TOUR.find("select.cal-vs") || par("[onclick=\"calView('week')\"]"); }, do:wk("cal"), t:V("Kiểu xem","View"), x:V("Đổi giữa <b>Tuần</b>, <b>Tháng</b> và <b>Danh sách</b>.","Switch between <b>Week</b>, <b>Month</b> and <b>List</b>.") },
     { el:"[onclick=\"calNav(0)\"]", t:V("Hôm nay","Today"), x:V("Dùng ‹ › để chuyển tuần, bấm <b>Hôm nay</b> để quay về tuần này.","Use ‹ › to move between weeks, <b>Today</b> to come back.") },
     { el:function(){ return par(".cal-chip[onclick=\"calToggle('v')\"]"); }, do:calTools, wait:200, t:V("Lọc loại việc","Filter by type"), x:V("Bật / tắt Đi địa bàn, Việc khác, Công tác, Đào tạo; ẩn việc đã xong.","Show or hide Field visits, Other tasks, Trips, Trainings; hide done tasks.") },
     { el:function(){ return par(".cal-chip[onclick=\"calSetPics('all')\"]"); }, t:V("Xem của ai","Whose tasks"), x:V("Team Leader và quản lý chọn được cả đội hoặc từng người.","Team leaders and managers can view the whole team or one person."), when:function(){ try{ return isMgrView(); }catch(_){ return true; } } },
+    { el:function(){ var a=document.querySelectorAll(".cal-card"); for(var i=0;i<a.length;i++){ var t=a[i].querySelector(".tg"); if(t && /other|việc khác/i.test(t.textContent)) return a[i]; } return null; },
+      when:function(){ try{ return isTH(); }catch(_){ return false; } },
+      t:V("Việc khác nhiều ngày","Other tasks over several days"), x:V("Việc có ngày bắt đầu và hạn khác nhau hiện trên <b>mọi ngày đang làm</b> (dải dd/mm→dd/mm). Bấm thẻ ▸ <b>Xong</b> ▸ chọn <b>Ngày hoàn thành</b> (ngày hạn · hôm nay · ngày khác) — việc không nhảy về hôm nay.","A task with different start and due dates shows on <b>every day you work on it</b> (dd/mm→dd/mm). Click the card ▸ <b>Done</b> ▸ pick <b>Finished on</b> (due date · today · other date) — the task no longer jumps to today.") },
     { el:function(){ return TOUR.find(".cal-add") || TOUR.find(".cal-wc.today .cal-wh") || TOUR.find(".cal-wh"); }, t:V("Thêm việc vào ngày","Add a task on a day"), x:V("Bấm <b>＋ Thêm việc</b> dưới một ngày để chọn: đi địa bàn hay việc khác.","Click <b>＋ Add task</b> under a day, then choose field visit or other task.") }
    ] },
  { id:"visit", v:10, d:"2026-11-17", g:V("Lịch & công việc","Calendar & tasks"), ic:"photo", t:V("Ghi nhanh đi địa bàn","Log a field visit"), x:V("Chọn account, ghi kết quả, lưu ngay.","Pick the account, write the result, save instantly."),

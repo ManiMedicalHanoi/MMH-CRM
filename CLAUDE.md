@@ -355,3 +355,8 @@ Kiến trúc & quy ước giống MMH Report Hub (repo `ManiMedicalHanoi/MMH-Rep
   ⇒ `wqLbl` / `wqErr` (bảng `WQ_ERR_EN`) dịch khi hiện cho nhóm Thái. Chữ mới trong hàng chờ / toast phải qua `TX`.
 - **v38.1 (19/11/2026, sửa khối `v343b-js` ④, Yong + người dùng: "finish cũng đừng nhảy ngày")**: task NHIỀU NGÀY (Finish > Start của dòng gốc) chuyển Completed ⇒ ô Ngày (Start) không đổi, finish gửi đi = Finish đang có (kẹp [Start, hôm nay]);
   khung `#v343-fin` hiện "Ngày kết thúc dự kiến" (`multi()` / `keepFin()`), "Hôm nay" / "Ngày khác" chỉ đổi Finish. Task 1 ngày giữ cách cũ (Start = Finish = ngày chọn). Lịch đặt task theo Start (`calItems` d = start).
+- **v38.2 (20/11/2026, khối `v382-css` + `v382-js` cuối file, Yong; backend crm-thai / crm-thai-dental 20/11) — Other tasks nhóm Thái (`isTH()`)**: ① lịch: việc Start < hạn / ngày xong hiện trên MỌI ngày trong khoảng
+  (≤ 31 ngày; dài hơn ⇒ ngày Start + ngày hạn), thẻ có "dd/mm→dd/mm" (bọc `calByDay` / `calCard`), ô tổng đếm mỗi việc 1 lần nếu khoảng chạm kỳ (`calSummary`). ② bấm Xong: Cập nhật nhanh có hàng `#v382-fin`
+  "Finished on" (Due date · Today · Other date; mặc định = hạn khi hạn ≤ hôm nay, không thì hôm nay) ⇒ `revised` = ngày chọn (`q16Save` riêng cho Thái); danh sách quá hạn ▸ Completed giữ ngày hạn (`calOdDone`).
+  Backend: Completed mà không có `revised` ⇒ hạn đã qua thì giữ ngày; `updateStatus` / `updateProgress` nhận `revised`. ③ `hubPost` lệnh ghi Other tasks của nhóm `ownTasks()` chạy LẦN LƯỢT, máy chủ bận ⇒ tự thử lại cùng rid
+  (3 / 6 / 10 / 15 / 20 giây). Nhóm VN không đổi. Ảnh + ý kiến gốc: mmh-backend `docs/feedback/2026-11-19-yong-crm-thaid/`.
