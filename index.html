@@ -4039,7 +4039,7 @@ function buildNav(){
     if(t.grp!==lastGrp){ h+='<div class="grp">'+t.grp+'</div>'; lastGrp=t.grp; }
     h+='<button class="nvi" data-t="'+t.id+'" onclick="go(\''+t.id+'\')"><span class="ic">'+t.ic+'</span><span class="lb">'+t.lb+'</span></button>';
   });
-  h+='<div style="flex:1"></div><div style="padding:10px;font-size:10.5px;color:var(--mute);line-height:1.5">MMH CRM v38.7<br>'+
+  h+='<div style="flex:1"></div><div style="padding:10px;font-size:10.5px;color:var(--mute);line-height:1.5">MMH CRM v38.8<br>'+
      (isMgmt()?'<a href="'+DRIVE_FOLDER+'" target="_blank">📁 Folder ảnh Drive</a>':"")+'</div>';
   $("side").innerHTML=h;
   /* ⭐ v4.5 — thanh dưới trượt ngang, đủ mọi mục, bỏ nút "Thêm" */
@@ -21027,7 +21027,7 @@ window.QS2={ open:qsOpen };
 </script>
 
 <!-- ⭐ v30.3 — THÔNG BÁO CẬP NHẬT (chép từ Report Hub): dữ liệu updates/notes.js · tự hiện 7 ngày · nút "Có gì mới" trên thanh trên cùng -->
-<script src="updates/notes.js?v=38.7"></script>
+<script src="updates/notes.js?v=38.8"></script>
 <style id="upd-css">
 #upd,#upd-zoom{--t-pri:var(--blue);--t-pri2:var(--blue-d);--t-ink:var(--navy);--t-soft:var(--pale);--t-line:var(--lb2);--t-bg:#F6F8FA;--mmh-blue:var(--blue);--mmh-navy:var(--navy)}
 
@@ -33154,6 +33154,9 @@ function tdChg(){
   return C;
 }
 function nHosp(L0){ var o={}; L0.forEach(function(x){ o[hk(x.h)||x.h]=1; }); return Object.keys(o).length; }
+/* v38.8: mỗi ý = 1 dòng chính (phần **…** in đậm) + các dòng con (ngăn bằng "\n") — người dùng: xuống dòng, gạch đầu dòng, bôi đậm mục */
+function ln(head,subs,tail){ subs=(subs||[]).filter(Boolean); return "**"+head+"**"+(tail||"")+(subs.length?"\n"+subs.join("\n"):""); }
+function cap1(s){ s=String(s||""); return s.charAt(0).toUpperCase()+s.slice(1); }
 function sumTd(){
   var t=T(), res=[], plan=[], src=t.opp==="fu"?"Tender Map":"Working Map";
   if(!(t.opp==="fu"?MS.fu:MS.opp)) return { wait:1, err:MS.fuErr||MS.oppErr };
@@ -33161,47 +33164,46 @@ function sumTd(){
   if(!C.moved.length&&!C.nw.length&&!C.upd.length) res.push(L("Không có cập nhật mới trên ","No new update on ")+src+L(" trong tuần."," this week."));
   else {
     if(C.moved.length){ var to={}; C.moved.forEach(function(x){ var k=stName(x.to); to[k]=(to[k]||0)+1; });
-      res.push(nHosp(C.moved)+L(" bệnh viện chuyển giai đoạn: "," accounts moved stage: ")+cnt(to).map(function(k){ return to[k]+" → "+lc(k); }).join(", ")+picSplit(C.moved.map(pOf))+"."); }
-    if(C.nw.length) res.push(C.nw.length+L(" cơ hội mới được thêm"," new opportunities added")+picSplit(C.nw.map(pOf))+".");
-    if(C.upd.length) res.push(C.upd.length+L(" cơ hội cập nhật tình hình, chưa đổi giai đoạn"," updates without a stage change")+picSplit(C.upd.map(pOf))+".");
+      res.push(ln(nHosp(C.moved)+L(" bệnh viện chuyển giai đoạn"," accounts moved stage"),cnt(to).map(function(k){ return to[k]+" → "+lc(k); }),picSplit(C.moved.map(pOf)))); }
+    if(C.nw.length) res.push(ln(C.nw.length+L(" cơ hội mới được thêm"," new opportunities added"),[],picSplit(C.nw.map(pOf))));
+    if(C.upd.length) res.push(ln(C.upd.length+L(" cơ hội cập nhật tình hình"," updates"),[],L(", chưa đổi giai đoạn",", no stage change")+picSplit(C.upd.map(pOf))));
   }
-  if(t.opp==="fu"&&(C.newPk||C.newRes)) res.push(L("Muasamcong / NPP trong tuần: ","Muasamcong / distributors this week: ")+C.newPk+L(" gói mới · "," new packages · ")+C.newRes+L(" gói có kết quả"," with results")+(C.maniWin?" (MANI "+L("trúng ","won ")+C.maniWin+")":"")+".");
+  if(t.opp==="fu"&&(C.newPk||C.newRes)) res.push(ln(L("Muasamcong / NPP trong tuần","Muasamcong / distributors this week"),[C.newPk+L(" gói mới"," new packages"),C.newRes+L(" gói có kết quả"," with results")+(C.maniWin?" (MANI "+L("trúng ","won ")+C.maniWin+")":"")]));
   var all=oppItems().filter(function(x){ return !x.naOnly&&picMatch(x.pic); }), open=all.filter(function(x){ return !isWon(x.stage)&&!isLost(x.stage)&&!isStop(x.stage); });
   var st={}; open.forEach(function(x){ var k=stName(x.stage,x.sn); st[k]=(st[k]||0)+1; });
-  res.push(L("Đang theo sát ","Following ")+open.length+L(" cơ hội"," opportunities")+" ("+L("công lập ","public ")+open.filter(function(x){ return x.ch==="pub"; }).length+" · "+L("tư nhân ","private ")+open.filter(function(x){ return x.ch==="pri"; }).length+")"+
-    (open.length?": "+cnt(st).slice(0,4).map(function(k){ return st[k]+" "+lc(k); }).join(", "):"")+".");
-  var B=estB(), BL=[["won",L("đã trúng / hợp đồng đang chạy","won / running contracts")],["renew",L("gói kế tiếp (duy trì)","next package (renewal)")],["bid",L("đang dự thầu","bidding")],
-    ["quote",L("đã gửi báo giá","quoted")],["early",L("các bước sớm","early stages")],["pri",L("kênh tư nhân","private channel")]];
-  res.push(B.tot?L("Doanh số ước tính ","Estimated sales ")+S.fy+" ≈ "+vnd(B.tot)+" VND: "+BL.filter(function(a){ return B[a[0]]>0; }).map(function(a){ return a[1]+" "+vnd(B[a[0]]); }).join(" · ")+".":L("Chưa có doanh số ước tính trên ","No estimated sales on ")+src+".");
+  res.push(ln(L("Đang theo sát ","Following ")+open.length+L(" cơ hội"," opportunities"),cnt(st).map(function(k){ return st[k]+" "+lc(k); }),
+    " ("+L("công lập ","public ")+open.filter(function(x){ return x.ch==="pub"; }).length+" · "+L("tư nhân ","private ")+open.filter(function(x){ return x.ch==="pri"; }).length+")"));
+  var B=estB(), BL=[["won",L("Đã trúng / hợp đồng đang chạy","Won / running contracts")],["renew",L("Gói kế tiếp (duy trì)","Next package (renewal)")],["bid",L("Đang dự thầu","Bidding")],
+    ["quote",L("Đã gửi báo giá","Quoted")],["early",L("Các bước sớm","Early stages")],["pri",L("Kênh tư nhân","Private channel")]];
+  res.push(B.tot?ln(L("Doanh số ước tính ","Estimated sales ")+S.fy+" ≈ "+vnd(B.tot)+" VND",BL.filter(function(a){ return B[a[0]]>0; }).map(function(a){ return a[1]+": "+vnd(B[a[0]]); })):L("Chưa có doanh số ước tính trên ","No estimated sales on ")+src+".");
   var na=naRows().filter(function(o){ return picMatch(o.pic)&&inR(o.decAt,R.w,R.we); });
   if(na.length){ var a=na.filter(function(o){ return !naIsSku(o); }), s=na.filter(naIsSku), nm=function(L0){ return L0.slice(0,3).map(naName).join(", ")+(L0.length>3?"…":""); };
-    res.push(L("Mở mới được duyệt trong tuần: ","Approved this week: ")+[a.length?a.length+" account ("+nm(a)+")":"",s.length?s.length+" SKU ("+nm(s)+")":""].filter(Boolean).join(" · ")+"."); }
+    res.push(ln(L("Mở mới được duyệt trong tuần","Approved this week"),[a.length?a.length+" account: "+nm(a):"",s.length?s.length+" SKU: "+nm(s):""])); }
   else res.push(L("Không có mở mới / SKU mới được duyệt trong tuần.","No new account / SKU approved this week."));
   if(!t.od && MS.ord){ var O=odData().wk, ok=O.filter(function(g){ return g.ap!=="wait"; }).length, amt=O.reduce(function(s,g){ return s+g.amt; },0);
-    res.push(O.length?L("Đơn hàng mới trong tuần: ","New orders this week: ")+O.length+L(" đơn · "," orders · ")+vnd(amt)+" VND ("+ok+L(" đã xác nhận"," confirmed")+(O.length-ok?" · "+(O.length-ok)+L(" chờ xác nhận"," waiting"):"")+")"+picSplit(O.map(pOf))+".":L("Không có đơn hàng mới trong tuần.","No new order this week.")); }
+    res.push(O.length?ln(L("Đơn hàng mới trong tuần: ","New orders this week: ")+O.length+L(" đơn · "," orders · ")+vnd(amt)+" VND",[ok+L(" đã xác nhận"," confirmed"),O.length-ok?(O.length-ok)+L(" chờ xác nhận"," waiting"):""],picSplit(O.map(pOf))):L("Không có đơn hàng mới trong tuần.","No new order this week.")); }
   var due=open.filter(function(x){ return inR(x.due,R.nx,R.ne); });
   if(due.length){ var dS={}; due.forEach(function(x){ var k=stName(x.stage,x.sn); dS[k]=(dS[k]||0)+1; });
-    plan.push(L("Mốc dự kiến tuần tới: ","Milestones next week: ")+due.length+L(" cơ hội"," opportunities")+" ("+cnt(dS).map(function(k){ return dS[k]+" "+lc(k); }).join(", ")+")"+picSplit(due.map(pOf))+"."); }
+    plan.push(ln(L("Mốc dự kiến tuần tới: ","Milestones next week: ")+due.length+L(" cơ hội"," opportunities"),cnt(dS).map(function(k){ return dS[k]+" "+lc(k); }),picSplit(due.map(pOf)))); }
   else plan.push(L("Không có mốc dự kiến trong tuần tới trên ","No milestone next week on ")+src+".");
-  var bid=open.filter(function(x){ return x.stage===5||x.stage===6; }); if(bid.length) plan.push(L("Theo dõi ","Watch ")+bid.length+L(" gói đang dự thầu"," packages in bidding")+picSplit(bid.map(pOf))+".");
+  var bid=open.filter(function(x){ return x.stage===5||x.stage===6; }); if(bid.length) plan.push(ln(L("Theo dõi ","Watch ")+bid.length+L(" gói đang dự thầu"," packages in bidding"),[],picSplit(bid.map(pOf))));
   var stale=open.filter(function(x){ return x.at&&d10(x.at)<addDays(todayISO(),-30); });
-  if(stale.length) plan.push(stale.length+L(" cơ hội chưa cập nhật trên 30 ngày — cập nhật trên "," opportunities not updated for 30+ days — update on ")+src+picSplit(stale.map(pOf))+".");
+  if(stale.length) plan.push(ln(stale.length+L(" cơ hội chưa cập nhật trên 30 ngày"," opportunities not updated for 30+ days"),[],L(" — cập nhật trên "," — update on ")+src+picSplit(stale.map(pOf))));
   return { res:res, plan:plan };
 }
 function sumFc(){
   var A=fcAgg(); if(!A) return { wait:1, err:MT.nppErr?L("Chưa đọc được file Turnover: ","Turnover file not available: ")+MT.nppErr:"" };
   if(A.none) return { res:[L("PIC này không phụ trách NPP nào trong file Turnover.","This PIC has no distributor in the Turnover file.")], plan:[] };
   var res=[], plan=[];
-  res.push(L("Tháng ","")+ymLb(A.ym)+": "+(A.closed?L("thực tế ","actual "):L("A/F ","forecast "))+usd(A.m.v)+L(" / budget "," vs budget ")+usd(A.m.bm)+" USD ("+pTx(pct(A.m.v,A.m.bm))+")"+(!A.closed&&A.m.ac?L(" — đã có thực tế ","; actual so far ")+usd(A.m.ac):"")+".");
-  if(A.act&&A.act.bm) res.push(L("Thực tế đến nay","Actual to date")+(A.act.last?" (→ "+ymLb(A.act.last)+")":"")+": "+usd(A.act.v)+L(" / "," vs budget ")+usd(A.act.bm)+" USD ("+pTx(pct(A.act.v,A.act.bm))+").");
+  res.push(ln(L("Tháng ","")+ymLb(A.ym),[(A.closed?L("Thực tế ","Actual "):L("A/F ","Forecast "))+usd(A.m.v)+L(" / budget "," vs budget ")+usd(A.m.bm)+" USD ("+pTx(pct(A.m.v,A.m.bm))+")",
+    !A.closed&&A.m.ac?"Actual sales "+usd(A.m.ac)+" USD":""]));
+  if(A.act&&A.act.bm) res.push(ln(L("Thực tế đến nay","Actual to date")+(A.act.last?" (→ "+ymLb(A.act.last)+")":""),[],": "+usd(A.act.v)+L(" / "," vs budget ")+usd(A.act.bm)+" USD ("+pTx(pct(A.act.v,A.act.bm))+")"));
   var withB=(A.byD||[]).filter(function(x){ return x.m.bm>0; }), low=withB.filter(function(x){ return pct(x.m.v,x.m.bm)<0.9; });
-  if(withB.length>1||low.length) res.push(low.length?L("NPP dưới 90% budget tháng: ","Under 90% of monthly budget: ")+low.map(function(x){ return x.label+" "+pTx(pct(x.m.v,x.m.bm)); }).join(" · ")+".":L("Mọi NPP đạt từ 90% budget tháng trở lên.","Every distributor is at 90%+ of the monthly budget."));
-  res.push(L("Lũy kế A/F ","Year to date (")+ms0(A)+L(": ","): ")+pTx(pct(A.ytd.v,A.ytd.bm))+L(" · dự báo cả "," of budget · full ")+S.fy+L(": "," forecast: ")+pTx(pct(A.fy.v,A.fy.bm))+".");
+  if(withB.length>1||low.length) res.push(low.length?ln(L("NPP dưới 90% budget tháng","Under 90% of monthly budget"),low.map(function(x){ return x.label+" "+pTx(pct(x.m.v,x.m.bm)); })):L("Mọi NPP đạt từ 90% budget tháng trở lên.","Every distributor is at 90%+ of the monthly budget."));
+  res.push(ln(L("Lũy kế A/F ","Year to date ")+ms0(A),[],": "+pTx(pct(A.ytd.v,A.ytd.bm))+L(" · dự báo cả "," of budget · full ")+S.fy+L(": "," forecast: ")+pTx(pct(A.fy.v,A.fy.bm))));
   var ms=A.msN||A.ms, i=ms.indexOf(A.ym), nx=i>=0&&i<ms.length-1?ms[i+1]:"";
-  if(nx){ try{ var B=mtNppAgg({ labels:nppLabels(), name:T().vi, all:true },nx); if(B&&B.m) plan.push(L("Tháng tới ","Next month, ")+ymLb(nx)+": forecast "+usd(B.m.v)+L(" / budget "," vs budget ")+usd(B.m.bm)+" USD ("+pTx(pct(B.m.v,B.m.bm))+")."); }catch(_){} }
-  if(low.length) plan.push(L("Cần giải trình / kế hoạch bù cho: ","Explain / recover: ")+low.map(function(x){ return x.label; }).join(", ")+".");
-  if(MS.ex&&MS.ex.list){ if(MS.ex.list.length){ var e=MS.ex.list[0]; plan.push(L("Giải trình forecast mới nhất: ","Latest forecast explanation: ")+(e.t||e.l||("Ver "+e.v))+"."); }
-    else plan.push(L("Chưa có giải trình forecast trong file Turnover.","No forecast explanation in the Turnover file yet.")); }
+  if(nx){ try{ var B=mtNppAgg({ labels:nppLabels(), name:T().vi, all:true },nx); if(B&&B.m) plan.push(ln(L("Tháng tới ","Next month ")+ymLb(nx),["Forecast "+usd(B.m.v)+L(" / budget "," vs budget ")+usd(B.m.bm)+" USD ("+pTx(pct(B.m.v,B.m.bm))+")"])); }catch(_){} }
+  if(low.length) plan.push(ln(L("Cần giải trình / kế hoạch bù","Explain / recover"),low.map(function(x){ return x.label; })));
   return { res:res, plan:plan };
 }
 function tripsOf(pic,a,b){ var A0=(window.TFT&&TFT.state&&TFT.state.trips)||[]; return A0.filter(function(x){ return mtPicEq(x.pic,pic)&&d10(x.start)<=b&&d10(x.planned||x.start)>=a; }); }
@@ -33211,16 +33213,19 @@ function sumVis(){
   if(!MS.vf && !(terrRows()||[]).length) return { wait:1, err:MS.vfErr };
   var V=visData(), R=wkR(), res=[], plan=[], anyTrip=false, hasT=!!(window.TFT&&TFT.state&&TFT.state.trips);
   V.forEach(function(v){
-    res.push(v.pic+": "+(v.cur.length?v.cur.length+L(" lượt / "," visits / ")+v.acc+L(" khách"," accounts")+" ("+v.done+L(" hoàn thành"," completed")+(v.nores?", "+v.nores+L(" chưa ghi kết quả"," without result"):"")+")":L("không có lượt đi địa bàn","no visit"))+
-      (v.k.t||v.k.n?" · "+L("viếng thăm tính KPI ","KPI visits ")+ymLb(v.k.ym)+": "+v.k.n+(v.k.t?"/"+v.k.t:""):"")+".");
-    var tw=tripsOf(v.pic,R.w,R.we); if(tw.length) res.push(v.pic+": "+L("công tác ","business trip ")+tw.map(tripTx).join("; ")+".");
-    if(!v.nxt.length) plan.push(v.pic+": "+L("chưa có kế hoạch đi địa bàn tuần tới trên CRM.","no visit planned for next week in the CRM."));
+    var tw=tripsOf(v.pic,R.w,R.we);
+    res.push(v.cur.length?ln(v.pic+":",[v.done+L(" hoàn thành"," completed"),v.nores?v.nores+L(" chưa ghi kết quả"," without result"):"",
+        v.k.t||v.k.n?L("Viếng thăm tính KPI ","KPI visits ")+ymLb(v.k.ym)+": "+v.k.n+(v.k.t?"/"+v.k.t:""):"",tw.length?L("Công tác: ","Business trip: ")+tw.map(tripTx).join("; "):""],
+        " "+v.cur.length+L(" lượt / "," visits / ")+v.acc+L(" khách"," accounts"))
+      :ln(v.pic+":",[tw.length?L("Công tác: ","Business trip: ")+tw.map(tripTx).join("; "):""]," "+L("không có lượt đi địa bàn","no visit")));
+    var tn=tripsOf(v.pic,R.nx,R.ne); if(tn.length) anyTrip=true;
+    var tl=tn.length?L("Công tác: ","Business trip: ")+tn.map(tripTx).join("; "):"";
+    if(!v.nxt.length) plan.push(ln(v.pic+":",[tl]," "+L("chưa có kế hoạch đi địa bàn tuần tới trên CRM","no visit planned for next week in the CRM")));
     else { var pv={}, ty={}, pr={}, ac={};
       v.nxt.forEach(function(x){ var a=parseAcc(x.account); ac[a.name]=1; if(a.province) pv[a.province]=(pv[a.province]||0)+1; if(a.type) ty[a.type]=(ty[a.type]||0)+1;
         String(x.product||"").split(/[,;\n]/).map(function(s){ return s.trim(); }).filter(Boolean).forEach(function(p){ pr[p]=(pr[p]||0)+1; }); });
-      plan.push(v.pic+": "+v.nxt.length+L(" lượt / "," visits / ")+Object.keys(ac).length+L(" khách"," accounts")+(cnt(pv).length?" — "+topTx(pv,4):"")+
-        (cnt(ty).length?" · "+L("nhóm khách: ","account types: ")+topTx(ty,3):"")+(cnt(pr).length?" · "+L("sản phẩm: ","products: ")+cnt(pr).slice(0,4).join(", "):"")+"."); }
-    var tn=tripsOf(v.pic,R.nx,R.ne); if(tn.length){ anyTrip=true; plan.push(v.pic+": "+L("công tác ","business trip ")+tn.map(tripTx).join("; ")+"."); }
+      plan.push(ln(v.pic+":",[cnt(pv).length?L("Tỉnh: ","Provinces: ")+topTx(pv,4):"",cnt(ty).length?L("Nhóm khách: ","Account types: ")+topTx(ty,3):"",
+        cnt(pr).length?L("Sản phẩm: ","Products: ")+cnt(pr).slice(0,4).join(", "):"",tl]," "+v.nxt.length+L(" lượt / "," visits / ")+Object.keys(ac).length+L(" khách"," accounts"))); }
   });
   if(hasT&&!anyTrip) plan.push(L("Không có kế hoạch công tác tuần tới.","No business trip planned for next week."));
   return { res:res, plan:plan };
@@ -33229,31 +33234,35 @@ function sumPr(){
   if(!MS.pres) return { wait:1 };
   var R=wkR(), all=MS.pres.filter(function(r){ return picMatch(r.pic)&&!/^TEST/i.test(r.pic||""); }), res=[], plan=[];
   var cur=all.filter(function(r){ return inR(r.day,R.w,R.we); }), nxt=all.filter(function(r){ return inR(r.day,R.nx,R.ne); });
-  var one=function(r){ return r.pic+" "+dd(r.day)+" "+(parseAcc(r.account).name||r.account); };
-  if(cur.length){ res.push(L("Tuần này: ","This week: ")+cur.length+L(" buổi — "," sessions — ")+cur.slice(0,3).map(function(r){ return one(r)+" ("+nn(r.actual)+"/"+nn(r.target)+L(" người"," people")+")"; }).join("; ")+(cur.length>3?"…":"")+".");
-    var nr=cur.filter(function(r){ return !String(r.review||"").trim(); }).length; if(nr) res.push(nr+L(" buổi chưa có review."," sessions without a review.")); }
+  var one=function(r){ return r.pic+" · "+dd(r.day)+" · "+(parseAcc(r.account).name||r.account); };
+  if(cur.length){ var nr=cur.filter(function(r){ return !String(r.review||"").trim(); }).length;
+    res.push(ln(L("Tuần này: ","This week: ")+cur.length+L(" buổi"," sessions"),cur.slice(0,6).map(function(r){ return one(r)+" ("+nn(r.actual)+"/"+nn(r.target)+L(" người"," people")+")"; }).concat(nr?[nr+L(" buổi chưa có review"," sessions without a review")]:[]))); }
   else res.push(L("Không có buổi thuyết trình trong tuần.","No presentation this week."));
-  plan.push(nxt.length?L("Tuần tới: ","Next week: ")+nxt.length+L(" buổi — "," sessions — ")+nxt.slice(0,4).map(one).join("; ")+(nxt.length>4?"…":"")+".":L("Không có kế hoạch thuyết trình tuần tới.","No presentation planned for next week."));
+  plan.push(nxt.length?ln(L("Tuần tới: ","Next week: ")+nxt.length+L(" buổi"," sessions"),nxt.slice(0,6).map(one)):L("Không có kế hoạch thuyết trình tuần tới.","No presentation planned for next week."));
   return { res:res, plan:plan };
 }
 function sumOd(){
   if(!MS.ord) return { wait:1, err:MS.ordErr };
   var D=odData(), sA=function(L0){ return L0.reduce(function(s,g){ return s+g.amt; },0); }, isW=function(g){ return g.ap==="wait"; }, notW=function(g){ return g.ap!=="wait"; };
   var wW=D.wk.filter(isW), mOk=D.mo.filter(notW), mW=D.mo.filter(isW);
-  return { res:[ D.wk.length?L("Tuần này: ","This week: ")+D.wk.length+L(" đơn · "," orders · ")+vnd(sA(D.wk))+" VND ("+(D.wk.length-wW.length)+L(" đã xác nhận"," confirmed")+(wW.length?" · "+wW.length+L(" chờ HOD"," waiting for HOD"):"")+")"+picSplit(D.wk.map(pOf))+".":L("Không có đơn hàng mới trong tuần.","No new order this week."),
-      ymLb(D.ym)+": "+mOk.length+L(" đơn đã xác nhận · "," confirmed orders · ")+vnd(sA(mOk))+" VND." ],
-    plan:[ mW.length?mW.length+L(" đơn chờ HOD xác nhận"," orders waiting for HOD")+" ("+vnd(sA(mW))+" VND)"+picSplit(mW.map(pOf))+".":L("Không có đơn chờ xác nhận.","No order waiting for approval.") ] };
+  return { res:[ D.wk.length?ln(L("Tuần này: ","This week: ")+D.wk.length+L(" đơn · "," orders · ")+vnd(sA(D.wk))+" VND",[(D.wk.length-wW.length)+L(" đã xác nhận"," confirmed"),wW.length?wW.length+L(" chờ HOD"," waiting for HOD"):""],picSplit(D.wk.map(pOf))):L("Không có đơn hàng mới trong tuần.","No new order this week."),
+      ln(ymLb(D.ym)+":",[]," "+mOk.length+L(" đơn đã xác nhận · "," confirmed orders · ")+vnd(sA(mOk))+" VND") ],
+    plan:[ mW.length?ln(mW.length+L(" đơn chờ HOD xác nhận"," orders waiting for HOD"),[]," ("+vnd(sA(mW))+" VND)"+picSplit(mW.map(pOf))):L("Không có đơn chờ xác nhận.","No order waiting for approval.") ] };
 }
 function sumOf(k){ return k==="fc"?sumFc():k==="td"?sumTd():k==="od"?sumOd():k==="vis"?sumVis():k==="pr"?sumPr():null; }
 /* kế hoạch tuần trước = phần Kế hoạch tuần tới đã tự tổng hợp trong biên bản tuần trước */
 function prevPlan(k){
   var P=MS.prev[addDays(wk(),-7)], s=P&&P.snap&&P.snap.sum&&P.snap.sum[k]; if(!s||!s.plan||!s.plan.length) return null;
   var o=teamPics().filter(function(p){ return MS.pic&&!mtPicEq(p,MS.pic); });
-  var L0=s.plan.filter(function(x){ return !o.some(function(p){ return String(x).indexOf(p+":")===0; }); });
+  var L0=s.plan.filter(function(x){ var y=String(x).replace(/\*\*/g,""); return !o.some(function(p){ return y.indexOf(p+":")===0; }); });
   return L0.length?L0:null;
 }
+/* dòng tóm tắt ⇒ <li>: "**đậm**" ⇒ <b>, dòng sau "\n" ⇒ danh sách con */
+function bh(h){ return h.replace(/\*\*([\s\S]+?)\*\*/g,"<b>$1</b>"); }
+function liH(s,css){ var a=String(s).split("\n"), sub=a.slice(1).filter(function(x){ return x.trim(); });
+  return '<li'+(css&&css.li?' style="'+css.li+'"':'')+'>'+bh(E(a[0]))+(sub.length?'<ul'+(css&&css.ul?' style="'+css.ul+'"':'')+'>'+sub.map(function(x){ return '<li>'+bh(E(x))+'</li>'; }).join("")+'</ul>':'')+'</li>'; }
 function sumHtml(k,x){
-  var ul=function(L0){ return '<ul>'+L0.map(function(s){ return '<li>'+E(s)+'</li>'; }).join("")+'</ul>'; };
+  var ul=function(L0){ return '<ul>'+L0.map(function(s){ return liH(s); }).join("")+'</ul>'; };
   if(!x||x.wait) return x&&x.err?'<div class="mts-err">'+E(x.err)+'</div>':'<div class="mts-load">'+E(L("Đang tổng hợp số liệu…","Summarising…"))+'</div>';
   var pv=prevPlan(k);
   return (pv?'<details class="v386-pv"><summary>'+E(L("Kế hoạch tuần trước","Last week's plan"))+' <span>'+E(rng(addDays(wk(),-7)))+'</span></summary>'+ul(pv)+'</details>':"")+
@@ -33524,7 +33533,7 @@ function noteM(lb,v,css){ v=String(v||"").trim(); return v?'<div style="'+(css||
 var MF="font-family:Calibri,Aptos,Arial,sans-serif;font-size:14px;color:#000;line-height:1.5";
 function mWk(w){ var a=new Date(w+"T00:00:00"), z=new Date(addDays(w,6)+"T00:00:00");
   return a.getDate()+(a.getMonth()!==z.getMonth()?" "+MON[a.getMonth()]:"")+" – "+z.getDate()+" "+MON[z.getMonth()]+" "+z.getFullYear(); }
-function mUl(L0){ return '<ul style="margin:2px 0 8px;padding-left:22px">'+L0.map(function(x){ return '<li>'+E(x)+'</li>'; }).join("")+'</ul>'; }
+function mUl(L0){ return '<ul style="margin:2px 0 8px;padding-left:22px">'+L0.map(function(x){ return liH(x,{ li:"margin:2px 0", ul:"margin:2px 0 4px;padding-left:20px;list-style-type:circle" }); }).join("")+'</ul>'; }
 function mailHtml(d,s,extra){
   var t=T(), w=s.week||wk(), me=S.user.pic, title=(ROLES[me]||{}).title||"", SS=secs(), no=0, SM=s.sumEn||{};
   var h='<div style="'+MF+'"><p style="margin:0 0 12px">Dear Tuyen san,</p>'+
@@ -33534,7 +33543,7 @@ function mailHtml(d,s,extra){
     h+='<p style="margin:16px 0 4px"><b>'+no+'. '+E(sx.en)+'</b></p>';
     if(k==="oth"){ h+=String(d.other||"").trim()?'<p style="margin:0 0 8px;white-space:pre-wrap">'+mtE(d.other)+'</p>':'<p style="margin:0 0 8px">No other matters.</p>'; return; }
     var sm=SM[k];
-    if(sm){ h+='<p style="margin:4px 0 0"><u>Results this week</u></p>'+mUl(sm.res)+'<p style="margin:4px 0 0"><u>Plan for next week</u></p>'+(sm.plan.length?mUl(sm.plan):'<p style="margin:0 0 8px">—</p>'); }
+    if(sm){ h+='<p style="margin:6px 0 0"><b><u>Results this week</u></b></p>'+mUl(sm.res)+'<p style="margin:6px 0 0"><b><u>Plan for next week</u></b></p>'+(sm.plan.length?mUl(sm.plan):'<p style="margin:0 0 8px">—</p>'); }
     else h+='<p style="margin:0 0 8px">Data not available.</p>';
     h+=notesM(k,d);
   });
@@ -33545,7 +33554,7 @@ function notesM(k,d){
   var o=[]; if(String(d[k+"Note"]||"").trim()) o.push(["General",d[k+"Note"]]);
   teamPics().forEach(function(p){ var v=d[k+"N_"+pk(p)]; if(String(v||"").trim()) o.push([p,v]); });
   if(String(d[k+"Prev"]||"").trim()) o.push(["Results (typed)",d[k+"Prev"]]); if(String(d[k+"Plan"]||"").trim()) o.push(["Plan (typed)",d[k+"Plan"]]);
-  return o.length?'<p style="margin:4px 0 0"><u>Meeting notes</u></p><ul style="margin:2px 0 8px;padding-left:22px">'+o.map(function(x){ return '<li>'+E(x[0])+': '+mtE(x[1])+'</li>'; }).join("")+'</ul>':"";
+  return o.length?'<p style="margin:6px 0 0"><b><u>Meeting notes</u></b></p><ul style="margin:2px 0 8px;padding-left:22px">'+o.map(function(x){ return '<li><b>'+E(x[0])+':</b> '+mtE(x[1])+'</li>'; }).join("")+'</ul>':"";
 }
 function subj(w){ var t=T(); return "[MMH "+t.mt+"] Weekly team meeting minutes – "+mWk(w); }
 function rcp(){
@@ -33715,6 +33724,7 @@ renderMeet=function(){
 .v386-cols h5 span{font-weight:400;font-size:12px;color:#5B6B7D}
 .v386-sum ul{margin:0;padding-left:18px;font-size:13.5px;line-height:1.5;color:#1F2D3D}
 .v386-sum li{margin:3px 0}
+.v386-sum li ul{margin:2px 0 4px;padding-left:18px;list-style-type:circle}.v386-sum li li{margin:1px 0}.v386-sum b{color:var(--t-ink,#003047);font-weight:700}
 .v386-pv{border:1px dashed #C3CDD8;border-radius:10px;padding:6px 12px;margin-bottom:10px;background:#FAFBFC}
 .v386-pv summary{cursor:pointer;font-size:12.5px;font-weight:700;color:#41566F}
 .v386-pv summary span{font-weight:400;color:#7A8794}
