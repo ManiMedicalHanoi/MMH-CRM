@@ -7,6 +7,14 @@
 function E(u){ u.en={ title:u.title, items:u.items.map(function(i){ return { title:i.title, text:i.text }; }) }; return u; }
 window.MMH_UPDATES = [
   E({
+    id:"2026-11-21-v38.7", version:"v38.7", date:"2026-11-21",
+    title:"Team meeting minutes e-mail in plain English",
+    summary:"The team meeting minutes e-mail is now a short, formal letter in English.",
+    items:[
+      { type:"imp", icon:"✉", title:"Plain, formal minutes e-mail", text:"<b>Weekly meeting</b> ▸ <b>Send minutes</b>: \"Dear Tuyen san, This is the summary of …\", then for each part <b>Results this week</b>, <b>Plan for next week</b> and <b>Meeting notes</b> as short bullet points. No colours, no tables.", img:"" }
+    ]
+  }),
+  E({
     id:"2026-11-21-v38.6", version:"v38.6", date:"2026-11-21",
     title:"Team meeting: automatic weekly summary, notes per PIC, Thursday reminder",
     summary:"Each part of the Surgical / Dental team meeting now writes \"This week's results\" and \"Plan for next week\" by itself from the CRM and Tender Map. In the meeting you only take notes, per PIC, autosaved and shared with the team.",

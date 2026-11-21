@@ -4039,7 +4039,7 @@ function buildNav(){
     if(t.grp!==lastGrp){ h+='<div class="grp">'+t.grp+'</div>'; lastGrp=t.grp; }
     h+='<button class="nvi" data-t="'+t.id+'" onclick="go(\''+t.id+'\')"><span class="ic">'+t.ic+'</span><span class="lb">'+t.lb+'</span></button>';
   });
-  h+='<div style="flex:1"></div><div style="padding:10px;font-size:10.5px;color:var(--mute);line-height:1.5">MMH CRM v38.6<br>'+
+  h+='<div style="flex:1"></div><div style="padding:10px;font-size:10.5px;color:var(--mute);line-height:1.5">MMH CRM v38.7<br>'+
      (isMgmt()?'<a href="'+DRIVE_FOLDER+'" target="_blank">📁 Folder ảnh Drive</a>':"")+'</div>';
   $("side").innerHTML=h;
   /* ⭐ v4.5 — thanh dưới trượt ngang, đủ mọi mục, bỏ nút "Thêm" */
@@ -21027,7 +21027,7 @@ window.QS2={ open:qsOpen };
 </script>
 
 <!-- ⭐ v30.3 — THÔNG BÁO CẬP NHẬT (chép từ Report Hub): dữ liệu updates/notes.js · tự hiện 7 ngày · nút "Có gì mới" trên thanh trên cùng -->
-<script src="updates/notes.js?v=38.6"></script>
+<script src="updates/notes.js?v=38.7"></script>
 <style id="upd-css">
 #upd,#upd-zoom{--t-pri:var(--blue);--t-pri2:var(--blue-d);--t-ink:var(--navy);--t-soft:var(--pale);--t-line:var(--lb2);--t-bg:#F6F8FA;--mmh-blue:var(--blue);--mmh-navy:var(--navy)}
 
@@ -32553,7 +32553,10 @@ window.V379={ LOC:LOC, fixPhoto:fixPhoto };
    "Theo từng PIC" = màn cũ (localStorage mmh_mts_mode = pic). */
 (function(){
 if(typeof renderMeet!=="function") return;
-var L=TX, E=function(s){ return esc(s==null?"":String(s)); };
+/* v38.7: FEN = dựng tóm tắt bằng tiếng Anh cho email (email biên bản luôn tiếng Anh) */
+var FEN=false, L=function(vi,en){ return FEN?en:TX(vi,en); }, E=function(s){ return esc(s==null?"":String(s)); };
+function enOn(){ try{ return FEN||isTH(); }catch(_){ return FEN; } }
+var MON=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
 var LSM="mmh_mts_mode";
 var CFGS={
   surgical:{ k:"surgical", vi:"Surgical Việt Nam", en:"Surgical Vietnam", tp:"Team Surgical", order:["Viet Ha","Khang"], opp:"fu", od:false, mt:"Surgical",
@@ -32586,7 +32589,7 @@ function idOf(w){ return mtId(w||wk(),T().tp); }
 function nn(v){ v=+v; return isFinite(v)?v:0; }
 function usd(v){ return Math.round(nn(v)).toLocaleString("en-US"); }
 function num1(v){ v=nn(v); return (Math.round(v*10)/10).toLocaleString("en-US"); }
-function vnd(v){ v=nn(v); if(!v) return "—"; if(Math.abs(v)>=1e9) return (Math.round(v/1e8)/10).toLocaleString("vi-VN")+" tỷ"; if(Math.abs(v)>=1e6) return Math.round(v/1e6).toLocaleString("vi-VN")+" tr"; return Math.round(v).toLocaleString("vi-VN"); }
+function vnd(v){ v=nn(v); if(!v) return "—"; if(enOn()){ if(Math.abs(v)>=1e9) return (Math.round(v/1e8)/10).toLocaleString("en-US")+" bn"; if(Math.abs(v)>=1e6) return Math.round(v/1e6).toLocaleString("en-US")+" M"; return Math.round(v).toLocaleString("en-US"); } if(Math.abs(v)>=1e9) return (Math.round(v/1e8)/10).toLocaleString("vi-VN")+" tỷ"; if(Math.abs(v)>=1e6) return Math.round(v/1e6).toLocaleString("vi-VN")+" tr"; return Math.round(v).toLocaleString("vi-VN"); }
 function pct(a,b){ return b>0?a/b:null; }
 function pTx(p){ return p==null?"—":Math.round(p*100)+"%"; }
 function tone(p){ return p==null?"low":p>1.2?"top":p>=1?"ok":p>=0.9?"mid":"low"; }
@@ -32595,7 +32598,7 @@ function d10(s){ return String(s||"").slice(0,10); }
 function dd(s){ s=d10(s); return /^\d{4}-\d{2}-\d{2}$/.test(s)?s.slice(8,10)+"/"+s.slice(5,7):""; }
 function ddy(s){ s=d10(s); return /^\d{4}-\d{2}-\d{2}$/.test(s)?s.slice(8,10)+"/"+s.slice(5,7)+"/"+s.slice(0,4):""; }
 function cut(s,k){ s=String(s||"").replace(/\s+/g," ").trim(); return s.length>k?s.slice(0,k)+"…":s; }
-function ymLb(ym){ ym=String(ym||""); return "T"+(+ym.slice(4,6))+"/"+ym.slice(0,4); }
+function ymLb(ym){ ym=String(ym||""); if(enOn()) return (MON[+ym.slice(4,6)-1]||"")+" "+ym.slice(0,4); return "T"+(+ym.slice(4,6))+"/"+ym.slice(0,4); }
 function wkLb(w){ return mtWeekLabel(w); }
 function rng(w){ return fmtVN(w).slice(0,5)+" – "+fmtVN(addDays(w,6)); }
 function nk(s){ return noAcc(String(s||"")).toLowerCase().replace(/[^a-z0-9]+/g," ").trim(); }
@@ -32765,7 +32768,7 @@ var RANK={ 8:0, 18:0, 7:1, 15:1, 14:1, 5:2, 6:2, 4:3, 13:3, 3:4, 12:4, 2:5, 11:5
 function rankOf(s){ return s in RANK?RANK[s]:7; }
 function isLost(s){ return s===8||s===18; } function isWon(s){ return s===7||s===14||s===15; } function isStop(s){ return s===9||s===10||s===19; }
 function stCls(s){ return isWon(s)?"win":isLost(s)?"lost":isStop(s)?"stop":"s"+Math.min(5,s>10?s-9:s); }
-function stName(s,fb){ var en=false; try{ en=typeof I18N!=="undefined"&&I18N.on; }catch(_){} return (en?STG_EN[s]:STG[s])||fb||""; }
+function stName(s,fb){ var en=FEN; try{ en=en||(typeof I18N!=="undefined"&&I18N.on); }catch(_){} return (en?STG_EN[s]:STG[s])||fb||""; }
 function fuLoad(force){
   if(MS.fuBusy) return; if(MS.fuAt && !force && Date.now()-MS.fuAt<5*60e3) return;
   MS.fuBusy=true; var t=T();
@@ -33189,13 +33192,13 @@ function sumFc(){
   var A=fcAgg(); if(!A) return { wait:1, err:MT.nppErr?L("Chưa đọc được file Turnover: ","Turnover file not available: ")+MT.nppErr:"" };
   if(A.none) return { res:[L("PIC này không phụ trách NPP nào trong file Turnover.","This PIC has no distributor in the Turnover file.")], plan:[] };
   var res=[], plan=[];
-  res.push(L("Tháng ","Month ")+ymLb(A.ym)+": "+(A.closed?L("thực tế ","actual "):"A/F ")+usd(A.m.v)+" / budget "+usd(A.m.bm)+" USD ("+pTx(pct(A.m.v,A.m.bm))+")"+(!A.closed&&A.m.ac?L(" — đã có thực tế "," — actual so far ")+usd(A.m.ac):"")+".");
-  if(A.act&&A.act.bm) res.push(L("Thực tế đến nay","Actual to date")+(A.act.last?" (→ "+ymLb(A.act.last)+")":"")+": "+usd(A.act.v)+" / "+usd(A.act.bm)+" USD ("+pTx(pct(A.act.v,A.act.bm))+").");
+  res.push(L("Tháng ","")+ymLb(A.ym)+": "+(A.closed?L("thực tế ","actual "):L("A/F ","forecast "))+usd(A.m.v)+L(" / budget "," vs budget ")+usd(A.m.bm)+" USD ("+pTx(pct(A.m.v,A.m.bm))+")"+(!A.closed&&A.m.ac?L(" — đã có thực tế ","; actual so far ")+usd(A.m.ac):"")+".");
+  if(A.act&&A.act.bm) res.push(L("Thực tế đến nay","Actual to date")+(A.act.last?" (→ "+ymLb(A.act.last)+")":"")+": "+usd(A.act.v)+L(" / "," vs budget ")+usd(A.act.bm)+" USD ("+pTx(pct(A.act.v,A.act.bm))+").");
   var withB=(A.byD||[]).filter(function(x){ return x.m.bm>0; }), low=withB.filter(function(x){ return pct(x.m.v,x.m.bm)<0.9; });
   if(withB.length>1||low.length) res.push(low.length?L("NPP dưới 90% budget tháng: ","Under 90% of monthly budget: ")+low.map(function(x){ return x.label+" "+pTx(pct(x.m.v,x.m.bm)); }).join(" · ")+".":L("Mọi NPP đạt từ 90% budget tháng trở lên.","Every distributor is at 90%+ of the monthly budget."));
-  res.push(L("Lũy kế A/F ","To date A/F ")+ms0(A)+": "+pTx(pct(A.ytd.v,A.ytd.bm))+" · "+L("dự báo cả ","full ")+S.fy+": "+pTx(pct(A.fy.v,A.fy.bm))+".");
+  res.push(L("Lũy kế A/F ","Year to date (")+ms0(A)+L(": ","): ")+pTx(pct(A.ytd.v,A.ytd.bm))+L(" · dự báo cả "," of budget · full ")+S.fy+L(": "," forecast: ")+pTx(pct(A.fy.v,A.fy.bm))+".");
   var ms=A.msN||A.ms, i=ms.indexOf(A.ym), nx=i>=0&&i<ms.length-1?ms[i+1]:"";
-  if(nx){ try{ var B=mtNppAgg({ labels:nppLabels(), name:T().vi, all:true },nx); if(B&&B.m) plan.push(L("Tháng tới ","Next month ")+ymLb(nx)+": forecast "+usd(B.m.v)+" / budget "+usd(B.m.bm)+" USD ("+pTx(pct(B.m.v,B.m.bm))+")."); }catch(_){} }
+  if(nx){ try{ var B=mtNppAgg({ labels:nppLabels(), name:T().vi, all:true },nx); if(B&&B.m) plan.push(L("Tháng tới ","Next month, ")+ymLb(nx)+": forecast "+usd(B.m.v)+L(" / budget "," vs budget ")+usd(B.m.bm)+" USD ("+pTx(pct(B.m.v,B.m.bm))+")."); }catch(_){} }
   if(low.length) plan.push(L("Cần giải trình / kế hoạch bù cho: ","Explain / recover: ")+low.map(function(x){ return x.label; }).join(", ")+".");
   if(MS.ex&&MS.ex.list){ if(MS.ex.list.length){ var e=MS.ex.list[0]; plan.push(L("Giải trình forecast mới nhất: ","Latest forecast explanation: ")+(e.t||e.l||("Ver "+e.v))+"."); }
     else plan.push(L("Chưa có giải trình forecast trong file Turnover.","No forecast explanation in the Turnover file yet.")); }
@@ -33445,6 +33448,7 @@ function snap(){
     if(MS.pres){ var P=prData(); s.pr={ cur:P.cur.map(function(r){ return { pic:r.pic, d:d10(r.day), a:parseAcc(r.account).name||r.account, n:nn(r.actual), t:nn(r.target), rv:cut(r.review,400) }; }),
       nxt:P.nxt.map(function(r){ return { pic:r.pic, d:d10(r.day), a:parseAcc(r.account).name||r.account, t:nn(r.target) }; }), mo:P.mo.length, att:P.att, ym:P.ym }; }
     s.sum={}; secs().forEach(function(x){ if(x.k==="oth") return; try{ var r=sumOf(x.k); if(r&&!r.wait) s.sum[x.k]={ res:r.res, plan:r.plan }; }catch(_){} });
+    s.sumEn={}; FEN=true; try{ secs().forEach(function(x){ if(x.k==="oth") return; try{ var r=sumOf(x.k); if(r&&!r.wait) s.sumEn[x.k]={ res:r.res.map(enOne), plan:r.plan.map(enOne) }; }catch(_){} }); } finally { FEN=false; }
     if(t.opp!=="fu"&&MS.opp){ s.st={}; MS.opp.forEach(function(r){ if(r.id) s.st[r.id]=+r.stage||0; }); }
     if(MS.ex&&MS.ex.list.length) s.ex=MS.ex.list.map(function(v){ var x=v.s||{}; return { v:v.v, t:v.t||v.l, sc:v.sc, tot:x.total, ds:(x.distributors||[]).filter(function(d){ return String(d.e||"").trim(); }).map(function(d){ return { name:d.name, e:cut(d.e,600) }; }) }; });
     var js=JSON.stringify(s);
@@ -33453,7 +33457,10 @@ function snap(){
     return { s:s, js:js };
   } finally { MS.pic=keep; }
 }
-function ms0(A){ var ms=A.ms; return ms.length?("T"+(+String(ms[0]).slice(4))+" → T"+(+String(A.ym).slice(4))):""; }
+/* tiếng Anh: "1 sessions" ⇒ "1 session" */
+function enOne(x){ var SG={ opportunities:"opportunity", sessions:"session", packages:"package", accounts:"account", visits:"visit", orders:"order", updates:"update", people:"person", distributors:"distributor", results:"result" };
+  return String(x).replace(/(^|[^\d.,\/])1 ((?:new |confirmed )?)(opportunities|sessions|packages|accounts|visits|orders|updates|people|distributors|results)\b/g,function(m,a,b,w){ return a+"1 "+b+SG[w]; }); }
+function ms0(A){ var ms=A.ms; if(!ms.length) return ""; if(enOn()) return MON[+String(ms[0]).slice(4)-1]+" → "+MON[+String(A.ym).slice(4)-1]; return "T"+(+String(ms[0]).slice(4))+" → T"+(+String(A.ym).slice(4)); }
 window.mtsSave=function(then,silent){
   if(MS.saving) return; flush(); clearTimeout(MS._as); var FL=FF(); var t=T(), w=wk(), id=idOf(w), mine=Object.assign({},draft(id)), base0=Object.assign({},MS.base[id]||{});
   MS.saving=true; var el=$("mtsSv"); if(el) el.textContent=L("Đang lưu…","Saving…");
@@ -33513,41 +33520,34 @@ var ST={ f:"font-family:Aptos,Calibri,'Segoe UI',Arial,sans-serif;font-size:14px
 function th(t,r){ return '<th style="'+(r?ST.thr:ST.th)+'">'+t+'</th>'; }
 function td(t,r,css){ return '<td style="'+(css||(r?ST.tdr:ST.td))+'">'+t+'</td>'; }
 function noteM(lb,v,css){ v=String(v||"").trim(); return v?'<div style="'+(css||ST.nt)+'"><b>'+E(lb)+':</b><br>'+mtE(v)+'</div>':""; }
+/* v38.7: email biên bản = thư thường tiếng Anh, ngắn, không màu (người dùng yêu cầu): Dear Tuyen san · This is … · từng phần: Results this week / Plan for next week / Meeting notes */
+var MF="font-family:Calibri,Aptos,Arial,sans-serif;font-size:14px;color:#000;line-height:1.5";
+function mWk(w){ var a=new Date(w+"T00:00:00"), z=new Date(addDays(w,6)+"T00:00:00");
+  return a.getDate()+(a.getMonth()!==z.getMonth()?" "+MON[a.getMonth()]:"")+" – "+z.getDate()+" "+MON[z.getMonth()]+" "+z.getFullYear(); }
+function mUl(L0){ return '<ul style="margin:2px 0 8px;padding-left:22px">'+L0.map(function(x){ return '<li>'+E(x)+'</li>'; }).join("")+'</ul>'; }
 function mailHtml(d,s,extra){
-  var t=T(), w=s.week||wk(), me=S.user.pic, title=(ROLES[me]||{}).title||"", SS=secs(), no=0;
-  var h='<div style="'+ST.f+'"><p style="margin:0 0 10px">Dear chị Tuyên,</p>'+
-    '<p style="margin:0 0 10px">Em gửi lại nội dung họp của team '+E(t.mt)+' vào '+E(wkLb(w).replace(/^Tuần/,"tuần"))+' ('+E(fmtVN(w))+' – '+E(fmtVN(addDays(w,6)))+') như sau:</p>'+
-    (String(extra||"").trim()?'<p style="margin:0 0 10px">'+mtE(extra)+'</p>':"");
+  var t=T(), w=s.week||wk(), me=S.user.pic, title=(ROLES[me]||{}).title||"", SS=secs(), no=0, SM=s.sumEn||{};
+  var h='<div style="'+MF+'"><p style="margin:0 0 12px">Dear Tuyen san,</p>'+
+    '<p style="margin:0 0 12px">This is the summary of the '+E(t.mt)+' team weekly meeting for the week of '+E(mWk(w))+'.</p>'+
+    (String(extra||"").trim()?'<p style="margin:0 0 12px">'+mtE(extra)+'</p>':"");
   SS.forEach(function(sx){ no++; var k=sx.k;
-    h+='<div style="'+ST.h+'">'+no+'. '+E(sx.vi)+'</div>';
-    if(k==="fc"){ var A=s.fc;
-      if(A){ var r3=function(lb,v,b){ var p=pct(v,b); return '<tr>'+td(E(lb))+td(usd(b),1)+td('<b>'+usd(v)+'</b>',1)+td('<b>'+pTx(p)+'</b>',1)+'</tr>'; };
-        h+='<table style="'+ST.tb+'"><tr>'+th("Kỳ")+th("Budget (USD)",1)+th("Thực tế / Forecast (USD)",1)+th("% Budget",1)+'</tr>'+
-          r3("Tháng "+ymLb(A.ym)+(A.closed?" (đã chốt)":" (forecast)"),A.m.v,A.m.bm)+(A.act?r3("Thực tế đến nay"+(A.act.last?" (→ "+ymLb(A.act.last)+")":""),A.act.v,A.act.bm):"")+r3("Lũy kế A/F "+A.run,A.ytd.v,A.ytd.bm)+r3("Dự báo cả "+(s.fy||S.fy),A.fy.v,A.fy.bm)+'</table>';
-        if((A.byD||[]).length) h+='<table style="'+ST.tb+'"><tr>'+th("NPP")+th("A/F "+ymLb(A.ym)+" / Budget",1)+th("%",1)+th("Thực tế đến nay / Budget",1)+th("%",1)+th("Lũy kế A/F / Budget",1)+th("%",1)+th("Dự báo FY / Budget",1)+'</tr>'+
-          A.byD.map(function(x){ var ac=x.act||{v:0,bm:0}, fy=x.fy||{v:0,bm:0}; return '<tr>'+td('<b>'+E(x.l)+'</b>')+td(usd(x.m.v)+" / "+usd(x.m.bm),1)+td(pTx(pct(x.m.v,x.m.bm)),1)+td(usd(ac.v)+" / "+usd(ac.bm),1)+td(pTx(pct(ac.v,ac.bm)),1)+td(usd(x.ytd.v)+" / "+usd(x.ytd.bm),1)+td(pTx(pct(x.ytd.v,x.ytd.bm)),1)+td(usd(fy.v)+" / "+usd(fy.bm),1)+'</tr>'; }).join("")+'</table>';
-      } else h+='<div style="'+ST.mu+'">Chưa đọc được số liệu Turnover.</div>';
-      if(s.ex&&s.ex.length){ var e0=s.ex[0], ds=e0.ds||[];
-        if(String((e0.tot||{}).e||"").trim()||ds.length) h+='<div style="'+ST.s+'">Giải trình forecast ('+E(e0.t||("Ver "+e0.v))+')</div>'+
-          (String((e0.tot||{}).e||"").trim()?'<div style="margin:0 0 4px;white-space:pre-wrap">'+mtE(e0.tot.e)+'</div>':"")+
-          (ds.length?'<ul style="margin:2px 0 8px;padding-left:20px">'+ds.map(function(x){ return '<li><b>'+E(x.name)+':</b> '+mtE(x.e)+'</li>'; }).join("")+'</ul>':""); }
-    }
-    if(k!=="oth"){ var sm=(s.sum||{})[k], ulM=function(L0){ return '<ul style="margin:2px 0 8px;padding-left:20px">'+L0.map(function(x){ return '<li>'+E(x)+'</li>'; }).join("")+'</ul>'; };
-      h+=sm?'<div style="'+ST.s+'">Kết quả tuần này</div>'+ulM(sm.res)+'<div style="'+ST.s+'">Kế hoạch tuần tới</div>'+(sm.plan.length?ulM(sm.plan):'<div style="'+ST.mu+'">—</div>'):'<div style="'+ST.mu+'">Chưa đủ số liệu để tổng hợp.</div>'; }
-    if(k==="oth"){ h+=(String(d.other||"").trim()?'<div style="white-space:pre-wrap">'+mtE(d.other)+'</div>':'<div style="'+ST.mu+'">Không có.</div>'); }
-    else h+=notesM(k,d);
+    h+='<p style="margin:16px 0 4px"><b>'+no+'. '+E(sx.en)+'</b></p>';
+    if(k==="oth"){ h+=String(d.other||"").trim()?'<p style="margin:0 0 8px;white-space:pre-wrap">'+mtE(d.other)+'</p>':'<p style="margin:0 0 8px">No other matters.</p>'; return; }
+    var sm=SM[k];
+    if(sm){ h+='<p style="margin:4px 0 0"><u>Results this week</u></p>'+mUl(sm.res)+'<p style="margin:4px 0 0"><u>Plan for next week</u></p>'+(sm.plan.length?mUl(sm.plan):'<p style="margin:0 0 8px">—</p>'); }
+    else h+='<p style="margin:0 0 8px">Data not available.</p>';
+    h+=notesM(k,d);
   });
-  h+='<p style="margin:14px 0 0;'+ST.mu+'">Chi tiết từng cơ hội, đơn hàng, lượt đi địa bàn: trang Họp nhóm trên MMH CRM — https://manimedicalhanoi.github.io/MMH-CRM/</p>';
-  h+='<p style="margin:22px 0 4px">Trân trọng,</p><p style="margin:0"><b>'+E(me)+'</b>'+(title?'<br><span style="'+ST.mu+'">'+E(title)+'</span>':"")+'<br><span style="'+ST.mu+'">MANI Medical Hanoi · '+E(t.mt)+' Team</span></p></div>';
+  h+='<p style="margin:20px 0 4px">Best regards,</p><p style="margin:0">'+E(me)+(title?'<br>'+E(title):"")+'<br>MANI Medical Hanoi</p></div>';
   return h;
 }
 function notesM(k,d){
-  var o=[]; if(String(d[k+"Note"]||"").trim()) o.push(["Chung",d[k+"Note"]]);
+  var o=[]; if(String(d[k+"Note"]||"").trim()) o.push(["General",d[k+"Note"]]);
   teamPics().forEach(function(p){ var v=d[k+"N_"+pk(p)]; if(String(v||"").trim()) o.push([p,v]); });
-  if(String(d[k+"Prev"]||"").trim()) o.push(["Kết quả thực hiện (ghi tay)",d[k+"Prev"]]); if(String(d[k+"Plan"]||"").trim()) o.push(["Kế hoạch tuần tới (ghi tay)",d[k+"Plan"]]);
-  return o.length?'<div style="'+ST.nt+'"><b>Ghi chú họp</b>'+o.map(function(x){ return '<br><b>'+E(x[0])+':</b> '+mtE(x[1]); }).join("")+'</div>':"";
+  if(String(d[k+"Prev"]||"").trim()) o.push(["Results (typed)",d[k+"Prev"]]); if(String(d[k+"Plan"]||"").trim()) o.push(["Plan (typed)",d[k+"Plan"]]);
+  return o.length?'<p style="margin:4px 0 0"><u>Meeting notes</u></p><ul style="margin:2px 0 8px;padding-left:22px">'+o.map(function(x){ return '<li>'+E(x[0])+': '+mtE(x[1])+'</li>'; }).join("")+'</ul>':"";
 }
-function subj(w){ var t=T(); return "[MMH "+t.mt+"] Biên bản họp team "+t.mt+" — "+wkLb(w)+" ("+fmtVN(w).slice(0,5)+" – "+fmtVN(addDays(w,6))+")"; }
+function subj(w){ var t=T(); return "[MMH "+t.mt+"] Weekly team meeting minutes – "+mWk(w); }
 function rcp(){
   var to=MT_MAIL_TO.filter(function(x){ return /tuyen/i.test(x.n); }), cc=MT_MAIL_TO.filter(function(x){ return /nguyen ha|ha$/i.test(x.n)&&!/tuyen/i.test(x.n); });
   var more=[{e:"mmh.product@manimedicalhanoi.com",n:"Giang",d:"Product Team Leader"}].concat(teamPics().map(function(p){ return { e:(ROLES[p]||{}).email, n:p, d:(ROLES[p]||{}).title }; })).filter(function(x){ return x.e; });
