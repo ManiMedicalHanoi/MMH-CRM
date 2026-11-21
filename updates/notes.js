@@ -7,6 +7,17 @@
 function E(u){ u.en={ title:u.title, items:u.items.map(function(i){ return { title:i.title, text:i.text }; }) }; return u; }
 window.MMH_UPDATES = [
   E({
+    id:"2026-11-21-v38.6", version:"v38.6", date:"2026-11-21",
+    title:"Team meeting: automatic weekly summary, notes per PIC, Thursday reminder",
+    summary:"Each part of the Surgical / Dental team meeting now writes \"This week's results\" and \"Plan for next week\" by itself from the CRM and Tender Map. In the meeting you only take notes, per PIC, autosaved and shared with the team.",
+    items:[
+      { type:"new", icon:"≡", title:"Automatic results and plan", text:"<b>Weekly meeting</b> ▸ each part shows <b>This week's results</b> (stage moves on Tender Map, new packages / results, estimated sales by stage, new accounts / SKUs, orders, visits, trips, presentations) and <b>Plan for next week</b>. Nothing to fill in beforehand.", img:"" },
+      { type:"imp", icon:"✎", title:"Meeting notes per PIC, autosaved", text:"The right column has a <b>General</b> box and one box per PIC (area). Notes save to the server a few seconds after you type; others see them when they open the page.", img:"" },
+      { type:"imp", icon:"▸", title:"Cleaner layout", text:"Detailed tables (distributor cards, opportunity list by PIC, visit list) are folded under <b>Details</b>; click to open. Last week's plan is shown above for comparison.", img:"" },
+      { type:"new", icon:"⏰", title:"Reminder before the Friday meeting", text:"On Thursday and Friday morning a small card lists what to update first (visits without a result, no plan for next week, opportunities not updated for 30+ days) ▸ <b>Open the team meeting</b>.", img:"" }
+    ]
+  }),
+  E({
     id:"2026-11-20-v38.5", version:"v38.5", date:"2026-11-20",
     title:"Team meeting: view by PIC, distributor cards, sales opportunities by channel, presentations",
     summary:"The Surgical team meeting now shows each PIC's role, one card per distributor with actual sales to date, sales opportunities split into public and private channels with new accounts marked, a presentations part and larger note boxes. Dental uses the same layout plus distributor support orders.",
