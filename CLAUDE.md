@@ -392,3 +392,6 @@ Kiến trúc & quy ước giống MMH Report Hub (repo `ManiMedicalHanoi/MMH-Rep
   `enOne()` sửa số ít ("1 session"). Ghi chú người dùng gõ giữ nguyên ngôn ngữ. Tiêu đề `[MMH <nhóm>] Weekly team meeting minutes – 16 – 22 Nov 2026`. To Tuyen · CC Nguyen Ha như cũ.
 - **v38.8 (21/11/2026, sửa khối `v382-js`)**: dòng tóm tắt Họp nhóm = `ln(head, subs, tail)` ⇒ chuỗi "**đậm**…\ný con\ný con" — `liH()` vẽ phần `**…**` in đậm + danh sách con, dùng cho màn hình (`sumHtml`) và email (`mUl`);
   `prevPlan` bỏ `**` trước khi lọc theo PIC. Bỏ dòng "Giải trình forecast mới nhất" (không đọc được); "đã có thực tế" ⇒ **Actual sales**. Email: Results this week / Plan for next week / Meeting notes in đậm, tên trong ghi chú in đậm.
+- **v38.9 (21/11/2026, sửa khối `v382-js`; backend crm-dental / crm-surgical `MMH_MeetAuto.gs`) — email biên bản Họp nhóm TỰ GỬI 16:00 thứ Bảy (người dùng yêu cầu)**: máy chủ (trigger ở crm-dental, gửi cả Surgical)
+  đọc biên bản tuần đã lưu ⇒ To Tuyen · CC Nguyen Ha. App: `snapSync()` (gọi ở `paintSum`, 6 giây sau lần vẽ cuối) — trang Họp nhóm TUẦN HIỆN TẠI đủ số liệu, người mở là PIC nhóm / quản lý, `snap().s.sumEn` khác bản đã lưu ⇒ `mtsSave(null,true)` im lặng
+  (để email thứ Bảy có tóm tắt mới nhất). Đã bấm Gửi biên bản trong tuần ⇒ thứ Bảy bỏ qua. Chữ chân trang / thẻ nhắc / tour `meetsg` v4 nói rõ lịch gửi.

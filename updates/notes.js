@@ -7,6 +7,14 @@
 function E(u){ u.en={ title:u.title, items:u.items.map(function(i){ return { title:i.title, text:i.text }; }) }; return u; }
 window.MMH_UPDATES = [
   E({
+    id:"2026-11-21-v38.9", version:"v38.9", date:"2026-11-21",
+    title:"Team meeting minutes are e-mailed automatically on Saturday 16:00",
+    summary:"The Surgical and Dental team meeting minutes are sent automatically to Tuyen san (CC Ha san) every Saturday at 16:00.",
+    items:[
+      { type:"new", icon:"✉", title:"Automatic minutes e-mail", text:"Every Saturday at 16:00 the system sends the week's minutes (summaries + meeting notes) to Tuyen san, CC Ha san. If someone already pressed <b>Send minutes</b> that week, Saturday is skipped. Opening the team meeting page keeps the saved summary up to date.", img:"" }
+    ]
+  }),
+  E({
     id:"2026-11-21-v38.8", version:"v38.8", date:"2026-11-21",
     title:"Team meeting: clearer summaries",
     summary:"Summaries on the team meeting page and in the minutes e-mail now use bold headings with sub-points.",
