@@ -7,6 +7,16 @@
 function E(u){ u.en={ title:u.title, items:u.items.map(function(i){ return { title:i.title, text:i.text }; }) }; return u; }
 window.MMH_UPDATES = [
   E({
+    id:"2026-11-21-v39.0", version:"v39.0", date:"2026-11-21",
+    title:"Team meeting: pick the period, zoom, product mix, VND / USD",
+    summary:"Pick the meeting period (from – to, no overlap with saved periods), zoom the page for the TV, see the product mix by type and code, and switch estimated sales between VND and USD.",
+    items:[
+      { type:"new", icon:"▦", title:"Meeting period from – to", text:"<b>Weekly meeting</b> ▸ pick <b>From</b> and <b>to</b>. Saved periods cannot overlap: a new period starts the day after the last saved one. Results follow the period; the plan is always next week.", img:"" },
+      { type:"new", icon:"⤢", title:"Zoom for the TV", text:"<b>A− / A+</b> next to the save status (or − / + keys in full screen) makes the page larger or smaller.", img:"" },
+      { type:"new", icon:"≡", title:"Product mix and VND / USD", text:"<b>Sales opportunities</b>: share of estimated sales by product type with every code and quantity; switch <b>VND / USD</b> (fixed rate 26,000).", img:"" }
+    ]
+  }),
+  E({
     id:"2026-11-21-v38.9", version:"v38.9", date:"2026-11-21",
     title:"Team meeting minutes are e-mailed automatically on Saturday 16:00",
     summary:"The Surgical and Dental team meeting minutes are sent automatically to Tuyen san (CC Ha san) every Saturday at 16:00.",
