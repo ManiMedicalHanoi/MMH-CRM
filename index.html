@@ -4039,7 +4039,7 @@ function buildNav(){
     if(t.grp!==lastGrp){ h+='<div class="grp">'+t.grp+'</div>'; lastGrp=t.grp; }
     h+='<button class="nvi" data-t="'+t.id+'" onclick="go(\''+t.id+'\')"><span class="ic">'+t.ic+'</span><span class="lb">'+t.lb+'</span></button>';
   });
-  h+='<div style="flex:1"></div><div style="padding:10px;font-size:10.5px;color:var(--mute);line-height:1.5">MMH CRM v38.8<br>'+
+  h+='<div style="flex:1"></div><div style="padding:10px;font-size:10.5px;color:var(--mute);line-height:1.5">MMH CRM v38.9<br>'+
      (isMgmt()?'<a href="'+DRIVE_FOLDER+'" target="_blank">📁 Folder ảnh Drive</a>':"")+'</div>';
   $("side").innerHTML=h;
   /* ⭐ v4.5 — thanh dưới trượt ngang, đủ mọi mục, bỏ nút "Thêm" */
@@ -21027,7 +21027,7 @@ window.QS2={ open:qsOpen };
 </script>
 
 <!-- ⭐ v30.3 — THÔNG BÁO CẬP NHẬT (chép từ Report Hub): dữ liệu updates/notes.js · tự hiện 7 ngày · nút "Có gì mới" trên thanh trên cùng -->
-<script src="updates/notes.js?v=38.8"></script>
+<script src="updates/notes.js?v=38.9"></script>
 <style id="upd-css">
 #upd,#upd-zoom{--t-pri:var(--blue);--t-pri2:var(--blue-d);--t-ink:var(--navy);--t-soft:var(--pale);--t-line:var(--lb2);--t-bg:#F6F8FA;--mmh-blue:var(--blue);--mmh-navy:var(--navy)}
 
@@ -25207,7 +25207,7 @@ window.RHN_CFG={ url:window.TRAINING_HUB_API, key:(typeof TRN_KEY!=="undefined"?
 <script src="rhnotify/rhnotify.js?v=1.1"></script>
 <script src="testflow/testflow.js?v=1.0"></script>
 <script src="tour/tour.js?v=1.1"></script>
-<script src="tour/tours.js?v=38.6"></script>
+<script src="tour/tours.js?v=38.9"></script>
 <script id="v319-i18n">
 /* v31.9 — bổ sung bản dịch EN (nhóm Thái): ô chọn account "N kết quả" */
 (function(){ try{ if(typeof RULES_EN!=="undefined" && RULES_EN.unshift){
@@ -32688,7 +32688,7 @@ function ensureList(){
 }
 function syncRec(){
   var w=wk(), id=idOf(w);
-  var p1=loadRec(w).then(function(){ if(S.tab==="meet"&&on()&&idOf()===id){ if(!isDirty(id)) paintNotes(); paintSv(); } }).catch(function(){});
+  var p1=loadRec(w).then(function(){ MS.recOk=MS.recOk||{}; MS.recOk[id]=1; if(S.tab==="meet"&&on()&&idOf()===id){ if(!isDirty(id)) paintNotes(); paintSv(); snapSync(); } }).catch(function(){});
   var p2=prevLoad(addDays(w,-7));
   return Promise.all([p1,p2]);
 }
@@ -33269,7 +33269,22 @@ function sumHtml(k,x){
     '<div class="v386-cols"><div class="c"><h5>'+E(L("Kết quả tuần này","This week's results"))+'<span>'+E(rng(wk()))+'</span></h5>'+ul(x.res)+'</div>'+
     '<div class="c pl"><h5>'+E(L("Kế hoạch tuần tới","Plan for next week"))+'<span>'+E(rng(addDays(wk(),7)))+'</span></h5>'+(x.plan.length?ul(x.plan):'<div class="mts-mute">—</div>')+'</div></div>';
 }
-function paintSum(k){ var el=$("mts-sum-"+k); if(!el) return; var x=null; try{ x=sumOf(k); }catch(e){ x={ wait:1, err:String(e&&e.message||e) }; } el.innerHTML=sumHtml(k,x); }
+/* v38.9: email biên bản tự gửi 16:00 thứ Bảy từ máy chủ (MMH_MeetAuto.gs) dùng bản tóm tắt đã lưu ⇒ mở trang tuần hiện tại, số liệu đã đủ mà tóm tắt khác bản đã lưu ⇒ tự lưu (im lặng) */
+function snapSync(){
+  clearTimeout(MS._ss); MS._ss=setTimeout(function(){
+    try{
+      if(!(S.tab==="meet"&&on()&&$("mtsRoot"))||MS.saving) return;
+      var t=T(), id=idOf(); if(wk()!==mondayOf(todayISO())||!(MS.recOk&&MS.recOk[id])) return;
+      if(!((t.opp==="fu"?MS.fu:MS.opp)&&MT.npp&&(MS.vf||(terrRows()||[]).length)&&MS.pres&&(!t.od||MS.ord))) return;
+      var me=S.user&&S.user.pic, mgr=false; try{ mgr=(typeof isMgrView==="function"&&isMgrView())||!!(S.user&&S.user.admin); }catch(_){}
+      if(!(mgr||teamPics().some(function(p){ return mtPicEq(p,me); }))) return;
+      var cur=JSON.stringify(snap().s.sumEn||{}), b=MS.base[id], old=b&&b._snap?JSON.stringify(b._snap.sumEn||{}):"";
+      if(cur==="{}"||cur===old||MS._ssDone===id+cur) return; MS._ssDone=id+cur;
+      mtsSave(null,true);
+    }catch(_){}
+  },6000);
+}
+function paintSum(k){ snapSync(); var el=$("mts-sum-"+k); if(!el) return; var x=null; try{ x=sumOf(k); }catch(e){ x={ wait:1, err:String(e&&e.message||e) }; } el.innerHTML=sumHtml(k,x); }
 function paintSums(){ secs().forEach(function(s){ if(s.k!=="oth") paintSum(s.k); }); }
 /* khung chi tiết số liệu: thu gọn / mở, nhớ theo máy */
 var DO=null;
@@ -33328,7 +33343,7 @@ renderMeet=function(){
       '<button class="btn sm pri" onclick="mtsSave()">'+E(L("Lưu","Save"))+'</button></div>'+
     '<div class="mts-nav" id="mtsNav"></div>'+picBar()+
     SS.map(function(s,i){ return sec(i+1,s,body(s)); }).join("")+
-    '<div class="mts-foot"><span class="mts-mute">'+E(L("Kết quả + kế hoạch tự tổng hợp từ CRM · ghi chú tự lưu lên sheet 13. WEEKLY MEETING sau vài giây, cả nhóm cùng xem","Results + plans are summarised from the CRM · notes autosave to sheet 13. WEEKLY MEETING, shared with the team"))+'</span>'+
+    '<div class="mts-foot"><span class="mts-mute">'+E(L("Kết quả + kế hoạch tự tổng hợp từ CRM · ghi chú tự lưu, cả nhóm cùng xem · email biên bản tự gửi chị Tuyên (CC sếp Hà) lúc 16:00 thứ Bảy","Results + plans are summarised from the CRM · notes autosave, shared with the team · the minutes e-mail goes to Tuyen san (CC Ha san) every Saturday at 16:00"))+'</span>'+
       '<button class="btn" onclick="mtsMail()">'+E(L("Gửi biên bản họp","Send the minutes"))+'</button><button class="btn pri" onclick="mtsSave()">'+E(L("Lưu biên bản","Save minutes"))+'</button></div>'+
   '</div>';
   $("main").innerHTML=h;
@@ -33627,7 +33642,7 @@ function rmCheck(){
     var items=rmLines(pics), mine=pics.length===1&&mtPicEq(pics[0],S.user.pic), fri=addDays(mondayOf(todayISO()),4);
     var el=document.createElement("div"); el.id="v386-rm";
     el.innerHTML='<b>'+E(L("Họp nhóm "+t.mt+" chiều thứ Sáu "+dd(fri),t.mt+" team meeting on Friday afternoon "+dd(fri)))+'</b>'+
-      '<p>'+E(L("Kết quả + kế hoạch tự tổng hợp từ CRM — chỉ cần cập nhật đủ dữ liệu trước giờ họp:","Results and plans are summarised from the CRM — just keep the data up to date before the meeting:"))+'</p>'+
+      '<p>'+E(L("Kết quả + kế hoạch tự tổng hợp từ CRM, email biên bản tự gửi 16:00 thứ Bảy — chỉ cần cập nhật đủ dữ liệu trước giờ họp:","Results and plans are summarised from the CRM and the minutes e-mail goes out on Saturday at 16:00 — just keep the data up to date before the meeting:"))+'</p>'+
       (items.length?'<ul>'+items.map(function(x){ return '<li>'+(mine?"":'<b>'+E(x.p)+':</b> ')+E(x.l.join("; "))+'</li>'; }).join("")+'</ul>':'<p class="ok">'+E(L("Dữ liệu tuần này đã đủ. Có vấn đề cần trao đổi thì ghi vào Ghi chú họp.","This week's data is complete. Add any issue to the meeting notes."))+'</p>')+
       '<div class="ft"><button class="btn sm" id="v386-rm-x">'+E(L("Để sau","Later"))+'</button><button class="btn sm pri" id="v386-rm-go">'+E(L("Mở Họp nhóm","Open the team meeting"))+'</button></div>';
     document.body.appendChild(el);
