@@ -7,6 +7,14 @@
 function E(u){ u.en={ title:u.title, items:u.items.map(function(i){ return { title:i.title, text:i.text }; }) }; return u; }
 window.MMH_UPDATES = [
   E({
+    id:"2026-11-21-v38.8", version:"v38.8", date:"2026-11-21",
+    title:"Team meeting: clearer summaries",
+    summary:"Summaries on the team meeting page and in the minutes e-mail now use bold headings with sub-points.",
+    items:[
+      { type:"imp", icon:"≡", title:"Bold headings, one point per line", text:"<b>Weekly meeting</b>: each summary line has a bold heading and its details as sub-points (stage moves, estimated sales by stage, visits by PIC…). The minutes e-mail uses the same layout. \"Latest forecast explanation\" is removed; month figures show <b>Actual sales</b>.", img:"" }
+    ]
+  }),
+  E({
     id:"2026-11-21-v38.7", version:"v38.7", date:"2026-11-21",
     title:"Team meeting minutes e-mail in plain English",
     summary:"The team meeting minutes e-mail is now a short, formal letter in English.",
