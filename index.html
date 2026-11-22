@@ -4039,7 +4039,7 @@ function buildNav(){
     if(t.grp!==lastGrp){ h+='<div class="grp">'+t.grp+'</div>'; lastGrp=t.grp; }
     h+='<button class="nvi" data-t="'+t.id+'" onclick="go(\''+t.id+'\')"><span class="ic">'+t.ic+'</span><span class="lb">'+t.lb+'</span></button>';
   });
-  h+='<div style="flex:1"></div><div style="padding:10px;font-size:10.5px;color:var(--mute);line-height:1.5">MMH CRM v39.0<br>'+
+  h+='<div style="flex:1"></div><div style="padding:10px;font-size:10.5px;color:var(--mute);line-height:1.5">MMH CRM v39.1<br>'+
      (isMgmt()?'<a href="'+DRIVE_FOLDER+'" target="_blank">📁 Folder ảnh Drive</a>':"")+'</div>';
   $("side").innerHTML=h;
   /* ⭐ v4.5 — thanh dưới trượt ngang, đủ mọi mục, bỏ nút "Thêm" */
@@ -21027,7 +21027,7 @@ window.QS2={ open:qsOpen };
 </script>
 
 <!-- ⭐ v30.3 — THÔNG BÁO CẬP NHẬT (chép từ Report Hub): dữ liệu updates/notes.js · tự hiện 7 ngày · nút "Có gì mới" trên thanh trên cùng -->
-<script src="updates/notes.js?v=39.0"></script>
+<script src="updates/notes.js?v=39.1"></script>
 <style id="upd-css">
 #upd,#upd-zoom{--t-pri:var(--blue);--t-pri2:var(--blue-d);--t-ink:var(--navy);--t-soft:var(--pale);--t-line:var(--lb2);--t-bg:#F6F8FA;--mmh-blue:var(--blue);--mmh-navy:var(--navy)}
 
@@ -25207,7 +25207,7 @@ window.RHN_CFG={ url:window.TRAINING_HUB_API, key:(typeof TRN_KEY!=="undefined"?
 <script src="rhnotify/rhnotify.js?v=1.1"></script>
 <script src="testflow/testflow.js?v=1.0"></script>
 <script src="tour/tour.js?v=1.1"></script>
-<script src="tour/tours.js?v=39.0"></script>
+<script src="tour/tours.js?v=39.1"></script>
 <script id="v319-i18n">
 /* v31.9 — bổ sung bản dịch EN (nhóm Thái): ô chọn account "N kết quả" */
 (function(){ try{ if(typeof RULES_EN!=="undefined" && RULES_EN.unshift){
@@ -34154,6 +34154,96 @@ if(mo) V30.more=function(){ var r=mo.apply(this,arguments);
     });
   }catch(_){}
   return r; };
+})();
+</script>
+<!-- ═════════ v39.1 (22/11/2026) — BÁO CÁO TUẦN / THÁNG GỬI TỪ GMAIL CỦA CHÍNH NGƯỜI GỬI (người dùng yêu cầu: "ai tự gửi của người đó",
+     hết lỗi hạn mức email của tài khoản mmh.product). selfmail/selfmail.js (dùng chung được cho app khác) + khối v391-js:
+     bấm Gửi ⇒ SELFMAIL.warm() mở cửa sổ Google (lần đầu hỏi quyền, sau đó tự đóng) ⇒ gọi weeklyReport / monthlyReport kèm selfMail=1
+     ⇒ máy chủ dựng email + PDF nhưng KHÔNG gửi (MMH_MailDomain.gs ▸ mmhSelfRun_) ⇒ app gửi bằng Gmail API của người bấm ⇒ selfAck (ghi nhận đã gửi).
+     Chưa có Client ID / chưa cho phép / sai tài khoản Google / Gmail lỗi / chế độ TEST ⇒ hệ thống gửi như cũ (không ai bị kẹt).
+     Client ID: SELFMAIL_CFG.clientId (OAuth Client ID loại Web của Google Cloud, công khai được). ═════════ -->
+<script src="selfmail/selfmail.js?v=1.0"></script>
+<script id="v391-js">
+window.SELFMAIL_CFG=window.SELFMAIL_CFG||{ clientId:"" };
+(function(){
+  if(!window.SELFMAIL) return;
+  SELFMAIL.cfg({ clientId:SELFMAIL_CFG.clientId,
+    me:function(){ try{ return window.AUTH&&AUTH.user&&AUTH.user(); }catch(e){ return null; } },
+    lang:function(){ try{ return isTH()?"en":"vi"; }catch(e){ return "vi"; } } });
+  function off(){
+    if(window.__CRM_TEST || window.__CRM_TF) return true;
+    try{ if(localStorage.getItem("mmh_sbx_crm")) return true; }catch(e){}
+    return !SELFMAIL.ready();
+  }
+  function real(body){
+    if(!body || body.selfMail || off()) return false;
+    if(body.action!=="weeklyReport" && body.action!=="monthlyReport") return false;
+    return !/^(download|teamFiles)$/.test(String(body.option||""));
+  }
+  function why(t){
+    if(!t) return "";
+    if(t.err==="account") return TX("bạn đã chọn tài khoản Google "+(t.email||"khác")+", không phải tài khoản công ty "+(t.want||"")+" — lần sau chọn đúng tài khoản",
+                                    "you picked the Google account "+(t.email||"another account")+", not your company account "+(t.want||"")+" — pick the right account next time");
+    if(/denied|access_denied|popup_closed/.test(t.err)) return TX("chưa cho phép gửi bằng Gmail của bạn","Gmail permission was not given");
+    if(/popup/.test(t.err)) return TX("trình duyệt chặn cửa sổ Google — cho phép cửa sổ bật lên rồi gửi lại","the browser blocked the Google window — allow pop-ups and send again");
+    return TX("chưa kết nối được Gmail","could not connect to Gmail");
+  }
+  function ack(a, tries){
+    if(!a) return;
+    window.postBody({ action:"selfAck", ack:a }).catch(function(){ if((tries||0)<3) setTimeout(function(){ ack(a,(tries||0)+1); }, 5000*((tries||0)+1)); });
+  }
+  /* hệ thống gửi thay (bỏ dấu "vừa gửi" của lớp chống gửi trùng W28 để không hỏi lại) */
+  function sys(inner, body){
+    var b={}; Object.keys(body).forEach(function(k){ if(k!=="rid" && k!=="selfMail") b[k]=body[k]; });
+    try{ if(S._rpSentAt) delete S._rpSentAt["wr|"+b.from+"|"+(b.toPic||"")+"|"+b.option]; }catch(e){}
+    return inner(b);
+  }
+  function run(inner, body){
+    return Promise.resolve(typeof probeCors==="function" ? probeCors() : true).then(function(cors){
+      if(!cors) return inner(body);                                   /* không đọc được phản hồi ⇒ hệ thống gửi như cũ */
+      return SELFMAIL.token().then(function(tok){
+        if(!tok || tok.err){
+          if(tok && tok.err && tok.err!=="gsi") toast(TX("Gửi từ hệ thống: ","Sent by the system: ")+why(tok)+".","warn",8000);
+          return inner(body);
+        }
+        var b={}; Object.keys(body).forEach(function(k){ b[k]=body[k]; }); b.selfMail="1";
+        return window.postBody(b).then(function(r){
+          if(!r || r.opaque) return sys(inner, body);
+          if(!r.selfMail || !r.mails) return r;                       /* máy chủ bản cũ ⇒ đã tự gửi */
+          if(!r.mails.length){ if(r.ack) ack(r.ack); return r; }
+          return SELFMAIL.send(tok, r.mails).then(function(n){
+            ack(r.ack);
+            r.message=(r.message||TX("Đã gửi báo cáo","Report sent"))+TX(" · gửi từ Gmail của bạn ("+tok.email+")"," · sent from your Gmail ("+tok.email+")");
+            r.selfSent=n; r.from=tok.email;
+            return r;
+          }, function(e){
+            if(e && e.sent>0){                                        /* đã gửi được một phần ⇒ không gửi lại để tránh trùng */
+              toast(TX("Đã gửi "+e.sent+"/"+r.mails.length+" email từ Gmail của bạn, phần còn lại chưa gửi được: ","Sent "+e.sent+"/"+r.mails.length+" e-mails from your Gmail; the rest failed: ")+(e.message||e),"err",12000);
+              return r;
+            }
+            toast(TX("Gmail của bạn chưa gửi được ("+((e&&e.message)||e)+") — hệ thống gửi thay.","Your Gmail could not send ("+((e&&e.message)||e)+") — the system sends it instead."),"warn",9000);
+            return sys(inner, body);
+          });
+        });
+      });
+    });
+  }
+  /* bấm Gửi ⇒ mở cửa sổ Google ngay trong lúc bấm (trình duyệt chặn nếu mở sau khi chờ mạng) */
+  var _sr=window.sendReport||sendReport;
+  window.sendReport=sendReport=function(option){
+    if(option!=="download" && !off()) try{ SELFMAIL.warm(); }catch(e){}
+    return _sr.apply(this,arguments);
+  };
+  var _pb391=window.postBody||postBody;
+  window.postBody=postBody=function(body){
+    if(real(body) && body.action==="weeklyReport") return run(_pb391, body);
+    return _pb391.apply(this,arguments);
+  };
+  var _ap391=window.apiPost||apiPost;
+  window.apiPost=apiPost=function(body){
+    if(real(body) && body.action==="monthlyReport") return run(_ap391, body);
+    return _ap391.apply(this,arguments);
+  };
 })();
 </script>
 </body>

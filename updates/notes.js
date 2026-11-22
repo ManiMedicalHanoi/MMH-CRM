@@ -7,6 +7,14 @@
 function E(u){ u.en={ title:u.title, items:u.items.map(function(i){ return { title:i.title, text:i.text }; }) }; return u; }
 window.MMH_UPDATES = [
   E({
+    id:"2026-11-22-v39.1", version:"v39.1", date:"2026-11-22",
+    title:"Weekly and monthly reports are sent from your own Gmail",
+    summary:"Reports no longer go out from the shared system account, so the daily e-mail limit no longer blocks them.",
+    items:[
+      { type:"imp", icon:"✉", title:"Sent from your own mailbox", text:"<b>Send report</b> ▸ <b>Send</b> works as before. The first time, Google asks once to let MMH CRM send e-mail for you: pick your company account and press <b>Allow</b>. The report then goes out from your own Gmail and stays in your Sent folder; replies go to your @mani.inc address. If Google is not allowed or fails, the system sends it as before.", img:"" }
+    ]
+  }),
+  E({
     id:"2026-11-21-v39.0", version:"v39.0", date:"2026-11-21",
     title:"Team meeting: pick the period, zoom, product mix, VND / USD",
     summary:"Pick the meeting period (from – to, no overlap with saved periods), zoom the page for the TV, see the product mix by type and code, and switch estimated sales between VND and USD.",
