@@ -407,3 +407,10 @@ Kiến trúc & quy ước giống MMH Report Hub (repo `ManiMedicalHanoi/MMH-Rep
   ⇒ `selfAck` (ghi `rpMark_` / `rplAdd_`). Chỉ nhận tài khoản Google @manimedicalhanoi.com / @mani.inc trùng phần trước @ với phiên đăng nhập. Không có Client ID (`SELFMAIL_CFG.clientId`) / chưa cho phép / sai tài khoản / Gmail lỗi / chế độ TEST, hộp cát
   ⇒ hệ thống gửi như cũ (`sys()` bỏ dấu "vừa gửi" của lớp W28 để không hỏi lại); đã gửi được một phần ⇒ không gửi lại. Module dùng chung được cho app khác (Report Hub…). Test: Playwright + mock GSI / userinfo / gmail (route).
   Client ID = OAuth Client ID loại Web trên Google Cloud (Internal, Gmail API bật, origin `https://manimedicalhanoi.github.io`) — công khai được.
+- **v39.2 (23/11/2026, khối `v392-css` + `v392-js` cuối file + sửa module WQ v30.6; backend 5 CRM `MMH_KpiQuick.gs` + crm-thai `TH_Speed.gs`) — tốc độ lưu MỌI nhóm + phản hồi Yong**:
+  ① Nguyên nhân chậm chung: từ v30.6 task / ảnh lưu qua hàng chờ WQ KHÔNG đi qua lớp v28 ⇒ thiếu `push=0` ⇒ máy chủ đẩy KPI sang file KPI tổng trong MỖI lần lưu (và giữ ScriptLock ⇒ "busy").
+  Nay lớp ngoài cùng của `apiPost` gắn `push=0` cho mọi lệnh `W28`; `kpiPushSoon` chờ WQ rỗng rồi mới gọi `kpiPush` (1 lượt). Backend: `k68PushQuick_` dùng cờ `k68QLock_` (không chặn lệnh lưu).
+  Lệnh ghi mới đi thẳng tới backend CRM (không qua `apiPost`) phải tự gửi `push=0`. ② WQ: thay đổi của task mới chưa lưu ⇒ "waits for the new task above" (không báo lỗi riêng, task gốc lưu xong tự gửi),
+  nút **Retry all**, mở app ⇒ mục đã lỗi thử lại 1 lần (cùng rid). ③ Thái (`isTH`): ô **Follow up until** (`#v392-fu-tk` / `#v392-fu-nt` ⇒ `data.finish`; đang chuyển Completed ⇒ thay `S._v343fin`, kẹp ≤ hôm nay),
+  lịch: task khách hàng Finish > Start hiện mọi ngày (≤ 31) + "Follow-up dd/mm→dd/mm". ④ Dental Thái: khung đơn v37.0 có hàng **This order is** Regular · New account · New SKU (`.v392-na`, gợi ý theo `thoOrders()`),
+  lựa chọn nhớ ở `localStorage.mmh_v392_na` (account|ngày) ⇒ `ordSave` xong ⇒ `naSave` case nháp (orderNo, SKU × SL, NPP); form NA có **Fill from an order** (`V392pick`, `S.na.wz.srcOrder` ⇒ orderNo).
