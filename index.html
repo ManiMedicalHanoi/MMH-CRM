@@ -4039,7 +4039,7 @@ function buildNav(){
     if(t.grp!==lastGrp){ h+='<div class="grp">'+t.grp+'</div>'; lastGrp=t.grp; }
     h+='<button class="nvi" data-t="'+t.id+'" onclick="go(\''+t.id+'\')"><span class="ic">'+t.ic+'</span><span class="lb">'+t.lb+'</span></button>';
   });
-  h+='<div style="flex:1"></div><div style="padding:10px;font-size:10.5px;color:var(--mute);line-height:1.5">MMH CRM v39.1<br>'+
+  h+='<div style="flex:1"></div><div style="padding:10px;font-size:10.5px;color:var(--mute);line-height:1.5">MMH CRM v39.2<br>'+
      (isMgmt()?'<a href="'+DRIVE_FOLDER+'" target="_blank">📁 Folder ảnh Drive</a>':"")+'</div>';
   $("side").innerHTML=h;
   /* ⭐ v4.5 — thanh dưới trượt ngang, đủ mọi mục, bỏ nút "Thêm" */
@@ -21027,7 +21027,7 @@ window.QS2={ open:qsOpen };
 </script>
 
 <!-- ⭐ v30.3 — THÔNG BÁO CẬP NHẬT (chép từ Report Hub): dữ liệu updates/notes.js · tự hiện 7 ngày · nút "Có gì mới" trên thanh trên cùng -->
-<script src="updates/notes.js?v=39.1"></script>
+<script src="updates/notes.js?v=39.2"></script>
 <style id="upd-css">
 #upd,#upd-zoom{--t-pri:var(--blue);--t-pri2:var(--blue-d);--t-ink:var(--navy);--t-soft:var(--pale);--t-line:var(--lb2);--t-bg:#F6F8FA;--mmh-blue:var(--blue);--mmh-navy:var(--navy)}
 
@@ -23100,8 +23100,11 @@ function runnable(it){
   if(it.tmp) return true;
   var r=realRow(it.row);
   if(r>=0 || !it.row) return true;
-  return Q.some(function(x){ return x.tmp===it.row && !x.err; }) ? false : (it.err="Task gốc chưa lưu được — bấm Thử lại ở task gốc", save(), false);
+  /* ⭐ v39.2 — task gốc (task mới) còn trong hàng chờ, kể cả đang lỗi ⇒ CHỜ (không báo lỗi riêng); task gốc lưu được là tự gửi tiếp */
+  if(Q.some(function(x){ return x.tmp===it.row; })) return false;
+  it.err=TX("Task gốc không còn trong hàng chờ — bấm Bỏ, rồi sửa lại task","The new task this change belongs to is no longer waiting — tap Discard, then edit the task again"); save(); return false;
 }
+function waitsFor(it){ if(it.err || it.tmp || !it.row || realRow(it.row)>=0) return null; return Q.filter(function(x){ return x.tmp===it.row; })[0]||null; }
 var PT=0;
 function pump(){
   if(RUN && RUN.at && Date.now()-RUN.at>150000){ var h=RUN.it; RUN=false; if(h && Q.indexOf(h)>=0) fail(h, "__TIMEOUT__"); return; }   /* ⭐ v36.9: lượt gửi treo quá 150 giây */
@@ -23174,6 +23177,7 @@ var WQ=window.WQ={
 /* ⭐ v38.0 — nhãn / lỗi đã lưu trong hàng chờ (có thể bằng tiếng Việt từ trước) ⇒ tiếng Anh cho nhóm Thái */
 function wqLbl(l){ l=String(l||""); if(!isTH()) return l; return l.replace(/^Thêm task /,"New task ").replace(/^Cập nhật task /,"Update task ").replace(/^Ảnh /,"Photo "); }
 var WQ_ERR_EN=[[/không được hỗ trợ trên dải ô có một hàng đã bị lọc bỏ/i,"This operation is not supported on a range with a filtered-out row (fixed on the server — tap Retry now)."],
+  [/Task gốc chưa lưu được|Task gốc không còn/i,"The new task this change belongs to is not saved yet — tap Retry on the new task above."],
   [/hết giờ chờ/i,"timed out"],[/Hệ thống đang bận/i,"The system is busy — try again in a few seconds."],[/Lỗi không rõ/i,"Unknown error"],[/Lỗi máy chủ/i,"Server error"],
   [/Dòng đã đổi/i,"The row changed — reload"],[/Máy chủ trả về lỗi/i,"The server returned an error — try again"],[/Bộ nhớ máy bận/i,"Device storage busy"],
   [/Máy chưa đọc được ảnh/i,"Cannot read the photo on this phone — close and reopen the app, then tap Retry"],[/Ảnh không còn trên máy/i,"The photo is no longer on this device — please take it again."],
@@ -23198,17 +23202,21 @@ function panel(){
   if(!Q.length) return;
   /* ⭐ v38.0: nhóm Thái ⇒ toàn bộ tiếng Anh (cả nhãn / lỗi đã lưu trên máy bằng tiếng Việt) */
   openModal(TX("Đang chờ lưu lên Google Sheet","Waiting to save to Google Sheet"), '<div style="font-size:13px;color:#7A8999;margin-bottom:10px">'+TX("Các mục dưới đây đã lưu an toàn trên máy này và tự gửi lên khi có mạng. Đừng xoá dữ liệu trình duyệt trước khi gửi xong.","These items are saved safely on this device and are sent automatically when online. Do not clear the browser data before they are sent.")+'</div>'
+    +(Q.filter(function(x){ return x.err; }).length>1?'<div style="margin:0 0 10px"><button class="btn pri sm" onclick="WQ.retry();closeModal()">'+TX("Thử lại tất cả","Retry all")+'</button></div>':'')   /* ⭐ v39.2 */
     +Q.map(function(x){
-      return '<div class="wq-li"><b>'+esc(wqLbl(x.label)||x.body.action)+'</b><span class="mt">'+(x.kind==="photo"?(x.kb||"")+" KB · ":"")+(x.err?"":TX("đang gửi · thử "+(x.n||0)+" lần","sending · "+(x.n||0)+" tries"))+'</span>'
+      var wf=waitsFor(x);   /* ⭐ v39.2 — thay đổi của task mới chưa lưu: chỉ ghi "đang chờ task mới", không hiện lỗi riêng */
+      return '<div class="wq-li"><b>'+esc(wqLbl(x.label)||x.body.action)+'</b><span class="mt">'+(x.kind==="photo"?(x.kb||"")+" KB · ":"")+(x.err?"":wf?TX("chờ task mới ở trên lưu xong","waits for the new task above"):TX("đang gửi · thử "+(x.n||0)+" lần","sending · "+(x.n||0)+" tries"))+'</span>'
         +(x.err?'<small>'+esc(wqErr(x.err))+'</small>':(x.last&&x.n?'<small style="color:#7A8999">'+TX("Lần trước: ","Last try: ")+esc(wqErr(x.last.replace(/__TIMEOUT__/,TX("hết giờ chờ","timed out"))))+'</small>':''))
-        +'<div style="margin-top:6px;display:flex;gap:6px"><button class="btn sm" onclick="WQ.retry(\''+x.id+'\');closeModal()">'+TX("Thử lại ngay","Retry now")+'</button>'
-        +'<button class="btn sm" onclick="if(confirm(\''+TX("Bỏ mục này? Dữ liệu chưa lưu lên Sheet sẽ mất.","Discard this item? Data not yet saved to the Sheet will be lost.")+'\')){WQ.drop(\''+x.id+'\');closeModal();terrRefresh();}">'+TX("Bỏ","Discard")+'</button></div></div>';
+        +(wf?'':'<div style="margin-top:6px;display:flex;gap:6px"><button class="btn sm" onclick="WQ.retry(\''+x.id+'\');closeModal()">'+TX("Thử lại ngay","Retry now")+'</button>')
+        +(wf?'':'<button class="btn sm" onclick="if(confirm(\''+TX("Bỏ mục này? Dữ liệu chưa lưu lên Sheet sẽ mất.","Discard this item? Data not yet saved to the Sheet will be lost.")+'\')){WQ.drop(\''+x.id+'\');closeModal();terrRefresh();}">'+TX("Bỏ","Discard")+'</button></div>')+'</div>';
     }).join(""), '<button class="btn" onclick="closeModal()">'+TX("Đóng","Close")+'</button>');
 }
 window.addEventListener("online", function(){ paint(); Q.forEach(function(x){ if(!x.err){ x.n=0; x.nx=0; } }); pump(); });
 window.addEventListener("offline", paint);
 document.addEventListener("visibilitychange", function(){ if(!document.hidden){ idbReset(); pump(); } });   /* ⭐ v36.9: iOS đóng kết nối IndexedDB khi app chạy nền */
 setInterval(function(){ if(Q.length) pump(); }, 15000);   /* ⭐ v36.9: pump tự gỡ lượt treo */
+/* ⭐ v39.2 — mở app: mục đã báo lỗi được thử lại 1 lần (máy chủ có thể đã sửa, vd. lỗi "dải ô có hàng bị lọc" 19/11/2026); cùng rid ⇒ không ghi trùng */
+setTimeout(function(){ var ch=false; Q.forEach(function(x){ if(x.err && !x.auto){ x.auto=1; x.err=""; x.n=0; x.nx=0; ch=true; } if(/^Task gốc chưa lưu được/.test(x.err||"")){ x.err=""; ch=true; } }); if(ch) save(); }, 1500);
 setTimeout(function(){ paint(); pump(); }, 2000);
 
 /* dữ liệu đi địa bàn tải lại trong lúc còn chờ ⇒ giữ thay đổi của mình (không "nhảy ngược", task mới không biến mất) */
@@ -25207,7 +25215,7 @@ window.RHN_CFG={ url:window.TRAINING_HUB_API, key:(typeof TRN_KEY!=="undefined"?
 <script src="rhnotify/rhnotify.js?v=1.1"></script>
 <script src="testflow/testflow.js?v=1.0"></script>
 <script src="tour/tour.js?v=1.1"></script>
-<script src="tour/tours.js?v=39.1"></script>
+<script src="tour/tours.js?v=39.2"></script>
 <script id="v319-i18n">
 /* v31.9 — bổ sung bản dịch EN (nhóm Thái): ô chọn account "N kết quả" */
 (function(){ try{ if(typeof RULES_EN!=="undefined" && RULES_EN.unshift){
@@ -34244,6 +34252,256 @@ window.SELFMAIL_CFG=window.SELFMAIL_CFG||{ clientId:"" };
     if(real(body) && body.action==="monthlyReport") return run(_ap391, body);
     return _ap391.apply(this,arguments);
   };
+})();
+</script>
+<style id="v392-css">
+/* v39.2 — Thái: ô "Follow up until" · thẻ lịch follow-up · nối đơn hàng ⇄ New account & SKU */
+.v392-fu input[type=date]{width:100%}
+.v392-fu small{display:block;margin-top:3px;font-size:11px;color:#6B7B8C;line-height:1.35}
+.cal-card .v392-fu-t{color:#2F6B4F;font-weight:700}
+.v392-na{margin:8px 0 6px;padding:9px 11px;border:1px solid var(--t-line,#CFE2F3);border-radius:10px;background:#fff}
+.v392-na>label{display:block;font-size:12.5px;font-weight:700;color:var(--t-ink,#003047);margin-bottom:6px}
+.v392-na .seg{display:flex;flex-wrap:wrap;gap:6px}
+.v392-na .seg button{border:1px solid #C3CDD8;background:#fff;border-radius:999px;padding:5px 11px;font:600 12.5px Aptos,"Segoe UI",sans-serif;color:#34465A;cursor:pointer}
+.v392-na .seg button.on{border-color:var(--t-pri,#3A5CAA);color:var(--t-ink,#003047);box-shadow:inset 0 0 0 1px var(--t-pri,#3A5CAA)}
+.v392-na small{display:block;margin-top:6px;font-size:11.5px;color:#5B6B7D;line-height:1.45}
+.v392-na .lk{font-size:12.5px;color:#2F6B4F}
+.v392-pick{display:flex;flex-direction:column;gap:6px;max-height:50vh;overflow:auto}
+.v392-pick button{display:flex;gap:10px;align-items:center;text-align:left;border:1px solid #E6EAEF;border-radius:10px;background:#fff;padding:9px 11px;font:500 13px Aptos,"Segoe UI",sans-serif;color:#1F2D3D;cursor:pointer}
+.v392-pick button:hover{border-color:var(--t-pri,#3A5CAA)}
+.v392-pick button .sp{flex:1}.v392-pick button small{color:#6B7B8C}
+</style>
+<script id="v392-js">
+/* ═════════════════════════════════════════════════════════════════════════════════════════
+   ⭐ v39.2 (23/11/2026) — phản hồi Yong (Thailand Dental) + "cải tiến tốc độ cho mọi team"
+   ① MỌI NHÓM — lưu nhanh: từ v30.6 task / ảnh lưu qua hàng chờ (WQ) đi thẳng tới máy chủ KHÔNG qua lớp v28 ⇒ thiếu push=0 ⇒
+      máy chủ đẩy KPI sang file KPI tổng NGAY trong mỗi lần lưu (thêm nhiều giây, giữ khoá ⇒ "The system is busy").
+      Nay mọi lệnh ghi có push=0; KPI đẩy 1 lượt ở nền sau khi hàng chờ gửi xong (kpiPushSoon chờ WQ rỗng).
+      Backend (mmh-backend 23/11/2026): MMH_KpiQuick.gs — lượt đẩy KPI không chặn lệnh lưu; Thái: OTHERS TASK có bộ đệm,
+      bundle không tải lại vì nhật ký; Surgical Thái chép sang ALL TASK ở nền (TH_Speed.gs).
+   ② Thái (isTH): task khách hàng có ô "Follow up until" (= Finish date) ⇒ lịch hiện task trên MỌI ngày từ ngày thăm tới hạn follow-up
+      (≤ 31 ngày; dài hơn ⇒ ngày đầu + ngày cuối), thẻ ghi "Follow-up dd/mm→dd/mm". Bấm Completed: luật v34.3 / v38.1 giữ nguyên.
+   ③ Thailand Dental: đơn hàng từ lượt thăm ⇄ New account & SKU — chọn "Regular order · New account · New SKU" ngay trong khung đơn
+      (app gợi ý theo lịch sử đơn của account) ⇒ lưu đơn xong tự tạo case NHÁP New account & SKU từ chính đơn đó (account, NPP, SKU × SL,
+      ngày, số đơn) ⇒ không nhập 2 lần. Form New account & SKU có nút "Fill from an order".
+   ═════════════════════════════════════════════════════════════════════════════════════════ */
+(function(){
+"use strict";
+function TH(){ try{ return isTH(); }catch(_){ return false; } }
+function TD(){ try{ return curTeamKey()==="thaid"; }catch(_){ return false; } }
+function nk(s){ return String(s||"").toLowerCase().replace(/\s+/g," ").trim(); }
+function accName(s){ try{ return parseAcc(s).name; }catch(_){ return String(s||"").split("/")[0]; } }
+function dm(iso){ try{ return calDM(iso); }catch(_){ return String(iso||"").slice(8,10)+"/"+String(iso||"").slice(5,7); } }
+function lsG(k){ try{ return JSON.parse(localStorage.getItem(k)||"null"); }catch(_){ return null; } }
+function lsS(k,v){ try{ localStorage.setItem(k,JSON.stringify(v)); }catch(_){} }
+
+/* ───── ① push=0 cho mọi lệnh ghi + đẩy KPI sau khi hàng chờ gửi xong ───── */
+function wqBusy(){ try{ return !!(window.WQ && WQ.list().some(function(x){ return !x.err; })); }catch(_){ return false; } }
+var _kps=window.kpiPushSoon||kpiPushSoon, _kpT=null;
+window.kpiPushSoon=kpiPushSoon=function(delay){
+  if(wqBusy()){ clearTimeout(_kpT); _kpT=setTimeout(function(){ kpiPushSoon(delay); },5000); return; }
+  return _kps.apply(this,arguments);
+};
+
+/* ───── ② Follow up until (Thái) — 1 ô cho form sửa task (tk) và 1 ô cho form task mới (nt) ───── */
+var FU={ tk:{ v:"", touched:false }, nt:{ v:"", touched:false } }, FORM="";
+function dIn(k){ return $(k==="tk"?"tk-date":"nt_start"); }
+function fuStart(k){ var a=dIn(k); return a?String(a.value||"").slice(0,10):""; }
+function fuNote(k){
+  var sm=document.querySelector("#v392-fu-"+k+" small"), s=fuStart(k), v=FU[k].v; if(!sm) return;
+  sm.textContent = v && s && v>s ? "On the calendar every day from "+dm(s)+" to "+dm(v)+" (follow-up)." : "Optional — the last day of the follow-up after this visit.";
+}
+window.V392fu=function(k,v){ FU[k].v=String(v||"").slice(0,10); FU[k].touched=true; try{ if(k==="tk") markDirty("_fu",FU[k].v); }catch(_){} fuNote(k); };
+function fuAdd(k){
+  var a=dIn(k); if(!TH() || !a || $("v392-fu-"+k)) return;
+  var host=k==="tk"?a.parentNode:a.closest(".fld"); if(!host||!host.parentNode) return;
+  var w=S.task||{}, st=String(w.start||"").slice(0,10), fin=String(w.finish||"").slice(0,10);
+  FU[k]={ v:(k==="tk" && fin && st && fin>st)?fin:"", touched:false };
+  var d=document.createElement("div"); d.id="v392-fu-"+k; d.className=(k==="tk"?"":"fld ")+"v392-fu";
+  d.innerHTML=(k==="tk"?'<span class="te-lb">Follow up until</span>':'<label>Follow up until</label>')+
+    '<input type="date" class="'+(k==="tk"?"":"inp")+'" id="v392-fud-'+k+'" value="'+esc(FU[k].v)+'" onchange="V392fu(\''+k+'\',this.value)"><small></small>';
+  host.parentNode.insertBefore(d, host.nextSibling);
+  a.addEventListener("change",function(){ var i=$("v392-fud-"+k); if(i) i.min=fuStart(k); fuNote(k); });
+  var i=$("v392-fud-"+k); if(i) i.min=fuStart(k); fuNote(k);
+}
+new MutationObserver(function(){ if(!TH()) return; if($("tk-date") && !$("v392-fu-tk")) fuAdd("tk"); if($("nt_start") && !$("v392-fu-nt")) fuAdd("nt"); }).observe(document.body,{childList:true,subtree:true});
+["saveTask","submitNewTask"].forEach(function(n){
+  var f=window[n]; if(typeof f!=="function") return;
+  window[n]=function(){ var o=FORM; FORM=n==="saveTask"?"tk":"nt"; try{ return f.apply(this,arguments); } finally{ FORM=o; } };
+});
+
+/* ───── ③ đơn hàng ⇄ New account & SKU (Dental Thái) ───── */
+var NAQ="mmh_v392_na", NAP=lsG(NAQ)||{};   /* khoá "account|ngày" ⇒ loại case muốn tạo (giữ qua lần tải lại trang) */
+function naKey(acc,day){ return nk(accName(acc))+"|"+String(day||"").slice(0,10); }
+function caseOf(acc,no){ return ((S.na&&S.na.rows)||[]).filter(function(c){ return c.status!=="Rejected" && nk(c.account)===nk(accName(acc)) && no && String(c.orderNo||"")===String(no); })[0]||null; }
+function suggest(acc,day,items){
+  var prev=[]; try{ prev=(window.thoOrders?thoOrders():[]).filter(function(o){ return nk(o.name)===nk(accName(acc)) && String(o.day)<String(day||"9999"); }); }catch(_){}
+  if(!prev.length) return "new_account";
+  var seen={}; prev.forEach(function(o){ o.lines.forEach(function(l){ seen[nk(l.item||l.group)]=1; }); });
+  return (items||[]).some(function(x){ return x && !seen[nk(x)]; }) ? "new_sku" : "";
+}
+function edCtx(root){
+  if(root.id==="tho-ed"){ var a=null, d=""; try{ var t=S.task||{}; a=$("tk-result")?t.account:(($("nt_account")||{}).value||($("nt_accName")||{}).value||""); d=$("tk-date")?$("tk-date").value:(($("nt_start")||{}).value||""); }catch(_){} return { acc:a||"", day:String(d||"").slice(0,10), no:"" }; }
+  var nm=(($("tho_acc")||{}).value||"").trim(), day=(($("tho_day")||{}).value||"");
+  var ed=window.THO&&THO.ed; return { acc:nm||(ed&&ed.account)||"", day:day, no:(ed&&ed.no)||"" };
+}
+function items(root){ return Array.prototype.map.call(root.querySelectorAll(".tho-l"),function(l){ var it=l.querySelector(".it"), g=l.querySelector(".g"); return (it&&it.value.trim())||(g&&g.value)||""; }).filter(String); }
+function naPaint(root){
+  var box=root.querySelector(".v392-na"); if(!box) return;
+  var c=edCtx(root), lk=c.no?caseOf(c.acc,c.no):null;
+  if(lk){ box.innerHTML='<span class="lk">Linked to New account &amp; SKU case <b>'+esc(lk.id)+'</b> ('+esc(lk.status||"")+')</span>'; return; }
+  var sel=box.getAttribute("data-v"), sg=suggest(c.acc,c.day,items(root));
+  if(sel==null){ sel=sg; box.setAttribute("data-v",sel); }
+  box.innerHTML='<label>This order is</label><div class="seg">'+[["","A regular order"],["new_account","New account (first order)"],["new_sku","New SKU"]].map(function(x){
+      return '<button type="button" class="'+(sel===x[0]?"on":"")+'" onclick="V392na(this,\''+x[0]+'\')">'+x[1]+(sg===x[0]&&x[0]?' ·&nbsp;suggested':'')+'</button>'; }).join("")+'</div>'+
+    '<small>'+(sel?"After the order is saved, a draft <b>New account &amp; SKU</b> case is created from it (account, distributor, SKU × qty, date, order No.) — no need to type it again. Then add the distributor confirmation and send.":
+      (sg==="new_account"?"No earlier order of this account in the CRM — if this is its first MANI order, choose New account.":sg==="new_sku"?"Some products were never ordered by this account before — choose New SKU to open the case from this order.":"Regular order — no New account &amp; SKU case."))+'</small>';
+}
+window.V392na=function(b,v){ var r=b.closest(".tho-ed")||b.closest("#m2Body"); var box=r&&r.querySelector(".v392-na"); if(!box) return; box.setAttribute("data-v",v); naPaint(r); };
+function naAdd(root){
+  if(!TD() || root.querySelector(".v392-na")) return;
+  var tot=root.querySelector(".tho-tot"); if(!tot) return;
+  var d=document.createElement("div"); d.className="v392-na"; tot.parentNode.insertBefore(d, tot.nextSibling); naPaint(root);
+}
+new MutationObserver(function(){
+  if(!TD()) return;
+  Array.prototype.forEach.call(document.querySelectorAll(".tho-ed"),function(r){ if(r.querySelector(".tho-tot") && !r.querySelector(".v392-na")) naAdd(r); });
+  var m=$("m2Body"); if(m && m.querySelector(".tho-tot") && !m.querySelector(".v392-na")) naAdd(m);
+}).observe(document.body,{childList:true,subtree:true});
+document.addEventListener("change",function(e){ var r=e.target&&e.target.closest&&(e.target.closest(".tho-ed")||e.target.closest("#m2Body")); if(r && r.querySelector(".v392-na") && !r.querySelector(".v392-na").getAttribute("data-u")) { var b=r.querySelector(".v392-na"); b.removeAttribute("data-v"); naPaint(r); } },true);
+document.addEventListener("click",function(e){ var b=e.target&&e.target.closest&&e.target.closest(".v392-na .seg button"); if(b) b.closest(".v392-na").setAttribute("data-u","1"); },true);
+/* lúc bấm lưu: nhớ lựa chọn theo account + ngày (đơn đi qua hàng chờ của v37.0) */
+function stash(root){
+  if(!root) return; var box=root.querySelector(".v392-na"); if(!box) return;
+  var v=box.getAttribute("data-v"); var c=edCtx(root); if(!c.acc) return;
+  var k=naKey(c.acc,c.day||todayISO());
+  if(v) NAP[k]={ type:v, at:Date.now() }; else delete NAP[k];
+  lsS(NAQ,NAP);
+}
+["thoSaveBox","thoSaveModal","saveTask","submitNewTask"].forEach(function(n){
+  var f=window[n]; if(typeof f!=="function") return;
+  window[n]=function(){ try{ if(TD()) stash(n==="thoSaveModal"?$("m2Body"):$("tho-ed")); }catch(_){} return f.apply(this,arguments); };
+});
+function naFromOrder(o, no){
+  var k=naKey(o.account,o.date), want=NAP[k]; if(!want) return;
+  delete NAP[k]; lsS(NAQ,NAP);
+  var c=(S.custIndex||[]).filter(function(x){ return nk(x.name)===nk(accName(o.account)); })[0]||{};
+  var qty=0, amt=0, groups=[];
+  (o.lines||[]).forEach(function(l){ qty+=Number(l.qty)||0; amt+=(Number(l.qty)||0)*(Number(l.price)||0); if(l.group && groups.indexOf(l.group)<0) groups.push(l.group); });
+  var data={ id:"NA-TH-"+(window.uid28?uid28():Date.now().toString(36)), pic:o.pic||(S.user&&S.user.pic)||"", type:want.type, account:c.name||accName(o.account), code:c.code||"", accType:c.type||"",
+    province:c.province||"", npp:o.dist||"", ptype:groups.join(", "), sku:(o.lines||[]).map(function(l){ return (l.item||l.group)+" × "+(l.qty||""); }).join("\n"),
+    orderDate:o.date, orderNo:no||"", qty:qty||"", amount:amt||"",
+    lines:(o.lines||[]).map(function(l){ return { ptype:l.group||"", detail:l.item||"", qty:l.qty, price:l.price }; }),
+    note:"From order "+(no||"")+" ("+dm(o.date)+")"+(o.note?" · "+o.note:"") };
+  apiPost({ action:"naSave", data:data, rid:"v392"+Date.now().toString(36) }).then(function(j){
+    try{ if(j&&j.rec) naMerge(j.rec); }catch(_){}
+    toast("Draft "+(want.type==="new_sku"?"New SKU":"New account")+" case "+((j&&j.rec&&j.rec.id)||"")+" created from order "+(no||"")+" — open New account & SKU to add the distributor confirmation and send.","ok",8000);
+    try{ if(S.tab==="newacc") naPaint(); }catch(_){}
+  }).catch(function(e){
+    var m=String(e&&e.message||e);
+    toast(/already exists/i.test(m)?"A New account & SKU case already exists for this account"+(want.type==="new_sku"?" and SKU":"")+" — no second case was created. "+m:"New account & SKU case not created: "+m,"warn",9000);
+  });
+}
+var _ap=window.apiPost||apiPost;
+window.apiPost=apiPost=function(body){
+  try{
+    if(body && body.action && typeof W28!=="undefined" && W28[body.action] && body.push==null){ body.push=0; try{ kpiPushSoon(); }catch(_){} }   /* ① */
+    var F=FORM&&FU[FORM];
+    /* task đang chuyển / đã Completed (lớp v34.3 / v38.1 gửi finish + finKeep, kẹp ≤ hôm nay) ⇒ ngày follow-up người dùng chọn thay ngày đó */
+    if(TH() && F && F.touched && F.v && body && body.action==="saveWeekly" && body.data && S._v343fin){
+      var s0=String(body.data.start||(FORM==="tk"?(S.task||{}).start:"")||"").slice(0,10), t0=todayISO(), f0=F.v>t0?t0:F.v; if(s0 && f0<s0) f0=s0; S._v343fin=f0;
+    }
+    if(TH() && F && body && body.action==="saveWeekly" && body.data && $("v392-fu-"+FORM) && (F.touched || (F.v && (FORM==="nt" || body.data.start)))){   /* ② */
+      var st=String(body.data.start||(FORM==="tk"?(S.task||{}).start:"")||"").slice(0,10), v=F.v;
+      if(v && st && v<st) v=st;
+      body.data.finish = v || st || body.data.finish;
+      delete body.data._fu;
+    } else if(body && body.data && typeof body.data==="object") delete body.data._fu;
+  }catch(_){}
+  var p=_ap.apply(this,arguments);
+  if(body && body.action==="ordSave" && body.order && p && p.then){   /* ③ */
+    p.then(function(j){ if(j && j.ok!==false && !j.softTimeout && !j.opaque) naFromOrder(body.order, j.no||body.order.no||""); }).catch(function(){});
+  }
+  if(body && body.action==="naSave" && body.data && S.na && S.na.wz && S.na.wz.srcOrder && !body.data.orderNo) body.data.orderNo=S.na.wz.srcOrder;
+  return p;
+};
+
+/* NA form (Dental Thái): "Fill from an order" */
+function naPickAdd(){
+  if(!TD() || !$("naWz") || $("v392-naord")) return;
+  var d=$("na_date"), row=d&&d.closest(".row"); if(!row) return;
+  var b=document.createElement("div"); b.style.cssText="margin:0 0 10px";
+  b.innerHTML='<button class="btn" type="button" id="v392-naord" onclick="V392pick()">Fill from an order</button> <small style="color:#6B7B8C">date, distributor, SKU × qty and order No. from the tab Orders</small>';
+  row.parentNode.insertBefore(b,row);
+}
+new MutationObserver(function(){ if(TD() && $("naWz") && !$("v392-naord")) naPickAdd(); }).observe(document.body,{childList:true,subtree:true});
+window.V392pick=function(){
+  var w=S.na&&S.na.wz; if(!w) return;
+  try{ if(window.thoLoad) thoLoad(false); }catch(_){}
+  var me=w.pic, key=w.acc?nk(w.acc.name):"", list=(window.thoOrders?thoOrders():[]).filter(function(o){ return key ? nk(o.name)===key : o.pic===me; }).slice(0,40);
+  if(!list.length) return toast(key?"No order of this account in the tab Orders yet":"Choose the account first, or add the order in the tab Orders","warn",5000);
+  window.__v392L=list;
+  openModal2("Fill from an order",'<div class="v392-pick">'+list.map(function(o,i){
+    return '<button type="button" onclick="V392use('+i+')"><b>'+esc(o.no||"Order")+'</b><span class="sp">'+esc(o.name)+' · '+esc(o.lines.map(function(l){ return (l.item||l.group)+" × "+l.qty; }).join(", "))+'</span><small>'+esc(fmtVN(o.day))+(o.dist?' · '+esc(o.dist):'')+'</small></button>'; }).join("")+'</div>',
+    '<button class="btn" onclick="closeModal2()">Cancel</button>');
+};
+window.V392use=function(i){
+  var o=(window.__v392L||[])[i], w=S.na&&S.na.wz; if(!o||!w) return; closeModal2();
+  if(!w.acc){ var c=(S.custIndex||[]).filter(function(x){ return nk(x.name)===nk(o.name); })[0]; if(c){ w.acc={ name:c.name, code:c.code, type:c.type, province:c.province, pic:c.pic }; if($("na_acc")) $("na_acc").value=c.name; } }
+  if($("na_date")) $("na_date").value=String(o.day||"").slice(0,10);
+  if($("na_npp") && o.dist) $("na_npp").value=o.dist;
+  if($("na_sku")) $("na_sku").value=o.lines.map(function(l){ return (l.item||l.group)+" × "+l.qty; }).join("\n");
+  var nt=$("na_note"); if(nt && nt.value.indexOf(o.no||"#")<0) nt.value=(nt.value?nt.value+"\n":"")+"From order "+(o.no||"")+" ("+fmtVN(o.day)+")";
+  w.srcOrder=o.no||"";
+  try{ naAccInfo(); naChk(); }catch(_){}
+  toast("Filled from order "+(o.no||""),"ok");
+};
+
+/* ───── ② lịch: task khách hàng nhiều ngày (follow-up) ───── */
+var LONG=31;
+function vMulti(it){ return it && it.kind==="v" && it.st && it.en && it.en>it.st; }
+function nd(a,b){ return Math.round((calDate(b)-calDate(a))/86400000); }
+var _bd=calByDay;
+window.calByDay=calByDay=function(items){
+  if(!TH()) return _bd.apply(this,arguments);
+  var span=[], rest=[];
+  (items||[]).forEach(function(it){ (vMulti(it)?span:rest).push(it); });
+  var by=_bd.call(this,rest);
+  span.forEach(function(it){
+    var put=function(d){ var a=(by[d]=by[d]||[]); if(a.indexOf(it)<0) a.push(it); }, n=nd(it.st,it.en);
+    if(n<=LONG){ var d=calDate(it.st); for(var i=0;i<=n;i++){ put(calISO(d)); d.setDate(d.getDate()+1); } }
+    else { put(it.st); put(it.en); }
+  });
+  var rank={e:0,t:1,v:2,o:3,d:4};
+  Object.keys(by).forEach(function(d){ by[d].sort(function(a,b){
+    if(!!a.done!==!!b.done) return a.done?1:-1;
+    if((rank[a.kind]||5)!==(rank[b.kind]||5)) return (rank[a.kind]||5)-(rank[b.kind]||5);
+    return String(a.title).localeCompare(String(b.title));
+  }); });
+  return by;
+};
+var _cc=window.calCard||calCard;
+window.calCard=calCard=function(it){
+  var h=_cc.apply(this,arguments);
+  try{
+    if(TH() && vMulti(it)){
+      var i=h.indexOf('<div class="m">'), j=i<0?-1:h.indexOf('</div>',i);
+      if(j>0) h=h.slice(0,j)+'<span class="pc v392-fu-t" title="Visit '+dm(it.st)+' · follow-up until '+dm(it.en)+'">Follow-up '+dm(it.st)+'→'+dm(it.en)+'</span>'+h.slice(j);
+    }
+  }catch(_){}
+  return h;
+};
+var _cs=calSummary;
+window.calSummary=calSummary=function(items){
+  if(!TH()) return _cs.apply(this,arguments);
+  var rg=calRange();
+  items=(items||[]).map(function(it){
+    if(!vMulti(it) || (it.d && it.d>=rg.from && it.d<=rg.to)) return it;
+    if(it.st<=rg.to && it.en>=rg.from) return Object.assign({}, it, { d: it.st<rg.from ? rg.from : it.st });
+    return it;
+  });
+  return _cs.call(this,items);
+};
 })();
 </script>
 </body>

@@ -7,6 +7,17 @@
 function E(u){ u.en={ title:u.title, items:u.items.map(function(i){ return { title:i.title, text:i.text }; }) }; return u; }
 window.MMH_UPDATES = [
   E({
+    id:"2026-11-23-v39.2", version:"v39.2", date:"2026-11-23",
+    title:"Faster saving for every team · follow-up on the calendar · orders linked to New account & SKU",
+    summary:"Saving a task no longer waits for the KPI file. Thailand: a visit can show its follow-up days on the calendar. Thailand Dental: an order from a visit can open the New account & SKU case by itself.",
+    items:[
+      { type:"imp", icon:"⚡", title:"Saving is much faster (all teams)", text:"Each saved task used to wait while the server also updated the company KPI file, and several saves in a row could end with <b>The system is busy</b>. Now the task is saved alone; the KPI file is updated once in the background after all your changes are sent.", img:"" },
+      { type:"fix", icon:"↻", title:"Waiting-to-save list", text:"Changes of a new task that is not saved yet now simply <b>wait for the new task</b> instead of showing an error; when the new task is saved they are sent by themselves. <b>Retry all</b> retries every item; items that failed before are retried once when you open the app.", img:"" },
+      { type:"new", icon:"▤", title:"Follow up until (Thailand)", text:"Task form ▸ <b>Follow up until</b>: e.g. visit on 18/11, follow-up until 30/11 ⇒ the calendar shows the task on every day from 18 to 30/11 with “Follow-up 18/11→30/11”.", img:"" },
+      { type:"new", icon:"⇄", title:"Order ⇄ New account & SKU (Thailand Dental)", text:"<b>Order from this visit</b> ▸ choose <b>New account</b> or <b>New SKU</b> (the app suggests one from the order history). After the order is saved, a draft New account &amp; SKU case is created from it — add the distributor confirmation and send. In the case form, <b>Fill from an order</b> fills the date, distributor, SKU × qty and order No.", img:"" }
+    ]
+  }),
+  E({
     id:"2026-11-22-v39.1", version:"v39.1", date:"2026-11-22",
     title:"Weekly and monthly reports are sent from your own Gmail",
     summary:"Reports no longer go out from the shared system account, so the daily e-mail limit no longer blocks them.",
