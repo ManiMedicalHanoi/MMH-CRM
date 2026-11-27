@@ -20277,7 +20277,8 @@ var RULES_ENK=[
   [/^Number of Visits to Distributor Key Accounts – (.+)$/, "Key account visits · $1"],
   [/^Product Knowledge Test Pass Rate – (.+)$/, "Product test pass rate · $1"],
   [/^Number of New Product Categories Launched – (.+)$/, "New product categories launched · $1"],
-  [/^Number of Product Content Items Published – (.+)$/, "Product content published · $1"]
+  [/^Number of Product Content Items Published – (.+)$/, "Product content published · $1"],
+  [/^Number of Online Content Items Published – (.+)$/, "Online content published · $1"]   /* 27/11/2026 — C17-07 Dental Thái: mọi nội dung online */
 ];
 function kpiShortEN(n){
   for(var i=0;i<RULES_ENK.length;i++){ if(RULES_ENK[i][0].test(n)) return n.replace(RULES_ENK[i][0], RULES_ENK[i][1]); }
